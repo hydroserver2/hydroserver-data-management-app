@@ -2,6 +2,7 @@
   <v-parallax
     src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
     height="500"
+    alt="vuetify parallax background image"
   >
     <div
       class="d-flex text-white flex-column align-center text-center fill-height justify-space-between py-16 has-text-shadow"
@@ -22,7 +23,7 @@
 
   <v-container class="my-8">
     <div class="d-flex flex-column align-center text-center">
-      <h2 class="text-h4 mb-4">Manage your Operation Data</h2>
+      <h2 class="text-h4 mb-4">Manage your Operational Data</h2>
 
       <p class="mb-8 text-body-1 text-medium-emphasis">
         The HydroServer Hydrologic Information System provides services and
@@ -121,14 +122,24 @@
         order="last"
         order-sm="first"
       >
-        <v-img :src="noaaLogo" max-width="12rem" class="fill-width"></v-img>
-        <v-img :src="owpLogo" max-width="18rem" class="fill-width"></v-img>
+        <v-img
+          :src="noaaLogo"
+          max-width="12rem"
+          class="fill-width"
+          alt="NOAA Logo"
+        ></v-img>
+        <v-img
+          :src="owpLogo"
+          max-width="18rem"
+          class="fill-width"
+          alt="OWP Logo"
+        ></v-img>
       </v-col>
       <v-col class="d-flex justify-center flex-column" cols="12" sm="7">
         <h4 class="text-h4 mb-4">Operational Data for Modeling</h4>
-        <h6 class="text-body-1 mb-2 font-weight-bold">
+        <p class="text-body-1 mb-2 font-weight-bold">
           Your data can improve NOAA's water prediction services
-        </h6>
+        </p>
         <p class="text-body-1 text-medium-emphasis">
           NOAA's National Water Model can assimilate streamflow data from
           operational monitoring sites like yours. Contribute your streamflow
@@ -150,7 +161,12 @@
           web services standard SensorThings.
         </p>
         <div>
-          <v-img :src="ogcLogo" max-width="26rem" height="auto"></v-img>
+          <v-img
+            :src="ogcLogo"
+            max-width="26rem"
+            height="auto"
+            alt="OGC Logo"
+          ></v-img>
         </div>
       </v-col>
       <v-col cols="12" sm="6" class="d-flex flex-column align-center gap-2">
@@ -158,6 +174,7 @@
           :src="sensorThingsLogo"
           class="fill-width"
           max-width="35rem"
+          alt="SensorThings Database Schema"
         ></v-img>
         <h4 class="text-h4">SensorThings</h4>
       </v-col>
@@ -167,7 +184,12 @@
   <v-divider> </v-divider>
 
   <v-container class="d-flex flex-column align-center my-8 gap-2">
-    <v-img :src="cirohLogo" class="fill-width" max-width="14rem"></v-img>
+    <v-img
+      :src="cirohLogo"
+      class="fill-width"
+      max-width="14rem"
+      alt="CIROH Logo"
+    ></v-img>
     <p class="text-body-1 text-medium-emphasis text-center">
       This HydroServer instance is supported through the Cooperative Institute
       for Research to Operations in Hydrology (CIROH)
@@ -179,7 +201,7 @@
 import noaaLogo from '@/assets/noaa.svg'
 import owpLogo from '@/assets/owp.png'
 import ogcLogo from '@/assets/ogc.svg'
-import cirohLogo from '@/assets/ciroh.png'
+import cirohLogo from '@/assets/CIROH_logo_transparent.png'
 import sensorThingsLogo from '@/assets/sensorThings.png'
 </script>
 

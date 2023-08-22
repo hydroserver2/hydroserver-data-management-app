@@ -1,32 +1,73 @@
 <template>
-  <div style="margin: 1rem" v-if="thingStore.things[thingId]">
-    <h2>{{ thingStore.things[thingId]?.name }}</h2>
-    <GoogleMap
-      :markers="[thingStore.things[thingId]]"
-      :mapOptions="mapOptions"
-    />
-
-    <div class="site-information-container">
-      <h2 class="site-information-title">Site Information</h2>
-      <div
-        v-if="
-          isAuthenticated &&
-          thingStore.things[thingId] &&
-          thingStore.things[thingId].owns_thing
-        "
-      >
-        <v-btn @click="showRegisterSiteModal = true" color="green"
+  <v-container>
+    <v-row v-if="thing">
+      <v-col class="single-site-name">
+        <h5 class="text-h5">{{ thing?.name }}</h5>
+      </v-col>
+    </v-row>
+    <v-row v-if="thing" style="height: 25rem">
+      <v-col>
+        <GoogleMap
+          :key="stringThing"
+          :things="[thing]"
+          :mapOptions="mapOptions"
+        />
+      </v-col>
+    </v-row>
+    <v-row class="justify-start" align="center">
+      <v-col cols="auto">
+        <h5 class="text-h5">Site Information</h5>
+      </v-col>
+      <v-col cols="auto" v-if="is_owner">
+        <v-btn class="access_control" @click="isAccessControlModalOpen = true"
+          >Access Control</v-btn
+        >
+        <v-dialog
+          class="access_control_dialog"
+          v-model="isAccessControlModalOpen"
+          width="60rem"
+        >
+          <SiteAccessControl
+            @close="isAccessControlModalOpen = false"
+            :thing-id="thingId"
+          ></SiteAccessControl>
+        </v-dialog>
+      </v-col>
+      <v-col cols="auto" v-if="is_owner">
+        <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit Site Information</v-btn
         >
-        <v-dialog v-model="showDeleteModal" width="40rem">
+        <v-dialog v-model="isRegisterModalOpen" width="80rem">
+          <SiteForm
+            @close="isRegisterModalOpen = false"
+            :thing-id="thingId"
+          ></SiteForm>
+        </v-dialog>
+      </v-col>
+      <v-col cols="auto" v-if="is_owner">
+        <v-btn
+          color="red-darken-3"
+          style="margin-left: 1rem"
+          @click="isDeleteModalOpen = true"
+          >Delete Site</v-btn
+        >
+        <v-dialog v-model="isDeleteModalOpen" width="40rem">
           <v-card>
             <v-card-title>
               <span class="text-h5">Confirm Deletion</span>
             </v-card-title>
             <v-card-text>
-              Please type the site name (<strong>{{
-                thingStore.things[thingId].name
-              }}</strong
+              This action will permanently delete the site along with all
+              associated datastreams and observations
+              <strong>for all users of this system</strong>. If you want to keep
+              your data, you can backup to HydroShare or download a local copy
+              before deletion. Alternatively, you can pass ownership of this
+              site to someone else on the
+              <v-btn @click="switchToAccessControlModal">Access Control</v-btn>
+              page.
+            </v-card-text>
+            <v-card-text>
+              Please type the site name (<strong>{{ thing.name }}</strong
               >) to confirm deletion:
               <v-form>
                 <v-text-field
@@ -38,336 +79,349 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="red darken-1" text @click="showDeleteModal = false"
-                >Cancel</v-btn
+              <v-spacer></v-spacer>
+              <v-btn-cancel @click="isDeleteModalOpen = false"
+                >Cancel</v-btn-cancel
               >
-              <v-btn color="green darken-1" text @click="deleteThing"
-                >Confirm</v-btn
-              >
+              <v-btn color="delete" @click="deleteThing">Delete</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
-
-        <v-btn
-          color="red-darken-3"
-          style="margin-left: 1rem"
-          @click="showDeleteModal = true"
-          >Delete Site</v-btn
-        >
-      </div>
-      <div
-        v-else-if="
-          isAuthenticated &&
-          thingStore.things[thingId] &&
-          !thingStore.things[thingId].owns_thing
-        "
-      >
-        <input
-          class="follow-checkbox"
-          type="checkbox"
-          :checked="thingStore.things[thingId].follows_thing"
-          @change="updateFollow"
-        />
-        <label>Follow Thing</label>
-      </div>
-    </div>
-
-    <v-dialog v-model="showRegisterSiteModal" width="80rem">
-      <SiteForm
-        @close="showRegisterSiteModal = false"
-        :thing-id="thingId"
-      ></SiteForm>
-    </v-dialog>
-
-    <div class="content-wrapper">
-      <div class="table-container">
-        <table>
-          <tr>
-            <td><i class="fas fa-id-badge"></i> ID</td>
-            <td>{{ thingStore.things[thingId]?.id }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-barcode"></i> Site Code</td>
-            <td>{{ thingStore.things[thingId]?.sampling_feature_code }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-map"></i> Latitude</td>
-            <td>{{ thingStore.things[thingId]?.latitude }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-map"></i> Longitude</td>
-            <td>{{ thingStore.things[thingId]?.longitude }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-mountain"></i> Elevation</td>
-            <td>{{ thingStore.things[thingId]?.elevation }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-file-alt"></i> Description</td>
-            <td>{{ thingStore.things[thingId]?.description }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-map-marker-alt"></i> Sampling Feature Type</td>
-            <td>{{ thingStore.things[thingId]?.sampling_feature_type }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-map-pin"></i> Site Type</td>
-            <td>{{ thingStore.things[thingId]?.site_type }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-flag-usa"></i>State</td>
-            <td>{{ thingStore.things[thingId]?.state }}</td>
-          </tr>
-          <tr>
-            <td><i class="fas fa-flag-usa"></i>Site Owners</td>
-            <td v-for="owner in thingStore.things[thingId]?.owners">
-              <li style="list-style: none">
-                {{ owner.firstname }} {{ owner.lastname }}:
-                {{ owner.organization }}
-              </li>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <ImageCarousel :carousel-items="carouselItems" />
-    </div>
-  </div>
-
-  <div class="site-information-container">
-    <h2 class="site-information-title">Datastreams Available at this Site</h2>
-    <v-btn
-      v-if="thingStore.things[thingId]?.owns_thing"
-      color="grey-lighten-2"
-      :to="{
-        name: 'SiteDatastreams',
-        params: { id: thingStore.things[thingId].id },
-      }"
-      >Manage Datastreams</v-btn
-    >
-    <img src="@/assets/hydro.png" alt="hydro" class="site-information-image" />
-    <v-btn color="grey-lighten-2" class="site-information-button"
-      >Download Data from HydroShare</v-btn
-    >
-  </div>
-
-  <v-row class="ma-2">
-    <template
-      v-for="datastream in datastreamStore.datastreams[thingId]"
-      :key="datastream.id"
-    >
-      <v-col
-        v-if="datastream.is_visible"
-        md="3"
-        class="pa-3 d-flex flex-column"
-      >
-        <v-card class="elevation-5 flex d-flex flex-column" outlined>
-          <v-card-title
-            >{{ datastream.observed_property_name }}
-            <v-icon small class="mr-2">
-              mdi-cloud-download-outline
-            </v-icon></v-card-title
-          >
-          <v-card-item v-if="datastream.observations">
-            <div v-for="observation in datastream.observations">
-              {{ observation.result }}----{{ observation.result_time }}
-            </div>
-            {{ datastream.unit_name }}
-            <br />
-            {{ datastream.most_recent_observation.result_time }}
-          </v-card-item>
-          <v-card-item v-else>No data for this datastream</v-card-item>
-        </v-card>
       </v-col>
-    </template>
-  </v-row>
+      <!-- Jeff said to comment out anything related to following a site August 8, 2023 -->
+      <!-- <v-col cols="auto" v-if="!is_owner">
+        <v-switch
+          color="secondary"
+          hide-details
+          v-if="isAuthenticated && thing"
+          v-model="thing.follows_thing"
+          @change="updateFollow"
+          :label="thing.follows_thing ? 'You Follow This site' : 'Follow Site'"
+        ></v-switch>
+      </v-col> -->
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="8">
+        <v-data-table class="elevation-2">
+          <tbody>
+            <tr v-for="property in thingProperties" :key="property.label">
+              <td><i :class="property.icon"></i></td>
+              <td>{{ property.label }}</td>
+              <td>{{ property.value }}</td>
+            </tr>
+          </tbody>
+          <template v-slot:bottom></template>
+        </v-data-table>
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-carousel
+          hide-delimiters
+          v-if="
+            !photoStore.loading &&
+            photoStore.photos[thingId] &&
+            photoStore.photos[thingId].length > 0
+          "
+        >
+          <v-carousel-item
+            v-for="photo in photoStore.photos[thingId]"
+            :key="photo.id"
+            :src="photo.url"
+            cover
+          >
+          </v-carousel-item>
+        </v-carousel>
+        <div v-else-if="photoStore.loading" class="text-center">
+          <p>
+            Your photos are being uploaded. They will appear once the upload is
+            complete.
+          </p>
+          <v-progress-circular
+            indeterminate
+            color="primary"
+          ></v-progress-circular>
+        </div>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="auto">
+        <h5 class="text-h5">Datastreams Available at this Site</h5>
+      </v-col>
+      <v-spacer></v-spacer>
+      <!-- <v-col cols="auto">
+        <img
+          style="max-height: 1.5rem"
+          src="@/assets/hydro.png"
+          alt="hydro share logo"
+          class="site-information-image"
+        />
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="grey" class="site-information-button"
+          >Download Data from HydroShare</v-btn
+        >
+      </v-col> -->
+    </v-row>
+    <v-row class="pb-2" v-if="is_owner">
+      <v-col>
+        <v-btn-secondary
+          prependIcon="mdi-plus"
+          variant="elevated"
+          :to="{ name: 'DatastreamForm', params: { id: thingId } }"
+          >Add New Datastream</v-btn-secondary
+        >
+      </v-col>
+    </v-row>
+    <v-row class="pb-5">
+      <v-data-table
+        class="elevation-3"
+        :headers="headers"
+        :items="visibleDatastreams"
+      >
+        <template v-slot:item.observations="{ item }">
+          <div v-if="item.raw.observations">
+            <v-dialog v-model="item.raw.chartOpen" width="80rem">
+              <SiteVisualization
+                :thing-id="thingId"
+                :datastream-id="item.raw.id"
+                @close="item.raw.chartOpen = false"
+              ></SiteVisualization>
+            </v-dialog>
+            <LineChart
+              @click="item.raw.chartOpen = true"
+              class="pt-2"
+              :is-stale="item.raw.is_stale"
+              :observations="item.raw.observations"
+            />
+          </div>
+          <div v-else>No data for this datastream</div>
+        </template>
+        <template v-slot:item.last_observation="{ item }">
+          <div v-if="item.raw.most_recent_observation">
+            <v-row>
+              {{
+                formatDate(
+                  (item.raw.most_recent_observation as Observation).result_time
+                )
+              }}
+            </v-row>
+            <v-row>
+              {{
+                (item.raw.most_recent_observation as Observation).result
+              }}&nbsp;
+              {{ item.raw.unit_name }}
+            </v-row>
+          </div>
+        </template>
+
+        <template v-slot:item.actions="{ item }">
+          <v-tooltip bottom :openDelay="500" v-if="item.raw.is_visible">
+            <template v-slot:activator="{ props }" v-if="is_owner">
+              <v-btn
+                small
+                color="grey"
+                v-bind="props"
+                icon="mdi-eye"
+                @click="toggleVisibility(item.raw)"
+              />
+            </template>
+            <span
+              >Hide this datastream from guests of your site. Owners will still
+              see it</span
+            >
+          </v-tooltip>
+          <v-tooltip bottom :openDelay="500" v-else>
+            <template v-slot:activator="{ props }" v-if="is_owner">
+              <v-btn
+                small
+                color="grey-lighten-1"
+                v-bind="props"
+                icon="mdi-eye-off"
+                @click="toggleVisibility(item.raw)"
+              />
+            </template>
+            <span>Make this datastream publicly visible</span>
+          </v-tooltip>
+
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-dots-vertical" />
+            </template>
+            <v-list>
+              <v-list-item
+                v-if="is_owner"
+                prepend-icon="mdi-link-variant"
+                title="Link Data Source"
+                @click="
+                  handleLinkDataSource(
+                    item.raw.id,
+                    item.raw.data_source_id,
+                    item.raw.column
+                  )
+                "
+              />
+              <v-list-item
+                v-if="is_owner"
+                prepend-icon="mdi-pencil"
+                title="Edit Datastream Metadata"
+                :to="{
+                  name: 'DatastreamForm',
+                  params: { id: thingId, datastreamId: item.raw.id },
+                }"
+              />
+              <v-list-item
+                v-if="is_owner"
+                prepend-icon="mdi-chart-line"
+                title="View Time Series Plot"
+                @click="item.raw.chartOpen = true"
+              />
+              <v-list-item
+                v-if="is_owner"
+                prepend-icon="mdi-delete"
+                title="Delete Datastream"
+                @click="openDeleteModal(item.raw)"
+              />
+              <!-- <v-list-item prepend-icon="mdi-download" title="Download Data" /> -->
+            </v-list>
+          </v-menu>
+        </template>
+      </v-data-table>
+      <v-dialog
+        v-if="selectedDatastream"
+        v-model="isDSDeleteModalOpen"
+        width="40rem"
+      >
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">Confirm Deletion</span>
+          </v-card-title>
+          <v-card-text>
+            Are you sure you want to permanently delete the this datastream and
+            all the observations associated with it?
+            <br />
+            <br />
+            <strong>ID:</strong> {{ selectedDatastream.id }} <br />
+          </v-card-text>
+          <v-card-text>
+            Please type <strong> Delete </strong> to confirm deletion:
+            <v-form>
+              <v-text-field
+                v-model="deleteDatastreamInput"
+                solo
+                @keydown.enter.prevent="deleteDatastream"
+              ></v-text-field>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn-cancel @click="isDSDeleteModalOpen = false"
+              >Cancel</v-btn-cancel
+            >
+            <v-btn color="delete" @click="deleteDatastream">Confirm</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="linkDataSourceDialogOpen" persistent>
+        <SiteLinkDataSourceForm
+          @close-dialog="handleCloseDataSourceDialog"
+          :thingId="thingId"
+          :datastreamId="linkFormDatastreamId"
+          :dataSourceId="linkFormDataSourceId"
+          :column="linkFormColumn"
+        />
+      </v-dialog>
+    </v-row>
+    <v-row v-if="thing?.include_data_disclaimer" class="pt-2 pb-8">
+      <h6 class="text-h6" style="color: #b71c1c">
+        {{ thing.data_disclaimer }}
+      </h6>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
 import GoogleMap from '@/components/GoogleMap.vue'
-import ImageCarousel from '@/components/ImageCarousel.vue'
-import MoonIm1 from '@/assets/moon_bridge1.jpg'
-import MoonIm2 from '@/assets/moon_bridge2.jpg'
-import MoonIm3 from '@/assets/moon_bridge3.jpg'
-import { computed, onMounted, ref } from 'vue'
+import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
+import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
+import LineChart from '@/components/LineChart.vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/store/authentication'
-import { useThingStore } from '@/store/things'
-import router from '@/router/router'
-import { useDatastreamStore } from '@/store/datastreams'
+import { Observation } from '@/types'
+import { usePhotosStore } from '@/store/photos'
+import { useThing } from '@/composables/useThing'
+// import { useAuthentication } from '@/composables/useAuthentication'
+import { useDatastreams } from '@/composables/useDatastreams'
+import { format } from 'date-fns'
+import SiteVisualization from '../SiteVisualization.vue'
 
-const authStore = useAuthStore()
-const thingStore = useThingStore()
-const datastreamStore = useDatastreamStore()
-const route = useRoute()
-const thingId = route.params.id.toString()
+const photoStore = usePhotosStore()
+const thingId = useRoute().params.id.toString()
 
-const showRegisterSiteModal = ref(false)
-const showDeleteModal = ref(false)
-const deleteInput = ref('')
-const carouselItems = ref([
+const {
+  thing,
+  stringThing,
+  mapOptions,
+  // updateFollow,
+  is_owner,
+  deleteInput,
+  deleteThing,
+  thingProperties,
+  isRegisterModalOpen,
+  isDeleteModalOpen,
+  isAccessControlModalOpen,
+  switchToAccessControlModal,
+} = useThing(thingId)
+const {
+  visibleDatastreams,
+  toggleVisibility,
+  selectedDatastream,
+  openDeleteModal,
+  deleteDatastream,
+  isDeleteModalOpen: isDSDeleteModalOpen,
+  deleteDatastreamInput,
+} = useDatastreams(thingId)
+// const { isAuthenticated } = useAuthentication()
+
+const headers = [
+  { title: 'Observed Property', key: 'observed_property_name', sortable: true },
   {
-    src: MoonIm1,
-    alt: 'Moon1',
+    title: 'Observations (Last 72 Hours)',
+    key: 'observations',
+    sortable: false,
   },
-  {
-    src: MoonIm2,
-    alt: 'Moon2',
-  },
-  {
-    src: MoonIm3,
-    alt: 'Moon3',
-  },
-])
+  { title: 'Last Observation', key: 'last_observation' },
+  { title: 'Sampled Medium', key: 'sampled_medium' },
+  { title: 'Sensor', key: 'method_name' },
+  { title: 'Actions', key: 'actions', sortable: false },
+]
 
-const isAuthenticated = computed(() => !!authStore.access_token)
-const mapOptions = computed(() => {
-  if (thingStore.things[thingId])
-    return {
-      center: {
-        lat: thingStore.things[thingId].latitude,
-        lng: thingStore.things[thingId].longitude,
-      },
-      zoom: 16,
-      mapTypeId: 'satellite',
-    }
-})
+const linkFormDatastreamId = ref()
+const linkFormDataSourceId = ref()
+const linkFormColumn = ref()
+const linkDataSourceDialogOpen = ref(false)
 
-function updateFollow() {
-  if (thingStore.things[thingId]) {
-    thingStore.things[thingId].follows_thing =
-      !thingStore.things[thingId].follows_thing
-    thingStore.updateThingFollowership(thingStore.things[thingId])
-  }
+function handleLinkDataSource(
+  datastreamId: string,
+  dataSourceId: string,
+  column: string | number
+) {
+  linkFormDatastreamId.value = datastreamId
+  linkFormDataSourceId.value = dataSourceId
+  linkFormColumn.value = column
+  linkDataSourceDialogOpen.value = true
 }
 
-async function deleteThing() {
-  if (!thingStore.things[thingId]) {
-    console.error('Site could not be found.')
-    return
-  }
-  if (deleteInput.value !== thingStore.things[thingId].name) {
-    console.error('Site name does not match.')
-    return
-  }
-  await thingStore.deleteThing(thingStore.things[thingId].id)
-  await router.push('/sites')
+function handleCloseDataSourceDialog() {
+  linkDataSourceDialogOpen.value = false
+}
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString)
+  return format(date, 'MMM dd, yyyy HH:mm')
 }
 
 onMounted(async () => {
-  await thingStore.fetchThingById(thingId)
-  await datastreamStore.fetchDatastreamsByThingId(thingId)
+  await photoStore.fetchPhotos(thingId)
 })
 </script>
-
-<style scoped lang="scss">
-.site-information-image {
-  margin-left: auto;
-  margin-right: 1rem;
-  max-height: 30px;
-}
-
-.hydroshare-logo-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.hydroshare-logo-container img {
-  max-height: 50px;
-}
-
-table {
-  width: 100%;
-  max-width: 100%;
-  margin-bottom: 1rem;
-  border-right: 1px solid lightgray;
-  border-bottom: 1px solid lightgray;
-  border-collapse: collapse;
-  border-spacing: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-table th,
-table td {
-  padding: 0.1rem; /* Adjusted padding to make elements shorter */
-  vertical-align: middle;
-  border-top: 1px solid #dee2e6;
-}
-
-table thead th {
-  vertical-align: bottom;
-  border-bottom: 2px solid #dee2e6;
-}
-
-table tbody + tbody {
-  border-top: 2px solid #dee2e6;
-}
-
-table th {
-  font-weight: 500;
-  text-align: left;
-}
-
-table tr:nth-of-type(odd) {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-table td:first-child {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  background-color: #f5f5f5;
-  text-align: left; /* Added to align text to the left */
-}
-
-table td:first-child i {
-  margin-right: 0.5rem;
-  width: 1.5rem; /* Set a fixed width for the icons */
-  text-align: center; /* Center the icons within the fixed width */
-}
-
-table td:last-child {
-  background-color: #ffffff; /* Set background color for right td */
-}
-
-table td:first-child i {
-  margin-right: 0.5rem;
-}
-
-.site-information-container {
-  padding-bottom: 1rem;
-  padding-top: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.site-information-title {
-  margin-right: 2rem;
-}
-
-.content-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-.content-wrapper > * {
-  max-height: 30vh;
-}
-
-.table-container {
-  width: 60%;
-  position: relative;
-}
-
-.carousel-container {
-  width: calc(40% - 1rem); /* Subtract the gap from the width */
-  position: relative;
-}
-
-.follow-checkbox .v-input--selection-controls__input .v-icon {
-  color: rgba(0, 0, 0, 0.54) !important;
-}
-</style>

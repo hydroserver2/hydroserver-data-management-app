@@ -1,37 +1,43 @@
 <template>
   <v-container class="d-flex align-center justify-center my-8">
     <v-card width="50rem">
-      <v-card-title class="mb-4">Sign Up</v-card-title>
+      <v-card-title class="mb-4 signup-title">Sign Up</v-card-title>
       <v-card-text>
-        <form>
+        <v-form
+          @submit.prevent="createUser"
+          v-model="valid"
+          ref="myForm"
+          validate-on="blur"
+        >
           <v-row>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="firstName"
-                label="First Name"
-                required
+                v-model="user.first_name"
+                label="First Name *"
+                :rules="rules.requiredName"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="middleName"
+                v-model="user.middle_name"
                 label="Middle Name"
+                :rules="user.middle_name ? rules.name : []"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="lastName"
-                label="Last Name"
-                required
+                v-model="user.last_name"
+                label="Last Name *"
+                :rules="rules.requiredName"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="email"
-                label="Email (This will be your login username)"
-                required
+                v-model="user.email"
+                label="Email (This will be your login username) *"
+                :rules="rules.email"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -39,61 +45,71 @@
             <v-col cols="12" md="6">
               <v-text-field
                 type="password"
-                v-model="password"
-                label="Password"
-                required
+                v-model="user.password"
+                label="Password *"
+                :rules="rules.password"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
                 type="password"
                 v-model="confirmPassword"
-                label="Confirm Password"
-                required
+                label="Confirm Password *"
+                :rules="rules.passwordMatch(user.password)"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="address"
-                label="Address (Optional)"
+                v-model="user.address"
+                label="Address"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="phone"
-                label="Phone (Optional)"
+                v-model="user.phone"
+                v-maska:[phoneMask]
+                label="Phone"
+                :rules="user.phone ? rules.phoneNumber : []"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="organization"
-                label="Organization (Optional)"
+                v-model="user.organization"
+                label="Organization"
+                :rules="user.organization ? rules.name : []"
+                validate-on="input"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col>
               <v-autocomplete
-                v-model="type"
-                label="User Type"
+                v-model="user.type"
+                label="User Type *"
                 :items="userTypes"
-                outlined
-                required
+                :rules="rules.required"
               ></v-autocomplete>
             </v-col>
           </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="user.link"
+                label="User's Link (URL)"
+                :rules="user.link ? rules.urlFormat : []"
+              ></v-text-field>
+            </v-col>
+          </v-row>
           <div class="mt-6">
-            <v-btn-primary type="submit" @click="submitForm"
-              >Create User</v-btn-primary
-            >
+            <v-btn-primary type="submit">Create User</v-btn-primary>
           </div>
-        </form>
+        </v-form>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-text class="text-body-1">
@@ -105,60 +121,22 @@
 </template>
 
 <script setup lang="ts">
-import router from '@/router/router'
-import { ref } from 'vue'
-import { useApiClient } from '@/utils/api-client'
-const api = useApiClient()
+import { rules } from '@/utils/rules'
+import { reactive, ref } from 'vue'
+import { useAuthStore } from '@/store/authentication'
+import { User } from '@/types'
+import { userTypes } from '@/vocabularies'
+import { VForm } from 'vuetify/components'
+import { vMaska } from 'maska'
 
-const firstName = ref('')
-const lastName = ref('')
-const email = ref('')
-const password = ref('')
+const valid = ref(false)
 const confirmPassword = ref('')
-const middleName = ref('')
-const phone = ref('')
-const address = ref('')
-const organization = ref('')
-const type = ref(null)
-const userTypes = ref([
-  'University Faculty',
-  'University Professional or Research Staff',
-  'Post-Doctoral Fellow',
-  'University Graduate Student',
-  'University Undergraduate Student',
-  'Commercial/Professional',
-  'Government Official',
-  'School Student Kindergarten to 12th Grade',
-  'School Teacher Kindergarten to 12th Grade',
-  'Organization',
-  'Other',
-])
+const myForm = ref<VForm>()
+const user = reactive<User>(new User())
+const phoneMask = { mask: '(###) ###-####' }
 
-async function submitForm() {
-  if (password.value !== confirmPassword.value) {
-    alert('Passwords do not match!')
-    return
-  }
-
-  try {
-    const response = await api.post('/user', {
-      first_name: firstName.value,
-      last_name: lastName.value,
-      email: email.value,
-      password: password.value,
-      middle_name: middleName.value,
-      phone: phone.value,
-      address: address.value,
-      organization: organization.value,
-      type: type.value,
-    })
-    const { access_token, refresh_token } = response.data
-    // TODO: save this in the store and configure property as persistent
-    localStorage.setItem('access_token', access_token)
-    localStorage.setItem('refresh_token', refresh_token)
-    await router.push('/profile')
-  } catch (error) {
-    console.error(error)
-  }
+async function createUser() {
+  if (!valid.value) return
+  await useAuthStore().createUser(user)
 }
 </script>

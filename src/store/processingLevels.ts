@@ -7,16 +7,22 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     ownedProcessingLevels(): ProcessingLevel[] {
       return this.processingLevels.filter((pl) => pl.person_id != null)
     },
+    unownedProcessingLevels(): ProcessingLevel[] {
+      return this.processingLevels.filter((pl) => pl.person_id == null)
+    },
   },
   actions: {
+    sortProcessingLevels() {
+      this.processingLevels.sort((a, b) =>
+        a.processing_level_code.localeCompare(b.processing_level_code)
+      )
+    },
     async fetchProcessingLevels() {
       if (this.loaded) return
       try {
         const { data } = await this.$http.get('/processing-levels')
-        this.processingLevels = data.sort(
-          (a: ProcessingLevel, b: ProcessingLevel) =>
-            a.processing_level_code.localeCompare(b.processing_level_code)
-        )
+        this.processingLevels = data
+        this.sortProcessingLevels()
         this.loaded = true
       } catch (error) {
         console.error('Error fetching processing levels from DB', error)
@@ -32,6 +38,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
           (pl) => pl.id === processingLevel.id
         )
         if (index !== -1) this.processingLevels[index] = data
+        this.sortProcessingLevels()
       } catch (error) {
         console.error(
           `Error updating processing level with id ${processingLevel.id}`,
@@ -46,10 +53,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
           processingLevel
         )
         this.processingLevels.push(data)
-        this.processingLevels = this.processingLevels.sort(
-          (a: ProcessingLevel, b: ProcessingLevel) =>
-            a.processing_level_code.localeCompare(b.processing_level_code)
-        )
+        this.sortProcessingLevels()
         return data
       } catch (error) {
         console.error('Error creating processing level', error)
@@ -57,23 +61,24 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     },
     async deleteProcessingLevel(id: string) {
       try {
-        await this.$http.delete(`/processing-levels/${id}`)
-        this.processingLevels = this.processingLevels.filter(
-          (pl) => pl.id !== id
-        )
+        const response = await this.$http.delete(`/processing-levels/${id}`)
+        if (response.status === 200 || response.status === 204) {
+          this.processingLevels = this.processingLevels.filter(
+            (pl) => pl.id !== id
+          )
+          this.sortProcessingLevels()
+        } else
+          console.error('Error deleting processing level from server', response)
       } catch (error) {
-        console.error(`Error deleting processing level with id ${id}`, error)
+        console.error('Error deleting processing level', error)
       }
     },
-    async getProcessingLevelById(id: string) {
-      await this.fetchProcessingLevels()
+    getProcessingLevelById(id: string) {
       const processingLevel = this.processingLevels.find(
         (pl) => pl.id.toString() === id.toString()
       )
-
       if (!processingLevel)
         throw new Error(`Processing Level with id ${id} not found`)
-
       return processingLevel
     },
   },

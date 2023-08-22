@@ -7,7 +7,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn @click="cancel()">{{ dialog.cancelText }}</v-btn>
+        <v-btn-cancel @click="cancel()">{{ dialog.cancelText }}</v-btn-cancel>
         <v-btn v-if="dialog.onSecondaryAction" @click="secondaryAction()">{{
           dialog.secondaryActionText
         }}</v-btn>
@@ -22,13 +22,17 @@
     v-model="snackbar.isActive"
     :timeout="snackbar.isInfinite ? -1 : snackbar.duration"
     multi-line
+    :color="snackbarColor"
   >
     {{ snackbar.message }}
 
     <template v-slot:actions>
-      <v-btn color="red" variant="text" @click="snackbar.isActive = false">
+      <v-btn-cancel
+        :color="actionButtonColor"
+        @click="snackbar.isActive = false"
+      >
         Dismiss
-      </v-btn>
+      </v-btn-cancel>
     </template>
   </v-snackbar>
 </template>
@@ -36,7 +40,7 @@
 <script lang="ts" setup>
 import { DEFAULT_TOAST_DURATION } from '@/constants'
 import { Subscription } from 'rxjs'
-import { reactive, onBeforeUnmount } from 'vue'
+import { reactive, onBeforeUnmount, computed } from 'vue'
 import Notification, { IDialog, IToast } from '@/store/notifications'
 
 const INITIAL_DIALOG = {
@@ -87,11 +91,19 @@ const onOpenDialog: Subscription = Notification.dialog$.subscribe(
 )
 
 const snackbarColors = {
-  success: { snackbar: 'primary', actionButton: 'primary darken-2' },
-  error: { snackbar: 'error darken-2', actionButton: 'error darken-3' },
-  info: { snackbar: 'primary', actionButton: 'primary darken-2' },
+  success: { snackbar: 'success', actionButton: 'grey-lighten-4' },
+  error: { snackbar: 'error', actionButton: 'grey-lighten-3' },
+  info: { snackbar: 'info', actionButton: 'grey-lighten-4' },
   default: { snackbar: undefined, actionButton: undefined },
 }
+const getColor = (type: 'success' | 'error' | 'info' | 'default') =>
+  snackbarColors[type] || snackbarColors.default
+const snackbarColor = computed(
+  () => getColor(snackbar.type || 'default').snackbar
+)
+const actionButtonColor = computed(
+  () => getColor(snackbar.type || 'default').actionButton
+)
 
 const secondaryAction = () => {
   dialog.isActive = false

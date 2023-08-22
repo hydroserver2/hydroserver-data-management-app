@@ -1,17 +1,41 @@
 <template>
   <div class="d-flex fill-height">
-    <v-card class="sidebar">
+    <v-navigation-drawer v-model="drawer" app width="350">
+      <v-row>
+        <v-spacer></v-spacer>
+        <v-col cols="auto">
+          <v-btn
+            color="cancel"
+            v-if="drawer"
+            class="toggler"
+            icon
+            @click="drawer = !drawer"
+          >
+            <v-icon>mdi-menu-open</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+
       <v-card-title>Browse Data Collection Sites</v-card-title>
       <v-card-text>
         <div class="d-flex my-2">
+          <v-btn-cancel color="grey" variant="flat" @click="clearFilters"
+            >Clear</v-btn-cancel
+          >
           <v-spacer></v-spacer>
-          <v-btn-secondary @click="clearFilters">Clear Filters</v-btn-secondary>
+          <v-btn-primary :disabled="!searchInput" @click="filterOrganizations"
+            >Filter By Org</v-btn-primary
+          >
         </div>
-        <SearchBar
-          :items="organizations"
-          :clear-search="clearSearch"
-          @filtered-items="handleFilteredOrganizations"
-        />
+        <form @submit.prevent="filterOrganizations">
+          <v-text-field
+            placeholder="Filter by Organizations"
+            prepend-inner-icon="mdi-magnify"
+            v-model="searchInput"
+            clearable
+          />
+        </form>
+        <p v-if="!validFilter" class="text-error">No results found</p>
         <div v-for="organization in filteredOrganizations">
           <p>{{ organization }}</p>
         </div>
@@ -29,10 +53,15 @@
           </v-expansion-panel>
         </v-expansion-panels>
       </v-card-text>
-    </v-card>
+    </v-navigation-drawer>
+
+    <v-btn v-if="!drawer" class="toggler" icon @click="drawer = !drawer">
+      <v-icon>mdi-menu</v-icon>
+    </v-btn>
 
     <GoogleMap
-      :markers="filteredMarkers"
+      :key="filteredThings"
+      :things="filteredThings"
       :mapOptions="{ center: { lat: 39, lng: -100 }, zoom: 4 }"
     />
   </div>
@@ -40,94 +69,71 @@
 
 <script setup lang="ts">
 import GoogleMap from '@/components/GoogleMap.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { computed, onMounted, ref } from 'vue'
-import { useMarkerStore } from '@/store/markers'
 import { Ref } from 'vue'
-import { Marker } from '@/types'
+import { Thing } from '@/types'
+import { useThingStore } from '@/store/things'
+import { siteTypes } from '@/vocabularies'
 
-const markerStore = useMarkerStore()
-const siteTypes = ref([
-  'Borehole',
-  'Ditch',
-  'Atmosphere',
-  'Estuary',
-  'House',
-  'Land',
-  'Pavement',
-  'Stream',
-  'Spring',
-  'Lake, Reservoir, Impoundment',
-  'Laboratory or sample-preparation area',
-  'Observation well',
-  'Soil hole',
-  'Storm sewer',
-  'Stream gage',
-  'Tidal stream',
-  'Water quality station',
-  'Weather station',
-  'Wetland',
-  'Other',
-])
-const clearSearch = ref(false)
-const selectedSiteTypes: Ref<any[]> = ref([])
-const filteredOrganizations: Ref<string[]> = ref([])
-const filteredOrganizationsSet = ref(new Set())
+const drawer = ref(true)
+const thingStore = useThingStore()
+const selectedSiteTypes: Ref<string[]> = ref([])
+const filteredOrganizations = ref(new Set())
+const searchInput = ref('')
+const validFilter = ref(true)
 
 const organizations = computed(() => {
-  if (!Array.isArray(markerStore.markers)) {
-    return []
-  }
   const allOrgs = new Set()
-  markerStore.markers.forEach((marker) => {
-    marker.owners.forEach((owner) => {
+  Object.values(thingStore.things).forEach((thing) => {
+    thing.owners.forEach((owner) => {
       if (owner.organization) {
-        allOrgs.add(owner.organization)
+        allOrgs.add(owner.organization.toLowerCase())
       }
     })
   })
   return Array.from(allOrgs)
 })
 
-const filteredMarkers = computed(() => {
-  if (!Array.isArray(markerStore.markers)) return []
-  return markerStore.markers.filter(isMarkerValid)
-})
-
-function handleFilteredOrganizations(filtered: any) {
-  filteredOrganizations.value = filtered
-  filteredOrganizationsSet.value = new Set(filtered)
+const filterOrganizations = () => {
+  if (!searchInput || !searchInput.value) {
+    filteredOrganizations.value = new Set([...organizations.value])
+  } else {
+    const lowerCase = searchInput.value.toLowerCase()
+    filteredOrganizations.value = new Set([
+      ...organizations.value.filter((org: any) => org.includes(lowerCase)),
+    ])
+  }
+  validFilter.value = filteredOrganizations.value.size === 0 ? false : true
 }
 
-function isMarkerValid(marker: Marker) {
+const filteredThings: any = computed(() => {
+  if (typeof thingStore.things !== 'object' || !thingStore.things) return []
+  return Object.values(thingStore.things).filter(isThingValid)
+})
+
+function isThingValid(thing: Thing) {
   const orgValid =
-    filteredOrganizationsSet.value.size === 0 ||
-    marker.owners.some((owner) =>
-      filteredOrganizationsSet.value.has(owner.organization)
+    filteredOrganizations.value.size === 0 ||
+    thing.owners.some((owner) =>
+      owner.organization
+        ? filteredOrganizations.value.has(owner.organization.toLowerCase())
+        : false
     )
   const siteTypeValid =
     selectedSiteTypes.value.length === 0 ||
-    selectedSiteTypes.value.includes(marker.site_type)
+    selectedSiteTypes.value.includes(thing.site_type)
 
   return orgValid && siteTypeValid
 }
 
 function clearFilters() {
   selectedSiteTypes.value = []
-  filteredOrganizations.value = []
-  filteredOrganizationsSet.value = new Set()
-  clearSearch.value = !clearSearch.value
+  filteredOrganizations.value = new Set()
+  validFilter.value = true
+  searchInput.value = ''
 }
 
-onMounted(() => {
-  markerStore.fetchMarkers()
+onMounted(async () => {
+  await thingStore.fetchThings()
 })
 </script>
-
-<style scoped lang="scss">
-.v-card.sidebar {
-  flex-basis: 35rem;
-  height: 100%;
-  overflow: auto;
-}
-</style>

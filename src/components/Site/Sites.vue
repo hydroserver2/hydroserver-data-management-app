@@ -1,25 +1,36 @@
 <template>
   <template v-if="thingStore.loaded">
     <div class="mb-8 flex-shrink-0" style="height: 25rem">
-      <GoogleMap
-        :markers="thingStore.ownedOrFollowedThings"
+      <!-- Jeff said to comment out anything related to following a site August 8, 2023 -->
+      <!-- <GoogleMap
+        :key="thingStore.ownedOrFollowedThings"
+        :things="thingStore.ownedOrFollowedThings"
         v-if="thingStore.ownedOrFollowedThings"
+      ></GoogleMap> -->
+      <GoogleMap
+        :key="thingStore.ownedThings"
+        :things="thingStore.ownedThings"
+        v-if="thingStore.ownedThings"
       ></GoogleMap>
       <v-divider></v-divider>
     </div>
 
     <v-container>
-      <div class="d-flex justify-space-between mb-4">
-        <h5 class="text-h5">My Registered Sites</h5>
-        <v-btn
-          color="green"
-          variant="elevated"
-          density="comfortable"
-          @click="showSiteForm = true"
-          prependIcon="mdi-plus"
-          >Register a new site</v-btn
-        >
-      </div>
+      <v-row class="mb-4">
+        <v-col cols="auto">
+          <h5 class="text-h5">My Registered Sites</h5>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col cols="auto">
+          <v-btn-secondary
+            class="register-site-btn"
+            variant="elevated"
+            @click="showSiteForm = true"
+            prependIcon="mdi-plus"
+            >Register a new site</v-btn-secondary
+          >
+        </v-col>
+      </v-row>
 
       <v-data-table
         v-if="thingStore.ownedThings.length"
@@ -27,10 +38,9 @@
         :items="thingStore.ownedThings"
         hover
         item-value="id"
-        class="elevation-1"
+        class="elevation-3 owned-sites-table"
         @click:row="onRowClick"
       >
-        <template v-slot:bottom></template>
       </v-data-table>
 
       <p v-else class="text-body-1 text-medium-emphasis">
@@ -38,7 +48,7 @@
       </p>
     </v-container>
 
-    <v-container class="mb-8">
+    <!-- <v-container class="mb-8">
       <h5 class="text-h5 mb-4">Followed Sites</h5>
       <v-data-table
         v-if="thingStore.followedThings.length"
@@ -46,15 +56,14 @@
         :items="thingStore.followedThings"
         hover
         item-value="id"
-        class="elevation-1"
+        class="elevation-3"
         @click:row="onRowClick"
       >
-        <template v-slot:bottom></template>
       </v-data-table>
       <p v-else class="text-body-1 text-medium-emphasis">
         You are not following any sites.
       </p>
-    </v-container>
+    </v-container> -->
 
     <v-dialog v-model="showSiteForm" width="60rem">
       <SiteForm @close="showSiteForm = false"></SiteForm>

@@ -9,8 +9,12 @@ export default defineConfig({
     vue(),
     vuetify({ styles: { configFile: 'src/assets/css/variables.scss' } }),
   ],
+  server: {
+    host: '127.0.0.1',
+    port: 5173
+  },
   resolve: {
-    extensions: ['.js', '.json', '.vue', '.less', '.scss'],
+    extensions: ['.js', '.json', '.vue', '.less', '.scss', '.ts'],
     alias: {
       '@': resolve(__dirname, 'src'),
     },

@@ -1,41 +1,74 @@
 <template>
-  <v-container class="d-flex align-center justify-center py-8 fill-height">
-    <v-card width="40rem">
-      <v-card-title class="mb-4">Sign In</v-card-title>
+  <v-container
+    class="d-flex align-center justify-center py-8 fill-height login-container"
+  >
+    <v-card class="login-card" width="40rem">
+      <v-card-title class="mb-4 login-title">Sign In</v-card-title>
       <v-card-text>
-        <v-form ref="form" @submit.prevent="loginSubmit" v-model="valid">
+        <v-btn
+          @click="openLogInDialog('google')"
+          variant="flat"
+          color="secondary"
+          prepend-icon="mdi-google"
+        >
+          Log in using Google
+        </v-btn>
+      </v-card-text>
+      <v-card-text>
+        <v-btn
+          @click="openLogInDialog('orcid')"
+          variant="flat"
+          color="secondary"
+          prepend-icon="mdi-orcid"
+        >
+          Log in using ORCID
+        </v-btn>
+      </v-card-text>
+      <v-card-text>
+        <v-form
+          class="login-form"
+          ref="form"
+          @submit.prevent="loginSubmit"
+          v-model="valid"
+        >
           <v-text-field
-            class="mb-4"
-            label="Email"
+            class="mb-4 email-input"
+            label="Email *"
             autofocus
             v-model="email"
             :rules="rules.email"
             type="email"
             name="email"
-            required
+            validate-on="blur"
           ></v-text-field>
           <v-text-field
-            class="mb-4"
-            label="Password"
-            :rules="rules.password"
+            class="mb-4 password-input"
+            label="Password *"
+            :rules="rules.required"
             v-model="password"
             type="password"
             name="password"
-            required
           ></v-text-field>
           <v-btn-primary
+            class="login-button mr-4"
             :disabled="!valid"
             type="submit"
-            color="primary"
-            class="mr-4"
             >Log In</v-btn-primary
           >
         </v-form>
       </v-card-text>
-      <v-divider></v-divider>
-      <v-card-actions class="text-body-1">
+      <v-divider class="login-divider"></v-divider>
+      <v-card-actions class="text-body-1 signup-link-section">
         <span class="mr-2">Don't have an account?</span>
-        <router-link to="/signup" class="light-text">Sign Up</router-link>
+        <router-link to="/signup" class="light-text signup-link"
+          >Sign Up</router-link
+        >
+        <v-spacer></v-spacer>
+        <router-link
+          to="/password_reset"
+          class="light-text forgot-password-link"
+          >Forgot your password?</router-link
+        >
       </v-card-actions>
     </v-card>
   </v-container>
@@ -44,43 +77,24 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
+import { rules } from '@/utils/rules'
 
-const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const form = ref(null)
 const valid = ref(false)
-const rules = {
-  password: [
-    (value: string) => {
-      if (value) return true
-
-      return 'Password is required.'
-    },
-    // (value: string) => {
-    //   if (value?.length <= 6) return true
-
-    //   return 'Password must be 6 characters or longer.'
-    // },
-  ],
-  email: [
-    (value: string) => {
-      if (value) return true
-
-      return 'Email is required.'
-    },
-    (value: string) => {
-      if (/.+@.+\..+/.test(value)) return true
-
-      return 'Email must be valid.'
-    },
-  ],
-}
 
 const loginSubmit = async () => {
-  if (valid) {
-    authStore.login(email.value, password.value)
-  }
+  if (!valid) return
+  await useAuthStore().login(email.value, password.value)
+}
+
+const openLogInDialog = async (backend: string) => {
+  await useAuthStore().OAuthLogin(backend, onLoggedIn)
+}
+
+const onLoggedIn = () => {
+  // TODO: update state on log in
 }
 </script>
 

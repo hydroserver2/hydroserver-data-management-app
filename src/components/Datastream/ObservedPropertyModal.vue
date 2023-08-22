@@ -7,87 +7,100 @@
     </v-card-title>
     <v-card-text>
       <v-container>
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="observedProperty.name"
-              label="Name"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12">
-            <v-text-field
-              v-model="observedProperty.definition"
-              label="Definition"
-              outlined
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12">
-            <v-text-field
-              v-model="observedProperty.description"
-              label="Description"
-              outlined
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field
-              v-model="observedProperty.variable_type"
-              label="Variable Type"
-              outlined
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field
-              v-model="observedProperty.variable_code"
-              label="Variable Code"
-              outlined
-            ></v-text-field>
-          </v-col>
-        </v-row>
+        <v-form
+          @submit.prevent="uploadObservedProperty"
+          ref="myForm"
+          v-model="valid"
+          validate-on="blur"
+        >
+          <v-row>
+            <v-col>
+              <v-autocomplete
+                v-if="!isEdit"
+                v-model="selectedId"
+                label="Load a template observed property"
+                :items="opStore.unownedOP"
+                item-title="name"
+                item-value="id"
+              ></v-autocomplete>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="observedProperty.name"
+                label="Name *"
+                :rules="rules.requiredName"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="observedProperty.definition"
+                label="Definition *"
+                :rules="rules.description"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="observedProperty.description"
+                label="Description"
+                :rules="rules.maxLength(500)"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-combobox
+                :items="OPVariableTypes"
+                v-model="observedProperty.variable_type"
+                label="Variable Type"
+                :rules="rules.maxLength(500)"
+              />
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="observedProperty.variable_code"
+                label="Variable Code"
+                :rules="rules.maxLength(500)"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+            <v-btn type="submit">{{ isEdit ? 'Update' : 'Save' }}</v-btn>
+          </v-card-actions>
+        </v-form>
       </v-container>
     </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue darken-1" text @click="$emit('close')">Cancel</v-btn>
-      <v-btn color="blue darken-1" text @click="uploadObservedProperty">{{
-        isEdit ? 'Update' : 'Save'
-      }}</v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue'
-import { ObservedProperty } from '@/types'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useObservedPropertyStore } from '@/store/observedProperties'
+import { rules } from '@/utils/rules'
+import { useObservedProperties } from '@/composables/useMetadata'
+import { OPVariableTypes } from '@/vocabularies'
 
 const opStore = useObservedPropertyStore()
 const props = defineProps({ id: String })
-const isEdit = computed(() => props.id != null)
 const emit = defineEmits(['uploaded', 'close'])
 
-const observedProperty = reactive<ObservedProperty>({
-  id: '',
-  name: '',
-  definition: '',
-  description: '',
-  variable_type: '',
-  variable_code: '',
-})
+const {
+  isEdit,
+  selectedId,
+  myForm,
+  valid,
+  selectedEntity: observedProperty,
+} = useObservedProperties(props.id)
 
 async function uploadObservedProperty() {
-  if (isEdit.value) await opStore.updateObservedProperty(observedProperty)
+  await myForm.value?.validate()
+  if (!valid.value) return
+  if (isEdit.value) await opStore.updateObservedProperty(observedProperty.value)
   else {
-    const newOP = await opStore.createObservedProperty(observedProperty)
-    emit('uploaded', String(newOP.id))
+    const newOP = await opStore.createObservedProperty(observedProperty.value)
+    emit('uploaded', newOP.id)
   }
   emit('close')
 }
-
-onMounted(async () => {
-  await opStore.fetchObservedProperties()
-  if (props.id) Object.assign(observedProperty, await opStore.getById(props.id))
-})
 </script>
