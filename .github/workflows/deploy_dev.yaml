@@ -51,6 +51,6 @@ jobs:
         run: |
           aws s3 sync ./dist s3://${{ secrets.AWS_S3_DEV_BUCKET_NAME }}/current/ --delete
 
-      # - name: Invalidate CloudFront distribution cache
-      #   run: |
-      #     aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+      - name: Invalidate CloudFront distribution cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
