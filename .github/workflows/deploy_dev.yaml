@@ -49,7 +49,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./dist s3://${{ secrets.AWS_S3_DEV_BUCKET_NAME }}/ --delete
+          aws s3 sync ./dist s3://${{ secrets.AWS_S3_DEV_BUCKET_NAME }}/current/ --delete
 
       # - name: Invalidate CloudFront distribution cache
       #   run: |
