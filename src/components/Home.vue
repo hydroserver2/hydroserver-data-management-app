@@ -1,14 +1,17 @@
 <template>
-  <v-parallax
-    src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
-    height="500"
-    alt="vuetify parallax background image"
+  <div
+    class="banner"
+    :style="`background-image: linear-gradient(180deg, rgba(30, 36, 58, 0.35), rgba(28, 37, 65, 0.3)), url(${bannerImg})`"
   >
     <div
-      class="d-flex text-white flex-column align-center text-center fill-height justify-space-between py-16 has-text-shadow"
+      class="d-flex text-white flex-column align-center text-center fill-height justify-space-between py-8"
     >
       <div>
-        <h3 class="text-h3 mb-8">HydroServer</h3>
+        <img
+          :src="hydroWhiteImg"
+          alt="Hydro Logo"
+          style="max-width: 500px; width: 100%"
+        />
         <h4 class="text-h4 font-weight-thin mb-8">
           Collect and Manage Your Operational Hydrologic Data
         </h4>
@@ -19,7 +22,7 @@
         <v-btn-primary to="/SignUp">Sign Up</v-btn-primary>
       </div>
     </div>
-  </v-parallax>
+  </div>
 
   <v-container class="my-8">
     <div class="d-flex flex-column align-center text-center">
@@ -203,6 +206,8 @@ import owpLogo from '@/assets/owp.png'
 import ogcLogo from '@/assets/ogc.svg'
 import cirohLogo from '@/assets/CIROH_logo_transparent.png'
 import sensorThingsLogo from '@/assets/sensorThings.png'
+import bannerImg from '@/assets/banner.jpg'
+import hydroWhiteImg from '@/assets/hydroserver-white.png'
 </script>
 
 <style scoped lang="scss">
@@ -212,5 +217,11 @@ import sensorThingsLogo from '@/assets/sensorThings.png'
 
 p {
   max-width: 40rem;
+}
+
+.banner {
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 37rem;
 }
 </style>
