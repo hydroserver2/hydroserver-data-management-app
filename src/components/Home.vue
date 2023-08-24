@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="banner"
-    :style="`background-image: linear-gradient(180deg, rgba(30, 36, 58, 0.35), rgba(28, 37, 65, 0.3)), url(${bannerImg})`"
-  >
+  <div class="banner">
     <div
       class="d-flex text-white flex-column align-center text-center fill-height justify-space-between py-8"
     >
@@ -201,13 +198,12 @@
 </template>
 
 <script setup lang="ts">
-import noaaLogo from '@/assets/noaa.svg'
-import owpLogo from '@/assets/owp.png'
-import ogcLogo from '@/assets/ogc.svg'
-import cirohLogo from '@/assets/CIROH_logo_transparent.png'
-import sensorThingsLogo from '@/assets/sensorThings.png'
-import bannerImg from '@/assets/banner.jpg'
-import hydroWhiteImg from '@/assets/hydroserver-white.png'
+import noaaLogo from '@/assets/noaa-min.png'
+import owpLogo from '@/assets/owp-min.png'
+import ogcLogo from '@/assets/ogc-min.png'
+import cirohLogo from '@/assets/CIROH_logo_transparent-min.png'
+import sensorThingsLogo from '@/assets/sensorThings-min.png'
+import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
 </script>
 
 <style scoped lang="scss">
@@ -219,9 +215,24 @@ p {
   max-width: 40rem;
 }
 
+$gradient: linear-gradient(
+  180deg,
+  rgba(30, 36, 58, 0.35),
+  rgba(28, 37, 65, 0.3)
+);
+
 .banner {
+  background-image: $gradient, url(@/assets/banner_25-min.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   height: 37rem;
+
+  // @media (min-width: 768px) {
+  //   background-image: $gradient, url(@/assets/banner_50.jpg);
+  // }
+
+  // @media (min-width: 1200px) {
+  //   background-image: $gradient, url(@/assets/banner_25.jpg);
+  // }
 }
 </style>

@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import uwrlLogo from '@/assets/UWRL.png'
+import uwrlLogo from '@/assets/UWRL-min.png'
 
 const version = import.meta.env.VITE_APP_VERSION || '0.0.1'
 </script>
