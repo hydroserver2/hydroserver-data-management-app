@@ -48,9 +48,13 @@ jobs:
           aws-region: 'us-east-1'
 
       - name: Deploy to S3
+        env:
+          AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET_DEV }}
         run: |
-          aws s3 sync ./dist s3://${{ env.AWS_S3_BUCKET_DEV }}/ --delete
+          aws s3 sync ./dist s3://$AWS_S3_BUCKET/ --delete
 
       - name: Invalidate CloudFront distribution cache
+        env:
+          CLOUDFRONT_ID: ${{ env.CLOUDFRONT_ID_DEV }}
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_ID_DEV }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
