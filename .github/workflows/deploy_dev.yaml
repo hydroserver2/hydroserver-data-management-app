@@ -27,7 +27,7 @@ jobs:
         env:
           VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
           VITE_APP_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_APP_GOOGLE_MAPS_API_KEY }}
-          VITE_APP_PROXY_BASE_URL: ${{ env.VITE_PROXY_BASE_URL_DEV }}
+          VITE_APP_PROXY_BASE_URL: ${{ vars.VITE_PROXY_BASE_URL_DEV }}
         run: |
           touch .env
           echo VITE_APP_VERSION="$VITE_APP_VERSION" >> .env
@@ -48,13 +48,10 @@ jobs:
           aws-region: 'us-east-1'
 
       - name: Deploy to S3
-        env:
-          AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET_DEV }}
         run: |
-          aws s3 sync ./dist s3://$AWS_S3_BUCKET/ --delete
+          echo $AWS_S3_BUCKET
+          aws s3 sync ./dist s3://${{ vars.AWS_S3_BUCKET_DEV }}/ --delete
 
       - name: Invalidate CloudFront distribution cache
-        env:
-          CLOUDFRONT_ID: ${{ env.CLOUDFRONT_ID_DEV }}
         run: |
-          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_ID_DEV }} --paths "/*"
