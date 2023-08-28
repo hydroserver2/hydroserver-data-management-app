@@ -28,11 +28,11 @@ export const useSiteLinkDataSourceFormStore = defineStore(
     },
     actions: {
       async fetchDatastreams(thingId: string, datastreamId: string) {
-        const response = await this.$http.get(`/datastreams/${thingId}`)
+        const response = await this.$http.get(`/data/datastreams/${thingId}`)
         return response.data.filter((ds: any) => ds.id === datastreamId)[0]
       },
       async fetchDataSources() {
-        const dataSources = await this.$http.get('/data-sources')
+        const dataSources = await this.$http.get('/data/data-sources')
         this.dataSources = dataSources.data
       },
       fillForm(datastreamId: string, dataSourceId: string, column: any) {
@@ -57,7 +57,7 @@ export const useSiteLinkDataSourceFormStore = defineStore(
         }
 
         return await this.$http.patch(
-          `/datastreams/patch/${this.datastreamId}`,
+          `/data/datastreams/patch/${this.datastreamId}`,
           datastreamBody
         )
       },

@@ -39,7 +39,7 @@ export const useDataSourceDashboardStore = defineStore('data-source-dashboard-st
   },
   actions: {
     async fetchDataSources() {
-      const dataStreams = await this.$http.get('/data-sources')
+      const dataStreams = await this.$http.get('/data/data-sources')
       this.dataSources = dataStreams.data.reduce((dataSources: any, dataSource: any) => {
         let status
         let statusTip = null
@@ -106,11 +106,11 @@ export const useDataSourceDashboardStore = defineStore('data-source-dashboard-st
     },
     async updateDataSourceStatus(dataSourceId: string, paused: boolean) {
       const body = { schedule: { paused: !paused } }
-      const response = await this.$http.patch(`/data-sources/${dataSourceId}`, body)
+      const response = await this.$http.patch(`/data/data-sources/${dataSourceId}`, body)
       console.log(response)
     },
     async deleteDataSource(dataSourceId: string) {
-      const response = await this.$http.delete(`/data-sources/${dataSourceId}`)
+      const response = await this.$http.delete(`/data/data-sources/${dataSourceId}`)
     }
   }
 })

@@ -11,7 +11,7 @@ export const useSensorStore = defineStore('sensor', {
     async fetchSensors() {
       if (this.sensors.length > 0) return
       try {
-        const { data } = await this.$http.get('/sensors')
+        const { data } = await this.$http.get('/data/sensors')
         this.sensors = data
         this.sortSensors()
         this.loaded = true
@@ -21,7 +21,7 @@ export const useSensorStore = defineStore('sensor', {
     },
     async updateSensor(sensor: Sensor) {
       try {
-        const { data } = await this.$http.patch(`/sensors/${sensor.id}`, sensor)
+        const { data } = await this.$http.patch(`/data/sensors/${sensor.id}`, sensor)
         const index = this.sensors.findIndex((s) => s.id === sensor.id)
         if (index !== -1) {
           this.sensors[index] = data
@@ -33,7 +33,7 @@ export const useSensorStore = defineStore('sensor', {
     },
     async createSensor(sensor: Sensor) {
       try {
-        const { data } = await this.$http.post('/sensors', sensor)
+        const { data } = await this.$http.post('/data/sensors', sensor)
         this.sensors.push(data)
         this.sortSensors()
         return data
@@ -43,7 +43,7 @@ export const useSensorStore = defineStore('sensor', {
     },
     async deleteSensor(id: string) {
       try {
-        const response = await this.$http.delete(`/sensors/${id}`)
+        const response = await this.$http.delete(`/data/sensors/${id}`)
         if (response.status === 200 || response.status === 204) {
           this.sensors = this.sensors.filter((sensor) => sensor.id !== id)
           this.sortSensors()

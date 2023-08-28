@@ -37,7 +37,7 @@ export const useDataSourceDetailStore = defineStore('data-source-detail-store', 
   state: (): DataSourceDetail => ({}),
   actions: {
     async fetchDataSource() {
-      let response = await this.$http.get(`/data-sources/${this.id}`)
+      let response = await this.$http.get(`/data/data-sources/${this.id}`)
       let dataSource = response.data
 
       let now = new Date()

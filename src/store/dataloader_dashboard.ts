@@ -30,7 +30,7 @@ export const useDataLoaderDashboardStore = defineStore('data-loader-dashboard-st
   },
   actions: {
     async fetchDataLoaders() {
-      const dataLoaders = await this.$http.get('/data-loaders')
+      const dataLoaders = await this.$http.get('/data/data-loaders')
       this.dataLoaders = dataLoaders.data.reduce((dataLoaders: any, dataLoader: any) => {
         dataLoaders[dataLoader['id']] = {
           id: dataLoader['id'],
@@ -41,7 +41,7 @@ export const useDataLoaderDashboardStore = defineStore('data-loader-dashboard-st
       }, {})
     },
     async deleteDataLoader(dataLoaderId: string) {
-      const response = await this.$http.delete(`/data-loaders/${dataLoaderId}`)
+      const response = await this.$http.delete(`/data/data-loaders/${dataLoaderId}`)
     }
   }
 })

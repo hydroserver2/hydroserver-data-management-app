@@ -193,7 +193,7 @@ export const useAuthStore = defineStore({
     },
     async deleteAccount() {
       try {
-        await this.$http.delete('/user')
+        await this.$http.delete('/account/user')
         await this.logout()
         Notification.toast({
           message: 'Your account has been deleted',
@@ -210,7 +210,7 @@ export const useAuthStore = defineStore({
     },
     async requestPasswordReset(email: String) {
       try {
-        const response = await this.$http.post('/user/password_reset', {
+        const response = await this.$http.post('/account/user/send-password-reset-email', {
           email: email,
         })
         return response.status === 200
@@ -238,7 +238,7 @@ export const useAuthStore = defineStore({
     },
     async resetPassword(uid: string, token: string, password: string) {
       try {
-        const response = await this.$http.post('/user/reset_password', {
+        const response = await this.$http.post('/account/user/reset-password', {
           uid: uid,
           token: token,
           password: password,

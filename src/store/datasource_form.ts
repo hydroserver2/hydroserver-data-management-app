@@ -48,14 +48,14 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
   actions: {
     async fetchDataSource() {
       if (this.dataSourceId) {
-        const dataSource = await this.$http.get(`/data-sources/${this.dataSourceId}`)
+        const dataSource = await this.$http.get(`/data/data-sources/${this.dataSourceId}`)
         this.dataSource = dataSource.data
       } else {
         this.dataSource = null
       }
     },
     async fetchDataLoaders() {
-      const dataLoaders = await this.$http.get('/data-loaders')
+      const dataLoaders = await this.$http.get('/data/data-loaders')
       this.dataLoaders = dataLoaders.data
     },
     async saveDataSource() {
@@ -90,12 +90,12 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
 
       if (this.dataSourceId) {
         response = await this.$http.patch(
-          `/data-sources/${this.dataSourceId}`,
+          `/data/data-sources/${this.dataSourceId}`,
           dataSourceBody
         )
       } else {
         response = await this.$http.post(
-          '/data-sources',
+          '/data/data-sources',
           dataSourceBody
         )
       }

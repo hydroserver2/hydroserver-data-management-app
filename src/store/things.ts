@@ -31,7 +31,7 @@ export const useThingStore = defineStore('things', {
     async fetchThings() {
       if (this.loaded) return
       try {
-        const { data } = await this.$http.get('/things')
+        const { data } = await this.$http.get('/data/things')
         const thingsDictionary = data.reduce(
           (acc: Record<string, Thing>, thing: Thing) => {
             acc[thing.id] = thing
@@ -47,7 +47,7 @@ export const useThingStore = defineStore('things', {
     async fetchThingById(id: string) {
       if (this.things[id]) return
       try {
-        const { data } = await this.$http.get(`/things/${id}`)
+        const { data } = await this.$http.get(`/data/things/${id}`)
         this.$patch({ things: { ...this.things, [id]: data } })
       } catch (error) {
         console.error('Error fetching thing', error)
@@ -55,7 +55,7 @@ export const useThingStore = defineStore('things', {
     },
     async createThing(newThing: Thing) {
       try {
-        const { data } = await this.$http.post(`/things`, newThing)
+        const { data } = await this.$http.post(`/data/things`, newThing)
         this.$patch({ things: { ...this.things, [data.id]: data } })
         return data
       } catch (error: any) {
@@ -71,7 +71,7 @@ export const useThingStore = defineStore('things', {
     async updateThing(updatedThing: Thing) {
       try {
         const response = await this.$http.patch(
-          `/things/${updatedThing.id}`,
+          `/data/things/${updatedThing.id}`,
           updatedThing
         )
         if (response && response.status == 200) {
@@ -83,7 +83,7 @@ export const useThingStore = defineStore('things', {
     },
     async updateThingFollowership(updatedThing: Thing) {
       try {
-        await this.$http.patch(`/things/${updatedThing.id}/followership`)
+        await this.$http.patch(`/data/things/${updatedThing.id}/followership`)
         this.things[updatedThing.id] = updatedThing
       } catch (error) {
         console.error('Error updating thing followership', error)
@@ -91,7 +91,7 @@ export const useThingStore = defineStore('things', {
     },
     async updateThingPrivacy(thingId: string, thingPrivacy: boolean) {
       try {
-        const response = await this.$http.patch(`/things/${thingId}/privacy`, {
+        const response = await this.$http.patch(`/data/things/${thingId}/privacy`, {
           is_private: thingPrivacy,
         })
         if (response && response.status == 200) {
@@ -103,7 +103,7 @@ export const useThingStore = defineStore('things', {
     },
     async deleteThing(thingId: string) {
       try {
-        const response = await this.$http.delete(`/things/${thingId}`)
+        const response = await this.$http.delete(`/data/things/${thingId}`)
         if (response && response.status == 200) {
           delete this.things[thingId]
         }
@@ -114,7 +114,7 @@ export const useThingStore = defineStore('things', {
     async addSecondaryOwner(thingId: string, email: string) {
       try {
         const response = await this.$http.patch(
-          `/things/${thingId}/ownership`,
+          `/data/things/${thingId}/ownership`,
           {
             email: email,
             make_owner: true,
@@ -168,7 +168,7 @@ export const useThingStore = defineStore('things', {
     async transferPrimaryOwnership(thingId: string, email: string) {
       try {
         const response = await this.$http.patch(
-          `/things/${thingId}/ownership`,
+          `/data/things/${thingId}/ownership`,
           {
             email: email,
             transfer_primary: true,
@@ -217,7 +217,7 @@ export const useThingStore = defineStore('things', {
     async removeOwner(thingId: string, email: string) {
       try {
         const response = await this.$http.patch(
-          `/things/${thingId}/ownership`,
+          `/data/things/${thingId}/ownership`,
           {
             email: email,
             remove_owner: true,
@@ -241,7 +241,7 @@ export const useThingStore = defineStore('things', {
     },
     async fetchPrimaryOwnerMetadataByThingId(id: string) {
       try {
-        const response = await this.$http.get(`/things/${id}/metadata`)
+        const response = await this.$http.get(`/data/things/${id}/metadata`)
         this.$patch({ POMetadata: { ...this.POMetadata, [id]: response.data } })
       } catch (error) {
         console.error('Error fetching primary owner data from DB', error)

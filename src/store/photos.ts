@@ -13,7 +13,7 @@ export const usePhotosStore = defineStore({
   actions: {
     async fetchPhotos(thingId: string) {
       try {
-        const response = await this.$http.get(`/photos/${thingId}`)
+        const response = await this.$http.get(`/data/photos/${thingId}`)
         if (response && response.status == 200) {
           this.photos[thingId] = response.data
         }
@@ -33,7 +33,7 @@ export const usePhotosStore = defineStore({
         newPhotos.forEach((photo) => data.append(`photos`, photo))
         photosToDelete.forEach((id) => data.append(`photosToDelete`, id))
 
-        const response = await this.$http.post(`/photos/${thingId}`, data, {
+        const response = await this.$http.post(`/data/photos/${thingId}`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

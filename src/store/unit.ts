@@ -18,7 +18,7 @@ export const useUnitStore = defineStore('units', {
     async fetchUnits() {
       if (this.units.length > 0) return
       try {
-        const { data } = await this.$http.get('/units')
+        const { data } = await this.$http.get('/data/units')
         this.units = data
         this.sortUnits()
         this.loaded = true
@@ -28,7 +28,7 @@ export const useUnitStore = defineStore('units', {
     },
     async createUnit(unit: Unit) {
       try {
-        const { data } = await this.$http.post('/units', unit)
+        const { data } = await this.$http.post('/data/units', unit)
         this.units.push(data)
         this.sortUnits()
         return data
@@ -38,7 +38,7 @@ export const useUnitStore = defineStore('units', {
     },
     async updateUnit(unit: Unit) {
       try {
-        await this.$http.patch(`/units/${unit.id}`, unit)
+        await this.$http.patch(`/data/units/${unit.id}`, unit)
         const index = this.units.findIndex((u) => u.id === unit.id)
         if (index !== -1) {
           this.units[index] = unit
@@ -50,7 +50,7 @@ export const useUnitStore = defineStore('units', {
     },
     async deleteUnit(unitId: string) {
       try {
-        const response = await this.$http.delete(`/units/${unitId}`)
+        const response = await this.$http.delete(`/data/units/${unitId}`)
         if (response.status === 200 || response.status === 204) {
           this.units = this.units.filter((unit) => unit.id !== unitId)
           this.sortUnits()
@@ -66,7 +66,7 @@ export const useUnitStore = defineStore('units', {
     },
     // async fetchUnitById(id: string) {
     //   try {
-    //     const response = await this.$http.get(`/units/${id}`)
+    //     const response = await this.$http.get(`/data/units/${id}`)
     //     if (response.status === 200) return response.data as Unit
     //   } catch (error) {
     //     console.error('Error deleting fetching unit by id', error)

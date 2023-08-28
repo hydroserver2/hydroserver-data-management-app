@@ -20,7 +20,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async fetchProcessingLevels() {
       if (this.loaded) return
       try {
-        const { data } = await this.$http.get('/processing-levels')
+        const { data } = await this.$http.get('/data/processing-levels')
         this.processingLevels = data
         this.sortProcessingLevels()
         this.loaded = true
@@ -31,7 +31,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async updateProcessingLevel(processingLevel: ProcessingLevel) {
       try {
         const { data } = await this.$http.patch(
-          `/processing-levels/${processingLevel.id}`,
+          `/data/processing-levels/${processingLevel.id}`,
           processingLevel
         )
         const index = this.processingLevels.findIndex(
@@ -49,7 +49,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async createProcessingLevel(processingLevel: ProcessingLevel) {
       try {
         const { data } = await this.$http.post(
-          '/processing-levels',
+          '/data/processing-levels',
           processingLevel
         )
         this.processingLevels.push(data)
@@ -61,7 +61,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     },
     async deleteProcessingLevel(id: string) {
       try {
-        const response = await this.$http.delete(`/processing-levels/${id}`)
+        const response = await this.$http.delete(`/data/processing-levels/${id}`)
         if (response.status === 200 || response.status === 204) {
           this.processingLevels = this.processingLevels.filter(
             (pl) => pl.id !== id

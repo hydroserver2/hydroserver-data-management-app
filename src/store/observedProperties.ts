@@ -21,7 +21,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async fetchObservedProperties() {
       if (this.observedProperties.length > 0) return
       try {
-        const { data } = await this.$http.get('/observed-properties')
+        const { data } = await this.$http.get('/data/observed-properties')
         this.observedProperties = data
         this.sortObservedProperties()
         this.loaded = true
@@ -32,7 +32,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async createObservedProperty(observedProperty: ObservedProperty) {
       try {
         const { data } = await this.$http.post(
-          '/observed-properties',
+          '/data/observed-properties',
           observedProperty
         )
         this.observedProperties.push(data)
@@ -45,7 +45,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async updateObservedProperty(observedProperty: ObservedProperty) {
       try {
         await this.$http.patch(
-          `/observed-properties/${observedProperty.id}`,
+          `/data/observed-properties/${observedProperty.id}`,
           observedProperty
         )
         const index = this.observedProperties.findIndex(
@@ -61,7 +61,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async deleteObservedProperty(id: string) {
       try {
-        const response = await this.$http.delete(`/observed-properties/${id}`)
+        const response = await this.$http.delete(`/data/observed-properties/${id}`)
         if (response.status === 200 || response.status === 204) {
           this.observedProperties = this.observedProperties.filter(
             (op) => op.id !== id

@@ -21,7 +21,7 @@ export const useDatastreamStore = defineStore('datastreams', {
   actions: {
     async fetchDatastreams() {
       try {
-        const { data } = await this.$http.get('/datastreams')
+        const { data } = await this.$http.get('/data/datastreams')
         let newDatastreams: Record<string, Datastream[]> = {}
         data.forEach((datastream: Datastream) => {
           if (!newDatastreams[datastream.thing_id]) {
@@ -38,7 +38,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     async fetchDatastreamsByThingId(id: string) {
       if (this.datastreams[id]) return
       try {
-        const { data } = await this.$http.get(`/datastreams/${id}`)
+        const { data } = await this.$http.get(`/data/datastreams/${id}`)
         this.datastreams[id] = data
       } catch (error) {
         console.error(
@@ -50,7 +50,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     async updateDatastream(datastream: Datastream) {
       try {
         const { data } = await this.$http.patch(
-          `/datastreams/patch/${datastream.id}`,
+          `/data/datastreams/patch/${datastream.id}`,
           datastream
         )
         const datastreamsForThing = this.datastreams[data.thing_id]
@@ -63,7 +63,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     async createDatastream(newDatastream: Datastream) {
       try {
         const { data } = await this.$http.post(
-          `/datastreams/${newDatastream.thing_id}`,
+          `/data/datastreams/${newDatastream.thing_id}`,
           newDatastream
         )
         if (!this.datastreams[newDatastream.thing_id]) {
@@ -76,7 +76,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async deleteDatastream(id: string, thingId: string) {
       try {
-        const response = await this.$http.delete(`/datastreams/${id}/temp`)
+        const response = await this.$http.delete(`/data/datastreams/${id}/temp`)
         if (response && response.status == 200) {
           const datastreams = this.datastreams[thingId].filter(
             (datastream) => datastream.id !== id
@@ -91,7 +91,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async setVisibility(id: string, visibility: boolean) {
       try {
-        const { data } = await this.$http.patch(`/datastreams/patch/${id}`, {
+        const { data } = await this.$http.patch(`/data/datastreams/patch/${id}`, {
           is_visible: visibility,
         })
         const datastreamIndex = this.datastreams[data.thing_id].findIndex(
