@@ -1,7 +1,7 @@
 export interface Owner {
   firstname: string
   lastname: string
-  organization: string
+  organizationName: string
   is_primary_owner: boolean
   email: string
 }
@@ -185,6 +185,22 @@ export class ProcessingLevel {
   }
 }
 
+export class Organization {
+  name: string
+  code: string
+  description?: string
+  type: string
+  link?: string
+
+  constructor() {
+    this.name = ''
+    this.code = ''
+    this.type = ''
+    this.description = ''
+    this.link = ''
+  }
+}
+
 export class User {
   id: string
   email: string
@@ -194,7 +210,7 @@ export class User {
   last_name: string
   phone: string
   address: string
-  organization: string
+  organization: Organization
   type: string
   is_verified: boolean
   link: string
@@ -208,7 +224,7 @@ export class User {
     this.last_name = ''
     this.phone = ''
     this.address = ''
-    this.organization = ''
+    this.organization = new Organization()
     this.type = ''
     this.is_verified = false
     this.link = ''

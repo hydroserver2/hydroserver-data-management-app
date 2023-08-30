@@ -24,8 +24,8 @@
                   <table>
                     <tbody>
                       <tr>
-                        <td class="pr-4"><strong>Organization</strong></td>
-                        <td>{{ authStore.user.organization }}</td>
+                        <td class="pr-4"><strong>Email</strong></td>
+                        <td>{{ authStore.user.email }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Address</strong></td>
@@ -36,12 +36,16 @@
                         <td>{{ authStore.user.phone }}</td>
                       </tr>
                       <tr>
-                        <td class="pr-4"><strong>Email</strong></td>
-                        <td>{{ authStore.user.email }}</td>
+                        <td class="pr-4"><strong>Type</strong></td>
+                        <td>{{ authStore.user.type }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Link</strong></td>
                         <td>{{ authStore.user.link }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization</strong></td>
+                        <td>{{ authStore.user.organization.name }}</td>
                       </tr>
                     </tbody>
                   </table>

@@ -36,8 +36,8 @@
           />
         </form>
         <p v-if="!validFilter" class="text-error">No results found</p>
-        <div v-for="organization in filteredOrganizations">
-          <p>{{ organization }}</p>
+        <div v-for="organizationName in filteredOrganizations">
+          <p>{{ organizationName }}</p>
         </div>
         <v-expansion-panels class="mt-4">
           <v-expansion-panel title="Site Types">
@@ -86,8 +86,8 @@ const organizations = computed(() => {
   const allOrgs = new Set()
   Object.values(thingStore.things).forEach((thing) => {
     thing.owners.forEach((owner) => {
-      if (owner.organization) {
-        allOrgs.add(owner.organization.toLowerCase())
+      if (owner.organizationName) {
+        allOrgs.add(owner.organizationName.toLowerCase())
       }
     })
   })
@@ -115,8 +115,8 @@ function isThingValid(thing: Thing) {
   const orgValid =
     filteredOrganizations.value.size === 0 ||
     thing.owners.some((owner) =>
-      owner.organization
-        ? filteredOrganizations.value.has(owner.organization.toLowerCase())
+      owner.organizationName
+        ? filteredOrganizations.value.has(owner.organizationName.toLowerCase())
         : false
     )
   const siteTypeValid =

@@ -100,7 +100,7 @@ export function useThing(thingId: string) {
         value: owners
           .map(
             (owner) =>
-              `${owner.firstname} ${owner.lastname}: ${owner.organization}`
+              `${owner.firstname} ${owner.lastname}: ${owner.organizationName}`
           )
           .join(', '),
       },

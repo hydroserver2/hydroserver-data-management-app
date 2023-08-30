@@ -78,16 +78,6 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="user.organization"
-                label="Organization"
-                :rules="user.organization ? rules.name : []"
-                validate-on="input"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
             <v-col>
               <v-autocomplete
                 v-model="user.type"
@@ -106,6 +96,67 @@
               ></v-text-field>
             </v-col>
           </v-row>
+          <v-row>
+            <v-col>
+              <v-switch
+                v-model="showOrg"
+                hide-details
+                :label="
+                  showOrg
+                    ? 'Affiliated with an Organization'
+                    : 'No Affiliated Organization'
+                "
+                color="primary"
+              ></v-switch>
+            </v-col>
+          </v-row>
+          <div v-if="user && showOrg">
+            <v-row>
+              <v-col>
+                <v-text-field
+                  v-model="user.organization.name"
+                  label="Organization Name *"
+                  :rules="rules.requiredName"
+                ></v-text-field>
+              </v-col>
+              <v-col>
+                <v-text-field
+                  v-model="user.organization.code"
+                  label="Organization Code *"
+                  :rules="rules.requiredName"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-autocomplete
+                  :items="organizationTypes"
+                  v-model="user.organization.type"
+                  label="Organization Type *"
+                  :rules="rules.requiredName"
+                />
+              </v-col>
+              <v-col>
+                <v-text-field
+                  v-model="user.organization.link"
+                  label="Organization Link"
+                  :rules="user.organization.link ? rules.maxLength(2000) : []"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col>
+                <v-text-field
+                  v-model="user.organization.description"
+                  label="Organization Description"
+                  :rules="
+                    user.organization.description ? rules.maxLength(2000) : []
+                  "
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
           <div class="mt-6">
             <v-btn-primary type="submit">Create User</v-btn-primary>
           </div>
@@ -128,15 +179,18 @@ import { User } from '@/types'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
+import { organizationTypes } from '@/vocabularies'
 
 const valid = ref(false)
 const confirmPassword = ref('')
 const myForm = ref<VForm>()
 const user = reactive<User>(new User())
 const phoneMask = { mask: '(###) ###-####' }
+const showOrg = ref(false)
 
 async function createUser() {
   if (!valid.value) return
+  console.log('creating user', user)
   await useAuthStore().createUser(user)
 }
 </script>

@@ -144,7 +144,8 @@ export const useAuthStore = defineStore({
       }
     },
     async sendVerificationEmail() {
-      if (this.sendingVerificationEmail === true) { return }
+      if (this.sendingVerificationEmail === true) return
+
       this.sendingVerificationEmail = true
       const response = await this.$http.post('/account/send-verification-email')
       this.sendingVerificationEmail = false
@@ -163,7 +164,7 @@ export const useAuthStore = defineStore({
     async activateAccount(uid: string, token: string) {
       const response = await this.$http.post('account/activate', {
         uid: uid,
-        token: token
+        token: token,
       })
       if (response.status === 200 && response.data.user.is_verified) {
         this.user = response.data.user
@@ -188,7 +189,7 @@ export const useAuthStore = defineStore({
         try {
           useResetStore().things()
         } catch (error) {}
-        this.user = data
+        this.user = data as User
       } catch (error) {}
     },
     async deleteAccount() {
@@ -210,9 +211,12 @@ export const useAuthStore = defineStore({
     },
     async requestPasswordReset(email: String) {
       try {
-        const response = await this.$http.post('/account/user/send-password-reset-email', {
-          email: email,
-        })
+        const response = await this.$http.post(
+          '/account/user/send-password-reset-email',
+          {
+            email: email,
+          }
+        )
         return response.status === 200
       } catch (error: any) {
         if (!error.response) {
@@ -328,6 +332,6 @@ export const useAuthStore = defineStore({
     },
     isVerified: (state) => {
       return state.user.is_verified
-    }
+    },
   },
 })

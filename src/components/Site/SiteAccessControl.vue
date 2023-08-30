@@ -105,7 +105,7 @@
             <ul>
               <li class="v-list-item" v-for="owner in thing.owners">
                 {{ owner.firstname }} {{ owner.lastname }} -
-                {{ owner.organization }}
+                {{ owner.organizationName }}
                 <strong v-if="owner.is_primary_owner">(Primary)</strong>
                 <div v-else style="text-align: right">
                   <v-btn

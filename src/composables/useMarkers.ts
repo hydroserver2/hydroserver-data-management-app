@@ -10,8 +10,8 @@ export function useMarkers() {
       (owner: any) => owner.is_primary_owner
     )
     const primaryOrg =
-      primaryOwner && primaryOwner.organization
-        ? `<p class="pb-1" style='color:green;'>Related Organization: ${primaryOwner.organization}</p>`
+      primaryOwner && primaryOwner.organizationName
+        ? `<p class="pb-1" style='color:green;'>Related Organization: ${primaryOwner.organizationName}</p>`
         : ''
 
     return `
