@@ -1,8 +1,8 @@
 export interface Owner {
-  firstname: string
-  lastname: string
+  firstName: string
+  lastName: string
   organizationName: string
-  is_primary_owner: boolean
+  isPrimaryOwner: boolean
   email: string
 }
 
@@ -205,28 +205,28 @@ export class User {
   id: string
   email: string
   password: string
-  first_name: string
-  middle_name: string
-  last_name: string
+  firstName: string
+  middleName: string
+  lastName: string
   phone: string
   address: string
   organization: Organization
   type: string
-  is_verified: boolean
+  isVerified: boolean
   link: string
 
   constructor() {
     this.id = ''
     this.email = ''
     this.password = ''
-    this.first_name = ''
-    this.middle_name = ''
-    this.last_name = ''
+    this.firstName = ''
+    this.middleName = ''
+    this.lastName = ''
     this.phone = ''
     this.address = ''
     this.organization = new Organization()
     this.type = ''
-    this.is_verified = false
+    this.isVerified = false
     this.link = ''
   }
 }

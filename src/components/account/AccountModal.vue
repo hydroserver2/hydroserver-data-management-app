@@ -10,27 +10,27 @@
         <v-row>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.first_name"
+              v-model="user.firstName"
               label="First Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.middle_name"
+              v-model="user.middleName"
               label="Middle Name"
               :rules="rules.name"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.last_name"
+              v-model="user.lastName"
               label="Last Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row v-if="!user.is_verified">
+        <v-row v-if="!user.isVerified">
           <v-col>
             <v-text-field
               v-model="user.email"

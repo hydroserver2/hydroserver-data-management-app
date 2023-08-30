@@ -12,21 +12,21 @@
           <v-row>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="user.first_name"
+                v-model="user.firstName"
                 label="First Name *"
                 :rules="rules.requiredName"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="user.middle_name"
+                v-model="user.middleName"
                 label="Middle Name"
-                :rules="user.middle_name ? rules.name : []"
+                :rules="user.middleName ? rules.name : []"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="user.last_name"
+                v-model="user.lastName"
                 label="Last Name *"
                 :rules="rules.requiredName"
               ></v-text-field>

@@ -104,9 +104,9 @@
           <v-card-text>
             <ul>
               <li class="v-list-item" v-for="owner in thing.owners">
-                {{ owner.firstname }} {{ owner.lastname }} -
+                {{ owner.firstName }} {{ owner.lastName }} -
                 {{ owner.organizationName }}
-                <strong v-if="owner.is_primary_owner">(Primary)</strong>
+                <strong v-if="owner.isPrimaryOwner">(Primary)</strong>
                 <div v-else style="text-align: right">
                   <v-btn
                     color="delete"

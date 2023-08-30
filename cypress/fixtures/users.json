@@ -1,16 +1,16 @@
 [
   {
-    "first_name": "john",
+    "firstName": "john",
     "email": "john@example.com",
     "password": "thisisjohnspassword"
   },
   {
-    "first_name": "paul",
+    "firstName": "paul",
     "email": "paul@example.com",
     "password": "thisispaulspassword"
   },
   {
-    "first_name": "jane",
+    "firstName": "jane",
     "email": "jane@example.com",
     "password": "thisisjanespassword"
   }

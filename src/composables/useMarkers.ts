@@ -7,7 +7,7 @@ export function useMarkers() {
 
   function generateMarkerContent(markerData: MarkerData): string {
     const primaryOwner = markerData.owners.find(
-      (owner: any) => owner.is_primary_owner
+      (owner: any) => owner.isPrimaryOwner
     )
     const primaryOrg =
       primaryOwner && primaryOwner.organizationName

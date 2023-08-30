@@ -13,9 +13,9 @@
                 >
                   <v-card-title :style="{ color: 'white' }">
                     <h5 class="text-h5 user-info">
-                      {{ authStore.user.first_name }}
-                      {{ authStore.user.middle_name }}
-                      {{ authStore.user.last_name }}
+                      {{ authStore.user.firstName }}
+                      {{ authStore.user.middleName }}
+                      {{ authStore.user.lastName }}
                     </h5>
                   </v-card-title>
                 </v-col>
