@@ -63,6 +63,7 @@ export function useDatastreams(thingId: string) {
   }
 
   onMounted(async () => {
+    if (datastreamStore.datastreams[thingId]) return
     await datastreamStore.fetchDatastreamsByThingId(thingId)
   })
 

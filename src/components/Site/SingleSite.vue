@@ -349,6 +349,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Observation } from '@/types'
 import { usePhotosStore } from '@/store/photos'
+import { useDatastreamStore } from '@/store/datastreams'
 import { useThing } from '@/composables/useThing'
 // import { useAuthentication } from '@/composables/useAuthentication'
 import { useDatastreams } from '@/composables/useDatastreams'
@@ -356,6 +357,7 @@ import { format } from 'date-fns'
 import SiteVisualization from '../SiteVisualization.vue'
 
 const photoStore = usePhotosStore()
+const datastreamStore = useDatastreamStore()
 const thingId = useRoute().params.id.toString()
 
 const {
@@ -423,5 +425,6 @@ function formatDate(dateString: string) {
 
 onMounted(async () => {
   await photoStore.fetchPhotos(thingId)
+  await datastreamStore.fetchDatastreamsByThingId(thingId)
 })
 </script>
