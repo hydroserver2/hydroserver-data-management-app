@@ -168,7 +168,7 @@
                   >
                     <img
                       v-if="!photosToDelete.includes(photo.id)"
-                      :src="photo.url"
+                      :src="photo.link"
                       class="photo"
                     />
                     <v-icon

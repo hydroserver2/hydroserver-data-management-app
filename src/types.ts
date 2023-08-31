@@ -241,5 +241,6 @@ export interface ThingMetadata {
 export interface Photo {
   id: string
   thingId: string
-  url: string
+  filePath: string
+  link: string
 }

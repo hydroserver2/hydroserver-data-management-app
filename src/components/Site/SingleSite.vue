@@ -126,7 +126,7 @@
           <v-carousel-item
             v-for="photo in photoStore.photos[thingId]"
             :key="photo.id"
-            :src="photo.url"
+            :src="photo.link"
             cover
           >
           </v-carousel-item>
