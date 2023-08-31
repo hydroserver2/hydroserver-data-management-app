@@ -16,6 +16,7 @@ export class Thing {
   latitude: number
   longitude: number
   elevation_m: number
+  elevationDatum: string
   ownsThing: boolean
   followsThing: boolean
   description: string
@@ -36,6 +37,7 @@ export class Thing {
     this.latitude = 0
     this.longitude = 0
     this.elevation_m = 0
+    this.elevationDatum = 'WGS84'
     this.ownsThing = false
     this.followsThing = false
     this.description = ''
