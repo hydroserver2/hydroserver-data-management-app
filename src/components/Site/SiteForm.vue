@@ -50,9 +50,9 @@
               /></v-col>
               <v-col cols="12"
                 ><v-textarea
-                  label="Site Description"
+                  label="Site Description *"
                   v-model="thing.description"
-                  :rules="thing.description ? rules.description : []"
+                  :rules="rules.description"
               /></v-col>
               <v-col cols="12"
                 ><v-autocomplete
