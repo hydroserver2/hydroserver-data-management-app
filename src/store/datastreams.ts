@@ -36,7 +36,7 @@ export const useDatastreamStore = defineStore('datastreams', {
       }
     },
     async fetchDatastreamsByThingId(id: string) {
-      if (this.datastreams[id]) return
+      // if (this.datastreams[id]) return
       try {
         const { data } = await this.$http.get(`/data/datastreams/${id}`)
         this.datastreams[id] = data
