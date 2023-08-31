@@ -15,7 +15,7 @@ export class Thing {
   isPrivate: boolean
   latitude: number
   longitude: number
-  elevation: number
+  elevation_m: number
   ownsThing: boolean
   followsThing: boolean
   description: string
@@ -35,7 +35,7 @@ export class Thing {
     this.isPrivate = false
     this.latitude = 0
     this.longitude = 0
-    this.elevation = 0
+    this.elevation_m = 0
     this.ownsThing = false
     this.followsThing = false
     this.description = ''

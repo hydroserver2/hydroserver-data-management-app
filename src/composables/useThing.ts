@@ -60,7 +60,7 @@ export function useThing(thingId: string) {
       samplingFeatureCode,
       latitude,
       longitude,
-      elevation,
+      elevation_m,
       description,
       // samplingFeatureType,
       siteType,
@@ -79,7 +79,7 @@ export function useThing(thingId: string) {
       },
       { icon: 'fas fa-map', label: 'Latitude', value: latitude },
       { icon: 'fas fa-map', label: 'Longitude', value: longitude },
-      { icon: 'fas fa-mountain', label: 'Elevation', value: elevation },
+      { icon: 'fas fa-mountain', label: 'Elevation', value: elevation_m },
       { icon: 'fas fa-file-alt', label: 'Description', value: description },
       // {
       //   icon: 'fas fa-map-marker-alt',

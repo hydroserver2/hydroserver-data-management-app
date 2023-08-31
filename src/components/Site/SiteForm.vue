@@ -104,7 +104,7 @@
               <v-col cols="12" sm="6"
                 ><v-text-field
                   label="Elevation (m) *"
-                  v-model="thing.elevation"
+                  v-model="thing.elevation_m"
                   type="number"
                   :rules="rules.required"
                   validate-on="input"
@@ -336,7 +336,7 @@ async function uploadThing() {
 function onMapLocationClicked(locationData: Thing) {
   thing.latitude = locationData.latitude
   thing.longitude = locationData.longitude
-  thing.elevation = locationData.elevation
+  thing.elevation_m = locationData.elevation_m
   thing.state = locationData.state
   thing.county = locationData.county
 }
