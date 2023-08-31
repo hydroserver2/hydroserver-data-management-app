@@ -39,7 +39,7 @@
               <v-col cols="12"
                 ><v-text-field
                   label="Site Code *"
-                  v-model="thing.sampling_feature_code"
+                  v-model="thing.samplingFeatureCode"
                   :rules="rules.requiredCode"
               /></v-col>
               <v-col cols="12"
@@ -58,7 +58,7 @@
                 ><v-autocomplete
                   label="Select Site Type *"
                   :items="siteTypes"
-                  v-model="thing.site_type"
+                  v-model="thing.siteType"
                   :rules="rules.required"
                 ></v-autocomplete
               ></v-col>
@@ -66,17 +66,17 @@
             <v-row no-gutters class="pt-2">
               <v-col>
                 <v-switch
-                  v-model="thing.include_data_disclaimer"
+                  v-model="thing.includeDataDisclaimer"
                   color="primary"
                   hide-details
                   label="Include a data disclaimer for this site"
                 ></v-switch>
               </v-col>
             </v-row>
-            <v-row v-if="thing.include_data_disclaimer" no-gutters>
+            <v-row v-if="thing.includeDataDisclaimer" no-gutters>
               <v-col>
                 <v-textarea
-                  v-model="thing.data_disclaimer"
+                  v-model="thing.dataDisclaimer"
                   color="primary"
                 ></v-textarea>
               </v-col>
@@ -240,10 +240,10 @@ const mapOptions = ref({
 const thing = reactive<Thing>(new Thing())
 
 watch(
-  () => thing.include_data_disclaimer,
+  () => thing.includeDataDisclaimer,
   (newVal) => {
-    if (newVal && !thing.data_disclaimer) {
-      thing.data_disclaimer =
+    if (newVal && !thing.dataDisclaimer) {
+      thing.dataDisclaimer =
         'WARNING: These data may be provisional and subject to revision. The data are released under the condition that the data collectors may not be held liable for any damages resulting from their use.'
     }
   }
@@ -316,7 +316,7 @@ async function uploadThing() {
 
   emit('close')
   if (thing) {
-    if (!thing.include_data_disclaimer) thing.data_disclaimer = ''
+    if (!thing.includeDataDisclaimer) thing.dataDisclaimer = ''
     if (props.thingId) {
       await thingStore.updateThing(thing)
       await photoStore.updatePhotos(

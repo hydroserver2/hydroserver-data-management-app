@@ -10,43 +10,43 @@ export class Thing {
   id: string
   name: string
   owners: Owner[]
-  site_type: string
-  sampling_feature_code: string
-  is_private: boolean
+  siteType: string
+  samplingFeatureCode: string
+  isPrivate: boolean
   latitude: number
   longitude: number
   elevation: number
-  owns_thing: boolean
-  follows_thing: boolean
+  ownsThing: boolean
+  followsThing: boolean
   description: string
-  sampling_feature_type: string
+  samplingFeatureType: string
   state: string
   county: string
-  is_primary_owner: boolean
+  isPrimaryOwner: boolean
   followers: number
-  data_disclaimer: string
-  include_data_disclaimer: boolean
+  dataDisclaimer: string
+  includeDataDisclaimer: boolean
 
   constructor() {
     this.id = ''
     this.name = ''
     this.owners = []
-    this.site_type = ''
-    this.sampling_feature_code = ''
-    this.is_private = false
+    this.siteType = ''
+    this.samplingFeatureCode = ''
+    this.isPrivate = false
     this.latitude = 0
     this.longitude = 0
     this.elevation = 0
-    this.owns_thing = false
-    this.follows_thing = false
+    this.ownsThing = false
+    this.followsThing = false
     this.description = ''
-    this.sampling_feature_type = 'Site'
+    this.samplingFeatureType = 'Site'
     this.state = ''
     this.county = ''
-    this.is_primary_owner = false
+    this.isPrimaryOwner = false
     this.followers = 0
-    this.data_disclaimer = ''
-    this.include_data_disclaimer = false
+    this.dataDisclaimer = ''
+    this.includeDataDisclaimer = false
   }
 }
 
@@ -71,7 +71,7 @@ export class Datastream {
   processing_level_id: string
   processing_level_name: string
   is_visible: boolean
-  is_primary_owner: boolean
+  isPrimaryOwner: boolean
   is_stale?: boolean
 
   constructor(thingId: string) {
@@ -95,7 +95,7 @@ export class Datastream {
     this.processing_level_id = ''
     this.processing_level_name = ''
     this.is_visible = true
-    this.is_primary_owner = false
+    this.isPrimaryOwner = false
   }
 }
 

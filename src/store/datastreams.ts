@@ -15,7 +15,7 @@ export const useDatastreamStore = defineStore('datastreams', {
       },
     primaryOwnedDatastreams: (state) => {
       const allDatastreams = Object.values(state.datastreams).flat()
-      return allDatastreams.filter((ds) => ds.is_primary_owner)
+      return allDatastreams.filter((ds) => ds.isPrimaryOwner)
     },
   },
   actions: {
@@ -91,9 +91,12 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async setVisibility(id: string, visibility: boolean) {
       try {
-        const { data } = await this.$http.patch(`/data/datastreams/patch/${id}`, {
-          is_visible: visibility,
-        })
+        const { data } = await this.$http.patch(
+          `/data/datastreams/patch/${id}`,
+          {
+            is_visible: visibility,
+          }
+        )
         const datastreamIndex = this.datastreams[data.thing_id].findIndex(
           (ds) => ds.id === id
         )

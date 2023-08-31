@@ -21,7 +21,7 @@ function requireVerifiedAuth(
 ) {
   const authStore = useAuthStore()
   if (!authStore.isLoggedIn) next({ name: 'Login' })
-  else if (!authStore.isVerified) next({ name: 'VerifyEmail'})
+  else if (!authStore.isVerified) next({ name: 'VerifyEmail' })
   else next()
 }
 
@@ -32,7 +32,7 @@ function requireUnverifiedAuth(
 ) {
   const authStore = useAuthStore()
   if (!authStore.isLoggedIn) next({ name: 'Login' })
-  else if (authStore.isVerified) next({ name: 'Sites'})
+  else if (authStore.isVerified) next({ name: 'Sites' })
   else next()
 }
 
@@ -49,7 +49,7 @@ async function requireThingOwnership(
   }
 
   if (!authStore.isVerified) {
-    next({ name: 'VerifyEmail'})
+    next({ name: 'VerifyEmail' })
     return
   }
 
@@ -60,7 +60,7 @@ async function requireThingOwnership(
 
   await thingStore.fetchThingById(to.params.id)
   const thing = thingStore.things[to.params.id]
-  if (thing && (thing.is_primary_owner || thing.owns_thing)) next()
+  if (thing && (thing.isPrimaryOwner || thing.ownsThing)) next()
   else next({ name: 'PageNotFound' })
 }
 

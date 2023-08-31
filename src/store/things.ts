@@ -10,20 +10,18 @@ export const useThingStore = defineStore('things', {
   }),
   getters: {
     primaryOwnedThings(): Thing[] {
-      return Object.values(this.things).filter(
-        (thing) => thing.is_primary_owner
-      )
+      return Object.values(this.things).filter((thing) => thing.isPrimaryOwner)
     },
     ownedThings(): Thing[] | any {
-      return Object.values(this.things).filter((thing) => thing.owns_thing)
+      return Object.values(this.things).filter((thing) => thing.ownsThing)
     },
     // Jeff said to comment out anything related to following a site August 8, 2023
     // followedThings(): Thing[] | any {
-    //   return Object.values(this.things).filter((thing) => thing.follows_thing)
+    //   return Object.values(this.things).filter((thing) => thing.followsThing)
     // },
     // ownedOrFollowedThings(): Thing[] | any {
     //   return Object.values(this.things).filter(
-    //     (thing) => thing.owns_thing || thing.follows_thing
+    //     (thing) => thing.ownsThing || thing.followsThing
     //   )
     // },
   },
@@ -91,9 +89,12 @@ export const useThingStore = defineStore('things', {
     },
     async updateThingPrivacy(thingId: string, thingPrivacy: boolean) {
       try {
-        const response = await this.$http.patch(`/data/things/${thingId}/privacy`, {
-          is_private: thingPrivacy,
-        })
+        const response = await this.$http.patch(
+          `/data/things/${thingId}/privacy`,
+          {
+            isPrivate: thingPrivacy,
+          }
+        )
         if (response && response.status == 200) {
           this.things[thingId] = response.data as Thing
         }
@@ -117,7 +118,7 @@ export const useThingStore = defineStore('things', {
           `/data/things/${thingId}/ownership`,
           {
             email: email,
-            make_owner: true,
+            makeOwner: true,
           }
         )
         if (response && response.status == 200) {
@@ -171,7 +172,7 @@ export const useThingStore = defineStore('things', {
           `/data/things/${thingId}/ownership`,
           {
             email: email,
-            transfer_primary: true,
+            transferPrimary: true,
           }
         )
         if (response && response.status == 200) {
@@ -220,7 +221,7 @@ export const useThingStore = defineStore('things', {
           `/data/things/${thingId}/ownership`,
           {
             email: email,
-            remove_owner: true,
+            removeOwner: true,
           }
         )
         if (response && response.status == 200) {

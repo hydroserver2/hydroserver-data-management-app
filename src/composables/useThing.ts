@@ -16,14 +16,14 @@ export function useThing(thingId: string) {
 
   const is_owner = computed(() => {
     if (isAuthenticated && thingStore.things[thingId]) {
-      return thingStore.things[thingId].owns_thing
+      return thingStore.things[thingId].ownsThing
     }
     return false
   })
 
   const isPrimaryOwner = computed(() => {
     if (isAuthenticated && thingStore.things[thingId]) {
-      return thingStore.things[thingId].is_primary_owner
+      return thingStore.things[thingId].isPrimaryOwner
     }
     return false
   })
@@ -57,16 +57,16 @@ export function useThing(thingId: string) {
     if (!thing.value) return []
     const {
       id,
-      sampling_feature_code,
+      samplingFeatureCode,
       latitude,
       longitude,
       elevation,
       description,
-      // sampling_feature_type,
-      site_type,
+      // samplingFeatureType,
+      siteType,
       state,
       county,
-      is_private,
+      isPrivate,
       owners,
     } = thing.value
 
@@ -75,7 +75,7 @@ export function useThing(thingId: string) {
       {
         icon: 'fas fa-barcode',
         label: 'Site Code',
-        value: sampling_feature_code,
+        value: samplingFeatureCode,
       },
       { icon: 'fas fa-map', label: 'Latitude', value: latitude },
       { icon: 'fas fa-map', label: 'Longitude', value: longitude },
@@ -84,15 +84,15 @@ export function useThing(thingId: string) {
       // {
       //   icon: 'fas fa-map-marker-alt',
       //   label: 'Sampling Feature Type',
-      //   value: sampling_feature_type,
+      //   value: samplingFeatureType,
       // },
-      { icon: 'fas fa-map-pin', label: 'Site Type', value: site_type },
+      { icon: 'fas fa-map-pin', label: 'Site Type', value: siteType },
       { icon: 'fas fa-flag-usa', label: 'State', value: state },
       { icon: 'fas fa-flag-usa', label: 'County', value: county },
       {
-        icon: is_private ? 'fas fa-lock' : 'fas fa-globe',
+        icon: isPrivate ? 'fas fa-lock' : 'fas fa-globe',
         label: 'Privacy',
-        value: is_private ? 'Private' : 'Public',
+        value: isPrivate ? 'Private' : 'Public',
       },
       {
         icon: 'fas fa-user',
@@ -153,7 +153,7 @@ export function useThing(thingId: string) {
   }
 
   async function toggleSitePrivacy() {
-    await thingStore.updateThingPrivacy(thingId, thing.value.is_private)
+    await thingStore.updateThingPrivacy(thingId, thing.value.isPrivate)
   }
 
   onMounted(async () => {

@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title class="text-h5">Access Control</v-card-title>
     <v-card-text>
-      <v-row v-if="thing?.is_primary_owner">
+      <v-row v-if="thing?.isPrimaryOwner">
         <v-col cols="12" md="6">
           <h6 class="text-h6 my-4">
             Add a secondary owner to this site
@@ -111,7 +111,7 @@
                   <v-btn
                     color="delete"
                     v-if="
-                      thing?.is_primary_owner ||
+                      thing?.isPrimaryOwner ||
                       owner.email == authStore.user.email
                     "
                     @click="removeOwner(owner.email)"
@@ -138,7 +138,7 @@
                 </v-icon>
               </template>
               <template v-slot:default>
-                <p v-if="thing.is_private" style="max-width: 25rem">
+                <p v-if="thing.isPrivate" style="max-width: 25rem">
                   Setting your site to public will make it visible to all users
                   and guests of the system. They will be able to follow your
                   site and download its data
@@ -154,8 +154,8 @@
           </h6>
           <v-card-text v-if="thing">
             <v-switch
-              v-model="thing.is_private"
-              :label="thing.is_private ? 'Site is private' : 'Site is public'"
+              v-model="thing.isPrivate"
+              :label="thing.isPrivate ? 'Site is private' : 'Site is public'"
               color="primary"
               @change="toggleSitePrivacy"
             ></v-switch>

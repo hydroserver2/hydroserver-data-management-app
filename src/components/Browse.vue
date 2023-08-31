@@ -121,7 +121,7 @@ function isThingValid(thing: Thing) {
     )
   const siteTypeValid =
     selectedSiteTypes.value.length === 0 ||
-    selectedSiteTypes.value.includes(thing.site_type)
+    selectedSiteTypes.value.includes(thing.siteType)
 
   return orgValid && siteTypeValid
 }
