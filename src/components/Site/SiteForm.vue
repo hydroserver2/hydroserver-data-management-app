@@ -46,7 +46,7 @@
                 ><v-text-field
                   label="Site Name *"
                   v-model="thing.name"
-                  :rules="rules.requiredCode"
+                  :rules="rules.requiredName"
               /></v-col>
               <v-col cols="12"
                 ><v-textarea
@@ -66,14 +66,14 @@
             <v-row no-gutters class="pt-2">
               <v-col>
                 <v-switch
-                  v-model="thing.includeDataDisclaimer"
+                  v-model="includeDataDisclaimer"
                   color="primary"
                   hide-details
                   label="Include a data disclaimer for this site"
                 ></v-switch>
               </v-col>
             </v-row>
-            <v-row v-if="thing.includeDataDisclaimer" no-gutters>
+            <v-row v-if="includeDataDisclaimer" no-gutters>
               <v-col>
                 <v-textarea
                   v-model="thing.dataDisclaimer"
@@ -239,8 +239,10 @@ const mapOptions = ref({
 })
 const thing = reactive<Thing>(new Thing())
 
+const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
+
 watch(
-  () => thing.includeDataDisclaimer,
+  () => includeDataDisclaimer.value,
   (newVal) => {
     if (newVal && !thing.dataDisclaimer) {
       thing.dataDisclaimer =
@@ -316,7 +318,7 @@ async function uploadThing() {
 
   emit('close')
   if (thing) {
-    if (!thing.includeDataDisclaimer) thing.dataDisclaimer = ''
+    if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
     if (props.thingId) {
       await thingStore.updateThing(thing)
       await photoStore.updatePhotos(
@@ -343,6 +345,7 @@ onMounted(async () => {
   if (props.thingId) {
     await populateThing(props.thingId)
     await photoStore.fetchPhotos(props.thingId)
+    includeDataDisclaimer.value = !!thing.dataDisclaimer
   }
 })
 </script>

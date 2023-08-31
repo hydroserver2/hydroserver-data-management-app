@@ -25,7 +25,6 @@ export class Thing {
   isPrimaryOwner: boolean
   followers: number
   dataDisclaimer: string
-  includeDataDisclaimer: boolean
 
   constructor() {
     this.id = ''
@@ -46,7 +45,6 @@ export class Thing {
     this.isPrimaryOwner = false
     this.followers = 0
     this.dataDisclaimer = ''
-    this.includeDataDisclaimer = false
   }
 }
 
