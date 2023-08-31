@@ -21,6 +21,7 @@ export function useDatastream(thingId: string, id: string) {
   //   }
 
   onMounted(async () => {
+    if (dsStore.datastreams[thingId]) return
     await dsStore.fetchDatastreamsByThingId(thingId)
   })
 
