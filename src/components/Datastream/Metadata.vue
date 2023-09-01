@@ -216,8 +216,8 @@ const sensorHeaders = [
 
 const OPHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Variable Type', key: 'variable_type' },
-  { title: 'Variable Code', key: 'variable_code' },
+  { title: 'Type', key: 'type' },
+  { title: 'Code', key: 'code' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]
 

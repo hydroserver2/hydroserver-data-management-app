@@ -152,20 +152,20 @@ export class Sensor {
 export class ObservedProperty {
   id: string
   name: string
-  person_id: string
+  personId: string
   definition: string
   description: string
-  variable_type: string
-  variable_code: string
+  type: string
+  code: string
 
   constructor() {
     this.id = ''
     this.name = ''
-    this.person_id = ''
+    this.personId = ''
     this.definition = ''
     this.description = ''
-    this.variable_type = 'Hydrology'
-    this.variable_code = ''
+    this.type = 'Hydrology'
+    this.code = ''
   }
 }
 

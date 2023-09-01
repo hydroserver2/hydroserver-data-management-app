@@ -8,10 +8,10 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
   }),
   getters: {
     ownedOP(): ObservedProperty[] {
-      return this.observedProperties.filter((op) => op.person_id != null)
+      return this.observedProperties.filter((op) => op.personId != null)
     },
     unownedOP(): ObservedProperty[] {
-      return this.observedProperties.filter((op) => op.person_id == null)
+      return this.observedProperties.filter((op) => op.personId == null)
     },
   },
   actions: {
@@ -61,7 +61,9 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async deleteObservedProperty(id: string) {
       try {
-        const response = await this.$http.delete(`/data/observed-properties/${id}`)
+        const response = await this.$http.delete(
+          `/data/observed-properties/${id}`
+        )
         if (response.status === 200 || response.status === 204) {
           this.observedProperties = this.observedProperties.filter(
             (op) => op.id !== id

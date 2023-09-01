@@ -43,23 +43,23 @@
             <v-col cols="12">
               <v-text-field
                 v-model="observedProperty.description"
-                label="Description"
-                :rules="rules.maxLength(500)"
+                label="Description *"
+                :rules="rules.description"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
               <v-combobox
                 :items="OPVariableTypes"
-                v-model="observedProperty.variable_type"
-                label="Variable Type"
-                :rules="rules.maxLength(500)"
+                v-model="observedProperty.type"
+                label="Variable Type *"
+                :rules="rules.required"
               />
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="observedProperty.variable_code"
-                label="Variable Code"
-                :rules="rules.maxLength(500)"
+                v-model="observedProperty.code"
+                label="Variable Code *"
+                :rules="rules.requiredName"
               ></v-text-field>
             </v-col>
           </v-row>
