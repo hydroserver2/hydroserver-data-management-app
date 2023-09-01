@@ -222,7 +222,7 @@ const OPHeaders = [
 ]
 
 const ProcLevelHeaders = [
-  { title: 'Processing Level Code', key: 'processing_level_code' },
+  { title: 'Code', key: 'code' },
   { title: 'Definition', key: 'definition' },
   { title: 'Explanation', key: 'explanation' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },

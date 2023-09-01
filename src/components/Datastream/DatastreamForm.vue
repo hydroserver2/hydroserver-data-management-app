@@ -265,12 +265,13 @@ const formattedProcessingLevels = computed(() => {
   let processingLevels
   if (isPrimaryOwner.value) {
     processingLevels = plStore.ownedProcessingLevels
+    console.log('owned PLs', processingLevels)
   } else {
     processingLevels = thingStore.POMetadata[thingId].processing_levels
   }
   return processingLevels.map((pl) => ({
     id: pl.id,
-    title: `${pl.processing_level_code} : ${pl.definition}`,
+    title: `${pl.code} : ${pl.definition}`,
   }))
 })
 

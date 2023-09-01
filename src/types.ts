@@ -171,15 +171,15 @@ export class ObservedProperty {
 
 export class ProcessingLevel {
   id: string
-  person_id: string
-  processing_level_code: string
+  personId: string
+  code: string
   definition: string
   explanation: string
 
   constructor() {
     this.id = ''
-    this.person_id = ''
-    this.processing_level_code = ''
+    this.personId = ''
+    this.code = ''
     this.definition = ''
     this.explanation = ''
   }

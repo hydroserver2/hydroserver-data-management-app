@@ -5,17 +5,15 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
   getters: {
     ownedProcessingLevels(): ProcessingLevel[] {
-      return this.processingLevels.filter((pl) => pl.person_id != null)
+      return this.processingLevels.filter((pl) => pl.personId != null)
     },
     unownedProcessingLevels(): ProcessingLevel[] {
-      return this.processingLevels.filter((pl) => pl.person_id == null)
+      return this.processingLevels.filter((pl) => pl.personId == null)
     },
   },
   actions: {
     sortProcessingLevels() {
-      this.processingLevels.sort((a, b) =>
-        a.processing_level_code.localeCompare(b.processing_level_code)
-      )
+      this.processingLevels.sort((a, b) => a.code.localeCompare(b.code))
     },
     async fetchProcessingLevels() {
       if (this.loaded) return
@@ -61,7 +59,9 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     },
     async deleteProcessingLevel(id: string) {
       try {
-        const response = await this.$http.delete(`/data/processing-levels/${id}`)
+        const response = await this.$http.delete(
+          `/data/processing-levels/${id}`
+        )
         if (response.status === 200 || response.status === 204) {
           this.processingLevels = this.processingLevels.filter(
             (pl) => pl.id !== id

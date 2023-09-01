@@ -112,7 +112,7 @@ export function useProcessingLevels(id: string | null = null) {
   const formattedProcessingLevels = computed(() => {
     return plStore.unownedProcessingLevels.map((pl) => ({
       id: pl.id,
-      title: `${pl.processing_level_code} : ${pl.definition}`,
+      title: `${pl.code} : ${pl.definition}`,
     }))
   })
 
