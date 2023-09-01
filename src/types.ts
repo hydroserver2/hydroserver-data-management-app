@@ -129,11 +129,11 @@ export class Sensor {
   description: string
   manufacturer: string
   model: string
-  method_type: string
-  method_code: string
-  method_link: string
-  encoding_type: string
-  model_url: string
+  methodType: string
+  methodCode: string
+  methodLink: string
+  encodingType: string
+  modelLink: string
 
   constructor() {
     this.id = ''
@@ -141,11 +141,11 @@ export class Sensor {
     this.description = ''
     this.manufacturer = ''
     this.model = ''
-    this.method_type = 'Instrument Deployment'
-    this.method_code = ''
-    this.method_link = ''
-    this.encoding_type = 'application/json'
-    this.model_url = ''
+    this.methodType = 'Instrument Deployment'
+    this.methodCode = ''
+    this.methodLink = ''
+    this.encodingType = 'application/json'
+    this.modelLink = ''
   }
 }
 

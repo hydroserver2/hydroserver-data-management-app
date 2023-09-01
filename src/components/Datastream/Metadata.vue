@@ -208,8 +208,8 @@ const {
 
 const sensorHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Method Type', key: 'method_type' },
-  { title: 'Method Code', key: 'method_code' },
+  { title: 'Method Type', key: 'methodType' },
+  { title: 'Method Code', key: 'methodCode' },
   { title: 'UUID', key: 'id' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]

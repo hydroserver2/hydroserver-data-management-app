@@ -1,8 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>
-      <span class="headline">{{ isEdit ? 'Edit' : 'Add' }} Sensor</span>
-    </v-card-title>
+    <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Sensor </v-card-title>
     <v-card-text>
       <v-container>
         <v-form
@@ -12,61 +10,73 @@
           validate-on="blur"
         >
           <v-row>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="sensor.method_type"
-                :items="methodTypes"
-                label="Method Type *"
-                :rules="rules.required"
-              ></v-select>
+            <v-col cols="12" md="6">
+              <v-row>
+                <v-col cols="12">
+                  <v-select
+                    v-model="sensor.methodType"
+                    :items="methodTypes"
+                    label="Method Type *"
+                    hide-details
+                    density="comfortable"
+                    :rules="rules.required"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="sensor.methodLink"
+                    label="Method Link"
+                    :rules="sensor.methodLink ? rules.urlFormat : []"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="sensor.methodCode"
+                    label="Method Code"
+                    :rules="rules.name"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </v-col>
-            <v-col cols="12" sm="6" v-if="!isInstrument">
-              <v-text-field
-                v-model="sensor.name"
-                label="Name *"
-                :rules="rules.requiredName"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="sensor.description"
-                label="Description"
-                :rules="rules.maxLength(1000)"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" v-if="isInstrument">
-              <v-text-field
-                v-model="sensor.manufacturer"
-                label="Manufacturer *"
-                :rules="rules.requiredName"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" v-if="isInstrument">
-              <v-text-field
-                v-model="sensor.model"
-                label="Model *"
-                :rules="rules.requiredName"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="sensor.model_url"
-                label="Model URL"
-                :rules="sensor.model_url ? rules.urlFormat : []"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="sensor.method_link"
-                label="Method Link"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="sensor.method_code"
-                label="Method Code"
-                :rules="rules.name"
-              ></v-text-field>
+            <v-col cols="12" md="6">
+              <v-row>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="sensor.description"
+                    label="Description *"
+                    rows="1"
+                    :rules="rules.description"
+                  ></v-textarea>
+                </v-col>
+                <v-col cols="12" v-if="!isInstrument">
+                  <v-text-field
+                    v-model="sensor.name"
+                    label="Name *"
+                    :rules="rules.requiredName"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" v-if="isInstrument">
+                  <v-text-field
+                    v-model="sensor.manufacturer"
+                    label="Manufacturer *"
+                    :rules="rules.requiredName"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" v-if="isInstrument">
+                  <v-text-field
+                    v-model="sensor.model"
+                    label="Model *"
+                    :rules="rules.requiredName"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" v-if="isInstrument">
+                  <v-text-field
+                    v-model="sensor.modelLink"
+                    label="Model Link"
+                    :rules="sensor.modelLink ? rules.urlFormat : []"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
           <v-card-actions>
@@ -98,14 +108,14 @@ const sensor = reactive<Sensor>(new Sensor())
 const isEdit = computed(() => props.id != null)
 
 const isInstrument = computed(
-  () => sensor.method_type === 'Instrument Deployment'
+  () => sensor.methodType === 'Instrument Deployment'
 )
 
 async function uploadSensor() {
   await myForm.value?.validate()
   if (!valid.value) return
   if (
-    sensor.method_type === 'Instrument Deployment' &&
+    sensor.methodType === 'Instrument Deployment' &&
     sensor.manufacturer &&
     sensor.model
   ) {
