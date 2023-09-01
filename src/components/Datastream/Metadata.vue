@@ -230,7 +230,7 @@ const ProcLevelHeaders = [
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Unit Type', key: 'unit_type' },
+  { title: 'Type', key: 'type' },
   { title: 'Symbol', key: 'symbol' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]

@@ -5,10 +5,10 @@ export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
   getters: {
     ownedUnits(): Unit[] {
-      return this.units.filter((u) => u.person_id != null)
+      return this.units.filter((u) => u.personId != null)
     },
     unownedUnits(): Unit[] {
-      return this.units.filter((u) => u.person_id == null)
+      return this.units.filter((u) => u.personId == null)
     },
   },
   actions: {

@@ -107,19 +107,19 @@ export interface Observation {
 
 export class Unit {
   id: string
-  person_id: string
+  personId: string
   name: string
   symbol: string
   definition: string
-  unit_type: string
+  type: string
 
   constructor() {
     this.id = ''
-    this.person_id = ''
+    this.personId = ''
     this.name = ''
     this.symbol = ''
     this.definition = ''
-    this.unit_type = ''
+    this.type = ''
   }
 }
 
