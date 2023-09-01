@@ -197,25 +197,23 @@
           <div v-else>No data for this datastream</div>
         </template>
         <template v-slot:item.last_observation="{ item }">
-          <div v-if="item.raw.most_recent_observation">
+          <div v-if="item.raw.mostRecentObservation">
             <v-row>
               {{
                 formatDate(
-                  (item.raw.most_recent_observation as Observation).result_time
+                  (item.raw.mostRecentObservation as Observation).result_time
                 )
               }}
             </v-row>
             <v-row>
-              {{
-                (item.raw.most_recent_observation as Observation).result
-              }}&nbsp;
-              {{ item.raw.unit_name }}
+              {{ (item.raw.mostRecentObservation as Observation).result }}&nbsp;
+              {{ item.raw.unitName }}
             </v-row>
           </div>
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-tooltip bottom :openDelay="500" v-if="item.raw.is_visible">
+          <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
             <template v-slot:activator="{ props }" v-if="is_owner">
               <v-btn
                 small
@@ -386,15 +384,15 @@ const {
 // const { isAuthenticated } = useAuthentication()
 
 const headers = [
-  { title: 'Observed Property', key: 'observed_property_name', sortable: true },
+  { title: 'Observed Property', key: 'observedPropertyName', sortable: true },
   {
     title: 'Observations (Last 72 Hours)',
     key: 'observations',
     sortable: false,
   },
   { title: 'Last Observation', key: 'last_observation' },
-  { title: 'Sampled Medium', key: 'sampled_medium' },
-  { title: 'Sensor', key: 'method_name' },
+  { title: 'Sampled Medium', key: 'sampledMedium' },
+  { title: 'Sensor', key: 'methodName' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 

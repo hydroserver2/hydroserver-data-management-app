@@ -15,7 +15,7 @@ export function useDatastreams(thingId: string) {
     if (!datastreamStore.datastreams[thingId]) return []
 
     return datastreamStore.datastreams[thingId]
-      .filter((datastream) => datastream.is_visible || is_owner.value)
+      .filter((datastream) => datastream.isVisible || is_owner.value)
       .map((datastream) => ({
         ...datastream,
         chartOpen: false, // Adding a dialog boolean to each datastream so we can open a modal for each
@@ -23,8 +23,8 @@ export function useDatastreams(thingId: string) {
   })
 
   async function toggleVisibility(datastream: Datastream) {
-    datastream.is_visible = !datastream.is_visible
-    await datastreamStore.setVisibility(datastream.id, datastream.is_visible)
+    datastream.isVisible = !datastream.isVisible
+    await datastreamStore.setVisibility(datastream.id, datastream.isVisible)
   }
 
   function openDeleteModal(datastream: Datastream) {

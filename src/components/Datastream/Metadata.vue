@@ -31,7 +31,7 @@
       <DeleteModal
         itemName="sensor"
         :itemID="selectedSensor.id"
-        parameter-name="method_id"
+        parameter-name="methodId"
         @delete="deleteSensor"
         @close="isSensorDModalOpen = false"
       ></DeleteModal>
@@ -66,7 +66,7 @@
       <DeleteModal
         itemName="Observed Property"
         :itemID="selectedOP.id"
-        parameter-name="observed_property_id"
+        parameter-name="observedPropertyId"
         @delete="deleteOP"
         @close="isOPDModalOpen = false"
       ></DeleteModal>
@@ -101,7 +101,7 @@
       <DeleteModal
         itemName="processing level"
         :itemID="selectedPL.id"
-        parameter-name="processing_level_id"
+        parameter-name="processingLevelId"
         @delete="deletePL"
         @close="isPLDModalOpen = false"
       ></DeleteModal>
@@ -136,7 +136,7 @@
       <DeleteModal
         itemName="unit"
         :itemID="selectedUnit.id"
-        parameter-name="unit_id"
+        parameter-name="unitId"
         @delete="deleteUnit"
         @close="isUnitDModalOpen = false"
       ></DeleteModal>

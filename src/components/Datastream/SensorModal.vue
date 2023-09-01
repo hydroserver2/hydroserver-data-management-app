@@ -45,7 +45,7 @@
                     v-model="sensor.description"
                     label="Description *"
                     rows="1"
-                    :rules="rules.description"
+                    :rules="rules.requiredDescription"
                   ></v-textarea>
                 </v-col>
                 <v-col cols="12" v-if="!isInstrument">

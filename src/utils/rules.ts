@@ -85,8 +85,9 @@ export const rules = {
 
   email: [...required, ...emailFormat],
   password: [...required, ...minLength(8), ...nonNumericCharacter],
-  requiredName: [...required, ...maxLength(200)],
   name: [...maxLength(200)],
-  description: [...maxLength(1000), ...required],
+  requiredName: [...required, ...maxLength(200)],
+  description: [...maxLength(3000)],
+  requiredDescription: [...maxLength(3000), ...required],
   requiredCode: [...maxLength(200), ...required],
 }

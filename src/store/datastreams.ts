@@ -24,10 +24,10 @@ export const useDatastreamStore = defineStore('datastreams', {
         const { data } = await this.$http.get('/data/datastreams')
         let newDatastreams: Record<string, Datastream[]> = {}
         data.forEach((datastream: Datastream) => {
-          if (!newDatastreams[datastream.thing_id]) {
-            newDatastreams[datastream.thing_id] = []
+          if (!newDatastreams[datastream.thingId]) {
+            newDatastreams[datastream.thingId] = []
           }
-          newDatastreams[datastream.thing_id].push(datastream)
+          newDatastreams[datastream.thingId].push(datastream)
         })
         this.$patch({ datastreams: newDatastreams })
         this.loaded = true
@@ -53,7 +53,7 @@ export const useDatastreamStore = defineStore('datastreams', {
           `/data/datastreams/patch/${datastream.id}`,
           datastream
         )
-        const datastreamsForThing = this.datastreams[data.thing_id]
+        const datastreamsForThing = this.datastreams[data.thingId]
         const index = datastreamsForThing.findIndex((ds) => ds.id === data.id)
         if (index !== -1) datastreamsForThing[index] = data
       } catch (error) {
@@ -63,13 +63,13 @@ export const useDatastreamStore = defineStore('datastreams', {
     async createDatastream(newDatastream: Datastream) {
       try {
         const { data } = await this.$http.post(
-          `/data/datastreams/${newDatastream.thing_id}`,
+          `/data/datastreams/${newDatastream.thingId}`,
           newDatastream
         )
-        if (!this.datastreams[newDatastream.thing_id]) {
-          this.datastreams[newDatastream.thing_id] = []
+        if (!this.datastreams[newDatastream.thingId]) {
+          this.datastreams[newDatastream.thingId] = []
         }
-        this.datastreams[newDatastream.thing_id].push(data)
+        this.datastreams[newDatastream.thingId].push(data)
       } catch (error) {
         console.error('Error creating datastream', error)
       }
@@ -94,14 +94,14 @@ export const useDatastreamStore = defineStore('datastreams', {
         const { data } = await this.$http.patch(
           `/data/datastreams/patch/${id}`,
           {
-            is_visible: visibility,
+            isVisible: visibility,
           }
         )
-        const datastreamIndex = this.datastreams[data.thing_id].findIndex(
+        const datastreamIndex = this.datastreams[data.thingId].findIndex(
           (ds) => ds.id === id
         )
         if (datastreamIndex !== -1)
-          this.datastreams[data.thing_id][datastreamIndex] = data
+          this.datastreams[data.thingId][datastreamIndex] = data
         else {
           console.error(
             `Datastream with id ${id} not found in the datastreams list`

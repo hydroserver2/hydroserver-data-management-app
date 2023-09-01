@@ -37,14 +37,14 @@
               <v-text-field
                 v-model="observedProperty.definition"
                 label="Definition *"
-                :rules="rules.description"
+                :rules="rules.requiredDescription"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field
                 v-model="observedProperty.description"
                 label="Description *"
-                :rules="rules.description"
+                :rules="rules.requiredDescription"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">

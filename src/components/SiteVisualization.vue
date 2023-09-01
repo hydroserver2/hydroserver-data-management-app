@@ -54,12 +54,12 @@ function drawD3Chart() {
   if (!chart.value) return
   chart.value.innerHTML = ''
 
-  const unitSymbol = datastream.value.unit_symbol
-    ? `(${datastream.value.unit_symbol})`
+  const unitSymbol = datastream.value.unitSymbol
+    ? `(${datastream.value.unitSymbol})`
     : ''
 
   const yAxisLabel = datastream.value
-    ? `${datastream.value.observed_property_name} ${unitSymbol} `
+    ? `${datastream.value.observedPropertyName} ${unitSymbol} `
     : ''
 
   const svg = drawChart(data, yAxisLabel)

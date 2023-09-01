@@ -52,50 +52,66 @@ export class Thing {
 
 export class Datastream {
   id: string
-  thing_id: string
-  observation_type: string
-  result_type: string
+  name: string
+  description: string
+  thingId: string
+  observationType: string
+  resultType: string
   status: string
-  sampled_medium: string
-  no_data_value: number
-  aggregation_statistic: string
+  sampledMedium: string
+  noDataValue: number
+  aggregationStatistic: string
   observations: Observation[]
-  most_recent_observation: any
-  unit_id: string
-  unit_name: string
-  unit_symbol: string
-  observed_property_id: string
-  observed_property_name: string
-  method_id: string
-  method_name: string
-  processing_level_id: string
-  processing_level_name: string
-  is_visible: boolean
+  mostRecentObservation: any
+  unitId: string
+  unitName: string
+  unitSymbol: string
+  observedPropertyId: string
+  observedPropertyName: string
+  methodId: string
+  methodName: string
+  processingLevelId: string
+  processingLevelName: string
+  isVisible: boolean
   isPrimaryOwner: boolean
   is_stale?: boolean
+  phenomenonBeginTime: string
+  phenomenonEndTime: string
+  intendedTimeSpacing: number
+  intendedTimeSpacingUnitsId: string
+  timeAggregationInterval: number
+  timeAggregationIntervalUnitsId: string
 
   constructor(thingId: string) {
     this.id = ''
-    this.thing_id = thingId
-    this.observation_type = 'OM_Measurement'
-    this.result_type = 'Time Series Coverage'
+    this.name = 'datastream'
+    this.description = 'Site Datastream'
+    this.thingId = thingId
+    this.observationType = 'OM_Measurement'
+    this.resultType = 'Time Series Coverage'
     this.status = ''
-    this.sampled_medium = ''
-    this.no_data_value = -9999
-    this.aggregation_statistic = ''
+    this.sampledMedium = ''
+    this.noDataValue = -9999
+    this.aggregationStatistic = ''
     this.observations = []
-    this.most_recent_observation = ''
-    this.unit_id = ''
-    this.unit_name = ''
-    this.unit_symbol = ''
-    this.observed_property_id = ''
-    this.observed_property_name = ''
-    this.method_id = ''
-    this.method_name = ''
-    this.processing_level_id = ''
-    this.processing_level_name = ''
-    this.is_visible = true
+    this.mostRecentObservation = ''
+    this.unitId = ''
+    this.unitName = ''
+    this.unitSymbol = ''
+    this.observedPropertyId = ''
+    this.observedPropertyName = ''
+    this.methodId = ''
+    this.methodName = ''
+    this.processingLevelId = ''
+    this.processingLevelName = ''
+    this.isVisible = true
     this.isPrimaryOwner = false
+    this.phenomenonBeginTime = ''
+    this.phenomenonEndTime = ''
+    this.intendedTimeSpacing = 0
+    this.intendedTimeSpacingUnitsId = ''
+    this.timeAggregationInterval = 0
+    this.timeAggregationIntervalUnitsId = ''
   }
 }
 

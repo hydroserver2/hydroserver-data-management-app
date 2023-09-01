@@ -52,7 +52,7 @@
                 ><v-textarea
                   label="Site Description *"
                   v-model="thing.description"
-                  :rules="rules.description"
+                  :rules="rules.requiredDescription"
               /></v-col>
               <v-col cols="12"
                 ><v-autocomplete

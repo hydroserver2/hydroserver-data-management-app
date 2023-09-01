@@ -15,11 +15,11 @@
           <br />
           DatastreamID: {{ (datastream as Datastream).id }} <br />
           Observed Property:
-          {{ (datastream as Datastream).observed_property_name }}<br />
+          {{ (datastream as Datastream).observedPropertyName }}<br />
           Unit:
-          {{ (datastream as Datastream).unit_name }}<br />
+          {{ (datastream as Datastream).unitName }}<br />
           Processing Level:
-          {{ (datastream as Datastream).processing_level_name }}
+          {{ (datastream as Datastream).processingLevelName }}
           <br />
         </div>
       </div>
