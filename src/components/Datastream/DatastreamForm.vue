@@ -39,8 +39,8 @@
       <v-row>
         <v-col cols="12" md="6">
           <v-autocomplete
-            :key="datastream.methodId"
-            v-model="datastream.methodId"
+            :key="datastream.sensorId"
+            v-model="datastream.sensorId"
             label="Select sensor *"
             :items="
               isPrimaryOwner
@@ -62,7 +62,7 @@
             width="60rem"
           >
             <sensor-modal
-              @uploaded="datastream.methodId = $event"
+              @uploaded="datastream.sensorId = $event"
               @close="showSensorModal = false"
             ></sensor-modal>
           </v-dialog>

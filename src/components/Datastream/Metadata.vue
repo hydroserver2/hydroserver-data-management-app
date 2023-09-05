@@ -31,7 +31,7 @@
       <DeleteModal
         itemName="sensor"
         :itemID="selectedSensor.id"
-        parameter-name="methodId"
+        parameter-name="sensorId"
         @delete="deleteSensor"
         @close="isSensorDModalOpen = false"
       ></DeleteModal>

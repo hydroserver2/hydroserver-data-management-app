@@ -68,15 +68,15 @@ export class Datastream {
   unitSymbol: string
   observedPropertyId: string
   observedPropertyName: string
-  methodId: string
+  sensorId: string
   methodName: string
   processingLevelId: string
   processingLevelName: string
   isVisible: boolean
   isPrimaryOwner: boolean
   is_stale?: boolean
-  phenomenonBeginTime: string
-  phenomenonEndTime: string
+  phenomenonBeginTime: string | null
+  phenomenonEndTime: string | null
   intendedTimeSpacing: number
   intendedTimeSpacingUnitsId: string
   timeAggregationInterval: number
@@ -84,7 +84,7 @@ export class Datastream {
 
   constructor(thingId: string) {
     this.id = ''
-    this.name = 'datastream'
+    this.name = 'Datastream'
     this.description = 'Site Datastream'
     this.thingId = thingId
     this.observationType = 'OM_Measurement'
@@ -100,14 +100,14 @@ export class Datastream {
     this.unitSymbol = ''
     this.observedPropertyId = ''
     this.observedPropertyName = ''
-    this.methodId = ''
+    this.sensorId = ''
     this.methodName = ''
     this.processingLevelId = ''
     this.processingLevelName = ''
     this.isVisible = true
     this.isPrimaryOwner = false
-    this.phenomenonBeginTime = ''
-    this.phenomenonEndTime = ''
+    this.phenomenonBeginTime = null
+    this.phenomenonEndTime = null
     this.intendedTimeSpacing = 0
     this.intendedTimeSpacingUnitsId = ''
     this.timeAggregationInterval = 0
