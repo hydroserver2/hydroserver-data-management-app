@@ -18,7 +18,7 @@
       <v-col cols="auto">
         <h5 class="text-h5">Site Information</h5>
       </v-col>
-      <v-col cols="auto" v-if="is_owner">
+      <v-col cols="auto" v-if="isOwner">
         <v-btn class="access_control" @click="isAccessControlModalOpen = true"
           >Access Control</v-btn
         >
@@ -33,7 +33,7 @@
           ></SiteAccessControl>
         </v-dialog>
       </v-col>
-      <v-col cols="auto" v-if="is_owner">
+      <v-col cols="auto" v-if="isOwner">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit Site Information</v-btn
         >
@@ -44,7 +44,7 @@
           ></SiteForm>
         </v-dialog>
       </v-col>
-      <v-col cols="auto" v-if="is_owner">
+      <v-col cols="auto" v-if="isOwner">
         <v-btn
           color="red-darken-3"
           style="margin-left: 1rem"
@@ -89,7 +89,7 @@
         </v-dialog>
       </v-col>
       <!-- Jeff said to comment out anything related to following a site August 8, 2023 -->
-      <!-- <v-col cols="auto" v-if="!is_owner">
+      <!-- <v-col cols="auto" v-if="!isOwner">
         <v-switch
           color="secondary"
           hide-details
@@ -162,7 +162,7 @@
         >
       </v-col> -->
     </v-row>
-    <v-row class="pb-2" v-if="is_owner">
+    <v-row class="pb-2" v-if="isOwner">
       <v-col>
         <v-btn-secondary
           prependIcon="mdi-plus"
@@ -190,7 +190,7 @@
             <LineChart
               @click="item.raw.chartOpen = true"
               class="pt-2"
-              :is-stale="item.raw.is_stale"
+              :is-stale="item.raw.isStale"
               :observations="item.raw.observations"
             />
           </div>
@@ -214,7 +214,7 @@
 
         <template v-slot:item.actions="{ item }">
           <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
-            <template v-slot:activator="{ props }" v-if="is_owner">
+            <template v-slot:activator="{ props }" v-if="isOwner">
               <v-btn
                 small
                 color="grey"
@@ -229,7 +229,7 @@
             >
           </v-tooltip>
           <v-tooltip bottom :openDelay="500" v-else>
-            <template v-slot:activator="{ props }" v-if="is_owner">
+            <template v-slot:activator="{ props }" v-if="isOwner">
               <v-btn
                 small
                 color="grey-lighten-1"
@@ -247,7 +247,7 @@
             </template>
             <v-list>
               <v-list-item
-                v-if="is_owner"
+                v-if="isOwner"
                 prepend-icon="mdi-link-variant"
                 title="Link Data Source"
                 @click="
@@ -259,7 +259,7 @@
                 "
               />
               <v-list-item
-                v-if="is_owner"
+                v-if="isOwner"
                 prepend-icon="mdi-pencil"
                 title="Edit Datastream Metadata"
                 :to="{
@@ -268,13 +268,13 @@
                 }"
               />
               <v-list-item
-                v-if="is_owner"
+                v-if="isOwner"
                 prepend-icon="mdi-chart-line"
                 title="View Time Series Plot"
                 @click="item.raw.chartOpen = true"
               />
               <v-list-item
-                v-if="is_owner"
+                v-if="isOwner"
                 prepend-icon="mdi-delete"
                 title="Delete Datastream"
                 @click="openDeleteModal(item.raw)"
@@ -363,7 +363,7 @@ const {
   stringThing,
   mapOptions,
   // updateFollow,
-  is_owner,
+  isOwner,
   deleteInput,
   deleteThing,
   thingProperties,
@@ -392,7 +392,7 @@ const headers = [
   },
   { title: 'Last Observation', key: 'last_observation' },
   { title: 'Sampled Medium', key: 'sampledMedium' },
-  { title: 'Sensor', key: 'methodName' },
+  { title: 'Sensor', key: 'sensorName' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 

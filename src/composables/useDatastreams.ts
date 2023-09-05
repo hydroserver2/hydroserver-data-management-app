@@ -5,7 +5,7 @@ import { Datastream } from '@/types'
 import Notification from '@/store/notifications'
 
 export function useDatastreams(thingId: string) {
-  const { is_owner } = useThing(thingId)
+  const { isOwner } = useThing(thingId)
   const datastreamStore = useDatastreamStore()
   const selectedDatastream: Ref<Datastream | null> = ref(null)
   const isDeleteModalOpen = ref(false)
@@ -15,7 +15,7 @@ export function useDatastreams(thingId: string) {
     if (!datastreamStore.datastreams[thingId]) return []
 
     return datastreamStore.datastreams[thingId]
-      .filter((datastream) => datastream.isVisible || is_owner.value)
+      .filter((datastream) => datastream.isVisible || isOwner.value)
       .map((datastream) => ({
         ...datastream,
         chartOpen: false, // Adding a dialog boolean to each datastream so we can open a modal for each

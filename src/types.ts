@@ -69,12 +69,12 @@ export class Datastream {
   observedPropertyId: string
   observedPropertyName: string
   sensorId: string
-  methodName: string
+  sensorName: string
   processingLevelId: string
   processingLevelName: string
   isVisible: boolean
   isPrimaryOwner: boolean
-  is_stale?: boolean
+  isStale?: boolean
   phenomenonBeginTime: string | null
   phenomenonEndTime: string | null
   intendedTimeSpacing: number
@@ -101,7 +101,7 @@ export class Datastream {
     this.observedPropertyId = ''
     this.observedPropertyName = ''
     this.sensorId = ''
-    this.methodName = ''
+    this.sensorName = ''
     this.processingLevelId = ''
     this.processingLevelName = ''
     this.isVisible = true

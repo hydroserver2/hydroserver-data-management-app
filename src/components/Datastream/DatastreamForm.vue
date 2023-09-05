@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="datastream && loaded">
+  <v-container>
     <v-row>
       <v-col>
         <h5 class="text-h5">
@@ -31,6 +31,7 @@
     </v-row>
 
     <v-form
+      v-if="datastream"
       @submit.prevent="uploadDatastream"
       ref="myForm"
       v-model="valid"
@@ -318,7 +319,6 @@ const thingStore = useThingStore()
 const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
-const loaded = ref(false)
 const selectedDatastreamID = ref(datastreamId)
 
 const { isPrimaryOwner } = useThing(thingId)
@@ -337,7 +337,7 @@ const datastream = reactive<Datastream>(new Datastream(thingId))
 const formattedDatastreams = computed(() => {
   return datastreamStore.primaryOwnedDatastreams.map((datastream) => ({
     id: datastream.id,
-    title: `Sensor:${datastream.methodName},  Observed Property: ${datastream.observedPropertyName},
+    title: `Sensor:${datastream.sensorName},  Observed Property: ${datastream.observedPropertyName},
      Unit: ${datastream.unitName},  Processing Level: ${datastream.processingLevelName},
       Sampled Medium ${datastream.sampledMedium}`,
   }))
@@ -366,6 +366,11 @@ function populateForm(id: string) {
   datastream.thingId = thingId
 }
 
+async function loadDatastreams() {
+  await datastreamStore.fetchDatastreams()
+  if (datastreamId) populateForm(datastreamId)
+}
+
 async function uploadDatastream() {
   await myForm.value?.validate()
   if (!valid.value) return
@@ -375,21 +380,9 @@ async function uploadDatastream() {
 }
 
 onMounted(async () => {
-  // fetch all independent operations in parallel with Promise.all
-  await Promise.all([
-    thingStore.fetchThingById(thingId),
-    datastreamStore.fetchDatastreams(),
-    sensorStore.fetchSensors(),
-    opStore.fetchObservedProperties(),
-    unitStore.fetchUnits(),
-    plStore.fetchProcessingLevels(),
-  ])
+  if (!isPrimaryOwner.value)
+    thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
 
-  if (!isPrimaryOwner.value) {
-    await thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
-  }
-
-  if (datastreamId) populateForm(datastreamId)
-  loaded.value = true
+  loadDatastreams()
 })
 </script>
