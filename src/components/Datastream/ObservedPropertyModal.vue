@@ -14,38 +14,29 @@
           validate-on="blur"
         >
           <v-row>
-            <v-col>
-              <v-autocomplete
-                v-if="!isEdit"
-                v-model="selectedId"
-                label="Load a template observed property"
-                :items="opStore.unownedOP"
-                item-title="name"
-                item-value="id"
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12">
-              <v-text-field
+              <v-combobox
                 v-model="observedProperty.name"
+                :items="OPNames"
+                hide-details
                 label="Name *"
                 :rules="rules.requiredName"
-              ></v-text-field>
+                @update:modelValue="handleNameUpdated"
+              ></v-combobox>
             </v-col>
             <v-col cols="12">
-              <v-text-field
+              <v-textarea
                 v-model="observedProperty.definition"
                 label="Definition *"
                 :rules="rules.requiredDescription"
-              ></v-text-field>
+              ></v-textarea>
             </v-col>
             <v-col cols="12">
-              <v-text-field
+              <v-textarea
                 v-model="observedProperty.description"
                 label="Description *"
                 :rules="rules.requiredDescription"
-              ></v-text-field>
+              ></v-textarea>
             </v-col>
             <v-col cols="12" sm="6">
               <v-combobox
@@ -75,11 +66,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { rules } from '@/utils/rules'
 import { useObservedProperties } from '@/composables/useMetadata'
-import { OPVariableTypes } from '@/vocabularies'
+import { OPVariableTypes, OPNameTypes } from '@/vocabularies'
+
+const OPNames = Object.keys(OPNameTypes)
 
 const opStore = useObservedPropertyStore()
 const props = defineProps({ id: String })
@@ -87,11 +79,18 @@ const emit = defineEmits(['uploaded', 'close'])
 
 const {
   isEdit,
-  selectedId,
   myForm,
   valid,
   selectedEntity: observedProperty,
 } = useObservedProperties(props.id)
+
+const handleNameUpdated = () => {
+  const name = observedProperty.value.name
+  if (name && OPNames.includes(name)) {
+    observedProperty.value.definition = OPNameTypes[name].definition
+    observedProperty.value.description = OPNameTypes[name].description
+  }
+}
 
 async function uploadObservedProperty() {
   await myForm.value?.validate()
