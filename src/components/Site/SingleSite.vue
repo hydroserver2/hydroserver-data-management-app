@@ -201,7 +201,7 @@
             <v-row>
               {{
                 formatDate(
-                  (item.raw.mostRecentObservation as Observation).result_time
+                  (item.raw.mostRecentObservation as Observation).phenomenonTime
                 )
               }}
             </v-row>
@@ -347,6 +347,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Observation } from '@/types'
 import { usePhotosStore } from '@/store/photos'
+import { useDatastreamStore } from '@/store/datastreams'
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreams } from '@/composables/useDatastreams'
@@ -355,6 +356,7 @@ import SiteVisualization from '../SiteVisualization.vue'
 import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 
 const photoStore = usePhotosStore()
+const datastreamStore = useDatastreamStore()
 const thingId = useRoute().params.id.toString()
 
 const { isOwner } = useThingOwnership(thingId)
@@ -424,5 +426,6 @@ function formatDate(dateString: string) {
 
 onMounted(async () => {
   await photoStore.fetchPhotos(thingId)
+  await datastreamStore.fetchDatastreamsByThingId(thingId)
 })
 </script>
