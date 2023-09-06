@@ -1,12 +1,10 @@
 import { useThingStore } from '@/store/things'
 import { Thing } from '@/types'
-import { onMounted } from 'vue'
-import { computed, ref } from 'vue'
-import { useAuthentication } from './useAuthentication'
+import { computed, ref, onMounted } from 'vue'
+
 import router from '@/router/router'
 
 export function useThing(thingId: string) {
-  const { isAuthenticated } = useAuthentication()
   const thingStore = useThingStore()
 
   const deleteInput = ref('')
@@ -14,26 +12,11 @@ export function useThing(thingId: string) {
   const isDeleteModalOpen = ref(false)
   const isAccessControlModalOpen = ref(false)
 
-  const isOwner = computed(() => {
-    if (isAuthenticated && thingStore.things[thingId]) {
-      return thingStore.things[thingId].ownsThing
-    }
-    return false
-  })
-
-  const isPrimaryOwner = computed(() => {
-    if (isAuthenticated && thingStore.things[thingId]) {
-      return thingStore.things[thingId].isPrimaryOwner
-    }
-    return false
-  })
-
   function switchToAccessControlModal() {
     isDeleteModalOpen.value = false
     isAccessControlModalOpen.value = true
   }
 
-  // const { things } = storeToRefs(thingStore)
   const thing = computed(() => thingStore.things[thingId] as unknown as Thing)
 
   //TODO: Find a better way to get GoogleMaps to reload on thing change
@@ -107,12 +90,6 @@ export function useThing(thingId: string) {
     ]
   })
 
-  function updateFollow() {
-    if (thingStore.things[thingId]) {
-      thingStore.updateThingFollowership(thingStore.things[thingId])
-    }
-  }
-
   async function deleteThing() {
     if (!thing.value) {
       console.error('Site could not be found.')
@@ -126,32 +103,6 @@ export function useThing(thingId: string) {
     await router.push('/sites')
   }
 
-  const newOwnerEmail = ref('')
-  const newPrimaryOwnerEmail = ref('')
-  const showPrimaryOwnerConfirmation = ref(false)
-
-  async function addSecondaryOwner() {
-    if (newOwnerEmail.value) {
-      await thingStore.addSecondaryOwner(thingId, newOwnerEmail.value)
-      newOwnerEmail.value = ''
-    }
-  }
-
-  async function transferPrimaryOwnership() {
-    if (newPrimaryOwnerEmail.value) {
-      await thingStore.transferPrimaryOwnership(
-        thingId,
-        newPrimaryOwnerEmail.value
-      )
-      newPrimaryOwnerEmail.value = ''
-      showPrimaryOwnerConfirmation.value = false
-    }
-  }
-
-  async function removeOwner(email: string) {
-    if (email) await thingStore.removeOwner(thingId, email)
-  }
-
   async function toggleSitePrivacy() {
     await thingStore.updateThingPrivacy(thingId, thing.value.isPrivate)
   }
@@ -161,18 +112,9 @@ export function useThing(thingId: string) {
   })
 
   return {
-    newOwnerEmail,
-    newPrimaryOwnerEmail,
-    addSecondaryOwner,
-    showPrimaryOwnerConfirmation,
-    transferPrimaryOwnership,
-    removeOwner,
     toggleSitePrivacy,
     thing,
     mapOptions,
-    updateFollow,
-    isOwner,
-    isPrimaryOwner,
     deleteInput,
     deleteThing,
     thingProperties,

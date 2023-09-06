@@ -1,9 +1,9 @@
 import { computed, onMounted } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
-import { useThing } from './useThing'
+import { useThingOwnership } from './useThingOwnership'
 
 export function useVisibleDatastreams(thingId: string) {
-  const { isOwner } = useThing(thingId)
+  const { isOwner } = useThingOwnership(thingId)
   const datastreamStore = useDatastreamStore()
 
   const visibleDatastreams = computed(() => {

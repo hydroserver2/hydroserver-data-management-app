@@ -300,7 +300,7 @@ import { Datastream } from '@/types'
 import { useThingStore } from '@/store/things'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
-import { useThing } from '@/composables/useThing'
+import { useThingOwnership } from '@/composables/useThingOwnership'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import {
   useSensors,
@@ -321,7 +321,7 @@ const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
 const selectedDatastreamID = ref(datastreamId)
 
-const { isPrimaryOwner } = useThing(thingId)
+const { isPrimaryOwner } = useThingOwnership(thingId)
 const { isCreateEditModalOpen: showSensorModal } = useSensors()
 const { isCreateEditModalOpen: showUnitModal } = useUnits()
 const { isCreateEditModalOpen: showPLModal } = useProcessingLevels()

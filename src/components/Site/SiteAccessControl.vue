@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title class="text-h5">Access Control</v-card-title>
     <v-card-text>
-      <v-row v-if="thing?.isPrimaryOwner">
+      <v-row v-if="isPrimaryOwner">
         <v-col cols="12" md="6">
           <h6 class="text-h6 my-4">
             Add a secondary owner to this site
@@ -110,10 +110,7 @@
                 <div v-else style="text-align: right">
                   <v-btn
                     color="delete"
-                    v-if="
-                      thing?.isPrimaryOwner ||
-                      owner.email == authStore.user.email
-                    "
+                    v-if="isPrimaryOwner || owner.email == authStore.user.email"
                     @click="removeOwner(owner.email)"
                   >
                     Remove
@@ -174,7 +171,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/store/authentication'
 import { useThing } from '@/composables/useThing'
-import { ref } from 'vue'
+import { useThingOwnership } from '@/composables/useThingOwnership'
 
 const authStore = useAuthStore()
 const emits = defineEmits(['close'])
@@ -183,15 +180,16 @@ const props = defineProps<{
 }>()
 
 const {
-  thing,
+  isPrimaryOwner,
   newOwnerEmail,
   newPrimaryOwnerEmail,
   addSecondaryOwner,
   showPrimaryOwnerConfirmation,
   transferPrimaryOwnership,
   removeOwner,
-  toggleSitePrivacy,
-} = useThing(props.thingId)
+} = useThingOwnership(props.thingId)
+
+const { thing, toggleSitePrivacy } = useThing(props.thingId)
 
 const emitClose = () => emits('close')
 </script>

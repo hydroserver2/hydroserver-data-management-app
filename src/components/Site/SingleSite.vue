@@ -348,6 +348,7 @@ import { useRoute } from 'vue-router'
 import { Observation } from '@/types'
 import { usePhotosStore } from '@/store/photos'
 import { useThing } from '@/composables/useThing'
+import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreams } from '@/composables/useDatastreams'
 import { format } from 'date-fns'
 import SiteVisualization from '../SiteVisualization.vue'
@@ -356,12 +357,12 @@ import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 const photoStore = usePhotosStore()
 const thingId = useRoute().params.id.toString()
 
+const { isOwner } = useThingOwnership(thingId)
+
 const {
   thing,
   stringThing,
   mapOptions,
-  // updateFollow,
-  isOwner,
   deleteInput,
   deleteThing,
   thingProperties,
