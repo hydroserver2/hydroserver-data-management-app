@@ -79,7 +79,7 @@ export class Datastream {
   phenomenonEndTime: string | null
   intendedTimeSpacing?: number
   intendedTimeSpacingUnitsId: string
-  timeAggregationInterval: number
+  timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
 
   constructor(thingId: string) {
@@ -109,7 +109,7 @@ export class Datastream {
     this.phenomenonBeginTime = null
     this.phenomenonEndTime = null
     this.intendedTimeSpacingUnitsId = ''
-    this.timeAggregationInterval = 0
+    this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
   }
 }
