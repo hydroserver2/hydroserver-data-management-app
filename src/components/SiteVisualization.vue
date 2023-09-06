@@ -44,7 +44,7 @@ const { datastream, observations } = useDatastream(
 let chart = ref<null | HTMLDivElement>(null)
 
 const data = observations.value.map((observation) => ({
-  date: new Date(observation.result_time),
+  date: new Date(observation.phenomenonTime),
   value: Number(observation.result),
 }))
 

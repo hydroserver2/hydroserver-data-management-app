@@ -117,7 +117,7 @@ export class Datastream {
 export interface Observation {
   id: string
   result: string
-  result_time: string
+  phenomenonTime: string
 }
 
 export class Unit {
