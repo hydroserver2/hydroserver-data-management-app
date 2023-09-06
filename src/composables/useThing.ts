@@ -83,7 +83,7 @@ export function useThing(thingId: string) {
         value: owners
           .map(
             (owner) =>
-              `${owner.firstName} ${owner.lastName}: ${owner.organizationName}`
+              (owner.firstName + ' ' + owner.lastName + (owner.organizationName ? `: ${owner.organizationName}` : ''))
           )
           .join(', '),
       },

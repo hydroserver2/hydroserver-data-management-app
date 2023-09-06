@@ -19,8 +19,10 @@
           @click="openLogInDialog('orcid')"
           variant="flat"
           color="secondary"
-          prepend-icon="mdi-orcid"
         >
+          <template v-slot:prepend>
+            <v-icon class="fa-brands fa-orcid"></v-icon>
+          </template>
           Log in using ORCID
         </v-btn>
       </v-card-text>
