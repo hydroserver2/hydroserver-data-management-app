@@ -108,7 +108,7 @@ export const useDataSourceDetailStore = defineStore('data-source-detail-store', 
       }
 
       this.datastreams = (dataSource.datastreams || []).map((datastream: any) => {
-        let dataThru = datastream.result_end_time ? new Date(Date.parse(datastream.result_end_time)) : null
+        let dataThru = datastream.phenomenon_end_time ? new Date(Date.parse(datastream.phenomenon_end_time)) : null
         let status
 
         if (!dataThru && !dataSourceThru) {
