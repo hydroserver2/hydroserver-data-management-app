@@ -192,7 +192,7 @@
           <v-text-field
             v-model="datastream.timeAggregationInterval"
             label="Time Aggregation Interval *"
-            :rules="rules.required"
+            :rules="rules.requiredNumber"
             type="number"
           ></v-text-field>
         </v-col>
