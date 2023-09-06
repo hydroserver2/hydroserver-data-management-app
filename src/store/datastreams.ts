@@ -54,7 +54,6 @@ export const useDatastreamStore = defineStore('datastreams', {
           this.getDatastreamById(datastream.id),
           datastream
         )
-        console.log(patchData)
         const { data } = await this.$http.patch(
           `/data/datastreams/patch/${datastream.id}`,
           patchData

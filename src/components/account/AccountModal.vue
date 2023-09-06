@@ -88,7 +88,7 @@
             ></v-switch>
           </v-col>
         </v-row>
-        <div v-if="user && showOrg">
+        <div v-if="user.organization && showOrg">
           <v-row>
             <v-col>
               <v-text-field
@@ -152,13 +152,13 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { reactive, ref, onMounted, defineProps } from 'vue'
+import { reactive, ref, onMounted, defineProps, watch } from 'vue'
 import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
 import { organizationTypes } from '@/vocabularies'
-import { Organization } from '@/types'
+import { Organization, User } from '@/types'
 
 const phoneMask = { mask: '(###) ###-####' }
 const authStore = useAuthStore()
@@ -166,10 +166,13 @@ const props = defineProps({
   isModal: { type: Boolean, required: false, default: true },
 })
 
-let user = reactive({ ...authStore.user })
-const showOrg = ref(false)
-if (user.organization?.name !== '') showOrg.value = true
-console.log('user', user)
+let user = reactive<User>(JSON.parse(JSON.stringify(authStore.user)))
+const showOrg = ref(!!user.organization)
+
+watch(showOrg, (newVal) => {
+  if (newVal && !user.organization) user.organization = new Organization()
+  else if (!newVal) user.organization = null
+})
 
 const valid = ref(false)
 const myForm = ref<VForm>()
@@ -180,7 +183,6 @@ const closeDialog = () => emit('close')
 const updateUser = async () => {
   await myForm.value?.validate()
   if (!valid.value) return
-  if (!showOrg.value) user.organization = new Organization()
   await authStore.updateUser(user)
   emit('close')
 }

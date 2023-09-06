@@ -110,7 +110,7 @@
               ></v-switch>
             </v-col>
           </v-row>
-          <div v-if="user && showOrg">
+          <div v-if="user.organization && showOrg">
             <v-row>
               <v-col>
                 <v-text-field
@@ -173,9 +173,9 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useAuthStore } from '@/store/authentication'
-import { User } from '@/types'
+import { Organization, User } from '@/types'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
@@ -185,12 +185,17 @@ const valid = ref(false)
 const confirmPassword = ref('')
 const myForm = ref<VForm>()
 const user = reactive<User>(new User())
-const phoneMask = { mask: '(###) ###-####' }
 const showOrg = ref(false)
+
+watch(showOrg, (newVal) => {
+  if (newVal && !user.organization) user.organization = new Organization()
+  else if (!newVal) user.organization = null
+})
+
+const phoneMask = { mask: '(###) ###-####' }
 
 async function createUser() {
   if (!valid.value) return
-  console.log('creating user', user)
   await useAuthStore().createUser(user)
 }
 </script>

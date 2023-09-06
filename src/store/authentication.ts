@@ -4,6 +4,7 @@ import { User } from '@/types'
 import { Subject } from 'rxjs'
 import Notification from './notifications'
 import { useResetStore } from '@/store/resetStore'
+import { createPatchObject } from '@/utils/api'
 
 export const useAuthStore = defineStore({
   id: 'authentication',
@@ -184,7 +185,9 @@ export const useAuthStore = defineStore({
     },
     async updateUser(user: User) {
       try {
-        const { data } = await this.$http.patch('/account/user', user)
+        const patchData = createPatchObject(this.user, user)
+        if (Object.keys(patchData).length === 0) return
+        const { data } = await this.$http.patch('/account/user', patchData)
         // things.organizations could be affected for many things so just invalidate cache
         try {
           useResetStore().things()
@@ -247,7 +250,6 @@ export const useAuthStore = defineStore({
           token: token,
           password: password,
         })
-        console.log('Reset Password Response', response)
         if (response.status === 200) {
           Notification.toast({
             message: 'Successfully reset password!',

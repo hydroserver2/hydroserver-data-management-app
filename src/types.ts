@@ -203,8 +203,8 @@ export class ProcessingLevel {
 export class Organization {
   name: string
   code: string
-  description?: string
   type: string
+  description?: string
   link?: string
 
   constructor() {
@@ -225,7 +225,7 @@ export class User {
   lastName: string
   phone: string
   address: string
-  organization: Organization
+  organization?: Organization | null
   type: string
   isVerified: boolean
   link: string
@@ -239,7 +239,6 @@ export class User {
     this.lastName = ''
     this.phone = ''
     this.address = ''
-    this.organization = new Organization()
     this.type = ''
     this.isVerified = false
     this.link = ''
