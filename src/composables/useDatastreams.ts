@@ -1,26 +1,14 @@
 import { useDatastreamStore } from '@/store/datastreams'
-import { onMounted, computed, ref, Ref, watch } from 'vue'
-import { useThing } from './useThing'
+import { onMounted, ref, Ref, watch } from 'vue'
+
 import { Datastream } from '@/types'
 import Notification from '@/store/notifications'
 
 export function useDatastreams(thingId: string) {
-  const { isOwner } = useThing(thingId)
   const datastreamStore = useDatastreamStore()
   const selectedDatastream: Ref<Datastream | null> = ref(null)
   const isDeleteModalOpen = ref(false)
   const deleteDatastreamInput = ref('')
-
-  const visibleDatastreams = computed(() => {
-    if (!datastreamStore.datastreams[thingId]) return []
-
-    return datastreamStore.datastreams[thingId]
-      .filter((datastream) => datastream.isVisible || isOwner.value)
-      .map((datastream) => ({
-        ...datastream,
-        chartOpen: false, // Adding a dialog boolean to each datastream so we can open a modal for each
-      }))
-  })
 
   async function toggleVisibility(datastream: Datastream) {
     datastream.isVisible = !datastream.isVisible
@@ -68,7 +56,6 @@ export function useDatastreams(thingId: string) {
   })
 
   return {
-    visibleDatastreams,
     toggleVisibility,
     selectedDatastream,
     openDeleteModal,
