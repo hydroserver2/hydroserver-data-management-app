@@ -77,7 +77,7 @@ export class Datastream {
   isStale?: boolean
   phenomenonBeginTime: string | null
   phenomenonEndTime: string | null
-  intendedTimeSpacing: number
+  intendedTimeSpacing?: number
   intendedTimeSpacingUnitsId: string
   timeAggregationInterval: number
   timeAggregationIntervalUnitsId: string
@@ -108,7 +108,6 @@ export class Datastream {
     this.isPrimaryOwner = false
     this.phenomenonBeginTime = null
     this.phenomenonEndTime = null
-    this.intendedTimeSpacing = 0
     this.intendedTimeSpacingUnitsId = ''
     this.timeAggregationInterval = 0
     this.timeAggregationIntervalUnitsId = ''

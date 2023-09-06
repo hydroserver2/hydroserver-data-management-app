@@ -157,7 +157,8 @@
           <v-combobox
             :items="mediumTypes"
             v-model="datastream.sampledMedium"
-            label="Medium"
+            label="Medium *"
+            :rules="rules.required"
           />
         </v-col>
         <v-col cols="4">
@@ -171,7 +172,8 @@
           <v-combobox
             :items="aggregationTypes"
             v-model="datastream.aggregationStatistic"
-            label="Aggregation Statistic"
+            label="Aggregation Statistic *"
+            :rules="rules.required"
           />
         </v-col>
       </v-row>

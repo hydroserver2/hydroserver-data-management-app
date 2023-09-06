@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Datastream } from '@/types'
+import { createPatchObject } from '@/utils/api'
 
 export const useDatastreamStore = defineStore('datastreams', {
   state: () => ({
@@ -49,9 +50,14 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async updateDatastream(datastream: Datastream) {
       try {
+        const patchData = createPatchObject(
+          this.getDatastreamById(datastream.id),
+          datastream
+        )
+        console.log(patchData)
         const { data } = await this.$http.patch(
           `/data/datastreams/patch/${datastream.id}`,
-          datastream
+          patchData
         )
         const datastreamsForThing = this.datastreams[data.thingId]
         const index = datastreamsForThing.findIndex((ds) => ds.id === data.id)
