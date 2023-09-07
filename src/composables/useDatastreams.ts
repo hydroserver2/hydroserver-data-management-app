@@ -12,7 +12,7 @@ export function useDatastreams(thingId: string) {
 
   async function toggleVisibility(datastream: Datastream) {
     datastream.isVisible = !datastream.isVisible
-    await datastreamStore.setVisibility(datastream.id, datastream.isVisible)
+    await datastreamStore.updateDatastream(datastream)
   }
 
   function openDeleteModal(datastream: Datastream) {

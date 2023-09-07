@@ -94,31 +94,6 @@ export const useDatastreamStore = defineStore('datastreams', {
         console.error(`Error deleting datastream with id ${id}`, error)
       }
     },
-    async setVisibility(id: string, visibility: boolean) {
-      try {
-        const { data } = await this.$http.patch(
-          `/data/datastreams/patch/${id}`,
-          {
-            isVisible: visibility,
-          }
-        )
-        const datastreamIndex = this.datastreams[data.thingId].findIndex(
-          (ds) => ds.id === id
-        )
-        if (datastreamIndex !== -1)
-          this.datastreams[data.thingId][datastreamIndex] = data
-        else {
-          console.error(
-            `Datastream with id ${id} not found in the datastreams list`
-          )
-        }
-      } catch (error) {
-        console.error(
-          `Error toggling visibility for datastream with id ${id}`,
-          error
-        )
-      }
-    },
     getDatastreamForThingById(
       thingId: string,
       datastreamId: string
