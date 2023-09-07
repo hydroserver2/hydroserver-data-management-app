@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Thing, ThingMetadata } from '@/types'
 import Notification from '@/store/notifications'
+import { createPatchObject } from '@/utils/api'
 
 export const useThingStore = defineStore('things', {
   state: () => ({
@@ -68,9 +69,14 @@ export const useThingStore = defineStore('things', {
     },
     async updateThing(updatedThing: Thing) {
       try {
+        const patchData = createPatchObject(
+          this.things[updatedThing.id],
+          updatedThing
+        )
+        if (Object.keys(patchData).length === 0) return
         const response = await this.$http.patch(
           `/data/things/${updatedThing.id}`,
-          updatedThing
+          patchData
         )
         if (response && response.status == 200) {
           this.things[updatedThing.id] = response.data as Thing

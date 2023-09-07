@@ -24,7 +24,6 @@ export class Thing {
   state: string
   county: string
   isPrimaryOwner: boolean
-  followers: number
   dataDisclaimer: string
 
   constructor() {
@@ -45,7 +44,6 @@ export class Thing {
     this.state = ''
     this.county = ''
     this.isPrimaryOwner = false
-    this.followers = 0
     this.dataDisclaimer = ''
   }
 }
