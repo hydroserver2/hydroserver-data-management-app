@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Sensor } from '@/types'
+import { createPatchObject } from '@/utils/api'
 
 export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),
@@ -21,7 +22,16 @@ export const useSensorStore = defineStore('sensor', {
     },
     async updateSensor(sensor: Sensor) {
       try {
-        const { data } = await this.$http.patch(`/data/sensors/${sensor.id}`, sensor)
+        const patchData = createPatchObject(
+          this.getSensorById(sensor.id),
+          sensor
+        )
+        if (Object.keys(patchData).length === 0) return
+        console.log('sensor', patchData)
+        const { data } = await this.$http.patch(
+          `/data/sensors/${sensor.id}`,
+          sensor
+        )
         const index = this.sensors.findIndex((s) => s.id === sensor.id)
         if (index !== -1) {
           this.sensors[index] = data
