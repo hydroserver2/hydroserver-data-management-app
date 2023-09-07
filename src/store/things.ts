@@ -85,14 +85,14 @@ export const useThingStore = defineStore('things', {
         console.error('Error updating thing', error)
       }
     },
-    async updateThingFollowership(updatedThing: Thing) {
-      try {
-        await this.$http.patch(`/data/things/${updatedThing.id}/followership`)
-        this.things[updatedThing.id] = updatedThing
-      } catch (error) {
-        console.error('Error updating thing followership', error)
-      }
-    },
+    // async updateThingFollowership(updatedThing: Thing) {
+    //   try {
+    //     await this.$http.patch(`/data/things/${updatedThing.id}/followership`)
+    //     this.things[updatedThing.id] = updatedThing
+    //   } catch (error) {
+    //     console.error('Error updating thing followership', error)
+    //   }
+    // },
     async updateThingPrivacy(thingId: string, thingPrivacy: boolean) {
       try {
         const response = await this.$http.patch(
@@ -105,7 +105,7 @@ export const useThingStore = defineStore('things', {
           this.things[thingId] = response.data as Thing
         }
       } catch (error) {
-        console.error('Error updating thing followership', error)
+        console.error('Error updating thing privacy', error)
       }
     },
     async deleteThing(thingId: string) {

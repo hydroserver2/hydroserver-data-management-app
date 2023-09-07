@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
+import { createPatchObject } from '@/utils/api'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
   state: () => ({
@@ -44,9 +45,14 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async updateObservedProperty(observedProperty: ObservedProperty) {
       try {
+        const patchData = createPatchObject(
+          this.getById(observedProperty.id),
+          observedProperty
+        )
+        if (Object.keys(patchData).length === 0) return
         await this.$http.patch(
           `/data/observed-properties/${observedProperty.id}`,
-          observedProperty
+          patchData
         )
         const index = this.observedProperties.findIndex(
           (op) => op.id === observedProperty.id
