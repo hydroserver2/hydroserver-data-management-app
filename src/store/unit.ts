@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Unit } from '@/types'
+import { createPatchObject } from '@/utils/api'
 
 export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
@@ -38,7 +39,10 @@ export const useUnitStore = defineStore('units', {
     },
     async updateUnit(unit: Unit) {
       try {
-        await this.$http.patch(`/data/units/${unit.id}`, unit)
+        const patchData = createPatchObject(this.getUnitById(unit.id), unit)
+        if (Object.keys(patchData).length === 0) return
+        console.log('Unit', patchData)
+        await this.$http.patch(`/data/units/${unit.id}`, patchData)
         const index = this.units.findIndex((u) => u.id === unit.id)
         if (index !== -1) {
           this.units[index] = unit
