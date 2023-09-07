@@ -178,6 +178,22 @@
         :headers="headers"
         :items="visibleDatastreams"
       >
+        <template v-slot:item.info="{ item }">
+          <v-col>
+            <v-row v-if="item.raw.id"> Identifier: {{ item.raw.id }}</v-row>
+            <v-row v-if="item.raw.observedPropertyName">
+              Observed Property: {{ item.raw.observedPropertyName }}</v-row
+            >
+            <v-row v-if="item.raw.processingLevelName">
+              Processing Level: {{ item.raw.processingLevelName }}</v-row
+            >
+            <v-row v-if="item.raw.id">
+              Sampled Medium: {{ item.raw.sampledMedium }}</v-row
+            >
+
+            <v-row v-if="item.raw.id"> Sensor: {{ item.raw.sensorName }}</v-row>
+          </v-col>
+        </template>
         <template v-slot:item.observations="{ item }">
           <div v-if="item.raw.observations">
             <v-dialog v-model="item.raw.chartOpen" width="80rem">
@@ -387,15 +403,13 @@ const {
 // const { isAuthenticated } = useAuthentication()
 
 const headers = [
-  { title: 'Observed Property', key: 'observedPropertyName', sortable: true },
+  { title: 'DataStream Info', key: 'info', sortable: true },
   {
     title: 'Observations (Last 72 Hours)',
     key: 'observations',
     sortable: false,
   },
   { title: 'Last Observation', key: 'last_observation' },
-  { title: 'Sampled Medium', key: 'sampledMedium' },
-  { title: 'Sensor', key: 'sensorName' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 

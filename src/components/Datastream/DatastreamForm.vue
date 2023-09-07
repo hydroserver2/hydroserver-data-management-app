@@ -359,7 +359,28 @@ const formattedProcessingLevels = computed(() => {
 })
 
 watch(selectedDatastreamID, async () => {
-  populateForm(selectedDatastreamID.value)
+  const sourceDatastream = datastreamStore.getDatastreamById(
+    selectedDatastreamID.value
+  )
+  if (!sourceDatastream) return
+  Object.assign(datastream, {
+    ...datastream,
+    sensorId: sourceDatastream.sensorId,
+    observedPropertyId: sourceDatastream.observedPropertyId,
+    processingLevelId: sourceDatastream.processingLevelId,
+    unitId: sourceDatastream.unitId,
+    timeAggregationIntervalUnitsId:
+      sourceDatastream.timeAggregationIntervalUnitsId,
+    intendedTimeSpacingUnitsId: sourceDatastream.intendedTimeSpacingUnitsId,
+    name: sourceDatastream.name,
+    description: sourceDatastream.description,
+    sampledMedium: sourceDatastream.sampledMedium,
+    noDataValue: sourceDatastream.noDataValue,
+    aggregationStatistic: sourceDatastream.aggregationStatistic,
+    status: sourceDatastream.status,
+    timeAggregationInterval: sourceDatastream.timeAggregationInterval,
+    intendedTimeSpacing: sourceDatastream.intendedTimeSpacing,
+  })
   await myForm.value?.validate()
 })
 

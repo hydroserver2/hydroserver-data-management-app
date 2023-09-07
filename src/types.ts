@@ -54,8 +54,8 @@ export class Datastream {
   description: string
   thingId: string
   observationType: string
-  resultType: string
-  status: string
+  resultType?: string
+  status?: string
   sampledMedium: string
   noDataValue: number
   aggregationStatistic: string
@@ -70,13 +70,13 @@ export class Datastream {
   sensorName: string
   processingLevelId: string
   processingLevelName: string
-  isVisible: boolean
+  isVisible?: boolean
   isPrimaryOwner: boolean
   isStale?: boolean
-  phenomenonBeginTime: string | null
-  phenomenonEndTime: string | null
+  phenomenonBeginTime?: string | null
+  phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
-  intendedTimeSpacingUnitsId: string
+  intendedTimeSpacingUnitsId?: string
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
 
@@ -87,7 +87,6 @@ export class Datastream {
     this.thingId = thingId
     this.observationType = 'OM_Measurement'
     this.resultType = 'Time Series Coverage'
-    this.status = ''
     this.sampledMedium = ''
     this.noDataValue = -9999
     this.aggregationStatistic = ''
@@ -102,11 +101,7 @@ export class Datastream {
     this.sensorName = ''
     this.processingLevelId = ''
     this.processingLevelName = ''
-    this.isVisible = true
     this.isPrimaryOwner = false
-    this.phenomenonBeginTime = null
-    this.phenomenonEndTime = null
-    this.intendedTimeSpacingUnitsId = ''
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
   }
