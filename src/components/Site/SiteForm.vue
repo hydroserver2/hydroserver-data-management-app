@@ -90,7 +90,7 @@
                   label="Latitude *"
                   v-model="thing.latitude"
                   type="number"
-                  :rules="rules.required"
+                  :rules="rules.requiredNumber"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6"
@@ -98,7 +98,7 @@
                   label="Longitude *"
                   v-model="thing.longitude"
                   type="number"
-                  :rules="rules.required"
+                  :rules="rules.requiredNumber"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6"
@@ -106,7 +106,7 @@
                   label="Elevation (m) *"
                   v-model="thing.elevation_m"
                   type="number"
-                  :rules="rules.required"
+                  :rules="rules.requiredNumber"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6">

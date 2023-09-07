@@ -13,9 +13,9 @@ export class Thing {
   siteType: string
   samplingFeatureCode: string
   isPrivate: boolean
-  latitude: number
-  longitude: number
-  elevation_m: number
+  latitude?: number
+  longitude?: number
+  elevation_m?: number
   elevationDatum: string
   ownsThing: boolean
   followsThing: boolean
@@ -33,9 +33,6 @@ export class Thing {
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
-    this.latitude = 0
-    this.longitude = 0
-    this.elevation_m = 0
     this.elevationDatum = 'WGS84'
     this.ownsThing = false
     this.followsThing = false

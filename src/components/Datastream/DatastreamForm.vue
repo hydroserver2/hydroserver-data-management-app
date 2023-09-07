@@ -339,9 +339,7 @@ const datastream = reactive<Datastream>(new Datastream(thingId))
 const formattedDatastreams = computed(() => {
   return datastreamStore.primaryOwnedDatastreams.map((datastream) => ({
     id: datastream.id,
-    title: `Sensor:${datastream.sensorName},  Observed Property: ${datastream.observedPropertyName},
-     Unit: ${datastream.unitName},  Processing Level: ${datastream.processingLevelName},
-      Sampled Medium ${datastream.sampledMedium}`,
+    title: `Sensor:${datastream.sensorName},  Observed Property: ${datastream.observedPropertyName},  Unit: ${datastream.unitName},  Processing Level: ${datastream.processingLevelName},  Sampled Medium ${datastream.sampledMedium}`,
   }))
 })
 
