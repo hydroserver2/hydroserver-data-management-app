@@ -32,7 +32,8 @@ export function useMarkers() {
     markerData: MarkerData,
     map: google.maps.Map | null
   ) => {
-    if (!markerData || !map) return null
+    if (!markerData || !map || !markerData.latitude || !markerData.longitude)
+      return null
     const marker = new google.maps.Marker({
       position: new google.maps.LatLng(
         markerData.latitude,

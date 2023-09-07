@@ -300,11 +300,12 @@ function removeExistingPhoto(photoId: string) {
 async function populateThing(id: string) {
   await thingStore.fetchThings()
   Object.assign(thing, thingStore.things[id])
-  mapOptions.value = {
-    center: { lat: thing.latitude, lng: thing.longitude },
-    zoom: 10,
-    mapTypeId: 'satellite',
-  }
+  if (thing.latitude && thing.longitude)
+    mapOptions.value = {
+      center: { lat: thing.latitude, lng: thing.longitude },
+      zoom: 10,
+      mapTypeId: 'satellite',
+    }
   loaded.value = true
 }
 
