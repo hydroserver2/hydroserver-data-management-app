@@ -103,7 +103,7 @@ export function useProcessingLevels(id: string | null = null) {
     () => new ProcessingLevel(),
     'fetchProcessingLevels',
     'deleteProcessingLevel',
-    'getProcessingLevelById',
+    'getById',
     id
   )
 

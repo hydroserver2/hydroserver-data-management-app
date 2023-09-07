@@ -41,7 +41,6 @@ export const useUnitStore = defineStore('units', {
       try {
         const patchData = createPatchObject(this.getUnitById(unit.id), unit)
         if (Object.keys(patchData).length === 0) return
-        console.log('Unit', patchData)
         await this.$http.patch(`/data/units/${unit.id}`, patchData)
         const index = this.units.findIndex((u) => u.id === unit.id)
         if (index !== -1) {

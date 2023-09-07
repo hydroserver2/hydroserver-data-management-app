@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ProcessingLevel } from '@/types'
+import { createPatchObject } from '@/utils/api'
 
 export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
@@ -26,22 +27,20 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
         console.error('Error fetching processing levels from DB', error)
       }
     },
-    async updateProcessingLevel(processingLevel: ProcessingLevel) {
+    async updateProcessingLevel(pl: ProcessingLevel) {
       try {
+        const patchData = createPatchObject(this.getById(pl.id), pl)
+        if (Object.keys(patchData).length === 0) return
+        console.log('PL', patchData)
         const { data } = await this.$http.patch(
-          `/data/processing-levels/${processingLevel.id}`,
-          processingLevel
+          `/data/processing-levels/${pl.id}`,
+          patchData
         )
-        const index = this.processingLevels.findIndex(
-          (pl) => pl.id === processingLevel.id
-        )
+        const index = this.processingLevels.findIndex((pl) => pl.id === pl.id)
         if (index !== -1) this.processingLevels[index] = data
         this.sortProcessingLevels()
       } catch (error) {
-        console.error(
-          `Error updating processing level with id ${processingLevel.id}`,
-          error
-        )
+        console.error(`Error updating processing level with id ${pl.id}`, error)
       }
     },
     async createProcessingLevel(processingLevel: ProcessingLevel) {
@@ -73,7 +72,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
         console.error('Error deleting processing level', error)
       }
     },
-    getProcessingLevelById(id: string) {
+    getById(id: string) {
       const processingLevel = this.processingLevels.find(
         (pl) => pl.id.toString() === id.toString()
       )
