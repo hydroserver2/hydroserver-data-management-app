@@ -98,30 +98,32 @@
           >
         </v-col>
       </v-row>
-      <v-row>
-        <v-col cols="12" md="6">
-          <h6 class="text-h6 my-4">Current Owners</h6>
-          <v-card-text>
-            <ul>
-              <li class="v-list-item" v-for="owner in thing.owners">
-                {{ owner.firstName }} {{ owner.lastName }} -
-                {{ owner.organizationName }}
-                <strong v-if="owner.isPrimaryOwner">(Primary)</strong>
-                <div v-else style="text-align: right">
-                  <v-btn
-                    color="delete"
-                    v-if="isPrimaryOwner || owner.email == authStore.user.email"
-                    @click="removeOwner(owner.email)"
-                  >
-                    Remove
-                  </v-btn>
-                </div>
-              </li>
-            </ul>
-          </v-card-text>
+
+      <h6 class="text-h6 my-4">Current Owners</h6>
+
+      <v-row v-for="owner in thing.owners" class="my-0">
+        <v-col cols="auto" class="py-0">
+          {{ owner.firstName }} {{ owner.lastName }} -
+          {{
+            owner.organizationName ? owner.organizationName : 'No Organization'
+          }}
         </v-col>
-        <v-col cols="12" md="6">
-          <h6 class="text-h6 my-4" v-if="thing">
+
+        <v-col class="py-0" cols="auto">
+          <strong v-if="owner.isPrimaryOwner">(Primary)</strong>
+          <v-btn
+            v-else
+            color="delete"
+            v-if="isPrimaryOwner || owner.email == authStore.user.email"
+            @click="removeOwner(owner.email)"
+            >Remove</v-btn
+          >
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="auto" class="pb-0">
+          <h6 class="text-h6 mt-4" v-if="thing">
             Toggle Site Privacy
             <v-tooltip>
               <template v-slot:activator="{ props }">
@@ -149,14 +151,18 @@
               </template>
             </v-tooltip>
           </h6>
-          <v-card-text v-if="thing">
-            <v-switch
-              v-model="thing.isPrivate"
-              :label="thing.isPrivate ? 'Site is private' : 'Site is public'"
-              color="primary"
-              @change="toggleSitePrivacy"
-            ></v-switch>
-          </v-card-text>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="auto" class="py-0">
+          <v-switch
+            v-model="thing.isPrivate"
+            :label="thing.isPrivate ? 'Site is private' : 'Site is public'"
+            color="primary"
+            hide-details
+            @change="toggleSitePrivacy"
+          ></v-switch>
         </v-col>
       </v-row>
     </v-card-text>
@@ -190,6 +196,7 @@ const {
 } = useThingOwnership(props.thingId)
 
 const { thing, toggleSitePrivacy } = useThing(props.thingId)
+console.log('thing', thing.value)
 
 const emitClose = () => emits('close')
 </script>
