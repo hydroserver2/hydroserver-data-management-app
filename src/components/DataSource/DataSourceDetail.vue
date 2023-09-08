@@ -7,6 +7,16 @@
         </v-col>
         <v-spacer/>
         <v-col class="text-right">
+          <v-tooltip text="Back to Data Sources" location="bottom">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                color="primary"
+                icon="mdi-arrow-left"
+                :to="{ name: 'DataSources' }"
+              />
+            </template>
+          </v-tooltip>
           <v-tooltip text="Edit Data Source" location="bottom">
             <template v-slot:activator="{ props }">
               <v-btn
@@ -40,7 +50,7 @@
       </v-row>
       <v-spacer/>
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col>
           <v-row>
             <v-col>
               <h5 class="text-h5">Data Source Configuration</h5>
@@ -51,8 +61,8 @@
               <v-table class="elevation-2">
                 <tbody>
                   <tr v-for="property in dataSourceProperties" :key="property.label">
-                    <td><i :class="property.icon"></i></td>
-                    <td>{{ property.label }}</td>
+<!--                    <td style="width: 30px;"><i :class="property.icon"></i></td>-->
+                    <td style="width: 220px;">{{ property.label }}</td>
                     <td>
                       {{
                         store[property.value as keyof Object]
@@ -64,7 +74,9 @@
             </v-col>
           </v-row>
         </v-col>
-        <v-col cols="12" md="6">
+      </v-row>
+      <v-row>
+        <v-col>
           <v-row>
             <v-col>
               <h5 class="text-h5">Data Source Status</h5>
@@ -78,8 +90,8 @@
               >
                 <tbody>
                   <tr v-for="property in dataSourceSyncProperties" :key="property.label">
-                    <td><i :class="property.icon"></i></td>
-                    <td>{{ property.label }}</td>
+<!--                    <td style="width: 30px;"><i :class="property.icon"></i></td>-->
+                    <td style="width: 220px;">{{ property.label }}</td>
                     <td>
                       {{
                         store[property.value as keyof Object]
@@ -129,6 +141,7 @@ import { ref } from 'vue'
 import { useDataSourceDetailStore } from '@/store/datasource_detail'
 import { useRoute } from 'vue-router'
 import DataSourceForm from "@/components/DataSource/DataSourceForm.vue";
+import DataSourceDashboard from "@/components/DataSource/DataSourceDashboard.vue";
 
 const store = useDataSourceDetailStore()
 const route = useRoute()
@@ -175,7 +188,7 @@ let dataSourceSyncProperties = [
     { icon: 'fas fa-id-badge', label: 'Last Synced', value: 'lastSynced' },
     { icon: 'fas fa-id-badge', label: 'Last Sync Message', value: 'lastSyncMessage' },
     { icon: 'fas fa-id-badge', label: 'Next Sync', value: 'nextSync' },
-    { icon: 'fas fa-id-badge', label: 'Data Source Thru', value: 'dataSourceThru' },
+    { icon: 'fas fa-id-badge', label: 'Last Loaded Timestamp', value: 'dataSourceThru' },
 ]
 
 let linkedDatastreamColumns = [
@@ -192,7 +205,7 @@ let linkedDatastreamColumns = [
     key: 'status',
   },
   {
-    title: 'HydroServer Data Thru',
+    title: 'Last Loaded Timestamp',
     align: 'start',
     sortable: true,
     key: 'dataThru',

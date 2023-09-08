@@ -15,7 +15,6 @@
           persistent-hint
           :rules="[
             (val: string) => val !== '' && val != null || 'Must enter data source name.',
-            (val: string) => /^[0-9a-zA-Z ... ]+$/.test(val) || 'Invalid data source name.',
           ]"
         ></v-text-field>
       </v-col>
