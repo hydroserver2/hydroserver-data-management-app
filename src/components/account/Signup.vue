@@ -97,7 +97,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col>
+            <v-col cols="auto">
               <v-switch
                 v-model="showOrg"
                 hide-details
