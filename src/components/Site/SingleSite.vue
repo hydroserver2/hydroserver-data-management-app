@@ -180,20 +180,30 @@
       >
         <template v-slot:item.info="{ item }">
           <v-col>
-            <v-row v-if="item.raw.id"> Identifier: {{ item.raw.id }}</v-row>
-            <v-row v-if="item.raw.observedPropertyName">
-              Observed Property: {{ item.raw.observedPropertyName }}</v-row
+            <v-row
+              style="font-size: 1.2em"
+              v-if="item.raw.observedPropertyName"
             >
-            <v-row v-if="item.raw.processingLevelName">
-              Processing Level: {{ item.raw.processingLevelName }}</v-row
-            >
+              <strong class="mr-2">Observed Property:</strong>
+              <strong>{{ item.raw.observedPropertyName }}</strong>
+            </v-row>
             <v-row v-if="item.raw.id">
-              Sampled Medium: {{ item.raw.sampledMedium }}</v-row
-            >
-
-            <v-row v-if="item.raw.id"> Sensor: {{ item.raw.sensorName }}</v-row>
+              <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
+            </v-row>
+            <v-row v-if="item.raw.processingLevelName">
+              <strong class="mr-2">Processing Level:</strong>
+              {{ item.raw.processingLevelName }}
+            </v-row>
+            <v-row v-if="item.raw.id">
+              <strong class="mr-2">Sampled Medium:</strong>
+              {{ item.raw.sampledMedium }}
+            </v-row>
+            <v-row v-if="item.raw.id">
+              <strong class="mr-2">Sensor:</strong> {{ item.raw.sensorName }}
+            </v-row>
           </v-col>
         </template>
+
         <template v-slot:item.observations="{ item }">
           <div v-if="item.raw.observations">
             <v-dialog v-model="item.raw.chartOpen" width="80rem">
@@ -296,7 +306,11 @@
                   title="Delete Datastream"
                   @click="openDeleteModal(item.raw)"
                 />
-                <!-- <v-list-item prepend-icon="mdi-download" title="Download Data" /> -->
+                <v-list-item
+                  prepend-icon="mdi-download"
+                  title="Download Data"
+                  @click="datastreamStore.downloadDatastream(item.raw.id)"
+                />
               </v-list>
             </v-menu>
           </v-row>

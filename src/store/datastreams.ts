@@ -115,5 +115,26 @@ export const useDatastreamStore = defineStore('datastreams', {
       }
       return null
     },
+    async downloadDatastream(id: string) {
+      try {
+        const { data } = await this.$http.get(`/data/datastreams/csv/${id}`)
+        // Create a Blob from the received data
+        const blob = new Blob([data], { type: 'text/csv' })
+
+        // Create a download link element
+        const link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = `datastream_${id}.csv`
+
+        // Append the link to the document and trigger a click event
+        document.body.appendChild(link)
+        link.click()
+
+        // Clean up by removing the link
+        document.body.removeChild(link)
+      } catch (error) {
+        console.error('Error downloading datastream CSV', error)
+      }
+    },
   },
 })
