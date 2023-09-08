@@ -229,75 +229,77 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
-            <template v-slot:activator="{ props }" v-if="isOwner">
-              <v-btn
-                small
-                color="grey"
-                v-bind="props"
-                icon="mdi-eye"
-                @click="toggleVisibility(item.raw)"
-              />
-            </template>
-            <span
-              >Hide this datastream from guests of your site. Owners will still
-              see it</span
-            >
-          </v-tooltip>
-          <v-tooltip bottom :openDelay="500" v-else>
-            <template v-slot:activator="{ props }" v-if="isOwner">
-              <v-btn
-                small
-                color="grey-lighten-1"
-                v-bind="props"
-                icon="mdi-eye-off"
-                @click="toggleVisibility(item.raw)"
-              />
-            </template>
-            <span>Make this datastream publicly visible</span>
-          </v-tooltip>
+          <v-row>
+            <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
+              <template v-slot:activator="{ props }" v-if="isOwner">
+                <v-btn
+                  small
+                  color="grey"
+                  v-bind="props"
+                  icon="mdi-eye"
+                  @click="toggleVisibility(item.raw)"
+                />
+              </template>
+              <span
+                >Hide this datastream from guests of your site. Owners will
+                still see it</span
+              >
+            </v-tooltip>
+            <v-tooltip bottom :openDelay="500" v-else>
+              <template v-slot:activator="{ props }" v-if="isOwner">
+                <v-btn
+                  small
+                  color="grey-lighten-1"
+                  v-bind="props"
+                  icon="mdi-eye-off"
+                  @click="toggleVisibility(item.raw)"
+                />
+              </template>
+              <span>Make this datastream publicly visible</span>
+            </v-tooltip>
 
-          <v-menu>
-            <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-dots-vertical" />
-            </template>
-            <v-list>
-              <v-list-item
-                v-if="isOwner"
-                prepend-icon="mdi-link-variant"
-                title="Link Data Source"
-                @click="
-                  handleLinkDataSource(
-                    item.raw.id,
-                    item.raw.data_source_id,
-                    item.raw.column
-                  )
-                "
-              />
-              <v-list-item
-                v-if="isOwner"
-                prepend-icon="mdi-pencil"
-                title="Edit Datastream Metadata"
-                :to="{
-                  name: 'DatastreamForm',
-                  params: { id: thingId, datastreamId: item.raw.id },
-                }"
-              />
-              <v-list-item
-                v-if="isOwner"
-                prepend-icon="mdi-chart-line"
-                title="View Time Series Plot"
-                @click="item.raw.chartOpen = true"
-              />
-              <v-list-item
-                v-if="isOwner"
-                prepend-icon="mdi-delete"
-                title="Delete Datastream"
-                @click="openDeleteModal(item.raw)"
-              />
-              <!-- <v-list-item prepend-icon="mdi-download" title="Download Data" /> -->
-            </v-list>
-          </v-menu>
+            <v-menu>
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" icon="mdi-dots-vertical" />
+              </template>
+              <v-list>
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-link-variant"
+                  title="Link Data Source"
+                  @click="
+                    handleLinkDataSource(
+                      item.raw.id,
+                      item.raw.data_source_id,
+                      item.raw.column
+                    )
+                  "
+                />
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-pencil"
+                  title="Edit Datastream Metadata"
+                  :to="{
+                    name: 'DatastreamForm',
+                    params: { id: thingId, datastreamId: item.raw.id },
+                  }"
+                />
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-chart-line"
+                  title="View Time Series Plot"
+                  @click="item.raw.chartOpen = true"
+                />
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-delete"
+                  title="Delete Datastream"
+                  @click="openDeleteModal(item.raw)"
+                />
+                <!-- <v-list-item prepend-icon="mdi-download" title="Download Data" /> -->
+              </v-list>
+            </v-menu>
+          </v-row>
         </template>
       </v-data-table>
       <v-dialog
