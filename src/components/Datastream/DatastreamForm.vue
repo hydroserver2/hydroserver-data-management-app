@@ -201,11 +201,7 @@
           <v-autocomplete
             v-model="datastream.timeAggregationIntervalUnitsId"
             label="Select time aggregation unit *"
-            :items="
-              isPrimaryOwner
-                ? unitStore.ownedUnits
-                : thingStore.POMetadata[thingId].units
-            "
+            :items="unitStore.timeUnits"
             item-title="name"
             item-value="id"
             :rules="rules.required"
@@ -240,11 +236,7 @@
           <v-autocomplete
             v-model="datastream.intendedTimeSpacingUnitsId"
             label="Select intended time spacing unit"
-            :items="
-              isPrimaryOwner
-                ? unitStore.ownedUnits
-                : thingStore.POMetadata[thingId].units
-            "
+            :items="unitStore.timeUnits"
             item-title="name"
             item-value="id"
             no-data-text="No available units"

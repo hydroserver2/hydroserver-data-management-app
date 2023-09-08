@@ -11,6 +11,9 @@ export const useUnitStore = defineStore('units', {
     unownedUnits(): Unit[] {
       return this.units.filter((u) => u.personId == null)
     },
+    timeUnits(): Unit[] {
+      return this.units.filter((u) => u.type === 'Time' && u.personId == null)
+    },
   },
   actions: {
     sortUnits() {
