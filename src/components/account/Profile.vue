@@ -44,8 +44,28 @@
                         <td>{{ authStore.user.link }}</td>
                       </tr>
                       <tr v-if="authStore.user.organization">
-                        <td class="pr-4"><strong>Organization</strong></td>
+                        <td class="pr-4 text-nowrap">
+                          <strong>Organization Name</strong>
+                        </td>
                         <td>{{ authStore.user.organization.name }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization Code</strong></td>
+                        <td>{{ authStore.user.organization.code }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization Link</strong></td>
+                        <td>{{ authStore.user.organization.link }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization Type</strong></td>
+                        <td>{{ authStore.user.organization.type }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4">
+                          <strong>Organization description</strong>
+                        </td>
+                        <td>{{ authStore.user.organization.description }}</td>
                       </tr>
                     </tbody>
                   </table>
