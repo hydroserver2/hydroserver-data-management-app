@@ -213,7 +213,7 @@
                 @close="item.raw.chartOpen = false"
               ></SiteVisualization>
             </v-dialog>
-            <LineChart
+            <Sparkline
               @click="item.raw.chartOpen = true"
               class="pt-2"
               :is-stale="item.raw.isStale"
@@ -374,7 +374,7 @@ import GoogleMap from '@/components/GoogleMap.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
-import LineChart from '@/components/LineChart.vue'
+import Sparkline from '@/components/Sparkline.vue'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Observation } from '@/types'
