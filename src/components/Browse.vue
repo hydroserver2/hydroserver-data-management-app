@@ -33,6 +33,7 @@
             prepend-inner-icon="mdi-magnify"
             v-model="searchInput"
             clearable
+            @click:clear="clearOrganizations"
           />
         </form>
         <p v-if="!validFilter" class="text-error">No results found</p>
@@ -87,7 +88,7 @@ const organizations = computed(() => {
   Object.values(thingStore.things).forEach((thing) => {
     thing.owners.forEach((owner) => {
       if (owner.organizationName) {
-        allOrgs.add(owner.organizationName.toLowerCase())
+        allOrgs.add(owner.organizationName)
       }
     })
   })
@@ -100,7 +101,9 @@ const filterOrganizations = () => {
   } else {
     const lowerCase = searchInput.value.toLowerCase()
     filteredOrganizations.value = new Set([
-      ...organizations.value.filter((org: any) => org.includes(lowerCase)),
+      ...organizations.value.filter((org: any) =>
+        org.toLowerCase().includes(lowerCase)
+      ),
     ])
   }
   validFilter.value = filteredOrganizations.value.size === 0 ? false : true
@@ -116,7 +119,7 @@ function isThingValid(thing: Thing) {
     filteredOrganizations.value.size === 0 ||
     thing.owners.some((owner) =>
       owner.organizationName
-        ? filteredOrganizations.value.has(owner.organizationName.toLowerCase())
+        ? filteredOrganizations.value.has(owner.organizationName)
         : false
     )
   const siteTypeValid =
@@ -126,11 +129,15 @@ function isThingValid(thing: Thing) {
   return orgValid && siteTypeValid
 }
 
-function clearFilters() {
-  selectedSiteTypes.value = []
+const clearOrganizations = () => {
   filteredOrganizations.value = new Set()
   validFilter.value = true
   searchInput.value = ''
+}
+
+function clearFilters() {
+  selectedSiteTypes.value = []
+  clearOrganizations()
 }
 
 onMounted(async () => {
