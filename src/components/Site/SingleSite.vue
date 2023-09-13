@@ -384,7 +384,7 @@ import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreams } from '@/composables/useDatastreams'
 import { format } from 'date-fns'
-import SiteVisualization from '../SiteVisualization.vue'
+import SiteVisualization from '@/components/Datastream/SiteVisualization.vue'
 import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 
 const photoStore = usePhotosStore()

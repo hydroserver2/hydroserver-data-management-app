@@ -86,7 +86,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/visualization/:id/:datastreamId',
     name: 'SiteVisualization',
-    component: () => import('@/components/SiteVisualization.vue'),
+    component: () => import('@/components/Datastream/SiteVisualization.vue'),
   },
   {
     path: '/sites/:id/datastreams/form/:datastreamId?',

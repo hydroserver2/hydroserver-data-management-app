@@ -12,7 +12,8 @@
         </v-btn>
       </v-col>
     </v-row>
-    <div ref="chart"></div>
+    <div ref="focusChart"></div>
+    <div ref="contextChart"></div>
   </v-card>
 </template>
 
@@ -20,7 +21,7 @@
 import { ref, watchEffect } from 'vue'
 import { useDatastream } from '@/composables/useDatastream'
 import { useThing } from '@/composables/useThing'
-import { drawChart } from '@/composables/chart'
+import { focus, context } from '@/utils/FocusContextPlot'
 
 const props = defineProps({
   thingId: {
@@ -41,28 +42,32 @@ const { datastream, observations } = useDatastream(
   props.datastreamId
 )
 
-let chart = ref<null | HTMLDivElement>(null)
+let focusChart = ref<any>(null)
+let contextChart = ref<any>(null)
 
 const data = observations.value.map((observation) => ({
   date: new Date(observation.phenomenonTime),
   value: Number(observation.result),
-}))
+})) as any
 
-watchEffect(drawD3Chart)
+watchEffect(drawPlot)
 
-function drawD3Chart() {
-  if (!chart.value) return
-  chart.value.innerHTML = ''
+function drawPlot() {
+  if (focusChart.value) {
+    const unitSymbol = datastream.value.unitSymbol
+      ? `(${datastream.value.unitSymbol})`
+      : ''
 
-  const unitSymbol = datastream.value.unitSymbol
-    ? `(${datastream.value.unitSymbol})`
-    : ''
+    const yAxisLabel = datastream.value
+      ? `${datastream.value.observedPropertyName} ${unitSymbol} `
+      : ''
 
-  const yAxisLabel = datastream.value
-    ? `${datastream.value.observedPropertyName} ${unitSymbol} `
-    : ''
-
-  const svg = drawChart(data, yAxisLabel)
-  if (svg) chart.value.appendChild(svg)
+    const focusSVG = focus(data, yAxisLabel)
+    focusChart.value.appendChild(focusSVG)
+  }
+  if (contextChart.value) {
+    const contextSVG = context(data, 1000)
+    contextChart.value.appendChild(contextSVG)
+  }
 }
 </script>
