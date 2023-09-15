@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Datastream } from '@/types'
-import { createPatchObject } from '@/utils/api'
+import { createPatchObject } from '@/utils/api/createPatchObject'
 
 export const useDatastreamStore = defineStore('datastreams', {
   state: () => ({

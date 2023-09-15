@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Sensor } from '@/types'
-import { createPatchObject } from '@/utils/api'
+import { createPatchObject } from '@/utils/api/createPatchObject'
 
 export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),

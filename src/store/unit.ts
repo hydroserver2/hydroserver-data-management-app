@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Unit } from '@/types'
-import { createPatchObject } from '@/utils/api'
+import { createPatchObject } from '@/utils/api/createPatchObject'
 
 export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),

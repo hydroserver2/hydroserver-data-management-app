@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ProcessingLevel } from '@/types'
-import { createPatchObject } from '@/utils/api'
+import { createPatchObject } from '@/utils/api/createPatchObject'
 
 export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),

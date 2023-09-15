@@ -38,7 +38,7 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
           px: 'date',
           py: 'value',
           dy: -17,
-          frameAnchor: 'top-right',
+          frameAnchor: 'top-left',
           fontVariant: 'tabular-nums',
           text: (d) =>
             [
@@ -115,7 +115,7 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
 
 export function context(data: PlotData[], width: number): SVGSVGElement {
   const chart = Plot.plot({
-    height: 90,
+    height: 80,
     marks: [
       Plot.areaY(data, {
         x: 'date',

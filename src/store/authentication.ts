@@ -4,7 +4,7 @@ import { User } from '@/types'
 import { Subject } from 'rxjs'
 import Notification from './notifications'
 import { useResetStore } from '@/store/resetStore'
-import { createPatchObject } from '@/utils/api'
+import { createPatchObject } from '@/utils/api/createPatchObject'
 
 export const useAuthStore = defineStore({
   id: 'authentication',

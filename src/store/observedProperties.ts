@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
-import { createPatchObject } from '@/utils/api'
+import { createPatchObject } from '@/utils/api/createPatchObject'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
   state: () => ({
