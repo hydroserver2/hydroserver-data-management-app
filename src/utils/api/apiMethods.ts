@@ -1,13 +1,12 @@
 import { requestInterceptor } from '@/utils/api/requestInterceptor'
 import { responseInterceptor } from '@/utils/api/responseInterceptor'
-import { baseUrl } from '@/utils/api/baseUrl'
 import { sendToast } from '@/utils/api/notifications'
 import { createPatchObject } from '@/utils/api/createPatchObject'
 
 async function interceptedFetch(endpoint: string, options: any) {
   const opts = requestInterceptor(options)
   try {
-    const response = await fetch(`${baseUrl}${endpoint}`, opts)
+    const response = await fetch(endpoint, opts)
     return await responseInterceptor(response, interceptedFetch, endpoint, opts)
   } catch (error: any) {
     if (error instanceof TypeError) sendToast(error, endpoint, true)

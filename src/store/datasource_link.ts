@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
 
 interface LinkDataSourceForm {
@@ -28,11 +29,13 @@ export const useSiteLinkDataSourceFormStore = defineStore(
     },
     actions: {
       async fetchDatastreams(thingId: string, datastreamId: string) {
-        const response = await this.$http.get(`/data/datastreams/${thingId}`)
+        const response = await this.$http.get(
+          ENDPOINTS.DATASTREAMS.FOR_THING(thingId)
+        )
         return response.data.filter((ds: any) => ds.id === datastreamId)[0]
       },
       async fetchDataSources() {
-        const dataSources = await this.$http.get('/data/data-sources')
+        const dataSources = await this.$http.get(ENDPOINTS.DATA_SOURCES)
         this.dataSources = dataSources.data
       },
       fillForm(datastreamId: string, dataSourceId: string, column: any) {
@@ -57,7 +60,7 @@ export const useSiteLinkDataSourceFormStore = defineStore(
         }
 
         return await this.$http.patch(
-          `/data/datastreams/patch/${this.datastreamId}`,
+          `${ENDPOINTS.DATASTREAMS}/patch/${this.datastreamId}`,
           datastreamBody
         )
       },

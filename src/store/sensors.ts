@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Sensor } from '@/types'
 import { createPatchObject } from '@/utils/api/createPatchObject'
+import { ENDPOINTS } from '@/constants'
 
 export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),
@@ -12,7 +13,7 @@ export const useSensorStore = defineStore('sensor', {
     async fetchSensors() {
       if (this.sensors.length > 0) return
       try {
-        const { data } = await this.$http.get('/data/sensors')
+        const { data } = await this.$http.get(ENDPOINTS.SENSORS)
         this.sensors = data
         this.sortSensors()
         this.loaded = true
@@ -29,7 +30,7 @@ export const useSensorStore = defineStore('sensor', {
         if (Object.keys(patchData).length === 0) return
         console.log('sensor', patchData)
         const { data } = await this.$http.patch(
-          `/data/sensors/${sensor.id}`,
+          ENDPOINTS.SENSORS.ID(sensor.id),
           sensor
         )
         const index = this.sensors.findIndex((s) => s.id === sensor.id)
@@ -43,7 +44,7 @@ export const useSensorStore = defineStore('sensor', {
     },
     async createSensor(sensor: Sensor) {
       try {
-        const { data } = await this.$http.post('/data/sensors', sensor)
+        const { data } = await this.$http.post(ENDPOINTS.SENSORS, sensor)
         this.sensors.push(data)
         this.sortSensors()
         return data
@@ -53,7 +54,7 @@ export const useSensorStore = defineStore('sensor', {
     },
     async deleteSensor(id: string) {
       try {
-        const response = await this.$http.delete(`/data/sensors/${id}`)
+        const response = await this.$http.delete(ENDPOINTS.SENSORS.ID(id))
         if (response.status === 200 || response.status === 204) {
           this.sensors = this.sensors.filter((sensor) => sensor.id !== id)
           this.sortSensors()

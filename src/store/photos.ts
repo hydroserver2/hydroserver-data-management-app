@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Photo } from '@/types'
+import { ENDPOINTS } from '@/constants'
 
 export const usePhotosStore = defineStore({
   id: 'photos',
@@ -13,7 +14,9 @@ export const usePhotosStore = defineStore({
   actions: {
     async fetchPhotos(thingId: string) {
       try {
-        const response = await this.$http.get(`/data/photos/${thingId}`)
+        const response = await this.$http.get(
+          ENDPOINTS.PHOTOS.FOR_THING(thingId)
+        )
         if (response && response.status == 200) {
           this.photos[thingId] = response.data
         }
@@ -33,11 +36,15 @@ export const usePhotosStore = defineStore({
         newPhotos.forEach((photo) => data.append(`photos`, photo))
         photosToDelete.forEach((id) => data.append(`photosToDelete`, id))
 
-        const response = await this.$http.post(`/data/photos/${thingId}`, data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
+        const response = await this.$http.post(
+          ENDPOINTS.PHOTOS.FOR_THING(thingId),
+          data,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        )
 
         if (response && response.status == 200) {
           this.photos[thingId] = response.data

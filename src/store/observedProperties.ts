@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
 import { createPatchObject } from '@/utils/api/createPatchObject'
+import { ENDPOINTS } from '@/constants'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
   state: () => ({
@@ -22,7 +23,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async fetchObservedProperties() {
       if (this.observedProperties.length > 0) return
       try {
-        const { data } = await this.$http.get('/data/observed-properties')
+        const { data } = await this.$http.get(ENDPOINTS.OBSERVED_PROPERTIES)
         this.observedProperties = data
         this.sortObservedProperties()
         this.loaded = true
@@ -33,7 +34,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async createObservedProperty(observedProperty: ObservedProperty) {
       try {
         const { data } = await this.$http.post(
-          '/data/observed-properties',
+          ENDPOINTS.OBSERVED_PROPERTIES,
           observedProperty
         )
         this.observedProperties.push(data)
@@ -51,7 +52,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
         )
         if (Object.keys(patchData).length === 0) return
         await this.$http.patch(
-          `/data/observed-properties/${observedProperty.id}`,
+          ENDPOINTS.OBSERVED_PROPERTIES.ID(observedProperty.id),
           patchData
         )
         const index = this.observedProperties.findIndex(
@@ -68,7 +69,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async deleteObservedProperty(id: string) {
       try {
         const response = await this.$http.delete(
-          `/data/observed-properties/${id}`
+          ENDPOINTS.OBSERVED_PROPERTIES.ID(id)
         )
         if (response.status === 200 || response.status === 204) {
           this.observedProperties = this.observedProperties.filter(

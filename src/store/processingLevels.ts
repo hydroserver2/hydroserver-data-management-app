@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ProcessingLevel } from '@/types'
 import { createPatchObject } from '@/utils/api/createPatchObject'
+import { ENDPOINTS } from '@/constants'
 
 export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
@@ -19,7 +20,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async fetchProcessingLevels() {
       if (this.loaded) return
       try {
-        const { data } = await this.$http.get('/data/processing-levels')
+        const { data } = await this.$http.get(ENDPOINTS.PROCESSING_LEVELS)
         this.processingLevels = data
         this.sortProcessingLevels()
         this.loaded = true
@@ -33,7 +34,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
         if (Object.keys(patchData).length === 0) return
         console.log('PL', patchData)
         const { data } = await this.$http.patch(
-          `/data/processing-levels/${pl.id}`,
+          ENDPOINTS.PROCESSING_LEVELS.ID(pl.id),
           patchData
         )
         const index = this.processingLevels.findIndex((pl) => pl.id === pl.id)
@@ -46,7 +47,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async createProcessingLevel(processingLevel: ProcessingLevel) {
       try {
         const { data } = await this.$http.post(
-          '/data/processing-levels',
+          ENDPOINTS.PROCESSING_LEVELS,
           processingLevel
         )
         this.processingLevels.push(data)
@@ -59,7 +60,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async deleteProcessingLevel(id: string) {
       try {
         const response = await this.$http.delete(
-          `/data/processing-levels/${id}`
+          ENDPOINTS.PROCESSING_LEVELS.ID(id)
         )
         if (response.status === 200 || response.status === 204) {
           this.processingLevels = this.processingLevels.filter(

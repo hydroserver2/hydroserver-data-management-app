@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Unit } from '@/types'
 import { createPatchObject } from '@/utils/api/createPatchObject'
+import { ENDPOINTS } from '@/constants'
 
 export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
@@ -22,7 +23,7 @@ export const useUnitStore = defineStore('units', {
     async fetchUnits() {
       if (this.units.length > 0) return
       try {
-        const { data } = await this.$http.get('/data/units')
+        const { data } = await this.$http.get(ENDPOINTS.UNITS)
         this.units = data
         this.sortUnits()
         this.loaded = true
@@ -32,7 +33,7 @@ export const useUnitStore = defineStore('units', {
     },
     async createUnit(unit: Unit) {
       try {
-        const { data } = await this.$http.post('/data/units', unit)
+        const { data } = await this.$http.post(ENDPOINTS.UNITS, unit)
         this.units.push(data)
         this.sortUnits()
         return data
@@ -44,7 +45,7 @@ export const useUnitStore = defineStore('units', {
       try {
         const patchData = createPatchObject(this.getUnitById(unit.id), unit)
         if (Object.keys(patchData).length === 0) return
-        await this.$http.patch(`/data/units/${unit.id}`, patchData)
+        await this.$http.patch(ENDPOINTS.UNITS.ID(unit.id), patchData)
         const index = this.units.findIndex((u) => u.id === unit.id)
         if (index !== -1) {
           this.units[index] = unit
@@ -56,7 +57,7 @@ export const useUnitStore = defineStore('units', {
     },
     async deleteUnit(unitId: string) {
       try {
-        const response = await this.$http.delete(`/data/units/${unitId}`)
+        const response = await this.$http.delete(ENDPOINTS.UNITS.ID(unitId))
         if (response.status === 200 || response.status === 204) {
           this.units = this.units.filter((unit) => unit.id !== unitId)
           this.sortUnits()

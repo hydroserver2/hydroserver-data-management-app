@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Datastream } from '@/types'
 import { createPatchObject } from '@/utils/api/createPatchObject'
+import { ENDPOINTS } from '@/constants'
 
 export const useDatastreamStore = defineStore('datastreams', {
   state: () => ({
@@ -22,7 +23,7 @@ export const useDatastreamStore = defineStore('datastreams', {
   actions: {
     async fetchDatastreams() {
       try {
-        const { data } = await this.$http.get('/data/datastreams')
+        const { data } = await this.$http.get(ENDPOINTS.DATASTREAMS)
         let newDatastreams: Record<string, Datastream[]> = {}
         data.forEach((datastream: Datastream) => {
           if (!newDatastreams[datastream.thingId]) {
@@ -39,7 +40,9 @@ export const useDatastreamStore = defineStore('datastreams', {
     async fetchDatastreamsByThingId(id: string) {
       // if (this.datastreams[id]) return
       try {
-        const { data } = await this.$http.get(`/data/datastreams/${id}`)
+        const { data } = await this.$http.get(
+          ENDPOINTS.DATASTREAMS.FOR_THING(id)
+        )
         this.datastreams[id] = data
       } catch (error) {
         console.error(
@@ -55,7 +58,7 @@ export const useDatastreamStore = defineStore('datastreams', {
           datastream
         )
         const { data } = await this.$http.patch(
-          `/data/datastreams/patch/${datastream.id}`,
+          `${ENDPOINTS.DATASTREAMS}/patch/${datastream.id}`,
           patchData
         )
         const datastreamsForThing = this.datastreams[data.thingId]
@@ -68,7 +71,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     async createDatastream(newDatastream: Datastream) {
       try {
         const { data } = await this.$http.post(
-          `/data/datastreams/${newDatastream.thingId}`,
+          ENDPOINTS.DATASTREAMS.FOR_THING(newDatastream.thingId),
           newDatastream
         )
         if (!this.datastreams[newDatastream.thingId]) {
@@ -81,7 +84,9 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async deleteDatastream(id: string, thingId: string) {
       try {
-        const response = await this.$http.delete(`/data/datastreams/${id}/temp`)
+        const response = await this.$http.delete(
+          `${ENDPOINTS.DATASTREAMS}/${id}/temp`
+        )
         if (response && response.status == 200) {
           const datastreams = this.datastreams[thingId].filter(
             (datastream) => datastream.id !== id
@@ -118,7 +123,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     // TODO: This shouldn't be in the store
     async downloadDatastream(id: string) {
       try {
-        const { data } = await this.$http.get(`/data/datastreams/csv/${id}`)
+        const { data } = await this.$http.get(ENDPOINTS.DATASTREAMS.CSV(id))
         // Create a Blob from the received data
         const blob = new Blob([data], { type: 'text/csv' })
 
