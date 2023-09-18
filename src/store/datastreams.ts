@@ -115,6 +115,7 @@ export const useDatastreamStore = defineStore('datastreams', {
       }
       return null
     },
+    // TODO: This shouldn't be in the store
     async downloadDatastream(id: string) {
       try {
         const { data } = await this.$http.get(`/data/datastreams/csv/${id}`)

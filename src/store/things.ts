@@ -19,77 +19,107 @@ export const useThingStore = defineStore('things', {
   actions: {
     async fetchThings() {
       if (this.loaded) return
-      const data = await api.fetch('/data/things')
-      if (!data) return
-      this.$patch({
-        things: Object.fromEntries(
-          data.map((thing: Thing) => [thing.id, thing])
-        ),
-        loaded: true,
-      })
+      try {
+        const data = await api.fetch('/data/things')
+        this.$patch({
+          things: Object.fromEntries(
+            data.map((thing: Thing) => [thing.id, thing])
+          ),
+          loaded: true,
+        })
+      } catch (error) {
+        console.error('Error fetching things', error)
+      }
     },
     async fetchThingById(id: string) {
       if (this.things[id]) return
-      const data = await api.fetch(`/data/things/${id}`)
-      if (!data) return
-      this.$patch({ things: { ...this.things, [id]: data } })
+      try {
+        const data = await api.fetch(`/data/things/${id}`)
+        this.$patch({ things: { ...this.things, [id]: data } })
+      } catch (error) {
+        console.error('Error fetching thing by id', error)
+      }
     },
     async createThing(newThing: Thing) {
-      const data = await api.post(`/data/things`, newThing)
-      if (!data) return
-      console.log('back from backend', data)
-      this.$patch({ things: { ...this.things, [data.id]: data } })
-      return data
+      try {
+        const data = await api.post(`/data/things`, newThing)
+        console.log('back from backend', data)
+        this.$patch({ things: { ...this.things, [data.id]: data } })
+        return data
+      } catch (error) {
+        console.error('Error creating thing', error)
+      }
     },
     async updateThing(updatedThing: Thing) {
-      const data = await api.patch(
-        `/data/things/${updatedThing.id}`,
-        updatedThing,
-        this.things[updatedThing.id]
-      )
-      if (!data) return
-      this.things[updatedThing.id] = data as Thing
+      try {
+        const data = await api.patch(
+          `/data/things/${updatedThing.id}`,
+          updatedThing,
+          this.things[updatedThing.id]
+        )
+        this.things[updatedThing.id] = data as Thing
+      } catch (error) {
+        console.error('Error updating thing', error)
+      }
     },
     async updateThingPrivacy(id: string, thingPrivacy: boolean) {
-      const data = await api.patch(`/data/things/${id}/privacy`, {
-        isPrivate: thingPrivacy,
-      })
-      if (!data) return
-      this.things[id] = data as Thing
+      try {
+        const data = await api.patch(`/data/things/${id}/privacy`, {
+          isPrivate: thingPrivacy,
+        })
+        this.things[id] = data as Thing
+      } catch (error) {
+        console.error('Error fetching thing privacy', error)
+      }
     },
     async deleteThing(thingId: string) {
-      const data = await api.delete(`/data/things/${thingId}`)
-      if (!data) return
-      delete this.things[thingId]
+      try {
+        await api.delete(`/data/things/${thingId}`)
+        delete this.things[thingId]
+      } catch (error) {
+        console.error('Error deleting thing', error)
+      }
     },
     async addSecondaryOwner(thingId: string, email: string) {
-      const data = await api.patch(`/data/things/${thingId}/ownership`, {
-        email: email,
-        makeOwner: true,
-      })
-      if (!data) return
-      this.things[thingId] = data
+      try {
+        const data = await api.patch(`/data/things/${thingId}/ownership`, {
+          email: email,
+          makeOwner: true,
+        })
+        this.things[thingId] = data
+      } catch (error) {
+        console.error('Error adding secondary owner', error)
+      }
     },
     async transferPrimaryOwnership(thingId: string, email: string) {
-      const data = await api.patch(`/data/things/${thingId}/ownership`, {
-        email: email,
-        transferPrimary: true,
-      })
-      if (!data) return
-      this.things[thingId] = data
+      try {
+        const data = await api.patch(`/data/things/${thingId}/ownership`, {
+          email: email,
+          transferPrimary: true,
+        })
+        this.things[thingId] = data
+      } catch (error) {
+        console.error('Error transferring thing ownership', error)
+      }
     },
     async removeOwner(thingId: string, email: string) {
-      const data = await api.patch(`/data/things/${thingId}/ownership`, {
-        email: email,
-        removeOwner: true,
-      })
-      if (!data) return
-      this.things[thingId] = data
+      try {
+        const data = await api.patch(`/data/things/${thingId}/ownership`, {
+          email: email,
+          removeOwner: true,
+        })
+        this.things[thingId] = data
+      } catch (error) {
+        console.error('Error removing owner from thing', error)
+      }
     },
     async fetchPrimaryOwnerMetadataByThingId(id: string) {
-      const data = await api.fetch(`/data/things/${id}/metadata`)
-      if (!data) return
-      this.$patch({ POMetadata: { ...this.POMetadata, [id]: data } })
+      try {
+        const data = await api.fetch(`/data/things/${id}/metadata`)
+        this.$patch({ POMetadata: { ...this.POMetadata, [id]: data } })
+      } catch (error) {
+        console.error('Error fetching primary owner metadata', error)
+      }
     },
   },
 })

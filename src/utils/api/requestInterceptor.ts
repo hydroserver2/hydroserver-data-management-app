@@ -8,9 +8,17 @@ export function requestInterceptor(options: any) {
     headers['Authorization'] = `Bearer ${authStore.access_token}`
   }
 
+  let body: string | undefined = undefined
+  if (options.body !== undefined) {
+    body =
+      typeof options.body === 'string'
+        ? options.body
+        : JSON.stringify(options.body)
+  }
+  // TODO: Test the order here to make sure we're not overriding
   return {
     ...options,
     headers: headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
+    body: body,
   }
 }

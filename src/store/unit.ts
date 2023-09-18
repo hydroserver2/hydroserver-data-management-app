@@ -65,6 +65,7 @@ export const useUnitStore = defineStore('units', {
         console.error('Error deleting unit', error)
       }
     },
+    // TODO: This should be a getter
     getUnitById(id: string) {
       const unit = this.units.find((u) => u.id.toString() === id.toString())
       if (!unit) throw new Error(`Unit with id ${id} not found`)
