@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
-import { createPatchObject } from '@/utils/api/createPatchObject'
+import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
@@ -23,7 +23,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async fetchObservedProperties() {
       if (this.observedProperties.length > 0) return
       try {
-        const { data } = await this.$http.get(ENDPOINTS.OBSERVED_PROPERTIES)
+        const data = await api.fetch(ENDPOINTS.OBSERVED_PROPERTIES)
         this.observedProperties = data
         this.sortObservedProperties()
         this.loaded = true
@@ -33,7 +33,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async createObservedProperty(observedProperty: ObservedProperty) {
       try {
-        const { data } = await this.$http.post(
+        const data = await api.post(
           ENDPOINTS.OBSERVED_PROPERTIES,
           observedProperty
         )
@@ -46,14 +46,10 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async updateObservedProperty(observedProperty: ObservedProperty) {
       try {
-        const patchData = createPatchObject(
-          this.getById(observedProperty.id),
-          observedProperty
-        )
-        if (Object.keys(patchData).length === 0) return
-        await this.$http.patch(
+        await api.patch(
           ENDPOINTS.OBSERVED_PROPERTIES.ID(observedProperty.id),
-          patchData
+          observedProperty,
+          this.getById(observedProperty.id)
         )
         const index = this.observedProperties.findIndex(
           (op) => op.id === observedProperty.id
@@ -68,19 +64,11 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async deleteObservedProperty(id: string) {
       try {
-        const response = await this.$http.delete(
-          ENDPOINTS.OBSERVED_PROPERTIES.ID(id)
+        await api.delete(ENDPOINTS.OBSERVED_PROPERTIES.ID(id))
+        this.observedProperties = this.observedProperties.filter(
+          (op) => op.id !== id
         )
-        if (response.status === 200 || response.status === 204) {
-          this.observedProperties = this.observedProperties.filter(
-            (op) => op.id !== id
-          )
-          this.sortObservedProperties()
-        } else
-          console.error(
-            'Error deleting observed property from server',
-            response
-          )
+        this.sortObservedProperties()
       } catch (error) {
         console.error('Error deleting observed property', error)
       }
