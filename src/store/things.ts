@@ -44,7 +44,6 @@ export const useThingStore = defineStore('things', {
     async createThing(newThing: Thing) {
       try {
         const data = await api.post(ENDPOINTS.THINGS, newThing)
-        console.log('back from backend', data)
         this.$patch({ things: { ...this.things, [data.id]: data } })
         return data
       } catch (error) {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Sensor } from '@/types'
-import { createPatchObject } from '@/utils/api/createPatchObject'
+import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useSensorStore = defineStore('sensor', {
@@ -13,7 +13,7 @@ export const useSensorStore = defineStore('sensor', {
     async fetchSensors() {
       if (this.sensors.length > 0) return
       try {
-        const { data } = await this.$http.get(ENDPOINTS.SENSORS)
+        const data = await api.fetch(ENDPOINTS.SENSORS)
         this.sensors = data
         this.sortSensors()
         this.loaded = true
@@ -23,20 +23,13 @@ export const useSensorStore = defineStore('sensor', {
     },
     async updateSensor(sensor: Sensor) {
       try {
-        const patchData = createPatchObject(
-          this.getSensorById(sensor.id),
-          sensor
-        )
-        if (Object.keys(patchData).length === 0) return
-        console.log('sensor', patchData)
-        const { data } = await this.$http.patch(
+        const data = await api.patch(
           ENDPOINTS.SENSORS.ID(sensor.id),
-          sensor
+          sensor,
+          this.getSensorById(sensor.id)
         )
         const index = this.sensors.findIndex((s) => s.id === sensor.id)
-        if (index !== -1) {
-          this.sensors[index] = data
-        }
+        if (index !== -1) this.sensors[index] = data
         this.sortSensors()
       } catch (error) {
         console.error('Error updating sensor', error)
@@ -44,7 +37,7 @@ export const useSensorStore = defineStore('sensor', {
     },
     async createSensor(sensor: Sensor) {
       try {
-        const { data } = await this.$http.post(ENDPOINTS.SENSORS, sensor)
+        const data = await api.post(ENDPOINTS.SENSORS, sensor)
         this.sensors.push(data)
         this.sortSensors()
         return data
@@ -54,11 +47,9 @@ export const useSensorStore = defineStore('sensor', {
     },
     async deleteSensor(id: string) {
       try {
-        const response = await this.$http.delete(ENDPOINTS.SENSORS.ID(id))
-        if (response.status === 200 || response.status === 204) {
-          this.sensors = this.sensors.filter((sensor) => sensor.id !== id)
-          this.sortSensors()
-        } else console.error('Error deleting sensor from server', response)
+        await api.delete(ENDPOINTS.SENSORS.ID(id))
+        this.sensors = this.sensors.filter((sensor) => sensor.id !== id)
+        this.sortSensors()
       } catch (error) {
         console.error('Error deleting sensor', error)
       }
