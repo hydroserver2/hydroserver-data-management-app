@@ -10,10 +10,10 @@ export async function responseInterceptor(
   if (response.status === 401 && !options._retry) {
     return await handle401(method, endpoint, options)
   } else if (response.ok) {
-    sendToast(response, endpoint)
+    sendToast(response, endpoint, options.method)
     return await response.json()
   } else {
-    sendToast(response, endpoint, true)
+    sendToast(response, endpoint, options.method)
     throw new Error('API call failed')
   }
 }

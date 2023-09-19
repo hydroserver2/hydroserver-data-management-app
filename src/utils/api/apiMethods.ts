@@ -9,7 +9,7 @@ async function interceptedFetch(endpoint: string, options: any) {
     const response = await fetch(endpoint, opts)
     return await responseInterceptor(response, interceptedFetch, endpoint, opts)
   } catch (error: any) {
-    if (error instanceof TypeError) sendToast(error, endpoint, true)
+    if (error instanceof TypeError) sendToast(error, endpoint, options.method)
     throw error
   }
 }
