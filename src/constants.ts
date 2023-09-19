@@ -70,6 +70,6 @@ export const ENDPOINTS = {
     ID: FOR_ID(THINGS_BASE),
     METADATA: (id: string) => `${THINGS_BASE}/${id}/metadata`,
     OWNERSHIP: (id: string) => `${THINGS_BASE}/${id}/ownership`,
-    PRIVACY: (id: string) => `${THINGS_BASE}/${id}/ownership`,
+    PRIVACY: (id: string) => `${THINGS_BASE}/${id}/privacy`,
   }),
 }
