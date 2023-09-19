@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Datastream } from '@/types'
-import { createPatchObject } from '@/utils/api/createPatchObject'
+import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useDatastreamStore = defineStore('datastreams', {
@@ -23,7 +23,7 @@ export const useDatastreamStore = defineStore('datastreams', {
   actions: {
     async fetchDatastreams() {
       try {
-        const { data } = await this.$http.get(ENDPOINTS.DATASTREAMS)
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS)
         let newDatastreams: Record<string, Datastream[]> = {}
         data.forEach((datastream: Datastream) => {
           if (!newDatastreams[datastream.thingId]) {
@@ -40,26 +40,18 @@ export const useDatastreamStore = defineStore('datastreams', {
     async fetchDatastreamsByThingId(id: string) {
       // if (this.datastreams[id]) return
       try {
-        const { data } = await this.$http.get(
-          ENDPOINTS.DATASTREAMS.FOR_THING(id)
-        )
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
         this.datastreams[id] = data
       } catch (error) {
-        console.error(
-          `Error fetching datastreams for thing with id ${id} from DB`,
-          error
-        )
+        console.error(`Error fetching datastreams by thingID`, error)
       }
     },
     async updateDatastream(datastream: Datastream) {
       try {
-        const patchData = createPatchObject(
-          this.getDatastreamById(datastream.id),
-          datastream
-        )
-        const { data } = await this.$http.patch(
+        const data = await api.patch(
           `${ENDPOINTS.DATASTREAMS}/patch/${datastream.id}`,
-          patchData
+          datastream,
+          this.getDatastreamById(datastream.id)
         )
         const datastreamsForThing = this.datastreams[data.thingId]
         const index = datastreamsForThing.findIndex((ds) => ds.id === data.id)
@@ -70,7 +62,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async createDatastream(newDatastream: Datastream) {
       try {
-        const { data } = await this.$http.post(
+        const data = await api.post(
           ENDPOINTS.DATASTREAMS.FOR_THING(newDatastream.thingId),
           newDatastream
         )
@@ -84,17 +76,14 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async deleteDatastream(id: string, thingId: string) {
       try {
-        const response = await this.$http.delete(
-          `${ENDPOINTS.DATASTREAMS}/${id}/temp`
+        await api.delete(`${ENDPOINTS.DATASTREAMS}/${id}/temp`)
+
+        const datastreams = this.datastreams[thingId].filter(
+          (datastream) => datastream.id !== id
         )
-        if (response && response.status == 200) {
-          const datastreams = this.datastreams[thingId].filter(
-            (datastream) => datastream.id !== id
-          )
-          this.$patch({
-            datastreams: { ...this.datastreams, [thingId]: datastreams },
-          })
-        }
+        this.$patch({
+          datastreams: { ...this.datastreams, [thingId]: datastreams },
+        })
       } catch (error) {
         console.error(`Error deleting datastream with id ${id}`, error)
       }
@@ -123,7 +112,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     // TODO: This shouldn't be in the store
     async downloadDatastream(id: string) {
       try {
-        const { data } = await this.$http.get(ENDPOINTS.DATASTREAMS.CSV(id))
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS.CSV(id))
         // Create a Blob from the received data
         const blob = new Blob([data], { type: 'text/csv' })
 

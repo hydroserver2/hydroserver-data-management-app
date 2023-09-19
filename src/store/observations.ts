@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Observation } from '@/types'
+import { api } from '@/utils/api/apiMethods'
 
 export const useObservationStore = defineStore('observations', {
   state: () => ({
@@ -10,7 +11,7 @@ export const useObservationStore = defineStore('observations', {
     async fetchObservations() {
       if (this.loaded) return
       try {
-        const { data } = await this.$http.get('/data/observations')
+        const { data } = await api.fetch('/data/observations')
         const observationsDictionary = data.reduce(
           (acc: Record<string, Observation>, observation: Observation) => {
             acc[observation.id] = observation
