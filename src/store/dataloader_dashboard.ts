@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
+import { api } from '@/utils/api/apiMethods'
 
 interface DataLoader {
   id: string
@@ -30,7 +31,7 @@ export const useDataLoaderDashboardStore = defineStore(
     },
     actions: {
       async fetchDataLoaders() {
-        const dataLoaders = await this.$http.get(ENDPOINTS.DATA_LOADERS)
+        const dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
         this.dataLoaders = dataLoaders.data.reduce(
           (dataLoaders: any, dataLoader: any) => {
             dataLoaders[dataLoader['id']] = {
@@ -44,7 +45,7 @@ export const useDataLoaderDashboardStore = defineStore(
         )
       },
       async deleteDataLoader(dataLoaderId: string) {
-        await this.$http.delete(ENDPOINTS.DATA_LOADERS.ID(dataLoaderId))
+        await api.delete(ENDPOINTS.DATA_LOADERS.ID(dataLoaderId))
       },
     },
   }

@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
+import { api } from '@/utils/api/apiMethods'
 
 interface DatastreamDetail {
   id: string
@@ -39,7 +40,7 @@ export const useDataSourceDetailStore = defineStore(
     actions: {
       async fetchDataSource() {
         // TODO: Are we sure this id will always be defined?
-        let response = await this.$http.get(ENDPOINTS.DATA_SOURCES.ID(this.id!))
+        let response = await api.fetch(ENDPOINTS.DATA_SOURCES.ID(this.id!))
         let dataSource = response.data
 
         let now = new Date()

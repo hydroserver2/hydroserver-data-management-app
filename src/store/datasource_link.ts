@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
+import { api } from '@/utils/api/apiMethods'
 
 interface LinkDataSourceForm {
   formLoaded: boolean
@@ -29,13 +30,13 @@ export const useSiteLinkDataSourceFormStore = defineStore(
     },
     actions: {
       async fetchDatastreams(thingId: string, datastreamId: string) {
-        const response = await this.$http.get(
+        const response = await api.fetch(
           ENDPOINTS.DATASTREAMS.FOR_THING(thingId)
         )
         return response.data.filter((ds: any) => ds.id === datastreamId)[0]
       },
       async fetchDataSources() {
-        const dataSources = await this.$http.get(ENDPOINTS.DATA_SOURCES)
+        const dataSources = await api.fetch(ENDPOINTS.DATA_SOURCES)
         this.dataSources = dataSources.data
       },
       fillForm(datastreamId: string, dataSourceId: string, column: any) {
@@ -59,7 +60,7 @@ export const useSiteLinkDataSourceFormStore = defineStore(
           data_source_column: this.selectedColumn,
         }
 
-        return await this.$http.patch(
+        return await api.patch(
           `${ENDPOINTS.DATASTREAMS}/patch/${this.datastreamId}`,
           datastreamBody
         )

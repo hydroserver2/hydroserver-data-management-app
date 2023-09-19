@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
+import { api } from '@/utils/api/apiMethods'
 
 interface DataSource {
   id: string
@@ -39,7 +40,7 @@ export const useDataSourceDashboardStore = defineStore(
     },
     actions: {
       async fetchDataSources() {
-        const dataStreams = await this.$http.get(ENDPOINTS.DATA_SOURCES)
+        const dataStreams = await api.fetch(ENDPOINTS.DATA_SOURCES)
         this.dataSources = dataStreams.data.reduce(
           (dataSources: any, dataSource: any) => {
             let status
@@ -125,10 +126,10 @@ export const useDataSourceDashboardStore = defineStore(
       },
       async updateDataSourceStatus(dataSourceId: string, paused: boolean) {
         const body = { schedule: { paused: !paused } }
-        await this.$http.patch(ENDPOINTS.DATA_SOURCES.ID(dataSourceId), body)
+        await api.patch(ENDPOINTS.DATA_SOURCES.ID(dataSourceId), body)
       },
       async deleteDataSource(dataSourceId: string) {
-        await this.$http.delete(ENDPOINTS.DATA_SOURCES.ID(dataSourceId))
+        await api.delete(ENDPOINTS.DATA_SOURCES.ID(dataSourceId))
       },
     },
   }

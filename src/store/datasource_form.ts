@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
+import { api } from '@/utils/api/apiMethods'
 
 type scheduleTypeValues = 'interval' | 'crontab'
 type intervalUnitsValues = 'minutes' | 'hours' | 'days'
@@ -47,7 +48,7 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
   actions: {
     async fetchDataSource() {
       if (this.dataSourceId) {
-        const dataSource = await this.$http.get(
+        const dataSource = await api.fetch(
           ENDPOINTS.DATA_SOURCES.ID(this.dataSourceId)
         )
         this.dataSource = dataSource.data
@@ -56,7 +57,7 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
       }
     },
     async fetchDataLoaders() {
-      const dataLoaders = await this.$http.get(ENDPOINTS.DATA_LOADERS)
+      const dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
       this.dataLoaders = dataLoaders.data
     },
     async saveDataSource() {
@@ -95,12 +96,12 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
       let response = null
 
       if (this.dataSourceId) {
-        response = await this.$http.patch(
+        response = await api.patch(
           ENDPOINTS.DATA_SOURCES.ID(this.dataSourceId),
           dataSourceBody
         )
       } else {
-        response = await this.$http.post(ENDPOINTS.DATA_SOURCES, dataSourceBody)
+        response = await api.post(ENDPOINTS.DATA_SOURCES, dataSourceBody)
       }
       return response?.status === 201 || response?.status === 204
     },

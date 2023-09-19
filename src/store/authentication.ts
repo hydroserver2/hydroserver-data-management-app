@@ -53,20 +53,6 @@ export const useAuthStore = defineStore({
         console.error('Error logging out', error)
       }
     },
-    // TODO: Can be deleted after axios is replaced with fetch api
-    async refreshAccessToken() {
-      try {
-        const { data } = await this.$http.post(ENDPOINTS.ACCOUNT.JWT_REFRESH, {
-          refresh: this.refresh_token,
-        })
-        this.access_token = data.access
-        this.refresh_token = data.refresh
-        console.log('Access token refreshed')
-      } catch (error) {
-        console.error('Error refreshing access token:', error)
-        await this.logout()
-      }
-    },
     async createUser(user: User) {
       try {
         const data = await api.post(ENDPOINTS.USER, user)
