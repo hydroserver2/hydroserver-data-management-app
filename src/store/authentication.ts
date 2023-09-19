@@ -29,8 +29,6 @@ export const useAuthStore = defineStore({
     async login(email: string, password: string) {
       try {
         this.resetState()
-        // '/account/jwt/pair'
-        console.log(ENDPOINTS.ACCOUNT.JWT_PAIR)
         const tokens = await api.post(ENDPOINTS.ACCOUNT.JWT_PAIR, {
           email: email,
           password: password,
