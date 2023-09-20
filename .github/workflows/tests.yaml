@@ -1,0 +1,27 @@
+name: Run Unit Tests
+run-name: ${{ github.actor }} is running unit tests on ${{ github.ref }}
+
+on: [push, pull_request]
+
+jobs:
+  Run-Tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
