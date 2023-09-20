@@ -2,9 +2,12 @@ name: hs-webapp Dev AWS S3 Deployment
 run-name: ${{ github.actor }} is deploying hs-webapp Dev to AWS S3 on ${{ github.ref }}
 
 on:
-  push:
+  workflow_run:
+    workflows: ['Run Unit Tests']
     branches:
       - dev
+    types:
+      - completed
 
 jobs:
   deploy:
