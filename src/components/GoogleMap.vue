@@ -5,9 +5,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Thing } from '@/types'
-import { loadMap } from '@/composables/loadMap'
-import { useMarkers } from '@/composables/useMarkers'
-import { useSingleMarkerMode } from '@/composables/mapUtils'
+import { loadMap } from '@/utils/googleMaps/loadMap'
+import { loadMarkers } from '@/utils/googleMaps/markers'
+import { useSingleMarkerMode } from '@/utils/googleMaps/mapUtils'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -22,8 +22,6 @@ const emit = defineEmits(['location-clicked'])
 let map: google.maps.Map | null = null
 let markers: google.maps.Marker[] = []
 const mapContainer = ref<HTMLElement>()
-
-const { loadMarkers } = useMarkers()
 
 onMounted(async () => {
   if (mapContainer && mapContainer.value) {
