@@ -80,10 +80,10 @@
     </v-row>
     <v-row>
       <v-col class="v-col-xs-12 v-col-sm-6">
-        <v-switch
+        <v-checkbox
           v-model="store.timestampUseTimezoneOffset"
           label="Append Timezone Offset?"
-        ></v-switch>
+        ></v-checkbox>
       </v-col>
       <v-col class="v-col-xs-12 v-col-sm-6">
         <v-autocomplete

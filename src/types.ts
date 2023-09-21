@@ -1,8 +1,8 @@
 export interface Owner {
-  firstname: string
-  lastname: string
-  organization: string
-  is_primary_owner: boolean
+  firstName: string
+  lastName: string
+  organizationName: string
+  isPrimaryOwner: boolean
   email: string
 }
 
@@ -10,116 +10,121 @@ export class Thing {
   id: string
   name: string
   owners: Owner[]
-  site_type: string
-  sampling_feature_code: string
-  is_private: boolean
-  latitude: number
-  longitude: number
-  elevation: number
-  owns_thing: boolean
-  follows_thing: boolean
+  siteType: string
+  samplingFeatureCode: string
+  isPrivate: boolean
+  latitude?: number | ''
+  longitude?: number | ''
+  elevation_m?: number | ''
+  elevationDatum: string
+  ownsThing: boolean
+  followsThing: boolean
   description: string
-  sampling_feature_type: string
+  samplingFeatureType: string
   state: string
   county: string
-  is_primary_owner: boolean
-  followers: number
-  data_disclaimer: string
-  include_data_disclaimer: boolean
+  isPrimaryOwner: boolean
+  dataDisclaimer: string
 
   constructor() {
     this.id = ''
     this.name = ''
     this.owners = []
-    this.site_type = ''
-    this.sampling_feature_code = ''
-    this.is_private = false
-    this.latitude = 0
-    this.longitude = 0
-    this.elevation = 0
-    this.owns_thing = false
-    this.follows_thing = false
+    this.siteType = ''
+    this.samplingFeatureCode = ''
+    this.isPrivate = false
+    this.elevationDatum = 'WGS84'
+    this.ownsThing = false
+    this.followsThing = false
     this.description = ''
-    this.sampling_feature_type = 'Site'
+    this.samplingFeatureType = 'Site'
     this.state = ''
     this.county = ''
-    this.is_primary_owner = false
-    this.followers = 0
-    this.data_disclaimer = ''
-    this.include_data_disclaimer = false
+    this.isPrimaryOwner = false
+    this.dataDisclaimer = ''
   }
 }
 
 export class Datastream {
   id: string
-  thing_id: string
-  observation_type: string
-  result_type: string
-  status: string
-  sampled_medium: string
-  no_data_value: number
-  aggregation_statistic: string
+  name: string
+  description: string
+  thingId: string
+  observationType: string
+  resultType?: string
+  status?: string
+  sampledMedium: string
+  noDataValue: number
+  aggregationStatistic: string
   observations: Observation[]
-  most_recent_observation: any
-  unit_id: string
-  unit_name: string
-  unit_symbol: string
-  observed_property_id: string
-  observed_property_name: string
-  method_id: string
-  method_name: string
-  processing_level_id: string
-  processing_level_name: string
-  is_visible: boolean
-  is_primary_owner: boolean
-  is_stale?: boolean
+  mostRecentObservation: any
+  unitId: string
+  unitName: string
+  unitSymbol: string
+  observedPropertyId: string
+  observedPropertyName: string
+  sensorId: string
+  sensorName: string
+  processingLevelId: string
+  processingLevelName: string
+  isVisible?: boolean
+  isPrimaryOwner: boolean
+  isStale?: boolean
+  phenomenonBeginTime?: string | null
+  phenomenonEndTime?: string | null
+  intendedTimeSpacing?: number
+  intendedTimeSpacingUnitsId?: string
+  timeAggregationInterval: number | null
+  timeAggregationIntervalUnitsId: string
 
   constructor(thingId: string) {
     this.id = ''
-    this.thing_id = thingId
-    this.observation_type = 'OM_Measurement'
-    this.result_type = 'Time Series Coverage'
-    this.status = ''
-    this.sampled_medium = ''
-    this.no_data_value = -9999
-    this.aggregation_statistic = ''
+    this.name = 'Datastream'
+    this.description = 'Site Datastream'
+    this.thingId = thingId
+    this.observationType = 'OM_Measurement'
+    this.resultType = 'Time Series Coverage'
+    this.sampledMedium = ''
+    this.noDataValue = -9999
+    this.aggregationStatistic = ''
     this.observations = []
-    this.most_recent_observation = ''
-    this.unit_id = ''
-    this.unit_name = ''
-    this.unit_symbol = ''
-    this.observed_property_id = ''
-    this.observed_property_name = ''
-    this.method_id = ''
-    this.method_name = ''
-    this.processing_level_id = ''
-    this.processing_level_name = ''
-    this.is_visible = true
-    this.is_primary_owner = false
+    this.mostRecentObservation = ''
+    this.unitId = ''
+    this.unitName = ''
+    this.unitSymbol = ''
+    this.observedPropertyId = ''
+    this.observedPropertyName = ''
+    this.sensorId = ''
+    this.sensorName = ''
+    this.processingLevelId = ''
+    this.processingLevelName = ''
+    this.isPrimaryOwner = false
+    this.timeAggregationInterval = null
+    this.timeAggregationIntervalUnitsId = ''
   }
 }
 
 export interface Observation {
   id: string
   result: string
-  result_time: string
+  phenomenonTime: string
 }
 
 export class Unit {
   id: string
-  person_id: string
+  personId: string
   name: string
   symbol: string
   definition: string
-  unit_type: string
+  type: string
 
   constructor() {
     this.id = ''
-    this.person_id = ''
+    this.personId = ''
     this.name = ''
     this.symbol = ''
     this.definition = ''
-    this.unit_type = ''
+    this.type = ''
   }
 }
 
@@ -129,11 +134,11 @@ export class Sensor {
   description: string
   manufacturer: string
   model: string
-  method_type: string
-  method_code: string
-  method_link: string
-  encoding_type: string
-  model_url: string
+  methodType: string
+  methodCode: string
+  methodLink: string
+  encodingType: string
+  modelLink: string
 
   constructor() {
     this.id = ''
@@ -141,47 +146,63 @@ export class Sensor {
     this.description = ''
     this.manufacturer = ''
     this.model = ''
-    this.method_type = 'Instrument Deployment'
-    this.method_code = ''
-    this.method_link = ''
-    this.encoding_type = 'application/json'
-    this.model_url = ''
+    this.methodType = 'Instrument Deployment'
+    this.methodCode = ''
+    this.methodLink = ''
+    this.encodingType = 'application/json'
+    this.modelLink = ''
   }
 }
 
 export class ObservedProperty {
   id: string
   name: string
-  person_id: string
+  personId: string
   definition: string
   description: string
-  variable_type: string
-  variable_code: string
+  type: string
+  code: string
 
   constructor() {
     this.id = ''
     this.name = ''
-    this.person_id = ''
+    this.personId = ''
     this.definition = ''
     this.description = ''
-    this.variable_type = 'Hydrology'
-    this.variable_code = ''
+    this.type = 'Hydrology'
+    this.code = ''
   }
 }
 
 export class ProcessingLevel {
   id: string
-  person_id: string
-  processing_level_code: string
+  personId: string
+  code: string
   definition: string
   explanation: string
 
   constructor() {
     this.id = ''
-    this.person_id = ''
-    this.processing_level_code = ''
+    this.personId = ''
+    this.code = ''
     this.definition = ''
     this.explanation = ''
+  }
+}
+
+export class Organization {
+  name: string
+  code: string
+  type: string
+  description?: string
+  link?: string
+
+  constructor() {
+    this.name = ''
+    this.code = ''
+    this.type = ''
+    this.description = ''
+    this.link = ''
   }
 }
 
@@ -189,28 +210,27 @@ export class User {
   id: string
   email: string
   password: string
-  first_name: string
-  middle_name: string
-  last_name: string
+  firstName: string
+  middleName: string
+  lastName: string
   phone: string
   address: string
-  organization: string
+  organization?: Organization | null
   type: string
-  is_verified: boolean
+  isVerified: boolean
   link: string
 
   constructor() {
     this.id = ''
     this.email = ''
     this.password = ''
-    this.first_name = ''
-    this.middle_name = ''
-    this.last_name = ''
+    this.firstName = ''
+    this.middleName = ''
+    this.lastName = ''
     this.phone = ''
     this.address = ''
-    this.organization = ''
     this.type = ''
-    this.is_verified = false
+    this.isVerified = false
     this.link = ''
   }
 }
@@ -225,5 +245,6 @@ export interface ThingMetadata {
 export interface Photo {
   id: string
   thingId: string
-  url: string
+  filePath: string
+  link: string
 }

@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="datastream && loaded">
+  <v-container>
     <v-row>
       <v-col>
         <h5 class="text-h5">
@@ -31,6 +31,7 @@
     </v-row>
 
     <v-form
+      v-if="datastream"
       @submit.prevent="uploadDatastream"
       ref="myForm"
       v-model="valid"
@@ -39,8 +40,8 @@
       <v-row>
         <v-col cols="12" md="6">
           <v-autocomplete
-            :key="datastream.method_id"
-            v-model="datastream.method_id"
+            :key="datastream.sensorId"
+            v-model="datastream.sensorId"
             label="Select sensor *"
             :items="
               isPrimaryOwner
@@ -62,14 +63,14 @@
             width="60rem"
           >
             <sensor-modal
-              @uploaded="datastream.method_id = $event"
+              @uploaded="datastream.sensorId = $event"
               @close="showSensorModal = false"
             ></sensor-modal>
           </v-dialog>
         </v-col>
         <v-col cols="12" md="6">
           <v-autocomplete
-            v-model="datastream.observed_property_id"
+            v-model="datastream.observedPropertyId"
             label="Select observed property *"
             :items="
               isPrimaryOwner
@@ -84,7 +85,7 @@
           ></v-autocomplete>
           <v-dialog v-if="isPrimaryOwner" v-model="showOPModal" width="60rem">
             <ObservedPropertyModal
-              @uploaded="datastream.observed_property_id = $event"
+              @uploaded="datastream.observedPropertyId = $event"
               @close="showOPModal = false"
             ></ObservedPropertyModal>
           </v-dialog>
@@ -94,7 +95,7 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-autocomplete
-            v-model="datastream.unit_id"
+            v-model="datastream.unitId"
             label="Select unit *"
             :items="
               isPrimaryOwner
@@ -112,7 +113,7 @@
           >
           <v-dialog v-if="isPrimaryOwner" v-model="showUnitModal" width="60rem">
             <UnitModal
-              @uploaded="datastream.unit_id = $event"
+              @uploaded="datastream.unitId = $event"
               @close="showUnitModal = false"
               >Add New</UnitModal
             >
@@ -120,7 +121,7 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-autocomplete
-            v-model="datastream.processing_level_id"
+            v-model="datastream.processingLevelId"
             label="Select processing level *"
             :items="formattedProcessingLevels"
             item-title="title"
@@ -134,7 +135,7 @@
           >
           <v-dialog v-if="isPrimaryOwner" v-model="showPLModal" width="60rem">
             <ProcessingLevelModal
-              @uploaded="datastream.processing_level_id = $event"
+              @uploaded="datastream.processingLevelId = $event"
               @close="showPLModal = false"
               >Add New</ProcessingLevelModal
             >
@@ -155,8 +156,9 @@
         <v-col cols="4">
           <v-combobox
             :items="mediumTypes"
-            v-model="datastream.sampled_medium"
-            label="Medium"
+            v-model="datastream.sampledMedium"
+            label="Medium *"
+            :rules="rules.required"
           />
         </v-col>
         <v-col cols="4">
@@ -169,19 +171,92 @@
         <v-col cols="4">
           <v-combobox
             :items="aggregationTypes"
-            v-model="datastream.aggregation_statistic"
-            label="Aggregation Statistic"
+            v-model="datastream.aggregationStatistic"
+            label="Aggregation Statistic *"
+            :rules="rules.required"
           />
         </v-col>
       </v-row>
       <v-row>
         <v-col>
           <v-text-field
-            v-model="datastream.no_data_value"
+            v-model="datastream.noDataValue"
             label="No data value"
-            :rules="datastream.no_data_value ? rules.maxLength(255) : []"
+            :rules="datastream.noDataValue ? rules.maxLength(255) : []"
             type="number"
           ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="6">
+          <v-text-field
+            v-model="datastream.timeAggregationInterval"
+            label="Time Aggregation Interval *"
+            :rules="rules.requiredNumber"
+            type="number"
+          ></v-text-field>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <v-autocomplete
+            v-model="datastream.timeAggregationIntervalUnitsId"
+            label="Select time aggregation unit *"
+            :items="unitStore.timeUnits"
+            item-title="name"
+            item-value="id"
+            :rules="rules.required"
+            no-data-text="No available units"
+            class="pb-1"
+          ></v-autocomplete>
+          <v-btn-add v-if="isPrimaryOwner" @click="showTimeAggUnitModal = true"
+            >Add New</v-btn-add
+          >
+          <v-dialog
+            v-if="isPrimaryOwner"
+            v-model="showTimeAggUnitModal"
+            width="60rem"
+          >
+            <UnitModal
+              @uploaded="datastream.timeAggregationIntervalUnitsId = $event"
+              @close="showTimeAggUnitModal = false"
+              >Add New</UnitModal
+            >
+          </v-dialog>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="6">
+          <v-text-field
+            v-model="datastream.intendedTimeSpacing"
+            label="Intended Time Spacing"
+            type="number"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-autocomplete
+            v-model="datastream.intendedTimeSpacingUnitsId"
+            label="Select intended time spacing unit"
+            :items="unitStore.timeUnits"
+            item-title="name"
+            item-value="id"
+            no-data-text="No available units"
+            class="pb-1"
+            clearable
+          ></v-autocomplete>
+          <v-btn-add v-if="isPrimaryOwner" @click="showIntendedTimeModal = true"
+            >Add New</v-btn-add
+          >
+          <v-dialog
+            v-if="isPrimaryOwner"
+            v-model="showIntendedTimeModal"
+            width="60rem"
+          >
+            <UnitModal
+              @uploaded="datastream.intendedTimeSpacingUnitsId = $event"
+              @close="showIntendedTimeModal = false"
+              >Add New</UnitModal
+            >
+          </v-dialog>
         </v-col>
       </v-row>
       <v-row>
@@ -219,7 +294,7 @@ import { Datastream } from '@/types'
 import { useThingStore } from '@/store/things'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
-import { useThing } from '@/composables/useThing'
+import { useThingOwnership } from '@/composables/useThingOwnership'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import {
   useSensors,
@@ -238,15 +313,16 @@ const thingStore = useThingStore()
 const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
-const loaded = ref(false)
 const selectedDatastreamID = ref(datastreamId)
 
-const { isPrimaryOwner } = useThing(thingId)
+const { isPrimaryOwner } = useThingOwnership(thingId)
 const { isCreateEditModalOpen: showSensorModal } = useSensors()
 const { isCreateEditModalOpen: showUnitModal } = useUnits()
 const { isCreateEditModalOpen: showPLModal } = useProcessingLevels()
 const { isCreateEditModalOpen: showOPModal } = useObservedProperties()
 
+const showTimeAggUnitModal = ref(false)
+const showIntendedTimeModal = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
 
@@ -255,9 +331,7 @@ const datastream = reactive<Datastream>(new Datastream(thingId))
 const formattedDatastreams = computed(() => {
   return datastreamStore.primaryOwnedDatastreams.map((datastream) => ({
     id: datastream.id,
-    title: `Sensor:${datastream.method_name},  Observed Property: ${datastream.observed_property_name},
-     Unit: ${datastream.unit_name},  Processing Level: ${datastream.processing_level_name},
-      Sampled Medium ${datastream.sampled_medium}`,
+    title: `Sensor:${datastream.sensorName},  Observed Property: ${datastream.observedPropertyName},  Unit: ${datastream.unitName},  Processing Level: ${datastream.processingLevelName},  Sampled Medium ${datastream.sampledMedium}`,
   }))
 })
 
@@ -270,18 +344,44 @@ const formattedProcessingLevels = computed(() => {
   }
   return processingLevels.map((pl) => ({
     id: pl.id,
-    title: `${pl.processing_level_code} : ${pl.definition}`,
+    title: `${pl.code} : ${pl.definition}`,
   }))
 })
 
 watch(selectedDatastreamID, async () => {
-  populateForm(selectedDatastreamID.value)
+  const sourceDatastream = datastreamStore.getDatastreamById(
+    selectedDatastreamID.value
+  )
+  if (!sourceDatastream) return
+  Object.assign(datastream, {
+    ...datastream,
+    sensorId: sourceDatastream.sensorId,
+    observedPropertyId: sourceDatastream.observedPropertyId,
+    processingLevelId: sourceDatastream.processingLevelId,
+    unitId: sourceDatastream.unitId,
+    timeAggregationIntervalUnitsId:
+      sourceDatastream.timeAggregationIntervalUnitsId,
+    intendedTimeSpacingUnitsId: sourceDatastream.intendedTimeSpacingUnitsId,
+    name: sourceDatastream.name,
+    description: sourceDatastream.description,
+    sampledMedium: sourceDatastream.sampledMedium,
+    noDataValue: sourceDatastream.noDataValue,
+    aggregationStatistic: sourceDatastream.aggregationStatistic,
+    status: sourceDatastream.status,
+    timeAggregationInterval: sourceDatastream.timeAggregationInterval,
+    intendedTimeSpacing: sourceDatastream.intendedTimeSpacing,
+  })
   await myForm.value?.validate()
 })
 
 function populateForm(id: string) {
   Object.assign(datastream, datastreamStore.getDatastreamById(id))
-  datastream.thing_id = thingId
+  datastream.thingId = thingId
+}
+
+async function loadDatastreams() {
+  await datastreamStore.fetchDatastreams()
+  if (datastreamId) populateForm(datastreamId)
 }
 
 async function uploadDatastream() {
@@ -293,21 +393,9 @@ async function uploadDatastream() {
 }
 
 onMounted(async () => {
-  // fetch all independent operations in parallel with Promise.all
-  await Promise.all([
-    thingStore.fetchThingById(thingId),
-    datastreamStore.fetchDatastreams(),
-    sensorStore.fetchSensors(),
-    opStore.fetchObservedProperties(),
-    unitStore.fetchUnits(),
-    plStore.fetchProcessingLevels(),
-  ])
+  if (!isPrimaryOwner.value)
+    thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
 
-  if (!isPrimaryOwner.value) {
-    await thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
-  }
-
-  if (datastreamId) populateForm(datastreamId)
-  loaded.value = true
+  loadDatastreams()
 })
 </script>

@@ -28,23 +28,23 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="processingLevel.processing_level_code"
-                label="Processing Level Code *"
+                v-model="processingLevel.code"
+                label="Code *"
                 :rules="rules.requiredCode"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-textarea
                 v-model="processingLevel.definition"
-                label="Definition *"
-                :rules="rules.description"
+                label="Definition"
+                :rules="rules.maxLength(2000)"
               ></v-textarea>
             </v-col>
             <v-col cols="12">
               <v-textarea
                 v-model="processingLevel.explanation"
-                label="Explanation *"
-                :rules="rules.description"
+                label="Explanation"
+                :rules="rules.maxLength(2000)"
               ></v-textarea>
             </v-col>
           </v-row>

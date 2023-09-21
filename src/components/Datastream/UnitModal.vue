@@ -42,12 +42,12 @@
               <v-text-field
                 v-model="unit.definition"
                 label="Definition *"
-                :rules="rules.description"
+                :rules="rules.requiredDescription"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field
-                v-model="unit.unit_type"
+                v-model="unit.type"
                 label="Unit Type *"
                 :rules="rules.requiredName"
               ></v-text-field>

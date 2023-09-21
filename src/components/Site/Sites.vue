@@ -92,7 +92,7 @@ const headers = [
     title: 'Site Code',
     align: 'start',
     sortable: true,
-    key: 'sampling_feature_code',
+    key: 'samplingFeatureCode',
   },
   {
     title: 'Site Name',
@@ -104,7 +104,7 @@ const headers = [
     title: 'Site Type',
     align: 'start',
     sortable: true,
-    key: 'site_type',
+    key: 'siteType',
   },
 ]
 

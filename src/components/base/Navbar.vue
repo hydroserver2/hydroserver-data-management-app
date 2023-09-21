@@ -191,14 +191,15 @@ const paths: {
     icon: 'mdi-layers-search',
   },
   {
+    name: 'mySites',
+    attrs: { to: '/sites' },
+    label: 'My Sites',
+    icon: 'mdi-map-marker-multiple',
+  },
+  {
     name: 'management',
     label: 'Data Management',
     menu: [
-      {
-        attrs: { to: '/sites' },
-        label: 'My Sites',
-        icon: 'mdi-map-marker-multiple',
-      },
       {
         attrs: { to: '/Metadata' },
         label: 'Manage Metadata',

@@ -1,0 +1,60 @@
+name: hs-webapp Dev AWS S3 Deployment
+run-name: ${{ github.actor }} is deploying hs-webapp Dev to AWS S3 on ${{ github.ref }}
+
+on:
+  workflow_run:
+    workflows: ['Run Unit Tests']
+    branches:
+      - dev
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          ref: dev
+
+      - name: Setup Node 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Add Environment Variables
+        env:
+          VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
+          VITE_APP_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_APP_GOOGLE_MAPS_API_KEY }}
+          VITE_APP_PROXY_BASE_URL: ${{ vars.VITE_PROXY_BASE_URL_DEV }}
+        run: |
+          touch .env
+          echo VITE_APP_VERSION="$VITE_APP_VERSION" >> .env
+          echo VITE_APP_GOOGLE_MAPS_API_KEY="$VITE_APP_GOOGLE_MAPS_API_KEY" >> .env
+          echo VITE_APP_PROXY_BASE_URL="$VITE_APP_PROXY_BASE_URL" >> .env
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: 'us-east-1'
+
+      - name: Deploy to S3
+        run: |
+          echo $AWS_S3_BUCKET
+          aws s3 sync ./dist s3://${{ vars.AWS_S3_BUCKET_DEV }}/ --delete
+
+      - name: Invalidate CloudFront distribution cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_ID_DEV }} --paths "/*"

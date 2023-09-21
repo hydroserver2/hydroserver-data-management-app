@@ -53,7 +53,7 @@ export async function fetchLocationData(position: google.maps.LatLngLiteral) {
   return {
     latitude: position.lat.toFixed(6),
     longitude: position.lng.toFixed(6),
-    elevation: Math.round(elevation),
+    elevation_m: Math.round(elevation),
     state: state,
     county: county,
   }

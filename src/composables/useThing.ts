@@ -1,12 +1,10 @@
 import { useThingStore } from '@/store/things'
 import { Thing } from '@/types'
-import { onMounted } from 'vue'
-import { computed, ref } from 'vue'
-import { useAuthentication } from './useAuthentication'
+import { computed, ref, onMounted } from 'vue'
+
 import router from '@/router/router'
 
 export function useThing(thingId: string) {
-  const { isAuthenticated } = useAuthentication()
   const thingStore = useThingStore()
 
   const deleteInput = ref('')
@@ -14,26 +12,11 @@ export function useThing(thingId: string) {
   const isDeleteModalOpen = ref(false)
   const isAccessControlModalOpen = ref(false)
 
-  const is_owner = computed(() => {
-    if (isAuthenticated && thingStore.things[thingId]) {
-      return thingStore.things[thingId].owns_thing
-    }
-    return false
-  })
-
-  const isPrimaryOwner = computed(() => {
-    if (isAuthenticated && thingStore.things[thingId]) {
-      return thingStore.things[thingId].is_primary_owner
-    }
-    return false
-  })
-
   function switchToAccessControlModal() {
     isDeleteModalOpen.value = false
     isAccessControlModalOpen.value = true
   }
 
-  // const { things } = storeToRefs(thingStore)
   const thing = computed(() => thingStore.things[thingId] as unknown as Thing)
 
   //TODO: Find a better way to get GoogleMaps to reload on thing change
@@ -57,16 +40,16 @@ export function useThing(thingId: string) {
     if (!thing.value) return []
     const {
       id,
-      sampling_feature_code,
+      samplingFeatureCode,
       latitude,
       longitude,
-      elevation,
+      elevation_m,
       description,
-      // sampling_feature_type,
-      site_type,
+      // samplingFeatureType,
+      siteType,
       state,
       county,
-      is_private,
+      isPrivate,
       owners,
     } = thing.value
 
@@ -75,24 +58,24 @@ export function useThing(thingId: string) {
       {
         icon: 'fas fa-barcode',
         label: 'Site Code',
-        value: sampling_feature_code,
+        value: samplingFeatureCode,
       },
       { icon: 'fas fa-map', label: 'Latitude', value: latitude },
       { icon: 'fas fa-map', label: 'Longitude', value: longitude },
-      { icon: 'fas fa-mountain', label: 'Elevation', value: elevation },
+      { icon: 'fas fa-mountain', label: 'Elevation', value: elevation_m },
       { icon: 'fas fa-file-alt', label: 'Description', value: description },
       // {
       //   icon: 'fas fa-map-marker-alt',
       //   label: 'Sampling Feature Type',
-      //   value: sampling_feature_type,
+      //   value: samplingFeatureType,
       // },
-      { icon: 'fas fa-map-pin', label: 'Site Type', value: site_type },
+      { icon: 'fas fa-map-pin', label: 'Site Type', value: siteType },
       { icon: 'fas fa-flag-usa', label: 'State', value: state },
       { icon: 'fas fa-flag-usa', label: 'County', value: county },
       {
-        icon: is_private ? 'fas fa-lock' : 'fas fa-globe',
+        icon: isPrivate ? 'fas fa-lock' : 'fas fa-globe',
         label: 'Privacy',
-        value: is_private ? 'Private' : 'Public',
+        value: isPrivate ? 'Private' : 'Public',
       },
       {
         icon: 'fas fa-user',
@@ -100,18 +83,12 @@ export function useThing(thingId: string) {
         value: owners
           .map(
             (owner) =>
-              `${owner.firstname} ${owner.lastname}: ${owner.organization}`
+              (owner.firstName + ' ' + owner.lastName + (owner.organizationName ? `: ${owner.organizationName}` : ''))
           )
           .join(', '),
       },
     ]
   })
-
-  function updateFollow() {
-    if (thingStore.things[thingId]) {
-      thingStore.updateThingFollowership(thingStore.things[thingId])
-    }
-  }
 
   async function deleteThing() {
     if (!thing.value) {
@@ -126,34 +103,8 @@ export function useThing(thingId: string) {
     await router.push('/sites')
   }
 
-  const newOwnerEmail = ref('')
-  const newPrimaryOwnerEmail = ref('')
-  const showPrimaryOwnerConfirmation = ref(false)
-
-  async function addSecondaryOwner() {
-    if (newOwnerEmail.value) {
-      await thingStore.addSecondaryOwner(thingId, newOwnerEmail.value)
-      newOwnerEmail.value = ''
-    }
-  }
-
-  async function transferPrimaryOwnership() {
-    if (newPrimaryOwnerEmail.value) {
-      await thingStore.transferPrimaryOwnership(
-        thingId,
-        newPrimaryOwnerEmail.value
-      )
-      newPrimaryOwnerEmail.value = ''
-      showPrimaryOwnerConfirmation.value = false
-    }
-  }
-
-  async function removeOwner(email: string) {
-    if (email) await thingStore.removeOwner(thingId, email)
-  }
-
   async function toggleSitePrivacy() {
-    await thingStore.updateThingPrivacy(thingId, thing.value.is_private)
+    await thingStore.updateThingPrivacy(thingId, thing.value.isPrivate)
   }
 
   onMounted(async () => {
@@ -161,18 +112,9 @@ export function useThing(thingId: string) {
   })
 
   return {
-    newOwnerEmail,
-    newPrimaryOwnerEmail,
-    addSecondaryOwner,
-    showPrimaryOwnerConfirmation,
-    transferPrimaryOwnership,
-    removeOwner,
     toggleSitePrivacy,
     thing,
     mapOptions,
-    updateFollow,
-    is_owner,
-    isPrimaryOwner,
     deleteInput,
     deleteThing,
     thingProperties,

@@ -13,9 +13,9 @@
                 >
                   <v-card-title :style="{ color: 'white' }">
                     <h5 class="text-h5 user-info">
-                      {{ authStore.user.first_name }}
-                      {{ authStore.user.middle_name }}
-                      {{ authStore.user.last_name }}
+                      {{ authStore.user.firstName }}
+                      {{ authStore.user.middleName }}
+                      {{ authStore.user.lastName }}
                     </h5>
                   </v-card-title>
                 </v-col>
@@ -24,8 +24,8 @@
                   <table>
                     <tbody>
                       <tr>
-                        <td class="pr-4"><strong>Organization</strong></td>
-                        <td>{{ authStore.user.organization }}</td>
+                        <td class="pr-4"><strong>Email</strong></td>
+                        <td>{{ authStore.user.email }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Address</strong></td>
@@ -36,12 +36,36 @@
                         <td>{{ authStore.user.phone }}</td>
                       </tr>
                       <tr>
-                        <td class="pr-4"><strong>Email</strong></td>
-                        <td>{{ authStore.user.email }}</td>
+                        <td class="pr-4"><strong>Type</strong></td>
+                        <td>{{ authStore.user.type }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Link</strong></td>
                         <td>{{ authStore.user.link }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4 text-nowrap">
+                          <strong>Organization Name</strong>
+                        </td>
+                        <td>{{ authStore.user.organization.name }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization Code</strong></td>
+                        <td>{{ authStore.user.organization.code }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization Link</strong></td>
+                        <td>{{ authStore.user.organization.link }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4"><strong>Organization Type</strong></td>
+                        <td>{{ authStore.user.organization.type }}</td>
+                      </tr>
+                      <tr v-if="authStore.user.organization">
+                        <td class="pr-4">
+                          <strong>Organization description</strong>
+                        </td>
+                        <td>{{ authStore.user.organization.description }}</td>
                       </tr>
                     </tbody>
                   </table>

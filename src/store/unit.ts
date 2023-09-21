@@ -1,14 +1,19 @@
 import { defineStore } from 'pinia'
 import { Unit } from '@/types'
+import { ENDPOINTS } from '@/constants'
+import { api } from '@/utils/api/apiMethods'
 
 export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
   getters: {
     ownedUnits(): Unit[] {
-      return this.units.filter((u) => u.person_id != null)
+      return this.units.filter((u) => u.personId != null)
     },
     unownedUnits(): Unit[] {
-      return this.units.filter((u) => u.person_id == null)
+      return this.units.filter((u) => u.personId == null)
+    },
+    timeUnits(): Unit[] {
+      return this.units.filter((u) => u.type === 'Time' && u.personId == null)
     },
   },
   actions: {
@@ -18,7 +23,7 @@ export const useUnitStore = defineStore('units', {
     async fetchUnits() {
       if (this.units.length > 0) return
       try {
-        const { data } = await this.$http.get('/units')
+        const data = await api.fetch(ENDPOINTS.UNITS)
         this.units = data
         this.sortUnits()
         this.loaded = true
@@ -28,7 +33,7 @@ export const useUnitStore = defineStore('units', {
     },
     async createUnit(unit: Unit) {
       try {
-        const { data } = await this.$http.post('/units', unit)
+        const data = await api.post(ENDPOINTS.UNITS, unit)
         this.units.push(data)
         this.sortUnits()
         return data
@@ -38,11 +43,13 @@ export const useUnitStore = defineStore('units', {
     },
     async updateUnit(unit: Unit) {
       try {
-        await this.$http.patch(`/units/${unit.id}`, unit)
+        await api.patch(
+          ENDPOINTS.UNITS.ID(unit.id),
+          unit,
+          this.getUnitById(unit.id)
+        )
         const index = this.units.findIndex((u) => u.id === unit.id)
-        if (index !== -1) {
-          this.units[index] = unit
-        }
+        if (index !== -1) this.units[index] = unit
         this.sortUnits()
       } catch (error) {
         console.error('Error updating unit', error)
@@ -50,11 +57,9 @@ export const useUnitStore = defineStore('units', {
     },
     async deleteUnit(unitId: string) {
       try {
-        const response = await this.$http.delete(`/units/${unitId}`)
-        if (response.status === 200 || response.status === 204) {
-          this.units = this.units.filter((unit) => unit.id !== unitId)
-          this.sortUnits()
-        } else console.error('Error deleting unit from server', response)
+        await api.delete(ENDPOINTS.UNITS.ID(unitId))
+        this.units = this.units.filter((unit) => unit.id !== unitId)
+        this.sortUnits()
       } catch (error) {
         console.error('Error deleting unit', error)
       }
@@ -64,13 +69,5 @@ export const useUnitStore = defineStore('units', {
       if (!unit) throw new Error(`Unit with id ${id} not found`)
       return unit
     },
-    // async fetchUnitById(id: string) {
-    //   try {
-    //     const response = await this.$http.get(`/units/${id}`)
-    //     if (response.status === 200) return response.data as Unit
-    //   } catch (error) {
-    //     console.error('Error deleting fetching unit by id', error)
-    //   }
-    // },
   },
 })

@@ -45,7 +45,7 @@ function drawChart() {
 
   const data = props.observations.map((observation) => ({
     date:
-      d3.timeParse('%Y-%m-%dT%H:%M:%S')(observation.result_time) || new Date(),
+      d3.timeParse('%Y-%m-%dT%H:%M:%S')(observation.phenomenonTime) || new Date(),
     value: +observation.result, // Result is cast to number here.
   }))
 

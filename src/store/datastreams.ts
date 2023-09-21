@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { Datastream } from '@/types'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export const useDatastreamStore = defineStore('datastreams', {
   state: () => ({
@@ -15,19 +17,19 @@ export const useDatastreamStore = defineStore('datastreams', {
       },
     primaryOwnedDatastreams: (state) => {
       const allDatastreams = Object.values(state.datastreams).flat()
-      return allDatastreams.filter((ds) => ds.is_primary_owner)
+      return allDatastreams.filter((ds) => ds.isPrimaryOwner)
     },
   },
   actions: {
     async fetchDatastreams() {
       try {
-        const { data } = await this.$http.get('/datastreams')
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS)
         let newDatastreams: Record<string, Datastream[]> = {}
         data.forEach((datastream: Datastream) => {
-          if (!newDatastreams[datastream.thing_id]) {
-            newDatastreams[datastream.thing_id] = []
+          if (!newDatastreams[datastream.thingId]) {
+            newDatastreams[datastream.thingId] = []
           }
-          newDatastreams[datastream.thing_id].push(datastream)
+          newDatastreams[datastream.thingId].push(datastream)
         })
         this.$patch({ datastreams: newDatastreams })
         this.loaded = true
@@ -36,24 +38,22 @@ export const useDatastreamStore = defineStore('datastreams', {
       }
     },
     async fetchDatastreamsByThingId(id: string) {
-      if (this.datastreams[id]) return
+      // if (this.datastreams[id]) return
       try {
-        const { data } = await this.$http.get(`/datastreams/${id}`)
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
         this.datastreams[id] = data
       } catch (error) {
-        console.error(
-          `Error fetching datastreams for thing with id ${id} from DB`,
-          error
-        )
+        console.error(`Error fetching datastreams by thingID`, error)
       }
     },
     async updateDatastream(datastream: Datastream) {
       try {
-        const { data } = await this.$http.patch(
-          `/datastreams/patch/${datastream.id}`,
-          datastream
+        const data = await api.patch(
+          `${ENDPOINTS.DATASTREAMS}/patch/${datastream.id}`,
+          datastream,
+          this.getDatastreamById(datastream.id)
         )
-        const datastreamsForThing = this.datastreams[data.thing_id]
+        const datastreamsForThing = this.datastreams[data.thingId]
         const index = datastreamsForThing.findIndex((ds) => ds.id === data.id)
         if (index !== -1) datastreamsForThing[index] = data
       } catch (error) {
@@ -62,53 +62,30 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async createDatastream(newDatastream: Datastream) {
       try {
-        const { data } = await this.$http.post(
-          `/datastreams/${newDatastream.thing_id}`,
+        const data = await api.post(
+          ENDPOINTS.DATASTREAMS.FOR_THING(newDatastream.thingId),
           newDatastream
         )
-        if (!this.datastreams[newDatastream.thing_id]) {
-          this.datastreams[newDatastream.thing_id] = []
+        if (!this.datastreams[newDatastream.thingId]) {
+          this.datastreams[newDatastream.thingId] = []
         }
-        this.datastreams[newDatastream.thing_id].push(data)
+        this.datastreams[newDatastream.thingId].push(data)
       } catch (error) {
         console.error('Error creating datastream', error)
       }
     },
     async deleteDatastream(id: string, thingId: string) {
       try {
-        const response = await this.$http.delete(`/datastreams/${id}/temp`)
-        if (response && response.status == 200) {
-          const datastreams = this.datastreams[thingId].filter(
-            (datastream) => datastream.id !== id
-          )
-          this.$patch({
-            datastreams: { ...this.datastreams, [thingId]: datastreams },
-          })
-        }
+        await api.delete(`${ENDPOINTS.DATASTREAMS}/${id}/temp`)
+
+        const datastreams = this.datastreams[thingId].filter(
+          (datastream) => datastream.id !== id
+        )
+        this.$patch({
+          datastreams: { ...this.datastreams, [thingId]: datastreams },
+        })
       } catch (error) {
         console.error(`Error deleting datastream with id ${id}`, error)
-      }
-    },
-    async setVisibility(id: string, visibility: boolean) {
-      try {
-        const { data } = await this.$http.patch(`/datastreams/patch/${id}`, {
-          is_visible: visibility,
-        })
-        const datastreamIndex = this.datastreams[data.thing_id].findIndex(
-          (ds) => ds.id === id
-        )
-        if (datastreamIndex !== -1)
-          this.datastreams[data.thing_id][datastreamIndex] = data
-        else {
-          console.error(
-            `Datastream with id ${id} not found in the datastreams list`
-          )
-        }
-      } catch (error) {
-        console.error(
-          `Error toggling visibility for datastream with id ${id}`,
-          error
-        )
       }
     },
     getDatastreamForThingById(
@@ -131,6 +108,28 @@ export const useDatastreamStore = defineStore('datastreams', {
         }
       }
       return null
+    },
+    // TODO: This shouldn't be in the store
+    async downloadDatastream(id: string) {
+      try {
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS.CSV(id))
+        // Create a Blob from the received data
+        const blob = new Blob([data], { type: 'text/csv' })
+
+        // Create a download link element
+        const link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = `datastream_${id}.csv`
+
+        // Append the link to the document and trigger a click event
+        document.body.appendChild(link)
+        link.click()
+
+        // Clean up by removing the link
+        document.body.removeChild(link)
+      } catch (error) {
+        console.error('Error downloading datastream CSV', error)
+      }
     },
   },
 })

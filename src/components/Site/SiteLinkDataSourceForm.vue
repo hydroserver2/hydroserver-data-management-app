@@ -81,7 +81,7 @@ store.formLoaded = false
 store.fetchDatastreams(props.thingId, props.datastreamId).then((datastream) => {
   store.fillForm(
     props.datastreamId,
-    datastream.data_source_id,
+    datastream.dataSourceId,
     datastream.column
   )
   store.fetchDataSources().then(() => {

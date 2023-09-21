@@ -39,26 +39,26 @@
               <v-col cols="12"
                 ><v-text-field
                   label="Site Code *"
-                  v-model="thing.sampling_feature_code"
+                  v-model="thing.samplingFeatureCode"
                   :rules="rules.requiredCode"
               /></v-col>
               <v-col cols="12"
                 ><v-text-field
                   label="Site Name *"
                   v-model="thing.name"
-                  :rules="rules.requiredCode"
+                  :rules="rules.requiredName"
               /></v-col>
               <v-col cols="12"
                 ><v-textarea
-                  label="Site Description"
+                  label="Site Description *"
                   v-model="thing.description"
-                  :rules="thing.description ? rules.description : []"
+                  :rules="rules.requiredDescription"
               /></v-col>
               <v-col cols="12"
                 ><v-autocomplete
                   label="Select Site Type *"
                   :items="siteTypes"
-                  v-model="thing.site_type"
+                  v-model="thing.siteType"
                   :rules="rules.required"
                 ></v-autocomplete
               ></v-col>
@@ -66,17 +66,17 @@
             <v-row no-gutters class="pt-2">
               <v-col>
                 <v-switch
-                  v-model="thing.include_data_disclaimer"
+                  v-model="includeDataDisclaimer"
                   color="primary"
                   hide-details
                   label="Include a data disclaimer for this site"
                 ></v-switch>
               </v-col>
             </v-row>
-            <v-row v-if="thing.include_data_disclaimer" no-gutters>
+            <v-row v-if="includeDataDisclaimer" no-gutters>
               <v-col>
                 <v-textarea
-                  v-model="thing.data_disclaimer"
+                  v-model="thing.dataDisclaimer"
                   color="primary"
                 ></v-textarea>
               </v-col>
@@ -90,7 +90,7 @@
                   label="Latitude *"
                   v-model="thing.latitude"
                   type="number"
-                  :rules="rules.required"
+                  :rules="rules.requiredNumber"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6"
@@ -98,15 +98,15 @@
                   label="Longitude *"
                   v-model="thing.longitude"
                   type="number"
-                  :rules="rules.required"
+                  :rules="rules.requiredNumber"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6"
                 ><v-text-field
                   label="Elevation (m) *"
-                  v-model="thing.elevation"
+                  v-model="thing.elevation_m"
                   type="number"
-                  :rules="rules.required"
+                  :rules="rules.requiredNumber"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6">
@@ -168,7 +168,7 @@
                   >
                     <img
                       v-if="!photosToDelete.includes(photo.id)"
-                      :src="photo.url"
+                      :src="photo.link"
                       class="photo"
                     />
                     <v-icon
@@ -239,11 +239,13 @@ const mapOptions = ref({
 })
 const thing = reactive<Thing>(new Thing())
 
+const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
+
 watch(
-  () => thing.include_data_disclaimer,
+  () => includeDataDisclaimer.value,
   (newVal) => {
-    if (newVal && !thing.data_disclaimer) {
-      thing.data_disclaimer =
+    if (newVal && !thing.dataDisclaimer) {
+      thing.dataDisclaimer =
         'WARNING: These data may be provisional and subject to revision. The data are released under the condition that the data collectors may not be held liable for any damages resulting from their use.'
     }
   }
@@ -298,11 +300,12 @@ function removeExistingPhoto(photoId: string) {
 async function populateThing(id: string) {
   await thingStore.fetchThings()
   Object.assign(thing, thingStore.things[id])
-  mapOptions.value = {
-    center: { lat: thing.latitude, lng: thing.longitude },
-    zoom: 10,
-    mapTypeId: 'satellite',
-  }
+  if (thing.latitude && thing.longitude)
+    mapOptions.value = {
+      center: { lat: thing.latitude, lng: thing.longitude },
+      zoom: 10,
+      mapTypeId: 'satellite',
+    }
   loaded.value = true
 }
 
@@ -316,7 +319,7 @@ async function uploadThing() {
 
   emit('close')
   if (thing) {
-    if (!thing.include_data_disclaimer) thing.data_disclaimer = ''
+    if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
     if (props.thingId) {
       await thingStore.updateThing(thing)
       await photoStore.updatePhotos(
@@ -334,7 +337,7 @@ async function uploadThing() {
 function onMapLocationClicked(locationData: Thing) {
   thing.latitude = locationData.latitude
   thing.longitude = locationData.longitude
-  thing.elevation = locationData.elevation
+  thing.elevation_m = locationData.elevation_m
   thing.state = locationData.state
   thing.county = locationData.county
 }
@@ -343,6 +346,7 @@ onMounted(async () => {
   if (props.thingId) {
     await populateThing(props.thingId)
     await photoStore.fetchPhotos(props.thingId)
+    includeDataDisclaimer.value = !!thing.dataDisclaimer
   }
 })
 </script>

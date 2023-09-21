@@ -10,27 +10,27 @@
         <v-row>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.first_name"
-              label="First Name"
+              v-model="user.firstName"
+              label="First Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.middle_name"
+              v-model="user.middleName"
               label="Middle Name"
               :rules="rules.name"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.last_name"
-              label="Last Name"
+              v-model="user.lastName"
+              label="Last Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row v-if="!user.is_verified">
+        <v-row v-if="!user.isVerified">
           <v-col>
             <v-text-field
               v-model="user.email"
@@ -56,16 +56,6 @@
         </v-row>
         <v-row>
           <v-col>
-            <v-text-field
-              v-model="user.organization"
-              label="Organization"
-              :rules="user.organization ? rules.name : []"
-            >
-            </v-text-field>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
             <v-autocomplete
               v-model="user.type"
               label="User Type *"
@@ -84,6 +74,68 @@
             </v-text-field>
           </v-col>
         </v-row>
+        <v-row>
+          <v-col cols="auto">
+            <v-switch
+              v-model="showOrg"
+              hide-details
+              :label="
+                showOrg
+                  ? 'Affiliated with an Organization'
+                  : 'No Affiliated Organization'
+              "
+              color="primary"
+            ></v-switch>
+          </v-col>
+        </v-row>
+        <div v-if="user.organization && showOrg">
+          <v-row>
+            <v-col>
+              <v-text-field
+                v-model="user.organization.name"
+                label="Organization Name *"
+                :rules="rules.requiredName"
+              ></v-text-field>
+            </v-col>
+            <v-col>
+              <v-text-field
+                v-model="user.organization.code"
+                label="Organization Code *"
+                :rules="rules.requiredName"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-autocomplete
+                :items="organizationTypes"
+                v-model="user.organization.type"
+                label="Organization Type *"
+                :rules="rules.requiredName"
+              />
+            </v-col>
+            <v-col>
+              <v-text-field
+                v-model="user.organization.link"
+                label="Organization Link"
+                :rules="user.organization.link ? rules.urlFormat : []"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-text-field
+                v-model="user.organization.description"
+                label="Organization Description"
+                :rules="
+                  user.organization.description ? rules.maxLength(2000) : []
+                "
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </div>
+
         <v-card-actions v-if="isModal">
           <v-spacer></v-spacer>
           <v-btn-cancel @click="closeDialog">Cancel</v-btn-cancel>
@@ -100,18 +152,28 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { reactive, ref, onMounted, defineProps } from 'vue'
+import { reactive, ref, onMounted, defineProps, watch } from 'vue'
 import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
+import { organizationTypes } from '@/vocabularies'
+import { Organization, User } from '@/types'
 
 const phoneMask = { mask: '(###) ###-####' }
 const authStore = useAuthStore()
 const props = defineProps({
   isModal: { type: Boolean, required: false, default: true },
 })
-let user = reactive({ ...authStore.user })
+
+let user = reactive<User>(JSON.parse(JSON.stringify(authStore.user)))
+const showOrg = ref(!!user.organization)
+
+watch(showOrg, (newVal) => {
+  if (newVal && !user.organization) user.organization = new Organization()
+  else if (!newVal) user.organization = null
+})
+
 const valid = ref(false)
 const myForm = ref<VForm>()
 

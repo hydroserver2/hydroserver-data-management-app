@@ -31,7 +31,7 @@
       <DeleteModal
         itemName="sensor"
         :itemID="selectedSensor.id"
-        parameter-name="method_id"
+        parameter-name="sensorId"
         @delete="deleteSensor"
         @close="isSensorDModalOpen = false"
       ></DeleteModal>
@@ -66,7 +66,7 @@
       <DeleteModal
         itemName="Observed Property"
         :itemID="selectedOP.id"
-        parameter-name="observed_property_id"
+        parameter-name="observedPropertyId"
         @delete="deleteOP"
         @close="isOPDModalOpen = false"
       ></DeleteModal>
@@ -101,7 +101,7 @@
       <DeleteModal
         itemName="processing level"
         :itemID="selectedPL.id"
-        parameter-name="processing_level_id"
+        parameter-name="processingLevelId"
         @delete="deletePL"
         @close="isPLDModalOpen = false"
       ></DeleteModal>
@@ -136,7 +136,7 @@
       <DeleteModal
         itemName="unit"
         :itemID="selectedUnit.id"
-        parameter-name="unit_id"
+        parameter-name="unitId"
         @delete="deleteUnit"
         @close="isUnitDModalOpen = false"
       ></DeleteModal>
@@ -208,21 +208,21 @@ const {
 
 const sensorHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Method Type', key: 'method_type' },
-  { title: 'Method Code', key: 'method_code' },
+  { title: 'Method Type', key: 'methodType' },
+  { title: 'Method Code', key: 'methodCode' },
   { title: 'UUID', key: 'id' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]
 
 const OPHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Variable Type', key: 'variable_type' },
-  { title: 'Variable Code', key: 'variable_code' },
+  { title: 'Type', key: 'type' },
+  { title: 'Code', key: 'code' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]
 
 const ProcLevelHeaders = [
-  { title: 'Processing Level Code', key: 'processing_level_code' },
+  { title: 'Code', key: 'code' },
   { title: 'Definition', key: 'definition' },
   { title: 'Explanation', key: 'explanation' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
@@ -230,7 +230,7 @@ const ProcLevelHeaders = [
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Unit Type', key: 'unit_type' },
+  { title: 'Type', key: 'type' },
   { title: 'Symbol', key: 'symbol' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]

@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
   state: () => ({
@@ -8,10 +10,10 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
   }),
   getters: {
     ownedOP(): ObservedProperty[] {
-      return this.observedProperties.filter((op) => op.person_id != null)
+      return this.observedProperties.filter((op) => op.personId != null)
     },
     unownedOP(): ObservedProperty[] {
-      return this.observedProperties.filter((op) => op.person_id == null)
+      return this.observedProperties.filter((op) => op.personId == null)
     },
   },
   actions: {
@@ -21,7 +23,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async fetchObservedProperties() {
       if (this.observedProperties.length > 0) return
       try {
-        const { data } = await this.$http.get('/observed-properties')
+        const data = await api.fetch(ENDPOINTS.OBSERVED_PROPERTIES)
         this.observedProperties = data
         this.sortObservedProperties()
         this.loaded = true
@@ -31,8 +33,8 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async createObservedProperty(observedProperty: ObservedProperty) {
       try {
-        const { data } = await this.$http.post(
-          '/observed-properties',
+        const data = await api.post(
+          ENDPOINTS.OBSERVED_PROPERTIES,
           observedProperty
         )
         this.observedProperties.push(data)
@@ -44,9 +46,10 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async updateObservedProperty(observedProperty: ObservedProperty) {
       try {
-        await this.$http.patch(
-          `/observed-properties/${observedProperty.id}`,
-          observedProperty
+        await api.patch(
+          ENDPOINTS.OBSERVED_PROPERTIES.ID(observedProperty.id),
+          observedProperty,
+          this.getById(observedProperty.id)
         )
         const index = this.observedProperties.findIndex(
           (op) => op.id === observedProperty.id
@@ -61,17 +64,11 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     },
     async deleteObservedProperty(id: string) {
       try {
-        const response = await this.$http.delete(`/observed-properties/${id}`)
-        if (response.status === 200 || response.status === 204) {
-          this.observedProperties = this.observedProperties.filter(
-            (op) => op.id !== id
-          )
-          this.sortObservedProperties()
-        } else
-          console.error(
-            'Error deleting observed property from server',
-            response
-          )
+        await api.delete(ENDPOINTS.OBSERVED_PROPERTIES.ID(id))
+        this.observedProperties = this.observedProperties.filter(
+          (op) => op.id !== id
+        )
+        this.sortObservedProperties()
       } catch (error) {
         console.error('Error deleting observed property', error)
       }

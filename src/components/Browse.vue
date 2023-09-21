@@ -33,11 +33,12 @@
             prepend-inner-icon="mdi-magnify"
             v-model="searchInput"
             clearable
+            @click:clear="clearOrganizations"
           />
         </form>
         <p v-if="!validFilter" class="text-error">No results found</p>
-        <div v-for="organization in filteredOrganizations">
-          <p>{{ organization }}</p>
+        <div v-for="organizationName in filteredOrganizations">
+          <p>{{ organizationName }}</p>
         </div>
         <v-expansion-panels class="mt-4">
           <v-expansion-panel title="Site Types">
@@ -86,8 +87,8 @@ const organizations = computed(() => {
   const allOrgs = new Set()
   Object.values(thingStore.things).forEach((thing) => {
     thing.owners.forEach((owner) => {
-      if (owner.organization) {
-        allOrgs.add(owner.organization.toLowerCase())
+      if (owner.organizationName) {
+        allOrgs.add(owner.organizationName)
       }
     })
   })
@@ -100,7 +101,9 @@ const filterOrganizations = () => {
   } else {
     const lowerCase = searchInput.value.toLowerCase()
     filteredOrganizations.value = new Set([
-      ...organizations.value.filter((org: any) => org.includes(lowerCase)),
+      ...organizations.value.filter((org: any) =>
+        org.toLowerCase().includes(lowerCase)
+      ),
     ])
   }
   validFilter.value = filteredOrganizations.value.size === 0 ? false : true
@@ -115,22 +118,26 @@ function isThingValid(thing: Thing) {
   const orgValid =
     filteredOrganizations.value.size === 0 ||
     thing.owners.some((owner) =>
-      owner.organization
-        ? filteredOrganizations.value.has(owner.organization.toLowerCase())
+      owner.organizationName
+        ? filteredOrganizations.value.has(owner.organizationName)
         : false
     )
   const siteTypeValid =
     selectedSiteTypes.value.length === 0 ||
-    selectedSiteTypes.value.includes(thing.site_type)
+    selectedSiteTypes.value.includes(thing.siteType)
 
   return orgValid && siteTypeValid
 }
 
-function clearFilters() {
-  selectedSiteTypes.value = []
+const clearOrganizations = () => {
   filteredOrganizations.value = new Set()
   validFilter.value = true
   searchInput.value = ''
+}
+
+function clearFilters() {
+  selectedSiteTypes.value = []
+  clearOrganizations()
 }
 
 onMounted(async () => {

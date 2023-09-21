@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { Photo } from '@/types'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export const usePhotosStore = defineStore({
   id: 'photos',
@@ -13,10 +15,8 @@ export const usePhotosStore = defineStore({
   actions: {
     async fetchPhotos(thingId: string) {
       try {
-        const response = await this.$http.get(`/photos/${thingId}`)
-        if (response && response.status == 200) {
-          this.photos[thingId] = response.data
-        }
+        const data = await api.fetch(ENDPOINTS.PHOTOS.FOR_THING(thingId))
+        this.photos[thingId] = data
       } catch (error) {
         console.error('Error fetching photos from DB', error)
       }
@@ -33,15 +33,16 @@ export const usePhotosStore = defineStore({
         newPhotos.forEach((photo) => data.append(`photos`, photo))
         photosToDelete.forEach((id) => data.append(`photosToDelete`, id))
 
-        const response = await this.$http.post(`/photos/${thingId}`, data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-
-        if (response && response.status == 200) {
-          this.photos[thingId] = response.data
-        }
+        const photos = await api.post(
+          ENDPOINTS.PHOTOS.FOR_THING(thingId),
+          data,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        )
+        this.photos[thingId] = photos
       } catch (error) {
         console.error('Error updating photos', error)
       } finally {

@@ -18,7 +18,7 @@
       <v-col cols="auto">
         <h5 class="text-h5">Site Information</h5>
       </v-col>
-      <v-col cols="auto" v-if="is_owner">
+      <v-col cols="auto" v-if="isOwner">
         <v-btn class="access_control" @click="isAccessControlModalOpen = true"
           >Access Control</v-btn
         >
@@ -33,7 +33,7 @@
           ></SiteAccessControl>
         </v-dialog>
       </v-col>
-      <v-col cols="auto" v-if="is_owner">
+      <v-col cols="auto" v-if="isOwner">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit Site Information</v-btn
         >
@@ -44,7 +44,7 @@
           ></SiteForm>
         </v-dialog>
       </v-col>
-      <v-col cols="auto" v-if="is_owner">
+      <v-col cols="auto" v-if="isOwner">
         <v-btn
           color="red-darken-3"
           style="margin-left: 1rem"
@@ -89,14 +89,14 @@
         </v-dialog>
       </v-col>
       <!-- Jeff said to comment out anything related to following a site August 8, 2023 -->
-      <!-- <v-col cols="auto" v-if="!is_owner">
+      <!-- <v-col cols="auto" v-if="!isOwner">
         <v-switch
           color="secondary"
           hide-details
           v-if="isAuthenticated && thing"
-          v-model="thing.follows_thing"
+          v-model="thing.followsThing"
           @change="updateFollow"
-          :label="thing.follows_thing ? 'You Follow This site' : 'Follow Site'"
+          :label="thing.followsThing ? 'You Follow This site' : 'Follow Site'"
         ></v-switch>
       </v-col> -->
     </v-row>
@@ -126,7 +126,7 @@
           <v-carousel-item
             v-for="photo in photoStore.photos[thingId]"
             :key="photo.id"
-            :src="photo.url"
+            :src="photo.link"
             cover
           >
           </v-carousel-item>
@@ -162,7 +162,7 @@
         >
       </v-col> -->
     </v-row>
-    <v-row class="pb-2" v-if="is_owner">
+    <v-row class="pb-2" v-if="isOwner">
       <v-col>
         <v-btn-secondary
           prependIcon="mdi-plus"
@@ -178,6 +178,32 @@
         :headers="headers"
         :items="visibleDatastreams"
       >
+        <template v-slot:item.info="{ item }">
+          <v-col>
+            <v-row
+              style="font-size: 1.2em"
+              v-if="item.raw.observedPropertyName"
+            >
+              <strong class="mr-2">Observed Property:</strong>
+              <strong>{{ item.raw.observedPropertyName }}</strong>
+            </v-row>
+            <v-row v-if="item.raw.id">
+              <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
+            </v-row>
+            <v-row v-if="item.raw.processingLevelName">
+              <strong class="mr-2">Processing Level:</strong>
+              {{ item.raw.processingLevelName }}
+            </v-row>
+            <v-row v-if="item.raw.id">
+              <strong class="mr-2">Sampled Medium:</strong>
+              {{ item.raw.sampledMedium }}
+            </v-row>
+            <v-row v-if="item.raw.id">
+              <strong class="mr-2">Sensor:</strong> {{ item.raw.sensorName }}
+            </v-row>
+          </v-col>
+        </template>
+
         <template v-slot:item.observations="{ item }">
           <div v-if="item.raw.observations">
             <v-dialog v-model="item.raw.chartOpen" width="80rem">
@@ -187,103 +213,107 @@
                 @close="item.raw.chartOpen = false"
               ></SiteVisualization>
             </v-dialog>
-            <LineChart
+            <Sparkline
               @click="item.raw.chartOpen = true"
               class="pt-2"
-              :is-stale="item.raw.is_stale"
+              :is-stale="item.raw.isStale"
               :observations="item.raw.observations"
             />
           </div>
           <div v-else>No data for this datastream</div>
         </template>
         <template v-slot:item.last_observation="{ item }">
-          <div v-if="item.raw.most_recent_observation">
+          <div v-if="item.raw.mostRecentObservation">
             <v-row>
               {{
                 formatDate(
-                  (item.raw.most_recent_observation as Observation).result_time
+                  (item.raw.mostRecentObservation as Observation).phenomenonTime
                 )
               }}
             </v-row>
             <v-row>
-              {{
-                (item.raw.most_recent_observation as Observation).result
-              }}&nbsp;
-              {{ item.raw.unit_name }}
+              {{ (item.raw.mostRecentObservation as Observation).result }}&nbsp;
+              {{ item.raw.unitName }}
             </v-row>
           </div>
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-tooltip bottom :openDelay="500" v-if="item.raw.is_visible">
-            <template v-slot:activator="{ props }" v-if="is_owner">
-              <v-btn
-                small
-                color="grey"
-                v-bind="props"
-                icon="mdi-eye"
-                @click="toggleVisibility(item.raw)"
-              />
-            </template>
-            <span
-              >Hide this datastream from guests of your site. Owners will still
-              see it</span
-            >
-          </v-tooltip>
-          <v-tooltip bottom :openDelay="500" v-else>
-            <template v-slot:activator="{ props }" v-if="is_owner">
-              <v-btn
-                small
-                color="grey-lighten-1"
-                v-bind="props"
-                icon="mdi-eye-off"
-                @click="toggleVisibility(item.raw)"
-              />
-            </template>
-            <span>Make this datastream publicly visible</span>
-          </v-tooltip>
+          <v-row>
+            <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
+              <template v-slot:activator="{ props }" v-if="isOwner">
+                <v-btn
+                  small
+                  color="grey"
+                  v-bind="props"
+                  icon="mdi-eye"
+                  @click="toggleVisibility(item.raw)"
+                />
+              </template>
+              <span
+                >Hide this datastream from guests of your site. Owners will
+                still see it</span
+              >
+            </v-tooltip>
+            <v-tooltip bottom :openDelay="500" v-else>
+              <template v-slot:activator="{ props }" v-if="isOwner">
+                <v-btn
+                  small
+                  color="grey-lighten-1"
+                  v-bind="props"
+                  icon="mdi-eye-off"
+                  @click="toggleVisibility(item.raw)"
+                />
+              </template>
+              <span>Make this datastream publicly visible</span>
+            </v-tooltip>
 
-          <v-menu>
-            <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-dots-vertical" />
-            </template>
-            <v-list>
-              <v-list-item
-                v-if="is_owner"
-                prepend-icon="mdi-link-variant"
-                title="Link Data Source"
-                @click="
-                  handleLinkDataSource(
-                    item.raw.id,
-                    item.raw.data_source_id,
-                    item.raw.column
-                  )
-                "
-              />
-              <v-list-item
-                v-if="is_owner"
-                prepend-icon="mdi-pencil"
-                title="Edit Datastream Metadata"
-                :to="{
-                  name: 'DatastreamForm',
-                  params: { id: thingId, datastreamId: item.raw.id },
-                }"
-              />
-              <v-list-item
-                v-if="is_owner"
-                prepend-icon="mdi-chart-line"
-                title="View Time Series Plot"
-                @click="item.raw.chartOpen = true"
-              />
-              <v-list-item
-                v-if="is_owner"
-                prepend-icon="mdi-delete"
-                title="Delete Datastream"
-                @click="openDeleteModal(item.raw)"
-              />
-              <!-- <v-list-item prepend-icon="mdi-download" title="Download Data" /> -->
-            </v-list>
-          </v-menu>
+            <v-menu>
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" icon="mdi-dots-vertical" />
+              </template>
+              <v-list>
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-link-variant"
+                  title="Link Data Source"
+                  @click="
+                    handleLinkDataSource(
+                      item.raw.id,
+                      item.raw.data_source_id,
+                      item.raw.column
+                    )
+                  "
+                />
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-pencil"
+                  title="Edit Datastream Metadata"
+                  :to="{
+                    name: 'DatastreamForm',
+                    params: { id: thingId, datastreamId: item.raw.id },
+                  }"
+                />
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-chart-line"
+                  title="View Time Series Plot"
+                  @click="item.raw.chartOpen = true"
+                />
+                <v-list-item
+                  v-if="isOwner"
+                  prepend-icon="mdi-delete"
+                  title="Delete Datastream"
+                  @click="openDeleteModal(item.raw)"
+                />
+                <v-list-item
+                  prepend-icon="mdi-download"
+                  title="Download Data"
+                  @click="datastreamStore.downloadDatastream(item.raw.id)"
+                />
+              </v-list>
+            </v-menu>
+          </v-row>
         </template>
       </v-data-table>
       <v-dialog
@@ -331,9 +361,9 @@
         />
       </v-dialog>
     </v-row>
-    <v-row v-if="thing?.include_data_disclaimer" class="pt-2 pb-8">
+    <v-row v-if="thing?.dataDisclaimer" class="pt-2 pb-8">
       <h6 class="text-h6" style="color: #b71c1c">
-        {{ thing.data_disclaimer }}
+        {{ thing.dataDisclaimer }}
       </h6>
     </v-row>
   </v-container>
@@ -344,26 +374,29 @@ import GoogleMap from '@/components/GoogleMap.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
-import LineChart from '@/components/LineChart.vue'
+import Sparkline from '@/components/Sparkline.vue'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Observation } from '@/types'
 import { usePhotosStore } from '@/store/photos'
+import { useDatastreamStore } from '@/store/datastreams'
 import { useThing } from '@/composables/useThing'
-// import { useAuthentication } from '@/composables/useAuthentication'
+import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreams } from '@/composables/useDatastreams'
 import { format } from 'date-fns'
-import SiteVisualization from '../SiteVisualization.vue'
+import SiteVisualization from '@/components/Datastream/SiteVisualization.vue'
+import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 
 const photoStore = usePhotosStore()
+const datastreamStore = useDatastreamStore()
 const thingId = useRoute().params.id.toString()
+
+const { isOwner } = useThingOwnership(thingId)
 
 const {
   thing,
   stringThing,
   mapOptions,
-  // updateFollow,
-  is_owner,
   deleteInput,
   deleteThing,
   thingProperties,
@@ -372,8 +405,10 @@ const {
   isAccessControlModalOpen,
   switchToAccessControlModal,
 } = useThing(thingId)
+
+const { visibleDatastreams } = useVisibleDatastreams(thingId)
+
 const {
-  visibleDatastreams,
   toggleVisibility,
   selectedDatastream,
   openDeleteModal,
@@ -384,15 +419,13 @@ const {
 // const { isAuthenticated } = useAuthentication()
 
 const headers = [
-  { title: 'Observed Property', key: 'observed_property_name', sortable: true },
+  { title: 'DataStream Info', key: 'info', sortable: true },
   {
     title: 'Observations (Last 72 Hours)',
     key: 'observations',
     sortable: false,
   },
   { title: 'Last Observation', key: 'last_observation' },
-  { title: 'Sampled Medium', key: 'sampled_medium' },
-  { title: 'Sensor', key: 'method_name' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -422,6 +455,8 @@ function formatDate(dateString: string) {
 }
 
 onMounted(async () => {
-  await photoStore.fetchPhotos(thingId)
+  photoStore.fetchPhotos(thingId)
+  await datastreamStore.fetchDatastreamsByThingId(thingId)
+  // TODO: observationStore.fetchObservationsByThingId(thingId)
 })
 </script>

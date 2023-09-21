@@ -4,6 +4,8 @@ import { User } from '@/types'
 import { Subject } from 'rxjs'
 import Notification from './notifications'
 import { useResetStore } from '@/store/resetStore'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export const useAuthStore = defineStore({
   id: 'authentication',
@@ -11,11 +13,14 @@ export const useAuthStore = defineStore({
     access_token: '',
     refresh_token: '',
     user: new User(),
-    loggingIn: false,
     sendingVerificationEmail: false,
     isLoginListenerSet: false,
     loggedIn$: new Subject<void>(),
   }),
+  getters: {
+    isLoggedIn: (state) => !!state.access_token,
+    isVerified: (state) => state.user.isVerified,
+  },
   actions: {
     resetState() {
       useResetStore().all()
@@ -23,249 +28,105 @@ export const useAuthStore = defineStore({
     },
     async login(email: string, password: string) {
       try {
-        this.loggingIn = true
         this.resetState()
-        const tokenResponse = await this.$http.post('/account/jwt/pair', {
+        const tokens = await api.post(ENDPOINTS.ACCOUNT.JWT_PAIR, {
           email: email,
           password: password,
         })
-        if (tokenResponse.status === 200) {
-          this.access_token = tokenResponse.data.access
-          this.refresh_token = tokenResponse.data.refresh
-          const userResponse = await this.$http.get('/account/user')
-          if (userResponse.status === 200) {
-            this.user = userResponse.data
-            await router.push({ name: 'Sites' })
-            Notification.toast({
-              message: 'You have logged in!',
-              type: 'success',
-            })
-          } else if (userResponse.status === 401) {
-            Notification.toast({
-              message: 'Invalid email or password.',
-              type: 'error',
-            })
-          } else {
-            Notification.toast({
-              message: 'Server error. Please try again later.',
-              type: 'error',
-            })
-          }
-        } else if (tokenResponse.status === 401) {
-          Notification.toast({
-            message: 'Invalid email or password.',
-            type: 'error',
-          })
-        } else {
-          Notification.toast({
-            message: 'Server error. Please try again later.',
-            type: 'error',
-          })
-        }
-      } catch (error: any) {
-        if (!error.response) {
-          Notification.toast({
-            message: 'Network error. Please check your connection.',
-            type: 'error',
-          })
-        } else {
-          this.resetState()
-          if (error.response.status === 401) {
-            Notification.toast({
-              message: 'Invalid email or password.',
-              type: 'error',
-            })
-          } else {
-            Notification.toast({
-              message: 'Something went wrong',
-              type: 'error',
-            })
-          }
-        }
-        console.error('Error Logging in', error)
-      } finally {
-        this.loggingIn = false
+
+        this.access_token = tokens.access
+        this.refresh_token = tokens.refresh
+        const user = await api.fetch(ENDPOINTS.USER)
+        if (!user) return
+
+        this.user = user
+        await router.push({ name: 'Sites' })
+      } catch (error) {
+        console.error('Error logging in', error)
       }
     },
     async logout() {
-      await router.push({ name: 'Login' })
-      this.resetState()
-    },
-    async refreshAccessToken() {
       try {
-        const { data } = await this.$http.post('/account/jwt/refresh', {
-          refresh: this.refresh_token,
-        })
-        this.access_token = data.access
-        this.refresh_token = data.refresh
-        console.log('Access token refreshed')
+        await router.push({ name: 'Login' })
+        this.resetState()
       } catch (error) {
-        console.error('Error refreshing access token:', error)
-        await this.logout()
+        console.error('Error logging out', error)
       }
     },
     async createUser(user: User) {
       try {
-        const response = await this.$http.post('/account/user', user)
-        if (response.status === 200) {
-          try {
-            useResetStore().things()
-          } catch (error) {}
-          this.user = response.data.user
-          this.access_token = response.data.access
-          this.refresh_token = response.data.refresh
-          await router.push({ name: 'VerifyEmail' })
-          Notification.toast({
-            message: 'Account successfully created.',
-            type: 'success',
-          })
-        }
-      } catch (error: any) {
-        if (!error.response) {
-          Notification.toast({
-            message: 'Network error. Please check your connection.',
-            type: 'error',
-          })
-        } else if (
-          error.response.status === 400 &&
-          error.response.data.detail === 'EmailAlreadyExists'
-        ) {
-          Notification.toast({
-            message: 'A user with this email already exists.',
-            type: 'error',
-          })
-        } else {
-          Notification.toast({
-            message: 'Something went wrong.',
-            type: 'error',
-          })
-        }
+        const data = await api.post(ENDPOINTS.USER, user)
+        useResetStore().things()
+        this.user = data.user
+        this.access_token = data.access
+        this.refresh_token = data.refresh
+        await router.push({ name: 'VerifyEmail' })
+      } catch (error) {
         console.error('Error creating user', error)
       }
     },
     async sendVerificationEmail() {
-      if (this.sendingVerificationEmail === true) { return }
-      this.sendingVerificationEmail = true
-      const response = await this.$http.post('/account/send-verification-email')
-      this.sendingVerificationEmail = false
-      if (response.status === 200) {
-        Notification.toast({
-          message: 'Verification email sent successfully.',
-          type: 'info',
-        })
-      } else {
-        Notification.toast({
-          message: 'Failed to send verification email.',
-          type: 'error',
-        })
+      try {
+        if (this.sendingVerificationEmail) return
+        this.sendingVerificationEmail = true
+        await api.post(ENDPOINTS.ACCOUNT.SEND_VERIFICATION_EMAIL)
+        this.sendingVerificationEmail = false
+      } catch (error) {
+        console.error('Error sending verification email', error)
       }
     },
     async activateAccount(uid: string, token: string) {
-      const response = await this.$http.post('account/activate', {
-        uid: uid,
-        token: token
-      })
-      if (response.status === 200 && response.data.user.is_verified) {
-        this.user = response.data.user
-        this.access_token = response.data.access
-        this.refresh_token = response.data.refresh
-        Notification.toast({
-          message: 'Your HydroServer account has been activated.',
-          type: 'success',
+      try {
+        const data = await api.post(ENDPOINTS.ACCOUNT.ACTIVATE, {
+          uid: uid,
+          token: token,
         })
-      } else {
-        Notification.toast({
-          message: 'Account activation failed. Token incorrect or expired.',
-          type: 'error',
-        })
+        if (!data.user.isVerified) return
+        this.user = data.user
+        this.access_token = data.access
+        this.refresh_token = data.refresh
+        await router.push({ name: 'Sites' })
+      } catch (error) {
+        console.error('Error activating account', error)
       }
-      await router.push({ name: 'Sites' })
     },
     async updateUser(user: User) {
       try {
-        const { data } = await this.$http.patch('/account/user', user)
+        const data = await api.patch(ENDPOINTS.USER, user, this.user)
         // things.organizations could be affected for many things so just invalidate cache
-        try {
-          useResetStore().things()
-        } catch (error) {}
-        this.user = data
-      } catch (error) {}
+        useResetStore().things()
+        this.user = data as User
+      } catch (error) {
+        console.error('Error updating user', error)
+      }
     },
     async deleteAccount() {
       try {
-        await this.$http.delete('/user')
+        await api.delete(ENDPOINTS.USER)
         await this.logout()
-        Notification.toast({
-          message: 'Your account has been deleted',
-          type: 'info',
-        })
       } catch (error) {
-        console.error('Error deleting account:', error)
-        Notification.toast({
-          message:
-            'Error occurred while deleting your account. Please try again.',
-          type: 'error',
-        })
+        console.error('Error deleting account', error)
       }
     },
     async requestPasswordReset(email: String) {
       try {
-        const response = await this.$http.post('/user/password_reset', {
+        return await api.post(ENDPOINTS.USER.SEND_RESET_EMAIL, {
           email: email,
         })
-        return response.status === 200
-      } catch (error: any) {
-        if (!error.response) {
-          Notification.toast({
-            message: 'Network error. Please check your connection.',
-            type: 'error',
-          })
-        } else if (error.response.status === 404) {
-          Notification.toast({
-            message: 'No account was found for the email you specified',
-            type: 'error',
-          })
-        } else {
-          Notification.toast({
-            message:
-              'Error occurred while requesting your password reset email. Please try again.',
-            type: 'error',
-          })
-        }
-        console.error('Error requesting password reset:', error)
-        return false
+      } catch (error) {
+        console.error('Error requesting password reset', error)
       }
     },
     async resetPassword(uid: string, token: string, password: string) {
       try {
-        const response = await this.$http.post('/user/reset_password', {
+        await api.post(ENDPOINTS.USER.RESET_PASSWORD, {
           uid: uid,
           token: token,
           password: password,
         })
-        console.log('Reset Password Response', response)
-        if (response.status === 200) {
-          Notification.toast({
-            message: 'Successfully reset password!',
-            type: 'success',
-          })
-          await router.push({ name: 'Login' })
-        }
-      } catch (error: any) {
-        if (!error.response) {
-          Notification.toast({
-            message: 'Network error. Please check your connection.',
-            type: 'error',
-          })
-        } else {
-          Notification.toast({
-            message:
-              'Error occurred while requesting your password reset email. Please try again.',
-            type: 'error',
-          })
-        }
-        console.error('Error requesting password reset:', error.response.status)
-        return false
+        await router.push({ name: 'Login' })
+      } catch (error) {
+        console.error('Error resetting password', error)
       }
     },
     async OAuthLogin(backend: string, callback?: () => any) {
@@ -321,13 +182,5 @@ export const useAuthStore = defineStore({
         })
       }
     },
-  },
-  getters: {
-    isLoggedIn: (state) => {
-      return !!state.access_token
-    },
-    isVerified: (state) => {
-      return state.user.is_verified
-    }
   },
 })
