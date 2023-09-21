@@ -17,6 +17,7 @@ const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PHOTOS_BASE = `${BASE_URL}/data/photos`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
 const UNIT_BASE = `${BASE_URL}/data/units`
+const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
 const FOR_ID = (base: string) => (id: string) => `${base}/${id}`
 
@@ -72,4 +73,11 @@ export const ENDPOINTS = {
     OWNERSHIP: (id: string) => `${THINGS_BASE}/${id}/ownership`,
     PRIVACY: (id: string) => `${THINGS_BASE}/${id}/privacy`,
   }),
+
+  SENSORTHINGS: {
+    DATASTREAMS: {
+      OBSERVATIONS: (id: string, timestamp: string) =>
+        `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${timestamp}`,
+    },
+  },
 }

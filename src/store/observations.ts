@@ -1,28 +1,40 @@
 import { defineStore } from 'pinia'
-import { Observation } from '@/types'
 import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
+
+interface DataArray {
+  date: string
+  value: number
+}
 
 export const useObservationStore = defineStore('observations', {
   state: () => ({
-    observations: {} as Record<string, Observation>,
-    loaded: false,
+    observations: {} as Record<string, DataArray>,
   }),
+  persist: false,
   actions: {
-    async fetchObservations() {
-      if (this.loaded) return
+    async fetchObservations(id: string, timestamp: string) {
       try {
-        const { data } = await api.fetch('/data/observations')
-        const observationsDictionary = data.reduce(
-          (acc: Record<string, Observation>, observation: Observation) => {
-            acc[observation.id] = observation
-            return acc
-          },
-          {} as Record<string, Observation>
+        const data = await api.fetch(
+          ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(id, timestamp)
         )
-        this.$patch({ observations: observationsDictionary, loaded: true })
+        const dataArray = data.values[0].dataArray
+        const newObs = dataArray.map((item: [string, number]) => {
+          return {
+            date: new Date(item[0]),
+            value: item[1],
+          }
+        })
+        this.$patch({ observations: { ...this.observations, [id]: newObs } })
       } catch (error) {
         console.error('Error fetching observations from DB', error)
       }
+    },
+    // TODO: Fetch observations for thingId
+    subtractHours(timestamp: string, hours: number): string {
+      const date = new Date(timestamp)
+      date.setHours(date.getHours() - hours)
+      return date.toISOString()
     },
   },
 })
