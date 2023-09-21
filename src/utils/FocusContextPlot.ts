@@ -9,6 +9,8 @@ interface PlotData {
 const dispatch = d3.dispatch('timeWindow')
 
 export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
+  const [minX, maxX] = d3.extent(data, (d) => d.date)
+  const [minY, maxY] = d3.extent(data, (d) => d.value)
   const spec = {
     height: 250,
     grid: true,
@@ -25,13 +27,32 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
         stroke: '#4CAF50',
         clip: true,
       }),
-      Plot.tip(
+      // We need to overlay a rectangle in order for the ruleX mouseover
+      // to be responsive above the areaY line.
+      Plot.rect([{ minX, maxX, minY, maxY }], {
+        x1: (d) => d.minX,
+        x2: (d) => d.maxX,
+        y1: (d) => d.minY,
+        y2: (d) => d.maxY,
+        fillOpacity: 0,
+        clip: true,
+      }),
+      Plot.ruleX(
         data,
         Plot.pointerX({
           x: 'date',
-          y: 'value',
+          py: 'value',
+          stroke: 'grey',
         })
       ),
+      Plot.dot(data, Plot.pointerX({ x: 'date', y: 'value', stroke: 'grey' })),
+      // Plot.tip(
+      //   data,
+      //   Plot.pointerX({
+      //     x: 'date',
+      //     y: 'value',
+      //   })
+      // ),
       Plot.text(
         data,
         Plot.pointerX({
