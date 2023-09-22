@@ -152,7 +152,7 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { reactive, ref, onMounted, defineProps, watch } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'

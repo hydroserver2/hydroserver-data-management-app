@@ -212,28 +212,28 @@ const sensorHeaders = [
   { title: 'Method Code', key: 'methodCode' },
   { title: 'UUID', key: 'id' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+] as const
 
 const OPHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Type', key: 'type' },
   { title: 'Code', key: 'code' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+] as const
 
 const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },
   { title: 'Definition', key: 'definition' },
   { title: 'Explanation', key: 'explanation' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+] as const
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Type', key: 'type' },
   { title: 'Symbol', key: 'symbol' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+] as const
 </script>
 
 <style scoped>
