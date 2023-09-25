@@ -6,15 +6,17 @@ import Notification from './notifications'
 import { useResetStore } from '@/store/resetStore'
 import { createPatchObject } from '@/utils/api'
 
+const baseUrl = import.meta.env.VITE_APP_PROXY_BASE_URL
+let OAuthLoginController = new AbortController()
+
 export const useAuthStore = defineStore({
   id: 'authentication',
   state: () => ({
-    access_token: '',
-    refresh_token: '',
+    accessToken: '',
+    refreshToken: '',
     user: new User(),
     loggingIn: false,
     sendingVerificationEmail: false,
-    isLoginListenerSet: false,
     loggedIn$: new Subject<void>(),
   }),
   actions: {
@@ -31,8 +33,8 @@ export const useAuthStore = defineStore({
           password: password,
         })
         if (tokenResponse.status === 200) {
-          this.access_token = tokenResponse.data.access
-          this.refresh_token = tokenResponse.data.refresh
+          this.accessToken = tokenResponse.data.access
+          this.refreshToken = tokenResponse.data.refresh
           const userResponse = await this.$http.get('/account/user')
           if (userResponse.status === 200) {
             this.user = userResponse.data
@@ -95,10 +97,10 @@ export const useAuthStore = defineStore({
     async refreshAccessToken() {
       try {
         const { data } = await this.$http.post('/account/jwt/refresh', {
-          refresh: this.refresh_token,
+          refresh: this.refreshToken,
         })
-        this.access_token = data.access
-        this.refresh_token = data.refresh
+        this.accessToken = data.access
+        this.refreshToken = data.refresh
         console.log('Access token refreshed')
       } catch (error) {
         console.error('Error refreshing access token:', error)
@@ -113,8 +115,8 @@ export const useAuthStore = defineStore({
             useResetStore().things()
           } catch (error) {}
           this.user = response.data.user
-          this.access_token = response.data.access
-          this.refresh_token = response.data.refresh
+          this.accessToken = response.data.access
+          this.refreshToken = response.data.refresh
           await router.push({ name: 'VerifyEmail' })
           Notification.toast({
             message: 'Account successfully created.',
@@ -169,8 +171,8 @@ export const useAuthStore = defineStore({
       })
       if (response.status === 200 && response.data.user.isVerified) {
         this.user = response.data.user
-        this.access_token = response.data.access
-        this.refresh_token = response.data.refresh
+        this.accessToken = response.data.access
+        this.refreshToken = response.data.refresh
         Notification.toast({
           message: 'Your HydroServer account has been activated.',
           type: 'success',
@@ -274,63 +276,64 @@ export const useAuthStore = defineStore({
         return false
       }
     },
-    async OAuthLogin(backend: string, callback?: () => any) {
-      let OAuthUrl: string = ''
+    async OAuthLogin(provider: string, callback?: () => any) {
+      const handleMessage = async (event: MessageEvent) => {
+        if (
+          // event.origin !== APP_URL ||
+          !event.data.hasOwnProperty('access')
+        ) {
+          return
+        }
 
-      if (backend === 'google') {
-        OAuthUrl = '/api/account/google/login'
-      } else if (backend === 'orcid') {
-        OAuthUrl = '/api/account/orcid/login'
+        if (event.data.access) {
+          this.accessToken = event.data.accessToken
+          this.refreshToken = event.data.refreshToken
+
+          const userInfo = await this.$http.get('/account/user')
+          console.log(userInfo)
+
+          // this.user = userInfo as User
+          Notification.toast({
+            message: 'You have logged in!',
+            type: 'success',
+          })
+          // await User.commit((state) => {
+          //   state.isLoggedIn = true
+          //   state.accessToken = event.data.accessToken
+          // })
+          this.loggedIn$.next()
+          callback?.()
+          router.push({ name: 'Sites' })
+        } else {
+          Notification.toast({
+            message: 'Failed to Log In',
+            type: 'error',
+          })
+        }
       }
 
-      window.open(OAuthUrl, '_blank')
+      // TODO: baseUrl domain has to be the same as the app's domain
+      // Otherwise, for security reasons, the browser will not set `window.opener`.
+      const OAuthUrl = `${baseUrl}/api/account/${provider}/login`
+      window.open(
+        OAuthUrl,
+        '_blank'
+        // 'location=1,status=1,scrollbars=1, width=800,height=800'
+      )
 
-      this.isLoginListenerSet = false
+      console.info(`User: listening to login window...`)
 
-      if (!this.isLoginListenerSet) {
-        this.isLoginListenerSet = true // Prevents registering the listener more than once
-        console.info(`User: listening to login window...`)
-        window.addEventListener('message', async (event: MessageEvent) => {
-          console.log(event)
-          if (
-            // event.origin !== APP_URL ||
-            !event.data.hasOwnProperty('access')
-          ) {
-            return
-          }
-
-          if (event.data.access) {
-            console.log(event)
-
-            this.access_token = event.data.access
-            this.refresh_token = event.data.refresh
-            this.user = event.data.user
-            await router.push({ name: 'Sites' })
-
-            Notification.toast({
-              message: 'You have logged in!',
-              type: 'success',
-            })
-            // await User.commit((state) => {
-            //   state.isLoggedIn = true
-            //   state.accessToken = event.data.accessToken
-            // })
-            this.loggedIn$.next()
-            this.isLoginListenerSet = false
-            callback?.()
-          } else {
-            Notification.toast({
-              message: 'Failed to Log In',
-              type: 'error',
-            })
-          }
-        })
-      }
+      // We need to re-instantiate the listener so that it uses current values in `handleMessage`
+      OAuthLoginController.abort()
+      OAuthLoginController = new AbortController()
+      window.addEventListener('message', handleMessage, {
+        signal: OAuthLoginController.signal, // Used to remove the listener
+      })
     },
   },
   getters: {
     isLoggedIn: (state) => {
-      return !!state.access_token
+      return !!state.accessToken
     },
     isVerified: (state) => {
       return state.user.isVerified

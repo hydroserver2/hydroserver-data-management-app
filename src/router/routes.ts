@@ -65,7 +65,6 @@ async function requireThingOwnership(
 }
 
 export const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'Home', component: Home },
   {
     path: '/browse',
     name: 'Browse',
@@ -76,6 +75,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/sites',
     name: 'Sites',
     component: () => import('@/components/Site/Sites.vue'),
+    // TODO: This type of guard syntax will only allow for one guard per route. Need to setup multiple guards
     beforeEnter: requireVerifiedAuth,
   },
   {
@@ -167,10 +167,21 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/components/account/ActivateAccount.vue'),
   },
   {
+    path: '/callback',
+    name: 'Callback',
+    meta: { hideFooter: true, hideNavBar: true },
+    component: () => import('@/components/account/LoginCallback.vue'),
+  },
+  {
     path: '/metadata',
     name: 'Metadata',
     component: () => import('@/components/Datastream/Metadata.vue'),
     beforeEnter: requireVerifiedAuth,
+  },
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/components/Home.vue'),
   },
   {
     path: '/:catchAll(.*)*',
