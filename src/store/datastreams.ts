@@ -49,7 +49,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     async updateDatastream(datastream: Datastream) {
       try {
         const data = await api.patch(
-          `${ENDPOINTS.DATASTREAMS}/patch/${datastream.id}`,
+          `${ENDPOINTS.DATASTREAMS}/${datastream.id}`,
           datastream,
           this.getDatastreamById(datastream.id)
         )
@@ -76,7 +76,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async deleteDatastream(id: string, thingId: string) {
       try {
-        await api.delete(`${ENDPOINTS.DATASTREAMS}/${id}/temp`)
+        await api.delete(`${ENDPOINTS.DATASTREAMS}/${id}`)
 
         const datastreams = this.datastreams[thingId].filter(
           (datastream) => datastream.id !== id

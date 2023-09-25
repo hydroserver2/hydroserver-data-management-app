@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useDataSourceDashboardStore } from '@/store/datasource_dashboard'
-import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
+import DataSourceForm from "@/components/DataSource/DataSourceForm.vue";
 
 const store = useDataSourceDashboardStore()
 const search = ref()
@@ -142,7 +142,7 @@ const deletingDataSource = ref(false)
 const updatingDataSourceStatus = ref(false)
 const dataSourceRowSelected = ref()
 
-store.fetchDataSources()
+store.fetchDataLoaders().then(() => store.fetchDataSources())
 
 function handleAddDataSource() {
   dataSourceRowSelected.value = null
@@ -196,7 +196,7 @@ const headers = [
     title: 'Data Loader',
     align: 'start',
     sortable: true,
-    key: 'data_loader',
+    key: 'dataLoader'
   },
   {
     title: 'Status',
@@ -208,13 +208,13 @@ const headers = [
     title: 'Last Synced',
     align: 'start',
     sortable: true,
-    key: 'last_synced',
+    key: 'lastSynced',
   },
   {
     title: 'Next Sync',
     align: 'start',
     sortable: true,
-    key: 'next_sync',
+    key: 'nextSync',
   },
   {
     title: 'Actions',

@@ -5,7 +5,6 @@ import { api } from '@/utils/api/apiMethods'
 interface DataLoader {
   id: string
   name: string
-  last_communication: string
 }
 
 interface DataLoaders {
@@ -32,12 +31,11 @@ export const useDataLoaderDashboardStore = defineStore(
     actions: {
       async fetchDataLoaders() {
         const dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
-        this.dataLoaders = dataLoaders.data.reduce(
+        this.dataLoaders = dataLoaders.reduce(
           (dataLoaders: any, dataLoader: any) => {
             dataLoaders[dataLoader['id']] = {
               id: dataLoader['id'],
               name: dataLoader['name'],
-              last_communication: dataLoader['last_communication'],
             }
             return dataLoaders
           },

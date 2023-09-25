@@ -14,8 +14,9 @@ const THINGS_BASE = `${BASE_URL}/data/things`
 const DATA_LOADERS_BASE = `${BASE_URL}/data/data-loaders`
 const DATA_SOURCES_BASE = `${BASE_URL}/data/data-sources`
 const OP_BASE = `${BASE_URL}/data/observed-properties`
-const PHOTOS_BASE = `${BASE_URL}/data/photos`
+const PHOTOS_BASE = `${BASE_URL}/data/things`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
+const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
 const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
@@ -43,7 +44,8 @@ export const ENDPOINTS = {
   }),
 
   DATASTREAMS: Object.assign(DS_BASE, {
-    FOR_THING: FOR_ID(DS_BASE),
+    ID: FOR_ID(DS_BASE),
+    FOR_THING: (id: string) => `${THINGS_BASE}/${id}/datastreams`,
     CSV: (id: string) => `${DS_BASE}/csv/${id}`,
   }),
 
@@ -65,6 +67,10 @@ export const ENDPOINTS = {
 
   UNITS: Object.assign(UNIT_BASE, {
     ID: FOR_ID(UNIT_BASE),
+  }),
+
+  RESULT_QUALIFIERS: Object.assign(RQ_BASE, {
+    ID: FOR_ID(RQ_BASE),
   }),
 
   THINGS: Object.assign(THINGS_BASE, {

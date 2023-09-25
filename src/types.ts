@@ -190,6 +190,20 @@ export class ProcessingLevel {
   }
 }
 
+export class ResultQualifier {
+  id: string
+  personId: string
+  code: string
+  description: string
+
+  constructor() {
+    this.id = ''
+    this.personId = ''
+    this.code = ''
+    this.description = ''
+  }
+}
+
 export class Organization {
   name: string
   code: string
