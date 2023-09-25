@@ -1,11 +1,19 @@
 <template>
   <v-app>
-    <Navbar />
-    <v-main class="flex-grow-1" :class="{ 'is-full-screen': isFullScreen }"
+    <Navbar v-if="!route.meta.hideNavBar" />
+
+    <v-main
+      class="flex-grow-1"
+      :class="{ 'is-full-screen': route.meta.isFullScreen }"
       ><router-view
     /></v-main>
-    <Footer v-if="!hideFooter" class="flex-grow-0" />
+
+    <Footer v-if="!route.meta.hideFooter" class="flex-grow-0" />
     <Notifications />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+      rel="stylesheet"
+    />
   </v-app>
 </template>
 
@@ -14,17 +22,8 @@ import Navbar from '@/components/base/Navbar.vue'
 import Footer from '@/components/base/Footer.vue'
 import Notifications from '@/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
 
 const route = useRoute()
-
-const hideFooter = computed(() => {
-  return route.meta.hideFooter
-})
-
-const isFullScreen = computed(() => {
-  return route.meta.isFullScreen
-})
 </script>
 
 <style scoped lang="scss">
@@ -34,6 +33,9 @@ const isFullScreen = computed(() => {
 </style>
 
 <style>
+/* TODO: This needs to be done by overriding SASS variables.
+https://vuetifyjs.com/en/features/sass-variables/#sass
+https://vuetifyjs.com/en/api/v-tooltip/#sass */
 /* Make tooltips easier to read */
 .v-tooltip > .v-overlay__content {
   background-color: rgba(var(--v-theme-surface-variant), 1) !important;
