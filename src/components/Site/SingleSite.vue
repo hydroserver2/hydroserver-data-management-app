@@ -455,7 +455,8 @@ function formatDate(dateString: string) {
 }
 
 onMounted(async () => {
-  await photoStore.fetchPhotos(thingId)
+  photoStore.fetchPhotos(thingId)
   await datastreamStore.fetchDatastreamsByThingId(thingId)
+  // TODO: observationStore.fetchObservationsByThingId(thingId)
 })
 </script>

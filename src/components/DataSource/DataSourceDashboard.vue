@@ -13,9 +13,7 @@
       class="elevation-3"
     >
       <template v-slot:top>
-        <v-toolbar
-          flat
-        >
+        <v-toolbar flat>
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
@@ -56,20 +54,21 @@
           v-if="item.raw.paused === true"
           :disabled="updatingDataSourceStatus"
           icon="mdi-play"
-          @click="handleUpdateDataSourceStatus(item.raw.id, item.raw.paused, item.raw)"
+          @click="
+            handleUpdateDataSourceStatus(item.raw.id, item.raw.paused, item.raw)
+          "
         />
         <v-btn
           v-else
           :disabled="updatingDataSourceStatus"
           icon="mdi-pause"
-          @click="handleUpdateDataSourceStatus(item.raw.id, item.raw.paused, item.raw)"
+          @click="
+            handleUpdateDataSourceStatus(item.raw.id, item.raw.paused, item.raw)
+          "
         />
         <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon="mdi-dots-vertical"
-            />
+            <v-btn v-bind="props" icon="mdi-dots-vertical" />
           </template>
           <v-list>
             <v-list-item
@@ -94,36 +93,29 @@
         </v-menu>
       </template>
     </v-data-table>
-    <v-dialog
-      v-model="dataSourceFormOpen"
-      persistent
-    >
+    <v-dialog v-model="dataSourceFormOpen" persistent>
       <DataSourceForm
         @close-dialog="handleFinishEditing"
         :dataSourceId="dataSourceRowSelected"
       />
     </v-dialog>
-    <v-dialog
-      v-model="confirmDeleteOpen"
-      max-width="500"
-    >
+    <v-dialog v-model="confirmDeleteOpen" max-width="500">
       <v-card>
-        <v-card-title>
-          Confirm Delete Data Source
-        </v-card-title>
+        <v-card-title> Confirm Delete Data Source </v-card-title>
         <v-card-text>
           Are you sure you want to delete the following data source?
         </v-card-text>
         <v-card-text>
-          • {{ store.dataSourceRows.filter(row => row.id === dataSourceRowSelected)[0].name }}
+          •
+          {{
+            store.dataSourceRows.filter(
+              (row) => row.id === dataSourceRowSelected
+            )[0].name
+          }}
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            @click="confirmDeleteOpen = false"
-          >
-            Cancel
-          </v-btn>
+          <v-btn @click="confirmDeleteOpen = false"> Cancel </v-btn>
           <v-btn
             color="red"
             :disabled="deletingDataSource"
@@ -140,8 +132,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useDataSourceDashboardStore } from '@/store/datasource_dashboard'
-import DataSourceForm from "@/components/DataSource/DataSourceForm.vue";
-
+import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 
 const store = useDataSourceDashboardStore()
 const search = ref()
@@ -163,7 +154,11 @@ function handleEditDataSource(dataSourceId: string) {
   dataSourceFormOpen.value = true
 }
 
-async function handleUpdateDataSourceStatus(dataSourceId: string, paused: boolean, row: any) {
+async function handleUpdateDataSourceStatus(
+  dataSourceId: string,
+  paused: boolean,
+  row: any
+) {
   updatingDataSourceStatus.value = true
   row.paused = !paused
   await store.updateDataSourceStatus(dataSourceId, paused).then(() => {
@@ -201,7 +196,7 @@ const headers = [
     title: 'Data Loader',
     align: 'start',
     sortable: true,
-    key: 'data_loader'
+    key: 'data_loader',
   },
   {
     title: 'Status',
@@ -227,11 +222,7 @@ const headers = [
     sortable: true,
     key: 'actions',
   },
-]
-
-
+] as const
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

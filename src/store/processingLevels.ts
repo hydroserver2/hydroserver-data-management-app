@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ProcessingLevel } from '@/types'
-import { createPatchObject } from '@/utils/api'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
@@ -19,7 +20,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async fetchProcessingLevels() {
       if (this.loaded) return
       try {
-        const { data } = await this.$http.get('/data/processing-levels')
+        const data = await api.fetch(ENDPOINTS.PROCESSING_LEVELS)
         this.processingLevels = data
         this.sortProcessingLevels()
         this.loaded = true
@@ -27,26 +28,26 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
         console.error('Error fetching processing levels from DB', error)
       }
     },
-    async updateProcessingLevel(pl: ProcessingLevel) {
+    async updateProcessingLevel(procLevel: ProcessingLevel) {
       try {
-        const patchData = createPatchObject(this.getById(pl.id), pl)
-        if (Object.keys(patchData).length === 0) return
-        console.log('PL', patchData)
-        const { data } = await this.$http.patch(
-          `/data/processing-levels/${pl.id}`,
-          patchData
+        await api.patch(
+          ENDPOINTS.PROCESSING_LEVELS.ID(procLevel.id),
+          procLevel,
+          this.getById(procLevel.id)
         )
-        const index = this.processingLevels.findIndex((pl) => pl.id === pl.id)
-        if (index !== -1) this.processingLevels[index] = data
+        const index = this.processingLevels.findIndex(
+          (pl) => pl.id === procLevel.id
+        )
+        if (index !== -1) this.processingLevels[index] = procLevel
         this.sortProcessingLevels()
       } catch (error) {
-        console.error(`Error updating processing level with id ${pl.id}`, error)
+        console.error(`Error updating processing level with id`, error)
       }
     },
     async createProcessingLevel(processingLevel: ProcessingLevel) {
       try {
-        const { data } = await this.$http.post(
-          '/data/processing-levels',
+        const data = await api.post(
+          ENDPOINTS.PROCESSING_LEVELS,
           processingLevel
         )
         this.processingLevels.push(data)
@@ -58,16 +59,11 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     },
     async deleteProcessingLevel(id: string) {
       try {
-        const response = await this.$http.delete(
-          `/data/processing-levels/${id}`
+        await api.delete(ENDPOINTS.PROCESSING_LEVELS.ID(id))
+        this.processingLevels = this.processingLevels.filter(
+          (pl) => pl.id !== id
         )
-        if (response.status === 200 || response.status === 204) {
-          this.processingLevels = this.processingLevels.filter(
-            (pl) => pl.id !== id
-          )
-          this.sortProcessingLevels()
-        } else
-          console.error('Error deleting processing level from server', response)
+        this.sortProcessingLevels()
       } catch (error) {
         console.error('Error deleting processing level', error)
       }

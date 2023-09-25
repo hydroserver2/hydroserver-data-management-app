@@ -10,11 +10,6 @@ export function useDatastream(thingId: string, id: string) {
       dsStore.getDatastreamForThingById(thingId, id) as unknown as Datastream
   )
 
-  const observations = computed(() => {
-    if (!datastream.value) return []
-    return datastream.value.observations
-  })
-
   onMounted(async () => {
     if (dsStore.datastreams[thingId]) return
     await dsStore.fetchDatastreamsByThingId(thingId)
@@ -22,6 +17,5 @@ export function useDatastream(thingId: string, id: string) {
 
   return {
     datastream,
-    observations,
   }
 }
