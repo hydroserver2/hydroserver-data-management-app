@@ -106,7 +106,7 @@ const headers = [
     sortable: true,
     key: 'siteType',
   },
-]
+] as const
 
 const onRowClick = (event: Event, item: any) => {
   const thing = item.item.raw

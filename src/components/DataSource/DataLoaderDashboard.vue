@@ -13,9 +13,7 @@
       class="elevation-3"
     >
       <template v-slot:top>
-        <v-toolbar
-          flat
-        >
+        <v-toolbar flat>
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
@@ -29,7 +27,7 @@
             color="primary"
             variant="elevated"
             :to="{
-              name: 'HydroLoader'
+              name: 'HydroLoader',
             }"
           >
             Download Streaming Data Loader
@@ -43,31 +41,28 @@
         />
       </template>
     </v-data-table>
-        <v-dialog
-      v-model="confirmDeleteOpen"
-      max-width="500"
-    >
+    <v-dialog v-model="confirmDeleteOpen" max-width="500">
       <v-card>
-        <v-card-title>
-          Confirm Delete Data Loader
-        </v-card-title>
+        <v-card-title> Confirm Delete Data Loader </v-card-title>
         <v-card-text>
           Are you sure you want to delete the following data loader?
         </v-card-text>
         <v-card-text>
-          • {{ store.dataLoaderRows.filter(row => row.id === dataLoaderRowSelected)[0].name }}
+          •
+          {{
+            store.dataLoaderRows.filter(
+              (row) => row.id === dataLoaderRowSelected
+            )[0].name
+          }}
         </v-card-text>
         <v-card-text>
-          Note: You should uninstall this data loader instance before deleting it here. Deleting this data loader
-          instance will unlink it from all associated data sources.
+          Note: You should uninstall this data loader instance before deleting
+          it here. Deleting this data loader instance will unlink it from all
+          associated data sources.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            @click="confirmDeleteOpen = false"
-          >
-            Cancel
-          </v-btn>
+          <v-btn @click="confirmDeleteOpen = false"> Cancel </v-btn>
           <v-btn
             color="red"
             :disabled="deletingDataLoader"
@@ -84,7 +79,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useDataLoaderDashboardStore } from '@/store/dataloader_dashboard'
-
 
 const store = useDataLoaderDashboardStore()
 const search = ref()
@@ -119,7 +113,7 @@ const headers = [
     title: 'Last Communication',
     align: 'start',
     sortable: true,
-    key: 'last_communication'
+    key: 'last_communication',
   },
   {
     title: 'Actions',
@@ -127,11 +121,7 @@ const headers = [
     sortable: false,
     key: 'actions',
   },
-]
-
-
+] as const
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

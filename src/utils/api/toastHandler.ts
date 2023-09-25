@@ -1,7 +1,7 @@
 import { ENDPOINTS } from '@/constants'
 import Notification from '@/store/notifications'
 
-export function sendToast(response: any, endpoint: string, method: string) {
+export function toastHandler(response: any, endpoint: string, method: string) {
   if (response instanceof TypeError) {
     Notification.toast({
       message: 'Network error. Please check your connection.',
@@ -9,23 +9,14 @@ export function sendToast(response: any, endpoint: string, method: string) {
     })
     return
   }
-
   const status = response.status
   if (!status) return
-  const type = determineToastType(response.status)
-
-  const messages = getMessages(endpoint)
-  let message = ''
-  if (messages && method in messages) {
-    let codes = messages[method]
-    if (status in codes) message = codes[status]
-    else return
-  }
-
+  const type = getType(status)
+  const message = getMessage(method, status, endpoint)
   if (message) Notification.toast({ type: type, message: message })
 }
 
-function determineToastType(status: number): 'success' | 'error' | 'default' {
+function getType(status: number): 'success' | 'error' | 'default' {
   if (status >= 200 && status < 300) {
     return 'success'
   } else if (status >= 400) {
@@ -34,9 +25,16 @@ function determineToastType(status: number): 'success' | 'error' | 'default' {
   return 'default'
 }
 
+function getMessage(method: string, status: number, endpoint: string) {
+  const messages = getEndpointMessages(endpoint)
+  return messages && method in messages && status in messages[method]
+    ? messages[method][status]
+    : undefined
+}
+
 // const THINGS_ID_PATTERN = new RegExp(`${ENDPOINTS.THINGS}/[a-zA-Z0-9]+`)
 
-function getMessages(endpoint: string): any {
+function getEndpointMessages(endpoint: string): any {
   if (endpoint.includes(ENDPOINTS.THINGS)) {
     // if (endpoint == ENDPOINTS.THINGS) {
     // } else if (THINGS_ID_PATTERN.test(endpoint)) {}

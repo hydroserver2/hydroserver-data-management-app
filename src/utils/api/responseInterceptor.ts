@@ -1,5 +1,5 @@
 import { handle401 } from '@/utils/api/handle401'
-import { sendToast } from './notifications'
+import { toastHandler } from '@/utils/api/toastHandler'
 
 export async function responseInterceptor(
   response: Response,
@@ -10,10 +10,10 @@ export async function responseInterceptor(
   if (response.status === 401 && !options._retry) {
     return await handle401(method, endpoint, options)
   } else if (response.ok) {
-    sendToast(response, endpoint, options.method)
+    toastHandler(response, endpoint, options.method)
     return await response.json()
   } else {
-    sendToast(response, endpoint, options.method)
+    toastHandler(response, endpoint, options.method)
     throw new Error('API call failed')
   }
 }
