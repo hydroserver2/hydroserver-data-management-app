@@ -11,7 +11,14 @@ export async function responseInterceptor(
     return await handle401(method, endpoint, options)
   } else if (response.ok) {
     toastHandler(response, endpoint, options.method)
-    return await response.json()
+    const contentType = response.headers.get('content-type')
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json()
+    } else if (contentType && contentType.includes('text/csv')) {
+      return await response.blob()
+    } else {
+      throw new Error('Unknown response type')
+    }
   } else {
     toastHandler(response, endpoint, options.method)
     throw new Error('API call failed')

@@ -8,9 +8,9 @@
         v-if="thingStore.ownedOrFollowedThings"
       ></GoogleMap> -->
       <GoogleMap
+        v-if="thingStore.ownedThings"
         :key="thingStore.ownedThings"
         :things="thingStore.ownedThings"
-        v-if="thingStore.ownedThings"
       ></GoogleMap>
       <v-divider></v-divider>
     </div>
