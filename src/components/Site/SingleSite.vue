@@ -416,7 +416,6 @@ const {
   isDeleteModalOpen: isDSDeleteModalOpen,
   deleteDatastreamInput,
 } = useDatastreams(thingId)
-// const { isAuthenticated } = useAuthentication()
 
 const headers = [
   { title: 'DataStream Info', key: 'info', sortable: true },
