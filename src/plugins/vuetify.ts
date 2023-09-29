@@ -54,6 +54,9 @@ export default createVuetify({
     VTable: {
       density: 'comfortable',
     },
+    VCombobox: {
+      variant: 'outlined',
+    },
     VBtn: {
       color: 'primary',
       variant: 'text',
