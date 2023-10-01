@@ -291,7 +291,7 @@ const ResultQualifierHeaders = [
   { title: 'Code', key: 'code' },
   { title: 'Description', key: 'description' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+] as const
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },
