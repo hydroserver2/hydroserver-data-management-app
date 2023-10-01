@@ -9,6 +9,9 @@ export async function responseInterceptor(
 ): Promise<any> {
   if (response.status === 401 && !options._retry) {
     return await handle401(method, endpoint, options)
+  } else if (response.status === 204) {
+    toastHandler(response, endpoint, options.method)
+    return null
   } else if (response.ok) {
     toastHandler(response, endpoint, options.method)
     const contentType = response.headers.get('content-type')

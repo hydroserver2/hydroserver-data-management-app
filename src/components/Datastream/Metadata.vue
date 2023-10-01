@@ -104,7 +104,6 @@
           ></DeleteModal>
         </v-dialog>
       </v-window-item>
-
       <v-window-item value="3">
         <!--    Units Table and Modal-->
         <v-data-table
@@ -135,6 +134,34 @@
           ></DeleteModal>
         </v-dialog>
       </v-window-item>
+      <v-window-item value="4">
+        <!--    Result Qualifiers Table and Modal-->
+        <v-data-table
+          :headers="ResultQualifierHeaders"
+          :items="rqStore.ownedResultQualifiers"
+          class="elevation-3"
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-icon @click="openRQDialog(item.raw)"> mdi-pencil </v-icon>
+            <v-icon @click="openRQDeleteDialog(item.raw)"> mdi-delete </v-icon>
+          </template></v-data-table
+        >
+        <v-dialog v-model="isRQCEModalOpen" width="60rem">
+          <ResultQualifierModal
+            :id="isRQSelected ? selectedRq.id : undefined"
+            @close="isRQCEModalOpen = false"
+          ></ResultQualifierModal>
+        </v-dialog>
+        <v-dialog v-model="isRQDModalOpen" width="40rem">
+          <DeleteModal
+            itemName="result qualifier"
+            :itemID="selectedRq.id"
+            parameter-name="resultQualifierId"
+            @delete="deleteRQ"
+            @close="isRQDModalOpen = false"
+          ></DeleteModal>
+        </v-dialog>
+      </v-window-item>
     </v-window>
   </v-container>
 </template>
@@ -148,6 +175,7 @@ import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useUnitStore } from '@/store/unit'
+import { useResultQualifierStore } from '@/store/resultQualifiers'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
 import { ref } from 'vue'
 
@@ -156,12 +184,15 @@ import {
   useUnits,
   useProcessingLevels,
   useObservedProperties,
+  useResultQualifiers,
 } from '@/composables/useMetadata'
+import ResultQualifierModal from "@/components/Datastream/ResultQualifierModal.vue";
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
 const plStore = useProcessingLevelStore()
 const unitStore = useUnitStore()
+const rqStore = useResultQualifierStore()
 
 const {
   isEntitySelected: isSensorSelected,
@@ -194,6 +225,16 @@ const {
 } = useProcessingLevels()
 
 const {
+  isEntitySelected: isRQSelected,
+  selectedEntity: selectedRq,
+  deleteSelectedEntity: deleteRQ,
+  isCreateEditModalOpen: isRQCEModalOpen,
+  isDeleteModalOpen: isRQDModalOpen,
+  openDialog: openRQDialog,
+  openDeleteDialog: openRQDeleteDialog,
+} = useResultQualifiers()
+
+const {
   isEntitySelected: isOPSelected,
   selectedEntity: selectedOP,
   deleteSelectedEntity: deleteOP,
@@ -220,6 +261,7 @@ const metaMap: Record<string, any> = {
     singularName: 'processing level',
   },
   3: { name: 'Units', openDialog: openUnitDialog, singularName: 'unit' },
+  4: { name: 'Result Qualifiers', openDialog: openRQDialog, 'singularName': 'result qualifier' },
 }
 const tab = ref(0)
 
@@ -244,6 +286,12 @@ const ProcLevelHeaders = [
   { title: 'Explanation', key: 'explanation' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
+
+const ResultQualifierHeaders = [
+  { title: 'Code', key: 'code' },
+  { title: 'Description', key: 'description' },
+  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
+]
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },

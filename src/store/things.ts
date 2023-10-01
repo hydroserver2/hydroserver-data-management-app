@@ -57,7 +57,9 @@ export const useThingStore = defineStore('things', {
           updatedThing,
           this.things[updatedThing.id]
         )
-        this.things[updatedThing.id] = data as Thing
+        if (data) {
+          this.things[updatedThing.id] = data as Thing
+        }
       } catch (error) {
         console.error('Error updating thing', error)
       }

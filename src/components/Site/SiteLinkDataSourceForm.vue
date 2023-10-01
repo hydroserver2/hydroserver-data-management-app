@@ -37,7 +37,7 @@
               label="Datastream Column *"
               hint="Enter the column name/index containing values for this datastream."
               :type="
-                (store.selectedDataSource.file_access || {}).header_row === 0
+                store.selectedDataSource.headerRow === 0
                   ? 'number'
                   : 'text'
               "
@@ -82,7 +82,7 @@ store.fetchDatastreams(props.thingId, props.datastreamId).then((datastream) => {
   store.fillForm(
     props.datastreamId,
     datastream.dataSourceId,
-    datastream.column
+    datastream.dataSourceColumn
   )
   store.fetchDataSources().then(() => {
     store.formLoaded = true
@@ -107,12 +107,8 @@ async function handleSave() {
     valid = await datastreamColumnName.value.validate()
   }
   if (valid.length === 0) {
-    let response = await store.saveDataSource()
-    if (response.status === 200) {
-      emit('closeDialog')
-    } else {
-      alert('Encountered an unexpected error updating linked data source.')
-    }
+    await store.saveDataSource()
+    emit('closeDialog')
   }
 }
 

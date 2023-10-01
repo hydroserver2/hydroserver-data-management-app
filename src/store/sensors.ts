@@ -1,11 +1,18 @@
 import { defineStore } from 'pinia'
-import { Sensor } from '@/types'
+import {ProcessingLevel, Sensor} from '@/types'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),
-  getters: {},
+  getters: {
+    ownedSensors(): Sensor[] {
+      return this.sensors.filter((sensor) => sensor.owner != null)
+    },
+    unownedSensors(): Sensor[] {
+      return this.sensors.filter((sensor) => sensor.owner == null)
+    },
+  },
   actions: {
     sortSensors() {
       this.sensors.sort((a, b) => a.name.localeCompare(b.name))
@@ -29,7 +36,7 @@ export const useSensorStore = defineStore('sensor', {
           this.getSensorById(sensor.id)
         )
         const index = this.sensors.findIndex((s) => s.id === sensor.id)
-        if (index !== -1) this.sensors[index] = data
+        if (index !== -1 && data) this.sensors[index] = data
         this.sortSensors()
       } catch (error) {
         console.error('Error updating sensor', error)
