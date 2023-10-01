@@ -155,6 +155,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataSources } from '@/composables/useDataSources'
+import { DataSource } from '@/types'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 
@@ -163,7 +164,7 @@ const dataSources = useDataSources()
 const route = useRoute()
 const dataSourceFormOpen = ref(false)
 
-let dataSource
+let dataSource: any
 
 if (dataSources.dataSourcesLoaded) {
   dataSource = dataSources.dataSources.value.find(
@@ -171,19 +172,19 @@ if (dataSources.dataSourcesLoaded) {
   )
 }
 
-function getScheduleString(dataSource) {
+function getScheduleString(dataSource: DataSource) {
   let scheduleString = ''
   if (dataSource.interval) {
     scheduleString = scheduleString.concat(`Every ${dataSource.interval} ${dataSource.intervalUnits}`)
   } else {
     scheduleString = scheduleString.concat(`Crontab: ${dataSource.crontab}`)
   }
-  if (dataSource.scheduleStartTime && dataSource.scheduleEndTime) {
-    scheduleString = scheduleString.concat(` from ${dataSource.scheduleStartTime} to ${dataSource.scheduleEndTime}`)
-  } else if (dataSource.scheduleStartTime) {
-    scheduleString = scheduleString.concat(` beginning ${dataSource.scheduleStartTime}`)
-  } else if (dataSource.scheduleEndTime) {
-    scheduleString = scheduleString.concat(` until ${dataSource.scheduleEndTime}`)
+  if (dataSource.startTime && dataSource.endTime) {
+    scheduleString = scheduleString.concat(` from ${dataSource.startTime} to ${dataSource.endTime}`)
+  } else if (dataSource.startTime) {
+    scheduleString = scheduleString.concat(` beginning ${dataSource.startTime}`)
+  } else if (dataSource.endTime) {
+    scheduleString = scheduleString.concat(` until ${dataSource.endTime}`)
   }
   return scheduleString
 }

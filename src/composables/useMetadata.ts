@@ -47,7 +47,6 @@ function useMetadata(
   }
 
   watch(selectedId, async () => {
-    console.log('HELLO')
     if (!selectedId.value) return
     populateForm(selectedId.value)
     await myForm.value?.validate()

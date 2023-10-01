@@ -51,8 +51,8 @@
           •
           {{
             dataLoaders.dataLoaders.value.find(
-              (dl) => dl.id.toString() === dataLoaders.selectedDataLoader.value.toString()
-            ).name
+              (dl) => dl.id === dataLoaders.selectedDataLoader.value
+            )?.name
           }}
         </v-card-text>
         <v-card-text>
@@ -84,7 +84,7 @@ const dataLoaders = useDataLoaders()
 const search = ref()
 const confirmDeleteOpen = ref(false)
 
-function handleDeleteDataLoader(dataLoaderId) {
+function handleDeleteDataLoader(dataLoaderId: any) {
   dataLoaders.selectedDataLoader.value = dataLoaderId
   confirmDeleteOpen.value = true
 }

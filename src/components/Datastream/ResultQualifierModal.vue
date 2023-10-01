@@ -14,18 +14,6 @@
           validate-on="blur"
         >
           <v-row>
-            <v-col>
-              <v-autocomplete
-                v-if="!isEdit"
-                v-model="selectedId"
-                label="Load a template result qualifier"
-                :items="formattedResultQualifiers"
-                item-value="id"
-                item-title="title"
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12">
               <v-text-field
                 v-model="resultQualifier.code"
@@ -53,7 +41,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
 import { useResultQualifiers } from '@/composables/useMetadata'
@@ -64,8 +51,6 @@ const emit = defineEmits(['uploaded', 'close'])
 
 const {
   isEdit,
-  selectedId,
-  formattedResultQualifiers,
   myForm,
   valid,
   selectedEntity: resultQualifier,

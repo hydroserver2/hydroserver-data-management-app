@@ -91,8 +91,8 @@
           •
           {{
             dataSources.dataSources.value.find(
-              (dl) => dl.id.toString() === dataSources.selectedDataSource.value.toString()
-            ).name
+              (dl) => dl.id === dataSources.selectedDataSource.value
+            )?.name
           }}
         </v-card-text>
         <v-card-actions>
@@ -123,7 +123,7 @@ const search = ref()
 const dataSourceFormOpen = ref(false)
 const confirmDeleteOpen = ref(false)
 
-async function handleTogglePaused(dataSourceId) {
+async function handleTogglePaused(dataSourceId: any) {
   dataSources.selectedDataSource.value = dataSourceId
   await dataSources.togglePaused().then(
     dataSources.selectedDataSource.value = null
@@ -135,12 +135,12 @@ function handleCreateDataSource() {
   dataSourceFormOpen.value = true
 }
 
-function handleEditDataSource(dataSourceId) {
+function handleEditDataSource(dataSourceId: any) {
   dataSources.selectedDataSource.value = dataSourceId
   dataSourceFormOpen.value = true
 }
 
-function handleDeleteDataSource(dataSourceId) {
+function handleDeleteDataSource(dataSourceId: any) {
   dataSources.selectedDataSource.value = dataSourceId
   confirmDeleteOpen.value = true
 }

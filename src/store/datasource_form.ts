@@ -1,6 +1,7 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api/apiMethods'
+import { DataSource } from '@/types'
 
 type scheduleTypeValues = 'interval' | 'crontab'
 type intervalUnitsValues = 'minutes' | 'hours' | 'days'
@@ -61,7 +62,7 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
       this.dataLoaders = dataLoaders
     },
     async saveDataSource() {
-      let dataSourceBody = {}
+      let dataSourceBody = {} as any
 
       dataSourceBody['name'] = this.dataSourceName
       dataSourceBody['dataLoaderId'] = this.dataLoader.id || this.dataLoader

@@ -21,7 +21,7 @@
   </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps(['status', 'paused'])
 
 </script>
