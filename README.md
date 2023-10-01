@@ -2,46 +2,13 @@
 
 The web app designed for real-time hydrologic data management.
 
-[Documentation](https://hydroserver2.github.io/docs/)
+[Documentation](https://hydroserver2.github.io/hydroserver/)
 
-[Contributing](CONTRIBUTING.md)
+[Contributing](https://github.com/hydroserver2/hydroserver/blob/main/CONTRIBUTING.md)
+
+[Issue Tracker](https://github.com/hydroserver2/hydroserver/issues)
 
 [License](LICENSE)
-
-## Building
-
-### Prerequisites
-
-- Node.js: The project uses various Node.js libraries. Check the package.json for specific version requirements.
-- npm (typically bundled with Node.js): This is required to install the project's dependencies.
-
-### Installation
-
-1. Clone the repository:
-
-```
-git clone https://github.com/hydroserver2/hydroserver-webapp-front.git
-```
-
-2. Navigate to the project directory and install the required packages:
-
-```
-cd hydroserver-webapp-front
-npm install
-```
-
-3. Build the static files and run the application in production mode:
-
-```
-npm run build
-npm run preview
-```
-
-or developer mode
-
-```
-npm run dev
-```
 
 ## Funding and Acknowledgements
 

@@ -1,146 +1,141 @@
 <template>
   <v-container>
-    <h4 class="text-h4 mb-4">Manage Metadata</h4>
+    <h5 class="text-h5 mb-4">Manage Metadata</h5>
 
-    <!--    Sensor Table and Modal-->
-    <v-row class="justify-start pt-5 pb-2">
-      <v-col cols="auto">
-        <h5 class="text-h5">Sensors</h5>
-      </v-col>
-      <v-col>
-        <v-btn-add @click="openSensorDialog()">Add New</v-btn-add>
-      </v-col>
-    </v-row>
-    <v-data-table
-      :headers="sensorHeaders"
-      :items="sensorStore.sensors"
-      class="elevation-3"
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-icon @click="openSensorDialog(item.raw)"> mdi-pencil </v-icon>
-        <v-icon @click="openSensorDeleteDialog(item.raw)"> mdi-delete </v-icon>
-      </template></v-data-table
-    >
-    <v-dialog v-model="isSensorCEModalOpen" width="60rem">
-      <SensorModal
-        :id="isSensorSelected ? selectedSensor.id : undefined"
-        @close="isSensorCEModalOpen = false"
-      ></SensorModal>
-    </v-dialog>
-    <v-dialog v-model="isSensorDModalOpen" width="40rem">
-      <DeleteModal
-        itemName="sensor"
-        :itemID="selectedSensor.id"
-        parameter-name="sensorId"
-        @delete="deleteSensor"
-        @close="isSensorDModalOpen = false"
-      ></DeleteModal>
-    </v-dialog>
+    <v-tabs v-model="tab" bg-color="brown" color="white" scrollable>
+      <v-tab v-for="metadata in metaMap">{{ metadata.name }}</v-tab>
+      <v-spacer></v-spacer>
+      <div class="d-flex align-center pr-4">
+        <v-btn-add
+          prependIcon="mdi-plus"
+          color="white"
+          @click="metaMap[tab]?.openDialog()"
+          >Add New {{ metaMap[tab]?.singularName }}</v-btn-add
+        >
+      </div>
+    </v-tabs>
 
-    <!--    Observed Properties Table and Modal-->
-    <v-row class="justify-start pt-5 pb-2">
-      <v-col cols="auto">
-        <h5 class="text-h5">Observed Properties</h5>
-      </v-col>
-      <v-col>
-        <v-btn-add @click="openOPDialog()">Add New</v-btn-add>
-      </v-col>
-    </v-row>
-    <v-data-table
-      :headers="OPHeaders"
-      :items="opStore.ownedOP"
-      class="elevation-3"
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-icon @click="openOPDialog(item.raw)"> mdi-pencil </v-icon>
-        <v-icon @click="openOPDeleteDialog(item.raw)"> mdi-delete </v-icon>
-      </template></v-data-table
-    >
-    <v-dialog v-model="isOPCEModalOpen" width="60rem">
-      <ObservedPropertyModal
-        :id="isOPSelected ? selectedOP.id : null"
-        @close="isOPCEModalOpen = false"
-      ></ObservedPropertyModal>
-    </v-dialog>
-    <v-dialog v-model="isOPDModalOpen" width="40rem">
-      <DeleteModal
-        itemName="Observed Property"
-        :itemID="selectedOP.id"
-        parameter-name="observedPropertyId"
-        @delete="deleteOP"
-        @close="isOPDModalOpen = false"
-      ></DeleteModal>
-    </v-dialog>
+    <v-window v-model="tab" class="elevation-3">
+      <v-window-item value="0">
+        <!--    Sensor Table and Modal-->
+        <v-data-table
+          :headers="sensorHeaders"
+          :items="sensorStore.sensors"
+          class="elevation-3"
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-icon @click="openSensorDialog(item.raw)"> mdi-pencil </v-icon>
+            <v-icon @click="openSensorDeleteDialog(item.raw)">
+              mdi-delete
+            </v-icon>
+          </template></v-data-table
+        >
+        <v-dialog v-model="isSensorCEModalOpen" width="60rem">
+          <SensorModal
+            :id="isSensorSelected ? selectedSensor.id : undefined"
+            @close="isSensorCEModalOpen = false"
+          ></SensorModal>
+        </v-dialog>
+        <v-dialog v-model="isSensorDModalOpen" width="40rem">
+          <DeleteModal
+            itemName="sensor"
+            :itemID="selectedSensor.id"
+            parameter-name="sensorId"
+            @delete="deleteSensor"
+            @close="isSensorDModalOpen = false"
+          ></DeleteModal>
+        </v-dialog>
+      </v-window-item>
 
-    <!--    Processing Levels Table and Modal-->
-    <v-row class="justify-start pt-5 pb-2">
-      <v-col cols="auto">
-        <h5 class="text-h5">Processing Levels</h5>
-      </v-col>
-      <v-col>
-        <v-btn-add @click="openPLDialog()">Add New</v-btn-add>
-      </v-col>
-    </v-row>
-    <v-data-table
-      :headers="ProcLevelHeaders"
-      :items="plStore.ownedProcessingLevels"
-      class="elevation-3"
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-icon @click="openPLDialog(item.raw)"> mdi-pencil </v-icon>
-        <v-icon @click="openPLDeleteDialog(item.raw)"> mdi-delete </v-icon>
-      </template></v-data-table
-    >
-    <v-dialog v-model="isPLCEModalOpen" width="60rem">
-      <ProcessingLevelModal
-        :id="isPLSelected ? selectedPL.id : undefined"
-        @close="isPLCEModalOpen = false"
-      ></ProcessingLevelModal>
-    </v-dialog>
-    <v-dialog v-model="isPLDModalOpen" width="40rem">
-      <DeleteModal
-        itemName="processing level"
-        :itemID="selectedPL.id"
-        parameter-name="processingLevelId"
-        @delete="deletePL"
-        @close="isPLDModalOpen = false"
-      ></DeleteModal>
-    </v-dialog>
+      <v-window-item value="1">
+        <!--    Observed Properties Table and Modal-->
+        <v-data-table
+          :headers="OPHeaders"
+          :items="opStore.ownedOP"
+          class="elevation-3"
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-icon @click="openOPDialog(item.raw)"> mdi-pencil </v-icon>
+            <v-icon @click="openOPDeleteDialog(item.raw)"> mdi-delete </v-icon>
+          </template></v-data-table
+        >
+        <v-dialog v-model="isOPCEModalOpen" width="60rem">
+          <ObservedPropertyModal
+            :id="isOPSelected ? selectedOP.id : null"
+            @close="isOPCEModalOpen = false"
+          ></ObservedPropertyModal>
+        </v-dialog>
+        <v-dialog v-model="isOPDModalOpen" width="40rem">
+          <DeleteModal
+            itemName="Observed Property"
+            :itemID="selectedOP.id"
+            parameter-name="observedPropertyId"
+            @delete="deleteOP"
+            @close="isOPDModalOpen = false"
+          ></DeleteModal>
+        </v-dialog>
+      </v-window-item>
 
-    <!--    Units Table and Modal-->
-    <v-row class="justify-start pt-5 pb-2">
-      <v-col cols="auto">
-        <h5 class="text-h5">Units</h5>
-      </v-col>
-      <v-col>
-        <v-btn-add @click="openUnitDialog()">Add New</v-btn-add>
-      </v-col>
-    </v-row>
-    <v-data-table
-      :headers="UnitHeaders"
-      :items="unitStore.ownedUnits"
-      class="elevation-3"
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-icon @click="openUnitDialog(item.raw)"> mdi-pencil </v-icon>
-        <v-icon @click="openUnitDeleteDialog(item.raw)"> mdi-delete </v-icon>
-      </template></v-data-table
-    >
-    <v-dialog v-model="isUnitCEModalOpen" width="60rem">
-      <UnitModal
-        :id="isUnitSelected ? selectedUnit.id : undefined"
-        @close="isUnitCEModalOpen = false"
-      ></UnitModal>
-    </v-dialog>
-    <v-dialog v-model="isUnitDModalOpen" width="40rem">
-      <DeleteModal
-        itemName="unit"
-        :itemID="selectedUnit.id"
-        parameter-name="unitId"
-        @delete="deleteUnit"
-        @close="isUnitDModalOpen = false"
-      ></DeleteModal>
-    </v-dialog>
+      <v-window-item value="2">
+        <!--    Processing Levels Table and Modal-->
+        <v-data-table
+          :headers="ProcLevelHeaders"
+          :items="plStore.ownedProcessingLevels"
+          class="elevation-3"
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-icon @click="openPLDialog(item.raw)"> mdi-pencil </v-icon>
+            <v-icon @click="openPLDeleteDialog(item.raw)"> mdi-delete </v-icon>
+          </template></v-data-table
+        >
+        <v-dialog v-model="isPLCEModalOpen" width="60rem">
+          <ProcessingLevelModal
+            :id="isPLSelected ? selectedPL.id : undefined"
+            @close="isPLCEModalOpen = false"
+          ></ProcessingLevelModal>
+        </v-dialog>
+        <v-dialog v-model="isPLDModalOpen" width="40rem">
+          <DeleteModal
+            itemName="processing level"
+            :itemID="selectedPL.id"
+            parameter-name="processingLevelId"
+            @delete="deletePL"
+            @close="isPLDModalOpen = false"
+          ></DeleteModal>
+        </v-dialog>
+      </v-window-item>
+
+      <v-window-item value="3">
+        <!--    Units Table and Modal-->
+        <v-data-table
+          :headers="UnitHeaders"
+          :items="unitStore.ownedUnits"
+          class="elevation-3"
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-icon @click="openUnitDialog(item.raw)"> mdi-pencil </v-icon>
+            <v-icon @click="openUnitDeleteDialog(item.raw)">
+              mdi-delete
+            </v-icon>
+          </template></v-data-table
+        >
+        <v-dialog v-model="isUnitCEModalOpen" width="60rem">
+          <UnitModal
+            :id="isUnitSelected ? selectedUnit.id : undefined"
+            @close="isUnitCEModalOpen = false"
+          ></UnitModal>
+        </v-dialog>
+        <v-dialog v-model="isUnitDModalOpen" width="40rem">
+          <DeleteModal
+            itemName="unit"
+            :itemID="selectedUnit.id"
+            parameter-name="unitId"
+            @delete="deleteUnit"
+            @close="isUnitDModalOpen = false"
+          ></DeleteModal>
+        </v-dialog>
+      </v-window-item>
+    </v-window>
   </v-container>
 </template>
 
@@ -154,6 +149,8 @@ import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useUnitStore } from '@/store/unit'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
+import { ref } from 'vue'
+
 import {
   useSensors,
   useUnits,
@@ -205,6 +202,26 @@ const {
   openDialog: openOPDialog,
   openDeleteDialog: openOPDeleteDialog,
 } = useObservedProperties()
+
+const metaMap: Record<string, any> = {
+  0: {
+    name: 'Sensors',
+    openDialog: openSensorDialog,
+    singularName: 'sensor',
+  },
+  1: {
+    name: 'Observed Properties',
+    openDialog: openOPDialog,
+    singularName: 'observed property',
+  },
+  2: {
+    name: 'Processing Levels',
+    openDialog: openPLDialog,
+    singularName: 'processing level',
+  },
+  3: { name: 'Units', openDialog: openUnitDialog, singularName: 'unit' },
+}
+const tab = ref(0)
 
 const sensorHeaders = [
   { title: 'Name', key: 'name' },

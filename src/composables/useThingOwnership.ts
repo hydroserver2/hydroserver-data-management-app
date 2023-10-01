@@ -1,9 +1,9 @@
-import { useAuthentication } from './useAuthentication'
 import { useThingStore } from '@/store/things'
 import { computed, ref, onMounted } from 'vue'
+import { useAuthStore } from '@/store/authentication'
 
 export function useThingOwnership(thingId: string) {
-  const { isAuthenticated } = useAuthentication()
+  const authStore = useAuthStore()
   const thingStore = useThingStore()
 
   const newOwnerEmail = ref('')
@@ -11,14 +11,14 @@ export function useThingOwnership(thingId: string) {
   const showPrimaryOwnerConfirmation = ref(false)
 
   const isOwner = computed(() => {
-    if (isAuthenticated && thingStore.things[thingId]) {
+    if (authStore.isLoggedIn && thingStore.things[thingId]) {
       return thingStore.things[thingId].ownsThing
     }
     return false
   })
 
   const isPrimaryOwner = computed(() => {
-    if (isAuthenticated && thingStore.things[thingId]) {
+    if (authStore.isLoggedIn && thingStore.things[thingId]) {
       return thingStore.things[thingId].isPrimaryOwner
     }
     return false

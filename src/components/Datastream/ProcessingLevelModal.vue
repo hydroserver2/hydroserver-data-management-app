@@ -60,7 +60,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useProcessingLevels } from '@/composables/useMetadata'
