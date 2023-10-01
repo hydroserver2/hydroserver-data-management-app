@@ -2,20 +2,12 @@ import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api/apiMethods'
 
-interface DatastreamDetail {
-  id: string
-  name: string
-  status: string
-  dataThru?: string
-  column: string | number
-}
-
 interface DataSourceDetail {
   id?: string
   name?: string
   status?: string
   paused?: string
-  dataLoader?: string
+  dataLoaderId?: string
   filePath?: string
   headerRow?: number
   dataStartRow?: number
@@ -25,7 +17,6 @@ interface DataSourceDetail {
   timestampFormat?: string
   timestampColumn?: string | number
   timezoneOffset?: string
-  datastreams?: DatastreamDetail[]
   lastSyncSuccessful?: boolean
   lastSyncMessage?: string
   lastSynced?: string
@@ -40,37 +31,30 @@ export const useDataSourceDetailStore = defineStore(
     actions: {
       async fetchDataSource() {
         // TODO: Are we sure this id will always be defined?
-        let response = await api.fetch(ENDPOINTS.DATA_SOURCES.ID(this.id!))
-        let dataSource = response.data
+        let dataSource = await api.fetch(ENDPOINTS.DATA_SOURCES.ID(this.id!))
 
         let now = new Date()
-        let scheduleStartTime = (dataSource.schedule || {}).start_time
-          ? new Date(Date.parse(dataSource.schedule.start_time))
+        let scheduleStartTime = dataSource.startTime
+          ? new Date(Date.parse(dataSource.startTime))
           : null
-        let scheduleEndTime = (dataSource.schedule || {}).end_time
-          ? new Date(Date.parse(dataSource.schedule.end_time))
+        let scheduleEndTime = dataSource.endTime
+          ? new Date(Date.parse(dataSource.endTime))
           : null
-        let databaseThruUpper = dataSource.database_thru_upper
-          ? new Date(Date.parse(dataSource.database_thru_upper))
+        let dataSourceThru = dataSource.dataSourceThru
+          ? new Date(Date.parse(dataSource.dataSourceThru))
           : null
-        let databaseThruLower = dataSource.database_thru_lower
-          ? new Date(Date.parse(dataSource.database_thru_lower))
+        let lastSynced = dataSource.lastSynced
+          ? new Date(Date.parse(dataSource.lastSynced))
           : null
-        let dataSourceThru = dataSource.data_source_thru
-          ? new Date(Date.parse(dataSource.data_source_thru))
-          : null
-        let lastSynced = dataSource.last_synced
-          ? new Date(Date.parse(dataSource.last_synced))
-          : null
-        let nextSync = dataSource.next_sync
-          ? new Date(Date.parse(dataSource.next_sync))
+        let nextSync = dataSource.nextSync
+          ? new Date(Date.parse(dataSource.nextSync))
           : null
 
         this.name = dataSource.name
-        this.dataLoader = (dataSource.data_loader || {}).name
-        this.filePath = (dataSource.file_access || {}).path
-        this.headerRow = (dataSource.file_access || {}).header_row
-        this.dataStartRow = (dataSource.file_access || {}).data_start_row
+        this.dataLoaderId = dataSource.dataLoaderId
+        this.filePath = dataSource.path
+        this.headerRow = dataSource.headerRow
+        this.dataStartRow = dataSource.dataStartRow
 
         this.scheduleStartTime = scheduleStartTime
           ? scheduleStartTime.toUTCString()
@@ -78,23 +62,23 @@ export const useDataSourceDetailStore = defineStore(
         this.scheduleEndTime = scheduleEndTime
           ? scheduleEndTime.toUTCString()
           : undefined
-        this.paused = (dataSource.schedule || {}).paused ? 'True' : 'False'
+        this.paused = dataSource.paused ? 'True' : 'False'
 
-        if ((dataSource.schedule || {}).crontab) {
-          this.scheduleValue = `Crontab: ${dataSource.schedule.crontab}`
-        } else if ((dataSource.schedule || {}).interval_units) {
-          this.scheduleValue = `Every ${dataSource.schedule.interval} ${dataSource.schedule.interval_units}`
+        if (dataSource.crontab) {
+          this.scheduleValue = `Crontab: ${dataSource.crontab}`
+        } else if (dataSource.intervalUnits) {
+          this.scheduleValue = `Every ${dataSource.interval} ${dataSource.intervalUnits}`
         }
 
         this.timestampFormat =
-          (dataSource.file_timestamp || {}).format === 'iso'
+          (dataSource.timestampFormat === 'iso'
             ? 'ISO'
-            : (dataSource.file_timestamp || {}).format
-        this.timestampColumn = (dataSource.file_timestamp || {}).column
-        this.timezoneOffset = (dataSource.file_timestamp || {}).offset
+            : dataSource.timestampFormat)
+        this.timestampColumn = dataSource.timestampColumn
+        this.timezoneOffset = dataSource.timestampOffset
 
-        this.lastSyncSuccessful = dataSource.last_sync_successful
-        this.lastSyncMessage = dataSource.last_sync_message
+        this.lastSyncSuccessful = dataSource.lastSyncSuccessful
+        this.lastSyncMessage = dataSource.lastSyncMessage
         this.lastSynced = lastSynced ? lastSynced.toUTCString() : undefined
         this.nextSync = nextSync ? nextSync.toUTCString() : undefined
         this.dataSourceThru = dataSourceThru
@@ -104,63 +88,20 @@ export const useDataSourceDetailStore = defineStore(
         if (lastSynced == null) {
           this.status = 'Pending'
         } else if (
-          databaseThruUpper?.valueOf() === databaseThruLower?.valueOf() &&
-          databaseThruUpper?.valueOf() === dataSourceThru?.valueOf() &&
-          dataSource['last_sync_successful'] === true &&
+          dataSource['lastSyncSuccessful'] === true &&
           nextSync &&
           nextSync >= now
         ) {
           this.status = 'Up-To-Date'
         } else if (dataSourceThru == null) {
           this.status = 'Needs Attention'
-        } else if (
-          databaseThruUpper &&
-          dataSourceThru &&
-          databaseThruUpper < dataSourceThru
-        ) {
-          this.status = 'Needs Attention'
-        } else if (
-          databaseThruLower &&
-          databaseThruUpper &&
-          databaseThruLower < databaseThruUpper
-        ) {
-          this.status = 'Needs Attention'
-        } else if (dataSource['last_sync_successful'] === false) {
+        } else if (dataSource['lastSyncSuccessful'] === false) {
           this.status = 'Needs Attention'
         } else if (nextSync && nextSync < now) {
           this.status = 'Behind Schedule'
         } else {
-          this.status = 'Unknown'
+          this.status = 'Needs Attention'
         }
-
-        this.datastreams = (dataSource.datastreams || []).map(
-          (datastream: any) => {
-            let dataThru = datastream.phenomenon_end_time
-              ? new Date(Date.parse(datastream.phenomenon_end_time))
-              : null
-            let status
-
-            if (!dataThru && !dataSourceThru) {
-              status = 'Pending'
-            } else if (
-              dataThru &&
-              dataSourceThru &&
-              dataThru >= dataSourceThru
-            ) {
-              status = 'Up-To-Date'
-            } else {
-              status = 'Needs Attention'
-            }
-
-            return {
-              id: datastream.id,
-              name: datastream.name,
-              status: status,
-              dataThru: dataThru ? dataThru.toUTCString() : undefined,
-              column: datastream.column,
-            }
-          }
-        )
       },
     },
   }

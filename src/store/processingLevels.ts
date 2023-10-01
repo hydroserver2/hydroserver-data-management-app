@@ -7,10 +7,10 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
   getters: {
     ownedProcessingLevels(): ProcessingLevel[] {
-      return this.processingLevels.filter((pl) => pl.personId != null)
+      return this.processingLevels.filter((pl) => pl.owner != null)
     },
     unownedProcessingLevels(): ProcessingLevel[] {
-      return this.processingLevels.filter((pl) => pl.personId == null)
+      return this.processingLevels.filter((pl) => pl.owner == null)
     },
   },
   actions: {
@@ -20,8 +20,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
     async fetchProcessingLevels() {
       if (this.loaded) return
       try {
-        const data = await api.fetch(ENDPOINTS.PROCESSING_LEVELS)
-        this.processingLevels = data
+        this.processingLevels = await api.fetch(ENDPOINTS.PROCESSING_LEVELS)
         this.sortProcessingLevels()
         this.loaded = true
       } catch (error) {

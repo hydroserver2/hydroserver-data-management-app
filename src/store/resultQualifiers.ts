@@ -7,10 +7,10 @@ export const useResultQualifierStore = defineStore('resultQualifiers', {
   state: () => ({ resultQualifiers: [] as ResultQualifier[], loaded: false }),
   getters: {
     ownedResultQualifiers(): ResultQualifier[] {
-      return this.resultQualifiers.filter((pl) => pl.personId != null)
+      return this.resultQualifiers.filter((rq) => rq.owner != null)
     },
     unownedResultQualifiers(): ResultQualifier[] {
-      return this.resultQualifiers.filter((pl) => pl.personId == null)
+      return this.resultQualifiers.filter((rq) => rq.owner == null)
     },
   },
   actions: {
@@ -20,25 +20,24 @@ export const useResultQualifierStore = defineStore('resultQualifiers', {
     async fetchResultQualifiers() {
       if (this.loaded) return
       try {
-        const data = await api.fetch(ENDPOINTS.RESULT_QUALIFIERS)
-        this.resultQualifiers = data
+        this.resultQualifiers = await api.fetch(ENDPOINTS.RESULT_QUALIFIERS)
         this.sortResultQualifiers()
         this.loaded = true
       } catch (error) {
         console.error('Error fetching result qualifiers from DB', error)
       }
     },
-    async updateResultQualifier(procLevel: ResultQualifier) {
+    async updateResultQualifier(resultQualifier: ResultQualifier) {
       try {
         await api.patch(
-          ENDPOINTS.RESULT_QUALIFIERS.ID(procLevel.id),
-          procLevel,
-          this.getById(procLevel.id)
+          ENDPOINTS.RESULT_QUALIFIERS.ID(resultQualifier.id),
+          resultQualifier,
+          this.getById(resultQualifier.id)
         )
         const index = this.resultQualifiers.findIndex(
-          (pl) => pl.id === procLevel.id
+          (rq) => rq.id === resultQualifier.id
         )
-        if (index !== -1) this.resultQualifiers[index] = procLevel
+        if (index !== -1) this.resultQualifiers[index] = resultQualifier
         this.sortResultQualifiers()
       } catch (error) {
         console.error(`Error updating result qualifier with id`, error)
@@ -61,7 +60,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', {
       try {
         await api.delete(ENDPOINTS.RESULT_QUALIFIERS.ID(id))
         this.resultQualifiers = this.resultQualifiers.filter(
-          (pl) => pl.id !== id
+          (rq) => rq.id !== id
         )
         this.sortResultQualifiers()
       } catch (error) {
@@ -70,7 +69,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', {
     },
     getById(id: string) {
       const resultQualifier = this.resultQualifiers.find(
-        (pl) => pl.id.toString() === id.toString()
+        (rq) => rq.id.toString() === id.toString()
       )
       if (!resultQualifier)
         throw new Error(`Result Qualifier with id ${id} not found`)

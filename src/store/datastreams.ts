@@ -21,7 +21,8 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
   },
   actions: {
-    async fetchDatastreams() {
+    async fetchDatastreams(reload = false) {
+      if (this.datastreams && !reload) return
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS)
         let newDatastreams: Record<string, Datastream[]> = {}
@@ -37,8 +38,8 @@ export const useDatastreamStore = defineStore('datastreams', {
         console.error('Error fetching datastreams from DB', error)
       }
     },
-    async fetchDatastreamsByThingId(id: string) {
-      // if (this.datastreams[id]) return
+    async fetchDatastreamsByThingId(id: string, reload = false) {
+      if (this.datastreams[id] && !reload) return
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
         this.datastreams[id] = data
@@ -55,7 +56,7 @@ export const useDatastreamStore = defineStore('datastreams', {
         )
         const datastreamsForThing = this.datastreams[data.thingId]
         const index = datastreamsForThing.findIndex((ds) => ds.id === data.id)
-        if (index !== -1) datastreamsForThing[index] = data
+        if (index !== -1 && data) datastreamsForThing[index] = data
       } catch (error) {
         console.error('Error updating datastream', error)
       }

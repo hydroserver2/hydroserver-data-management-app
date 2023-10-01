@@ -7,13 +7,13 @@
     </v-row>
     <v-data-table
       :headers="headers"
-      :items="store.dataSourceRows"
+      :items="dataSources.dataSources.value"
       :search="search"
-      hover
+      :hover="true"
       class="elevation-3"
     >
       <template v-slot:top>
-        <v-toolbar flat>
+        <v-toolbar :flat="true">
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
@@ -26,45 +26,27 @@
             color="secondary"
             prepend-icon="mdi-plus"
             variant="elevated"
-            @click="handleAddDataSource"
+            @click="handleCreateDataSource"
           >
             Add Data Source
           </v-btn>
         </v-toolbar>
       </template>
       <template v-slot:item.status="{ item }">
-        <v-chip v-if="item.columns.status === 'ok'" color="green">
-          Up-To-Date
-        </v-chip>
-        <v-chip v-if="item.columns.status === 'pending'" color="blue">
-          Pending
-        </v-chip>
-        <v-chip v-if="item.columns.status === 'bad'" color="red">
-          Needs Attention
-        </v-chip>
-        <v-chip v-if="item.columns.status === 'stale'" color="orange">
-          Behind Schedule
-        </v-chip>
-        <v-chip v-if="item.columns.status === 'unknown'" color="gray">
-          Unknown
-        </v-chip>
+        <DataSourceStatus :status="item.columns.status" :paused="null"/>
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn
           v-if="item.raw.paused === true"
-          :disabled="updatingDataSourceStatus"
+          :disabled="dataSources.updatingDataSource.value"
           icon="mdi-play"
-          @click="
-            handleUpdateDataSourceStatus(item.raw.id, item.raw.paused, item.raw)
-          "
+          @click="handleTogglePaused(item.raw.id)"
         />
         <v-btn
           v-else
-          :disabled="updatingDataSourceStatus"
+          :disabled="dataSources.updatingDataSource.value"
           icon="mdi-pause"
-          @click="
-            handleUpdateDataSourceStatus(item.raw.id, item.raw.paused, item.raw)
-          "
+          @click="handleTogglePaused(item.raw.id)"
         />
         <v-menu>
           <template v-slot:activator="{ props }">
@@ -87,20 +69,20 @@
             <v-list-item
               title="Delete Data Source"
               prepend-icon="mdi-delete"
-              @click="handleOpenConfirmDelete(item.raw.id)"
+              @click="handleDeleteDataSource(item.raw.id)"
             />
           </v-list>
         </v-menu>
       </template>
     </v-data-table>
-    <v-dialog v-model="dataSourceFormOpen" persistent>
+    <v-dialog v-model="dataSourceFormOpen" :persistent="true">
       <DataSourceForm
-        @close-dialog="handleFinishEditing"
-        :dataSourceId="dataSourceRowSelected"
+        @close-dialog="handleCloseForm()"
+        :dataSourceId="dataSources.selectedDataSource.value"
       />
     </v-dialog>
     <v-dialog v-model="confirmDeleteOpen" max-width="500">
-      <v-card>
+      <v-card v-if="dataSources.selectedDataSource.value">
         <v-card-title> Confirm Delete Data Source </v-card-title>
         <v-card-text>
           Are you sure you want to delete the following data source?
@@ -108,9 +90,9 @@
         <v-card-text>
           •
           {{
-            store.dataSourceRows.filter(
-              (row) => row.id === dataSourceRowSelected
-            )[0].name
+            dataSources.dataSources.value.find(
+              (dl) => dl.id.toString() === dataSources.selectedDataSource.value.toString()
+            ).name
           }}
         </v-card-text>
         <v-card-actions>
@@ -118,8 +100,8 @@
           <v-btn @click="confirmDeleteOpen = false"> Cancel </v-btn>
           <v-btn
             color="red"
-            :disabled="deletingDataSource"
-            @click="handleDeleteDataSource"
+            :disabled="dataSources.updatingDataSource.value"
+            @click="handleConfirmDeleteDataSource()"
           >
             Delete
           </v-btn>
@@ -131,58 +113,46 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDataSourceDashboardStore } from '@/store/datasource_dashboard'
-import DataSourceForm from "@/components/DataSource/DataSourceForm.vue";
+import { useDataSources } from '@/composables/useDataSources'
+import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
+import DataSourceStatus from "@/components/DataSource/DataSourceStatus.vue";
 
-const store = useDataSourceDashboardStore()
+const dataSources = useDataSources()
+
 const search = ref()
 const dataSourceFormOpen = ref(false)
 const confirmDeleteOpen = ref(false)
-const deletingDataSource = ref(false)
-const updatingDataSourceStatus = ref(false)
-const dataSourceRowSelected = ref()
 
-store.fetchDataLoaders().then(() => store.fetchDataSources())
+async function handleTogglePaused(dataSourceId) {
+  dataSources.selectedDataSource.value = dataSourceId
+  await dataSources.togglePaused().then(
+    dataSources.selectedDataSource.value = null
+  )
+}
 
-function handleAddDataSource() {
-  dataSourceRowSelected.value = null
+function handleCreateDataSource() {
+  dataSources.selectedDataSource.value = null
   dataSourceFormOpen.value = true
 }
 
-function handleEditDataSource(dataSourceId: string) {
-  dataSourceRowSelected.value = dataSourceId
+function handleEditDataSource(dataSourceId) {
+  dataSources.selectedDataSource.value = dataSourceId
   dataSourceFormOpen.value = true
 }
 
-async function handleUpdateDataSourceStatus(
-  dataSourceId: string,
-  paused: boolean,
-  row: any
-) {
-  updatingDataSourceStatus.value = true
-  row.paused = !paused
-  await store.updateDataSourceStatus(dataSourceId, paused).then(() => {
-    updatingDataSourceStatus.value = false
-  })
-}
-
-function handleOpenConfirmDelete(dataSourceId: string) {
-  dataSourceRowSelected.value = dataSourceId
+function handleDeleteDataSource(dataSourceId) {
+  dataSources.selectedDataSource.value = dataSourceId
   confirmDeleteOpen.value = true
 }
 
-function handleDeleteDataSource() {
-  deletingDataSource.value = true
-  store.deleteDataSource(dataSourceRowSelected.value).then(() => {
-    confirmDeleteOpen.value = false
-    deletingDataSource.value = false
-    store.fetchDataSources()
-  })
+function handleCloseForm() {
+  dataSourceFormOpen.value = false
+  dataSources.reloadDataSources()
 }
 
-function handleFinishEditing() {
-  dataSourceFormOpen.value = false
-  store.fetchDataSources()
+function handleConfirmDeleteDataSource() {
+  dataSources.deleteDataSource()
+  confirmDeleteOpen.value = false
 }
 
 const headers = [
@@ -196,7 +166,7 @@ const headers = [
     title: 'Data Loader',
     align: 'start',
     sortable: true,
-    key: 'dataLoader'
+    key: 'dataLoaderName'
   },
   {
     title: 'Status',

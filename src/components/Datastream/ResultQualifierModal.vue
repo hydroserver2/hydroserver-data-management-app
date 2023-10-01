@@ -76,8 +76,8 @@ async function uploadResultQualifier() {
   if (!valid.value) return
   if (isEdit.value) await rqStore.updateResultQualifier(resultQualifier.value)
   else {
-    const newPl = await rqStore.createResultQualifier(resultQualifier.value)
-    emit('uploaded', newPl.id)
+    const newRq = await rqStore.createResultQualifier(resultQualifier.value)
+    emit('uploaded', newRq.id)
   }
   emit('close')
 }

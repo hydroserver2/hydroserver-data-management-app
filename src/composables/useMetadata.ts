@@ -47,6 +47,7 @@ function useMetadata(
   }
 
   watch(selectedId, async () => {
+    console.log('HELLO')
     if (!selectedId.value) return
     populateForm(selectedId.value)
     await myForm.value?.validate()
@@ -104,7 +105,7 @@ export function useResultQualifiers(id: string | null = null) {
     () => new ResultQualifier(),
     'fetchResultQualifiers',
     'deleteResultQualifier',
-    'getResultQualifierById',
+    'getById',
     id
   )
 }

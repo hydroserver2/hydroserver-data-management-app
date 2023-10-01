@@ -51,47 +51,33 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
         const dataSource = await api.fetch(
           ENDPOINTS.DATA_SOURCES.ID(this.dataSourceId)
         )
-        this.dataSource = dataSource.data
+        this.dataSource = dataSource
       } else {
         this.dataSource = null
       }
     },
     async fetchDataLoaders() {
       const dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
-      this.dataLoaders = dataLoaders.data
+      this.dataLoaders = dataLoaders
     },
     async saveDataSource() {
-      let dataSourceBody
-
-      dataSourceBody = {
-        name: null as string | null | undefined,
-        data_loader: null as string | null,
-        schedule: {} as any,
-        file_access: {} as any,
-        file_timestamp: {} as any,
-        datastreams: [] as any[] | undefined,
-      }
+      let dataSourceBody = {}
 
       dataSourceBody['name'] = this.dataSourceName
-      dataSourceBody['data_loader'] = this.dataLoader.id || this.dataLoader
-      dataSourceBody['file_access']['path'] = this.localFilePath
-      dataSourceBody['file_access']['header_row'] = this.fileHeaderRow || null
-      dataSourceBody['file_access']['data_start_row'] =
-        this.dataStartRow || null
-      dataSourceBody['file_access']['delimiter'] = this.fileDelimiter || null
-      dataSourceBody['schedule']['start_time'] = this.scheduleStartTime || null
-      dataSourceBody['schedule']['end_time'] = this.scheduleEndTime || null
-      dataSourceBody['schedule']['crontab'] =
-        this.scheduleType === 'crontab' ? this.crontab : null
-      dataSourceBody['schedule']['interval'] =
-        this.scheduleType === 'interval' ? this.interval : null
-      dataSourceBody['schedule']['interval_units'] =
-        this.scheduleType === 'interval' ? this.intervalUnits : null
-      dataSourceBody['file_timestamp']['column'] = this.timestampColumn || null
-      dataSourceBody['file_timestamp']['format'] =
-        this.timestampCustomFormat || 'iso'
-      dataSourceBody['file_timestamp']['offset'] =
-        this.timestampTimezoneOffset || null
+      dataSourceBody['dataLoaderId'] = this.dataLoader.id || this.dataLoader
+      dataSourceBody['path'] = this.localFilePath
+      dataSourceBody['headerRow'] = this.fileHeaderRow || null
+      dataSourceBody['dataStartRow'] = this.dataStartRow || null
+      dataSourceBody['delimiter'] = this.fileDelimiter || null
+      dataSourceBody['startTime'] = this.scheduleStartTime || null
+      dataSourceBody['endTime'] = this.scheduleEndTime || null
+      dataSourceBody['crontab'] = this.scheduleType === 'crontab' ? this.crontab : null
+      dataSourceBody['interval'] = this.scheduleType === 'interval' ? this.interval : null
+      dataSourceBody['intervalUnits'] = this.scheduleType === 'interval' ? this.intervalUnits : null
+      dataSourceBody['timestampColumn'] = this.timestampColumn || null
+      dataSourceBody['timestampFormat'] = this.timestampCustomFormat || 'iso'
+      dataSourceBody['timestampOffset'] = this.timestampTimezoneOffset || null
+      dataSourceBody['paused'] = false
 
       let response = null
 
@@ -103,50 +89,51 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
       } else {
         response = await api.post(ENDPOINTS.DATA_SOURCES, dataSourceBody)
       }
-      return response?.status === 201 || response?.status === 204
+      return true
     },
     fillForm() {
       let dataSource = this.dataSource
 
       this.dataSourceName = dataSource ? dataSource['name'] : null
       this.dataSource = dataSource ? dataSource['name'] : null
-      this.dataLoader = dataSource ? dataSource['data_loader'] : null
-      this.localFilePath = dataSource ? dataSource['file_access']['path'] : null
+      this.dataLoader = dataSource ? this.dataLoaders.find(
+        dl => dl.id === dataSource['dataLoaderId']
+      ) : null
+      this.localFilePath = dataSource ? dataSource['path'] : null
       this.fileHeaderRow = dataSource
-        ? dataSource['file_access']['header_row']
+        ? dataSource['headerRow']
         : null
       this.dataStartRow = dataSource
-        ? dataSource['file_access']['data_start_row']
+        ? dataSource['dataStartRow']
         : 1
       this.fileDelimiter = dataSource
-        ? dataSource['file_access']['delimiter']
+        ? dataSource['delimiter']
         : ','
 
       this.scheduleStartTime =
-        dataSource && dataSource['schedule']
-          ? dataSource['schedule']['start_time']
+        dataSource
+          ? dataSource['startTime']
           : null
       this.scheduleEndTime =
-        dataSource && dataSource['schedule']
-          ? dataSource['schedule']['end_time']
+        dataSource
+          ? dataSource['endTime']
           : null
       this.scheduleType =
         dataSource &&
-        dataSource['schedule'] &&
-        dataSource['schedule']['interval'] == null
+        dataSource['interval'] == null
           ? 'crontab'
           : 'interval'
       this.interval =
-        dataSource && dataSource['schedule']
-          ? dataSource['schedule']['interval']
+        dataSource
+          ? dataSource['interval']
           : null
       this.intervalUnits =
-        dataSource && dataSource['schedule']
-          ? dataSource['schedule']['interval_units']
+        dataSource
+          ? dataSource['intervalUnits']
           : 'minutes'
       this.crontab =
-        dataSource && dataSource['schedule']
-          ? dataSource['schedule']['crontab']
+        dataSource
+          ? dataSource['crontab']
           : null
 
       if (this.scheduleStartTime) {
@@ -158,22 +145,22 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
       }
 
       this.timestampType =
-        dataSource && typeof dataSource['file_timestamp']['column'] === 'string'
+        dataSource && typeof dataSource['timestampColumn'] === 'string'
           ? 'name'
           : 'index'
       this.timestampColumn = dataSource
-        ? dataSource['file_timestamp']['column']
+        ? dataSource['timestampColumn']
         : null
       this.timestampFormat =
-        dataSource && dataSource['file_timestamp']['format'] != 'iso'
+        dataSource && dataSource['timestampFormat'] != 'iso'
           ? 'custom'
           : 'iso'
       this.timestampCustomFormat =
-        dataSource && dataSource['file_timestamp']['format'] != 'iso'
-          ? dataSource['file_timestamp']['format']
+        dataSource && dataSource['timestampFormat'] != 'iso'
+          ? dataSource['timestampFormat']
           : null
       this.timestampTimezoneOffset = dataSource
-        ? dataSource['file_timestamp']['offset']
+        ? dataSource['timestampOffset']
         : null
     },
   },

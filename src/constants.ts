@@ -54,7 +54,7 @@ export const ENDPOINTS = {
   }),
 
   PHOTOS: Object.assign(PHOTOS_BASE, {
-    FOR_THING: FOR_ID(PHOTOS_BASE),
+    FOR_THING: (thingId: string, photoId: string = '') => `${THINGS_BASE}/${thingId}/photos${photoId ? '/' + photoId : ''}`,
   }),
 
   PROCESSING_LEVELS: Object.assign(PL_BASE, {

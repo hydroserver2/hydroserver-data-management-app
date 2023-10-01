@@ -104,7 +104,6 @@
           ></DeleteModal>
         </v-dialog>
       </v-window-item>
-
       <v-window-item value="3">
         <!--    Units Table and Modal-->
         <v-data-table
@@ -135,7 +134,6 @@
           ></DeleteModal>
         </v-dialog>
       </v-window-item>
-
       <v-window-item value="4">
         <!--    Result Qualifiers Table and Modal-->
         <v-data-table
