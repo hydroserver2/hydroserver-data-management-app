@@ -1,15 +1,12 @@
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
-
-interface DataArray {
-  date: string
-  value: number
-}
+import { DataArray, DataPoint, Datastream } from '@/types'
 
 export const useObservationStore = defineStore('observations', {
   state: () => ({
     observations: {} as Record<string, DataArray>,
+    mostRecentObs: {} as Record<string, DataPoint>,
   }),
   persist: false,
   actions: {
@@ -25,10 +22,28 @@ export const useObservationStore = defineStore('observations', {
             value: item[1],
           }
         })
-        this.$patch({ observations: { ...this.observations, [id]: newObs } })
+        if (newObs && newObs.length > 0) {
+          const mostRecent = newObs[newObs.length - 1]
+          this.$patch({
+            observations: { ...this.observations, [id]: newObs },
+            mostRecentObs: { ...this.mostRecentObs, [id]: mostRecent },
+          })
+        }
       } catch (error) {
         console.error('Error fetching observations from DB', error)
       }
+    },
+    async fetchObservationsBulk(datastreams: Datastream[], hours: number) {
+      console.log('Hello')
+      const observationPromises = datastreams
+        .map((ds) => {
+          if (ds.phenomenonEndTime) {
+            const startTime = this.subtractHours(ds.phenomenonEndTime, hours)
+            return this.fetchObservations(ds['id'], startTime)
+          }
+        })
+        .filter(Boolean)
+      await Promise.all(observationPromises)
     },
     // TODO: Fetch observations for thingId
     subtractHours(timestamp: string, hours: number): string {

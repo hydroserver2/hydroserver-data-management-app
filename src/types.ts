@@ -1,3 +1,10 @@
+export interface DataPoint {
+  date: string
+  value: number
+}
+
+export type DataArray = DataPoint[]
+
 export interface Owner {
   firstName: string
   lastName: string
