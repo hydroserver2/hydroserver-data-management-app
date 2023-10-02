@@ -17,20 +17,19 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 
-onMounted(async () => {
-  console.log(window.opener)
+const APP_URL = import.meta.env.VITE_APP_URL
 
-  // TODO: Find a way to pass the data using the store
+onMounted(async () => {
   const data = {
     accessToken: route.query.t || '',
     refreshToken: route.query.rt || '',
   }
   // window.opener references our original window from where the login popup was opened
-  // window.opener.postMessage(
-  //   data,
-  //   APP_URL // Important security measure: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
-  // )
-  // window.close()
+  window.opener.postMessage(
+    data,
+    APP_URL // Important security measure: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
+  )
+  window.close()
 })
 </script>
 

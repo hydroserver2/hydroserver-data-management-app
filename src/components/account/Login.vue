@@ -5,9 +5,11 @@
       <v-card-text>
         <v-btn
           @click="openLogInDialog('google')"
-          variant="flat"
-          color="secondary"
+          variant="outlined"
           prepend-icon="mdi-google"
+          :rounded="false"
+          block
+          class="py-4"
         >
           Log in using Google
         </v-btn>
@@ -15,8 +17,11 @@
       <v-card-text>
         <v-btn
           @click="openLogInDialog('orcid')"
-          variant="flat"
-          color="secondary"
+          variant="outlined"
+          outlined
+          :rounded="false"
+          block
+          class="py-4"
         >
           <template v-slot:prepend>
             <v-icon class="fa-brands fa-orcid"></v-icon>
@@ -24,6 +29,7 @@
           Log in using ORCID
         </v-btn>
       </v-card-text>
+      <v-divider class="my-8"></v-divider>
       <v-card-text>
         <v-form
           class="login-form"
@@ -78,6 +84,7 @@
 import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
+import { OAuthProvider } from '@/types'
 
 const email = ref('')
 const password = ref('')
@@ -89,8 +96,8 @@ const loginSubmit = async () => {
   await useAuthStore().login(email.value, password.value)
 }
 
-const openLogInDialog = async (backend: string) => {
-  await useAuthStore().OAuthLogin(backend, onLoggedIn)
+const openLogInDialog = async (provider: OAuthProvider) => {
+  await useAuthStore().OAuthLogin(provider, onLoggedIn)
 }
 
 const onLoggedIn = () => {

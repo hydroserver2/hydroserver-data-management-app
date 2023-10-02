@@ -2,7 +2,7 @@ import { requestInterceptor } from '@/utils/api/requestInterceptor'
 import { describe, it, expect } from 'vitest'
 
 describe('requestInterceptor', () => {
-  it('adds Authorization header when access_token is provided', () => {
+  it('adds Authorization header when accessToken is provided', () => {
     const result = requestInterceptor({}, 'test_token')
     expect(result.headers['Authorization']).toBe('Bearer test_token')
   })
@@ -30,11 +30,11 @@ describe('requestInterceptor', () => {
       credentials: 'include',
     }
 
-    const access_token = 'new_token'
-    const result = requestInterceptor(options, access_token)
+    const accessToken = 'new_token'
+    const result = requestInterceptor(options, accessToken)
 
     // Checking modified properties
-    expect(result.headers['Authorization']).toBe(`Bearer ${access_token}`)
+    expect(result.headers['Authorization']).toBe(`Bearer ${accessToken}`)
     expect(result.body).toBe(JSON.stringify(options.body))
 
     // Checking properties that shouldn't be changed

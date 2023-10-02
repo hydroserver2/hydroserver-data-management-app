@@ -4,7 +4,7 @@ import Notification from '@/store/notifications'
 export function toastHandler(response: any, endpoint: string, method: string) {
   if (response instanceof TypeError) {
     Notification.toast({
-      message: 'Network error. Please check your connection.',
+      message: response.message,
       type: 'error',
     })
     return

@@ -248,3 +248,8 @@ export interface Photo {
   filePath: string
   link: string
 }
+
+export enum OAuthProvider {
+  'google',
+  'orcid',
+}

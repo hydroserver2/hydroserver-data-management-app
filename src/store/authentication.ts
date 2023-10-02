@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { User } from '@/types'
+import { User, OAuthProvider } from '@/types'
 import { Subject } from 'rxjs'
 import { useResetStore } from '@/store/resetStore'
 import { api } from '@/utils/api/apiMethods'
@@ -7,7 +7,7 @@ import { ENDPOINTS } from '@/constants'
 import Notification from './notifications'
 import router from '@/router/router'
 
-const baseUrl = import.meta.env.VITE_APP_PROXY_BASE_URL
+const APP_URL = import.meta.env.VITE_APP_URL
 let OAuthLoginController = new AbortController()
 
 export const useAuthStore = defineStore({
@@ -131,34 +131,34 @@ export const useAuthStore = defineStore({
         console.error('Error resetting password', error)
       }
     },
-    async OAuthLogin(provider: string, callback?: () => any) {
+    async OAuthLogin(provider: OAuthProvider, callback?: () => any) {
       const handleMessage = async (event: MessageEvent) => {
         if (
-          // event.origin !== APP_URL ||
-          !event.data.hasOwnProperty('access')
+          event.origin !== APP_URL ||
+          !event.data.hasOwnProperty('accessToken')
         ) {
           return
         }
 
-        if (event.data.access) {
+        if (event.data.accessToken) {
           this.accessToken = event.data.accessToken
           this.refreshToken = event.data.refreshToken
 
-          const userInfo = await this.$http.get('/account/user')
-          console.log(userInfo)
+          try {
+            const user = await api.fetch(ENDPOINTS.USER)
+            if (!user) return
+            this.user = user
 
-          // this.user = userInfo as User
-          Notification.toast({
-            message: 'You have logged in!',
-            type: 'success',
-          })
-          // await User.commit((state) => {
-          //   state.isLoggedIn = true
-          //   state.accessToken = event.data.accessToken
-          // })
-          this.loggedIn$.next()
-          callback?.()
-          router.push({ name: 'Sites' })
+            Notification.toast({
+              message: 'You have logged in!',
+              type: 'success',
+            })
+            this.loggedIn$.next()
+            callback?.()
+            router.push({ name: 'Sites' })
+          } catch (e) {
+            console.log('Failed to Log In')
+          }
         } else {
           Notification.toast({
             message: 'Failed to Log In',
@@ -167,13 +167,11 @@ export const useAuthStore = defineStore({
         }
       }
 
-      // TODO: baseUrl domain has to be the same as the app's domain
-      // Otherwise, for security reasons, the browser will not set `window.opener`.
-      const OAuthUrl = `${baseUrl}/api/account/${provider}/login`
+      // TODO: window.opener is not populated in redirect response
       window.open(
-        OAuthUrl,
-        '_blank'
-        // 'location=1,status=1,scrollbars=1, width=800,height=800'
+        ENDPOINTS.ACCOUNT.OAUTH_LOGIN(provider),
+        '_blank',
+        'noopener=false'
       )
 
       console.info(`User: listening to login window...`)
