@@ -65,7 +65,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useUnitStore } from '@/store/unit'
 import { useUnits } from '@/composables/useMetadata'

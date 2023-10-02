@@ -76,6 +76,8 @@ export class Datastream {
   intendedTimeSpacingUnitsId?: string
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
+  dataSourceId?: string
+  dataSourceColumn?: string | number
 
   constructor(thingId: string) {
     this.id = ''
@@ -101,6 +103,8 @@ export class Datastream {
     this.isPrimaryOwner = false
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
+    this.dataSourceId = ''
+    this.dataSourceColumn = ''
   }
 }
 
@@ -112,7 +116,7 @@ export interface Observation {
 
 export class Unit {
   id: string
-  personId: string
+  owner: Owner | null
   name: string
   symbol: string
   definition: string
@@ -120,7 +124,7 @@ export class Unit {
 
   constructor() {
     this.id = ''
-    this.personId = ''
+    this.owner = null
     this.name = ''
     this.symbol = ''
     this.definition = ''
@@ -130,6 +134,7 @@ export class Unit {
 
 export class Sensor {
   id: string
+  owner: Owner | null
   name: string
   description: string
   manufacturer: string
@@ -142,6 +147,7 @@ export class Sensor {
 
   constructor() {
     this.id = ''
+    this.owner = null
     this.name = ''
     this.description = ''
     this.manufacturer = ''
@@ -157,7 +163,7 @@ export class Sensor {
 export class ObservedProperty {
   id: string
   name: string
-  personId: string
+  owner: Owner | null
   definition: string
   description: string
   type: string
@@ -166,7 +172,7 @@ export class ObservedProperty {
   constructor() {
     this.id = ''
     this.name = ''
-    this.personId = ''
+    this.owner = null
     this.definition = ''
     this.description = ''
     this.type = 'Hydrology'
@@ -176,17 +182,91 @@ export class ObservedProperty {
 
 export class ProcessingLevel {
   id: string
-  personId: string
+  owner: Owner | null
   code: string
   definition: string
   explanation: string
 
   constructor() {
     this.id = ''
-    this.personId = ''
+    this.owner = null
     this.code = ''
     this.definition = ''
     this.explanation = ''
+  }
+}
+
+export class ResultQualifier {
+  id: string
+  owner: Owner | null
+  code: string
+  description: string
+
+  constructor() {
+    this.id = ''
+    this.owner = null
+    this.code = ''
+    this.description = ''
+  }
+}
+
+export class DataSource {
+  id: string
+  name: string
+  path: string
+  url: string
+  headerRow: number
+  dataStartRow: number
+  delimiter: string
+  interval: number
+  intervalUnits: string
+  crontab: string
+  startTime: string
+  endTime: string
+  paused: boolean
+  timestampColumn: string | number
+  timestampFormat: string
+  timestampOffset: string
+  dataLoaderId: string
+  dataSourceThru: string
+  lastSyncSuccessful: boolean
+  lastSyncMessage: string
+  lastSynced: string
+  nextSync: string
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.path = ''
+    this.url = ''
+    this.headerRow = 0
+    this.dataStartRow = 0
+    this.delimiter = ''
+    this.interval = 0
+    this.intervalUnits = ''
+    this.crontab = ''
+    this.startTime = ''
+    this.endTime = ''
+    this.paused = false
+    this.timestampColumn = ''
+    this.timestampFormat = ''
+    this.timestampOffset = ''
+    this.dataLoaderId = ''
+    this.dataSourceThru = ''
+    this.lastSyncSuccessful = false
+    this.lastSyncMessage = ''
+    this.lastSynced = ''
+    this.nextSync = ''
+  }
+}
+
+export class DataLoader {
+  id: string
+  name: string
+
+  constructor() {
+    this.id = ''
+    this.name = ''
   }
 }
 

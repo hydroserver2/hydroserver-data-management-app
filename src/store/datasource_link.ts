@@ -1,6 +1,6 @@
-import { ENDPOINTS } from '@/constants'
-import { defineStore } from 'pinia'
-import { api } from '@/utils/api/apiMethods'
+import {ENDPOINTS} from '@/constants'
+import {defineStore} from 'pinia'
+import {api} from '@/utils/api/apiMethods'
 
 interface LinkDataSourceForm {
   formLoaded: boolean
@@ -33,11 +33,10 @@ export const useSiteLinkDataSourceFormStore = defineStore(
         const response = await api.fetch(
           ENDPOINTS.DATASTREAMS.FOR_THING(thingId)
         )
-        return response.data.filter((ds: any) => ds.id === datastreamId)[0]
+        return response.filter((ds: any) => ds.id === datastreamId)[0]
       },
       async fetchDataSources() {
-        const dataSources = await api.fetch(ENDPOINTS.DATA_SOURCES)
-        this.dataSources = dataSources.data
+        this.dataSources = await api.fetch(ENDPOINTS.DATA_SOURCES)
       },
       fillForm(datastreamId: string, dataSourceId: string, column: any) {
         let dataSource = this.dataSources.filter(
@@ -51,17 +50,17 @@ export const useSiteLinkDataSourceFormStore = defineStore(
       },
       async saveDataSource() {
         let datastreamBody = {
-          data_source_id:
+          dataSourceId:
             (
               this.dataSources.filter(
                 (ds) => ds.name === this.selectedDataSource
               )[0] || {}
             ).id || null,
-          data_source_column: this.selectedColumn,
+          dataSourceColumn: this.selectedColumn,
         }
 
         return await api.patch(
-          `${ENDPOINTS.DATASTREAMS}/patch/${this.datastreamId}`,
+          `${ENDPOINTS.DATASTREAMS}/${this.datastreamId}`,
           datastreamBody
         )
       },

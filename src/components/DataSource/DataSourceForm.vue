@@ -79,7 +79,6 @@ const router = useRouter()
 const dataSourceLocationForm = ref()
 const dataSourceScheduleForm = ref()
 const dataSourceTimestampForm = ref()
-const dataSourceDatastreamForm = ref()
 const formTitle = ref()
 
 store.dataSourceId = props.dataSourceId || null

@@ -7,13 +7,13 @@ export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
   getters: {
     ownedUnits(): Unit[] {
-      return this.units.filter((u) => u.personId != null)
+      return this.units.filter((u) => u.owner != null)
     },
     unownedUnits(): Unit[] {
-      return this.units.filter((u) => u.personId == null)
+      return this.units.filter((u) => u.owner == null)
     },
     timeUnits(): Unit[] {
-      return this.units.filter((u) => u.type === 'Time' && u.personId == null)
+      return this.units.filter((u) => u.type === 'Time' && u.owner == null)
     },
   },
   actions: {
@@ -23,8 +23,7 @@ export const useUnitStore = defineStore('units', {
     async fetchUnits() {
       if (this.units.length > 0) return
       try {
-        const data = await api.fetch(ENDPOINTS.UNITS)
-        this.units = data
+        this.units = await api.fetch(ENDPOINTS.UNITS)
         this.sortUnits()
         this.loaded = true
       } catch (error) {

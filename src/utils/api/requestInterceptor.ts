@@ -17,7 +17,7 @@ export function requestInterceptor(options: any, accessToken: string) {
   let body: string | undefined = undefined
   if (options.body !== undefined) {
     body =
-      typeof options.body === 'string'
+      typeof options.body === 'string' || options.body instanceof FormData
         ? options.body
         : JSON.stringify(options.body)
   }
