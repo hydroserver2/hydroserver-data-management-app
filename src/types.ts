@@ -63,19 +63,11 @@ export class Datastream {
   sampledMedium: string
   noDataValue: number
   aggregationStatistic: string
-  observations: Observation[]
-  mostRecentObservation: any
   unitId: string
-  unitName: string
-  unitSymbol: string
   observedPropertyId: string
-  observedPropertyName: string
   sensorId: string
-  sensorName: string
   processingLevelId: string
-  processingLevelName: string
-  isVisible?: boolean
-  isPrimaryOwner: boolean
+  isVisible: boolean
   isStale?: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
@@ -96,29 +88,14 @@ export class Datastream {
     this.sampledMedium = ''
     this.noDataValue = -9999
     this.aggregationStatistic = ''
-    this.observations = []
-    this.mostRecentObservation = ''
     this.unitId = ''
-    this.unitName = ''
-    this.unitSymbol = ''
     this.observedPropertyId = ''
-    this.observedPropertyName = ''
     this.sensorId = ''
-    this.sensorName = ''
     this.processingLevelId = ''
-    this.processingLevelName = ''
-    this.isPrimaryOwner = false
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
-    this.dataSourceId = ''
-    this.dataSourceColumn = ''
+    this.isVisible = true
   }
-}
-
-export interface Observation {
-  id: string
-  result: string
-  phenomenonTime: string
 }
 
 export class Unit {

@@ -182,10 +182,8 @@ import { usePhotosStore } from '@/store/photos'
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
-import { useObservationStore } from '@/store/observations'
 
 const photoStore = usePhotosStore()
-const obsStore = useObservationStore()
 const thingId = useRoute().params.id.toString()
 
 const { isOwner } = useThingOwnership(thingId)

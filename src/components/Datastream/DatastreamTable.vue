@@ -6,23 +6,24 @@
   >
     <template v-slot:item.info="{ item }">
       <v-col>
-        <v-row style="font-size: 1.2em" v-if="item.raw.observedPropertyName">
+        <v-row style="font-size: 1.2em">
           <strong class="mr-2">Observed Property:</strong>
-          <strong>{{ item.raw.observedPropertyName }}</strong>
+          <strong>{{ OPName(item.raw.observedPropertyId) }}</strong>
         </v-row>
         <v-row>
           <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
         </v-row>
         <v-row>
           <strong class="mr-2">Processing Level:</strong>
-          {{ item.raw.processingLevelName }}
+          {{ PLName(item.raw.processingLevelId, 'code') }}
         </v-row>
         <v-row>
           <strong class="mr-2">Sampled Medium:</strong>
           {{ item.raw.sampledMedium }}
         </v-row>
         <v-row>
-          <strong class="mr-2">Sensor:</strong> {{ item.raw.sensorName }}
+          <strong class="mr-2">Sensor:</strong>
+          {{ sensorName(item.raw.sensorId) }}
         </v-row>
       </v-col>
     </template>
@@ -52,7 +53,7 @@
         </v-row>
         <v-row>
           {{ mostRecentObs[item.raw.id].value }}&nbsp;
-          {{ item.raw.unitName }}
+          {{ unitName(item.raw.unitId) }}
         </v-row>
       </div>
     </template>
@@ -183,13 +184,18 @@
 import SiteVisualization from '@/components/Datastream/SiteVisualization.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import Sparkline from '@/components/Sparkline.vue'
-import { Observation } from '@/types'
 import { useDatastreams } from '@/composables/useDatastreams'
 import { format } from 'date-fns'
 import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreamStore } from '@/store/datastreams'
+import {
+  useUnitGetters,
+  useSensorGetters,
+  useProcessingLevelGetters,
+  useObservedPropertiesGetters,
+} from '@/composables/useMetadataGetters'
 
 const datastreamStore = useDatastreamStore()
 
@@ -203,6 +209,11 @@ const props = defineProps({
 const { isOwner } = useThingOwnership(props.thingId)
 const { visibleDatastreams, observations, mostRecentObs } =
   useVisibleDatastreams(props.thingId)
+
+const { getNameById: unitName } = useUnitGetters()
+const { getNameById: sensorName } = useSensorGetters()
+const { getNameById: PLName } = useProcessingLevelGetters()
+const { getNameById: OPName } = useObservedPropertiesGetters()
 
 const {
   toggleVisibility,

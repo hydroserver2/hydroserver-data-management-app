@@ -34,7 +34,6 @@ export const useObservationStore = defineStore('observations', {
       }
     },
     async fetchObservationsBulk(datastreams: Datastream[], hours: number) {
-      console.log('Hello')
       const observationPromises = datastreams
         .map((ds) => {
           if (ds.phenomenonEndTime) {
