@@ -1,8 +1,8 @@
 <template>
   <v-card>
-    <v-card-subtitle
-      >We need more information to create your account.</v-card-subtitle
-    >
+    <slot name="header">
+      <v-card-title>Edit Profile</v-card-title>
+    </slot>
     <v-divider class="my-4"></v-divider>
     <!-- <p v-for="error of validator.instance.$errors" :key="error.$uid">
       <strong>{{ error.$validator }}</strong>
@@ -49,6 +49,7 @@
           <v-col>
             <v-text-field
               v-if="!state.isVerified"
+              :disabled="user.isVerified"
               v-model="state.email"
               v-bind="validator.attrs('email')"
               v-on="validator.handlers('email')"
@@ -59,11 +60,11 @@
           <!-- USER TYPE -->
           <v-col cols="12" sm="6">
             <v-autocomplete
-              v-model="state.userType"
+              v-model="state.type"
               label="User Type"
               :items="userTypes"
-              v-bind="validator.attrs('userType')"
-              v-on="validator.handlers('userType')"
+              v-bind="validator.attrs('type')"
+              v-on="validator.handlers('type')"
             ></v-autocomplete>
           </v-col>
 
@@ -169,11 +170,13 @@
     <v-card-actions>
       <span class="text-caption text-medium-emphasis">(*) Required fields</span>
       <v-spacer />
-      <v-btn v-if="isModal" @click="emit('close')">Cancel</v-btn>
+      <v-btn v-if="hasCancelButton" @click="emit('close')">Cancel</v-btn>
       <v-btn
         color="primary"
         variant="flat"
-        :disabled="validator.instance.value.$invalid"
+        :disabled="
+          validator.instance.value.$invalid || !validator.instance.value.$dirty
+        "
         @click="submit"
         >Save Changes</v-btn
       >
@@ -183,7 +186,7 @@
 
 <script setup lang="ts">
 // import { rules } from '@/utils/rules'
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
 import { vMaska } from 'maska'
@@ -204,7 +207,7 @@ const phoneRegex = helpers.regex(/^\(\d{3}\) \d{3}-\d{4}/)
 
 const authStore = useAuthStore()
 const props = defineProps({
-  isModal: { type: Boolean, required: false, default: true },
+  hasCancelButton: { type: Boolean, required: false, default: true },
 })
 
 const user = reactive<User>({ ...authStore.user })
@@ -223,7 +226,7 @@ const rules = {
   },
   address: {},
   userLink: { url },
-  userType: { required },
+  type: { required },
   organizationName: {
     required: requiredIf(showOrg),
     maxLength: maxLength(200),
@@ -244,6 +247,10 @@ const state = reactive<any>({
 
 const validator = new HsFormValidator(rules, state)
 
+onMounted(() => {
+  validator.validate()
+})
+
 const emit = defineEmits(['close'])
 
 const submit = async () => {
@@ -259,10 +266,4 @@ const submit = async () => {
 }
 </script>
 
-<style scoped lang="scss">
-:deep(.is-required .v-label)::after {
-  display: inline;
-  content: '*';
-  margin-left: 0.15rem;
-}
-</style>
+<style scoped lang="scss"></style>

@@ -99,6 +99,9 @@ export const useAuthStore = defineStore({
         // things.organizations could be affected for many things so just invalidate cache
         // useResetStore().things()
         this.user = data as User
+        if (!user.isVerified) {
+          await router.push({ name: 'VerifyEmail' })
+        }
       } catch (error) {
         console.error('Error updating user', error)
       }

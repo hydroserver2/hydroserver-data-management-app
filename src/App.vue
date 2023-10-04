@@ -32,6 +32,12 @@ const route = useRoute()
 .v-main.is-full-screen {
   height: 100vh;
 }
+
+:deep(.is-required .v-label.v-field-label)::after {
+  display: inline;
+  content: '*';
+  margin-left: 0.15rem;
+}
 </style>
 
 <style>

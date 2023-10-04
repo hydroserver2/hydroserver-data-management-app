@@ -21,7 +21,7 @@ function requireVerifiedAuth(
 ) {
   const authStore = useAuthStore()
   if (!authStore.isLoggedIn) next({ name: 'Login' })
-  else if (!authStore.isVerified) next({ name: 'VerifyEmail' })
+  else if (!authStore.isVerified) next({ name: 'CompleteProfile' })
   else next()
 }
 
@@ -154,6 +154,12 @@ export const routes: RouteRecordRaw[] = [
     name: 'Profile',
     component: () => import('@/components/account/Profile.vue'),
     beforeEnter: requireAuth,
+  },
+  {
+    path: '/complete-profile',
+    name: 'CompleteProfile',
+    component: () => import('@/components/account/CompleteProfile.vue'),
+    beforeEnter: requireUnverifiedAuth,
   },
   {
     path: '/verify-email',
