@@ -1,3 +1,5 @@
+// TODO: this can all be replaced by https://vuelidate-next.netlify.app/validators.html
+
 export const required = [
   (value: string) => !!value || 'This field is required.',
 ]
@@ -31,10 +33,11 @@ export const emailFormat = [
 
 export const phoneNumber = [
   (value: string) => {
-    if (!value) return true
     const numericValue = value.replace(/\D/g, '')
     if (numericValue.length == 10) {
-      if (/^[\d\+\-\(\)\s]*$/.test(value)) return true
+      if (/^[\d\+\-\(\)\s]*$/.test(value)) {
+        return true
+      }
       return 'Phone number can only contain digits, plus sign, parentheses, hyphens, and spaces.'
     }
     return 'Phone number must contain 10 digits.'

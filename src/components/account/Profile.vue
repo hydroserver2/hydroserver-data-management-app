@@ -181,7 +181,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn-cancel @click="cancelDeletion">Cancel</v-btn-cancel>
+        <v-btn @click="cancelDeletion">Cancel</v-btn>
         <v-btn color="delete" @click="deleteAccount">Delete</v-btn>
       </v-card-actions>
     </v-card>

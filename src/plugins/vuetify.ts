@@ -18,7 +18,7 @@ const theme: ThemeDefinition = {
     surface: '#FFFFFF', // white
     primary: '#2196F3', // blue
     secondary: '#4CAF50', // green
-    cancel: '#757575', // grey-darken-1
+    default: '#757575', // grey-darken-1
     delete: '#F44336', // red
     error: '#B71C1C', // red-darken-4
     info: '#03A9F4', // light-blue
@@ -30,7 +30,6 @@ const theme: ThemeDefinition = {
 const textFieldAttrs = {
   density: 'comfortable',
   variant: 'outlined',
-  hideDetails: 'auto',
 }
 
 export default createVuetify({
@@ -58,27 +57,19 @@ export default createVuetify({
       variant: 'outlined',
     },
     VBtn: {
-      color: 'primary',
+      color: 'default',
       variant: 'text',
-      rounded: true,
       density: 'comfortable',
+      rounded: false,
     },
     VBtnPrimary: {
       color: 'primary',
       variant: 'flat',
-      rounded: true,
       density: 'comfortable',
     },
     VBtnSecondary: {
       color: 'secondary',
       variant: 'flat',
-      rounded: true,
-      density: 'comfortable',
-    },
-    VBtnCancel: {
-      color: 'cancel',
-      variant: 'text',
-      rounded: true,
       density: 'comfortable',
     },
     VBtnAdd: {
