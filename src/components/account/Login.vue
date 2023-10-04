@@ -6,18 +6,20 @@
         <v-btn
           @click="openLogInDialog('google')"
           variant="outlined"
+          color="primary"
           prepend-icon="mdi-google"
           :rounded="false"
           block
           class="py-4"
         >
-          Log in using Google
+          Continue with Google
         </v-btn>
       </v-card-text>
       <v-card-text>
         <v-btn
           @click="openLogInDialog('orcid')"
           variant="outlined"
+          color="primary"
           outlined
           :rounded="false"
           block
@@ -26,7 +28,7 @@
           <template v-slot:prepend>
             <v-icon class="fa-brands fa-orcid"></v-icon>
           </template>
-          Log in using ORCID
+          Continue with ORCID
         </v-btn>
       </v-card-text>
       <v-divider class="my-8"></v-divider>

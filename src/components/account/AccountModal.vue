@@ -4,7 +4,7 @@
       >We need more information to create your account.</v-card-subtitle
     >
     <v-divider class="my-4"></v-divider>
-    <!-- <p v-for="error of v$.$errors" :key="error.$uid">
+    <!-- <p v-for="error of validator.instance.$errors" :key="error.$uid">
       <strong>{{ error.$validator }}</strong>
       <small> on property</small>
       <strong>{{ error.$property }}</strong>
@@ -18,8 +18,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.firstName"
-              v-bind="attrs('firstName')"
-              v-on="handlers('firstName')"
+              v-bind="validator.attrs('firstName')"
+              v-on="validator.handlers('firstName')"
               label="First Name"
             >
             </v-text-field>
@@ -29,8 +29,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.middleName"
-              v-bind="attrs('middleName')"
-              v-on="handlers('middleName')"
+              v-bind="validator.attrs('middleName')"
+              v-on="validator.handlers('middleName')"
               label="Middle Name"
             ></v-text-field>
           </v-col>
@@ -39,8 +39,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.lastName"
-              v-bind="attrs('lastName')"
-              v-on="handlers('lastName')"
+              v-bind="validator.attrs('lastName')"
+              v-on="validator.handlers('lastName')"
               label="Last Name"
             ></v-text-field>
           </v-col>
@@ -50,8 +50,8 @@
             <v-text-field
               v-if="!state.isVerified"
               v-model="state.email"
-              v-bind="attrs('email')"
-              v-on="handlers('email')"
+              v-bind="validator.attrs('email')"
+              v-on="validator.handlers('email')"
               label="Email"
             ></v-text-field>
           </v-col>
@@ -62,8 +62,8 @@
               v-model="state.userType"
               label="User Type"
               :items="userTypes"
-              v-bind="attrs('userType')"
-              v-on="handlers('userType')"
+              v-bind="validator.attrs('userType')"
+              v-on="validator.handlers('userType')"
             ></v-autocomplete>
           </v-col>
 
@@ -73,8 +73,8 @@
               v-model="state.phone"
               v-maska:[phoneMask]
               label="Phone Number"
-              v-bind="attrs('phone')"
-              v-on="handlers('phone')"
+              v-bind="validator.attrs('phone')"
+              v-on="validator.handlers('phone')"
             ></v-text-field>
           </v-col>
 
@@ -83,8 +83,8 @@
             <v-text-field
               v-model="state.userLink"
               label="User's Link (URL)"
-              v-bind="attrs('userLink')"
-              v-on="handlers('userLink')"
+              v-bind="validator.attrs('userLink')"
+              v-on="validator.handlers('userLink')"
             >
             </v-text-field>
           </v-col>
@@ -94,8 +94,8 @@
             <v-text-field
               v-model="state.address"
               label="Address"
-              v-bind="attrs('address')"
-              v-on="handlers('address')"
+              v-bind="validator.attrs('address')"
+              v-on="validator.handlers('address')"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -112,8 +112,8 @@
           <v-col cols="12" sm="8">
             <v-text-field
               v-model="state.organization.name"
-              v-bind="attrs('organizationName')"
-              v-on="handlers('organizationName')"
+              v-bind="validator.attrs('organizationName')"
+              v-on="validator.handlers('organizationName')"
               label="Organization Name"
             ></v-text-field>
           </v-col>
@@ -122,8 +122,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.organization.code"
-              v-bind="attrs('organizationCode')"
-              v-on="handlers('organizationCode')"
+              v-bind="validator.attrs('organizationCode')"
+              v-on="validator.handlers('organizationCode')"
               label="Organization Code"
             ></v-text-field>
           </v-col>
@@ -133,8 +133,8 @@
             <v-autocomplete
               :items="organizationTypes"
               v-model="state.organization.type"
-              v-bind="attrs('organizationType')"
-              v-on="handlers('organizationType')"
+              v-bind="validator.attrs('organizationType')"
+              v-on="validator.handlers('organizationType')"
               label="Organization Type"
             />
           </v-col>
@@ -143,8 +143,8 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="state.organization.link"
-              v-bind="attrs('organizationLink')"
-              v-on="handlers('organizationLink')"
+              v-bind="validator.attrs('organizationLink')"
+              v-on="validator.handlers('organizationLink')"
               label="Organization Link"
             ></v-text-field>
           </v-col>
@@ -153,12 +153,11 @@
           <v-col cols="12">
             <v-textarea
               v-model="state.organization.description"
-              v-bind="attrs('organizationDescription')"
-              v-on="handlers('organizationDescription')"
+              v-bind="validator.attrs('organizationDescription')"
+              v-on="validator.handlers('organizationDescription')"
               label="Organization Description"
               auto-grow
               :rows="1"
-              :counter="2000"
             ></v-textarea>
           </v-col>
         </v-row>
@@ -168,13 +167,13 @@
     <v-divider></v-divider>
 
     <v-card-actions>
-      <span class="text-caption">(*) Required fields</span>
+      <span class="text-caption text-medium-emphasis">(*) Required fields</span>
       <v-spacer />
       <v-btn v-if="isModal" @click="emit('close')">Cancel</v-btn>
       <v-btn
         color="primary"
         variant="flat"
-        :disabled="v$.$invalid"
+        :disabled="validator.instance.value.$invalid"
         @click="submit"
         >Save Changes</v-btn
       >
@@ -190,7 +189,6 @@ import { userTypes } from '@/vocabularies'
 import { vMaska } from 'maska'
 import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
-import { useVuelidate } from '@vuelidate/core'
 import { helpers } from '@vuelidate/validators'
 import {
   required,
@@ -199,7 +197,7 @@ import {
   url,
   requiredIf,
 } from '@vuelidate/validators'
-// import { phoneNumber } from '@/utils/rules'
+import { HsFormValidator } from '@/utils/rules'
 
 const phoneMask = { mask: '(###) ###-####' }
 const phoneRegex = helpers.regex(/^\(\d{3}\) \d{3}-\d{4}/)
@@ -243,29 +241,22 @@ const state = reactive<any>({
   ...user,
   organization: user.organization || new Organization(),
 })
-const v$ = useVuelidate(rules, state)
+
+const validator = new HsFormValidator(rules, state)
+
 const emit = defineEmits(['close'])
 
 const submit = async () => {
-  const isValid = await v$.value.$validate()
+  const isValid = await validator.validate()
   if (isValid) {
-    await authStore.updateUser({
+    const data = {
       ...state,
-      organization: showOrg ? state.organization : undefined,
-    })
+      organization: showOrg.value ? state.organization : undefined,
+    }
+    await authStore.updateUser(data)
     emit('close')
   }
 }
-
-const handlers = (name: string) => ({
-  input: v$.value[name].$touch,
-  blur: v$.value[name].$touch,
-})
-
-const attrs = (name: string) => ({
-  'error-messages': v$.value[name].$errors.map((e: any) => e.$message),
-  class: { 'is-required': v$.value[name]?.hasOwnProperty('required') },
-})
 </script>
 
 <style scoped lang="scss">

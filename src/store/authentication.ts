@@ -95,8 +95,9 @@ export const useAuthStore = defineStore({
     async updateUser(user: User) {
       try {
         const data = await api.patch(ENDPOINTS.USER, user, this.user)
+        // TODO: investigate this
         // things.organizations could be affected for many things so just invalidate cache
-        useResetStore().things()
+        // useResetStore().things()
         this.user = data as User
       } catch (error) {
         console.error('Error updating user', error)
