@@ -168,7 +168,7 @@ export const routes: RouteRecordRaw[] = [
     beforeEnter: requireUnverifiedAuth,
   },
   {
-    path: '/activate/:uid/:token',
+    path: '/activate',
     name: 'ActivateAccount',
     component: () => import('@/components/account/ActivateAccount.vue'),
   },

@@ -83,7 +83,9 @@ export const useAuthStore = defineStore({
           uid: uid,
           token: token,
         })
-        if (!data.user.isVerified) return
+        if (!data.user.isVerified) {
+          return false
+        }
         this.user = data.user
         this.accessToken = data.access
         this.refreshToken = data.refresh

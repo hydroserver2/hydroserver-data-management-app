@@ -35,6 +35,9 @@ function getMessage(method: string, status: number, endpoint: string) {
 // const THINGS_ID_PATTERN = new RegExp(`${ENDPOINTS.THINGS}/[a-zA-Z0-9]+`)
 
 function getEndpointMessages(endpoint: string): any {
+  // TODO: this setup is very limiting because it forces us to define routes in such
+  // a way that parent fragments are not repeated in child routes
+  // Most of these errors should be handled inside the components or store methods
   if (endpoint.includes(ENDPOINTS.THINGS)) {
     // if (endpoint == ENDPOINTS.THINGS) {
     // } else if (THINGS_ID_PATTERN.test(endpoint)) {}
