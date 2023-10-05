@@ -46,7 +46,7 @@ export const ENDPOINTS = {
   DATASTREAMS: Object.assign(DS_BASE, {
     ID: FOR_ID(DS_BASE),
     FOR_THING: (id: string) => `${THINGS_BASE}/${id}/datastreams`,
-    CSV: (id: string) => `${DS_BASE}/csv/${id}`,
+    CSV: (id: string) => `${DS_BASE}/${id}/csv`,
   }),
 
   OBSERVED_PROPERTIES: Object.assign(OP_BASE, {
@@ -54,7 +54,8 @@ export const ENDPOINTS = {
   }),
 
   PHOTOS: Object.assign(PHOTOS_BASE, {
-    FOR_THING: (thingId: string, photoId: string = '') => `${THINGS_BASE}/${thingId}/photos${photoId ? '/' + photoId : ''}`,
+    FOR_THING: (thingId: string, photoId: string = '') =>
+      `${THINGS_BASE}/${thingId}/photos${photoId ? '/' + photoId : ''}`,
   }),
 
   PROCESSING_LEVELS: Object.assign(PL_BASE, {
