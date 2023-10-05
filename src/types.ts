@@ -68,7 +68,6 @@ export class Datastream {
   sensorId: string
   processingLevelId: string
   isVisible: boolean
-  isStale?: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number

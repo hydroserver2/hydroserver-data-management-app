@@ -40,7 +40,7 @@
         <Sparkline
           @click="item.raw.chartOpen = true"
           class="pt-2"
-          :is-stale="item.raw.isStale"
+          :is-stale="isStale(item.raw.phenomenonEndTime)"
           :observations="observations[item.raw.id]"
         />
       </div>
@@ -258,5 +258,11 @@ function handleCloseDataSourceDialog() {
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   return format(date, 'MMM dd, yyyy HH:mm')
+}
+
+function isStale(timestamp: string) {
+  let endTime = new Date(timestamp)
+  let seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000)
+  return endTime < seventyTwoHoursAgo
 }
 </script>
