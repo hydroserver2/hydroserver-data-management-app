@@ -6,19 +6,24 @@ import Notification from './notifications'
 import { useResetStore } from '@/store/resetStore'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
+import jwtDecode from 'jwt-decode'
+
+interface JWTPayload {
+  exp: number
+}
 
 export const useAuthStore = defineStore({
   id: 'authentication',
   state: () => ({
-    access_token: '',
-    refresh_token: '',
+    accessToken: '',
+    refreshToken: '',
     user: new User(),
     sendingVerificationEmail: false,
     isLoginListenerSet: false,
     loggedIn$: new Subject<void>(),
   }),
   getters: {
-    isLoggedIn: (state) => !!state.access_token,
+    isLoggedIn: (state) => !!state.accessToken,
     isVerified: (state) => state.user.isVerified,
   },
   actions: {
@@ -34,8 +39,8 @@ export const useAuthStore = defineStore({
           password: password,
         })
 
-        this.access_token = tokens.access
-        this.refresh_token = tokens.refresh
+        this.accessToken = tokens.access
+        this.refreshToken = tokens.refresh
         const user = await api.fetch(ENDPOINTS.USER)
         if (!user) return
 
@@ -53,13 +58,32 @@ export const useAuthStore = defineStore({
         console.error('Error logging out', error)
       }
     },
+    isRefreshTokenExpired() {
+      if (!this.refreshToken) return false
+      const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
+      const currentTime = Date.now() / 1000
+      console.log(
+        'decodedToken.exp - currentTime',
+        decodedToken.exp - currentTime
+      )
+      return decodedToken.exp < currentTime
+    },
+    checkTokenExpiry() {
+      if (this.isRefreshTokenExpired()) {
+        this.logout()
+        Notification.toast({
+          message: 'Session expired. Please login',
+          type: 'info',
+        })
+      }
+    },
     async createUser(user: User) {
       try {
         const data = await api.post(ENDPOINTS.USER, user)
         useResetStore().things()
         this.user = data.user
-        this.access_token = data.access
-        this.refresh_token = data.refresh
+        this.accessToken = data.access
+        this.refreshToken = data.refresh
         await router.push({ name: 'VerifyEmail' })
       } catch (error) {
         console.error('Error creating user', error)
@@ -83,8 +107,8 @@ export const useAuthStore = defineStore({
         })
         if (!data.user.isVerified) return
         this.user = data.user
-        this.access_token = data.access
-        this.refresh_token = data.refresh
+        this.accessToken = data.access
+        this.refreshToken = data.refresh
         await router.push({ name: 'Sites' })
       } catch (error) {
         console.error('Error activating account', error)
@@ -157,8 +181,8 @@ export const useAuthStore = defineStore({
           if (event.data.access) {
             console.log(event)
 
-            this.access_token = event.data.access
-            this.refresh_token = event.data.refresh
+            this.accessToken = event.data.access
+            this.refreshToken = event.data.refresh
             this.user = event.data.user
             await router.push({ name: 'Sites' })
 

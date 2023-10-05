@@ -5,14 +5,14 @@
  * - If a body is present and it's an object, the body is stringified.
  *
  * @param {any} options - The original request options object.
- * @param {string} access_token - The access token to be added to the request headers.
+ * @param {string} accessToken - The access token to be added to the request headers.
  *
  * @returns {any} The enhanced request options with possible modified headers and body.
  */
-export function requestInterceptor(options: any, access_token: string) {
+export function requestInterceptor(options: any, accessToken: string) {
   let headers = options.headers ? { ...options.headers } : {}
 
-  if (access_token) headers['Authorization'] = `Bearer ${access_token}`
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`
 
   let body: string | undefined = undefined
   if (options.body !== undefined) {

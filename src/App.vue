@@ -15,6 +15,8 @@ import Footer from '@/components/base/Footer.vue'
 import Notifications from '@/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useAuthStore } from '@/store/authentication'
+import { onMounted, onUnmounted } from 'vue'
 
 const route = useRoute()
 
@@ -24,6 +26,21 @@ const hideFooter = computed(() => {
 
 const isFullScreen = computed(() => {
   return route.meta.isFullScreen
+})
+
+// Check the refresh token every 600,000 milliseconds = 10 minutes
+// Logout if the refresh token is expired
+const authStore = useAuthStore()
+let interval: any
+onMounted(() => {
+  interval = setInterval(() => {
+    console.log('Checking token')
+    authStore.checkTokenExpiry()
+  }, 600000)
+})
+
+onUnmounted(() => {
+  clearInterval(interval)
 })
 </script>
 
