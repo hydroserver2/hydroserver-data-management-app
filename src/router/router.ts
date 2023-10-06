@@ -19,7 +19,7 @@ const guards: ((
   next?: (to?: string | object) => void
 ) => any | null)[] = [
   // hasAuthGuard
-  (to, _from, next) => {
+  (to, _from, _next) => {
     if (to.meta?.hasAuthGuard) {
       const authStore = useAuthStore()
 
@@ -31,14 +31,26 @@ const guards: ((
     }
     return null
   },
+
+  // hasLoggedOutGuard
+  (to, _from, _next) => {
+    if (to.meta?.hasLoggedOutGuard) {
+      const authStore = useAuthStore()
+
+      if (authStore.isLoggedIn) {
+        return { name: 'PageNotFound' }
+      }
+    }
+    return null
+  },
+
   // hasUnverifiedAuthGuard
-  (to, _from, next) => {
+  (to, _from, _next) => {
     if (to.meta?.hasUnverifiedAuthGuard) {
       const authStore = useAuthStore()
-      if (authStore.isLoggedIn && !authStore.isVerified) {
-        return to
+      if (authStore.isLoggedIn && authStore.isVerified) {
+        return { name: 'PageNotFound' }
       }
-      return { name: 'PageNotFound' }
     }
     return null
   },

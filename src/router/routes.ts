@@ -104,6 +104,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'Signup',
     component: () => import('@/components/account/Signup.vue'),
     meta: {
+      hasLoggedOutGuard: true,
       title: 'Sign Up',
       metaTags: [
         {
@@ -119,6 +120,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/components/account/Login.vue'),
     meta: {
       title: 'Login',
+      hasLoggedOutGuard: true,
     },
   },
   {
