@@ -176,11 +176,7 @@
       <v-btn
         color="primary"
         variant="flat"
-        :disabled="
-          validator.instance.value.$invalid ||
-          !validator.instance.value.$dirty ||
-          isSaving
-        "
+        :disabled="validator.instance.value.$invalid || isSaving"
         @click="submit"
         >{{ isSaving ? 'Saving Changes...' : 'Save Changes' }}</v-btn
       >
