@@ -37,6 +37,7 @@ export const useThingStore = defineStore('things', {
       try {
         const data = await api.fetch(ENDPOINTS.THINGS.ID(id))
         this.$patch({ things: { ...this.things, [id]: data } })
+        return this.things[id]
       } catch (error) {
         console.error('Error fetching thing by id', error)
       }

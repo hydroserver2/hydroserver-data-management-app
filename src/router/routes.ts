@@ -1,87 +1,50 @@
 import { RouteRecordRaw } from 'vue-router'
-import Home from '@/components/Home.vue'
-import { useAuthStore } from '@/store/authentication'
-import { useThingStore } from '@/store/things'
-import { RouteLocationNormalized } from 'vue-router'
-
-function requireAuth(
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: (to?: string | object) => void
-) {
-  const authStore = useAuthStore()
-  if (!authStore.isLoggedIn) next({ name: 'Login' })
-  else next()
-}
-
-function requireVerifiedAuth(
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: (to?: string | object) => void
-) {
-  const authStore = useAuthStore()
-  if (!authStore.isLoggedIn) next({ name: 'Login' })
-  else if (!authStore.isVerified) next({ name: 'CompleteProfile' })
-  else next()
-}
-
-function requireUnverifiedAuth(
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: (to?: string | object) => void
-) {
-  const authStore = useAuthStore()
-  if (!authStore.isLoggedIn) next({ name: 'Login' })
-  else if (authStore.isVerified) next({ name: 'Sites' })
-  else next()
-}
-
-async function requireThingOwnership(
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: (to?: string | object) => void
-) {
-  const authStore = useAuthStore()
-  const thingStore = useThingStore()
-  if (!authStore.isLoggedIn) {
-    next({ name: 'Login' })
-    return
-  }
-
-  if (!authStore.isVerified) {
-    next({ name: 'VerifyEmail' })
-    return
-  }
-
-  if (typeof to.params.id !== 'string') {
-    next({ name: 'PageNotFound' })
-    return
-  }
-
-  await thingStore.fetchThingById(to.params.id)
-  const thing = thingStore.things[to.params.id]
-  if (thing && (thing.isPrimaryOwner || thing.ownsThing)) next()
-  else next({ name: 'PageNotFound' })
-}
 
 export const routes: RouteRecordRaw[] = [
   {
     path: '/browse',
     name: 'Browse',
     component: () => import('@/components/Browse.vue'),
-    meta: { hideFooter: true, isFullScreen: true },
+    meta: {
+      hideFooter: true,
+      isFullScreen: true,
+      title: 'Browse Monigoring Sites',
+      metaTags: [
+        {
+          name: 'keywords',
+          content: 'HydroServer, Site Types, Map, Sites, Data',
+        },
+      ],
+    },
   },
   {
     path: '/sites',
     name: 'Sites',
     component: () => import('@/components/Site/Sites.vue'),
-    // TODO: This type of guard syntax will only allow for one guard per route. Need to setup multiple guards
-    beforeEnter: requireVerifiedAuth,
+    meta: {
+      hasAuthGuard: true,
+      title: 'My Sites',
+      metaTags: [
+        {
+          name: 'keywords',
+          content: 'HydroServer, My Sites',
+        },
+      ],
+    },
   },
   {
     path: '/sites/:id',
     name: 'SingleSite',
     component: () => import('@/components/Site/SingleSite.vue'),
+    meta: {
+      title: 'Site',
+      metaTags: [
+        {
+          name: 'keywords',
+          content: 'HydroServer, Site',
+        },
+      ],
+    },
   },
   {
     path: '/visualization/:id/:datastreamId',
@@ -92,18 +55,27 @@ export const routes: RouteRecordRaw[] = [
     path: '/sites/:id/datastreams/form/:datastreamId?',
     name: 'DatastreamForm',
     component: () => import('@/components/Datastream/DatastreamForm.vue'),
-    beforeEnter: requireThingOwnership,
+    meta: { hasThingOwnershipGuard: true },
   },
   {
     path: '/contact',
     name: 'Contact',
     component: () => import('@/components/Contact.vue'),
+    meta: {
+      title: 'Contact Us',
+      metaTags: [
+        {
+          name: 'keywords',
+          content: 'HydroServer, Contact Us, GitHub, Email',
+        },
+      ],
+    },
   },
   {
     path: '/data-sources',
     name: 'DataSources',
     component: () => import('@/components/DataSource/DataSourceDashboard.vue'),
-    beforeEnter: requireVerifiedAuth,
+    meta: { hasAuthGuard: true },
   },
   {
     path: '/data-sources/:id',
@@ -114,7 +86,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/data-loaders',
     name: 'DataLoaders',
     component: () => import('@/components/DataSource/DataLoaderDashboard.vue'),
-    beforeEnter: requireVerifiedAuth,
+    meta: { hasAuthGuard: true },
   },
   {
     path: '/hydroloader/download',
@@ -125,52 +97,71 @@ export const routes: RouteRecordRaw[] = [
     path: '/sites/:id/datastreams/:datastreamId/datasource',
     name: 'DataSourceForm',
     component: () => import('@/components/DataSource/DataSourceForm.vue'),
-    beforeEnter: requireThingOwnership,
+    meta: { hasThingOwnershipGuard: true },
   },
   {
     path: '/signup',
     name: 'Signup',
     component: () => import('@/components/account/Signup.vue'),
+    meta: {
+      title: 'Sign Up',
+      metaTags: [
+        {
+          name: 'keywords',
+          content: 'Sign Up, Account, User',
+        },
+      ],
+    },
   },
   {
     path: '/login',
     name: 'Login',
     component: () => import('@/components/account/Login.vue'),
+    meta: {
+      title: 'Login',
+    },
   },
   {
     path: '/password_reset',
     name: 'PasswordResetRequest',
     component: () =>
       import('@/components/account/PasswordRecovery/PasswordResetRequest.vue'),
+    meta: {
+      title: 'Reset Password',
+    },
   },
   {
     path: '/password_reset/:uid/:token',
     name: 'PasswordReset',
     component: () =>
       import('@/components/account/PasswordRecovery/PasswordReset.vue'),
+    meta: {
+      title: 'Reset Password',
+    },
   },
   {
     path: '/profile',
     name: 'Profile',
     component: () => import('@/components/account/Profile.vue'),
-    beforeEnter: requireAuth,
+    meta: { hasAuthGuard: true, title: 'Profile' },
   },
   {
     path: '/complete-profile',
     name: 'CompleteProfile',
     component: () => import('@/components/account/CompleteProfile.vue'),
-    beforeEnter: requireUnverifiedAuth,
+    meta: { hasUnverifiedAuthGuard: true, title: 'Complete Profile' },
   },
   {
     path: '/verify-email',
     name: 'VerifyEmail',
     component: () => import('@/components/account/VerifyEmail.vue'),
-    beforeEnter: requireUnverifiedAuth,
+    meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
   },
   {
     path: '/activate',
     name: 'ActivateAccount',
     component: () => import('@/components/account/ActivateAccount.vue'),
+    meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
   },
   {
     path: '/callback',
@@ -182,16 +173,18 @@ export const routes: RouteRecordRaw[] = [
     path: '/metadata',
     name: 'Metadata',
     component: () => import('@/components/Datastream/Metadata.vue'),
-    beforeEnter: requireVerifiedAuth,
+    meta: { hasAuthGuard: true },
   },
   {
     path: '/',
     name: 'Home',
     component: () => import('@/components/Home.vue'),
+    meta: { title: 'Home' },
   },
   {
     path: '/:catchAll(.*)*',
     name: 'PageNotFound',
     component: () => import('@/components/base/PageNotFound.vue'),
+    meta: { title: 'Page Not Found' },
   },
 ]

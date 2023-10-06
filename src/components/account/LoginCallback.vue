@@ -15,8 +15,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-const route = useRoute()
 
+const route = useRoute()
 const APP_URL = import.meta.env.VITE_APP_URL
 
 onMounted(async () => {

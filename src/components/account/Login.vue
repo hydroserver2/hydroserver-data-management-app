@@ -87,6 +87,10 @@ import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { OAuthProvider } from '@/types'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -103,7 +107,11 @@ const openLogInDialog = async (provider: OAuthProvider) => {
 }
 
 const onLoggedIn = () => {
-  // TODO: update state on log in
+  if (route.query.next) {
+    router.push({ name: route.query.next as string })
+  } else {
+    router.push({ name: 'Sites' })
+  }
 }
 </script>
 

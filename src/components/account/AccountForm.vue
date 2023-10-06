@@ -48,12 +48,14 @@
           <!-- EMAIL -->
           <v-col>
             <v-text-field
-              v-if="!state.isVerified"
-              :disabled="user.isVerified"
+              :readonly="user.isVerified"
               v-model="state.email"
               v-bind="validator.attrs('email')"
               v-on="validator.handlers('email')"
               label="Email"
+              :append-inner-icon="
+                user.isVerified ? 'mdi-pencil-off' : undefined
+              "
             ></v-text-field>
           </v-col>
 
@@ -82,10 +84,10 @@
           <!-- USER'S LINK -->
           <v-col cols="12" sm="6">
             <v-text-field
-              v-model="state.userLink"
+              v-model="state.link"
               label="User's Link (URL)"
-              v-bind="validator.attrs('userLink')"
-              v-on="validator.handlers('userLink')"
+              v-bind="validator.attrs('link')"
+              v-on="validator.handlers('link')"
             >
             </v-text-field>
           </v-col>
@@ -175,10 +177,12 @@
         color="primary"
         variant="flat"
         :disabled="
-          validator.instance.value.$invalid || !validator.instance.value.$dirty
+          validator.instance.value.$invalid ||
+          !validator.instance.value.$dirty ||
+          isSaving
         "
         @click="submit"
-        >Save Changes</v-btn
+        >{{ isSaving ? 'Saving Changes...' : 'Save Changes' }}</v-btn
       >
     </v-card-actions>
   </v-card>
@@ -206,12 +210,13 @@ const phoneMask = { mask: '(###) ###-####' }
 const phoneRegex = helpers.regex(/^\(\d{3}\) \d{3}-\d{4}/)
 
 const authStore = useAuthStore()
-const props = defineProps({
+defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
 })
 
 const user = reactive<User>({ ...authStore.user })
 const showOrg = ref(!!user.organization)
+const isSaving = ref(false)
 
 const rules = {
   firstName: { required, maxLength: maxLength(200) },
@@ -225,7 +230,7 @@ const rules = {
     ),
   },
   address: {},
-  userLink: { url },
+  link: { url },
   type: { required },
   organizationName: {
     required: requiredIf(showOrg),
@@ -260,7 +265,9 @@ const submit = async () => {
       ...state,
       organization: showOrg.value ? state.organization : undefined,
     }
+    isSaving.value = true
     await authStore.updateUser(data)
+    isSaving.value = false
     emit('close')
   }
 }

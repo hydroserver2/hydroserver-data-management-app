@@ -18,136 +18,43 @@ const guards: ((
   from?: RouteLocationNormalized,
   next?: (to?: string | object) => void
 ) => any | null)[] = [
-  // requireAuth
+  // hasAuthGuard
   (to, _from, next) => {
-    if (to.meta?.hasRequireAuthGuard) {
+    if (to.meta?.hasAuthGuard) {
       const authStore = useAuthStore()
-
-      if (!authStore.isLoggedIn) next?.({ name: 'Login' })
-      else next?.()
-    }
-    return null
-  },
-
-  // requireVerifiedAuth
-  (to, _from, next) => {
-    if (to.meta?.hasRequireVerifiedAuth) {
-      const authStore = useAuthStore()
-
-      if (!authStore.isLoggedIn) next?.({ name: 'Login' })
-      else if (!authStore.isVerified) next?.({ name: 'VerifyEmail' })
-      else next?.()
-    }
-    return null
-  },
-
-  // requireUnverifiedAuth
-  (to, _from, next) => {
-    if (to.meta?.hasRequireUnverifiedAuthGuard) {
-      const authStore = useAuthStore()
-
-      if (!authStore.isLoggedIn) next?.({ name: 'Login' })
-      else if (authStore.isVerified) next?.({ name: 'Sites' })
-      else next?.()
-    }
-    return null
-  },
-
-  // requireThingOwnership
-  async (to, _from, next) => {
-    if (to.meta?.hasRequireThingOwnershipGuard) {
-      const authStore = useAuthStore()
-      const thingStore = useThingStore()
 
       if (!authStore.isLoggedIn) {
-        next?.({ name: 'Login' })
-        return
-      }
-
-      if (!authStore.isVerified) {
-        next?.({ name: 'VerifyEmail' })
-        return
-      }
-
-      if (typeof to.params.id !== 'string') {
-        next?.({ name: 'PageNotFound' })
-        return
-      }
-
-      await thingStore.fetchThingById(to.params.id)
-      const thing = thingStore.things[to.params.id]
-      if (thing && (thing.isPrimaryOwner || thing.ownsThing)) {
-        next?.()
-      } else {
-        next?.({ name: 'PageNotFound' })
+        return { name: 'Login', query: { next: to.name } }
+      } else if (!authStore.isVerified) {
+        return { name: 'VerifyEmail' }
       }
     }
     return null
   },
+  // hasUnverifiedAuthGuard
+  (to, _from, next) => {
+    if (to.meta?.hasUnverifiedAuthGuard) {
+      const authStore = useAuthStore()
+      if (authStore.isLoggedIn && !authStore.isVerified) {
+        return to
+      }
+      return { name: 'PageNotFound' }
+    }
+    return null
+  },
 
-  // hasNextRouteGuard
-  // (_to, _from?): any | null => {
-  //   const nextRoute = User.$state.next
-  //   if (nextRoute) {
-  //     // Consume the redirect
-  //     User.commit((state) => {
-  //       state.next = ''
-  //     })
-  //     return { path: nextRoute }
-  //   }
-
-  //   return null
-  // },
-
-  // hasLoggedInGuard
-  // (to, from?, _next?): any | null => {
-  //   if (to.meta?.hasLoggedInGuard && !User.$state.isLoggedIn) {
-  //     User.openLogInDialog({ path: to.path })
-  //     return from
-  //   }
-
-  //   return null
-  // },
-
-  // hasAccessTokenGuard
-  // (to, from?): any | null => {
-  //   if (to.meta?.hasAccessTokenGuard) {
-  //     if (
-  //       !isRepositoryAuthorized(to.params.repository, false) &&
-  //       User.$state.isLoggedIn
-  //     ) {
-  //       Repository.openAuthorizeDialog(to.params.repository, { path: to.path })
-  //       return from
-  //     }
-  //   }
-
-  //   return null
-  // },
-
-  // hasUnsavedChangesGuard
-  // (to, from?, _next?): any | null => {
-  //   if (
-  //     from &&
-  //     from.meta?.hasUnsavedChangesGuard &&
-  //     User.$state.hasUnsavedChanges
-  //   ) {
-  //     Notifications.openDialog({
-  //       title: 'You have unsaved changes',
-  //       content: 'Do you want to continue and discard your changes?',
-  //       confirmText: 'Discard',
-  //       cancelText: 'Cancel',
-  //       onConfirm: async () => {
-  //         User.commit((state) => {
-  //           state.hasUnsavedChanges = false
-  //         })
-  //         router.push(to)
-  //       },
-  //     })
-  //     return from
-  //   }
-
-  //   return null
-  // },
+  // hasThingOwnershipGuard
+  async (to, _from, _next) => {
+    if (to.meta?.hasThingOwnershipGuard) {
+      const thingStore = useThingStore()
+      const id = to.params.id as string
+      const thing = await thingStore.fetchThingById(id)
+      if (!thing || (!thing.isPrimaryOwner && !thing.ownsThing)) {
+        return { name: 'PageNotFound' }
+      }
+    }
+    return null
+  },
 
   // https://www.digitalocean.com/community/tutorials/vuejs-vue-router-modify-head
   // Append head tags and update page title
@@ -211,14 +118,9 @@ const guards: ((
 ]
 
 export function setupRouteGuards() {
-  // router.beforeEach((to, _from, next) => {
-  //   console.log('Router beforeEach: ', to)
-  //   next()
-  // })
-
   guards.map((fn) => {
-    router.beforeEach((to, from, next) => {
-      const activatedRouteGuard = fn(to, from, next)
+    router.beforeEach(async (to, from, next) => {
+      const activatedRouteGuard = await fn(to, from, next)
       if (activatedRouteGuard) {
         next(activatedRouteGuard)
       } else {
@@ -230,22 +132,12 @@ export function setupRouteGuards() {
   checkGuardsOnce()
 }
 
-/** Call before navigating to an external url to save the next route in state and navigate to it after callback url */
-export function saveNextRoute() {
-  const next = router.currentRoute.query.next
-  if (next) {
-    // User.commit((state) => {
-    //   state.next = next
-    // })
-  }
-}
-
 // Call this manually immediately after guards are setup to check guards on the page that loaded on app start.
-function checkGuardsOnce() {
+async function checkGuardsOnce() {
   let activatedGuardRoute: any | null = null
 
   for (let i = 0; i < guards.length; i++) {
-    const r = guards[i](router.currentRoute)
+    const r = await guards[i](router.currentRoute.value)
     if (r) {
       // Some guard activated
       activatedGuardRoute = r

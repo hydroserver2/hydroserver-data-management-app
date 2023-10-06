@@ -25,7 +25,7 @@ import { useRoute } from 'vue-router'
 import { setupRouteGuards } from './router/router'
 
 const route = useRoute()
-// setupRouteGuards()
+setupRouteGuards()
 </script>
 
 <style scoped lang="scss">
