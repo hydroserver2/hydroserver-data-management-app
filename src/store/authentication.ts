@@ -116,6 +116,7 @@ export const useAuthStore = defineStore({
         await router.push({ name: 'Sites' })
       } catch (error) {
         console.error('Error activating account', error)
+        throw error
       }
     },
     async updateUser(user: User) {
@@ -175,6 +176,7 @@ export const useAuthStore = defineStore({
 
           try {
             const user = await api.fetch(ENDPOINTS.USER)
+
             if (!user) return
             this.user = user
 

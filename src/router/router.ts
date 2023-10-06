@@ -26,7 +26,11 @@ const guards: ((
       if (!authStore.isLoggedIn) {
         return { name: 'Login', query: { next: to.name } }
       } else if (!authStore.isVerified) {
-        return { name: 'VerifyEmail' }
+        if (!authStore.user.email) {
+          return { name: 'CompleteProfile' }
+        } else {
+          return { name: 'VerifyEmail' }
+        }
       }
     }
     return null
