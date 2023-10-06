@@ -15,10 +15,6 @@ export const useDatastreamStore = defineStore('datastreams', {
         const datastreams = Object.values(state.datastreams).flat()
         return datastreams.filter((ds) => ds[parameter_name] === parameter_id)
       },
-    primaryOwnedDatastreams: (state) => {
-      const allDatastreams = Object.values(state.datastreams).flat()
-      return allDatastreams.filter((ds) => ds.isPrimaryOwner)
-    },
   },
   actions: {
     async fetchDatastreams(reload = false) {
@@ -63,10 +59,7 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async createDatastream(newDatastream: Datastream) {
       try {
-        const data = await api.post(
-          ENDPOINTS.DATASTREAMS.FOR_THING(newDatastream.thingId),
-          newDatastream
-        )
+        const data = await api.post(ENDPOINTS.DATASTREAMS, newDatastream)
         if (!this.datastreams[newDatastream.thingId]) {
           this.datastreams[newDatastream.thingId] = []
         }

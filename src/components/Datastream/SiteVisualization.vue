@@ -33,6 +33,10 @@ import { useDatastream } from '@/composables/useDatastream'
 import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
+import {
+  useUnitGetters,
+  useObservedPropertiesGetters,
+} from '@/composables/useMetadataGetters'
 
 const obsStore = useObservationStore()
 
@@ -60,17 +64,20 @@ const emit = defineEmits(['close'])
 const { thing } = useThing(props.thingId)
 const { datastream } = useDatastream(props.thingId, props.datastreamId)
 
+const { getNameById: unitName } = useUnitGetters()
+const { getNameById: OPName } = useObservedPropertiesGetters()
+
 let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
 
 function drawPlot(data: any) {
   if (focusChart.value) {
-    const unitSymbol = datastream.value.unitSymbol
-      ? `(${datastream.value.unitSymbol})`
+    const unitSymbol = datastream.value.unitId
+      ? `(${unitName(datastream.value.unitId, 'symbol')})`
       : ''
 
     const yAxisLabel = datastream.value
-      ? `${datastream.value.observedPropertyName} ${unitSymbol} `
+      ? `${OPName(datastream.value.observedPropertyId)} ${unitSymbol} `
       : ''
 
     const focusSVG = focus(data, yAxisLabel)

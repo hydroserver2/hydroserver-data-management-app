@@ -177,6 +177,11 @@
       </v-card>
 
       <v-card class="outlined-container mb-10">
+        <v-card-text class="text-subtitle-2 text-medium-emphasis">
+          Add time aggregation interval and intended time spacing. Note: in
+          order to create a new unit which appears in the dropdowns below, the
+          unit type must be 'Time'.
+        </v-card-text>
         <v-card-text>
           <v-row>
             <v-col md="6" cols="12">
@@ -280,6 +285,7 @@ import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
+import { useFormattedDatastreams } from '@/composables/useFormattedDatastreams'
 
 const unitStore = useUnitStore()
 
@@ -290,14 +296,10 @@ const datastreamId = route.params.datastreamId?.toString() || ''
 const { sensors, units, observedProperties, processingLevels, isPrimaryOwner } =
   usePrimaryOwnerData(thingId)
 
-const {
-  datastream,
-  selectedDatastreamID,
-  formattedDatastreams,
-  uploadDatastream,
-  valid,
-  myForm,
-} = useDatastreamForm(thingId, datastreamId)
+const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
+  useDatastreamForm(thingId, datastreamId)
+
+const { formattedDatastreams } = useFormattedDatastreams()
 
 const showSensorModal = ref(false)
 const showUnitModal = ref(false)

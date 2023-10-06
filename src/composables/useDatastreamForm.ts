@@ -11,13 +11,6 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
   const selectedDatastreamID = ref(datastreamId)
   const datastream = reactive<Datastream>(new Datastream(thingId))
 
-  const formattedDatastreams = computed(() => {
-    return datastreamStore.primaryOwnedDatastreams.map((ds) => ({
-      id: ds.id,
-      title: `Sensor:${ds.sensorName},  Observed Property: ${ds.observedPropertyName},  Unit: ${ds.unitName},  Processing Level: ${ds.processingLevelName},  Sampled Medium ${ds.sampledMedium}`,
-    }))
-  })
-
   watch(selectedDatastreamID, async () => {
     const sourceDatastream = datastreamStore.getDatastreamById(
       selectedDatastreamID.value
@@ -67,7 +60,6 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
   return {
     datastream,
     selectedDatastreamID,
-    formattedDatastreams,
     uploadDatastream,
     valid,
     myForm,

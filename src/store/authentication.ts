@@ -9,6 +9,11 @@ import router from '@/router/router'
 
 const APP_URL = import.meta.env.VITE_APP_URL
 let OAuthLoginController = new AbortController()
+import jwtDecode from 'jwt-decode'
+
+interface JWTPayload {
+  exp: number
+}
 
 export const useAuthStore = defineStore({
   id: 'authentication',
@@ -53,6 +58,25 @@ export const useAuthStore = defineStore({
         this.resetState()
       } catch (error) {
         console.error('Error logging out', error)
+      }
+    },
+    isRefreshTokenExpired() {
+      if (!this.refreshToken) return false
+      const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
+      const currentTime = Date.now() / 1000
+      console.log(
+        'decodedToken.exp - currentTime',
+        decodedToken.exp - currentTime
+      )
+      return decodedToken.exp < currentTime
+    },
+    checkTokenExpiry() {
+      if (this.isRefreshTokenExpired()) {
+        this.logout()
+        Notification.toast({
+          message: 'Session expired. Please login',
+          type: 'info',
+        })
       }
     },
     async createUser(user: User) {

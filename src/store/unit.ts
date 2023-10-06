@@ -13,7 +13,7 @@ export const useUnitStore = defineStore('units', {
       return this.units.filter((u) => u.owner == null)
     },
     timeUnits(): Unit[] {
-      return this.units.filter((u) => u.type === 'Time' && u.owner == null)
+      return this.units.filter((u) => u.type === 'Time')
     },
   },
   actions: {
@@ -64,7 +64,7 @@ export const useUnitStore = defineStore('units', {
       }
     },
     getUnitById(id: string) {
-      const unit = this.units.find((u) => u.id.toString() === id.toString())
+      const unit = this.units.find((u) => u.id === id)
       if (!unit) throw new Error(`Unit with id ${id} not found`)
       return unit
     },

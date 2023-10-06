@@ -86,17 +86,6 @@
           </v-card>
         </v-dialog>
       </v-col>
-      <!-- Jeff said to comment out anything related to following a site August 8, 2023 -->
-      <!-- <v-col cols="auto" v-if="!isOwner">
-        <v-switch
-          color="secondary"
-          hide-details
-          v-if="isAuthenticated && thing"
-          v-model="thing.followsThing"
-          @change="updateFollow"
-          :label="thing.followsThing ? 'You Follow This site' : 'Follow Site'"
-        ></v-switch>
-      </v-col> -->
     </v-row>
     <v-row>
       <v-col cols="12" md="8">
@@ -212,6 +201,5 @@ const {
 
 onMounted(async () => {
   photoStore.fetchPhotos(thingId)
-  // TODO: observationStore.fetchObservationsByThingId(thingId)
 })
 </script>

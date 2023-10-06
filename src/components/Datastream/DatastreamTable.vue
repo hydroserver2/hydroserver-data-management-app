@@ -6,29 +6,30 @@
   >
     <template v-slot:item.info="{ item }">
       <v-col>
-        <v-row style="font-size: 1.2em" v-if="item.raw.observedPropertyName">
+        <v-row style="font-size: 1.2em">
           <strong class="mr-2">Observed Property:</strong>
-          <strong>{{ item.raw.observedPropertyName }}</strong>
+          <strong>{{ OPName(item.raw.observedPropertyId) }}</strong>
         </v-row>
-        <v-row v-if="item.raw.id">
+        <v-row>
           <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
         </v-row>
-        <v-row v-if="item.raw.processingLevelName">
+        <v-row>
           <strong class="mr-2">Processing Level:</strong>
-          {{ item.raw.processingLevelName }}
+          {{ PLName(item.raw.processingLevelId, 'code') }}
         </v-row>
-        <v-row v-if="item.raw.id">
+        <v-row>
           <strong class="mr-2">Sampled Medium:</strong>
           {{ item.raw.sampledMedium }}
         </v-row>
-        <v-row v-if="item.raw.id">
-          <strong class="mr-2">Sensor:</strong> {{ item.raw.sensorName }}
+        <v-row>
+          <strong class="mr-2">Sensor:</strong>
+          {{ sensorName(item.raw.sensorId) }}
         </v-row>
       </v-col>
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="item.raw.observations">
+      <div v-if="observations[item.raw.id]">
         <v-dialog v-model="item.raw.chartOpen" width="80rem">
           <SiteVisualization
             :thing-id="thingId"
@@ -39,24 +40,20 @@
         <Sparkline
           @click="item.raw.chartOpen = true"
           class="pt-2"
-          :is-stale="item.raw.isStale"
-          :observations="item.raw.observations"
+          :is-stale="isStale(item.raw.phenomenonEndTime)"
+          :observations="observations[item.raw.id]"
         />
       </div>
       <div v-else>No data for this datastream</div>
     </template>
     <template v-slot:item.last_observation="{ item }">
-      <div v-if="item.raw.mostRecentObservation">
+      <div v-if="mostRecentObs[item.raw.id]">
         <v-row>
-          {{
-            formatDate(
-              (item.raw.mostRecentObservation as Observation).phenomenonTime
-            )
-          }}
+          {{ formatDate(mostRecentObs[item.raw.id].date) }}
         </v-row>
         <v-row>
-          {{ (item.raw.mostRecentObservation as Observation).result }}&nbsp;
-          {{ item.raw.unitName }}
+          {{ mostRecentObs[item.raw.id].value }}&nbsp;
+          {{ unitName(item.raw.unitId) }}
         </v-row>
       </div>
     </template>
@@ -187,13 +184,18 @@
 import SiteVisualization from '@/components/Datastream/SiteVisualization.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import Sparkline from '@/components/Sparkline.vue'
-import { Observation } from '@/types'
 import { useDatastreams } from '@/composables/useDatastreams'
 import { format } from 'date-fns'
 import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreamStore } from '@/store/datastreams'
+import {
+  useUnitGetters,
+  useSensorGetters,
+  useProcessingLevelGetters,
+  useObservedPropertiesGetters,
+} from '@/composables/useMetadataGetters'
 
 const datastreamStore = useDatastreamStore()
 
@@ -205,7 +207,13 @@ const props = defineProps({
 })
 
 const { isOwner } = useThingOwnership(props.thingId)
-const { visibleDatastreams } = useVisibleDatastreams(props.thingId)
+const { visibleDatastreams, observations, mostRecentObs } =
+  useVisibleDatastreams(props.thingId)
+
+const { getNameById: unitName } = useUnitGetters()
+const { getNameById: sensorName } = useSensorGetters()
+const { getNameById: PLName } = useProcessingLevelGetters()
+const { getNameById: OPName } = useObservedPropertiesGetters()
 
 const {
   toggleVisibility,
@@ -250,5 +258,11 @@ function handleCloseDataSourceDialog() {
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   return format(date, 'MMM dd, yyyy HH:mm')
+}
+
+function isStale(timestamp: string) {
+  let endTime = new Date(timestamp)
+  let seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000)
+  return endTime < seventyTwoHoursAgo
 }
 </script>
