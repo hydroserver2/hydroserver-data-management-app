@@ -57,8 +57,7 @@ export default createVuetify({
       variant: 'outlined',
     },
     VBtn: {
-      color: 'default',
-      variant: 'text',
+      color: 'primary',
       density: 'comfortable',
       rounded: false,
     },
