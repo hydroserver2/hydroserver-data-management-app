@@ -1,3 +1,38 @@
+// TODO: this can all be replaced by https://vuelidate-next.netlify.app/validators.html
+
+import { Validation, useVuelidate } from '@vuelidate/core'
+import { Ref } from 'vue'
+export class HsFormValidator {
+  instance: Ref<Validation>
+
+  constructor(rules: any, state: any) {
+    this.instance = useVuelidate(rules, state)
+  }
+
+  validate() {
+    return this.instance.value.$validate()
+  }
+
+  /** Returns event handlers for a field */
+  handlers(name: string) {
+    const field = this.instance.value[name]
+    return {
+      input: field.$touch,
+      blur: field.$touch,
+    }
+  }
+
+  /** Returns attributes for a field */
+  attrs(name: string) {
+    const field = this.instance.value[name]
+    return {
+      'error-messages': field.$errors.map((e: any) => e.$message),
+      counter: field.maxLength?.$params.max || undefined,
+      class: { 'is-required': field?.hasOwnProperty('required') },
+    }
+  }
+}
+
 export const required = [
   (value: string) => !!value || 'This field is required.',
 ]
@@ -31,10 +66,11 @@ export const emailFormat = [
 
 export const phoneNumber = [
   (value: string) => {
-    if (!value) return true
     const numericValue = value.replace(/\D/g, '')
     if (numericValue.length == 10) {
-      if (/^[\d\+\-\(\)\s]*$/.test(value)) return true
+      if (/^[\d\+\-\(\)\s]*$/.test(value)) {
+        return true
+      }
       return 'Phone number can only contain digits, plus sign, parentheses, hyphens, and spaces.'
     }
     return 'Phone number must contain 10 digits.'

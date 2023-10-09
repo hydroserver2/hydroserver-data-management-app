@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
-import router from '@/router/router'
-import { User } from '@/types'
+import { User, OAuthProvider } from '@/types'
 import { Subject } from 'rxjs'
-import Notification from './notifications'
 import { useResetStore } from '@/store/resetStore'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
+import Notification from './notifications'
+import router from '@/router/router'
+
+const APP_URL = import.meta.env.VITE_APP_URL
+let OAuthLoginController = new AbortController()
 import jwtDecode from 'jwt-decode'
 
 interface JWTPayload {
@@ -19,7 +22,6 @@ export const useAuthStore = defineStore({
     refreshToken: '',
     user: new User(),
     sendingVerificationEmail: false,
-    isLoginListenerSet: false,
     loggedIn$: new Subject<void>(),
   }),
   getters: {
@@ -52,8 +54,8 @@ export const useAuthStore = defineStore({
     },
     async logout() {
       try {
-        await router.push({ name: 'Login' })
         this.resetState()
+        router.push({ name: 'Login' })
       } catch (error) {
         console.error('Error logging out', error)
       }
@@ -105,21 +107,27 @@ export const useAuthStore = defineStore({
           uid: uid,
           token: token,
         })
-        if (!data.user.isVerified) return
+        if (!data.user.isVerified) {
+          return false
+        }
         this.user = data.user
         this.accessToken = data.access
         this.refreshToken = data.refresh
         await router.push({ name: 'Sites' })
       } catch (error) {
         console.error('Error activating account', error)
+        throw error
       }
     },
     async updateUser(user: User) {
       try {
         const data = await api.patch(ENDPOINTS.USER, user, this.user)
         // things.organizations could be affected for many things so just invalidate cache
-        useResetStore().things()
+        // useResetStore().things()
         this.user = data as User
+        if (!user.isVerified) {
+          await router.push({ name: 'VerifyEmail' })
+        }
       } catch (error) {
         console.error('Error updating user', error)
       }
@@ -153,58 +161,57 @@ export const useAuthStore = defineStore({
         console.error('Error resetting password', error)
       }
     },
-    async OAuthLogin(backend: string, callback?: () => any) {
-      let OAuthUrl: string = ''
+    async OAuthLogin(provider: OAuthProvider, callback?: () => any) {
+      const handleMessage = async (event: MessageEvent) => {
+        if (
+          event.origin !== APP_URL ||
+          !event.data.hasOwnProperty('accessToken')
+        ) {
+          return
+        }
 
-      if (backend === 'google') {
-        OAuthUrl = '/api/account/google/login'
-      } else if (backend === 'orcid') {
-        OAuthUrl = '/api/account/orcid/login'
-      }
+        if (event.data.accessToken) {
+          this.accessToken = event.data.accessToken
+          this.refreshToken = event.data.refreshToken
 
-      window.open(OAuthUrl, '_blank')
+          try {
+            const user = await api.fetch(ENDPOINTS.USER)
 
-      this.isLoginListenerSet = false
-
-      if (!this.isLoginListenerSet) {
-        this.isLoginListenerSet = true // Prevents registering the listener more than once
-        console.info(`User: listening to login window...`)
-        window.addEventListener('message', async (event: MessageEvent) => {
-          console.log(event)
-          if (
-            // event.origin !== APP_URL ||
-            !event.data.hasOwnProperty('access')
-          ) {
-            return
-          }
-
-          if (event.data.access) {
-            console.log(event)
-
-            this.accessToken = event.data.access
-            this.refreshToken = event.data.refresh
-            this.user = event.data.user
-            await router.push({ name: 'Sites' })
+            if (!user) return
+            this.user = user
 
             Notification.toast({
               message: 'You have logged in!',
               type: 'success',
             })
-            // await User.commit((state) => {
-            //   state.isLoggedIn = true
-            //   state.accessToken = event.data.accessToken
-            // })
             this.loggedIn$.next()
-            this.isLoginListenerSet = false
             callback?.()
-          } else {
-            Notification.toast({
-              message: 'Failed to Log In',
-              type: 'error',
-            })
+          } catch (e) {
+            console.log('Failed to Log In')
           }
-        })
+        } else {
+          Notification.toast({
+            message: 'Failed to Log In',
+            type: 'error',
+          })
+        }
       }
+
+      // TODO: window.opener is not populated in redirect response
+      window.open(
+        ENDPOINTS.ACCOUNT.OAUTH_LOGIN(provider),
+        '_blank',
+        'noopener=false'
+      )
+
+      console.info(`User: listening to login window...`)
+
+      // We need to re-instantiate the listener so that it uses current values in `handleMessage`
+      OAuthLoginController.abort()
+      OAuthLoginController = new AbortController()
+      window.addEventListener('message', handleMessage, {
+        signal: OAuthLoginController.signal, // Used to remove the listener
+      })
     },
   },
 })

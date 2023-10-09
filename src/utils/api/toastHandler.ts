@@ -4,7 +4,7 @@ import Notification from '@/store/notifications'
 export function toastHandler(response: any, endpoint: string, method: string) {
   if (response instanceof TypeError) {
     Notification.toast({
-      message: 'Network error. Please check your connection.',
+      message: response.message,
       type: 'error',
     })
     return
@@ -35,6 +35,9 @@ function getMessage(method: string, status: number, endpoint: string) {
 // const THINGS_ID_PATTERN = new RegExp(`${ENDPOINTS.THINGS}/[a-zA-Z0-9]+`)
 
 function getEndpointMessages(endpoint: string): any {
+  // TODO: this setup is very limiting because it forces us to define endpoints in such
+  // a way that fragments are not repeated between endpoints
+  // Most of these errors should be handled inside the components or store methods
   if (endpoint.includes(ENDPOINTS.THINGS)) {
     // if (endpoint == ENDPOINTS.THINGS) {
     // } else if (THINGS_ID_PATTERN.test(endpoint)) {}

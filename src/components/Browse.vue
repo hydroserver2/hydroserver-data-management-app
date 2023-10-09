@@ -5,7 +5,7 @@
         <v-spacer></v-spacer>
         <v-col cols="auto">
           <v-btn
-            color="cancel"
+            color="default"
             v-if="drawer"
             class="toggler"
             icon
@@ -19,9 +19,7 @@
       <v-card-title>Browse Data Collection Sites</v-card-title>
       <v-card-text>
         <div class="d-flex my-2">
-          <v-btn-cancel color="grey" variant="flat" @click="clearFilters"
-            >Clear</v-btn-cancel
-          >
+          <v-btn color="grey" variant="flat" @click="clearFilters">Clear</v-btn>
           <v-spacer></v-spacer>
           <v-btn-primary :disabled="!searchInput" @click="filterOrganizations"
             >Filter By Org</v-btn-primary

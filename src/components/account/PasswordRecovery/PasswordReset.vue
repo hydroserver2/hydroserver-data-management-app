@@ -1,7 +1,5 @@
 <template>
-  <v-container
-    class="d-flex align-center justify-center py-8 fill-height login-container"
-  >
+  <v-container class="d-flex align-center justify-center py-8 fill-height">
     <v-card class="login-card" width="40rem">
       <v-card-title class="mb-4 login-title">Reset Password</v-card-title>
       <v-card-text>

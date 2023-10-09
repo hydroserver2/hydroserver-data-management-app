@@ -254,19 +254,13 @@ export class DataLoader {
 }
 
 export class Organization {
-  name: string
-  code: string
-  type: string
+  name?: string
+  code?: string
+  type?: string
   description?: string
   link?: string
 
-  constructor() {
-    this.name = ''
-    this.code = ''
-    this.type = ''
-    this.description = ''
-    this.link = ''
-  }
+  constructor() {}
 }
 
 export class User {
@@ -278,7 +272,7 @@ export class User {
   lastName: string
   phone: string
   address: string
-  organization?: Organization | null
+  organization?: Organization
   type: string
   isVerified: boolean
   link: string
@@ -310,4 +304,9 @@ export interface Photo {
   thingId: string
   filePath: string
   link: string
+}
+
+export enum OAuthProvider {
+  'google',
+  'orcid',
 }

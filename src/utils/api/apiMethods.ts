@@ -9,6 +9,7 @@ async function interceptedFetch(endpoint: string, options: any) {
   const opts = requestInterceptor(options, authStore.accessToken)
   try {
     const response = await fetch(endpoint, opts)
+    // TODO: user info endpoint fails due to CORS policy
     return await responseInterceptor(response, interceptedFetch, endpoint, opts)
   } catch (error: any) {
     if (error instanceof TypeError)

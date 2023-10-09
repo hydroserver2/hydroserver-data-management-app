@@ -1,3 +1,5 @@
+import { OAuthProvider } from './types'
+
 export const DEFAULT_TOAST_DURATION = 5000
 
 export const BASE_URL = `${
@@ -41,6 +43,8 @@ export const ENDPOINTS = {
     ACTIVATE: `${ACCOUNT_BASE}/activate`,
     JWT_PAIR: `${ACCOUNT_BASE}/jwt/pair`,
     JWT_REFRESH: `${ACCOUNT_BASE}/jwt/refresh`,
+    OAUTH_LOGIN: (provider: OAuthProvider) =>
+      `${ACCOUNT_BASE}/${provider}/login`,
   }),
 
   DATASTREAMS: Object.assign(DS_BASE, {

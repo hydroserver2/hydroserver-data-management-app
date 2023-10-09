@@ -80,9 +80,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn-cancel @click="isDeleteModalOpen = false"
-                >Cancel</v-btn-cancel
-              >
+              <v-btn @click="isDeleteModalOpen = false">Cancel</v-btn>
               <v-btn color="delete" @click="deleteThing">Delete</v-btn>
             </v-card-actions>
           </v-card>

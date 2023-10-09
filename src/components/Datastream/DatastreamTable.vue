@@ -164,7 +164,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn-cancel @click="isDSDeleteModalOpen = false">Cancel</v-btn-cancel>
+        <v-btn @click="isDSDeleteModalOpen = false">Cancel</v-btn>
         <v-btn color="delete" @click="deleteDatastream">Confirm</v-btn>
       </v-card-actions>
     </v-card>

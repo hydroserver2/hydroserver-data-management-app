@@ -1,31 +1,37 @@
 <template>
-  <v-container
-    class="d-flex align-center justify-center py-8 fill-height login-container"
-  >
+  <v-container class="d-flex align-center justify-center py-8 fill-height">
     <v-card class="login-card" width="40rem">
       <v-card-title class="mb-4 login-title">Sign In</v-card-title>
       <v-card-text>
         <v-btn
           @click="openLogInDialog('google')"
-          variant="flat"
-          color="secondary"
+          variant="outlined"
+          color="primary"
           prepend-icon="mdi-google"
+          :rounded="false"
+          block
+          class="py-4"
         >
-          Log in using Google
+          Continue with Google
         </v-btn>
       </v-card-text>
       <v-card-text>
         <v-btn
           @click="openLogInDialog('orcid')"
-          variant="flat"
-          color="secondary"
+          variant="outlined"
+          color="primary"
+          outlined
+          :rounded="false"
+          block
+          class="py-4"
         >
           <template v-slot:prepend>
             <v-icon class="fa-brands fa-orcid"></v-icon>
           </template>
-          Log in using ORCID
+          Continue with ORCID
         </v-btn>
       </v-card-text>
+      <v-divider class="my-8"></v-divider>
       <v-card-text>
         <v-form
           class="login-form"
@@ -80,6 +86,11 @@
 import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
+import { OAuthProvider } from '@/types'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -91,12 +102,16 @@ const loginSubmit = async () => {
   await useAuthStore().login(email.value, password.value)
 }
 
-const openLogInDialog = async (backend: string) => {
-  await useAuthStore().OAuthLogin(backend, onLoggedIn)
+const openLogInDialog = async (provider: OAuthProvider) => {
+  await useAuthStore().OAuthLogin(provider, onLoggedIn)
 }
 
 const onLoggedIn = () => {
-  // TODO: update state on log in
+  if (route.query.next) {
+    router.push({ name: route.query.next as string })
+  } else {
+    router.push({ name: 'Sites' })
+  }
 }
 </script>
 

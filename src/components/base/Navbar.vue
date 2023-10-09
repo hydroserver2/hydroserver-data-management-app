@@ -14,11 +14,9 @@
           v-if="!path.menu"
           v-bind="path.attrs"
           :id="`navbar-nav-${path.label.replaceAll(/[\/\s]/g, ``)}`"
-          :elevation="0"
           :class="path.isActive && path.isActive() ? 'primary' : ''"
-          class="ma-1"
-          color="surface"
-          variant="flat"
+          :rounded="false"
+          density="default"
           @click="
             path.isExternal ? openInNewTab($event, path.attrs?.href) : null
           "
@@ -33,9 +31,8 @@
             <v-btn
               v-bind="props"
               :elevation="0"
-              class="ma-1"
-              color="surface"
-              variant="flat"
+              :rounded="false"
+              density="default"
             >
               {{ path.label }}
               <v-icon right small>mdi-menu-down</v-icon>
@@ -91,16 +88,16 @@
           class="navbar-login-button"
           prepend-icon="mdi-login"
           to="/Login"
-          color="surface"
-          variant="flat"
+          :rounded="false"
+          density="default"
           >Log In</v-btn
         >
         <v-btn
           class="signup-btn"
           prepend-icon="mdi-account-plus-outline"
           to="/SignUp"
-          color="surface"
-          variant="flat"
+          :rounded="false"
+          density="default"
           >Sign Up</v-btn
         >
       </template>

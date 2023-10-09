@@ -256,10 +256,10 @@
 
       <v-row>
         <v-col cols="auto">
-          <v-btn-cancel @click="$router.go(-1)">
+          <v-btn @click="$router.go(-1)">
             <v-icon>mdi-arrow-left</v-icon>
             Return to previous page
-          </v-btn-cancel>
+          </v-btn>
         </v-col>
         <v-spacer></v-spacer>
         <v-col cols="auto">
