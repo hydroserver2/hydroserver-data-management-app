@@ -68,7 +68,7 @@
       <v-divider class="login-divider"></v-divider>
       <v-card-actions class="text-body-1 signup-link-section">
         <span class="mr-2">Don't have an account?</span>
-        <router-link to="/signup" class="light-text signup-link"
+        <router-link to="/sign-up" class="light-text signup-link"
           >Sign Up</router-link
         >
         <v-spacer></v-spacer>

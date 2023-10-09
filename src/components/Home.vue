@@ -14,11 +14,17 @@
         </h4>
       </div>
 
-      <div>
+      <div v-if="authStore.isLoggedIn">
+        <h5 class="text-h5 mb-8 has-text-shadow">
+          Logged in as {{ authStore.user.firstName }}
+          {{ authStore.user.lastName }}
+        </h5>
+      </div>
+      <div v-else>
         <h5 class="text-h5 mb-8 has-text-shadow">
           Create an account to get started
         </h5>
-        <v-btn-primary to="/SignUp">Sign Up</v-btn-primary>
+        <v-btn-primary to="/sign-up">Sign Up</v-btn-primary>
       </div>
     </div>
   </div>
@@ -206,6 +212,9 @@ import ogcLogo from '@/assets/ogc-min.png'
 import cirohLogo from '@/assets/CIROH_logo_transparent-min.png'
 import sensorThingsLogo from '@/assets/sensorThings-min.png'
 import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
+import { useAuthStore } from '@/store/authentication'
+
+const authStore = useAuthStore()
 </script>
 
 <style scoped lang="scss">

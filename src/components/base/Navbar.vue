@@ -95,7 +95,7 @@
         <v-btn
           class="signup-btn"
           prepend-icon="mdi-account-plus-outline"
-          to="/SignUp"
+          to="/sign-up"
           :rounded="false"
           density="default"
           >Sign Up</v-btn
@@ -147,7 +147,7 @@
 
       <template v-else>
         <v-list-item prepend-icon="mdi-login" to="/Login">Login</v-list-item>
-        <v-list-item prepend-icon="mdi-account-plus-outline" to="/SignUp"
+        <v-list-item prepend-icon="mdi-account-plus-outline" to="/sign-up"
           >Sign Up</v-list-item
         >
       </template>

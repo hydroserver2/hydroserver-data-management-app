@@ -100,8 +100,8 @@ export const routes: RouteRecordRaw[] = [
     meta: { hasThingOwnershipGuard: true },
   },
   {
-    path: '/signup',
-    name: 'Signup',
+    path: '/sign-up',
+    name: 'SignUp',
     component: () => import('@/components/account/Signup.vue'),
     meta: {
       hasLoggedOutGuard: true,

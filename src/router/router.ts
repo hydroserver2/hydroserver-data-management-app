@@ -64,8 +64,9 @@ const guards: ((
     if (to.meta?.hasThingOwnershipGuard) {
       const thingStore = useThingStore()
       const id = to.params.id as string
-      const thing = await thingStore.fetchThingById(id)
-      if (!thing || (!thing.isPrimaryOwner && !thing.ownsThing)) {
+      await thingStore.fetchThingById(id)
+      const thing = thingStore.things[id]
+      if (!thing || !thing.ownsThing) {
         return { name: 'PageNotFound' }
       }
     }
