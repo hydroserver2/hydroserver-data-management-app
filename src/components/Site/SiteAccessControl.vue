@@ -169,7 +169,7 @@
 
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn text @click="emitClose">Close</v-btn>
+      <v-btn variant="text" @click="emitClose">Close</v-btn>
     </v-card-actions>
   </v-card>
 </template>

@@ -272,7 +272,7 @@ export class User {
   lastName: string
   phone: string
   address: string
-  organization?: Organization
+  organization?: Organization | null
   type: string
   isVerified: boolean
   link: string
@@ -307,6 +307,6 @@ export interface Photo {
 }
 
 export enum OAuthProvider {
-  'google',
-  'orcid',
+  google = 'google',
+  orcid = 'orcid',
 }

@@ -4,7 +4,7 @@
       <v-card-title class="mb-4 login-title">Sign In</v-card-title>
       <v-card-text>
         <v-btn
-          @click="openLogInDialog('google')"
+          @click="openLogInDialog(OAuthProvider.google)"
           variant="outlined"
           color="primary"
           prepend-icon="mdi-google"
@@ -17,7 +17,7 @@
       </v-card-text>
       <v-card-text>
         <v-btn
-          @click="openLogInDialog('orcid')"
+          @click="openLogInDialog(OAuthProvider.orcid)"
           variant="outlined"
           color="primary"
           outlined
