@@ -1,5 +1,3 @@
-// TODO: this can all be replaced by https://vuelidate-next.netlify.app/validators.html
-
 import { Validation, useVuelidate } from '@vuelidate/core'
 import { Ref } from 'vue'
 export class HsFormValidator {
@@ -31,6 +29,8 @@ export class HsFormValidator {
     }
   }
 }
+
+// TODO: the code below can all be replaced by https://vuelidate-next.netlify.app/validators.html
 
 export const required = [
   (value: string) => !!value || 'This field is required.',

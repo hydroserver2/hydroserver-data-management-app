@@ -202,7 +202,6 @@ export const useAuthStore = defineStore({
         }
       }
 
-      // TODO: window.opener is not populated in redirect response
       window.open(
         ENDPOINTS.ACCOUNT.OAUTH_LOGIN(provider),
         '_blank',
