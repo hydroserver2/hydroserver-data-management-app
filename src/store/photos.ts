@@ -1,7 +1,7 @@
-import {defineStore} from 'pinia'
-import {Photo} from '@/types'
-import {api} from '@/utils/api/apiMethods'
-import {ENDPOINTS} from '@/constants'
+import { defineStore } from 'pinia'
+import { Photo } from '@/types'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export const usePhotosStore = defineStore({
   id: 'photos',
@@ -15,7 +15,9 @@ export const usePhotosStore = defineStore({
   actions: {
     async fetchPhotos(thingId: string) {
       try {
-        this.photos[thingId] = await api.fetch(ENDPOINTS.PHOTOS.FOR_THING(thingId))
+        this.photos[thingId] = await api.fetch(
+          ENDPOINTS.PHOTOS.FOR_THING(thingId)
+        )
       } catch (error) {
         console.error('Error fetching photos from DB', error)
       }
@@ -28,6 +30,7 @@ export const usePhotosStore = defineStore({
     ) {
       try {
         this.loading = true
+        if (newPhotos.length === 0 && photosToDelete.length === 0) return
         if (newPhotos.length > 0) {
           const data = new FormData()
           newPhotos.forEach((photo) => data.append('files', photo))
@@ -37,11 +40,11 @@ export const usePhotosStore = defineStore({
           )
         }
         for (const photoId of photosToDelete) {
-          await api.delete(
-            ENDPOINTS.PHOTOS.FOR_THING(thingId, photoId)
-          )
+          await api.delete(ENDPOINTS.PHOTOS.FOR_THING(thingId, photoId))
         }
-        this.photos[thingId] = this.photos[thingId].filter(photo => !photosToDelete.includes(photo.id))
+        this.photos[thingId] = this.photos[thingId].filter(
+          (photo) => !photosToDelete.includes(photo.id)
+        )
       } catch (error) {
         console.error('Error updating photos', error)
       } finally {

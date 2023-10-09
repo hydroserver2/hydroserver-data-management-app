@@ -64,10 +64,6 @@ export const useAuthStore = defineStore({
       if (!this.refreshToken) return false
       const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
       const currentTime = Date.now() / 1000
-      console.log(
-        'decodedToken.exp - currentTime',
-        decodedToken.exp - currentTime
-      )
       return decodedToken.exp < currentTime
     },
     checkTokenExpiry() {
