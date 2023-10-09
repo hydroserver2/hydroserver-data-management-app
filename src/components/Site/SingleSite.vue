@@ -19,7 +19,10 @@
         <h5 class="text-h5">Site Information</h5>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
-        <v-btn class="access_control" @click="isAccessControlModalOpen = true"
+        <v-btn
+          color="primary"
+          class="access_control"
+          @click="isAccessControlModalOpen = true"
           >Access Control</v-btn
         >
         <v-dialog

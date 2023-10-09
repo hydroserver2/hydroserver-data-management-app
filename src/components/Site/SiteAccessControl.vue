@@ -196,7 +196,6 @@ const {
 } = useThingOwnership(props.thingId)
 
 const { thing, toggleSitePrivacy } = useThing(props.thingId)
-console.log('thing', thing.value)
 
 const emitClose = () => emits('close')
 </script>
