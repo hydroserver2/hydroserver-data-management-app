@@ -256,8 +256,9 @@ function handleCloseDataSourceDialog() {
 }
 
 function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  return format(date, 'MMM dd, yyyy HH:mm')
+  return (
+    new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
+  )
 }
 
 function isStale(timestamp: string) {

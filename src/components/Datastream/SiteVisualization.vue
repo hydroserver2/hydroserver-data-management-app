@@ -37,6 +37,7 @@ import {
   useUnitGetters,
   useObservedPropertiesGetters,
 } from '@/composables/useMetadataGetters'
+import { DataArray, DataPoint } from '@/types'
 
 const obsStore = useObservationStore()
 
@@ -70,7 +71,14 @@ const { getNameById: OPName } = useObservedPropertiesGetters()
 let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
 
-function drawPlot(data: any) {
+function drawPlot(dataArray: DataArray) {
+  const data = dataArray.map((item: DataPoint) => {
+    return {
+      date: new Date(item.date),
+      value: item.value,
+    }
+  })
+
   if (focusChart.value) {
     const unitSymbol = datastream.value.unitId
       ? `(${unitName(datastream.value.unitId, 'symbol')})`
@@ -92,26 +100,23 @@ function drawPlot(data: any) {
 }
 
 async function fetchDataForPeriod(hours: number) {
-  let timestamp = ''
-  if (hours == -1 && datastream.value.phenomenonBeginTime)
-    timestamp = datastream.value.phenomenonBeginTime
-  else if (datastream.value.phenomenonEndTime)
-    timestamp = obsStore.subtractHours(
-      datastream.value.phenomenonEndTime,
-      hours
-    )
-
   selectedTime.value = hours
-  await obsStore.fetchObservations(datastream.value.id, timestamp)
+  if (datastream.value.phenomenonEndTime)
+    await obsStore.fetchObservations(
+      datastream.value.id,
+      hours,
+      datastream.value.phenomenonEndTime
+    )
   drawPlot(obsStore.observations[datastream.value.id])
 }
 
 onMounted(async () => {
-  let timestamp = ''
   if (datastream.value.phenomenonEndTime)
-    timestamp = obsStore.subtractHours(datastream.value.phenomenonEndTime, 72)
-
-  await obsStore.fetchObservations(datastream.value.id, timestamp)
+    await obsStore.fetchObservations(
+      datastream.value.id,
+      72,
+      datastream.value.phenomenonEndTime
+    )
   drawPlot(obsStore.observations[datastream.value.id])
 })
 </script>

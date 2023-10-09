@@ -34,7 +34,6 @@ const authStore = useAuthStore()
 let interval: any
 onMounted(() => {
   interval = setInterval(() => {
-    console.log('Checking token')
     authStore.checkTokenExpiry()
   }, 600000)
 })

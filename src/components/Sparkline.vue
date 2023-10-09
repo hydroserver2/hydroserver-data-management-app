@@ -3,10 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, onMounted } from 'vue'
 import * as Plot from '@observablehq/plot'
 import { PropType } from 'vue'
-import { DataArray } from '@/types'
+import { DataArray, DataPoint } from '@/types'
 
 const props = defineProps({
   observations: {
@@ -18,14 +18,19 @@ const props = defineProps({
 
 const chart = ref<HTMLDivElement | null>(null)
 
-watchEffect(drawChart)
-
 function drawChart() {
   if (!chart.value) return
 
   let colors = props.isStale
     ? { line: '#9E9E9E', fill: '#F5F5F5' } // Grey and grey-lighten-4
     : { line: '#4CAF50', fill: '#E8F5E9' } // Green and green-lighten-5
+
+  const observations = props.observations.map((item: DataPoint) => {
+    return {
+      date: new Date(item.date),
+      value: item.value,
+    }
+  })
 
   const sparkline = Plot.plot({
     width: 250,
@@ -39,7 +44,7 @@ function drawChart() {
       axis: null,
     },
     marks: [
-      Plot.areaY(props.observations, {
+      Plot.areaY(observations, {
         x: 'date',
         y: 'value',
         stroke: colors.line,
@@ -54,4 +59,8 @@ function drawChart() {
   chart.value.innerHTML = ''
   chart.value.appendChild(sparkline)
 }
+
+onMounted(() => {
+  drawChart()
+})
 </script>
