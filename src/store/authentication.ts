@@ -127,6 +127,11 @@ export const useAuthStore = defineStore({
         this.user = data as User
         if (!user.isVerified) {
           await router.push({ name: 'VerifyEmail' })
+        } else {
+          Notification.toast({
+            message: 'Your changes have been saved.',
+            type: 'success',
+          })
         }
       } catch (error) {
         console.error('Error updating user', error)
