@@ -18,8 +18,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.firstName"
-              v-bind="validator.attrs('firstName')"
-              v-on="validator.handlers('firstName')"
+              v-bind="validator.attrs(validator.instance.value.firstName)"
+              v-on="validator.handlers(validator.instance.value.firstName)"
               label="First Name"
             >
             </v-text-field>
@@ -29,8 +29,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.middleName"
-              v-bind="validator.attrs('middleName')"
-              v-on="validator.handlers('middleName')"
+              v-bind="validator.attrs(validator.instance.value.middleName)"
+              v-on="validator.handlers(validator.instance.value.middleName)"
               label="Middle Name"
             ></v-text-field>
           </v-col>
@@ -39,8 +39,8 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.lastName"
-              v-bind="validator.attrs('lastName')"
-              v-on="validator.handlers('lastName')"
+              v-bind="validator.attrs(validator.instance.value.lastName)"
+              v-on="validator.handlers(validator.instance.value.lastName)"
               label="Last Name"
             ></v-text-field>
           </v-col>
@@ -50,8 +50,8 @@
             <v-text-field
               :readonly="user.isVerified"
               v-model="state.email"
-              v-bind="validator.attrs('email')"
-              v-on="validator.handlers('email')"
+              v-bind="validator.attrs(validator.instance.value.email)"
+              v-on="validator.handlers(validator.instance.value.email)"
               label="Email"
               :append-inner-icon="
                 user.isVerified ? 'mdi-pencil-off' : undefined
@@ -65,8 +65,8 @@
               v-model="state.type"
               label="User Type"
               :items="userTypes"
-              v-bind="validator.attrs('type')"
-              v-on="validator.handlers('type')"
+              v-bind="validator.attrs(validator.instance.value.type)"
+              v-on="validator.handlers(validator.instance.value.type)"
             ></v-autocomplete>
           </v-col>
 
@@ -76,8 +76,8 @@
               v-model="state.phone"
               v-maska:[phoneMask]
               label="Phone Number"
-              v-bind="validator.attrs('phone')"
-              v-on="validator.handlers('phone')"
+              v-bind="validator.attrs(validator.instance.value.phone)"
+              v-on="validator.handlers(validator.instance.value.phone)"
             ></v-text-field>
           </v-col>
 
@@ -86,8 +86,8 @@
             <v-text-field
               v-model="state.link"
               label="User's Link (URL)"
-              v-bind="validator.attrs('link')"
-              v-on="validator.handlers('link')"
+              v-bind="validator.attrs(validator.instance.value.link)"
+              v-on="validator.handlers(validator.instance.value.link)"
             >
             </v-text-field>
           </v-col>
@@ -97,8 +97,8 @@
             <v-text-field
               v-model="state.address"
               label="Address"
-              v-bind="validator.attrs('address')"
-              v-on="validator.handlers('address')"
+              v-bind="validator.attrs(validator.instance.value.address)"
+              v-on="validator.handlers(validator.instance.value.address)"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -115,8 +115,12 @@
           <v-col cols="12" sm="8">
             <v-text-field
               v-model="state.organization.name"
-              v-bind="validator.attrs('organizationName')"
-              v-on="validator.handlers('organizationName')"
+              v-bind="
+                validator.attrs(validator.instance.value.organization.name)
+              "
+              v-on="
+                validator.handlers(validator.instance.value.organization.name)
+              "
               label="Organization Name"
             ></v-text-field>
           </v-col>
@@ -125,8 +129,12 @@
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="state.organization.code"
-              v-bind="validator.attrs('organizationCode')"
-              v-on="validator.handlers('organizationCode')"
+              v-bind="
+                validator.attrs(validator.instance.value.organization.code)
+              "
+              v-on="
+                validator.handlers(validator.instance.value.organization.code)
+              "
               label="Organization Code"
             ></v-text-field>
           </v-col>
@@ -136,8 +144,12 @@
             <v-autocomplete
               :items="organizationTypes"
               v-model="state.organization.type"
-              v-bind="validator.attrs('organizationType')"
-              v-on="validator.handlers('organizationType')"
+              v-bind="
+                validator.attrs(validator.instance.value.organization.type)
+              "
+              v-on="
+                validator.handlers(validator.instance.value.organization.type)
+              "
               label="Organization Type"
             />
           </v-col>
@@ -146,8 +158,12 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="state.organization.link"
-              v-bind="validator.attrs('organizationLink')"
-              v-on="validator.handlers('organizationLink')"
+              v-bind="
+                validator.attrs(validator.instance.value.organization.link)
+              "
+              v-on="
+                validator.handlers(validator.instance.value.organization.link)
+              "
               label="Organization Link"
             ></v-text-field>
           </v-col>
@@ -156,8 +172,16 @@
           <v-col cols="12">
             <v-textarea
               v-model="state.organization.description"
-              v-bind="validator.attrs('organizationDescription')"
-              v-on="validator.handlers('organizationDescription')"
+              v-bind="
+                validator.attrs(
+                  validator.instance.value.organization.description
+                )
+              "
+              v-on="
+                validator.handlers(
+                  validator.instance.value.organization.description
+                )
+              "
               label="Organization Description"
               auto-grow
               :rows="1"
@@ -185,7 +209,6 @@
 </template>
 
 <script setup lang="ts">
-// import { rules } from '@/utils/rules'
 import { onMounted, reactive, ref } from 'vue'
 import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
@@ -203,17 +226,17 @@ import {
 import { HsFormValidator } from '@/utils/rules'
 
 const phoneMask = { mask: '(###) ###-####' }
-const phoneRegex = helpers.regex(/^\(\d{3}\) \d{3}-\d{4}/)
-
 const authStore = useAuthStore()
+
 defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
 })
 
-const user = reactive<User>({ ...authStore.user })
+const user = { ...authStore.user }
 const showOrg = ref(!!user.organization)
 const isSaving = ref(false)
 
+// Should match the shape of the form state
 const rules = {
   firstName: { required, maxLength: maxLength(200) },
   middleName: { maxLength: maxLength(200) },
@@ -222,28 +245,30 @@ const rules = {
   phone: {
     phoneRegex: helpers.withMessage(
       'Please provide a valid phone number',
-      phoneRegex
+      helpers.regex(/^\(\d{3}\) \d{3}-\d{4}/)
     ),
   },
   address: {},
   link: { url },
   type: { required },
-  organizationName: {
-    required: requiredIf(showOrg),
-    maxLength: maxLength(200),
+  organization: {
+    name: {
+      required: requiredIf(showOrg),
+      maxLength: maxLength(200),
+    },
+    code: {
+      required: requiredIf(showOrg),
+      maxLength: maxLength(200),
+    },
+    type: { required: requiredIf(showOrg) },
+    link: { url },
+    description: { maxLength: maxLength(3000) },
   },
-  organizationCode: {
-    required: requiredIf(showOrg),
-    maxLength: maxLength(200),
-  },
-  organizationType: { required: requiredIf(showOrg) },
-  organizationLink: { url },
-  organizationDescription: { maxLength: maxLength(3000) },
 }
 
 const state = reactive<any>({
   ...user,
-  organization: user.organization || new Organization(),
+  organization: { ...user.organization } || new Organization(),
 })
 
 const validator = new HsFormValidator(rules, state)

@@ -123,6 +123,11 @@ export const useAuthStore = defineStore({
         this.user = data as User
         if (!user.isVerified) {
           await router.push({ name: 'VerifyEmail' })
+        } else {
+          Notification.toast({
+            message: 'Your changes have been saved.',
+            type: 'success',
+          })
         }
       } catch (error) {
         console.error('Error updating user', error)
@@ -193,7 +198,6 @@ export const useAuthStore = defineStore({
         }
       }
 
-      // TODO: window.opener is not populated in redirect response
       window.open(
         ENDPOINTS.ACCOUNT.OAUTH_LOGIN(provider),
         '_blank',

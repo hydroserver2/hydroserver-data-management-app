@@ -50,15 +50,15 @@ onUnmounted(() => {
 .v-main.is-full-screen {
   height: 100vh;
 }
+</style>
 
-:deep(.is-required .v-label.v-field-label)::after {
+<style>
+.is-required .v-label.v-field-label::after {
   display: inline;
   content: '*';
   margin-left: 0.15rem;
 }
-</style>
 
-<style>
 /* TODO: This needs to be done by overriding SASS variables.
 https://vuetifyjs.com/en/features/sass-variables/#sass
 https://vuetifyjs.com/en/api/v-tooltip/#sass */

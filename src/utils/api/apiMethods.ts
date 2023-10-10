@@ -9,7 +9,6 @@ async function interceptedFetch(endpoint: string, options: any) {
   const opts = requestInterceptor(options, authStore.accessToken)
   try {
     const response = await fetch(endpoint, opts)
-    // TODO: user info endpoint fails due to CORS policy
     return await responseInterceptor(response, interceptedFetch, endpoint, opts)
   } catch (error: any) {
     if (error instanceof TypeError)
@@ -30,6 +29,8 @@ export const api = {
     options: any = {}
   ): Promise<any> {
     options.method = 'PATCH'
+    // TODO (Daniel): `createPatchObject` won't override a child property that we want to make undefined.
+    // For example, this prevents saving changes after editing profile by unchecking the organization affiliation
     options.body = originalBody ? createPatchObject(originalBody, body) : body
     if (Object.keys(options.body).length === 0) return
     return await interceptedFetch(endpoint, options)
