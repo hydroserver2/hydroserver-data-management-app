@@ -88,7 +88,7 @@ export const ENDPOINTS = {
   SENSORTHINGS: {
     DATASTREAMS: {
       OBSERVATIONS: (id: string, timestamp: string) =>
-        `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${timestamp}`,
+        `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${timestamp}&$top=1000`,
     },
   },
 }

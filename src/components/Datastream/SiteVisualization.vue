@@ -101,20 +101,28 @@ function drawPlot(dataArray: DataArray) {
 
 async function fetchDataForPeriod(hours: number) {
   selectedTime.value = hours
-  if (datastream.value.phenomenonEndTime)
+  if (
+    datastream.value.phenomenonEndTime &&
+    datastream.value.phenomenonBeginTime
+  )
     await obsStore.fetchObservations(
       datastream.value.id,
       hours,
+      datastream.value.phenomenonBeginTime,
       datastream.value.phenomenonEndTime
     )
   drawPlot(obsStore.observations[datastream.value.id])
 }
 
 onMounted(async () => {
-  if (datastream.value.phenomenonEndTime)
+  if (
+    datastream.value.phenomenonEndTime &&
+    datastream.value.phenomenonBeginTime
+  )
     await obsStore.fetchObservations(
       datastream.value.id,
       72,
+      datastream.value.phenomenonBeginTime,
       datastream.value.phenomenonEndTime
     )
   drawPlot(obsStore.observations[datastream.value.id])

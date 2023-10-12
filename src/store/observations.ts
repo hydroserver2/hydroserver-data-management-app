@@ -11,7 +11,14 @@ export const useObservationStore = defineStore('observations', {
   }),
   persist: false,
   actions: {
-    async fetchObservations(id: string, hoursBefore: number, endTime: string) {
+    async fetchObservations(
+      id: string,
+      hoursBefore: number,
+      beginTime: string,
+      endTime: string
+    ) {
+      // TODO: Probably move the startTime endTime calculations to a separate function
+      // and fetch directly from the last72HourStore
       try {
         const last72HoursStore = useObservationsLast72Hours()
         if (hoursBefore == 72 && last72HoursStore.observations[id]) {
@@ -19,15 +26,29 @@ export const useObservationStore = defineStore('observations', {
           return
         }
 
-        const startTime = this.subtractHours(endTime, hoursBefore)
-        const data = await api.fetch(
-          ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(id, startTime)
+        let startTime = beginTime
+        if (hoursBefore > 0) {
+          const calcStart = this.subtractHours(endTime, hoursBefore)
+          if (new Date(calcStart) < new Date(beginTime)) startTime = calcStart
+        }
+
+        let allData: any = []
+        let nextLink = ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(
+          id,
+          startTime
         )
 
-        const dataArray = data.value[0].dataArray
-        const newObs = dataArray.map((item: [string, number]) => {
+        while (nextLink) {
+          const data = await api.fetch(nextLink)
+          if (data.value && data.value[0] && data.value[0].dataArray) {
+            allData = allData.concat(data.value[0].dataArray)
+          }
+          nextLink = data['@iot.nextLink'] || null
+        }
+
+        const newObs = allData.map((item: [string, number]) => {
           return {
-            date: item[0],
+            date: new Date(item[0]),
             value: item[1],
           }
         })
@@ -42,33 +63,6 @@ export const useObservationStore = defineStore('observations', {
           last72HoursStore.setObservations(id, last72Hours)
         }
 
-        // let allData: any = []
-        // let nextLink = ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(
-        //   id,
-        //   startTime
-        // )
-        // console.log('initial Link', nextLink)
-
-        // // While nextLink is available, keep fetching more data
-        // while (nextLink) {
-        //   const data = await api.fetch(nextLink)
-        //   console.log('observations', data)
-
-        //   if (data.values && data.values[0] && data.values[0].dataArray) {
-        //     allData = allData.concat(data.values[0].dataArray)
-        //   }
-
-        //   // Update nextLink if available
-        //   nextLink = data['@iot.nextLink'] || null
-        //   console.log('next Link', nextLink)
-        // }
-
-        // const newObs = allData.map((item: [string, number]) => {
-        //   return {
-        //     date: new Date(item[0]),
-        //     value: item[1],
-        //   }
-        // })
         if (newObs && newObs.length > 0) {
           const mostRecent = newObs[newObs.length - 1]
           this.$patch({
@@ -77,14 +71,19 @@ export const useObservationStore = defineStore('observations', {
           })
         }
       } catch (error) {
-        console.error('Error fetching observations from DB', error)
+        console.error('Error fetching observations from DB.', error)
       }
     },
     async fetchObservationsBulk(datastreams: Datastream[], hours: number) {
       const observationPromises = datastreams
         .map((ds) => {
-          if (ds.phenomenonEndTime) {
-            return this.fetchObservations(ds.id, hours, ds.phenomenonEndTime)
+          if (ds.phenomenonEndTime && ds.phenomenonBeginTime) {
+            return this.fetchObservations(
+              ds.id,
+              hours,
+              ds.phenomenonBeginTime,
+              ds.phenomenonEndTime
+            )
           }
         })
         .filter(Boolean)
