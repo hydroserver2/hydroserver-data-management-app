@@ -17,8 +17,6 @@
     "@googlemaps/js-api-loader": "^1.15.1",
     "@mdi/js": "^7.2.96",
     "@observablehq/plot": "^0.6.10",
-    "@vuelidate/core": "^2.0.3",
-    "@vuelidate/validators": "^2.0.4",
     "d3": "^7.8.5",
     "date-fns": "^2.30.0",
     "dotenv": "^16.0.3",

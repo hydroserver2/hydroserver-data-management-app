@@ -1,37 +1,3 @@
-import { Validation, useVuelidate } from '@vuelidate/core'
-import { Ref } from 'vue'
-export class HsFormValidator {
-  instance: Ref<Validation>
-
-  constructor(rules: any, state: any) {
-    this.instance = useVuelidate(rules, state)
-  }
-
-  get validate() {
-    return this.instance.value.$validate
-  }
-
-  /** Returns event handlers for a field */
-  handlers(field: Validation) {
-    // const field = this.instance.value[name]
-    return {
-      input: field.$touch,
-      blur: field.$touch,
-    }
-  }
-
-  /** Returns attributes for a field */
-  attrs(field: Validation) {
-    return {
-      'error-messages': field.$errors.map((e: any) => e.$message),
-      counter: field.maxLength?.$params.max || undefined,
-      class: { 'is-required': field.value?.hasOwnProperty('required') },
-    }
-  }
-}
-
-// TODO: the code below can all be replaced by https://vuelidate-next.netlify.app/validators.html
-
 export const required = [
   (value: string) => !!value || 'This field is required.',
 ]
@@ -139,3 +105,32 @@ export const rules = {
   requiredDescription: [...maxLength(3000), ...required],
   requiredCode: [...maxLength(200), ...required],
 }
+
+// Starter code for Vuelidate if we ever decide to use it
+// import { Validation, useVuelidate } from '@vuelidate/core'
+// import { Ref } from 'vue'
+// export class HsFormValidator {
+//   instance: Ref<Validation>
+//   constructor(rules: any, state: any) {
+//     this.instance = useVuelidate(rules, state)
+//   }
+//   get validate() {
+//     return this.instance.value.$validate
+//   }
+//   /** Returns event handlers for a field */
+//   handlers(field: Validation) {
+//     // const field = this.instance.value[name]
+//     return {
+//       input: field.$touch,
+//       blur: field.$touch,
+//     }
+//   }
+//   /** Returns attributes for a field */
+//   attrs(field: Validation) {
+//     return {
+//       'error-messages': field.$errors.map((e: any) => e.$message),
+//       counter: field.maxLength?.$params.max || undefined,
+//       class: { 'is-required': field.value?.hasOwnProperty('required') },
+//     }
+//   }
+// }
