@@ -24,7 +24,7 @@ export const useObservationStore = defineStore('observations', {
           ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(id, startTime)
         )
 
-        const dataArray = data.values[0].dataArray
+        const dataArray = data.value[0].dataArray
         const newObs = dataArray.map((item: [string, number]) => {
           return {
             date: item[0],
