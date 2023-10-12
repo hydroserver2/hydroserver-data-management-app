@@ -48,8 +48,8 @@ export const routes: RouteRecordRaw[] = [
   },
   {
     path: '/visualization/:id/:datastreamId',
-    name: 'SiteVisualization',
-    component: () => import('@/components/Datastream/SiteVisualization.vue'),
+    name: 'FocusContextPlot',
+    component: () => import('@/components/Datastream/FocusContextPlot.vue'),
   },
   {
     path: '/sites/:id/datastreams/form/:datastreamId?',

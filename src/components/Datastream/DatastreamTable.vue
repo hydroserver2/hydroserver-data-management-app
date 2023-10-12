@@ -31,11 +31,11 @@
     <template v-slot:item.observations="{ item }">
       <div v-if="observations[item.raw.id]">
         <v-dialog v-model="item.raw.chartOpen" width="80rem">
-          <SiteVisualization
+          <FocusContextPlot
             :thing-id="thingId"
             :datastream-id="item.raw.id"
             @close="item.raw.chartOpen = false"
-          ></SiteVisualization>
+          ></FocusContextPlot>
         </v-dialog>
         <Sparkline
           @click="item.raw.chartOpen = true"
@@ -181,11 +181,10 @@
 </template>
 
 <script setup lang="ts">
-import SiteVisualization from '@/components/Datastream/SiteVisualization.vue'
+import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { useDatastreams } from '@/composables/useDatastreams'
-import { format } from 'date-fns'
 import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'

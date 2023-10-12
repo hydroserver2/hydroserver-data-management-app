@@ -5,7 +5,7 @@
         <h5 class="flex-grow-1 pt-2 pl-4 text-center text-h5">
           Datastream for {{ thing?.name }}
         </h5>
-        <v-btn class="pt-2 pr-2" icon @click="$emit('close')">
+        <v-btn icon @click="$emit('close')">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </div>
