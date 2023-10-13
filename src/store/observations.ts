@@ -29,7 +29,7 @@ export const useObservationStore = defineStore('observations', {
         let startTime = beginTime
         if (hoursBefore > 0) {
           const calcStart = this.subtractHours(endTime, hoursBefore)
-          if (new Date(calcStart) < new Date(beginTime)) startTime = calcStart
+          if (new Date(calcStart) > new Date(beginTime)) startTime = calcStart
         }
 
         let allData: any = []
