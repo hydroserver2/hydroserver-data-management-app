@@ -29,7 +29,7 @@ onMounted(async () => {
     data,
     APP_URL // Important security measure: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
   )
-  window.close()
+  // window.close()
 })
 </script>
 
