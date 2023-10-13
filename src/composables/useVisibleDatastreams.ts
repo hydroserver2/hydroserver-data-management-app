@@ -28,8 +28,8 @@ export function useVisibleDatastreams(thingId: string) {
   })
 
   const mostRecentObs = computed(() => {
-    if (Object.keys(obsStore.mostRecentObs).length === 0) return {}
-    return obsStore.mostRecentObs
+    if (Object.keys(obs72HourStore.mostRecentObs).length === 0) return {}
+    return obs72HourStore.mostRecentObs
   })
 
   onMounted(async () => {
