@@ -164,10 +164,6 @@ export const useAuthStore = defineStore({
     },
     async OAuthLogin(provider: OAuthProvider, callback?: () => any) {
       const handleMessage = async (event: MessageEvent) => {
-        console.log('!!!!!!!!!!!!!!!')
-        console.log(event.origin)
-        console.log(APP_URL)
-        console.log(event.data)
         if (
           event.origin !== APP_URL ||
           !event.data.hasOwnProperty('accessToken')
