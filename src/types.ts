@@ -292,11 +292,11 @@ export class User {
   }
 }
 
-export interface ThingMetadata {
+export interface DatastreamMetadata {
   units: Unit[]
   sensors: Sensor[]
-  processing_levels: ProcessingLevel[]
-  observed_properties: ObservedProperty[]
+  processingLevels: ProcessingLevel[]
+  observedProperties: ObservedProperty[]
 }
 
 export interface Photo {

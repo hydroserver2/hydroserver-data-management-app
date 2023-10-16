@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
-import { Thing, ThingMetadata } from '@/types'
+import { Thing, DatastreamMetadata } from '@/types'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useThingStore = defineStore('things', {
   state: () => ({
     things: {} as Record<string, Thing>,
-    POMetadata: {} as Record<string, ThingMetadata>,
+    POMetadata: {} as Record<string, DatastreamMetadata>,
     loaded: false,
   }),
   getters: {

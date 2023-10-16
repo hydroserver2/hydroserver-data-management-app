@@ -8,14 +8,16 @@
       <v-col>
         <v-row style="font-size: 1.2em">
           <strong class="mr-2">Observed Property:</strong>
-          <strong>{{ OPName(item.raw.observedPropertyId) }}</strong>
+          <strong>{{
+            getObservedPropertyAttrById(item.raw.observedPropertyId)
+          }}</strong>
         </v-row>
         <v-row>
           <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
         </v-row>
         <v-row>
           <strong class="mr-2">Processing Level:</strong>
-          {{ PLName(item.raw.processingLevelId, 'code') }}
+          {{ getProcessingLevelAttrById(item.raw.processingLevelId, 'code') }}
         </v-row>
         <v-row>
           <strong class="mr-2">Sampled Medium:</strong>
@@ -23,7 +25,7 @@
         </v-row>
         <v-row>
           <strong class="mr-2">Sensor:</strong>
-          {{ sensorName(item.raw.sensorId) }}
+          {{ getSensorAttrById(item.raw.sensorId) }}
         </v-row>
       </v-col>
     </template>
@@ -53,7 +55,7 @@
         </v-row>
         <v-row>
           {{ mostRecentObs[item.raw.id].value }}&nbsp;
-          {{ unitName(item.raw.unitId) }}
+          {{ getUnitAttrById(item.raw.unitId) }}
         </v-row>
       </div>
     </template>
@@ -189,12 +191,7 @@ import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreamStore } from '@/store/datastreams'
-import {
-  useUnitGetters,
-  useSensorGetters,
-  useProcessingLevelGetters,
-  useObservedPropertiesGetters,
-} from '@/composables/useMetadataGetters'
+import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 
 const datastreamStore = useDatastreamStore()
 
@@ -209,10 +206,12 @@ const { isOwner } = useThingOwnership(props.thingId)
 const { visibleDatastreams, observations, mostRecentObs } =
   useVisibleDatastreams(props.thingId)
 
-const { getNameById: unitName } = useUnitGetters()
-const { getNameById: sensorName } = useSensorGetters()
-const { getNameById: PLName } = useProcessingLevelGetters()
-const { getNameById: OPName } = useObservedPropertiesGetters()
+const {
+  getUnitAttrById,
+  getSensorAttrById,
+  getObservedPropertyAttrById,
+  getProcessingLevelAttrById,
+} = usePrimaryOwnerData(props.thingId)
 
 const {
   toggleVisibility,

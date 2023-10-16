@@ -286,14 +286,16 @@ import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
 import { useFormattedDatastreams } from '@/composables/useFormattedDatastreams'
+import { useThingOwnership } from '@/composables/useThingOwnership'
 
 const unitStore = useUnitStore()
 
 const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
+const { isPrimaryOwner } = useThingOwnership(thingId)
 
-const { sensors, units, observedProperties, processingLevels, isPrimaryOwner } =
+const { sensors, units, observedProperties, processingLevels } =
   usePrimaryOwnerData(thingId)
 
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =

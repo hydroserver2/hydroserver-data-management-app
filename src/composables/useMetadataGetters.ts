@@ -4,6 +4,9 @@ import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { onMounted } from 'vue'
 
+// TODO: This should be replaced by usePrimaryOwnerData or something else once we decide
+// how we're going to structure organizations and access control
+
 function useMetadataGetters(
   store: any,
   fetchEntities: string,
