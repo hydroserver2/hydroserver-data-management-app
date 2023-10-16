@@ -31,7 +31,8 @@ export function useFormattedDatastreams() {
       title: `Sensor:${sensorName(ds.sensorId)},  Observed Property: ${OPName(
         ds.observedPropertyId
       )},  Unit: ${unitName(ds.unitId)},  Processing Level: ${PLName(
-        ds.processingLevelId
+        ds.processingLevelId,
+        'code'
       )},  Sampled Medium ${ds.sampledMedium}`,
     }))
   })

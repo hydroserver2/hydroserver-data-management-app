@@ -51,7 +51,7 @@
             <v-btn-add @click="showSensorModal = true">Add New</v-btn-add>
             <v-dialog v-model="showSensorModal" width="60rem">
               <SensorModal
-                @uploaded="datastream.sensorId = $event"
+                @uploaded="handleMetadataUploaded('sensorId', $event)"
                 @close="showSensorModal = false"
               ></SensorModal>
             </v-dialog>
@@ -73,7 +73,7 @@
             <v-btn-add @click="showOPModal = true">Add New</v-btn-add>
             <v-dialog v-model="showOPModal" width="60rem">
               <ObservedPropertyModal
-                @uploaded="datastream.observedPropertyId = $event"
+                @uploaded="handleMetadataUploaded('observedPropertyId', $event)"
                 @close="showOPModal = false"
               ></ObservedPropertyModal>
             </v-dialog>
@@ -95,7 +95,7 @@
             <v-btn-add @click="showUnitModal = true">Add New</v-btn-add>
             <v-dialog v-model="showUnitModal" width="60rem">
               <UnitModal
-                @uploaded="datastream.unitId = $event"
+                @uploaded="handleMetadataUploaded('unitId', $event)"
                 @close="showUnitModal = false"
                 >Add New</UnitModal
               >
@@ -107,7 +107,7 @@
           <v-autocomplete
             v-model="datastream.processingLevelId"
             label="Select processing level *"
-            :items="processingLevels"
+            :items="formattedProcessingLevels"
             item-title="title"
             item-value="id"
             :rules="rules.required"
@@ -118,7 +118,7 @@
             <v-btn-add @click="showPLModal = true">Add New</v-btn-add>
             <v-dialog v-model="showPLModal" width="60rem">
               <ProcessingLevelModal
-                @uploaded="datastream.processingLevelId = $event"
+                @uploaded="handleMetadataUploaded('processingLevelId', $event)"
                 @close="showPLModal = false"
                 >Add New</ProcessingLevelModal
               >
@@ -287,15 +287,18 @@ import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
 import { useFormattedDatastreams } from '@/composables/useFormattedDatastreams'
 import { useThingOwnership } from '@/composables/useThingOwnership'
+import { Datastream } from '@/types'
+import { useThingStore } from '@/store/things'
 
 const unitStore = useUnitStore()
+const thingStore = useThingStore()
 
 const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
 const { isPrimaryOwner } = useThingOwnership(thingId)
 
-const { sensors, units, observedProperties, processingLevels } =
+const { sensors, units, observedProperties, formattedProcessingLevels } =
   usePrimaryOwnerData(thingId)
 
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
@@ -309,6 +312,16 @@ const showPLModal = ref(false)
 const showOPModal = ref(false)
 const showTimeAggUnitModal = ref(false)
 const showIntendedTimeModal = ref(false)
+
+const handleMetadataUploaded = async (
+  updateId: keyof Datastream,
+  newId: string
+) => {
+  if (datastream && updateId in datastream) {
+    ;(datastream[updateId] as unknown as string) = newId
+  }
+  await thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
+}
 
 onMounted(() => window.scrollTo(0, 0))
 </script>
