@@ -31,6 +31,7 @@ export const emailFormat = [
 
 export const phoneNumber = [
   (value: string) => {
+    if (!value) return true
     const numericValue = value.replace(/\D/g, '')
     if (numericValue.length == 10) {
       if (/^[\d\+\-\(\)\s]*$/.test(value)) {
