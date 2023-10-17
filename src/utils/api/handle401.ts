@@ -51,15 +51,15 @@ async function refreshAccessToken() {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      refresh: authStore.refresh_token,
+      refresh: authStore.refreshToken,
     }),
   }
   const response = await fetch(ENDPOINTS.ACCOUNT.JWT_REFRESH, options)
 
   if (response.ok) {
     const data = await response.json()
-    authStore.access_token = data.access
-    authStore.refresh_token = data.refresh
+    authStore.accessToken = data.access
+    authStore.refreshToken = data.refresh
     console.log('access token successfully refreshed')
   } else {
     throw new Error('Session Expired')

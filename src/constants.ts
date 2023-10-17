@@ -1,3 +1,5 @@
+import { OAuthProvider } from './types'
+
 export const DEFAULT_TOAST_DURATION = 5000
 
 export const BASE_URL = `${
@@ -14,8 +16,9 @@ const THINGS_BASE = `${BASE_URL}/data/things`
 const DATA_LOADERS_BASE = `${BASE_URL}/data/data-loaders`
 const DATA_SOURCES_BASE = `${BASE_URL}/data/data-sources`
 const OP_BASE = `${BASE_URL}/data/observed-properties`
-const PHOTOS_BASE = `${BASE_URL}/data/photos`
+const PHOTOS_BASE = `${BASE_URL}/data/things`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
+const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
 const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
@@ -40,11 +43,14 @@ export const ENDPOINTS = {
     ACTIVATE: `${ACCOUNT_BASE}/activate`,
     JWT_PAIR: `${ACCOUNT_BASE}/jwt/pair`,
     JWT_REFRESH: `${ACCOUNT_BASE}/jwt/refresh`,
+    OAUTH_LOGIN: (provider: OAuthProvider) =>
+      `${ACCOUNT_BASE}/${provider}/login`,
   }),
 
   DATASTREAMS: Object.assign(DS_BASE, {
-    FOR_THING: FOR_ID(DS_BASE),
-    CSV: (id: string) => `${DS_BASE}/csv/${id}`,
+    ID: FOR_ID(DS_BASE),
+    FOR_THING: (id: string) => `${THINGS_BASE}/${id}/datastreams`,
+    CSV: (id: string) => `${DS_BASE}/${id}/csv`,
   }),
 
   OBSERVED_PROPERTIES: Object.assign(OP_BASE, {
@@ -52,7 +58,8 @@ export const ENDPOINTS = {
   }),
 
   PHOTOS: Object.assign(PHOTOS_BASE, {
-    FOR_THING: FOR_ID(PHOTOS_BASE),
+    FOR_THING: (thingId: string, photoId: string = '') =>
+      `${THINGS_BASE}/${thingId}/photos${photoId ? '/' + photoId : ''}`,
   }),
 
   PROCESSING_LEVELS: Object.assign(PL_BASE, {
@@ -67,6 +74,10 @@ export const ENDPOINTS = {
     ID: FOR_ID(UNIT_BASE),
   }),
 
+  RESULT_QUALIFIERS: Object.assign(RQ_BASE, {
+    ID: FOR_ID(RQ_BASE),
+  }),
+
   THINGS: Object.assign(THINGS_BASE, {
     ID: FOR_ID(THINGS_BASE),
     METADATA: (id: string) => `${THINGS_BASE}/${id}/metadata`,
@@ -77,7 +88,7 @@ export const ENDPOINTS = {
   SENSORTHINGS: {
     DATASTREAMS: {
       OBSERVATIONS: (id: string, timestamp: string) =>
-        `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${timestamp}`,
+        `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${timestamp}&$top=1000`,
     },
   },
 }

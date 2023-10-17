@@ -13,13 +13,13 @@
         <br />
         <div v-for="datastream in datastreamsForItem" :key="datastream.id">
           <br />
-          DatastreamID: {{ (datastream as Datastream).id }} <br />
+          DatastreamID: {{ datastream.id }} <br />
           Observed Property:
-          {{ (datastream as Datastream).observedPropertyName }}<br />
+          {{ OPName(datastream.observedPropertyId) }}<br />
           Unit:
-          {{ (datastream as Datastream).unitName }}<br />
+          {{ unitName(datastream.unitId) }}<br />
           Processing Level:
-          {{ (datastream as Datastream).processingLevelName }}
+          {{ PLName(datastream.processingLevelId, 'code') }}
           <br />
         </div>
       </div>
@@ -31,7 +31,7 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn-cancel @click="emit('close')">Cancel</v-btn-cancel>
+      <v-btn @click="emit('close')">Cancel</v-btn>
       <v-btn
         v-if="!datastreamsForItem || datastreamsForItem.length <= 0"
         color="delete"
@@ -46,6 +46,15 @@
 import { Datastream } from '@/types'
 import { computed, onMounted } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
+import {
+  useUnitGetters,
+  useProcessingLevelGetters,
+  useObservedPropertiesGetters,
+} from '@/composables/useMetadataGetters'
+
+const { getNameById: unitName } = useUnitGetters()
+const { getNameById: PLName } = useProcessingLevelGetters()
+const { getNameById: OPName } = useObservedPropertiesGetters()
 
 const datastreamStore = useDatastreamStore()
 const emit = defineEmits(['delete', 'close'])

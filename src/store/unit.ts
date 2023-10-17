@@ -7,13 +7,13 @@ export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
   getters: {
     ownedUnits(): Unit[] {
-      return this.units.filter((u) => u.personId != null)
+      return this.units.filter((u) => u.owner != null)
     },
     unownedUnits(): Unit[] {
-      return this.units.filter((u) => u.personId == null)
+      return this.units.filter((u) => u.owner == null)
     },
     timeUnits(): Unit[] {
-      return this.units.filter((u) => u.type === 'Time' && u.personId == null)
+      return this.units.filter((u) => u.type === 'Time')
     },
   },
   actions: {
@@ -23,8 +23,7 @@ export const useUnitStore = defineStore('units', {
     async fetchUnits() {
       if (this.units.length > 0) return
       try {
-        const data = await api.fetch(ENDPOINTS.UNITS)
-        this.units = data
+        this.units = await api.fetch(ENDPOINTS.UNITS)
         this.sortUnits()
         this.loaded = true
       } catch (error) {
@@ -65,7 +64,7 @@ export const useUnitStore = defineStore('units', {
       }
     },
     getUnitById(id: string) {
-      const unit = this.units.find((u) => u.id.toString() === id.toString())
+      const unit = this.units.find((u) => u.id === id)
       if (!unit) throw new Error(`Unit with id ${id} not found`)
       return unit
     },

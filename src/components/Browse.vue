@@ -1,64 +1,69 @@
 <template>
   <div class="d-flex fill-height">
-    <v-navigation-drawer v-model="drawer" app width="350">
-      <v-row>
-        <v-spacer></v-spacer>
-        <v-col cols="auto">
-          <v-btn
-            color="cancel"
-            v-if="drawer"
-            class="toggler"
-            icon
-            @click="drawer = !drawer"
-          >
+    <v-navigation-drawer v-model="drawer" width="370">
+      <v-card v-if="drawer" flat>
+        <v-card-title class="d-flex justify-space-between align-start">
+          <div>Browse Data Collection Sites</div>
+
+          <v-btn v-if="drawer" icon @click="drawer = !drawer">
             <v-icon>mdi-menu-open</v-icon>
           </v-btn>
-        </v-col>
-      </v-row>
-
-      <v-card-title>Browse Data Collection Sites</v-card-title>
-      <v-card-text>
-        <div class="d-flex my-2">
-          <v-btn-cancel color="grey" variant="flat" @click="clearFilters"
-            >Clear</v-btn-cancel
-          >
-          <v-spacer></v-spacer>
-          <v-btn-primary :disabled="!searchInput" @click="filterOrganizations"
-            >Filter By Org</v-btn-primary
-          >
-        </div>
-        <form @submit.prevent="filterOrganizations">
-          <v-text-field
-            placeholder="Filter by Organizations"
-            prepend-inner-icon="mdi-magnify"
-            v-model="searchInput"
-            clearable
-            @click:clear="clearOrganizations"
-          />
-        </form>
-        <p v-if="!validFilter" class="text-error">No results found</p>
-        <div v-for="organizationName in filteredOrganizations">
-          <p>{{ organizationName }}</p>
-        </div>
-        <v-expansion-panels class="mt-4">
-          <v-expansion-panel title="Site Types">
-            <v-expansion-panel-text>
-              <template v-for="type in siteTypes" :key="type">
-                <v-checkbox
-                  v-model="selectedSiteTypes"
-                  :label="type"
-                  :value="type"
+        </v-card-title>
+        <v-divider></v-divider>
+        <v-card-text>
+          <div class="d-flex justify-end">
+            <v-btn class="mb-2" @click="clearFilters">Clear Filters</v-btn>
+          </div>
+          <v-card>
+            <v-card-text>
+              <form @submit.prevent="filterOrganizations">
+                <v-text-field
+                  placeholder="Filter by Organizations"
+                  prepend-inner-icon="mdi-magnify"
+                  v-model="searchInput"
+                  clearable
+                  hide-details="auto"
+                  @click:clear="clearOrganizations"
                 />
-              </template>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-card-text>
+              </form>
+              <p v-if="!validFilter" class="text-error mt-2">
+                No results found
+              </p>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn-primary
+                :disabled="!searchInput"
+                @click="filterOrganizations"
+                >Filter</v-btn-primary
+              >
+            </v-card-actions>
+          </v-card>
+          <div v-for="organizationName in filteredOrganizations">
+            <p>{{ organizationName }}</p>
+          </div>
+          <v-expansion-panels class="mt-4">
+            <v-expansion-panel title="Site Types">
+              <v-expansion-panel-text>
+                <template v-for="type in siteTypes" :key="type">
+                  <v-checkbox
+                    v-model="selectedSiteTypes"
+                    :label="type"
+                    :value="type"
+                  />
+                </template>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-card-text>
+      </v-card>
     </v-navigation-drawer>
 
-    <v-btn v-if="!drawer" class="toggler" icon @click="drawer = !drawer">
-      <v-icon>mdi-menu</v-icon>
-    </v-btn>
+    <div class="pa-2" v-if="!drawer">
+      <v-btn icon @click="drawer = !drawer">
+        <v-icon>mdi-menu</v-icon>
+      </v-btn>
+    </div>
 
     <GoogleMap
       :key="filteredThings"

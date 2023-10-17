@@ -4,7 +4,8 @@ import { useSensorStore } from '@/store/sensors'
 import { useUnitStore } from '@/store/unit'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useProcessingLevelStore } from '@/store/processingLevels'
-import { Sensor, Unit, ObservedProperty, ProcessingLevel } from '@/types'
+import { useResultQualifierStore } from '@/store/resultQualifiers'
+import { Sensor, Unit, ObservedProperty, ProcessingLevel, ResultQualifier } from '@/types'
 
 function useMetadata(
   entityStore: any,
@@ -93,6 +94,17 @@ export function useUnits(id: string | null = null) {
     'fetchUnits',
     'deleteUnit',
     'getUnitById',
+    id
+  )
+}
+
+export function useResultQualifiers(id: string | null = null) {
+  return useMetadata(
+    useResultQualifierStore(),
+    () => new ResultQualifier(),
+    'fetchResultQualifiers',
+    'deleteResultQualifier',
+    'getById',
     id
   )
 }

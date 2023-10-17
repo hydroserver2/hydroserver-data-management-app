@@ -7,41 +7,20 @@
         </span>
       </v-card-title>
       <v-card-item v-if="store.formReady">
-        <DataSourceLocation
-          ref="dataSourceLocationForm"
-          v-if="step === 1"
-        />
-        <DataSourceSchedule
-          ref="dataSourceScheduleForm"
-          v-if="step === 2"
-        />
-        <DataSourceTimestamp
-          ref="dataSourceTimestampForm"
-          v-if="step === 3"
-        />
+        <DataSourceLocation ref="dataSourceLocationForm" v-if="step === 1" />
+        <DataSourceSchedule ref="dataSourceScheduleForm" v-if="step === 2" />
+        <DataSourceTimestamp ref="dataSourceTimestampForm" v-if="step === 3" />
       </v-card-item>
-      <v-card-item v-else>
-        Loading...
-      </v-card-item>
+      <v-card-item v-else> Loading... </v-card-item>
       <v-card-actions>
-        <div class="text-subtitle-2">
-          * indicates a required field.
-        </div>
+        <div class="text-subtitle-2">* indicates a required field.</div>
         <v-spacer></v-spacer>
-        <v-btn
-          variant="text"
-          @click="handleCancel"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="step > 1"
-          variant="text"
-          @click="step--"
-        >
+        <v-btn variant="text" @click="handleCancel"> Cancel </v-btn>
+        <v-btn color="primary" v-if="step > 1" variant="text" @click="step--">
           Previous
         </v-btn>
         <v-btn
+          color="primary"
           v-if="step < 3"
           variant="text"
           @click="handleNextPage"
@@ -49,6 +28,7 @@
           Next
         </v-btn>
         <v-btn
+          color="primary"
           v-if="step === 3"
           variant="text"
           @click="handleSaveChanges"
@@ -62,11 +42,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDataSourceFormStore } from '@/store/datasource_form';
+import { useDataSourceFormStore } from '@/store/datasource_form'
 import { useRoute, useRouter } from 'vue-router'
-import DataSourceLocation from "@/components/DataSource/DataSourceLocation.vue";
-import DataSourceSchedule from "@/components/DataSource/DataSourceSchedule.vue";
-import DataSourceTimestamp from "@/components/DataSource/DataSourceTimestamp.vue";
+import DataSourceLocation from '@/components/DataSource/DataSourceLocation.vue'
+import DataSourceSchedule from '@/components/DataSource/DataSourceSchedule.vue'
+import DataSourceTimestamp from '@/components/DataSource/DataSourceTimestamp.vue'
 
 const props = defineProps(['dataSourceId'])
 const emit = defineEmits(['closeDialog'])
@@ -79,7 +59,6 @@ const router = useRouter()
 const dataSourceLocationForm = ref()
 const dataSourceScheduleForm = ref()
 const dataSourceTimestampForm = ref()
-const dataSourceDatastreamForm = ref()
 const formTitle = ref()
 
 store.dataSourceId = props.dataSourceId || null
@@ -112,16 +91,16 @@ async function handleSaveChanges() {
 
 async function handleNextPage() {
   let form = null
-  switch(step.value) {
+  switch (step.value) {
     case 1:
       form = dataSourceLocationForm
-      break;
+      break
     case 2:
       form = dataSourceScheduleForm
-      break;
+      break
     case 3:
       form = dataSourceTimestampForm
-      break;
+      break
   }
 
   if (store.dataSource != null) {
@@ -137,9 +116,6 @@ async function handleNextPage() {
 function handleCancel() {
   emit('closeDialog')
 }
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

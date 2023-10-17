@@ -81,8 +81,10 @@
           </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
-            <v-btn type="submit">{{ isEdit ? 'Update' : 'Save' }}</v-btn>
+            <v-btn @click="$emit('close')">Cancel</v-btn>
+            <v-btn color="primary" type="submit">{{
+              isEdit ? 'Update' : 'Save'
+            }}</v-btn>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -91,47 +93,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed } from 'vue'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import { useSensorStore } from '@/store/sensors'
-import { Sensor } from '@/types'
 import { methodTypes } from '@/vocabularies'
+import { useSensors } from '@/composables/useMetadata'
 
 const sensorStore = useSensorStore()
 const props = defineProps({ id: String })
 const emit = defineEmits(['uploaded', 'close'])
-const valid = ref(false)
-const myForm = ref<VForm>()
-const sensor = reactive<Sensor>(new Sensor())
 
-const isEdit = computed(() => props.id != null)
+const { isEdit, myForm, valid, selectedEntity: sensor } = useSensors(props.id)
 
 const isInstrument = computed(
-  () => sensor.methodType === 'Instrument Deployment'
+  () => sensor.value.methodType === 'Instrument Deployment'
 )
 
 async function uploadSensor() {
   await myForm.value?.validate()
   if (!valid.value) return
   if (
-    sensor.methodType === 'Instrument Deployment' &&
-    sensor.manufacturer &&
-    sensor.model
+    sensor.value.methodType === 'Instrument Deployment' &&
+    sensor.value.manufacturer &&
+    sensor.value.model
   ) {
-    sensor.name = sensor.manufacturer + ': ' + sensor.model
+    sensor.value.name = sensor.value.manufacturer + ': ' + sensor.value.model
   }
 
-  if (isEdit.value) await sensorStore.updateSensor(sensor)
+  if (isEdit.value) await sensorStore.updateSensor(sensor.value)
   else {
-    const newSensor = await sensorStore.createSensor(sensor)
+    const newSensor = await sensorStore.createSensor(sensor.value)
     emit('uploaded', String(newSensor.id))
   }
   emit('close')
 }
-
-onMounted(async () => {
-  await sensorStore.fetchSensors()
-  if (props.id) Object.assign(sensor, sensorStore.getSensorById(props.id))
-})
 </script>

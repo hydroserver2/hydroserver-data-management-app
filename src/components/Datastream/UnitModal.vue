@@ -55,8 +55,10 @@
           </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
-            <v-btn type="submit">{{ isEdit ? 'Update' : 'Save' }}</v-btn>
+            <v-btn @click="$emit('close')">Cancel</v-btn>
+            <v-btn color="primary" type="submit">{{
+              isEdit ? 'Update' : 'Save'
+            }}</v-btn>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -65,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useUnitStore } from '@/store/unit'
 import { useUnits } from '@/composables/useMetadata'

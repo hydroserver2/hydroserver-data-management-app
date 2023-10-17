@@ -94,10 +94,7 @@
               </v-card-text>
             </v-card>
             <v-dialog v-model="editAccountDialog" max-width="40rem">
-              <AccountModal
-                title="Edit Profile"
-                @close="editAccountDialog = false"
-              ></AccountModal>
+              <AccountForm @close="editAccountDialog = false"></AccountForm>
             </v-dialog>
           </v-col>
           <v-col md="8">
@@ -181,15 +178,15 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn-cancel @click="cancelDeletion">Cancel</v-btn-cancel>
-        <v-btn color="delete" text @click="deleteAccount">Delete</v-btn>
+        <v-btn @click="cancelDeletion">Cancel</v-btn>
+        <v-btn color="delete" @click="deleteAccount">Delete</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import AccountModal from '@/components/account/AccountModal.vue'
+import AccountForm from '@/components/account/AccountForm.vue'
 import { useAuthStore } from '@/store/authentication'
 import { onMounted, ref } from 'vue'
 import Notification from '@/store/notifications'

@@ -10,10 +10,10 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
   }),
   getters: {
     ownedOP(): ObservedProperty[] {
-      return this.observedProperties.filter((op) => op.personId != null)
+      return this.observedProperties.filter((op) => op.owner != null)
     },
     unownedOP(): ObservedProperty[] {
-      return this.observedProperties.filter((op) => op.personId == null)
+      return this.observedProperties.filter((op) => op.owner == null)
     },
   },
   actions: {
@@ -23,8 +23,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
     async fetchObservedProperties() {
       if (this.observedProperties.length > 0) return
       try {
-        const data = await api.fetch(ENDPOINTS.OBSERVED_PROPERTIES)
-        this.observedProperties = data
+        this.observedProperties = await api.fetch(ENDPOINTS.OBSERVED_PROPERTIES)
         this.sortObservedProperties()
         this.loaded = true
       } catch (error) {

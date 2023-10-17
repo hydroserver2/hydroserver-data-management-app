@@ -15,8 +15,9 @@ export const usePhotosStore = defineStore({
   actions: {
     async fetchPhotos(thingId: string) {
       try {
-        const data = await api.fetch(ENDPOINTS.PHOTOS.FOR_THING(thingId))
-        this.photos[thingId] = data
+        this.photos[thingId] = await api.fetch(
+          ENDPOINTS.PHOTOS.FOR_THING(thingId)
+        )
       } catch (error) {
         console.error('Error fetching photos from DB', error)
       }
@@ -29,20 +30,21 @@ export const usePhotosStore = defineStore({
     ) {
       try {
         this.loading = true
-        const data = new FormData()
-        newPhotos.forEach((photo) => data.append(`photos`, photo))
-        photosToDelete.forEach((id) => data.append(`photosToDelete`, id))
-
-        const photos = await api.post(
-          ENDPOINTS.PHOTOS.FOR_THING(thingId),
-          data,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }
+        if (newPhotos.length === 0 && photosToDelete.length === 0) return
+        if (newPhotos.length > 0) {
+          const data = new FormData()
+          newPhotos.forEach((photo) => data.append('files', photo))
+          this.photos[thingId] = await api.post(
+            ENDPOINTS.PHOTOS.FOR_THING(thingId),
+            data
+          )
+        }
+        for (const photoId of photosToDelete) {
+          await api.delete(ENDPOINTS.PHOTOS.FOR_THING(thingId, photoId))
+        }
+        this.photos[thingId] = this.photos[thingId].filter(
+          (photo) => !photosToDelete.includes(photo.id)
         )
-        this.photos[thingId] = photos
       } catch (error) {
         console.error('Error updating photos', error)
       } finally {

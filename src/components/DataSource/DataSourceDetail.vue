@@ -1,11 +1,11 @@
 <template>
   <v-container>
-    <div v-if="!loading">
+    <div v-if="dataSources.dataSourcesLoaded.value">
       <v-row>
         <v-col>
-          <h4 class="text-h4 mb-4">{{ store.name }}</h4>
+          <h4 class="text-h4 mb-4">{{ dataSource.name }}</h4>
         </v-col>
-        <v-spacer/>
+        <v-spacer />
         <v-col class="text-right">
           <v-tooltip text="Back to Data Sources" location="bottom">
             <template v-slot:activator="{ props }">
@@ -29,26 +29,12 @@
           </v-tooltip>
           <v-tooltip text="Delete Data Source" location="bottom">
             <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                color="delete"
-                icon="mdi-delete"
-              />
-            </template>
-          </v-tooltip>
-          <v-tooltip text="Refresh" location="bottom">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                color="primary"
-                icon="mdi-refresh"
-                @click="loadDataSource"
-              />
+              <v-btn v-bind="props" color="delete" icon="mdi-delete" />
             </template>
           </v-tooltip>
         </v-col>
       </v-row>
-      <v-spacer/>
+      <v-spacer />
       <v-row>
         <v-col>
           <v-row>
@@ -60,14 +46,41 @@
             <v-col>
               <v-table class="elevation-2">
                 <tbody>
-                  <tr v-for="property in dataSourceProperties" :key="property.label">
-<!--                    <td style="width: 30px;"><i :class="property.icon"></i></td>-->
-                    <td style="width: 220px;">{{ property.label }}</td>
-                    <td>
-                      {{
-                        store[property.value as keyof Object]
-                      }}
-                    </td>
+                  <tr>
+                    <td style="width: 220px">ID</td>
+                    <td>{{dataSource.id}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Name</td>
+                    <td>{{dataSource.name}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Data Loader</td>
+                    <td>{{dataSource.dataLoaderName}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Local File Path</td>
+                    <td>{{dataSource.path}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Header Row</td>
+                    <td>{{dataSource.headerRow}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Data Start Row</td>
+                    <td>{{dataSource.dataStartRow}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Timestamp Column</td>
+                    <td>{{dataSource.timestampColumn}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Timestamp Format</td>
+                    <td>{{dataSource.timestampFormat === 'iso' ? 'ISO' : dataSource.timestampFormat}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Timezone Offset</td>
+                    <td>{{dataSource.timestampOffset ? dataSource.timestampOffset : 'UTC'}}</td>
                   </tr>
                 </tbody>
               </v-table>
@@ -84,19 +97,27 @@
           </v-row>
           <v-row>
             <v-col>
-              <v-table
-                :key="testkey"
-                class="elevation-2"
-              >
+              <v-table class="elevation-2">
                 <tbody>
-                  <tr v-for="property in dataSourceSyncProperties" :key="property.label">
-<!--                    <td style="width: 30px;"><i :class="property.icon"></i></td>-->
-                    <td style="width: 220px;">{{ property.label }}</td>
-                    <td>
-                      {{
-                        store[property.value as keyof Object]
-                      }}
-                    </td>
+                  <tr>
+                    <td style="width: 220px">Status</td>
+                    <td><DataSourceStatus :status="dataSource.status" :paused="dataSource.paused"/></td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Schedule</td>
+                    <td>{{getScheduleString(dataSource)}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Last Synced</td>
+                    <td>{{dataSource.lastSynced}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Last Sync Message</td>
+                    <td>{{dataSource.lastSyncMessage}}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 220px">Next Sync</td>
+                    <td>{{dataSource.nextSync}}</td>
                   </tr>
                 </tbody>
               </v-table>
@@ -114,23 +135,17 @@
           <v-data-table
             class="elevation-2"
             :headers="linkedDatastreamColumns"
-            :items="store.datastreams"
+            :items="dataSource.datastreams"
           >
           </v-data-table>
         </v-col>
       </v-row>
     </div>
-    <div v-else>
-      Loading
-    </div>
-    <v-dialog
-      v-model="dataSourceFormOpen"
-      persistent
-    >
+    <div v-else>Loading...</div>
+    <v-dialog v-model="dataSourceFormOpen" :persistent="true">
       <DataSourceForm
-        v-if="dataSourceFormOpen === true"
-        @close-dialog="handleFinishEditDataSource()"
-        :dataSourceId="store.id"
+        @close-dialog="dataSourceFormOpen = false"
+        :dataSourceId="dataSources.selectedDataSource"
       />
     </v-dialog>
   </v-container>
@@ -138,65 +153,54 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDataSourceDetailStore } from '@/store/datasource_detail'
 import { useRoute } from 'vue-router'
-import DataSourceForm from "@/components/DataSource/DataSourceForm.vue";
-import DataSourceDashboard from "@/components/DataSource/DataSourceDashboard.vue";
+import { useDataSources } from '@/composables/useDataSources'
+import { DataSource } from '@/types'
+import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
+import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 
-const store = useDataSourceDetailStore()
+const dataSources = useDataSources()
+
 const route = useRoute()
-const loading = ref(true)
 const dataSourceFormOpen = ref(false)
-const testkey = ref(0)
 
-store.id = route.params.id.toString()
+let dataSource: any
 
-function loadDataSource() {
-  loading.value = true
-  store.fetchDataSource().then(() => {
-    testkey.value++
-    loading.value = false
-    testkey.value++
-  })
+if (dataSources.dataSourcesLoaded) {
+  dataSource = dataSources.dataSources.value.find(
+    (ds) => ds.id.toString() === route.params.id.toString()
+  )
 }
 
-function handleFinishEditDataSource() {
-  dataSourceFormOpen.value = false
-  loadDataSource()
+function getScheduleString(dataSource: DataSource) {
+  let scheduleString = ''
+  if (dataSource.interval) {
+    scheduleString = scheduleString.concat(`Every ${dataSource.interval} ${dataSource.intervalUnits}`)
+  } else {
+    scheduleString = scheduleString.concat(`Crontab: ${dataSource.crontab}`)
+  }
+  if (dataSource.startTime && dataSource.endTime) {
+    scheduleString = scheduleString.concat(` from ${dataSource.startTime} to ${dataSource.endTime}`)
+  } else if (dataSource.startTime) {
+    scheduleString = scheduleString.concat(` beginning ${dataSource.startTime}`)
+  } else if (dataSource.endTime) {
+    scheduleString = scheduleString.concat(` until ${dataSource.endTime}`)
+  }
+  return scheduleString
 }
 
-loadDataSource()
-
-let dataSourceProperties = [
-    { icon: 'fas fa-id-badge', label: 'ID', value: 'id' },
-    { icon: 'fas fa-id-badge', label: 'Name', value: 'name' },
-    { icon: 'fas fa-id-badge', label: 'Data Loader', value: 'dataLoader' },
-    { icon: 'fas fa-id-badge', label: 'Local File Path', value: 'filePath' },
-    { icon: 'fas fa-id-badge', label: 'Header Row', value: 'headerRow' },
-    { icon: 'fas fa-id-badge', label: 'Data Start Row', value: 'dataStartRow' },
-    { icon: 'fas fa-id-badge', label: 'Timestamp Column', value: 'timestampColumn' },
-    { icon: 'fas fa-id-badge', label: 'Timestamp Format', value: 'timestampFormat' },
-    { icon: 'fas fa-id-badge', label: 'Timezone Offset', value: 'timezoneOffset' },
-]
-
-let dataSourceSyncProperties = [
-    { icon: 'fas fa-id-badge', label: 'Status', value: 'status' },
-    { icon: 'fas fa-id-badge', label: 'Paused', value: 'paused' },
-    { icon: 'fas fa-id-badge', label: 'Schedule', value: 'scheduleValue' },
-    { icon: 'fas fa-id-badge', label: 'Schedule Start Time', value: 'scheduleStartTime' },
-    { icon: 'fas fa-id-badge', label: 'Schedule End Time', value: 'scheduleEndTime' },
-    { icon: 'fas fa-id-badge', label: 'Last Synced', value: 'lastSynced' },
-    { icon: 'fas fa-id-badge', label: 'Last Sync Message', value: 'lastSyncMessage' },
-    { icon: 'fas fa-id-badge', label: 'Next Sync', value: 'nextSync' },
-    { icon: 'fas fa-id-badge', label: 'Last Loaded Timestamp', value: 'dataSourceThru' },
-]
-
-let linkedDatastreamColumns = [
+const linkedDatastreamColumns = [
+  {
+    title: 'ID',
+    align: 'start',
+    sortable: true,
+    key: 'name',
+  },
   {
     title: 'Name',
     align: 'start',
     sortable: true,
-    key: 'name',
+    key: 'description',
   },
   {
     title: 'Status',
@@ -208,17 +212,15 @@ let linkedDatastreamColumns = [
     title: 'Last Loaded Timestamp',
     align: 'start',
     sortable: true,
-    key: 'dataThru',
+    key: 'phenomenonEndTime',
   },
   {
     title: 'Data Source Column',
     align: 'start',
     sortable: true,
-    key: 'column',
-  }
-]
+    key: 'dataSourceColumn',
+  },
+] as const
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

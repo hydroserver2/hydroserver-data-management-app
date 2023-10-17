@@ -5,7 +5,7 @@
         <h5 class="flex-grow-1 pt-2 pl-4 text-center text-h5">
           Datastream for {{ thing?.name }}
         </h5>
-        <v-btn class="pt-2 pr-2" icon @click="$emit('close')">
+        <v-btn icon @click="$emit('close')">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </div>
@@ -33,6 +33,8 @@ import { useDatastream } from '@/composables/useDatastream'
 import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
+import { DataArray, DataPoint } from '@/types'
+import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 
 const obsStore = useObservationStore()
 
@@ -60,17 +62,30 @@ const emit = defineEmits(['close'])
 const { thing } = useThing(props.thingId)
 const { datastream } = useDatastream(props.thingId, props.datastreamId)
 
+const { getUnitAttrById, getObservedPropertyAttrById } = usePrimaryOwnerData(
+  props.thingId
+)
+
 let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
 
-function drawPlot(data: any) {
+function drawPlot(dataArray: DataArray) {
+  const data = dataArray.map((item: DataPoint) => {
+    return {
+      date: new Date(item.date),
+      value: item.value,
+    }
+  })
+
   if (focusChart.value) {
-    const unitSymbol = datastream.value.unitSymbol
-      ? `(${datastream.value.unitSymbol})`
+    const unitSymbol = datastream.value.unitId
+      ? `(${getUnitAttrById(datastream.value.unitId, 'symbol')})`
       : ''
 
     const yAxisLabel = datastream.value
-      ? `${datastream.value.observedPropertyName} ${unitSymbol} `
+      ? `${getObservedPropertyAttrById(
+          datastream.value.observedPropertyId
+        )} ${unitSymbol} `
       : ''
 
     const focusSVG = focus(data, yAxisLabel)
@@ -85,26 +100,31 @@ function drawPlot(data: any) {
 }
 
 async function fetchDataForPeriod(hours: number) {
-  let timestamp = ''
-  if (hours == -1 && datastream.value.phenomenonBeginTime)
-    timestamp = datastream.value.phenomenonBeginTime
-  else if (datastream.value.phenomenonEndTime)
-    timestamp = obsStore.subtractHours(
-      datastream.value.phenomenonEndTime,
-      hours
-    )
-
   selectedTime.value = hours
-  await obsStore.fetchObservations(datastream.value.id, timestamp)
+  if (
+    datastream.value.phenomenonEndTime &&
+    datastream.value.phenomenonBeginTime
+  )
+    await obsStore.fetchObservations(
+      datastream.value.id,
+      hours,
+      datastream.value.phenomenonBeginTime,
+      datastream.value.phenomenonEndTime
+    )
   drawPlot(obsStore.observations[datastream.value.id])
 }
 
 onMounted(async () => {
-  let timestamp = ''
-  if (datastream.value.phenomenonEndTime)
-    timestamp = obsStore.subtractHours(datastream.value.phenomenonEndTime, 72)
-
-  await obsStore.fetchObservations(datastream.value.id, timestamp)
+  if (
+    datastream.value.phenomenonEndTime &&
+    datastream.value.phenomenonBeginTime
+  )
+    await obsStore.fetchObservations(
+      datastream.value.id,
+      72,
+      datastream.value.phenomenonBeginTime,
+      datastream.value.phenomenonEndTime
+    )
   drawPlot(obsStore.observations[datastream.value.id])
 })
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="banner">
     <div
-      class="d-flex text-white flex-column align-center text-center fill-height justify-space-between py-8"
+      class="d-flex text-white flex-column align-center text-center fill-height justify-space-between py-12"
     >
       <div>
         <img
@@ -9,14 +9,22 @@
           alt="Hydro Logo"
           style="max-width: 500px; width: 100%"
         />
-        <h4 class="text-h4 font-weight-thin mb-8">
+        <h4 class="text-h4 font-weight mb-8 has-text-shadow">
           Collect and Manage Your Operational Hydrologic Data
         </h4>
       </div>
 
-      <div>
-        <h5 class="text-h5 mb-8">Create an account to get started</h5>
-        <v-btn-primary to="/SignUp">Sign Up</v-btn-primary>
+      <div v-if="authStore.isLoggedIn">
+        <h5 class="text-h5 mb-8 has-text-shadow">
+          Logged in as {{ authStore.user.firstName }}
+          {{ authStore.user.lastName }}
+        </h5>
+      </div>
+      <div v-else>
+        <h5 class="text-h5 mb-8 has-text-shadow">
+          Create an account to get started
+        </h5>
+        <v-btn-primary to="/sign-up">Sign Up</v-btn-primary>
       </div>
     </div>
   </div>
@@ -204,6 +212,9 @@ import ogcLogo from '@/assets/ogc-min.png'
 import cirohLogo from '@/assets/CIROH_logo_transparent-min.png'
 import sensorThingsLogo from '@/assets/sensorThings-min.png'
 import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
+import { useAuthStore } from '@/store/authentication'
+
+const authStore = useAuthStore()
 </script>
 
 <style scoped lang="scss">
@@ -216,15 +227,18 @@ p {
 }
 
 $gradient: linear-gradient(
-  180deg,
-  rgba(30, 36, 58, 0.35),
-  rgba(28, 37, 65, 0.3)
-);
+    180deg,
+    rgba(55, 104, 155, 0.47) 10%,
+    rgb(21 40 61 / 36%) 65%,
+    #00051ab0
+  ),
+  url(/src/assets/banner_25-min.jpg);
 
 .banner {
   background-image: $gradient, url(@/assets/banner_25-min.jpg);
   background-size: cover;
   background-repeat: no-repeat;
+  background-position: center;
   height: 37rem;
 
   // @media (min-width: 768px) {

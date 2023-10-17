@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
-import { Thing, ThingMetadata } from '@/types'
+import { Thing, DatastreamMetadata } from '@/types'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useThingStore = defineStore('things', {
   state: () => ({
     things: {} as Record<string, Thing>,
-    POMetadata: {} as Record<string, ThingMetadata>,
+    POMetadata: {} as Record<string, DatastreamMetadata>,
     loaded: false,
   }),
   getters: {
@@ -37,6 +37,7 @@ export const useThingStore = defineStore('things', {
       try {
         const data = await api.fetch(ENDPOINTS.THINGS.ID(id))
         this.$patch({ things: { ...this.things, [id]: data } })
+        return this.things[id]
       } catch (error) {
         console.error('Error fetching thing by id', error)
       }
@@ -57,7 +58,9 @@ export const useThingStore = defineStore('things', {
           updatedThing,
           this.things[updatedThing.id]
         )
-        this.things[updatedThing.id] = data as Thing
+        if (data) {
+          this.things[updatedThing.id] = data as Thing
+        }
       } catch (error) {
         console.error('Error updating thing', error)
       }

@@ -34,7 +34,9 @@ export const phoneNumber = [
     if (!value) return true
     const numericValue = value.replace(/\D/g, '')
     if (numericValue.length == 10) {
-      if (/^[\d\+\-\(\)\s]*$/.test(value)) return true
+      if (/^[\d\+\-\(\)\s]*$/.test(value)) {
+        return true
+      }
       return 'Phone number can only contain digits, plus sign, parentheses, hyphens, and spaces.'
     }
     return 'Phone number must contain 10 digits.'
@@ -104,3 +106,32 @@ export const rules = {
   requiredDescription: [...maxLength(3000), ...required],
   requiredCode: [...maxLength(200), ...required],
 }
+
+// Starter code for Vuelidate if we ever decide to use it
+// import { Validation, useVuelidate } from '@vuelidate/core'
+// import { Ref } from 'vue'
+// export class HsFormValidator {
+//   instance: Ref<Validation>
+//   constructor(rules: any, state: any) {
+//     this.instance = useVuelidate(rules, state)
+//   }
+//   get validate() {
+//     return this.instance.value.$validate
+//   }
+//   /** Returns event handlers for a field */
+//   handlers(field: Validation) {
+//     // const field = this.instance.value[name]
+//     return {
+//       input: field.$touch,
+//       blur: field.$touch,
+//     }
+//   }
+//   /** Returns attributes for a field */
+//   attrs(field: Validation) {
+//     return {
+//       'error-messages': field.$errors.map((e: any) => e.$message),
+//       counter: field.maxLength?.$params.max || undefined,
+//       class: { 'is-required': field.value?.hasOwnProperty('required') },
+//     }
+//   }
+// }

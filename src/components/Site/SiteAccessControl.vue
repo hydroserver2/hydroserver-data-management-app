@@ -169,7 +169,7 @@
 
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn-cancel text @click="emitClose">Close</v-btn-cancel>
+      <v-btn variant="text" @click="emitClose">Close</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -196,7 +196,6 @@ const {
 } = useThingOwnership(props.thingId)
 
 const { thing, toggleSitePrivacy } = useThing(props.thingId)
-console.log('thing', thing.value)
 
 const emitClose = () => emits('close')
 </script>

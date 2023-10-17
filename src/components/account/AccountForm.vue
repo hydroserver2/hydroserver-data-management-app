@@ -1,5 +1,9 @@
 <template>
   <v-card>
+    <slot name="header">
+      <v-card-title>Edit Profile</v-card-title>
+    </slot>
+    <v-divider class="my-4"></v-divider>
     <v-card-text>
       <v-form
         ref="myForm"
@@ -29,18 +33,16 @@
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
-        </v-row>
-        <v-row v-if="!user.isVerified">
-          <v-col>
+
+          <v-col cols="12" v-if="!user.isVerified">
             <v-text-field
               v-model="user.email"
               label="Email"
               :rules="rules.email"
             ></v-text-field>
           </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
+
+          <v-col cols="12" sm="6">
             <v-text-field
               v-model="user.phone"
               v-maska:[phoneMask]
@@ -48,14 +50,8 @@
               :rules="rules.phoneNumber"
             ></v-text-field>
           </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-text-field v-model="user.address" label="Address"></v-text-field>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
+
+          <v-col cols="12" sm="6">
             <v-autocomplete
               v-model="user.type"
               label="User Type *"
@@ -63,8 +59,11 @@
               :rules="rules.required"
             ></v-autocomplete>
           </v-col>
-        </v-row>
-        <v-row>
+
+          <v-col cols="12">
+            <v-text-field v-model="user.address" label="Address"></v-text-field>
+          </v-col>
+
           <v-col>
             <v-text-field
               v-model="user.link"
@@ -74,76 +73,61 @@
             </v-text-field>
           </v-col>
         </v-row>
-        <v-row>
-          <v-col cols="auto">
-            <v-switch
-              v-model="showOrg"
-              hide-details
-              :label="
-                showOrg
-                  ? 'Affiliated with an Organization'
-                  : 'No Affiliated Organization'
+
+        <v-switch
+          v-model="showOrg"
+          hide-details
+          label="Affiliated with an Organization"
+          color="primary"
+        ></v-switch>
+
+        <v-row v-if="user.organization && showOrg">
+          <v-col cols="12" sm="8">
+            <v-text-field
+              v-model="user.organization.name"
+              label="Organization Name *"
+              :rules="rules.requiredName"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-text-field
+              v-model="user.organization.code"
+              label="Organization Code *"
+              :rules="rules.requiredName"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-autocomplete
+              :items="organizationTypes"
+              v-model="user.organization.type"
+              label="Organization Type *"
+              :rules="rules.requiredName"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="user.organization.link"
+              label="Organization Link"
+              :rules="user.organization.link ? rules.urlFormat : []"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-textarea
+              v-model="user.organization.description"
+              label="Organization Description"
+              :rules="
+                user.organization.description ? rules.maxLength(2000) : []
               "
-              color="primary"
-            ></v-switch>
+            ></v-textarea>
           </v-col>
         </v-row>
-        <div v-if="user.organization && showOrg">
-          <v-row>
-            <v-col>
-              <v-text-field
-                v-model="user.organization.name"
-                label="Organization Name *"
-                :rules="rules.requiredName"
-              ></v-text-field>
-            </v-col>
-            <v-col>
-              <v-text-field
-                v-model="user.organization.code"
-                label="Organization Code *"
-                :rules="rules.requiredName"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-autocomplete
-                :items="organizationTypes"
-                v-model="user.organization.type"
-                label="Organization Type *"
-                :rules="rules.requiredName"
-              />
-            </v-col>
-            <v-col>
-              <v-text-field
-                v-model="user.organization.link"
-                label="Organization Link"
-                :rules="user.organization.link ? rules.urlFormat : []"
-              ></v-text-field>
-            </v-col>
-          </v-row>
 
-          <v-row>
-            <v-col>
-              <v-text-field
-                v-model="user.organization.description"
-                label="Organization Description"
-                :rules="
-                  user.organization.description ? rules.maxLength(2000) : []
-                "
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </div>
+        <v-divider></v-divider>
 
-        <v-card-actions v-if="isModal">
+        <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn-cancel @click="closeDialog">Cancel</v-btn-cancel>
-          <v-btn type="submit">Update</v-btn>
-        </v-card-actions>
-        <v-card-actions v-else>
-          <v-spacer></v-spacer>
-          <v-btn type="submit">Save</v-btn>
+          <v-btn v-if="hasCancelButton" @click="emit('close')">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" type="submit">Save</v-btn>
         </v-card-actions>
       </v-form>
     </v-card-text>
@@ -152,7 +136,7 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { reactive, ref, onMounted, defineProps, watch } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
@@ -162,8 +146,9 @@ import { Organization, User } from '@/types'
 
 const phoneMask = { mask: '(###) ###-####' }
 const authStore = useAuthStore()
-const props = defineProps({
-  isModal: { type: Boolean, required: false, default: true },
+
+defineProps({
+  hasCancelButton: { type: Boolean, required: false, default: true },
 })
 
 let user = reactive<User>(JSON.parse(JSON.stringify(authStore.user)))
@@ -178,7 +163,6 @@ const valid = ref(false)
 const myForm = ref<VForm>()
 
 const emit = defineEmits(['close'])
-const closeDialog = () => emit('close')
 
 const updateUser = async () => {
   await myForm.value?.validate()

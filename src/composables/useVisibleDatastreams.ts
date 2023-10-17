@@ -1,10 +1,14 @@
 import { computed, onMounted } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
 import { useThingOwnership } from './useThingOwnership'
+import { useObservationStore } from '@/store/observations'
+import { useObservationsLast72Hours } from '@/store/observations72Hours'
 
 export function useVisibleDatastreams(thingId: string) {
   const { isOwner } = useThingOwnership(thingId)
   const datastreamStore = useDatastreamStore()
+  const obsStore = useObservationStore()
+  const obs72HourStore = useObservationsLast72Hours()
 
   const visibleDatastreams = computed(() => {
     if (!datastreamStore.datastreams[thingId]) return []
@@ -18,10 +22,21 @@ export function useVisibleDatastreams(thingId: string) {
       }))
   })
 
-  onMounted(async () => {
-    if (datastreamStore.datastreams[thingId]) return
-    await datastreamStore.fetchDatastreamsByThingId(thingId)
+  const observations = computed(() => {
+    if (Object.keys(obs72HourStore.observations).length === 0) return {}
+    return obs72HourStore.observations
   })
 
-  return { visibleDatastreams }
+  const mostRecentObs = computed(() => {
+    if (Object.keys(obs72HourStore.mostRecentObs).length === 0) return {}
+    return obs72HourStore.mostRecentObs
+  })
+
+  onMounted(async () => {
+    // if (datastreamStore.datastreams[thingId]) return
+    await datastreamStore.fetchDatastreamsByThingId(thingId)
+    await obsStore.fetchObservationsBulk(visibleDatastreams.value, 72)
+  })
+
+  return { visibleDatastreams, observations, mostRecentObs }
 }

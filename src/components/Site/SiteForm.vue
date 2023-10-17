@@ -200,8 +200,8 @@
         </v-row>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn-cancel @click="closeDialog">Cancel</v-btn-cancel>
-          <v-btn @click="uploadThing">Save</v-btn>
+          <v-btn @click="closeDialog">Cancel</v-btn>
+          <v-btn color="primary" @click="uploadThing">Save</v-btn>
         </v-card-actions>
       </v-form>
     </v-card-text>
@@ -329,7 +329,8 @@ async function uploadThing() {
       )
     } else {
       const newThing = await thingStore.createThing(thing)
-      await photoStore.updatePhotos(newThing.id, newPhotos.value, [])
+      if (newPhotos.value)
+        await photoStore.updatePhotos(newThing.id, newPhotos.value, [])
     }
   }
 }

@@ -7,15 +7,13 @@
     </v-row>
     <v-data-table
       :headers="headers"
-      :items="store.dataLoaderRows"
+      :items="dataLoaders.dataLoaders.value"
       :search="search"
       hover
       class="elevation-3"
     >
       <template v-slot:top>
-        <v-toolbar
-          flat
-        >
+        <v-toolbar flat>
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
@@ -29,7 +27,7 @@
             color="primary"
             variant="elevated"
             :to="{
-              name: 'HydroLoader'
+              name: 'HydroLoader',
             }"
           >
             Download Streaming Data Loader
@@ -39,39 +37,36 @@
       <template v-slot:item.actions="{ item }">
         <v-btn
           icon="mdi-delete"
-          @click="handleOpenConfirmDelete(item.raw.id)"
+          @click="handleDeleteDataLoader(item.raw.id)"
         />
       </template>
     </v-data-table>
-        <v-dialog
-      v-model="confirmDeleteOpen"
-      max-width="500"
-    >
-      <v-card>
-        <v-card-title>
-          Confirm Delete Data Loader
-        </v-card-title>
+    <v-dialog v-model="confirmDeleteOpen" max-width="500">
+      <v-card v-if="dataLoaders.selectedDataLoader.value">
+        <v-card-title> Confirm Delete Data Loader </v-card-title>
         <v-card-text>
           Are you sure you want to delete the following data loader?
         </v-card-text>
         <v-card-text>
-          • {{ store.dataLoaderRows.filter(row => row.id === dataLoaderRowSelected)[0].name }}
+          •
+          {{
+            dataLoaders.dataLoaders.value.find(
+              (dl) => dl.id === dataLoaders.selectedDataLoader.value
+            )?.name
+          }}
         </v-card-text>
         <v-card-text>
-          Note: You should uninstall this data loader instance before deleting it here. Deleting this data loader
-          instance will unlink it from all associated data sources.
+          Note: You should uninstall this data loader instance before deleting
+          it here. Deleting this data loader instance will unlink it from all
+          associated data sources.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            @click="confirmDeleteOpen = false"
-          >
-            Cancel
-          </v-btn>
+          <v-btn @click="confirmDeleteOpen = false"> Cancel </v-btn>
           <v-btn
             color="red"
-            :disabled="deletingDataLoader"
-            @click="handleDeleteDataLoader"
+            :disabled="dataLoaders.updatingDataLoader.value"
+            @click="handleConfirmDeleteDataLoader()"
           >
             Delete
           </v-btn>
@@ -83,29 +78,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDataLoaderDashboardStore } from '@/store/dataloader_dashboard'
+import { useDataLoaders } from '@/composables/useDataLoaders'
 
-
-const store = useDataLoaderDashboardStore()
+const dataLoaders = useDataLoaders()
 const search = ref()
 const confirmDeleteOpen = ref(false)
-const deletingDataLoader = ref(false)
-const dataLoaderRowSelected = ref()
 
-store.fetchDataLoaders()
-
-function handleOpenConfirmDelete(dataLoaderId: string) {
-  dataLoaderRowSelected.value = dataLoaderId
+function handleDeleteDataLoader(dataLoaderId: any) {
+  dataLoaders.selectedDataLoader.value = dataLoaderId
   confirmDeleteOpen.value = true
 }
 
-function handleDeleteDataLoader() {
-  deletingDataLoader.value = true
-  store.deleteDataLoader(dataLoaderRowSelected.value).then(() => {
-    confirmDeleteOpen.value = false
-    deletingDataLoader.value = false
-    store.fetchDataLoaders()
-  })
+function handleConfirmDeleteDataLoader() {
+  dataLoaders.deleteDataLoader()
+  confirmDeleteOpen.value = false
 }
 
 const headers = [
@@ -116,22 +102,12 @@ const headers = [
     key: 'name',
   },
   {
-    title: 'Last Communication',
-    align: 'start',
-    sortable: true,
-    key: 'last_communication'
-  },
-  {
     title: 'Actions',
     align: 'end',
     sortable: false,
     key: 'actions',
   },
-]
-
-
+] as const
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

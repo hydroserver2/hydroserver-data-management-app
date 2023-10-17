@@ -1,3 +1,10 @@
+export interface DataPoint {
+  date: string
+  value: number
+}
+
+export type DataArray = DataPoint[]
+
 export interface Owner {
   firstName: string
   lastName: string
@@ -56,26 +63,19 @@ export class Datastream {
   sampledMedium: string
   noDataValue: number
   aggregationStatistic: string
-  observations: Observation[]
-  mostRecentObservation: any
   unitId: string
-  unitName: string
-  unitSymbol: string
   observedPropertyId: string
-  observedPropertyName: string
   sensorId: string
-  sensorName: string
   processingLevelId: string
-  processingLevelName: string
-  isVisible?: boolean
-  isPrimaryOwner: boolean
-  isStale?: boolean
+  isVisible: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
   intendedTimeSpacingUnitsId?: string
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
+  dataSourceId?: string
+  dataSourceColumn?: string | number
 
   constructor(thingId: string) {
     this.id = ''
@@ -87,32 +87,19 @@ export class Datastream {
     this.sampledMedium = ''
     this.noDataValue = -9999
     this.aggregationStatistic = ''
-    this.observations = []
-    this.mostRecentObservation = ''
     this.unitId = ''
-    this.unitName = ''
-    this.unitSymbol = ''
     this.observedPropertyId = ''
-    this.observedPropertyName = ''
     this.sensorId = ''
-    this.sensorName = ''
     this.processingLevelId = ''
-    this.processingLevelName = ''
-    this.isPrimaryOwner = false
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
+    this.isVisible = true
   }
-}
-
-export interface Observation {
-  id: string
-  result: string
-  phenomenonTime: string
 }
 
 export class Unit {
   id: string
-  personId: string
+  owner: Owner | null
   name: string
   symbol: string
   definition: string
@@ -120,7 +107,7 @@ export class Unit {
 
   constructor() {
     this.id = ''
-    this.personId = ''
+    this.owner = null
     this.name = ''
     this.symbol = ''
     this.definition = ''
@@ -130,6 +117,7 @@ export class Unit {
 
 export class Sensor {
   id: string
+  owner: Owner | null
   name: string
   description: string
   manufacturer: string
@@ -142,6 +130,7 @@ export class Sensor {
 
   constructor() {
     this.id = ''
+    this.owner = null
     this.name = ''
     this.description = ''
     this.manufacturer = ''
@@ -157,7 +146,7 @@ export class Sensor {
 export class ObservedProperty {
   id: string
   name: string
-  personId: string
+  owner: Owner | null
   definition: string
   description: string
   type: string
@@ -166,7 +155,7 @@ export class ObservedProperty {
   constructor() {
     this.id = ''
     this.name = ''
-    this.personId = ''
+    this.owner = null
     this.definition = ''
     this.description = ''
     this.type = 'Hydrology'
@@ -176,34 +165,102 @@ export class ObservedProperty {
 
 export class ProcessingLevel {
   id: string
-  personId: string
+  owner: Owner | null
   code: string
   definition: string
   explanation: string
 
   constructor() {
     this.id = ''
-    this.personId = ''
+    this.owner = null
     this.code = ''
     this.definition = ''
     this.explanation = ''
   }
 }
 
-export class Organization {
-  name: string
+export class ResultQualifier {
+  id: string
+  owner: Owner | null
   code: string
-  type: string
+  description: string
+
+  constructor() {
+    this.id = ''
+    this.owner = null
+    this.code = ''
+    this.description = ''
+  }
+}
+
+export class DataSource {
+  id: string
+  name: string
+  path: string
+  url: string
+  headerRow: number
+  dataStartRow: number
+  delimiter: string
+  interval: number
+  intervalUnits: string
+  crontab: string
+  startTime: string
+  endTime: string
+  paused: boolean
+  timestampColumn: string | number
+  timestampFormat: string
+  timestampOffset: string
+  dataLoaderId: string
+  dataSourceThru: string
+  lastSyncSuccessful: boolean
+  lastSyncMessage: string
+  lastSynced: string
+  nextSync: string
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.path = ''
+    this.url = ''
+    this.headerRow = 0
+    this.dataStartRow = 0
+    this.delimiter = ''
+    this.interval = 0
+    this.intervalUnits = ''
+    this.crontab = ''
+    this.startTime = ''
+    this.endTime = ''
+    this.paused = false
+    this.timestampColumn = ''
+    this.timestampFormat = ''
+    this.timestampOffset = ''
+    this.dataLoaderId = ''
+    this.dataSourceThru = ''
+    this.lastSyncSuccessful = false
+    this.lastSyncMessage = ''
+    this.lastSynced = ''
+    this.nextSync = ''
+  }
+}
+
+export class DataLoader {
+  id: string
+  name: string
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+  }
+}
+
+export class Organization {
+  name?: string
+  code?: string
+  type?: string
   description?: string
   link?: string
 
-  constructor() {
-    this.name = ''
-    this.code = ''
-    this.type = ''
-    this.description = ''
-    this.link = ''
-  }
+  constructor() {}
 }
 
 export class User {
@@ -235,11 +292,11 @@ export class User {
   }
 }
 
-export interface ThingMetadata {
+export interface DatastreamMetadata {
   units: Unit[]
   sensors: Sensor[]
-  processing_levels: ProcessingLevel[]
-  observed_properties: ObservedProperty[]
+  processingLevels: ProcessingLevel[]
+  observedProperties: ObservedProperty[]
 }
 
 export interface Photo {
@@ -247,4 +304,9 @@ export interface Photo {
   thingId: string
   filePath: string
   link: string
+}
+
+export enum OAuthProvider {
+  google = 'google',
+  orcid = 'orcid',
 }
