@@ -34,8 +34,8 @@ export const routes: RouteRecordRaw[] = [
   },
   {
     path: '/sites/:id',
-    name: 'SingleSite',
-    component: () => import('@/components/Site/SingleSite.vue'),
+    name: 'SiteDetails',
+    component: () => import('@/components/Site/SiteDetails.vue'),
     meta: {
       title: 'Site',
       metaTags: [

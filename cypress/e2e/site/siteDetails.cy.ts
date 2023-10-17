@@ -1,4 +1,4 @@
-describe('SingleSite', () => {
+describe('SiteDetails', () => {
   beforeEach(() => {
     cy.viewport(1500, 1200)
     cy.login('paul')
