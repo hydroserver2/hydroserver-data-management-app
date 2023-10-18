@@ -68,7 +68,7 @@ const headers = [
 
 const onRowClick = (event: Event, item: any) => {
   const thing = item.item.raw
-  router.push({ name: 'SingleSite', params: { id: thing.id } })
+  router.push({ name: 'SiteDetails', params: { id: thing.id } })
 }
 
 onMounted(async () => thingStore.fetchThings())

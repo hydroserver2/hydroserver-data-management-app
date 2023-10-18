@@ -52,7 +52,7 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
     if (!valid.value) return
     if (datastreamId) await datastreamStore.updateDatastream(datastream)
     else await datastreamStore.createDatastream(datastream)
-    await router.push({ name: 'SingleSite', params: { id: thingId } })
+    await router.push({ name: 'SiteDetails', params: { id: thingId } })
   }
 
   onMounted(async () => loadDatastreams())
