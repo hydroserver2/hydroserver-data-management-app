@@ -78,7 +78,7 @@ export const useAuthStore = defineStore({
     async createUser(user: User) {
       try {
         const data = await api.post(ENDPOINTS.USER, user)
-        useResetStore().things()
+        // useResetStore().things()
         this.user = data.user
         this.accessToken = data.access
         this.refreshToken = data.refresh
