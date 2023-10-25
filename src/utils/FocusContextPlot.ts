@@ -16,7 +16,7 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
     grid: true,
     marginBottom: 45,
     x: { type: 'utc', label: 'Date/Time' },
-    y: { label: yAxisLabel },
+    y: { label: yAxisLabel, domain: [minY, maxY] },
     marks: [
       Plot.axisX({ labelAnchor: 'center', labelOffset: 40 }),
       Plot.axisY({ labelAnchor: 'center' }),
@@ -135,17 +135,20 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
 }
 
 export function context(data: PlotData[], width: number): SVGSVGElement {
+  const [minY, maxY] = d3.extent(data, (d) => d.value)
+
   const chart = Plot.plot({
     height: 65,
     marginTop: 5,
     marks: [
       Plot.areaY(data, {
         x: 'date',
-        y: 'value',
+        y1: (d) => minY,
+        y2: 'value',
         fill: '#E8F5E9',
       }),
     ],
-    y: { ticks: 0, label: null },
+    y: { ticks: 0, label: null, domain: [minY, maxY] },
   })
 
   const x = chart.scale('x')
