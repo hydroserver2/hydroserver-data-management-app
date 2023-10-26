@@ -15,11 +15,16 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
     height: 250,
     grid: true,
     marginBottom: 45,
+    marginLeft: 60,
     x: { type: 'utc', label: 'Date/Time' },
-    y: { label: yAxisLabel },
+    y: { label: yAxisLabel, domain: [minY, maxY] },
     marks: [
       Plot.axisX({ labelAnchor: 'center', labelOffset: 40 }),
-      Plot.axisY({ labelAnchor: 'center' }),
+      Plot.axisY({
+        labelAnchor: 'center',
+        tickFormat: (d: number) =>
+          d.toString().length > 4 ? d.toExponential() : d,
+      }),
       Plot.areaY(data, {
         x: 'date',
         y: 'value',
@@ -64,7 +69,7 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
           text: (d) =>
             [
               `Date/Time ${Plot.formatIsoDate(d.date)}`,
-              `${yAxisLabel} ${d.value.toFixed(2)}`,
+              `${yAxisLabel} ${d.value}`,
             ].join('   '),
         })
       ),
@@ -135,17 +140,21 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
 }
 
 export function context(data: PlotData[], width: number): SVGSVGElement {
+  const [minY, maxY] = d3.extent(data, (d) => d.value)
+
   const chart = Plot.plot({
     height: 65,
     marginTop: 5,
+    marginLeft: 60,
     marks: [
       Plot.areaY(data, {
         x: 'date',
-        y: 'value',
+        y1: (d) => minY,
+        y2: 'value',
         fill: '#E8F5E9',
       }),
     ],
-    y: { ticks: 0, label: null },
+    y: { ticks: 0, label: null, domain: [minY, maxY] },
   })
 
   const x = chart.scale('x')
