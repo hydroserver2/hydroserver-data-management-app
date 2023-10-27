@@ -4,7 +4,7 @@ import Notification from '@/store/notifications'
 export function toastHandler(response: any, endpoint: string, method: string) {
   if (response instanceof TypeError) {
     Notification.toast({
-      message: response.message,
+      message: 'Network error. Please check your connection.',
       type: 'error',
     })
     return
@@ -35,9 +35,6 @@ function getMessage(method: string, status: number, endpoint: string) {
 // const THINGS_ID_PATTERN = new RegExp(`${ENDPOINTS.THINGS}/[a-zA-Z0-9]+`)
 
 function getEndpointMessages(endpoint: string): any {
-  // TODO: this setup is very limiting because it forces us to define endpoints in such
-  // a way that fragments are not repeated between endpoints
-  // Most of these errors should be handled inside the components or store methods
   if (endpoint.includes(ENDPOINTS.THINGS)) {
     // if (endpoint == ENDPOINTS.THINGS) {
     // } else if (THINGS_ID_PATTERN.test(endpoint)) {}
@@ -69,14 +66,12 @@ function getEndpointMessages(endpoint: string): any {
       return {
         POST: {
           404: 'No account was found for the email you specified',
-          // TODO 'Account activation failed. Token incorrect or expired.'
         },
       }
     } else if (endpoint.includes('reset-password')) {
       return {
         POST: {
           200: 'Successfully reset password!',
-          // TODO 'Account activation failed. Token incorrect or expired.'
         },
       }
     }
@@ -85,21 +80,18 @@ function getEndpointMessages(endpoint: string): any {
       return {
         DELETE: {
           200: 'Your account has been deleted',
-          //TODO: 'Error occurred while deleting your account. Please try again.'
         },
       }
     } else if (endpoint.includes('send-verification-email')) {
       return {
         POST: {
           200: 'Verification email sent successfully.',
-          //TODO: 'Failed to send verification email.'
         },
       }
     } else if (endpoint.includes('activate')) {
       return {
         POST: {
           200: 'Your HydroServer account has been activated.',
-          // TODO 'Account activation failed. Token incorrect or expired.'
         },
       }
     }

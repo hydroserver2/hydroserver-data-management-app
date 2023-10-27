@@ -50,6 +50,8 @@
                     v-model="selectedSiteTypes"
                     :label="type"
                     :value="type"
+                    hide-details
+                    density="compact"
                   />
                 </template>
               </v-expansion-panel-text>

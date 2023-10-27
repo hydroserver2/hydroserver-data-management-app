@@ -31,22 +31,29 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="observations[item.raw.id]">
-        <v-dialog v-model="item.raw.chartOpen" width="80rem">
-          <FocusContextPlot
-            :thing-id="thingId"
-            :datastream-id="item.raw.id"
-            @close="item.raw.chartOpen = false"
-          ></FocusContextPlot>
-        </v-dialog>
-        <Sparkline
-          @click="item.raw.chartOpen = true"
-          class="pt-2"
-          :is-stale="isStale(item.raw.phenomenonEndTime)"
-          :observations="observations[item.raw.id]"
-        />
+      <div v-if="obsStore72.loaded[item.raw.id]">
+        <div v-if="observations[item.raw.id]">
+          <v-dialog v-model="item.raw.chartOpen" width="80rem">
+            <FocusContextPlot
+              :thing-id="thingId"
+              :datastream-id="item.raw.id"
+              @close="item.raw.chartOpen = false"
+            ></FocusContextPlot>
+          </v-dialog>
+          <Sparkline
+            @click="item.raw.chartOpen = true"
+            class="pt-2"
+            :is-stale="isStale(item.raw.phenomenonEndTime)"
+            :observations="observations[item.raw.id]"
+          />
+        </div>
+        <div v-else>No data for this datastream</div>
       </div>
-      <div v-else>No data for this datastream</div>
+      <div v-else>
+        <v-progress-linear color="secondary" indeterminate :height="25"
+          >Loading...</v-progress-linear
+        >
+      </div>
     </template>
     <template v-slot:item.last_observation="{ item }">
       <div v-if="mostRecentObs[item.raw.id]">
@@ -192,8 +199,10 @@ import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreamStore } from '@/store/datastreams'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
+import { useObservationsLast72Hours } from '@/store/observations72Hours'
 
 const datastreamStore = useDatastreamStore()
+const obsStore72 = useObservationsLast72Hours()
 
 const props = defineProps({
   thingId: {

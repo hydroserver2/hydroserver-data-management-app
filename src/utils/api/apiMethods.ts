@@ -29,8 +29,6 @@ export const api = {
     options: any = {}
   ): Promise<any> {
     options.method = 'PATCH'
-    // TODO (Daniel): `createPatchObject` won't override a child property that we want to make undefined.
-    // For example, this prevents saving changes after editing profile by unchecking the organization affiliation
     options.body = originalBody ? createPatchObject(originalBody, body) : body
     if (Object.keys(options.body).length === 0) return
     return await interceptedFetch(endpoint, options)

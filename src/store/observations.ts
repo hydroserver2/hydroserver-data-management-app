@@ -22,6 +22,7 @@ export const useObservationStore = defineStore('observations', {
         const last72HoursStore = useObservationsLast72Hours()
         if (hoursBefore == 72 && last72HoursStore.observations[id]) {
           this.observations[id] = last72HoursStore.observations[id]
+          last72HoursStore.loaded[id] = true
           return
         }
 
@@ -68,11 +69,13 @@ export const useObservationStore = defineStore('observations', {
           })
           last72HoursStore.setMostRecentObs(id, newObs)
         }
+        last72HoursStore.loaded[id] = true
       } catch (error) {
         console.error('Error fetching observations from DB.', error)
       }
     },
     async fetchObservationsBulk(datastreams: Datastream[], hours: number) {
+      const last72HoursStore = useObservationsLast72Hours()
       const observationPromises = datastreams
         .map((ds) => {
           if (ds.phenomenonEndTime && ds.phenomenonBeginTime) {
@@ -82,6 +85,8 @@ export const useObservationStore = defineStore('observations', {
               ds.phenomenonBeginTime,
               ds.phenomenonEndTime
             )
+          } else {
+            last72HoursStore.loaded[ds.id] = true
           }
         })
         .filter(Boolean)

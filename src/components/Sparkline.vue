@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import * as Plot from '@observablehq/plot'
+import * as d3 from 'd3'
 import { PropType } from 'vue'
 import { DataArray, DataPoint } from '@/types'
 
@@ -32,6 +33,8 @@ function drawChart() {
     }
   })
 
+  const [minY, maxY] = d3.extent(observations, (d) => d.value)
+
   const sparkline = Plot.plot({
     width: 250,
     height: 100,
@@ -40,6 +43,7 @@ function drawChart() {
       axis: null,
     },
     y: {
+      domain: [minY, maxY],
       grid: false,
       axis: null,
     },
