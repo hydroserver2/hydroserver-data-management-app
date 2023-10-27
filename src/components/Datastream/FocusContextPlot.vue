@@ -33,7 +33,7 @@ import { useDatastream } from '@/composables/useDatastream'
 import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
-import { DataArray, DataPoint } from '@/types'
+import { DataArray } from '@/types'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 
 const obsStore = useObservationStore()
@@ -70,12 +70,11 @@ let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
 
 function drawPlot(dataArray: DataArray) {
-  const data = dataArray.map((item: DataPoint) => {
-    return {
-      date: new Date(item.date),
-      value: item.value,
-    }
-  })
+  // Observable Plot expects an array of objects so convert
+  const data = dataArray.map(([dateString, value]) => ({
+    date: new Date(dateString),
+    value,
+  }))
 
   if (focusChart.value) {
     const unitSymbol = datastream.value.unitId
@@ -93,7 +92,7 @@ function drawPlot(dataArray: DataArray) {
     focusChart.value.appendChild(focusSVG)
   }
   if (contextChart.value) {
-    const contextSVG = context(data, 1000)
+    const contextSVG = context(data)
     contextChart.value.innerHTML = ''
     contextChart.value.appendChild(contextSVG)
   }

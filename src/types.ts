@@ -1,9 +1,4 @@
-export interface DataPoint {
-  date: string
-  value: number
-}
-
-export type DataArray = DataPoint[]
+export type DataArray = [string, number][]
 
 export interface Owner {
   firstName: string

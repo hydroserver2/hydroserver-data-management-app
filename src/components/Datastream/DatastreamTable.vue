@@ -58,10 +58,10 @@
     <template v-slot:item.last_observation="{ item }">
       <div v-if="mostRecentObs[item.raw.id]">
         <v-row>
-          {{ formatDate(mostRecentObs[item.raw.id].date) }}
+          {{ formatDate(mostRecentObs[item.raw.id][0]) }}
         </v-row>
         <v-row>
-          {{ mostRecentObs[item.raw.id].value }}&nbsp;
+          {{ mostRecentObs[item.raw.id][1] }}&nbsp;
           {{ getUnitAttrById(item.raw.unitId) }}
         </v-row>
       </div>

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
-import { DataArray, DataPoint, Datastream } from '@/types'
+import { DataArray, Datastream } from '@/types'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 
 export const useObservationStore = defineStore('observations', {
@@ -32,7 +32,7 @@ export const useObservationStore = defineStore('observations', {
           if (new Date(calcStart) > new Date(beginTime)) startTime = calcStart
         }
 
-        let allData: any = []
+        let allData: DataArray = []
         let nextLink = ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(
           id,
           startTime
@@ -46,28 +46,21 @@ export const useObservationStore = defineStore('observations', {
           nextLink = data['@iot.nextLink'] || null
         }
 
-        const newObs = allData.map((item: [string, number]) => {
-          return {
-            date: new Date(item[0]),
-            value: item[1],
-          }
-        })
-
         const end = new Date(endTime)
         const start72H = new Date(end)
         start72H.setHours(end.getHours() - 72)
-        const last72Hours = newObs.filter((obs: DataPoint) => {
-          return new Date(obs.date) >= start72H && new Date(obs.date) <= end
+        const last72Hours = allData.filter((obs: [string, number]) => {
+          return new Date(obs[0]) >= start72H && new Date(obs[1]) <= end
         })
         if (last72Hours && last72Hours.length > 0) {
           last72HoursStore.setObservations(id, last72Hours)
         }
 
-        if (newObs && newObs.length > 0) {
+        if (allData && allData.length > 0) {
           this.$patch({
-            observations: { ...this.observations, [id]: newObs },
+            observations: { ...this.observations, [id]: allData },
           })
-          last72HoursStore.setMostRecentObs(id, newObs)
+          last72HoursStore.setMostRecentObs(id, allData)
         }
         last72HoursStore.loaded[id] = true
       } catch (error) {
