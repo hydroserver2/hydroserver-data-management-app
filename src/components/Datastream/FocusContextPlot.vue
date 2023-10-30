@@ -20,7 +20,7 @@
         v-for="selection in timeSelections"
         rounded
         :variant="selectedTime === selection.value ? 'outlined' : 'plain'"
-        @click="fetchDataForPeriod(selection.value)"
+        @click="drawObservationsSince(selection.value)"
         >{{ selection.label }}</v-btn
       >
     </v-card-actions>
@@ -35,8 +35,11 @@ import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
 import { DataArray } from '@/types'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
+import { calculateEffectiveStartTime } from '@/utils/observationsUtils'
+import { useObservationsLast72Hours } from '@/store/observations72Hours'
 
 const obsStore = useObservationStore()
+const obs72Store = useObservationsLast72Hours()
 
 const props = defineProps({
   thingId: {
@@ -98,32 +101,34 @@ function drawPlot(dataArray: DataArray) {
   }
 }
 
-async function fetchDataForPeriod(hours: number) {
+async function getStartTime(hours: number) {
   selectedTime.value = hours
   if (
     datastream.value.phenomenonEndTime &&
     datastream.value.phenomenonBeginTime
-  )
-    await obsStore.fetchObservations(
-      datastream.value.id,
-      hours,
+  ) {
+    return calculateEffectiveStartTime(
       datastream.value.phenomenonBeginTime,
-      datastream.value.phenomenonEndTime
+      datastream.value.phenomenonEndTime,
+      hours
     )
-  drawPlot(obsStore.observations[datastream.value.id].dataArray)
+  }
+}
+
+async function drawObservationsSince(hours: number) {
+  const startTime = await getStartTime(hours)
+  const observations = await obsStore.getObservationsSince(
+    datastream.value.id,
+    startTime!
+  )
+  if (observations) drawPlot(observations)
 }
 
 onMounted(async () => {
-  if (
-    datastream.value.phenomenonEndTime &&
-    datastream.value.phenomenonBeginTime
-  )
-    await obsStore.fetchObservations(
-      datastream.value.id,
-      72,
-      datastream.value.phenomenonBeginTime,
-      datastream.value.phenomenonEndTime
-    )
-  drawPlot(obsStore.observations[datastream.value.id].dataArray)
+  // Pull from the 72hourStore the first time since it should already by loaded
+  const startTime = await getStartTime(72)
+  if (!datastream.value.phenomenonEndTime) return
+  await obs72Store.getObservationsSince(datastream.value.id, startTime!)
+  drawPlot(obs72Store.observations[datastream.value.id])
 })
 </script>

@@ -89,6 +89,12 @@ export const ENDPOINTS = {
     DATASTREAMS: {
       OBSERVATIONS: (id: string, timestamp: string) =>
         `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${timestamp}&$top=1000`,
+      OBSERVATIONS_BETWEEN_DATES: (
+        id: string,
+        startTime: string,
+        endTime: string
+      ) =>
+        `${SENSORTHINGS_BASE}/Datastreams(${id})/Observations?$resultFormat=dataArray&$filter=phenomenonTime%20ge%20${startTime}%20and%20phenomenonTime%20lt%20${endTime}&$top=1000`,
     },
   },
 }
