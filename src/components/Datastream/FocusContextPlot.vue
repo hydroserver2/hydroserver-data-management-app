@@ -110,7 +110,7 @@ async function fetchDataForPeriod(hours: number) {
       datastream.value.phenomenonBeginTime,
       datastream.value.phenomenonEndTime
     )
-  drawPlot(obsStore.observations[datastream.value.id])
+  drawPlot(obsStore.observations[datastream.value.id].dataArray)
 }
 
 onMounted(async () => {
@@ -124,6 +124,6 @@ onMounted(async () => {
       datastream.value.phenomenonBeginTime,
       datastream.value.phenomenonEndTime
     )
-  drawPlot(obsStore.observations[datastream.value.id])
+  drawPlot(obsStore.observations[datastream.value.id].dataArray)
 })
 </script>

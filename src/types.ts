@@ -1,5 +1,12 @@
 export type DataArray = [string, number][]
 
+export interface ObservationRecord {
+  dataArray: DataArray
+  beginTime: string
+  endTime: string
+  loading: boolean
+}
+
 export interface Owner {
   firstName: string
   lastName: string

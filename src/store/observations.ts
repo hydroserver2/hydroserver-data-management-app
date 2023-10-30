@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
-import { DataArray, Datastream } from '@/types'
+import { DataArray, Datastream, ObservationRecord } from '@/types'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 
 export const useObservationStore = defineStore('observations', {
   state: () => ({
-    observations: {} as Record<string, DataArray>,
+    observations: {} as Record<string, ObservationRecord>,
   }),
   persist: false,
   actions: {
@@ -16,22 +16,34 @@ export const useObservationStore = defineStore('observations', {
       beginTime: string,
       endTime: string
     ) {
-      // TODO: Probably move the startTime endTime calculations to a separate function
-      // and fetch directly from the last72HourStore
+      const last72HoursStore = useObservationsLast72Hours()
+
       try {
-        const last72HoursStore = useObservationsLast72Hours()
+        // Check if this.observations[id] exists, if not, initialize it
+        if (!this.observations[id]) {
+          this.observations[id] = {
+            dataArray: [],
+            beginTime: '',
+            endTime: '',
+            loading: false,
+          }
+        }
+
+        // If we have cached data, just set this store and return
         if (hoursBefore == 72 && last72HoursStore.observations[id]) {
-          this.observations[id] = last72HoursStore.observations[id]
+          this.observations[id].dataArray = last72HoursStore.observations[id]
           last72HoursStore.loaded[id] = true
           return
         }
 
+        // If the requested time frame is bigger than the data we have, start at the first data point
         let startTime = beginTime
         if (hoursBefore > 0) {
           const calcStart = this.subtractHours(endTime, hoursBefore)
           if (new Date(calcStart) > new Date(beginTime)) startTime = calcStart
         }
 
+        // Keep calling paginated data and combine
         let allData: DataArray = []
         let nextLink = ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(
           id,
@@ -46,25 +58,36 @@ export const useObservationStore = defineStore('observations', {
           nextLink = data['@iot.nextLink'] || null
         }
 
+        // Update 72Hours Store to match
         const end = new Date(endTime)
-        const start72H = new Date(end)
-        start72H.setHours(end.getHours() - 72)
-        const last72Hours = allData.filter((obs: [string, number]) => {
-          return new Date(obs[0]) >= start72H && new Date(obs[1]) <= end
-        })
+        const start72H = new Date(end.getTime() - 72 * 3600000)
+        const last72Hours = allData.filter(
+          (obs: [string, number]) => new Date(obs[0]) >= start72H
+        )
+
         if (last72Hours && last72Hours.length > 0) {
           last72HoursStore.setObservations(id, last72Hours)
-        }
-
-        if (allData && allData.length > 0) {
-          this.$patch({
-            observations: { ...this.observations, [id]: allData },
-          })
           last72HoursStore.setMostRecentObs(id, allData)
         }
-        last72HoursStore.loaded[id] = true
+
+        // Update store
+        if (!allData || !allData.length) return
+
+        this.$patch({
+          observations: {
+            ...this.observations,
+            [id]: {
+              dataArray: allData,
+              beginTime: beginTime,
+              endTime: endTime,
+              loading: false,
+            },
+          },
+        })
       } catch (error) {
         console.error('Error fetching observations from DB.', error)
+      } finally {
+        last72HoursStore.loaded[id] = true
       }
     },
     async fetchObservationsBulk(datastreams: Datastream[], hours: number) {
