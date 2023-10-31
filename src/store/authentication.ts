@@ -118,8 +118,8 @@ export const useAuthStore = defineStore({
     async updateUser(user: User) {
       try {
         const data = await api.patch(ENDPOINTS.USER, user, this.user)
-        // things.organizations could be affected for many things so just invalidate cache
-        // useResetStore().things()
+        // things.organizations won't automatically update so invalidate cache
+        useResetStore().things()
         this.user = data as User
         if (!user.isVerified) {
           await router.push({ name: 'VerifyEmail' })
