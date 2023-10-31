@@ -30,7 +30,8 @@ export const useAuthStore = defineStore({
   },
   actions: {
     resetState() {
-      useResetStore().all()
+      const resetStore = useResetStore()
+      resetStore.all()
       localStorage.clear()
     },
     async login(email: string, password: string) {
@@ -77,8 +78,8 @@ export const useAuthStore = defineStore({
     },
     async createUser(user: User) {
       try {
+        this.resetState()
         const data = await api.post(ENDPOINTS.USER, user)
-        // useResetStore().things()
         this.user = data.user
         this.accessToken = data.access
         this.refreshToken = data.refresh
@@ -99,6 +100,7 @@ export const useAuthStore = defineStore({
     },
     async activateAccount(uid: string, token: string) {
       try {
+        this.resetState()
         const data = await api.post(ENDPOINTS.ACCOUNT.ACTIVATE, {
           uid: uid,
           token: token,
@@ -119,7 +121,8 @@ export const useAuthStore = defineStore({
       try {
         const data = await api.patch(ENDPOINTS.USER, user, this.user)
         // things.organizations won't automatically update so invalidate cache
-        useResetStore().things()
+        const resetStore = useResetStore()
+        resetStore.things()
         this.user = data as User
         if (!user.isVerified) {
           await router.push({ name: 'VerifyEmail' })
