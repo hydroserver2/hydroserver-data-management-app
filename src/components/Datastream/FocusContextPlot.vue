@@ -13,6 +13,16 @@
     <v-card-text>
       <div ref="focusChart"></div>
       <div ref="contextChart"></div>
+      <v-progress-linear
+        v-if="
+          obsStore.observations[datastreamId] &&
+          obsStore.observations[datastreamId].loading
+        "
+        color="primary"
+        indeterminate
+        :height="25"
+        >Loading...</v-progress-linear
+      >
     </v-card-text>
 
     <v-card-actions class="my-3 d-flex justify-center">
