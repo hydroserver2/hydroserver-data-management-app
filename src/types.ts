@@ -1,9 +1,16 @@
-export interface DataPoint {
-  date: string
-  value: number
-}
+export type DataArray = [string, number][]
 
-export type DataArray = DataPoint[]
+export class ObservationRecord {
+  dataArray: DataArray
+  beginTime: string
+  loading: boolean
+
+  constructor() {
+    this.dataArray = []
+    this.beginTime = ''
+    this.loading = false
+  }
+}
 
 export interface Owner {
   firstName: string

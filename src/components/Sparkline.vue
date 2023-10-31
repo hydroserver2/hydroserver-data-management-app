@@ -7,7 +7,7 @@ import { ref, onMounted } from 'vue'
 import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
 import { PropType } from 'vue'
-import { DataArray, DataPoint } from '@/types'
+import { DataArray } from '@/types'
 
 const props = defineProps({
   observations: {
@@ -26,10 +26,10 @@ function drawChart() {
     ? { line: '#9E9E9E', fill: '#F5F5F5' } // Grey and grey-lighten-4
     : { line: '#4CAF50', fill: '#E8F5E9' } // Green and green-lighten-5
 
-  const observations = props.observations.map((item: DataPoint) => {
+  const observations = props.observations.map((item: [string, number]) => {
     return {
-      date: new Date(item.date),
-      value: item.value,
+      date: new Date(item[0]),
+      value: item[1],
     }
   })
 

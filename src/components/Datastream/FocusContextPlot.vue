@@ -13,6 +13,16 @@
     <v-card-text>
       <div ref="focusChart"></div>
       <div ref="contextChart"></div>
+      <v-progress-linear
+        v-if="
+          obsStore.observations[datastreamId] &&
+          obsStore.observations[datastreamId].loading
+        "
+        color="primary"
+        indeterminate
+        :height="25"
+        >Loading...</v-progress-linear
+      >
     </v-card-text>
 
     <v-card-actions class="my-3 d-flex justify-center">
@@ -20,7 +30,7 @@
         v-for="selection in timeSelections"
         rounded
         :variant="selectedTime === selection.value ? 'outlined' : 'plain'"
-        @click="fetchDataForPeriod(selection.value)"
+        @click="drawObservationsSince(selection.value)"
         >{{ selection.label }}</v-btn
       >
     </v-card-actions>
@@ -33,10 +43,13 @@ import { useDatastream } from '@/composables/useDatastream'
 import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
-import { DataArray, DataPoint } from '@/types'
+import { DataArray } from '@/types'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
+import { calculateEffectiveStartTime } from '@/utils/observationsUtils'
+import { useObservationsLast72Hours } from '@/store/observations72Hours'
 
 const obsStore = useObservationStore()
+const obs72Store = useObservationsLast72Hours()
 
 const props = defineProps({
   thingId: {
@@ -70,12 +83,11 @@ let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
 
 function drawPlot(dataArray: DataArray) {
-  const data = dataArray.map((item: DataPoint) => {
-    return {
-      date: new Date(item.date),
-      value: item.value,
-    }
-  })
+  // Observable Plot expects an array of objects so convert
+  const data = dataArray.map(([dateString, value]) => ({
+    date: new Date(dateString),
+    value,
+  }))
 
   if (focusChart.value) {
     const unitSymbol = datastream.value.unitId
@@ -93,38 +105,40 @@ function drawPlot(dataArray: DataArray) {
     focusChart.value.appendChild(focusSVG)
   }
   if (contextChart.value) {
-    const contextSVG = context(data, 1000)
+    const contextSVG = context(data)
     contextChart.value.innerHTML = ''
     contextChart.value.appendChild(contextSVG)
   }
 }
 
-async function fetchDataForPeriod(hours: number) {
+async function getStartTime(hours: number) {
   selectedTime.value = hours
   if (
     datastream.value.phenomenonEndTime &&
     datastream.value.phenomenonBeginTime
-  )
-    await obsStore.fetchObservations(
-      datastream.value.id,
-      hours,
+  ) {
+    return calculateEffectiveStartTime(
       datastream.value.phenomenonBeginTime,
-      datastream.value.phenomenonEndTime
+      datastream.value.phenomenonEndTime,
+      hours
     )
-  drawPlot(obsStore.observations[datastream.value.id])
+  }
+}
+
+async function drawObservationsSince(hours: number) {
+  const startTime = await getStartTime(hours)
+  const observations = await obsStore.getObservationsSince(
+    datastream.value.id,
+    startTime!
+  )
+  if (observations) drawPlot(observations)
 }
 
 onMounted(async () => {
-  if (
-    datastream.value.phenomenonEndTime &&
-    datastream.value.phenomenonBeginTime
-  )
-    await obsStore.fetchObservations(
-      datastream.value.id,
-      72,
-      datastream.value.phenomenonBeginTime,
-      datastream.value.phenomenonEndTime
-    )
-  drawPlot(obsStore.observations[datastream.value.id])
+  // Pull from the 72hourStore the first time since it should already by loaded
+  const startTime = await getStartTime(72)
+  if (!datastream.value.phenomenonEndTime) return
+  await obs72Store.getObservationsSince(datastream.value.id, startTime!)
+  drawPlot(obs72Store.observations[datastream.value.id])
 })
 </script>

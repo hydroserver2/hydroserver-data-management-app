@@ -1,14 +1,14 @@
 import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
 
-interface PlotData {
+type DataPoint = {
   date: Date
   value: number
 }
 
 const dispatch = d3.dispatch('timeWindow')
 
-export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
+export function focus(data: DataPoint[], yAxisLabel: string): SVGSVGElement {
   const [minX, maxX] = d3.extent(data, (d) => d.date)
   const [minY, maxY] = d3.extent(data, (d) => d.value)
   const spec = {
@@ -139,7 +139,7 @@ export function focus(data: PlotData[], yAxisLabel: string): SVGSVGElement {
   return wrapper
 }
 
-export function context(data: PlotData[], width: number): SVGSVGElement {
+export function context(data: DataPoint[]): SVGSVGElement {
   const [minY, maxY] = d3.extent(data, (d) => d.value)
 
   const chart = Plot.plot({
