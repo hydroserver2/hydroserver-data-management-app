@@ -49,7 +49,7 @@ export const useAuthStore = defineStore({
         this.user = user
         await router.push({ name: 'Sites' })
       } catch (error) {
-        console.error('Error logging in', error)
+        console.error('Error logging in.', error)
       }
     },
     async logout() {
@@ -57,7 +57,7 @@ export const useAuthStore = defineStore({
         this.resetState()
         router.push({ name: 'Login' })
       } catch (error) {
-        console.error('Error logging out', error)
+        console.error('Error logging out.', error)
       }
     },
     isRefreshTokenExpired() {

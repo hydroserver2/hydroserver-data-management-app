@@ -82,6 +82,12 @@ function getEndpointMessages(endpoint: string): any {
           200: 'Your account has been deleted',
         },
       }
+    } else if (endpoint.includes(ENDPOINTS.ACCOUNT.JWT_PAIR)) {
+      return {
+        POST: {
+          401: 'No active account found with the given credentials.',
+        },
+      }
     } else if (endpoint.includes('send-verification-email')) {
       return {
         POST: {
