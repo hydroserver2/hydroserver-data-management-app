@@ -59,7 +59,7 @@ function getEndpointMessages(endpoint: string): any {
         GET: { 200: 'You have logged in!', 401: 'Invalid email or password.' },
         POST: {
           200: 'Account successfully created.',
-          400: 'A user with this email already exists.',
+          409: 'A user with this email already exists.',
         },
       }
     } else if (endpoint.includes('send-password-reset-email')) {
@@ -80,6 +80,12 @@ function getEndpointMessages(endpoint: string): any {
       return {
         DELETE: {
           200: 'Your account has been deleted',
+        },
+      }
+    } else if (endpoint.includes(ENDPOINTS.ACCOUNT.JWT_PAIR)) {
+      return {
+        POST: {
+          401: 'No active account found with the given credentials.',
         },
       }
     } else if (endpoint.includes('send-verification-email')) {

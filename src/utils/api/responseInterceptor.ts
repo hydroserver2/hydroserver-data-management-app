@@ -8,7 +8,17 @@ export async function responseInterceptor(
   options: any
 ): Promise<any> {
   if (response.status === 401 && !options._retry) {
-    return await handle401(method, endpoint, options)
+    const clonedResponse = response.clone()
+    const jsonResponse = await clonedResponse.json()
+    if (
+      jsonResponse.detail ===
+      'No active account found with the given credentials'
+    ) {
+      toastHandler(response, endpoint, options.method)
+      throw new Error('Invalid Credentials')
+    } else {
+      return await handle401(method, endpoint, options)
+    }
   } else {
     toastHandler(response, endpoint, options.method)
     if (response.status === 204) {
