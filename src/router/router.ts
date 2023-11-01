@@ -6,6 +6,7 @@ import {
 import { routes } from '@/router/routes'
 import { useAuthStore } from '@/store/authentication'
 import { useThingStore } from '@/store/things'
+import Notification from '@/store/notifications'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,6 +19,21 @@ const guards: ((
   from?: RouteLocationNormalized,
   next?: (to?: string | object) => void
 ) => any | null)[] = [
+  // Check if the refresh token is expired each page change
+  (_to, _from, _next) => {
+    const authStore = useAuthStore()
+    if (authStore.isRefreshTokenExpired()) {
+      authStore.resetState()
+      Notification.toast({
+        message: 'Session expired. Please login',
+        type: 'info',
+        duration: 1000,
+      })
+      return { name: 'Login' }
+    }
+    return null
+  },
+
   // hasAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasAuthGuard) {
@@ -62,6 +78,7 @@ const guards: ((
   // hasThingOwnershipGuard
   async (to, _from, _next) => {
     if (to.meta?.hasThingOwnershipGuard) {
+      console.log('checking thing ownership')
       const thingStore = useThingStore()
       const id = to.params.id as string
       await thingStore.fetchThingById(id)
@@ -145,25 +162,6 @@ export function setupRouteGuards() {
       }
     })
   })
-
-  checkGuardsOnce()
-}
-
-// Call this manually immediately after guards are setup to check guards on the page that loaded on app start.
-async function checkGuardsOnce() {
-  let activatedGuardRoute: any | null = null
-
-  for (let i = 0; i < guards.length; i++) {
-    const r = await guards[i](router.currentRoute.value)
-    if (r) {
-      // Some guard activated
-      activatedGuardRoute = r
-      break
-    }
-  }
-  if (activatedGuardRoute) {
-    router.push(activatedGuardRoute)
-  }
 }
 
 export default router
