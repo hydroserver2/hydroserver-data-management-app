@@ -1,41 +1,51 @@
 <template>
   <v-card>
-    <v-card-title>
-      <span class="text-h5">Confirm {{ itemName }} deletion</span>
+    <v-card-title class="text-h5">
+      {{
+        hasDatastreams
+          ? `Cannot delete ${itemName}`
+          : `Confirm ${itemName} deletion`
+      }}
     </v-card-title>
+
+    <v-divider class="my-4"></v-divider>
+
     <v-card-text>
-      <div v-if="datastreamsForItem && datastreamsForItem.length > 0">
+      <template v-if="hasDatastreams">
         This {{ itemName }} cannot be deleted because it's being referenced by
-        some of your datastreams. Before this {{ itemName }} can be deleted, all
-        related datastreams need to be removed or reassigned to another
-        {{ itemName }}. The following datastreams are currently linked to this
-        {{ itemName }}:
-        <br />
-        <div v-for="datastream in datastreamsForItem" :key="datastream.id">
-          <br />
-          DatastreamID: {{ datastream.id }} <br />
-          Observed Property:
-          {{ OPName(datastream.observedPropertyId) }}<br />
-          Unit:
-          {{ unitName(datastream.unitId) }}<br />
-          Processing Level:
-          {{ PLName(datastream.processingLevelId, 'code') }}
-          <br />
+        some of your datastreams. Before deletion, all related datastreams need
+        to be removed or reassigned to another {{ itemName }}. The following
+        datastreams are currently linked to this {{ itemName }}:
+
+        <div
+          class="my-4"
+          v-for="datastream in datastreamsForItem"
+          :key="datastream.id"
+        >
+          <p><strong>DatastreamID:</strong> {{ datastream.id }}</p>
+          <p>
+            <strong>Observed Property:</strong>
+            {{ OPName(datastream.observedPropertyId) }}
+          </p>
+          <p><strong>Unit:</strong> {{ unitName(datastream.unitId) }}</p>
+          <p>
+            <strong>Processing Level:</strong>
+            {{ PLName(datastream.processingLevelId, 'code') }}
+          </p>
         </div>
-      </div>
-      <div v-else>
+      </template>
+      <template v-else>
         This {{ itemName }} isn't being used by any datastreams and is safe to
-        delete
-      </div>
-      <br />
+        delete.
+      </template>
     </v-card-text>
+
+    <v-divider class="my-4"></v-divider>
+
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn @click="emit('close')">Cancel</v-btn>
-      <v-btn
-        v-if="!datastreamsForItem || datastreamsForItem.length <= 0"
-        color="delete"
-        @click="emit('delete')"
+      <v-btn v-if="!hasDatastreams" color="delete" @click="emit('delete')"
         >Delete</v-btn
       >
     </v-card-actions>
@@ -60,7 +70,7 @@ const datastreamStore = useDatastreamStore()
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
   itemName: String,
-  itemID: [String, Number],
+  itemID: String,
   parameterName: String,
 })
 
@@ -71,6 +81,10 @@ const datastreamsForItem = computed(() => {
       props.itemID
     )
   }
+})
+
+const hasDatastreams = computed(() => {
+  return datastreamsForItem.value && datastreamsForItem.value.length > 0
 })
 
 onMounted(async () => await datastreamStore.fetchDatastreams())
