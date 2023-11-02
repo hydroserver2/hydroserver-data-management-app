@@ -106,7 +106,7 @@ export class Datastream {
 
 export class Unit {
   id: string
-  owner: Owner | null
+  owner: string | null
   name: string
   symbol: string
   definition: string
@@ -124,7 +124,7 @@ export class Unit {
 
 export class Sensor {
   id: string
-  owner: Owner | null
+  owner: string | null
   name: string
   description: string
   manufacturer: string
@@ -153,7 +153,7 @@ export class Sensor {
 export class ObservedProperty {
   id: string
   name: string
-  owner: Owner | null
+  owner: string | null
   definition: string
   description: string
   type: string
@@ -172,7 +172,7 @@ export class ObservedProperty {
 
 export class ProcessingLevel {
   id: string
-  owner: Owner | null
+  owner: string | null
   code: string
   definition: string
   explanation: string
