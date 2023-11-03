@@ -51,6 +51,7 @@ export const ENDPOINTS = {
     ID: FOR_ID(DS_BASE),
     FOR_THING: (id: string) => `${THINGS_BASE}/${id}/datastreams`,
     CSV: (id: string) => `${DS_BASE}/${id}/csv`,
+    FOR_USER: `${DS_BASE}?exclude_unowned=true`,
   }),
 
   OBSERVED_PROPERTIES: Object.assign(OP_BASE, {
