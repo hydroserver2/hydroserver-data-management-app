@@ -13,25 +13,26 @@
     <v-card-text>
       <template v-if="hasDatastreams">
         This {{ itemName }} cannot be deleted because it's being referenced by
-        some of your datastreams. Before deletion, all related datastreams need
-        to be removed or reassigned to another {{ itemName }}. The following
-        datastreams are currently linked to this {{ itemName }}:
-
+        some of your datastreams. Before deletion, all of the following
+        datastreams need to be deleted or use a different {{ itemName }}:
         <div
           class="my-4"
-          v-for="datastream in datastreamsForItem"
-          :key="datastream.id"
+          v-for="(thing, thingId) in thingsWithDatastreams"
+          :key="thingId"
         >
-          <p><strong>DatastreamID:</strong> {{ datastream.id }}</p>
           <p>
-            <strong>Observed Property:</strong>
-            {{ OPName(datastream.observedPropertyId) }}
+            <router-link :to="`/sites/${thingId}`">
+              <strong>{{ thing.name }}</strong>
+            </router-link>
+            has the following datastreams using this {{ itemName }}:
           </p>
-          <p><strong>Unit:</strong> {{ unitName(datastream.unitId) }}</p>
-          <p>
-            <strong>Processing Level:</strong>
-            {{ PLName(datastream.processingLevelId, 'code') }}
-          </p>
+          <v-list>
+            <v-list-item v-for="id in thing.datastreamIds" :key="id">
+              <router-link :to="`/sites/${thingId}/datastreams/form/${id}`">{{
+                id
+              }}</router-link>
+            </v-list-item>
+          </v-list>
         </div>
       </template>
       <template v-else>
@@ -56,17 +57,11 @@
 import { Datastream } from '@/types'
 import { computed, onMounted } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
-import {
-  useUnitGetters,
-  useProcessingLevelGetters,
-  useObservedPropertiesGetters,
-} from '@/composables/useMetadataGetters'
+import { useThingStore } from '@/store/things'
 
-const { getNameById: unitName } = useUnitGetters()
-const { getNameById: PLName } = useProcessingLevelGetters()
-const { getNameById: OPName } = useObservedPropertiesGetters()
-
+const thingStore = useThingStore()
 const datastreamStore = useDatastreamStore()
+
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
   itemName: String,
@@ -83,9 +78,31 @@ const datastreamsForItem = computed(() => {
   }
 })
 
+const thingsWithDatastreams = computed(() => {
+  let usageMap: any = {}
+  if (datastreamsForItem.value) {
+    for (const datastream of datastreamsForItem.value) {
+      const thing = thingStore.things[datastream.thingId]
+      if (!thing) continue
+
+      if (!usageMap[thing.id]) {
+        usageMap[thing.id] = {
+          name: thing.name,
+          datastreamIds: [],
+        }
+      }
+      usageMap[thing.id].datastreamIds.push(datastream.id)
+    }
+  }
+
+  return usageMap
+})
+
 const hasDatastreams = computed(() => {
   return datastreamsForItem.value && datastreamsForItem.value.length > 0
 })
 
-onMounted(async () => await datastreamStore.fetchDatastreams())
+onMounted(async () => {
+  await datastreamStore.fetchUsersDatastreams()
+})
 </script>
