@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
-import { useResultQualifiers } from '@/composables/useMetadata'
+import { useResultQualifierModals } from '@/composables/useMetadataModals'
 
 const rqStore = useResultQualifierStore()
 const props = defineProps({ id: String })
@@ -56,7 +56,7 @@ const {
   myForm,
   valid,
   selectedEntity: resultQualifier,
-} = useResultQualifiers(props.id)
+} = useResultQualifierModals(props.id)
 
 async function uploadResultQualifier() {
   await myForm.value?.validate()

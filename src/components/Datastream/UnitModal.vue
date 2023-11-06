@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { useUnitStore } from '@/store/unit'
-import { useUnits } from '@/composables/useMetadata'
+import { useUnitModals } from '@/composables/useMetadataModals'
 
 const unitStore = useUnitStore()
 const props = defineProps({ id: String })
@@ -81,7 +81,7 @@ const {
   myForm,
   valid,
   selectedEntity: unit,
-} = useUnits(props.id)
+} = useUnitModals(props.id)
 
 async function uploadUnit() {
   await myForm.value?.validate()
