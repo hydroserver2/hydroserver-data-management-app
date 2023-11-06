@@ -38,8 +38,7 @@ export function useFormattedDatastreams() {
   })
 
   onMounted(async () => {
-    // if (datastreamStore.datastreams) return
-    await datastreamStore.fetchDatastreams()
+    await datastreamStore.fetchUsersDatastreams()
   })
 
   return { formattedDatastreams }

@@ -9,14 +9,17 @@
       v-if="!datastreamId && isPrimaryOwner"
     >
       <v-card-text class="text-subtitle-2 text-medium-emphasis"
-        >Use an existing datastream as a template</v-card-text
-      >
-      <v-autocomplete
-        v-model="selectedDatastreamID"
-        label="Select datastream"
-        :items="formattedDatastreams"
-        item-value="id"
-      ></v-autocomplete>
+        >Use an existing datastream as a template
+      </v-card-text>
+      <v-card-text>
+        <v-btn @click="showTemplateModal = true">Load template</v-btn>
+        <v-dialog v-model="showTemplateModal" width="60rem">
+          <DatastreamTemplateModal
+            @selected-datastream-id="selectedDatastreamID = $event"
+            @close="showTemplateModal = false"
+          />
+        </v-dialog>
+      </v-card-text>
     </v-card>
 
     <v-form
@@ -276,6 +279,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
+import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import UnitModal from '@/components/Datastream/UnitModal.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
@@ -304,8 +308,11 @@ const { sensors, units, observedProperties, formattedProcessingLevels } =
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
   useDatastreamForm(thingId, datastreamId)
 
+// TODO: This fetches each of the metadata stores. Delete this composable and replace
+// by fetching each of the metadata stores directly.
 const { formattedDatastreams } = useFormattedDatastreams()
 
+const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
 const showUnitModal = ref(false)
 const showPLModal = ref(false)

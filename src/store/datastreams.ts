@@ -58,10 +58,11 @@ export const useDatastreamStore = defineStore('datastreams', {
       return grouped
     },
     async fetchDatastreamsByThingId(id: string, reload = false) {
-      if (this.datastreams[id] && !reload) return
+      // if (this.datastreams[id] && !reload) return
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
         this.datastreams[id] = data
+        return data
       } catch (error) {
         console.error(`Error fetching datastreams by thingID`, error)
       }
