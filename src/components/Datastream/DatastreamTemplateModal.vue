@@ -56,10 +56,11 @@ import { useSensorStore } from '@/store/sensors'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 
-const datastreamStore = useDatastreamStore()
 const sensorStore = useSensorStore()
 const plStore = useProcessingLevelStore()
 const opStore = useObservedPropertyStore()
+
+const datastreamStore = useDatastreamStore()
 const thingStore = useThingStore()
 const selectedThingId = ref('')
 const datastreamsForThing = ref<Datastream[]>([])
@@ -84,5 +85,12 @@ function datastreamSelected(id: string) {
   emit('close')
 }
 
-onMounted(async () => thingStore.fetchThings())
+onMounted(async () => {
+  await thingStore.fetchThings()
+  await Promise.all([
+    sensorStore.fetchSensors(),
+    plStore.fetchProcessingLevels(),
+    opStore.fetchObservedProperties(),
+  ])
+})
 </script>

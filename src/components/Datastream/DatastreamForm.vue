@@ -289,7 +289,6 @@ import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
-import { useFormattedDatastreams } from '@/composables/useFormattedDatastreams'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { Datastream } from '@/types'
 import { useThingStore } from '@/store/things'
@@ -307,10 +306,6 @@ const { sensors, units, observedProperties, formattedProcessingLevels } =
 
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
   useDatastreamForm(thingId, datastreamId)
-
-// TODO: This fetches each of the metadata stores. Delete this composable and replace
-// by fetching each of the metadata stores directly.
-const { formattedDatastreams } = useFormattedDatastreams()
 
 const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
@@ -330,7 +325,10 @@ const handleMetadataUploaded = async (
   await thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
 }
 
-onMounted(() => window.scrollTo(0, 0))
+onMounted(async () => {
+  window.scrollTo(0, 0)
+  // TODO: Get all the metadata for the primary owner of this datastream
+})
 </script>
 
 <style scoped>

@@ -193,7 +193,7 @@
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import Sparkline from '@/components/Sparkline.vue'
-import { useDatastreams } from '@/composables/useDatastreams'
+import { useDatastreamTable } from '@/composables/useDatastreamTable'
 import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
@@ -229,7 +229,7 @@ const {
   deleteDatastream,
   isDeleteModalOpen: isDSDeleteModalOpen,
   deleteDatastreamInput,
-} = useDatastreams(props.thingId)
+} = useDatastreamTable(props.thingId)
 
 const headers = [
   { title: 'DataStream Info', key: 'info', sortable: true },
