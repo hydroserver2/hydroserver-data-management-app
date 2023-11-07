@@ -82,6 +82,8 @@ export const ENDPOINTS = {
   THINGS: Object.assign(THINGS_BASE, {
     ID: FOR_ID(THINGS_BASE),
     METADATA: (id: string) => `${THINGS_BASE}/${id}/metadata`,
+    USER_METADATA: (id: string) =>
+      `${THINGS_BASE}/${id}/metadata?include_assignable_metadata=true`,
     OWNERSHIP: (id: string) => `${THINGS_BASE}/${id}/ownership`,
     PRIVACY: (id: string) => `${THINGS_BASE}/${id}/privacy`,
   }),
