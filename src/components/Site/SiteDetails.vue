@@ -45,10 +45,7 @@
         </v-dialog>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
-        <v-btn
-          color="red-darken-3"
-          style="margin-left: 1rem"
-          @click="isDeleteModalOpen = true"
+        <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete Site</v-btn
         >
         <v-dialog v-model="isDeleteModalOpen" width="40rem">
@@ -112,14 +109,7 @@
       </v-col>
 
       <v-col cols="12" md="4">
-        <v-carousel
-          hide-delimiters
-          v-if="
-            !photoStore.loading &&
-            photoStore.photos[thingId] &&
-            photoStore.photos[thingId].length > 0
-          "
-        >
+        <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
             v-for="photo in photoStore.photos[thingId]"
             :key="photo.id"
@@ -184,15 +174,20 @@
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
 
-const photoStore = usePhotosStore()
 const thingId = useRoute().params.id.toString()
+const photoStore = usePhotosStore()
+
+const hasPhotos = computed(() => {
+  const photos = photoStore.photos[thingId]
+  return !photoStore.loading && photos && photos.length > 0
+})
 
 const { isOwner } = useThingOwnership(thingId)
 
