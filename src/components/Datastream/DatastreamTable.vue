@@ -71,7 +71,7 @@
       <v-row>
         <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
           <template v-slot:activator="{ props }" v-if="isOwner">
-            <v-btn
+            <v-icon
               small
               color="grey"
               v-bind="props"
@@ -86,7 +86,7 @@
         </v-tooltip>
         <v-tooltip bottom :openDelay="500" v-else>
           <template v-slot:activator="{ props }" v-if="isOwner">
-            <v-btn
+            <v-icon
               small
               color="grey-lighten-1"
               v-bind="props"
@@ -99,7 +99,7 @@
 
         <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-dots-vertical" />
+            <v-icon v-bind="props" icon="mdi-dots-vertical" />
           </template>
           <v-list>
             <v-list-item

@@ -15,26 +15,24 @@
       <v-card-actions>
         <div class="text-subtitle-2">* indicates a required field.</div>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="handleCancel"> Cancel </v-btn>
-        <v-btn color="primary" v-if="step > 1" variant="text" @click="step--">
+        <v-btn-cancel @click="handleCancel"> Cancel </v-btn-cancel>
+        <v-btn-secondary
+          v-if="step > 1"
+          @click="step--"
+          prepend-icon="mdi-arrow-left"
+        >
           Previous
-        </v-btn>
-        <v-btn
-          color="primary"
+        </v-btn-secondary>
+        <v-btn-secondary
           v-if="step < 3"
-          variant="text"
           @click="handleNextPage"
+          append-icon="mdi-arrow-right"
         >
           Next
-        </v-btn>
-        <v-btn
-          color="primary"
-          v-if="step === 3"
-          variant="text"
-          @click="handleSaveChanges"
-        >
+        </v-btn-secondary>
+        <v-btn-primary v-if="step === 3" @click="handleSaveChanges">
           Save
-        </v-btn>
+        </v-btn-primary>
       </v-card-actions>
     </v-card>
   </v-container>

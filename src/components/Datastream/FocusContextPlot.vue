@@ -1,13 +1,11 @@
 <template>
   <v-card class="elevation-5">
     <v-card-title>
-      <div class="d-flex">
-        <h5 class="flex-grow-1 pt-2 pl-4 text-center text-h5">
+      <div class="d-flex pt-2">
+        <h5 class="flex-grow-1 pl-4 text-center text-h5">
           Datastream for {{ thing?.name }}
         </h5>
-        <v-btn icon @click="$emit('close')">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+        <v-icon @click="$emit('close')">mdi-close</v-icon>
       </div>
     </v-card-title>
     <v-card-text>

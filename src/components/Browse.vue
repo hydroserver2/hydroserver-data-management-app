@@ -4,17 +4,18 @@
       <v-card v-if="drawer" flat>
         <v-card-title class="d-flex justify-space-between align-start">
           <div>Browse Data Collection Sites</div>
-
-          <v-btn v-if="drawer" icon @click="drawer = !drawer">
-            <v-icon>mdi-menu-open</v-icon>
-          </v-btn>
+          <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
         </v-card-title>
+
         <v-divider></v-divider>
+
         <v-card-text>
           <div class="d-flex justify-end">
-            <v-btn class="mb-2" @click="clearFilters">Clear Filters</v-btn>
+            <v-btn-cancel elevation="3" class="mb-2" @click="clearFilters"
+              >Clear Filters</v-btn-cancel
+            >
           </div>
-          <v-card>
+          <v-card elevation="3">
             <v-card-text>
               <form @submit.prevent="filterOrganizations">
                 <v-text-field

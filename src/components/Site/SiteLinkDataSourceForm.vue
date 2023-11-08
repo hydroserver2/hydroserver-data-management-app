@@ -37,9 +37,7 @@
               label="Datastream Column *"
               hint="Enter the column name/index containing values for this datastream."
               :type="
-                store.selectedDataSource.headerRow === 0
-                  ? 'number'
-                  : 'text'
+                store.selectedDataSource.headerRow === 0 ? 'number' : 'text'
               "
               :rules="[
                 (val: string) => !!val || 'Must enter the column containing the datastream.'
@@ -57,10 +55,10 @@
       <v-card-actions>
         <div class="text-subtitle-2">* indicates a required field.</div>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="handleCancel"> Cancel </v-btn>
-        <v-btn variant="text" :disabled="!store.savable" @click="handleSave">
+        <v-btn-cancel @click="handleCancel"> Cancel </v-btn-cancel>
+        <v-btn-primary :disabled="!store.savable" @click="handleSave">
           Save
-        </v-btn>
+        </v-btn-primary>
       </v-card-actions>
     </v-card>
   </v-container>

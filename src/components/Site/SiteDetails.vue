@@ -19,10 +19,7 @@
         <h5 class="text-h5">Site Information</h5>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
-        <v-btn
-          color="primary"
-          class="access_control"
-          @click="isAccessControlModalOpen = true"
+        <v-btn class="access_control" @click="isAccessControlModalOpen = true"
           >Access Control</v-btn
         >
         <v-dialog
@@ -66,7 +63,12 @@
               your data, you can backup to HydroShare or download a local copy
               before deletion. Alternatively, you can pass ownership of this
               site to someone else on the
-              <v-btn @click="switchToAccessControlModal">Access Control</v-btn>
+              <v-btn
+                class="px-0"
+                variant="text"
+                @click="switchToAccessControlModal"
+                >Access Control</v-btn
+              >
               page.
             </v-card-text>
             <v-card-text>
@@ -74,6 +76,7 @@
               >) to confirm deletion:
               <v-form>
                 <v-text-field
+                  class="pt-2"
                   v-model="deleteInput"
                   label="Site name"
                   solo
@@ -83,8 +86,12 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn @click="isDeleteModalOpen = false">Cancel</v-btn>
-              <v-btn color="delete" @click="deleteThing">Delete</v-btn>
+              <v-btn-cancel @click="isDeleteModalOpen = false"
+                >Cancel</v-btn-cancel
+              >
+              <v-btn-delete color="delete" @click="deleteThing"
+                >Delete</v-btn-delete
+              >
             </v-card-actions>
           </v-card>
         </v-dialog>
