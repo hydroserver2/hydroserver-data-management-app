@@ -2,6 +2,7 @@
   <v-container class="d-flex align-center justify-center my-8">
     <v-card width="50rem">
       <v-card-title class="mb-4 signup-title">Sign Up</v-card-title>
+      <v-divider></v-divider>
       <v-card-text>
         <v-form
           @submit.prevent="createUser"
@@ -157,16 +158,15 @@
               </v-col>
             </v-row>
           </div>
-          <div class="mt-6">
-            <v-btn-primary type="submit">Create User</v-btn-primary>
-          </div>
         </v-form>
       </v-card-text>
       <v-divider></v-divider>
-      <v-card-text class="text-body-1">
+      <v-card-actions class="text-body-1">
         <span class="mr-2">Already have an account?</span>
         <router-link to="/login">Sign In</router-link>
-      </v-card-text>
+        <v-spacer></v-spacer>
+        <v-btn-primary type="submit">Create User</v-btn-primary>
+      </v-card-actions>
     </v-card>
   </v-container>
 </template>
