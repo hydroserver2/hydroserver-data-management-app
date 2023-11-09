@@ -39,7 +39,7 @@
             label="Secondary Owner's Email"
             required
           ></v-text-field>
-          <v-btn color="primary" @click="addSecondaryOwner">Submit</v-btn>
+          <v-btn-primary @click="addSecondaryOwner">Submit</v-btn-primary>
         </v-col>
         <v-col cols="12" md="6">
           <h6 class="text-h6 my-4">
@@ -84,24 +84,20 @@
             ownership, your permissions will be reduced to those of a secondary
             owner.</v-card-text
           >
-          <v-btn
+          <v-btn-primary
             v-if="showPrimaryOwnerConfirmation"
-            color="primary"
             @click="transferPrimaryOwnership"
-            >Confirm</v-btn
+            >Confirm</v-btn-primary
           >
-          <v-btn
-            v-else
-            color="primary"
-            @click="showPrimaryOwnerConfirmation = true"
-            >Submit</v-btn
+          <v-btn-primary v-else @click="showPrimaryOwnerConfirmation = true"
+            >Submit</v-btn-primary
           >
         </v-col>
       </v-row>
 
       <h6 class="text-h6 my-4">Current Owners</h6>
 
-      <v-row v-for="owner in thing.owners" class="my-0">
+      <v-row v-for="owner in thing.owners" class="my-1">
         <v-col cols="auto" class="py-0">
           {{ owner.firstName }} {{ owner.lastName }} -
           {{
@@ -111,13 +107,13 @@
 
         <v-col class="py-0" cols="auto">
           <strong v-if="owner.isPrimaryOwner">(Primary)</strong>
-          <v-btn
-            v-else
-            color="delete"
-            v-if="isPrimaryOwner || owner.email == authStore.user.email"
-            @click="removeOwner(owner.email)"
-            >Remove</v-btn
-          >
+          <div v-else>
+            <v-btn-delete
+              v-if="isPrimaryOwner || owner.email == authStore.user.email"
+              @click="removeOwner(owner.email)"
+              >Remove</v-btn-delete
+            >
+          </div>
         </v-col>
       </v-row>
 
@@ -169,7 +165,7 @@
 
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn variant="text" @click="emitClose">Close</v-btn>
+      <v-btn-cancel @click="emitClose">Close</v-btn-cancel>
     </v-card-actions>
   </v-card>
 </template>

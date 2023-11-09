@@ -19,10 +19,7 @@
         <h5 class="text-h5">Site Information</h5>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
-        <v-btn
-          color="primary"
-          class="access_control"
-          @click="isAccessControlModalOpen = true"
+        <v-btn class="access_control" @click="isAccessControlModalOpen = true"
           >Access Control</v-btn
         >
         <v-dialog
@@ -48,10 +45,7 @@
         </v-dialog>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
-        <v-btn
-          color="red-darken-3"
-          style="margin-left: 1rem"
-          @click="isDeleteModalOpen = true"
+        <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete Site</v-btn
         >
         <v-dialog v-model="isDeleteModalOpen" width="40rem">
@@ -66,7 +60,12 @@
               your data, you can backup to HydroShare or download a local copy
               before deletion. Alternatively, you can pass ownership of this
               site to someone else on the
-              <v-btn @click="switchToAccessControlModal">Access Control</v-btn>
+              <v-btn
+                class="px-0"
+                variant="text"
+                @click="switchToAccessControlModal"
+                >Access Control</v-btn
+              >
               page.
             </v-card-text>
             <v-card-text>
@@ -74,6 +73,7 @@
               >) to confirm deletion:
               <v-form>
                 <v-text-field
+                  class="pt-2"
                   v-model="deleteInput"
                   label="Site name"
                   solo
@@ -83,8 +83,12 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn @click="isDeleteModalOpen = false">Cancel</v-btn>
-              <v-btn color="delete" @click="deleteThing">Delete</v-btn>
+              <v-btn-cancel @click="isDeleteModalOpen = false"
+                >Cancel</v-btn-cancel
+              >
+              <v-btn-delete color="delete" @click="deleteThing"
+                >Delete</v-btn-delete
+              >
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -105,14 +109,7 @@
       </v-col>
 
       <v-col cols="12" md="4">
-        <v-carousel
-          hide-delimiters
-          v-if="
-            !photoStore.loading &&
-            photoStore.photos[thingId] &&
-            photoStore.photos[thingId].length > 0
-          "
-        >
+        <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
             v-for="photo in photoStore.photos[thingId]"
             :key="photo.id"
@@ -177,15 +174,20 @@
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
 
-const photoStore = usePhotosStore()
 const thingId = useRoute().params.id.toString()
+const photoStore = usePhotosStore()
+
+const hasPhotos = computed(() => {
+  const photos = photoStore.photos[thingId]
+  return !photoStore.loading && photos && photos.length > 0
+})
 
 const { isOwner } = useThingOwnership(thingId)
 

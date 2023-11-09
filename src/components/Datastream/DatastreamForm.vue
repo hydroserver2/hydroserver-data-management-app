@@ -259,16 +259,16 @@
 
       <v-row>
         <v-col cols="auto">
-          <v-btn @click="$router.go(-1)">
+          <v-btn-cancel @click="$router.go(-1)">
             <v-icon>mdi-arrow-left</v-icon>
             Return to previous page
-          </v-btn>
+          </v-btn-cancel>
         </v-col>
         <v-spacer></v-spacer>
         <v-col cols="auto">
-          <v-btn type="submit" color="secondary">{{
+          <v-btn-primary type="submit">{{
             datastreamId ? 'Update' : 'Save'
-          }}</v-btn>
+          }}</v-btn-primary>
         </v-col>
       </v-row>
     </v-form>

@@ -39,6 +39,7 @@ export default createVuetify({
     VBtnPrimary: VBtn,
     VBtnSecondary: VBtn,
     VBtnCancel: VBtn,
+    VBtnDelete: VBtn,
     VBtnAdd: VBtn,
   },
   components: {
@@ -63,12 +64,18 @@ export default createVuetify({
     },
     VBtnPrimary: {
       color: 'primary',
-      variant: 'flat',
       density: 'comfortable',
     },
     VBtnSecondary: {
       color: 'secondary',
-      variant: 'flat',
+      density: 'comfortable',
+    },
+    VBtnDelete: {
+      color: 'delete',
+      density: 'comfortable',
+    },
+    VBtnCancel: {
+      color: 'grey',
       density: 'comfortable',
     },
     VBtnAdd: {

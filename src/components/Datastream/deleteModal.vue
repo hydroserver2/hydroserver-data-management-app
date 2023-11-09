@@ -45,9 +45,9 @@
 
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn @click="emit('close')">Cancel</v-btn>
-      <v-btn v-if="!hasDatastreams" color="delete" @click="emit('delete')"
-        >Delete</v-btn
+      <v-btn-cancel @click="emit('close')">Cancel</v-btn-cancel>
+      <v-btn-delete v-if="!hasDatastreams" @click="emit('delete')"
+        >Delete</v-btn-delete
       >
     </v-card-actions>
   </v-card>
