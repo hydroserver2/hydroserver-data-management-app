@@ -8,7 +8,7 @@
           >
           <v-card-text align="center" class="my-2"
             >Note that all provided information besides your password will be
-            publicly available. This helps with communication and data
+            publicly viewable. This helps with communication and data
             integrity.</v-card-text
           >
           <v-divider></v-divider>
