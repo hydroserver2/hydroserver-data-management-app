@@ -5,7 +5,13 @@ import { useUnitStore } from '@/store/unit'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
-import { Sensor, Unit, ObservedProperty, ProcessingLevel, ResultQualifier } from '@/types'
+import {
+  Sensor,
+  Unit,
+  ObservedProperty,
+  ProcessingLevel,
+  ResultQualifier,
+} from '@/types'
 
 function useMetadata(
   entityStore: any,
@@ -76,7 +82,7 @@ function useMetadata(
   }
 }
 
-export function useSensors(id: string | null = null) {
+export function useSensorModals(id: string | null = null) {
   return useMetadata(
     useSensorStore(),
     () => new Sensor(),
@@ -87,7 +93,7 @@ export function useSensors(id: string | null = null) {
   )
 }
 
-export function useUnits(id: string | null = null) {
+export function useUnitModals(id: string | null = null) {
   return useMetadata(
     useUnitStore(),
     () => new Unit(),
@@ -98,7 +104,7 @@ export function useUnits(id: string | null = null) {
   )
 }
 
-export function useResultQualifiers(id: string | null = null) {
+export function useResultQualifierModals(id: string | null = null) {
   return useMetadata(
     useResultQualifierStore(),
     () => new ResultQualifier(),
@@ -109,7 +115,7 @@ export function useResultQualifiers(id: string | null = null) {
   )
 }
 
-export function useProcessingLevels(id: string | null = null) {
+export function useProcessingLevelModals(id: string | null = null) {
   const metadataFuncs = useMetadata(
     useProcessingLevelStore(),
     () => new ProcessingLevel(),
@@ -134,7 +140,7 @@ export function useProcessingLevels(id: string | null = null) {
   }
 }
 
-export function useObservedProperties(id: string | null = null) {
+export function useObservedPropertyModals(id: string | null = null) {
   return useMetadata(
     useObservedPropertyStore(),
     () => new ObservedProperty(),

@@ -10,7 +10,7 @@ describe('Login Component', () => {
     cy.get('.email-input').should('exist')
     cy.get('.password-input').should('exist')
     cy.get('.login-button').should('exist')
-    cy.get('.signup-link').should('have.attr', 'href', '/signup')
+    cy.get('.signup-link').should('have.attr', 'href', '/sign-up')
   })
 
   it('requires valid email', () => {
@@ -29,14 +29,13 @@ describe('Login Component', () => {
 
   it('signup button redirects to the signup page', () => {
     cy.get('.signup-link').click()
-    cy.url().should('include', '/signup')
+    cy.url().should('include', '/sign-up')
   })
 
   it('does not log in with invalid credentials', () => {
     cy.get('.email-input').type('invalidemail@test.com')
     cy.get('.password-input').type('invalidpassword')
     cy.get('.login-button').click()
-    cy.wait(500)
     cy.url().should('include', '/login')
   })
 
@@ -66,7 +65,7 @@ describe('Login Component', () => {
 
   it('user stays logged in after reload', () => {
     cy.login('john')
-    cy.wait(500)
+    cy.url().should('include', '/sites')
     cy.reload()
     cy.url().should('include', '/sites')
   })

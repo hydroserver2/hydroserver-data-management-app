@@ -14,14 +14,6 @@ describe('Sites', () => {
     cy.get('.owned-sites-table tbody tr').should('have.length.greaterThan', 0)
   })
 
-  it('opens and closes site form', () => {
-    cy.login('paul')
-    cy.get('.register-site-btn').click()
-    // cy.get('v-dialog').should('be.visible')
-    // cy.get('SiteForm').find('button').contains('Close').click()
-    // cy.get('v-dialog').should('not.be.visible')
-  })
-
   it('links navigate to the correct pages', () => {
     cy.login('paul')
     cy.get('.owned-sites-table tbody tr').first().click()

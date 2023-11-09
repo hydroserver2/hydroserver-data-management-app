@@ -180,13 +180,13 @@ import DeleteModal from '@/components/Datastream/deleteModal.vue'
 import { ref } from 'vue'
 
 import {
-  useSensors,
-  useUnits,
-  useProcessingLevels,
-  useObservedProperties,
-  useResultQualifiers,
-} from '@/composables/useMetadata'
-import ResultQualifierModal from "@/components/Datastream/ResultQualifierModal.vue";
+  useSensorModals,
+  useUnitModals,
+  useProcessingLevelModals,
+  useObservedPropertyModals,
+  useResultQualifierModals,
+} from '@/composables/useMetadataModals'
+import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
@@ -202,7 +202,7 @@ const {
   isDeleteModalOpen: isSensorDModalOpen,
   openDialog: openSensorDialog,
   openDeleteDialog: openSensorDeleteDialog,
-} = useSensors()
+} = useSensorModals()
 
 const {
   isEntitySelected: isUnitSelected,
@@ -212,7 +212,7 @@ const {
   isDeleteModalOpen: isUnitDModalOpen,
   openDialog: openUnitDialog,
   openDeleteDialog: openUnitDeleteDialog,
-} = useUnits()
+} = useUnitModals()
 
 const {
   isEntitySelected: isPLSelected,
@@ -222,7 +222,7 @@ const {
   isDeleteModalOpen: isPLDModalOpen,
   openDialog: openPLDialog,
   openDeleteDialog: openPLDeleteDialog,
-} = useProcessingLevels()
+} = useProcessingLevelModals()
 
 const {
   isEntitySelected: isRQSelected,
@@ -232,7 +232,7 @@ const {
   isDeleteModalOpen: isRQDModalOpen,
   openDialog: openRQDialog,
   openDeleteDialog: openRQDeleteDialog,
-} = useResultQualifiers()
+} = useResultQualifierModals()
 
 const {
   isEntitySelected: isOPSelected,
@@ -242,7 +242,7 @@ const {
   isDeleteModalOpen: isOPDModalOpen,
   openDialog: openOPDialog,
   openDeleteDialog: openOPDeleteDialog,
-} = useObservedProperties()
+} = useObservedPropertyModals()
 
 const metaMap: Record<string, any> = {
   0: {
@@ -261,7 +261,11 @@ const metaMap: Record<string, any> = {
     singularName: 'processing level',
   },
   3: { name: 'Units', openDialog: openUnitDialog, singularName: 'unit' },
-  4: { name: 'Result Qualifiers', openDialog: openRQDialog, 'singularName': 'result qualifier' },
+  4: {
+    name: 'Result Qualifiers',
+    openDialog: openRQDialog,
+    singularName: 'result qualifier',
+  },
 }
 const tab = ref(0)
 

@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { rules } from '@/utils/rules'
-import { useObservedProperties } from '@/composables/useMetadata'
+import { useObservedPropertyModals } from '@/composables/useMetadataModals'
 import { OPVariableTypes, OPNameTypes } from '@/vocabularies'
 
 const OPNames = Object.keys(OPNameTypes)
@@ -84,7 +84,7 @@ const {
   myForm,
   valid,
   selectedEntity: observedProperty,
-} = useObservedProperties(props.id)
+} = useObservedPropertyModals(props.id)
 
 const handleNameUpdated = () => {
   const name = observedProperty.value.name

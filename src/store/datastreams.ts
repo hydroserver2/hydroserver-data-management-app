@@ -7,6 +7,7 @@ export const useDatastreamStore = defineStore('datastreams', {
   state: () => ({
     datastreams: {} as Record<string, Datastream[]>,
     loaded: false,
+    loadedUsersDatastreams: false,
   }),
   getters: {
     getDatastreamsByParameter:
@@ -21,24 +22,47 @@ export const useDatastreamStore = defineStore('datastreams', {
       if (this.datastreams && !reload) return
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS)
-        let newDatastreams: Record<string, Datastream[]> = {}
-        data.forEach((datastream: Datastream) => {
-          if (!newDatastreams[datastream.thingId]) {
-            newDatastreams[datastream.thingId] = []
-          }
-          newDatastreams[datastream.thingId].push(datastream)
-        })
+        let newDatastreams = this.groupDatastreamsByThingId(data)
         this.$patch({ datastreams: newDatastreams })
         this.loaded = true
       } catch (error) {
         console.error('Error fetching datastreams from DB', error)
       }
     },
+    async fetchUsersDatastreams(reload = false) {
+      try {
+        if (this.loadedUsersDatastreams && !reload) return
+        const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_USER)
+        let datastreamMap = this.groupDatastreamsByThingId(data)
+
+        // Replace the existing datastreams with the new set for each thingId
+        this.$patch((state) => {
+          Object.keys(datastreamMap).forEach((thingId) => {
+            state.datastreams[thingId] = datastreamMap[thingId]
+          })
+        })
+
+        this.loadedUsersDatastreams = true
+      } catch (error) {
+        console.error('Error fetching datastreams from DB', error)
+      }
+    },
+    groupDatastreamsByThingId(datastreams: Datastream[]) {
+      const grouped: Record<string, Datastream[]> = {}
+      datastreams.forEach((datastream: Datastream) => {
+        if (!grouped[datastream.thingId]) {
+          grouped[datastream.thingId] = []
+        }
+        grouped[datastream.thingId].push(datastream)
+      })
+      return grouped
+    },
     async fetchDatastreamsByThingId(id: string, reload = false) {
-      if (this.datastreams[id] && !reload) return
+      // if (this.datastreams[id] && !reload) return
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
         this.datastreams[id] = data
+        return data
       } catch (error) {
         console.error(`Error fetching datastreams by thingID`, error)
       }

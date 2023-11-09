@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
@@ -20,5 +20,9 @@ export default defineConfig({
   },
   build: {
     manifest: true,
+  },
+  test: {
+    globals: true,
+    environmentMatchGlobs: [['src/components/**', 'jsdom']],
   },
 })

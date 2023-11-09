@@ -1,41 +1,52 @@
 <template>
   <v-card>
-    <v-card-title>
-      <span class="text-h5">Confirm {{ itemName }} deletion</span>
+    <v-card-title class="text-h5">
+      {{
+        hasDatastreams
+          ? `Cannot delete ${itemName}`
+          : `Confirm ${itemName} deletion`
+      }}
     </v-card-title>
+
+    <v-divider class="my-4"></v-divider>
+
     <v-card-text>
-      <div v-if="datastreamsForItem && datastreamsForItem.length > 0">
+      <template v-if="hasDatastreams">
         This {{ itemName }} cannot be deleted because it's being referenced by
-        some of your datastreams. Before this {{ itemName }} can be deleted, all
-        related datastreams need to be removed or reassigned to another
-        {{ itemName }}. The following datastreams are currently linked to this
-        {{ itemName }}:
-        <br />
-        <div v-for="datastream in datastreamsForItem" :key="datastream.id">
-          <br />
-          DatastreamID: {{ datastream.id }} <br />
-          Observed Property:
-          {{ OPName(datastream.observedPropertyId) }}<br />
-          Unit:
-          {{ unitName(datastream.unitId) }}<br />
-          Processing Level:
-          {{ PLName(datastream.processingLevelId, 'code') }}
-          <br />
+        some of your datastreams. Before deletion, all of the following
+        datastreams need to be deleted or use a different {{ itemName }}:
+        <div
+          class="my-4"
+          v-for="(thing, thingId) in thingsWithDatastreams"
+          :key="thingId"
+        >
+          <p>
+            <router-link :to="`/sites/${thingId}`">
+              <strong>{{ thing.name }}</strong>
+            </router-link>
+            has the following datastreams using this {{ itemName }}:
+          </p>
+          <v-list>
+            <v-list-item v-for="id in thing.datastreamIds" :key="id">
+              <router-link :to="`/sites/${thingId}/datastreams/form/${id}`">{{
+                id
+              }}</router-link>
+            </v-list-item>
+          </v-list>
         </div>
-      </div>
-      <div v-else>
+      </template>
+      <template v-else>
         This {{ itemName }} isn't being used by any datastreams and is safe to
-        delete
-      </div>
-      <br />
+        delete.
+      </template>
     </v-card-text>
+
+    <v-divider class="my-4"></v-divider>
+
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn @click="emit('close')">Cancel</v-btn>
-      <v-btn
-        v-if="!datastreamsForItem || datastreamsForItem.length <= 0"
-        color="delete"
-        @click="emit('delete')"
+      <v-btn v-if="!hasDatastreams" color="delete" @click="emit('delete')"
         >Delete</v-btn
       >
     </v-card-actions>
@@ -46,21 +57,15 @@
 import { Datastream } from '@/types'
 import { computed, onMounted } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
-import {
-  useUnitGetters,
-  useProcessingLevelGetters,
-  useObservedPropertiesGetters,
-} from '@/composables/useMetadataGetters'
+import { useThingStore } from '@/store/things'
 
-const { getNameById: unitName } = useUnitGetters()
-const { getNameById: PLName } = useProcessingLevelGetters()
-const { getNameById: OPName } = useObservedPropertiesGetters()
-
+const thingStore = useThingStore()
 const datastreamStore = useDatastreamStore()
+
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
   itemName: String,
-  itemID: [String, Number],
+  itemID: String,
   parameterName: String,
 })
 
@@ -73,5 +78,31 @@ const datastreamsForItem = computed(() => {
   }
 })
 
-onMounted(async () => await datastreamStore.fetchDatastreams())
+const thingsWithDatastreams = computed(() => {
+  let usageMap: any = {}
+  if (datastreamsForItem.value) {
+    for (const datastream of datastreamsForItem.value) {
+      const thing = thingStore.things[datastream.thingId]
+      if (!thing) continue
+
+      if (!usageMap[thing.id]) {
+        usageMap[thing.id] = {
+          name: thing.name,
+          datastreamIds: [],
+        }
+      }
+      usageMap[thing.id].datastreamIds.push(datastream.id)
+    }
+  }
+
+  return usageMap
+})
+
+const hasDatastreams = computed(() => {
+  return datastreamsForItem.value && datastreamsForItem.value.length > 0
+})
+
+onMounted(async () => {
+  await datastreamStore.fetchUsersDatastreams()
+})
 </script>
