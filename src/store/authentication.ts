@@ -24,6 +24,7 @@ export const useAuthStore = defineStore({
     sendingVerificationEmail: false,
     loggedIn$: new Subject<void>(),
   }),
+  persist: true,
   getters: {
     isLoggedIn: (state) => !!state.accessToken,
     isVerified: (state) => state.user.isVerified,
