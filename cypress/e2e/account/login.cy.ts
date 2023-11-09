@@ -6,7 +6,7 @@ describe('Login Component', () => {
 
   it('renders the login form', () => {
     cy.get('.login-card').should('exist')
-    cy.get('.login-title').should('contain', 'Sign In')
+    cy.get('.login-title').should('contain', 'Log in')
     cy.get('.email-input').should('exist')
     cy.get('.password-input').should('exist')
     cy.get('.login-button').should('exist')

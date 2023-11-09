@@ -78,7 +78,6 @@ const guards: ((
   // hasThingOwnershipGuard
   async (to, _from, _next) => {
     if (to.meta?.hasThingOwnershipGuard) {
-      console.log('checking thing ownership')
       const thingStore = useThingStore()
       const id = to.params.id as string
       await thingStore.fetchThingById(id)

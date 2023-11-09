@@ -328,6 +328,8 @@ const handleMetadataUploaded = async (
 onMounted(async () => {
   window.scrollTo(0, 0)
   // TODO: Get all the metadata for the primary owner of this datastream
+  // and the master list metadata
+  await unitStore.fetchUnits()
 })
 </script>
 

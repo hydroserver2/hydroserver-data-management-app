@@ -29,7 +29,12 @@ export function usePrimaryOwnerData(thingId: string) {
   }
 
   const sensors = computed(() => getPOData('sensors'))
-  const units = computed(() => getPOData('units'))
+  const units = computed(() => {
+    const allUnits = getPOData('units') as Unit[]
+    return allUnits.filter(
+      (unit) => unit.type !== 'Time' && unit.owner !== null
+    )
+  })
   const observedProperties = computed(() => getPOData('observedProperties'))
   const processingLevels = computed(() => getPOData('processingLevels'))
 
