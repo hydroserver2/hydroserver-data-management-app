@@ -8,6 +8,7 @@ export const useThingStore = defineStore('things', {
     things: {} as Record<string, Thing>,
     POMetadata: {} as Record<string, DatastreamMetadata>,
     loaded: false,
+    fetching: false,
   }),
   getters: {
     primaryOwnedThings(): Thing[] {
@@ -33,13 +34,16 @@ export const useThingStore = defineStore('things', {
       }
     },
     async fetchThingById(id: string) {
-      if (this.things[id]) return
+      if (this.fetching || this.things[id]) return
+      this.fetching = true
       try {
         const data = await api.fetch(ENDPOINTS.THINGS.ID(id))
         this.$patch({ things: { ...this.things, [id]: data } })
         return this.things[id]
       } catch (error) {
         console.error('Error fetching thing by id', error)
+      } finally {
+        this.fetching = false
       }
     },
     async createThing(newThing: Thing) {
