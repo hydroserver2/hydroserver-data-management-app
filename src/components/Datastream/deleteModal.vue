@@ -101,8 +101,4 @@ const thingsWithDatastreams = computed(() => {
 const hasDatastreams = computed(() => {
   return datastreamsForItem.value && datastreamsForItem.value.length > 0
 })
-
-onMounted(async () => {
-  await datastreamStore.fetchUsersDatastreams()
-})
 </script>

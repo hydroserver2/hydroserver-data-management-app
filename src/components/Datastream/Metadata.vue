@@ -177,7 +177,7 @@ import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useUnitStore } from '@/store/unit'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import {
   useSensorModals,
@@ -187,6 +187,8 @@ import {
   useResultQualifierModals,
 } from '@/composables/useMetadataModals'
 import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
+import { useDatastreamStore } from '@/store/datastreams'
+import { useThingStore } from '@/store/things'
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
@@ -303,6 +305,16 @@ const UnitHeaders = [
   { title: 'Symbol', key: 'symbol' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
+
+const datastreamStore = useDatastreamStore()
+const thingStore = useThingStore()
+
+onMounted(async () => {
+  // Fetch things because the deleteModal needs them, but we don't want to
+  // pull all the things each time a user clicks the delete button
+  thingStore.fetchThings()
+  await datastreamStore.fetchUsersDatastreams()
+})
 </script>
 
 <style scoped>
