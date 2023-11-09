@@ -194,7 +194,6 @@ import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { useDatastreamTable } from '@/composables/useDatastreamTable'
-import { useVisibleDatastreams } from '@/composables/useVisibleDatastreams'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useDatastreamStore } from '@/store/datastreams'
@@ -212,8 +211,6 @@ const props = defineProps({
 })
 
 const { isOwner } = useThingOwnership(props.thingId)
-const { visibleDatastreams, observations, mostRecentObs } =
-  useVisibleDatastreams(props.thingId)
 
 const {
   getUnitAttrById,
@@ -223,6 +220,9 @@ const {
 } = usePrimaryOwnerData(props.thingId)
 
 const {
+  visibleDatastreams,
+  observations,
+  mostRecentObs,
   toggleVisibility,
   selectedDatastream,
   openDeleteModal,

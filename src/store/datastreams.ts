@@ -7,6 +7,7 @@ export const useDatastreamStore = defineStore('datastreams', {
   state: () => ({
     datastreams: {} as Record<string, Datastream[]>,
     loaded: false,
+    fetching: false,
     loadedUsersDatastreams: false,
   }),
   getters: {
@@ -31,7 +32,8 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async fetchUsersDatastreams(reload = false) {
       try {
-        if (this.loadedUsersDatastreams && !reload) return
+        if (this.fetching || (this.loadedUsersDatastreams && !reload)) return
+        this.fetching = true
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_USER)
         let datastreamMap = this.groupDatastreamsByThingId(data)
 
@@ -45,6 +47,8 @@ export const useDatastreamStore = defineStore('datastreams', {
         this.loadedUsersDatastreams = true
       } catch (error) {
         console.error('Error fetching datastreams from DB', error)
+      } finally {
+        this.fetching = false
       }
     },
     groupDatastreamsByThingId(datastreams: Datastream[]) {
@@ -58,13 +62,16 @@ export const useDatastreamStore = defineStore('datastreams', {
       return grouped
     },
     async fetchDatastreamsByThingId(id: string, reload = false) {
-      // if (this.datastreams[id] && !reload) return
+      if (this.fetching || (this.datastreams[id] && !reload)) return
+      this.fetching = true
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
         this.datastreams[id] = data
         return data
       } catch (error) {
         console.error(`Error fetching datastreams by thingID`, error)
+      } finally {
+        this.fetching = false
       }
     },
     async updateDatastream(datastream: Datastream) {
