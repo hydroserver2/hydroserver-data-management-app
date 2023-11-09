@@ -3,13 +3,13 @@
     <v-card width="50rem">
       <v-card-title class="mb-4 signup-title">Sign Up</v-card-title>
       <v-divider></v-divider>
-      <v-card-text>
-        <v-form
-          @submit.prevent="createUser"
-          v-model="valid"
-          ref="myForm"
-          validate-on="blur"
-        >
+      <v-form
+        @submit.prevent="createUser"
+        v-model="valid"
+        ref="myForm"
+        validate-on="blur"
+      >
+        <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
               <v-text-field
@@ -158,15 +158,15 @@
               </v-col>
             </v-row>
           </div>
-        </v-form>
-      </v-card-text>
-      <v-divider></v-divider>
-      <v-card-actions class="text-body-1">
-        <span class="mr-2">Already have an account?</span>
-        <router-link to="/login">Sign In</router-link>
-        <v-spacer></v-spacer>
-        <v-btn-primary type="submit">Create User</v-btn-primary>
-      </v-card-actions>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions class="text-body-1">
+          <span class="mr-2">Already have an account?</span>
+          <router-link to="/login">Sign In</router-link>
+          <v-spacer></v-spacer>
+          <v-btn-primary type="submit">Create User</v-btn-primary>
+        </v-card-actions>
+      </v-form>
     </v-card>
   </v-container>
 </template>

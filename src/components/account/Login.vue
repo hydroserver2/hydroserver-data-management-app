@@ -5,13 +5,13 @@
         <v-card class="login-card">
           <v-card-title align="center" class="login-title">Log in</v-card-title>
           <v-divider class="my-2"></v-divider>
-          <v-card-text>
-            <v-form
-              class="login-form"
-              ref="form"
-              @submit.prevent="loginSubmit"
-              v-model="valid"
-            >
+          <v-form
+            class="login-form"
+            ref="form"
+            @submit.prevent="loginSubmit"
+            v-model="valid"
+          >
+            <v-card-text>
               <v-text-field
                 class="mb-4 email-input"
                 label="Email *"
@@ -30,18 +30,18 @@
                 type="password"
                 name="password"
               ></v-text-field>
-            </v-form>
-          </v-card-text>
-          <v-divider class="login-divider"></v-divider>
-          <v-card-actions class="text-body-1 signup-link-section">
-            <v-spacer></v-spacer>
-            <v-btn-primary
-              class="login-button mr-4"
-              :disabled="!valid"
-              type="submit"
-              >Log in</v-btn-primary
-            >
-          </v-card-actions>
+            </v-card-text>
+            <v-divider class="login-divider"></v-divider>
+            <v-card-actions class="text-body-1 signup-link-section">
+              <v-spacer></v-spacer>
+              <v-btn-primary
+                class="login-button mr-4"
+                :disabled="!valid"
+                type="submit"
+                >Log in</v-btn-primary
+              >
+            </v-card-actions>
+          </v-form>
         </v-card>
       </v-col>
     </v-row>
