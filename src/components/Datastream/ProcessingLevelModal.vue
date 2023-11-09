@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { useProcessingLevelStore } from '@/store/processingLevels'
-import { useProcessingLevels } from '@/composables/useMetadata'
+import { useProcessingLevelModals } from '@/composables/useMetadataModals'
 
 const plStore = useProcessingLevelStore()
 const props = defineProps({ id: String })
@@ -77,7 +77,7 @@ const {
   myForm,
   valid,
   selectedEntity: processingLevel,
-} = useProcessingLevels(props.id)
+} = useProcessingLevelModals(props.id)
 
 async function uploadProcessingLevel() {
   await myForm.value?.validate()

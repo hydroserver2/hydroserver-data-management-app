@@ -24,6 +24,7 @@ export const useAuthStore = defineStore({
     sendingVerificationEmail: false,
     loggedIn$: new Subject<void>(),
   }),
+  persist: true,
   getters: {
     isLoggedIn: (state) => !!state.accessToken,
     isVerified: (state) => state.user.isVerified,
@@ -62,18 +63,15 @@ export const useAuthStore = defineStore({
       }
     },
     isRefreshTokenExpired() {
-      if (!this.refreshToken) return false
-      const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
-      const currentTime = Date.now() / 1000
-      return decodedToken.exp < currentTime
-    },
-    checkTokenExpiry() {
-      if (this.isRefreshTokenExpired()) {
-        this.logout()
-        Notification.toast({
-          message: 'Session expired. Please login',
-          type: 'info',
-        })
+      if (!this.isLoggedIn || !this.refreshToken) return false
+
+      try {
+        const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
+        const currentTime = Date.now() / 1000
+        return decodedToken.exp < currentTime
+      } catch (e) {
+        console.error('Invalid refresh token:', e)
+        return true
       }
     },
     async createUser(user: User) {

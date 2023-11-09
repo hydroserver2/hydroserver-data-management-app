@@ -9,14 +9,17 @@
       v-if="!datastreamId && isPrimaryOwner"
     >
       <v-card-text class="text-subtitle-2 text-medium-emphasis"
-        >Use an existing datastream as a template</v-card-text
-      >
-      <v-autocomplete
-        v-model="selectedDatastreamID"
-        label="Select datastream"
-        :items="formattedDatastreams"
-        item-value="id"
-      ></v-autocomplete>
+        >Use an existing datastream as a template
+      </v-card-text>
+      <v-card-text>
+        <v-btn @click="showTemplateModal = true">Load template</v-btn>
+        <v-dialog v-model="showTemplateModal" width="60rem">
+          <DatastreamTemplateModal
+            @selected-datastream-id="selectedDatastreamID = $event"
+            @close="showTemplateModal = false"
+          />
+        </v-dialog>
+      </v-card-text>
     </v-card>
 
     <v-form
@@ -276,6 +279,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
+import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import UnitModal from '@/components/Datastream/UnitModal.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
@@ -285,7 +289,6 @@ import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
-import { useFormattedDatastreams } from '@/composables/useFormattedDatastreams'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { Datastream } from '@/types'
 import { useThingStore } from '@/store/things'
@@ -304,8 +307,7 @@ const { sensors, units, observedProperties, formattedProcessingLevels } =
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
   useDatastreamForm(thingId, datastreamId)
 
-const { formattedDatastreams } = useFormattedDatastreams()
-
+const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
 const showUnitModal = ref(false)
 const showPLModal = ref(false)
@@ -323,7 +325,10 @@ const handleMetadataUploaded = async (
   await thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
 }
 
-onMounted(() => window.scrollTo(0, 0))
+onMounted(async () => {
+  window.scrollTo(0, 0)
+  // TODO: Get all the metadata for the primary owner of this datastream
+})
 </script>
 
 <style scoped>

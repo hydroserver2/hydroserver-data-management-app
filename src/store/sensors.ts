@@ -1,16 +1,25 @@
 import { defineStore } from 'pinia'
-import {ProcessingLevel, Sensor} from '@/types'
+import { ProcessingLevel, Sensor } from '@/types'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
+import { useAuthStore } from '@/store/authentication'
 
 export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),
   getters: {
     ownedSensors(): Sensor[] {
-      return this.sensors.filter((sensor) => sensor.owner != null)
+      const authStore = useAuthStore()
+      if (!authStore.user || !authStore.user.email) return []
+      return this.sensors.filter(
+        (sensor) => sensor.owner === authStore.user.email
+      )
     },
     unownedSensors(): Sensor[] {
       return this.sensors.filter((sensor) => sensor.owner == null)
+    },
+    dataByUser(): (ownerEmail: string) => Sensor[] {
+      return (ownerEmail: string) =>
+        this.sensors.filter((s) => s.owner === ownerEmail)
     },
   },
   actions: {

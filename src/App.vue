@@ -22,28 +22,10 @@ import Navbar from '@/components/base/Navbar.vue'
 import Footer from '@/components/base/Footer.vue'
 import Notifications from '@/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/store/authentication'
-import { onMounted, onUnmounted } from 'vue'
 import { setupRouteGuards } from './router/router'
 
 const route = useRoute()
 setupRouteGuards()
-
-// Check the refresh token every 600,000 milliseconds = 10 minutes
-// Logout if the refresh token is expired
-const authStore = useAuthStore()
-let interval: any
-
-// TODO: this is bad practice. This behavior should be replaced with vue-idle (https://www.npmjs.com/package/idle-vue) and token refresh backend support
-onMounted(() => {
-  interval = setInterval(() => {
-    authStore.checkTokenExpiry()
-  }, 600000)
-})
-
-onUnmounted(() => {
-  clearInterval(interval)
-})
 </script>
 
 <style scoped lang="scss">

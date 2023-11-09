@@ -2,18 +2,25 @@ import { defineStore } from 'pinia'
 import { Unit } from '@/types'
 import { ENDPOINTS } from '@/constants'
 import { api } from '@/utils/api/apiMethods'
+import { useAuthStore } from '@/store/authentication'
 
 export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
   getters: {
     ownedUnits(): Unit[] {
-      return this.units.filter((u) => u.owner != null)
+      const authStore = useAuthStore()
+      if (!authStore.user || !authStore.user.email) return []
+      return this.units.filter((u) => u.owner === authStore.user.email)
     },
     unownedUnits(): Unit[] {
       return this.units.filter((u) => u.owner == null)
     },
     timeUnits(): Unit[] {
       return this.units.filter((u) => u.type === 'Time')
+    },
+    dataByUser(): (ownerEmail: string) => Unit[] {
+      return (ownerEmail: string) =>
+        this.units.filter((u) => u.owner === ownerEmail)
     },
   },
   actions: {

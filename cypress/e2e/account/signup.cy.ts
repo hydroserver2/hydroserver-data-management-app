@@ -4,7 +4,7 @@ describe('Signup', () => {
   })
 
   it('Renders page', () => {
-    cy.visit('/signup')
+    cy.visit('/sign-up')
     cy.get('.signup-title').contains('Sign Up')
   })
 

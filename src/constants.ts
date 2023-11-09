@@ -51,6 +51,7 @@ export const ENDPOINTS = {
     ID: FOR_ID(DS_BASE),
     FOR_THING: (id: string) => `${THINGS_BASE}/${id}/datastreams`,
     CSV: (id: string) => `${DS_BASE}/${id}/csv`,
+    FOR_USER: `${DS_BASE}?exclude_unowned=true`,
   }),
 
   OBSERVED_PROPERTIES: Object.assign(OP_BASE, {
@@ -81,6 +82,8 @@ export const ENDPOINTS = {
   THINGS: Object.assign(THINGS_BASE, {
     ID: FOR_ID(THINGS_BASE),
     METADATA: (id: string) => `${THINGS_BASE}/${id}/metadata`,
+    USER_METADATA: (id: string) =>
+      `${THINGS_BASE}/${id}/metadata?include_assignable_metadata=true`,
     OWNERSHIP: (id: string) => `${THINGS_BASE}/${id}/ownership`,
     PRIVACY: (id: string) => `${THINGS_BASE}/${id}/privacy`,
   }),
