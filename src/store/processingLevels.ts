@@ -2,17 +2,15 @@ import { defineStore } from 'pinia'
 import { ProcessingLevel } from '@/types'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from '@/store/user'
 
 export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
   getters: {
     ownedProcessingLevels(): ProcessingLevel[] {
-      const authStore = useAuthStore()
-      if (!authStore.user || !authStore.user.email) return []
-      return this.processingLevels.filter(
-        (pl) => pl.owner === authStore.user.email
-      )
+      const { user } = useUserStore()
+      if (!user?.email) return []
+      return this.processingLevels.filter((pl) => pl.owner === user.email)
     },
     unownedProcessingLevels(): ProcessingLevel[] {
       return this.processingLevels.filter((pl) => pl.owner == null)

@@ -40,7 +40,9 @@
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/store/authentication'
+import { ENDPOINTS } from '@/constants'
+import { api } from '@/utils/api/apiMethods'
+import router from '@/router/router'
 
 const valid = ref(false)
 const myForm = ref(null)
@@ -50,10 +52,16 @@ const confirmPassword = ref('')
 
 const resetPassword = async () => {
   if (!valid.value) return
-  await useAuthStore().resetPassword(
-    route.params.uid.toString(),
-    route.params.token.toString(),
-    password.value
-  )
+
+  try {
+    await api.post(ENDPOINTS.USER.RESET_PASSWORD, {
+      uid: route.params.uid.toString(),
+      token: route.params.token.toString(),
+      password: password.value,
+    })
+    await router.push({ name: 'Login' })
+  } catch (error) {
+    console.error('Error resetting password', error)
+  }
 }
 </script>

@@ -2,15 +2,15 @@ import { defineStore } from 'pinia'
 import { Unit } from '@/types'
 import { ENDPOINTS } from '@/constants'
 import { api } from '@/utils/api/apiMethods'
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from './user'
 
 export const useUnitStore = defineStore('units', {
   state: () => ({ units: [] as Unit[], loaded: false }),
   getters: {
     ownedUnits(): Unit[] {
-      const authStore = useAuthStore()
-      if (!authStore.user || !authStore.user.email) return []
-      return this.units.filter((u) => u.owner === authStore.user.email)
+      const { user } = useUserStore()
+      if (!user?.email) return []
+      return this.units.filter((u) => u.owner === user.email)
     },
     unownedUnits(): Unit[] {
       return this.units.filter((u) => u.owner == null)

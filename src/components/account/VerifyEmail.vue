@@ -7,7 +7,7 @@
         <p>
           Before you continue, we need to verify the email address you provided
           for your account. We've sent an email to
-          <b>{{ authStore.user.email }}</b
+          <b>{{ user?.email }}</b
           >.
         </p>
         <br />
@@ -25,10 +25,10 @@
       <v-card-text class="text-body-2 text-medium-emphasis">
         <span class="mr-2">Didn't receive a verification email?</span>
         <v-btn
-          :disabled="authStore.sendingVerificationEmail"
+          :disabled="sendingVerificationEmail"
           color="default"
           variant="text"
-          @click="authStore.sendVerificationEmail()"
+          @click="sendVerificationEmail()"
         >
           Resend Email
         </v-btn>
@@ -38,7 +38,22 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from '@/store/user'
+import { ENDPOINTS } from '@/constants'
+import { api } from '@/utils/api/apiMethods'
+import { storeToRefs } from 'pinia'
 
-const authStore = useAuthStore()
+const { user } = storeToRefs(useUserStore())
+let sendingVerificationEmail = false
+
+async function sendVerificationEmail() {
+  try {
+    if (sendingVerificationEmail) return
+    sendingVerificationEmail = true
+    await api.post(ENDPOINTS.ACCOUNT.SEND_VERIFICATION_EMAIL)
+    sendingVerificationEmail = false
+  } catch (error) {
+    console.error('Error sending verification email', error)
+  }
+}
 </script>

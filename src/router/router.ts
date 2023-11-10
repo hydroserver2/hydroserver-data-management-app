@@ -7,6 +7,7 @@ import { routes } from '@/router/routes'
 import { useAuthStore } from '@/store/authentication'
 import { useThingStore } from '@/store/things'
 import Notification from '@/store/notifications'
+import { useUserStore } from '@/store/user'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,9 +22,10 @@ const guards: ((
 ) => any | null)[] = [
   // Check if the refresh token is expired each page change
   (_to, _from, _next) => {
-    const authStore = useAuthStore()
-    if (authStore.isRefreshTokenExpired()) {
-      authStore.resetState()
+    const { isRefreshTokenExpired, resetState } = useAuthStore()
+
+    if (isRefreshTokenExpired()) {
+      resetState()
       Notification.toast({
         message: 'Session expired. Please login',
         type: 'info',
@@ -37,17 +39,13 @@ const guards: ((
   // hasAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasAuthGuard) {
-      const authStore = useAuthStore()
+      const { isLoggedIn } = useAuthStore()
+      const { user } = useUserStore()
 
-      if (!authStore.isLoggedIn) {
-        return { name: 'Login', query: { next: to.name } }
-      } else if (!authStore.isVerified) {
-        if (!authStore.user.email) {
-          return { name: 'CompleteProfile' }
-        } else {
-          return { name: 'VerifyEmail' }
-        }
-      }
+      if (!isLoggedIn) return { name: 'Login', query: { next: to.name } }
+      if (user?.isVerified) return null
+      if (user?.email) return { name: 'VerifyEmail' }
+      return { name: 'CompleteProfile' }
     }
     return null
   },
@@ -55,11 +53,8 @@ const guards: ((
   // hasLoggedOutGuard
   (to, _from, _next) => {
     if (to.meta?.hasLoggedOutGuard) {
-      const authStore = useAuthStore()
-
-      if (authStore.isLoggedIn) {
-        return { name: 'PageNotFound' }
-      }
+      const { isLoggedIn } = useAuthStore()
+      if (isLoggedIn) return { name: 'PageNotFound' }
     }
     return null
   },
@@ -67,10 +62,9 @@ const guards: ((
   // hasUnverifiedAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasUnverifiedAuthGuard) {
-      const authStore = useAuthStore()
-      if (authStore.isLoggedIn && authStore.isVerified) {
-        return { name: 'PageNotFound' }
-      }
+      const { isLoggedIn } = useAuthStore()
+      const { user } = useUserStore()
+      if (isLoggedIn && user?.isVerified) return { name: 'PageNotFound' }
     }
     return null
   },

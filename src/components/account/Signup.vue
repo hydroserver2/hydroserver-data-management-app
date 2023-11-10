@@ -203,12 +203,18 @@ import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
 import { organizationTypes } from '@/vocabularies'
 import OAuth from '@/components/account/OAuth.vue'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
+import router from '@/router/router'
+import { useUserStore } from '@/store/user'
 
 const valid = ref(false)
 const confirmPassword = ref('')
 const myForm = ref<VForm>()
 const user = reactive<User>(new User())
 const showOrg = ref(false)
+const { resetState, setTokens } = useAuthStore()
+const { setUser } = useUserStore()
 
 watch(showOrg, (newVal) => {
   if (newVal && !user.organization) user.organization = new Organization()
@@ -219,6 +225,14 @@ const phoneMask = { mask: '(###) ###-####' }
 
 async function createUser() {
   if (!valid.value) return
-  await useAuthStore().createUser(user)
+  try {
+    resetState()
+    const data = await api.post(ENDPOINTS.USER, user)
+    setUser(data.user)
+    setTokens(data.access, data.refresh)
+    await router.push({ name: 'VerifyEmail' })
+  } catch (error) {
+    console.error('Error creating user', error)
+  }
 }
 </script>

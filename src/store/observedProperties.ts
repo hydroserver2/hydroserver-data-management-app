@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
 import { api } from '@/utils/api/apiMethods'
 import { ENDPOINTS } from '@/constants'
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from './user'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
   state: () => ({
@@ -11,11 +11,9 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
   }),
   getters: {
     ownedOP(): ObservedProperty[] {
-      const authStore = useAuthStore()
-      if (!authStore.user || !authStore.user.email) return []
-      return this.observedProperties.filter(
-        (op) => op.owner === authStore.user.email
-      )
+      const { user } = useUserStore()
+      if (!user?.email) return []
+      return this.observedProperties.filter((op) => op.owner === user.email)
     },
     unownedOP(): ObservedProperty[] {
       return this.observedProperties.filter((op) => op.owner == null)

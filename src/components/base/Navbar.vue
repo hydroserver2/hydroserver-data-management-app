@@ -49,7 +49,7 @@
       </div>
       <v-spacer></v-spacer>
 
-      <template v-if="authStore.isLoggedIn">
+      <template v-if="isLoggedIn">
         <v-btn
           elevation="2"
           rounded
@@ -74,7 +74,7 @@
 
               <v-divider></v-divider>
 
-              <v-list-item id="navbar-logout" @click="logout">
+              <v-list-item id="navbar-logout" @click="onLogout">
                 <template v-slot:prepend><v-icon>mdi-logout</v-icon></template>
                 <v-list-item-title>Log Out</v-list-item-title>
               </v-list-item>
@@ -136,7 +136,7 @@
     <v-divider></v-divider>
 
     <v-list density="compact" nav>
-      <template v-if="authStore.isLoggedIn">
+      <template v-if="isLoggedIn">
         <v-list-item to="/profile" prepend-icon="mdi-account-circle"
           >Profile</v-list-item
         >
@@ -158,11 +158,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import appLogo from '@/assets/hydroserver-icon-min.png'
 import Notification from '@/store/notifications'
 
-const authStore = useAuthStore()
+const { logout } = useAuthStore()
+const { isLoggedIn } = storeToRefs(useAuthStore())
 const { smAndDown } = useDisplay()
 const drawer = ref(false)
 
@@ -234,8 +236,8 @@ const paths: {
   // },
 ]
 
-function logout() {
-  authStore.logout()
+function onLogout() {
+  logout()
   Notification.toast({ message: 'You have logged out', type: 'info' })
 }
 function openInNewTab(event: MouseEvent, href: string | undefined) {

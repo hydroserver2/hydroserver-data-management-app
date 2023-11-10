@@ -68,14 +68,34 @@ import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
+import { api } from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
+import router from '@/router/router'
+import { useUserStore } from '@/store/user'
 
 const email = ref('')
 const password = ref('')
 const form = ref(null)
 const valid = ref(false)
 
+const { resetState, setTokens } = useAuthStore()
+const { setUser } = useUserStore()
+
 const loginSubmit = async () => {
   if (!valid) return
-  await useAuthStore().login(email.value, password.value)
+
+  try {
+    resetState()
+    const tokens = await api.post(ENDPOINTS.ACCOUNT.JWT_PAIR, {
+      email: email.value,
+      password: password.value,
+    })
+    setTokens(tokens.access, tokens.refresh)
+    const user = await api.fetch(ENDPOINTS.USER)
+    setUser(user)
+    await router.push({ name: 'Sites' })
+  } catch (error) {
+    console.error('Error logging in.', error)
+  }
 }
 </script>

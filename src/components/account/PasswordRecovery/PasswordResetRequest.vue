@@ -31,12 +31,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useAuthStore } from '@/store/authentication'
+import { ENDPOINTS } from '@/constants'
+import { api } from '@/utils/api/apiMethods'
 
 const email = ref('')
 const resetEmailSent = ref(false)
 
 const submitForm = async () => {
-  resetEmailSent.value = await useAuthStore().requestPasswordReset(email.value)
+  try {
+    resetEmailSent.value = await api.post(ENDPOINTS.USER.SEND_RESET_EMAIL, {
+      email: email,
+    })
+  } catch (error) {
+    console.error('Error requesting password reset', error)
+  }
 }
 </script>
