@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 import { User, OAuthProvider } from '@/types'
 import { Subject } from 'rxjs'
 import { useResetStore } from '@/store/resetStore'
@@ -15,90 +16,99 @@ interface JWTPayload {
   exp: number
 }
 
-export const useAuthStore = defineStore({
-  id: 'authentication',
-  state: () => ({
-    accessToken: '',
-    refreshToken: '',
-    user: new User(),
-    sendingVerificationEmail: false,
-    loggedIn$: new Subject<void>(),
-  }),
-  persist: true,
-  getters: {
-    isLoggedIn: (state) => !!state.accessToken,
-    isVerified: (state) => state.user.isVerified,
-  },
-  actions: {
-    resetState() {
+export const useAuthStore = defineStore(
+  'authentication',
+  () => {
+    const accessToken = ref('')
+    const refreshToken = ref('')
+    const user = ref<User>(new User())
+    const loggedIn$ = new Subject<void>()
+    let sendingVerificationEmail = false
+
+    const isLoggedIn = computed(() => !!accessToken.value)
+    const isVerified = computed(() => user.value.isVerified)
+
+    function $reset() {
+      accessToken.value = ''
+      refreshToken.value = ''
+      user.value = new User()
+    }
+
+    function resetState() {
       const resetStore = useResetStore()
       resetStore.all()
       localStorage.clear()
-    },
-    async login(email: string, password: string) {
+    }
+
+    async function login(email: string, password: string) {
       try {
-        this.resetState()
+        resetState()
         const tokens = await api.post(ENDPOINTS.ACCOUNT.JWT_PAIR, {
           email: email,
           password: password,
         })
 
-        this.accessToken = tokens.access
-        this.refreshToken = tokens.refresh
-        const user = await api.fetch(ENDPOINTS.USER)
-        if (!user) return
+        accessToken.value = tokens.access
+        refreshToken.value = tokens.refresh
+        const data = await api.fetch(ENDPOINTS.USER)
+        if (!data) return
 
-        this.user = user
+        user.value = data
         await router.push({ name: 'Sites' })
       } catch (error) {
         console.error('Error logging in.', error)
       }
-    },
-    async logout() {
+    }
+
+    async function logout() {
       try {
-        this.resetState()
+        resetState()
         router.push({ name: 'Login' })
       } catch (error) {
         console.error('Error logging out.', error)
       }
-    },
-    isRefreshTokenExpired() {
-      if (!this.isLoggedIn || !this.refreshToken) return false
+    }
+
+    function isRefreshTokenExpired() {
+      if (!isLoggedIn.value || !refreshToken.value) return false
 
       try {
-        const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
+        const decodedToken = jwtDecode(refreshToken.value) as JWTPayload
         const currentTime = Date.now() / 1000
         return decodedToken.exp < currentTime
       } catch (e) {
         console.error('Invalid refresh token:', e)
         return true
       }
-    },
-    async createUser(user: User) {
+    }
+
+    async function createUser(user: User) {
       try {
-        this.resetState()
+        resetState()
         const data = await api.post(ENDPOINTS.USER, user)
-        this.user = data.user
-        this.accessToken = data.access
-        this.refreshToken = data.refresh
+        user = data.user
+        accessToken.value = data.access
+        refreshToken.value = data.refresh
         await router.push({ name: 'VerifyEmail' })
       } catch (error) {
         console.error('Error creating user', error)
       }
-    },
-    async sendVerificationEmail() {
+    }
+
+    async function sendVerificationEmail() {
       try {
-        if (this.sendingVerificationEmail) return
-        this.sendingVerificationEmail = true
+        if (sendingVerificationEmail) return
+        sendingVerificationEmail = true
         await api.post(ENDPOINTS.ACCOUNT.SEND_VERIFICATION_EMAIL)
-        this.sendingVerificationEmail = false
+        sendingVerificationEmail = false
       } catch (error) {
         console.error('Error sending verification email', error)
       }
-    },
-    async activateAccount(uid: string, token: string) {
+    }
+
+    async function activateAccount(uid: string, token: string) {
       try {
-        this.resetState()
+        resetState()
         const data = await api.post(ENDPOINTS.ACCOUNT.ACTIVATE, {
           uid: uid,
           token: token,
@@ -106,22 +116,23 @@ export const useAuthStore = defineStore({
         if (!data.user.isVerified) {
           return false
         }
-        this.user = data.user
-        this.accessToken = data.access
-        this.refreshToken = data.refresh
+        user.value = data.user
+        accessToken.value = data.access
+        refreshToken.value = data.refresh
         await router.push({ name: 'Sites' })
       } catch (error) {
         console.error('Error activating account', error)
         throw error
       }
-    },
-    async updateUser(user: User) {
+    }
+
+    async function updateUser(user: User) {
       try {
-        const data = await api.patch(ENDPOINTS.USER, user, this.user)
+        const data = await api.patch(ENDPOINTS.USER, user, user)
         // things.organizations won't automatically update so invalidate cache
         const resetStore = useResetStore()
         resetStore.things()
-        this.user = data as User
+        user = data as User
         if (!user.isVerified) {
           await router.push({ name: 'VerifyEmail' })
         } else {
@@ -133,16 +144,18 @@ export const useAuthStore = defineStore({
       } catch (error) {
         console.error('Error updating user', error)
       }
-    },
-    async deleteAccount() {
+    }
+
+    async function deleteAccount() {
       try {
         await api.delete(ENDPOINTS.USER)
-        await this.logout()
+        await logout()
       } catch (error) {
         console.error('Error deleting account', error)
       }
-    },
-    async requestPasswordReset(email: String) {
+    }
+
+    async function requestPasswordReset(email: String) {
       try {
         return await api.post(ENDPOINTS.USER.SEND_RESET_EMAIL, {
           email: email,
@@ -150,8 +163,9 @@ export const useAuthStore = defineStore({
       } catch (error) {
         console.error('Error requesting password reset', error)
       }
-    },
-    async resetPassword(uid: string, token: string, password: string) {
+    }
+
+    async function resetPassword(uid: string, token: string, password: string) {
       try {
         await api.post(ENDPOINTS.USER.RESET_PASSWORD, {
           uid: uid,
@@ -162,8 +176,9 @@ export const useAuthStore = defineStore({
       } catch (error) {
         console.error('Error resetting password', error)
       }
-    },
-    async OAuthLogin(provider: OAuthProvider, callback?: () => any) {
+    }
+
+    async function OAuthLogin(provider: OAuthProvider, callback?: () => any) {
       const handleMessage = async (event: MessageEvent) => {
         if (
           event.origin !== APP_URL ||
@@ -173,20 +188,20 @@ export const useAuthStore = defineStore({
         }
 
         if (event.data.accessToken) {
-          this.accessToken = event.data.accessToken
-          this.refreshToken = event.data.refreshToken
+          accessToken.value = event.data.accessToken
+          refreshToken.value = event.data.refreshToken
 
           try {
-            const user = await api.fetch(ENDPOINTS.USER)
+            const data = await api.fetch(ENDPOINTS.USER)
 
-            if (!user) return
-            this.user = user
+            if (!data) return
+            user.value = data
 
             Notification.toast({
               message: 'You have logged in!',
               type: 'success',
             })
-            this.loggedIn$.next()
+            loggedIn$.next()
             callback?.()
           } catch (e) {
             console.log('Failed to Log In')
@@ -213,6 +228,30 @@ export const useAuthStore = defineStore({
       window.addEventListener('message', handleMessage, {
         signal: OAuthLoginController.signal, // Used to remove the listener
       })
-    },
+    }
+
+    return {
+      accessToken,
+      refreshToken,
+      user,
+      isLoggedIn,
+      isVerified,
+      resetState,
+      login,
+      logout,
+      isRefreshTokenExpired,
+      createUser,
+      sendVerificationEmail,
+      activateAccount,
+      updateUser,
+      deleteAccount,
+      requestPasswordReset,
+      resetPassword,
+      OAuthLogin,
+      $reset,
+    }
   },
-})
+  {
+    persist: true,
+  }
+)
