@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 
 const email = ref('')
 const resetEmailSent = ref(false)

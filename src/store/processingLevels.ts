@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ProcessingLevel } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 import { useUserStore } from '@/store/user'
 

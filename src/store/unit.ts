@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { Unit } from '@/types'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { useUserStore } from './user'
 
 export const useUnitStore = defineStore('units', {

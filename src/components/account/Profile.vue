@@ -194,7 +194,7 @@ import Notification from '@/store/notifications'
 import { useThingStore } from '@/store/things'
 import HydroShareIcon from '@/assets/hydro.png'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { storeToRefs } from 'pinia'
 
 const { logout } = useAuthStore()

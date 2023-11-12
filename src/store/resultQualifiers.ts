@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ResultQualifier } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useResultQualifierStore = defineStore('resultQualifiers', {

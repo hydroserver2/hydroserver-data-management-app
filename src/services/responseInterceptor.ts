@@ -1,5 +1,5 @@
-import { handle401 } from '@/utils/api/handle401'
-import { toastHandler } from '@/utils/api/toastHandler'
+import { handle401 } from '@/services/handle401'
+import { toastHandler } from '@/services/toastHandler'
 
 export async function responseInterceptor(
   response: Response,

@@ -62,7 +62,7 @@ import Notification from '@/store/notifications'
 import googleImg from '@/assets/google.png'
 import { useAuthStore } from '@/store/authentication'
 import { useUserStore } from '@/store/user'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 
 const APP_URL = import.meta.env.VITE_APP_URL
 let OAuthLoginController = new AbortController()

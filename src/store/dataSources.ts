@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { DataSource } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useDataSourceStore = defineStore('dataSources', {
   state: () => ({
     dataSources: [] as DataSource[],
-    loaded: false
+    loaded: false,
   }),
   actions: {
     sortDataSources() {
@@ -41,10 +41,7 @@ export const useDataSourceStore = defineStore('dataSources', {
     },
     async createDataSource(dataSource: DataSource) {
       try {
-        const data = await api.post(
-          ENDPOINTS.DATA_SOURCES,
-          dataSource
-        )
+        const data = await api.post(ENDPOINTS.DATA_SOURCES, dataSource)
         this.dataSources.push(data)
         this.sortDataSources()
         return data
@@ -55,9 +52,7 @@ export const useDataSourceStore = defineStore('dataSources', {
     async deleteDataSource(id: string) {
       try {
         await api.delete(ENDPOINTS.DATA_SOURCES.ID(id))
-        this.dataSources = this.dataSources.filter(
-          (ds) => ds.id !== id
-        )
+        this.dataSources = this.dataSources.filter((ds) => ds.id !== id)
         this.sortDataSources()
       } catch (error) {
         console.error('Error deleting data source', error)
@@ -70,6 +65,6 @@ export const useDataSourceStore = defineStore('dataSources', {
       if (!dataSource)
         throw new Error(`Data Source with id ${dataSourceId} not found`)
       return dataSource
-    }
-  }
+    },
+  },
 })

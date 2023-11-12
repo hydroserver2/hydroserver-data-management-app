@@ -1,6 +1,6 @@
 import { DataArray } from '@/types'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)

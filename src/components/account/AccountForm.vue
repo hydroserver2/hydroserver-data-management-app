@@ -151,7 +151,7 @@ import { useUserStore } from '@/store/user'
 import router from '@/router/router'
 import Notification from '@/store/notifications'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 
 defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },

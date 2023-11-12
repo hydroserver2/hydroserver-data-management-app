@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ObservedProperty } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 import { useUserStore } from './user'
 

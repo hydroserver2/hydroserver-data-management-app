@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { storeToRefs } from 'pinia'
 
 const { user } = storeToRefs(useUserStore())

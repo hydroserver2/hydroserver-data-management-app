@@ -41,7 +41,7 @@ import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useRoute } from 'vue-router'
 import { ENDPOINTS } from '@/constants'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import router from '@/router/router'
 
 const valid = ref(false)
