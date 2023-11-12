@@ -322,7 +322,6 @@ const handleMetadataUploaded = async (
   if (datastream && updateId in datastream) {
     ;(datastream[updateId] as unknown as string) = newId
   }
-  await thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
 }
 
 onMounted(async () => {

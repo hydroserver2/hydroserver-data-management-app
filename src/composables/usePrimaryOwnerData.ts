@@ -1,5 +1,4 @@
-import { onMounted, computed } from 'vue'
-import { useThingStore } from '@/store/things'
+import { onMounted, computed, ref } from 'vue'
 import {
   ProcessingLevel,
   Unit,
@@ -7,17 +6,10 @@ import {
   ObservedProperty,
   DatastreamMetadata,
 } from '@/types'
+import { api } from '@/services/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export function usePrimaryOwnerData(thingId: string) {
-  const thingStore = useThingStore()
-
-  // If the current user is the primary owner of the datastream, use their metadata,
-  // otherwise get the primary owner's
-  function getPOData(attribute: keyof DatastreamMetadata) {
-    const metadata = thingStore.POMetadata[thingId]
-    return metadata ? metadata[attribute] : []
-  }
-
   function getAttributeById(
     computedList: any,
     id: string,
@@ -28,15 +20,20 @@ export function usePrimaryOwnerData(thingId: string) {
     return entity ? entity[attributeName] : null
   }
 
-  const sensors = computed(() => getPOData('sensors'))
+  const metadata = ref<DatastreamMetadata | null>()
+  const sensors = computed(() => metadata.value?.sensors || [])
   const units = computed(() => {
-    const allUnits = getPOData('units') as Unit[]
+    const allUnits = metadata.value?.units || []
     return allUnits.filter(
       (unit) => unit.type !== 'Time' && unit.owner !== null
     )
   })
-  const observedProperties = computed(() => getPOData('observedProperties'))
-  const processingLevels = computed(() => getPOData('processingLevels'))
+  const observedProperties = computed(
+    () => metadata.value?.observedProperties || []
+  )
+  const processingLevels = computed(
+    () => metadata.value?.processingLevels || []
+  )
 
   const formattedProcessingLevels = computed(() => {
     const pls = processingLevels.value as ProcessingLevel[]
@@ -71,7 +68,11 @@ export function usePrimaryOwnerData(thingId: string) {
   }
 
   onMounted(async () => {
-    thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
+    try {
+      metadata.value = await api.fetch(ENDPOINTS.THINGS.USER_METADATA(thingId))
+    } catch (error) {
+      console.error('Error fetching primary owner metadata', error)
+    }
   })
 
   return {

@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
-import { Thing, DatastreamMetadata } from '@/types'
+import { Thing } from '@/types'
 import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useThingStore = defineStore('things', {
   state: () => ({
     things: {} as Record<string, Thing>,
-    POMetadata: {} as Record<string, DatastreamMetadata>,
     loaded: false,
     fetching: false,
   }),
@@ -118,14 +117,6 @@ export const useThingStore = defineStore('things', {
         this.things[thingId] = data
       } catch (error) {
         console.error('Error removing owner from thing', error)
-      }
-    },
-    async fetchPrimaryOwnerMetadataByThingId(id: string) {
-      try {
-        const data = await api.fetch(ENDPOINTS.THINGS.USER_METADATA(id))
-        this.$patch({ POMetadata: { ...this.POMetadata, [id]: data } })
-      } catch (error) {
-        console.error('Error fetching primary owner metadata', error)
       }
     },
   },
