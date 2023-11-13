@@ -32,7 +32,7 @@ export const useSensorStore = defineStore('sensor', {
         this.sortSensors()
         this.loaded = true
       } catch (error) {
-        console.error('Error fetching units from DB', error)
+        console.error('Error fetching sensors from DB', error)
       }
     },
     async updateSensor(sensor: Sensor) {
