@@ -62,7 +62,7 @@ export const useDatastreamStore = defineStore('datastreams', {
       return grouped
     },
     async fetchDatastreamsByThingId(id: string, reload = false) {
-      if (this.fetching || (this.datastreams[id] && !reload)) return
+      if (this.fetching) return
       this.fetching = true
       try {
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
