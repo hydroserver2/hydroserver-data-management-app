@@ -1,26 +1,11 @@
 import { onMounted, computed, ref } from 'vue'
-import {
-  ProcessingLevel,
-  Unit,
-  Sensor,
-  ObservedProperty,
-  DatastreamMetadata,
-} from '@/types'
+import { ProcessingLevel, DatastreamMetadata } from '@/types'
 import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export function usePrimaryOwnerData(thingId: string) {
-  function getAttributeById(
-    computedList: any,
-    id: string,
-    attributeName: string
-  ) {
-    if (!computedList || !computedList.value) return null
-    const entity = computedList.value.find((item: any) => item.id === id)
-    return entity ? entity[attributeName] : null
-  }
-
   const metadata = ref<DatastreamMetadata | null>()
+
   const sensors = computed(() => metadata.value?.sensors || [])
   const units = computed(() => {
     const allUnits = metadata.value?.units || []
@@ -45,28 +30,6 @@ export function usePrimaryOwnerData(thingId: string) {
     return []
   })
 
-  const getUnitAttrById = (id: string, attr: keyof Unit = 'name') => {
-    return getAttributeById(units, id, attr)
-  }
-
-  const getSensorAttrById = (id: string, attr: keyof Sensor = 'name') => {
-    return getAttributeById(sensors, id, attr)
-  }
-
-  const getObservedPropertyAttrById = (
-    id: string,
-    attr: keyof ObservedProperty = 'name'
-  ) => {
-    return getAttributeById(observedProperties, id, attr)
-  }
-
-  const getProcessingLevelAttrById = (
-    id: string,
-    attr: keyof ProcessingLevel = 'code'
-  ) => {
-    return getAttributeById(processingLevels, id, attr)
-  }
-
   onMounted(async () => {
     try {
       metadata.value = await api.fetch(ENDPOINTS.THINGS.USER_METADATA(thingId))
@@ -81,9 +44,5 @@ export function usePrimaryOwnerData(thingId: string) {
     observedProperties,
     processingLevels,
     formattedProcessingLevels,
-    getUnitAttrById,
-    getSensorAttrById,
-    getObservedPropertyAttrById,
-    getProcessingLevelAttrById,
   }
 }

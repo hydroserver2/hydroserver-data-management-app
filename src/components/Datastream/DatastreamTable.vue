@@ -9,7 +9,9 @@
         <v-row style="font-size: 1.2em">
           <strong class="mr-2">Observed Property:</strong>
           <strong>{{
-            getObservedPropertyAttrById(item.raw.observedPropertyId)
+            observedProperties.find(
+              (op) => op.id === item.raw.observedPropertyId
+            )?.name
           }}</strong>
         </v-row>
         <v-row>
@@ -17,7 +19,10 @@
         </v-row>
         <v-row>
           <strong class="mr-2">Processing Level:</strong>
-          {{ getProcessingLevelAttrById(item.raw.processingLevelId, 'code') }}
+          {{
+            processingLevels.find((p) => p.id === item.raw.processingLevelId)
+              ?.code
+          }}
         </v-row>
         <v-row>
           <strong class="mr-2">Sampled Medium:</strong>
@@ -25,7 +30,7 @@
         </v-row>
         <v-row>
           <strong class="mr-2">Sensor:</strong>
-          {{ getSensorAttrById(item.raw.sensorId) }}
+          {{ sensors.find((s) => s.id === item.raw.sensorId)?.name }}
         </v-row>
       </v-col>
     </template>
@@ -62,7 +67,7 @@
         </v-row>
         <v-row>
           {{ mostRecentObs[item.raw.id][1] }}&nbsp;
-          {{ getUnitAttrById(item.raw.unitId) }}
+          {{ units.find((u) => u.id === item.raw.unitId)?.name }}
         </v-row>
       </div>
     </template>
@@ -212,12 +217,8 @@ const props = defineProps({
 
 const { isOwner } = useThingOwnership(props.thingId)
 
-const {
-  getUnitAttrById,
-  getSensorAttrById,
-  getObservedPropertyAttrById,
-  getProcessingLevelAttrById,
-} = usePrimaryOwnerData(props.thingId)
+const { sensors, units, observedProperties, processingLevels } =
+  usePrimaryOwnerData(props.thingId)
 
 const {
   visibleDatastreams,
