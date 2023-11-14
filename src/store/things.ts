@@ -67,59 +67,12 @@ export const useThingStore = defineStore('things', () => {
     }
   }
 
-  const updateThingPrivacy = async (id: string, thingPrivacy: boolean) => {
-    try {
-      const data = await api.patch(ENDPOINTS.THINGS.PRIVACY(id), {
-        isPrivate: thingPrivacy,
-      })
-      things.value[id] = data
-    } catch (error) {
-      console.error('Error updating thing privacy', error)
-    }
-  }
-
   const deleteThing = async (thingId: string) => {
     try {
       await api.delete(ENDPOINTS.THINGS.ID(thingId))
       delete things.value[thingId]
     } catch (error) {
       console.error('Error deleting thing', error)
-    }
-  }
-
-  const addSecondaryOwner = async (thingId: string, email: string) => {
-    try {
-      const data = await api.patch(ENDPOINTS.THINGS.OWNERSHIP(thingId), {
-        email: email,
-        makeOwner: true,
-      })
-      things.value[thingId] = data
-    } catch (error) {
-      console.error('Error adding secondary owner', error)
-    }
-  }
-
-  const transferPrimaryOwnership = async (thingId: string, email: string) => {
-    try {
-      const data = await api.patch(ENDPOINTS.THINGS.OWNERSHIP(thingId), {
-        email: email,
-        transferPrimary: true,
-      })
-      things.value[thingId] = data
-    } catch (error) {
-      console.error('Error transferring thing ownership', error)
-    }
-  }
-
-  const removeOwner = async (thingId: string, email: string) => {
-    try {
-      const data = await api.patch(ENDPOINTS.THINGS.OWNERSHIP(thingId), {
-        email: email,
-        removeOwner: true,
-      })
-      things.value[thingId] = data
-    } catch (error) {
-      console.error('Error removing owner from thing', error)
     }
   }
 
@@ -133,10 +86,6 @@ export const useThingStore = defineStore('things', () => {
     fetchThingById,
     createThing,
     updateThing,
-    updateThingPrivacy,
     deleteThing,
-    addSecondaryOwner,
-    transferPrimaryOwnership,
-    removeOwner,
   }
 })

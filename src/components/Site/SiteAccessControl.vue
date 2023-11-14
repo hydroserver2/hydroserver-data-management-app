@@ -176,6 +176,7 @@ import { useThingStore } from '@/store/things'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
+import { api } from '@/services/api'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -185,12 +186,6 @@ const props = defineProps<{
 
 const { isPrimaryOwner } = useThingOwnership(props.thingId)
 
-const {
-  addSecondaryOwner,
-  transferPrimaryOwnership,
-  removeOwner,
-  updateThingPrivacy,
-} = useThingStore()
 const { things } = storeToRefs(useThingStore())
 
 const thing = computed(() => things.value[props.thingId])
@@ -200,26 +195,50 @@ const showPrimaryOwnerConfirmation = ref(false)
 const newOwnerEmail = ref('')
 
 async function onTransferPrimaryOwnership() {
-  if (newPrimaryOwnerEmail.value) {
-    await transferPrimaryOwnership(props.thingId, newPrimaryOwnerEmail.value)
-    newPrimaryOwnerEmail.value = ''
-    showPrimaryOwnerConfirmation.value = false
+  if (!newPrimaryOwnerEmail.value) return
+  try {
+    const data = await api.transferPrimaryOwnership(
+      props.thingId,
+      newPrimaryOwnerEmail.value
+    )
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error transferring thing ownership', error)
   }
+  newPrimaryOwnerEmail.value = ''
+  showPrimaryOwnerConfirmation.value = false
 }
 
 async function onAddSecondaryOwner() {
-  if (newOwnerEmail.value) {
-    await addSecondaryOwner(props.thingId, newOwnerEmail.value)
-    newOwnerEmail.value = ''
+  if (!newOwnerEmail.value) return
+  try {
+    const data = await api.addSecondaryOwner(props.thingId, newOwnerEmail.value)
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error adding secondary owner', error)
   }
+  newOwnerEmail.value = ''
 }
 
 async function onRemoveOwner(email: string) {
-  if (email) await removeOwner(props.thingId, email)
+  try {
+    const data = await api.removeThingOwner(props.thingId, email)
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error removing owner from thing', error)
+  }
 }
 
 async function toggleSitePrivacy() {
-  await updateThingPrivacy(props.thingId, thing.value.isPrivate)
+  try {
+    const data = await api.updateThingPrivacy(
+      props.thingId,
+      thing.value.isPrivate
+    )
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error updating thing privacy', error)
+  }
 }
 
 const emitClose = () => emits('close')

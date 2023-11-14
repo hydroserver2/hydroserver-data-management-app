@@ -28,6 +28,27 @@ export const api = {
     apiMethods.patch(`${UNIT_BASE}/${newUnit.id}`, newUnit, oldUnit),
   deleteUnit: async (id: string) => apiMethods.delete(`${UNIT_BASE}/${id}`),
   getUnit: async (id: string) => apiMethods.fetch(`${UNIT_BASE}/${id}`),
+
+  removeThingOwner: async (id: string, email: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${id}/ownership`, {
+      email: email,
+      removeOwner: true,
+    }),
+  addSecondaryOwner: async (id: string, email: string) =>
+    apiMethods.post(`${THINGS_BASE}/${id}/ownership`, {
+      email: email,
+      makeOwner: true,
+    }),
+  transferPrimaryOwnership: async (id: string, email: string) =>
+    apiMethods.patch(`${THINGS_BASE}/${id}/ownership`, {
+      email: email,
+      makeOwner: true,
+    }),
+  updateThingPrivacy: async (id: string, thingPrivacy: boolean) =>
+    apiMethods.patch(`${THINGS_BASE}/${id}/privacy`, {
+      isPrivate: thingPrivacy,
+    }),
+
   getObservedProperty: async (id: string) =>
     apiMethods.fetch(`${OP_BASE}/${id}`),
 }

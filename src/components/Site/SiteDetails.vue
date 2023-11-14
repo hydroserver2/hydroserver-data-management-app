@@ -34,10 +34,7 @@
           >Edit Site Information</v-btn
         >
         <v-dialog v-model="isRegisterModalOpen" width="80rem">
-          <SiteForm
-            @close="isRegisterModalOpen = false"
-            :thing-id="thingId"
-          ></SiteForm>
+          <SiteForm @close="isRegisterModalOpen = false" :thing-id="thingId" />
         </v-dialog>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
