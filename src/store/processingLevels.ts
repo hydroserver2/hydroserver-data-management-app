@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { ProcessingLevel } from '@/types'
 import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
@@ -8,9 +8,9 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
   state: () => ({ processingLevels: [] as ProcessingLevel[], loaded: false }),
   getters: {
     ownedProcessingLevels(): ProcessingLevel[] {
-      const { user } = useUserStore()
-      if (!user?.email) return []
-      return this.processingLevels.filter((pl) => pl.owner === user.email)
+      const { user } = storeToRefs(useUserStore())
+      if (!user.value?.email) return []
+      return this.processingLevels.filter((pl) => pl.owner === user.value.email)
     },
     unownedProcessingLevels(): ProcessingLevel[] {
       return this.processingLevels.filter((pl) => pl.owner == null)

@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { ObservedProperty } from '@/types'
 import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
@@ -11,9 +11,11 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
   }),
   getters: {
     ownedOP(): ObservedProperty[] {
-      const { user } = useUserStore()
-      if (!user?.email) return []
-      return this.observedProperties.filter((op) => op.owner === user.email)
+      const { user } = storeToRefs(useUserStore())
+      if (!user.value?.email) return []
+      return this.observedProperties.filter(
+        (op) => op.owner === user.value.email
+      )
     },
     unownedOP(): ObservedProperty[] {
       return this.observedProperties.filter((op) => op.owner == null)

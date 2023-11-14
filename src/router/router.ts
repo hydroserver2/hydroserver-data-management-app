@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authentication'
 import { useThingStore } from '@/store/things'
 import Notification from '@/store/notifications'
 import { useUserStore } from '@/store/user'
+import { storeToRefs } from 'pinia'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -39,12 +40,12 @@ const guards: ((
   // hasAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasAuthGuard) {
-      const { isLoggedIn } = useAuthStore()
-      const { user } = useUserStore()
+      const { isLoggedIn } = storeToRefs(useAuthStore())
+      const { user } = storeToRefs(useUserStore())
 
-      if (!isLoggedIn) return { name: 'Login', query: { next: to.name } }
-      if (user?.isVerified) return null
-      if (user?.email) return { name: 'VerifyEmail' }
+      if (!isLoggedIn.value) return { name: 'Login', query: { next: to.name } }
+      if (user.value?.isVerified) return null
+      if (user.value?.email) return { name: 'VerifyEmail' }
       return { name: 'CompleteProfile' }
     }
     return null
@@ -63,8 +64,8 @@ const guards: ((
   (to, _from, _next) => {
     if (to.meta?.hasUnverifiedAuthGuard) {
       const { isLoggedIn } = useAuthStore()
-      const { user } = useUserStore()
-      if (isLoggedIn && user?.isVerified) return { name: 'PageNotFound' }
+      const { user } = storeToRefs(useUserStore())
+      if (isLoggedIn && user.value?.isVerified) return { name: 'PageNotFound' }
     }
     return null
   },

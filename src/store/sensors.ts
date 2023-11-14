@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { Sensor } from '@/types'
 import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
@@ -8,9 +8,9 @@ export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),
   getters: {
     ownedSensors(): Sensor[] {
-      const { user } = useUserStore()
-      if (!user?.email) return []
-      return this.sensors.filter((sensor) => sensor.owner === user.email)
+      const { user } = storeToRefs(useUserStore())
+      if (!user.value?.email) return []
+      return this.sensors.filter((sensor) => sensor.owner === user.value.email)
     },
     unownedSensors(): Sensor[] {
       return this.sensors.filter((sensor) => sensor.owner == null)

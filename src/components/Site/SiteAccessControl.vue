@@ -174,8 +174,9 @@
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useUserStore } from '@/store/user'
+import { storeToRefs } from 'pinia'
 
-const { user } = useUserStore()
+const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
 const props = defineProps<{
   thingId: string
