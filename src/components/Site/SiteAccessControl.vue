@@ -173,8 +173,10 @@
 <script setup lang="ts">
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
+import { useThingStore } from '@/store/things'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -182,15 +184,32 @@ const props = defineProps<{
   thingId: string
 }>()
 
-const {
-  isPrimaryOwner,
-  newOwnerEmail,
-  newPrimaryOwnerEmail,
-  onAddSecondaryOwner,
-  showPrimaryOwnerConfirmation,
-  onTransferPrimaryOwnership,
-  onRemoveOwner,
-} = useThingOwnership(props.thingId)
+const { addSecondaryOwner, transferPrimaryOwnership, removeOwner } =
+  useThingStore()
+
+const { isPrimaryOwner } = useThingOwnership(props.thingId)
+const newPrimaryOwnerEmail = ref('')
+const showPrimaryOwnerConfirmation = ref(false)
+const newOwnerEmail = ref('')
+
+async function onTransferPrimaryOwnership() {
+  if (newPrimaryOwnerEmail.value) {
+    await transferPrimaryOwnership(props.thingId, newPrimaryOwnerEmail.value)
+    newPrimaryOwnerEmail.value = ''
+    showPrimaryOwnerConfirmation.value = false
+  }
+}
+
+async function onAddSecondaryOwner() {
+  if (newOwnerEmail.value) {
+    await addSecondaryOwner(props.thingId, newOwnerEmail.value)
+    newOwnerEmail.value = ''
+  }
+}
+
+async function onRemoveOwner(email: string) {
+  if (email) await removeOwner(props.thingId, email)
+}
 
 const { thing, toggleSitePrivacy } = useThing(props.thingId)
 
