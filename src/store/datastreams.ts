@@ -32,7 +32,8 @@ export const useDatastreamStore = defineStore('datastreams', {
     },
     async fetchUsersDatastreams(reload = false) {
       try {
-        if (this.fetching || (this.loadedUsersDatastreams && !reload)) return
+        // if (this.fetching || (this.loadedUsersDatastreams && !reload)) return
+        if (this.fetching) return
         this.fetching = true
         const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_USER)
         let datastreamMap = this.groupDatastreamsByThingId(data)

@@ -25,7 +25,7 @@ export const useSensorStore = defineStore('sensor', {
       this.sensors.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchSensors() {
-      if (this.sensors.length > 0) return
+      // if (this.sensors.length > 0) return
       try {
         const data = await api.fetch(ENDPOINTS.SENSORS)
         this.sensors = data

@@ -13,7 +13,7 @@ export const useDataSourceStore = defineStore('dataSources', {
       this.dataSources.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchDataSources(reload = false) {
-      if (this.loaded && !reload) return
+      // if (this.loaded && !reload) return
       try {
         this.dataSources = await api.fetch(ENDPOINTS.DATA_SOURCES)
         this.loaded = true

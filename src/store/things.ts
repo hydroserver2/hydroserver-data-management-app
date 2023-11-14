@@ -19,7 +19,7 @@ export const useThingStore = defineStore('things', {
   },
   actions: {
     async fetchThings() {
-      if (this.loaded) return
+      // if (this.loaded) return
       try {
         const data = await api.fetch(ENDPOINTS.THINGS)
         this.$patch({
@@ -33,7 +33,7 @@ export const useThingStore = defineStore('things', {
       }
     },
     async fetchThingById(id: string) {
-      if (this.fetching || this.things[id]) return
+      if (this.fetching) return
       this.fetching = true
       try {
         const data = await api.fetch(ENDPOINTS.THINGS.ID(id))

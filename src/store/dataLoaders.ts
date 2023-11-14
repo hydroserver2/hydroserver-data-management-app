@@ -13,7 +13,7 @@ export const useDataLoaderStore = defineStore('dataLoaders', {
       this.dataLoaders.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchDataLoaders(reload = false) {
-      if (this.loaded && !reload) return
+      // if (this.loaded && !reload) return
       this.loaded = false
       try {
         this.dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)

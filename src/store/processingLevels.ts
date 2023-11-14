@@ -25,7 +25,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', {
       this.processingLevels.sort((a, b) => a.code.localeCompare(b.code))
     },
     async fetchProcessingLevels() {
-      if (this.loaded) return
+      // if (this.loaded) return
       try {
         this.processingLevels = await api.fetch(ENDPOINTS.PROCESSING_LEVELS)
         this.sortProcessingLevels()

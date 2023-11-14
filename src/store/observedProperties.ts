@@ -28,7 +28,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
       this.observedProperties.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchObservedProperties() {
-      if (this.observedProperties.length > 0) return
+      // if (this.observedProperties.length > 0) return
       try {
         this.observedProperties = await api.fetch(ENDPOINTS.OBSERVED_PROPERTIES)
         this.sortObservedProperties()
