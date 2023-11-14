@@ -7,7 +7,7 @@
         Filter datastreams by site
         <v-select
           v-model="selectedThingId"
-          :items="thingStore.primaryOwnedThings"
+          :items="primaryOwnedThings"
           item-title="name"
           item-value="id"
         >
@@ -55,13 +55,15 @@ import { Datastream } from '@/types'
 import { useSensorStore } from '@/store/sensors'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useObservedPropertyStore } from '@/store/observedProperties'
+import { storeToRefs } from 'pinia'
 
 const sensorStore = useSensorStore()
 const plStore = useProcessingLevelStore()
 const opStore = useObservedPropertyStore()
 
 const datastreamStore = useDatastreamStore()
-const thingStore = useThingStore()
+const { fetchThings } = useThingStore()
+const { primaryOwnedThings } = storeToRefs(useThingStore())
 const selectedThingId = ref('')
 const datastreamsForThing = ref<Datastream[]>([])
 
@@ -86,8 +88,8 @@ function datastreamSelected(id: string) {
 }
 
 onMounted(async () => {
-  await thingStore.fetchThings()
   await Promise.all([
+    fetchThings(),
     sensorStore.fetchSensors(),
     plStore.fetchProcessingLevels(),
     opStore.fetchObservedProperties(),

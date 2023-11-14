@@ -213,7 +213,7 @@ const confirmPassword = ref('')
 const myForm = ref<VForm>()
 const user = reactive<User>(new User())
 const showOrg = ref(false)
-const { resetState, setTokens } = useAuthStore()
+const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 
 watch(showOrg, (newVal) => {
@@ -226,7 +226,7 @@ const phoneMask = { mask: '(###) ###-####' }
 async function createUser() {
   if (!valid.value) return
   try {
-    resetState()
+    // resetState()
     const data = await api.post(ENDPOINTS.USER, user)
     setUser(data.user)
     setTokens(data.access, data.refresh)

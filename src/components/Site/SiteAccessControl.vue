@@ -39,7 +39,7 @@
             label="Secondary Owner's Email"
             required
           ></v-text-field>
-          <v-btn-primary @click="addSecondaryOwner">Submit</v-btn-primary>
+          <v-btn-primary @click="onAddSecondaryOwner">Submit</v-btn-primary>
         </v-col>
         <v-col cols="12" md="6">
           <h6 class="text-h6 my-4">
@@ -86,7 +86,7 @@
           >
           <v-btn-primary
             v-if="showPrimaryOwnerConfirmation"
-            @click="transferPrimaryOwnership"
+            @click="onTransferPrimaryOwnership"
             >Confirm</v-btn-primary
           >
           <v-btn-primary v-else @click="showPrimaryOwnerConfirmation = true"
@@ -110,7 +110,7 @@
           <div v-else>
             <v-btn-delete
               v-if="isPrimaryOwner || owner.email == user.email"
-              @click="removeOwner(owner.email)"
+              @click="onRemoveOwner(owner.email)"
               >Remove</v-btn-delete
             >
           </div>
@@ -186,10 +186,10 @@ const {
   isPrimaryOwner,
   newOwnerEmail,
   newPrimaryOwnerEmail,
-  addSecondaryOwner,
+  onAddSecondaryOwner,
   showPrimaryOwnerConfirmation,
-  transferPrimaryOwnership,
-  removeOwner,
+  onTransferPrimaryOwnership,
+  onRemoveOwner,
 } = useThingOwnership(props.thingId)
 
 const { thing, toggleSitePrivacy } = useThing(props.thingId)

@@ -327,11 +327,11 @@ const UnitHeaders = [
 ] as const
 
 const datastreamStore = useDatastreamStore()
-const thingStore = useThingStore()
+const { fetchThings } = useThingStore()
 const { sortUnits, setUnits } = useUnitStore()
 
 onMounted(async () => {
-  thingStore.fetchThings() // Things are used in the deleteModal
+  fetchThings() // Things are used in the deleteModal
   await datastreamStore.fetchUsersDatastreams()
   try {
     const units = await api.fetchUnits()

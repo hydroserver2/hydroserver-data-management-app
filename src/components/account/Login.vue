@@ -78,14 +78,14 @@ const password = ref('')
 const form = ref(null)
 const valid = ref(false)
 
-const { resetState, setTokens } = useAuthStore()
+const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 
 const loginSubmit = async () => {
   if (!valid) return
 
   try {
-    resetState()
+    // resetState()
     const tokens = await api.post(ENDPOINTS.ACCOUNT.JWT_PAIR, {
       email: email.value,
       password: password.value,

@@ -31,6 +31,12 @@
                 No results found
               </p>
             </v-card-text>
+            <v-card-text
+              class="py-0"
+              v-for="organizationName in filteredOrganizations"
+            >
+              {{ organizationName }}
+            </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn-primary
@@ -40,9 +46,6 @@
               >
             </v-card-actions>
           </v-card>
-          <div v-for="organizationName in filteredOrganizations">
-            <p>{{ organizationName }}</p>
-          </div>
           <v-expansion-panels class="mt-4">
             <v-expansion-panel title="Site Types">
               <v-expansion-panel-text>
@@ -69,7 +72,6 @@
     </div>
 
     <GoogleMap
-      :key="filteredThings"
       :things="filteredThings"
       :mapOptions="{ center: { lat: 39, lng: -100 }, zoom: 4 }"
     />
@@ -83,9 +85,12 @@ import { Ref } from 'vue'
 import { Thing } from '@/types'
 import { useThingStore } from '@/store/things'
 import { siteTypes } from '@/vocabularies'
+import { storeToRefs } from 'pinia'
+
+const { fetchThings } = useThingStore()
+const { things } = storeToRefs(useThingStore())
 
 const drawer = ref(true)
-const thingStore = useThingStore()
 const selectedSiteTypes: Ref<string[]> = ref([])
 const filteredOrganizations = ref(new Set())
 const searchInput = ref('')
@@ -93,11 +98,9 @@ const validFilter = ref(true)
 
 const organizations = computed(() => {
   const allOrgs = new Set()
-  Object.values(thingStore.things).forEach((thing) => {
-    thing.owners.forEach((owner) => {
-      if (owner.organizationName) {
-        allOrgs.add(owner.organizationName)
-      }
+  Object.values(things.value).forEach((t) => {
+    t.owners.forEach((owner) => {
+      if (owner.organizationName) allOrgs.add(owner.organizationName)
     })
   })
   return Array.from(allOrgs)
@@ -118,17 +121,18 @@ const filterOrganizations = () => {
 }
 
 const filteredThings: any = computed(() => {
-  if (typeof thingStore.things !== 'object' || !thingStore.things) return []
-  return Object.values(thingStore.things).filter(isThingValid)
+  if (typeof things.value !== 'object' || !things.value) return []
+  return Object.values(things.value).filter(isThingValid)
 })
 
 function isThingValid(thing: Thing) {
   const orgValid =
     filteredOrganizations.value.size === 0 ||
-    thing.owners.some((owner) =>
-      owner.organizationName
-        ? filteredOrganizations.value.has(owner.organizationName)
-        : false
+    thing.owners.some(
+      (owner) =>
+        owner.isPrimaryOwner &&
+        owner.organizationName &&
+        filteredOrganizations.value.has(owner.organizationName)
     )
   const siteTypeValid =
     selectedSiteTypes.value.length === 0 ||
@@ -149,6 +153,6 @@ function clearFilters() {
 }
 
 onMounted(async () => {
-  await thingStore.fetchThings()
+  await fetchThings()
 })
 </script>

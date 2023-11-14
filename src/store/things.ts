@@ -1,4 +1,3 @@
-// store/thingStore.ts
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { Thing } from '@/types'

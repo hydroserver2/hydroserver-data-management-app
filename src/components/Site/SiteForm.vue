@@ -218,8 +218,10 @@ import { siteTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import Notification from '@/store/notifications'
+import { storeToRefs } from 'pinia'
 
-const thingStore = useThingStore()
+const { fetchThings, updateThing, createThing } = useThingStore()
+const { things } = storeToRefs(useThingStore())
 const photoStore = usePhotosStore()
 const props = defineProps({ thingId: String })
 const emit = defineEmits(['close'])
@@ -298,12 +300,12 @@ function removeExistingPhoto(photoId: string) {
 }
 
 async function populateThing(id: string) {
-  await thingStore.fetchThings()
-  Object.assign(thing, thingStore.things[id])
+  await fetchThings()
+  Object.assign(thing, things.value[id])
   if (thing.latitude && thing.longitude)
     mapOptions.value = {
       center: { lat: thing.latitude, lng: thing.longitude },
-      zoom: 10,
+      zoom: 15,
       mapTypeId: 'satellite',
     }
   loaded.value = true
@@ -321,14 +323,14 @@ async function uploadThing() {
   if (thing) {
     if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
     if (props.thingId) {
-      await thingStore.updateThing(thing)
+      await updateThing(thing)
       await photoStore.updatePhotos(
         props.thingId,
         newPhotos.value,
         photosToDelete.value
       )
     } else {
-      const newThing = await thingStore.createThing(thing)
+      const newThing = await createThing(thing)
       if (newPhotos.value)
         await photoStore.updatePhotos(newThing.id, newPhotos.value, [])
     }

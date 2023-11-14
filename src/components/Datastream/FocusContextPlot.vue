@@ -3,7 +3,7 @@
     <v-card-title>
       <div class="d-flex pt-2">
         <h5 class="flex-grow-1 pl-4 text-center text-h5">
-          Datastream for {{ thing?.name }}
+          Datastream for {{ things[thingId]?.name }}
         </h5>
         <v-icon @click="$emit('close')">mdi-close</v-icon>
       </div>
@@ -38,13 +38,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useDatastream } from '@/composables/useDatastream'
-import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
 import { DataArray } from '@/types'
 import { calculateEffectiveStartTime } from '@/utils/observationsUtils'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
+import { useThingStore } from '@/store/things'
+import { storeToRefs } from 'pinia'
 
 const obsStore = useObservationStore()
 const obs72Store = useObservationsLast72Hours()
@@ -70,7 +71,7 @@ const timeSelections = [
 const selectedTime = ref(72)
 const emit = defineEmits(['close'])
 
-const { thing } = useThing(props.thingId)
+const { things } = storeToRefs(useThingStore())
 const { datastream } = useDatastream(props.thingId, props.datastreamId)
 
 let focusChart = ref<any>(null)

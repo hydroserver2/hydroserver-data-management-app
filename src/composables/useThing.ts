@@ -3,9 +3,11 @@ import { Thing } from '@/types'
 import { computed, ref, onMounted } from 'vue'
 
 import router from '@/router/router'
+import { storeToRefs } from 'pinia'
 
 export function useThing(thingId: string) {
-  const thingStore = useThingStore()
+  const { things } = storeToRefs(useThingStore())
+  const { deleteThing, fetchThingById, updateThingPrivacy } = useThingStore()
 
   const deleteInput = ref('')
   const isRegisterModalOpen = ref(false)
@@ -17,19 +19,14 @@ export function useThing(thingId: string) {
     isAccessControlModalOpen.value = true
   }
 
-  const thing = computed(() => thingStore.things[thingId] as unknown as Thing)
-
-  //TODO: Find a better way to get GoogleMaps to reload on thing change
-  const stringThing = computed(
-    () => thingStore.things[thingId] as unknown as string
-  )
+  const thing = computed(() => things.value[thingId] as unknown as Thing)
 
   const mapOptions = computed(() => {
-    if (thingStore.things[thingId])
+    if (things.value[thingId])
       return {
         center: {
-          lat: thingStore.things[thingId].latitude,
-          lng: thingStore.things[thingId].longitude,
+          lat: things.value[thingId].latitude,
+          lng: things.value[thingId].longitude,
         },
         zoom: 16,
         mapTypeId: 'satellite',
@@ -83,14 +80,17 @@ export function useThing(thingId: string) {
         value: owners
           .map(
             (owner) =>
-              (owner.firstName + ' ' + owner.lastName + (owner.organizationName ? `: ${owner.organizationName}` : ''))
+              owner.firstName +
+              ' ' +
+              owner.lastName +
+              (owner.organizationName ? `: ${owner.organizationName}` : '')
           )
           .join(', '),
       },
     ]
   })
 
-  async function deleteThing() {
+  async function OnDeleteThing() {
     if (!thing.value) {
       console.error('Site could not be found.')
       return
@@ -99,16 +99,16 @@ export function useThing(thingId: string) {
       console.error('Site name does not match.')
       return
     }
-    await thingStore.deleteThing(thingId)
+    await deleteThing(thingId)
     await router.push('/sites')
   }
 
   async function toggleSitePrivacy() {
-    await thingStore.updateThingPrivacy(thingId, thing.value.isPrivate)
+    await updateThingPrivacy(thingId, thing.value.isPrivate)
   }
 
   onMounted(async () => {
-    await thingStore.fetchThingById(thingId)
+    await fetchThingById(thingId)
   })
 
   return {
@@ -116,12 +116,11 @@ export function useThing(thingId: string) {
     thing,
     mapOptions,
     deleteInput,
-    deleteThing,
+    OnDeleteThing,
     thingProperties,
     isRegisterModalOpen,
     isDeleteModalOpen,
     isAccessControlModalOpen,
     switchToAccessControlModal,
-    stringThing,
   }
 }

@@ -1,12 +1,8 @@
 import { Thing } from '@/types'
 
-type MarkerData = Thing
 let infoWindow: google.maps.InfoWindow | null = null
 
-export const loadMarkers = (
-  things: MarkerData[],
-  map: google.maps.Map | null
-) => {
+export const loadMarkers = (things: Thing[], map: google.maps.Map | null) => {
   if (!things || !map) return []
 
   map.addListener('click', () => {
@@ -18,7 +14,7 @@ export const loadMarkers = (
     .filter((marker): marker is google.maps.Marker => marker !== null)
 }
 
-const createMarker = (markerData: MarkerData, map: google.maps.Map | null) => {
+const createMarker = (markerData: Thing, map: google.maps.Map | null) => {
   if (!markerData || !map || !markerData.latitude || !markerData.longitude)
     return null
   const marker = new google.maps.Marker({
@@ -37,7 +33,7 @@ const createMarker = (markerData: MarkerData, map: google.maps.Map | null) => {
   return marker
 }
 
-function generateMarkerContent(markerData: MarkerData): string {
+function generateMarkerContent(markerData: Thing): string {
   const primaryOwner = markerData.owners.find(
     (owner: any) => owner.isPrimaryOwner
   )

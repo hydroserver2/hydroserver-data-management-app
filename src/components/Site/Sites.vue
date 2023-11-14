@@ -1,10 +1,6 @@
 <template>
   <div class="mb-8 flex-shrink-0" style="height: 25rem">
-    <GoogleMap
-      v-if="thingStore.ownedThings"
-      :key="thingStore.ownedThings"
-      :things="thingStore.ownedThings"
-    ></GoogleMap>
+    <GoogleMap v-if="ownedThings" :things="ownedThings"></GoogleMap>
   </div>
 
   <v-container>
@@ -24,9 +20,9 @@
     </v-row>
 
     <v-data-table
-      v-if="thingStore.ownedThings && thingStore.ownedThings.length"
+      v-if="ownedThings?.length"
       :headers="headers"
-      :items="thingStore.ownedThings"
+      :items="ownedThings"
       hover
       item-value="id"
       class="elevation-3 owned-sites-table"
@@ -46,8 +42,10 @@ import SiteForm from '@/components/Site/SiteForm.vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { useThingStore } from '@/store/things'
+import { storeToRefs } from 'pinia'
 
-const thingStore = useThingStore()
+const { fetchThings } = useThingStore()
+const { ownedThings } = storeToRefs(useThingStore())
 const showSiteForm = ref(false)
 const router = useRouter()
 
@@ -71,5 +69,5 @@ const onRowClick = (event: Event, item: any) => {
   router.push({ name: 'SiteDetails', params: { id: thing.id } })
 }
 
-onMounted(async () => thingStore.fetchThings())
+onMounted(async () => fetchThings())
 </script>

@@ -7,11 +7,7 @@
     </v-row>
     <v-row v-if="thing" style="height: 25rem">
       <v-col>
-        <GoogleMap
-          :key="stringThing"
-          :things="[thing]"
-          :mapOptions="mapOptions"
-        />
+        <GoogleMap :things="[thing]" :mapOptions="mapOptions" />
       </v-col>
     </v-row>
     <v-row class="justify-start" align="center">
@@ -77,7 +73,7 @@
                   v-model="deleteInput"
                   label="Site name"
                   solo
-                  @keydown.enter.prevent="deleteThing"
+                  @keydown.enter.prevent="OnDeleteThing"
                 ></v-text-field>
               </v-form>
             </v-card-text>
@@ -86,7 +82,7 @@
               <v-btn-cancel @click="isDeleteModalOpen = false"
                 >Cancel</v-btn-cancel
               >
-              <v-btn-delete color="delete" @click="deleteThing"
+              <v-btn-delete color="delete" @click="OnDeleteThing"
                 >Delete</v-btn-delete
               >
             </v-card-actions>
@@ -195,10 +191,9 @@ const { isOwner } = useThingOwnership(thingId)
 
 const {
   thing,
-  stringThing,
   mapOptions,
   deleteInput,
-  deleteThing,
+  OnDeleteThing,
   thingProperties,
   isRegisterModalOpen,
   isDeleteModalOpen,
