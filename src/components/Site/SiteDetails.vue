@@ -92,16 +92,7 @@
     </v-row>
     <v-row>
       <v-col cols="12" md="8">
-        <v-data-table class="elevation-2">
-          <tbody>
-            <tr v-for="property in thingProperties" :key="property.label">
-              <td><i :class="property.icon"></i></td>
-              <td>{{ property.label }}</td>
-              <td>{{ property.value }}</td>
-            </tr>
-          </tbody>
-          <template v-slot:bottom></template>
-        </v-data-table>
+        <SiteDetailsTable :thing-id="thingId" />
       </v-col>
 
       <v-col cols="12" md="4">
@@ -180,6 +171,7 @@ import DatastreamTable from '../Datastream/DatastreamTable.vue'
 import { useThingStore } from '@/store/things'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
+import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 
 const thingId = useRoute().params.id.toString()
 const photoStore = usePhotosStore()
@@ -228,57 +220,6 @@ const mapOptions = computed(() => {
       zoom: 16,
       mapTypeId: 'satellite',
     }
-})
-
-const thingProperties = computed(() => {
-  if (!thing.value) return []
-  const {
-    id,
-    samplingFeatureCode,
-    latitude,
-    longitude,
-    elevation_m,
-    description,
-    siteType,
-    state,
-    county,
-    isPrivate,
-    owners,
-  } = thing.value
-
-  return [
-    { icon: 'fas fa-id-badge', label: 'ID', value: id },
-    {
-      icon: 'fas fa-barcode',
-      label: 'Site Code',
-      value: samplingFeatureCode,
-    },
-    { icon: 'fas fa-map', label: 'Latitude', value: latitude },
-    { icon: 'fas fa-map', label: 'Longitude', value: longitude },
-    { icon: 'fas fa-mountain', label: 'Elevation', value: elevation_m },
-    { icon: 'fas fa-file-alt', label: 'Description', value: description },
-    { icon: 'fas fa-map-pin', label: 'Site Type', value: siteType },
-    { icon: 'fas fa-flag-usa', label: 'State', value: state },
-    { icon: 'fas fa-flag-usa', label: 'County', value: county },
-    {
-      icon: isPrivate ? 'fas fa-lock' : 'fas fa-globe',
-      label: 'Privacy',
-      value: isPrivate ? 'Private' : 'Public',
-    },
-    {
-      icon: 'fas fa-user',
-      label: 'Site Owners',
-      value: owners
-        .map(
-          (owner) =>
-            owner.firstName +
-            ' ' +
-            owner.lastName +
-            (owner.organizationName ? `: ${owner.organizationName}` : '')
-        )
-        .join(', '),
-    },
-  ]
 })
 
 onMounted(async () => {
