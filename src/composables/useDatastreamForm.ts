@@ -52,7 +52,10 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
 
   onMounted(async () => {
     await datastreamStore.fetchDatastreams()
-    if (datastreamId) populateForm(datastreamId)
+    if (datastreamId) {
+      populateForm(datastreamId)
+      datastream.id = datastreamId
+    }
   })
 
   return {
