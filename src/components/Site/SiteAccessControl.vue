@@ -171,12 +171,11 @@
 </template>
 
 <script setup lang="ts">
-import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useThingStore } from '@/store/things'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -184,10 +183,18 @@ const props = defineProps<{
   thingId: string
 }>()
 
-const { addSecondaryOwner, transferPrimaryOwnership, removeOwner } =
-  useThingStore()
-
 const { isPrimaryOwner } = useThingOwnership(props.thingId)
+
+const {
+  addSecondaryOwner,
+  transferPrimaryOwnership,
+  removeOwner,
+  updateThingPrivacy,
+} = useThingStore()
+const { things } = storeToRefs(useThingStore())
+
+const thing = computed(() => things.value[props.thingId])
+
 const newPrimaryOwnerEmail = ref('')
 const showPrimaryOwnerConfirmation = ref(false)
 const newOwnerEmail = ref('')
@@ -211,7 +218,9 @@ async function onRemoveOwner(email: string) {
   if (email) await removeOwner(props.thingId, email)
 }
 
-const { thing, toggleSitePrivacy } = useThing(props.thingId)
+async function toggleSitePrivacy() {
+  await updateThingPrivacy(props.thingId, thing.value.isPrivate)
+}
 
 const emitClose = () => emits('close')
 </script>

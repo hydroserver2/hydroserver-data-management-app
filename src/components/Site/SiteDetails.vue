@@ -73,7 +73,7 @@
                   v-model="deleteInput"
                   label="Site name"
                   solo
-                  @keydown.enter.prevent="OnDeleteThing"
+                  @keydown.enter.prevent="onDeleteThing"
                 ></v-text-field>
               </v-form>
             </v-card-text>
@@ -82,7 +82,7 @@
               <v-btn-cancel @click="isDeleteModalOpen = false"
                 >Cancel</v-btn-cancel
               >
-              <v-btn-delete color="delete" @click="OnDeleteThing"
+              <v-btn-delete color="delete" @click="onDeleteThing"
                 >Delete</v-btn-delete
               >
             </v-card-actions>
@@ -172,12 +172,14 @@
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
-import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
+import { useThingStore } from '@/store/things'
+import { storeToRefs } from 'pinia'
+import router from '@/router/router'
 
 const thingId = useRoute().params.id.toString()
 const photoStore = usePhotosStore()
@@ -189,19 +191,98 @@ const hasPhotos = computed(() => {
 
 const { isOwner } = useThingOwnership(thingId)
 
-const {
-  thing,
-  mapOptions,
-  deleteInput,
-  OnDeleteThing,
-  thingProperties,
-  isRegisterModalOpen,
-  isDeleteModalOpen,
-  isAccessControlModalOpen,
-  switchToAccessControlModal,
-} = useThing(thingId)
+const isRegisterModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const isAccessControlModalOpen = ref(false)
+const deleteInput = ref('')
+
+function switchToAccessControlModal() {
+  isDeleteModalOpen.value = false
+  isAccessControlModalOpen.value = true
+}
+
+async function onDeleteThing() {
+  if (!thing.value) {
+    console.error('Site could not be found.')
+    return
+  }
+  if (deleteInput.value !== thing.value.name) {
+    console.error('Site name does not match.')
+    return
+  }
+  await deleteThing(thingId)
+  await router.push('/sites')
+}
+
+const { things } = storeToRefs(useThingStore())
+const { deleteThing, fetchThingById } = useThingStore()
+const thing = computed(() => things.value[thingId])
+
+const mapOptions = computed(() => {
+  if (things.value[thingId])
+    return {
+      center: {
+        lat: things.value[thingId].latitude,
+        lng: things.value[thingId].longitude,
+      },
+      zoom: 16,
+      mapTypeId: 'satellite',
+    }
+})
+
+const thingProperties = computed(() => {
+  if (!thing.value) return []
+  const {
+    id,
+    samplingFeatureCode,
+    latitude,
+    longitude,
+    elevation_m,
+    description,
+    siteType,
+    state,
+    county,
+    isPrivate,
+    owners,
+  } = thing.value
+
+  return [
+    { icon: 'fas fa-id-badge', label: 'ID', value: id },
+    {
+      icon: 'fas fa-barcode',
+      label: 'Site Code',
+      value: samplingFeatureCode,
+    },
+    { icon: 'fas fa-map', label: 'Latitude', value: latitude },
+    { icon: 'fas fa-map', label: 'Longitude', value: longitude },
+    { icon: 'fas fa-mountain', label: 'Elevation', value: elevation_m },
+    { icon: 'fas fa-file-alt', label: 'Description', value: description },
+    { icon: 'fas fa-map-pin', label: 'Site Type', value: siteType },
+    { icon: 'fas fa-flag-usa', label: 'State', value: state },
+    { icon: 'fas fa-flag-usa', label: 'County', value: county },
+    {
+      icon: isPrivate ? 'fas fa-lock' : 'fas fa-globe',
+      label: 'Privacy',
+      value: isPrivate ? 'Private' : 'Public',
+    },
+    {
+      icon: 'fas fa-user',
+      label: 'Site Owners',
+      value: owners
+        .map(
+          (owner) =>
+            owner.firstName +
+            ' ' +
+            owner.lastName +
+            (owner.organizationName ? `: ${owner.organizationName}` : '')
+        )
+        .join(', '),
+    },
+  ]
+})
 
 onMounted(async () => {
   photoStore.fetchPhotos(thingId)
+  await fetchThingById(thingId)
 })
 </script>
