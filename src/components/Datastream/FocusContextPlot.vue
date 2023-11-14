@@ -42,9 +42,9 @@ import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
 import { DataArray } from '@/types'
-import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { calculateEffectiveStartTime } from '@/utils/observationsUtils'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
+import { api } from '@/services/api'
 
 const obsStore = useObservationStore()
 const obs72Store = useObservationsLast72Hours()
@@ -73,14 +73,23 @@ const emit = defineEmits(['close'])
 const { thing } = useThing(props.thingId)
 const { datastream } = useDatastream(props.thingId, props.datastreamId)
 
-const { getUnitAttrById, getObservedPropertyAttrById } = usePrimaryOwnerData(
-  props.thingId
-)
-
 let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
+let yAxisLabel = ''
 
-function drawPlot(dataArray: DataArray) {
+const fetchUnit = api.getUnit(datastream.value.unitId).catch((error) => {
+  console.error('Failed to fetch Unit:', error)
+  return null
+})
+
+const fetchObservedProperty = api
+  .getObservedProperty(datastream.value.observedPropertyId)
+  .catch((error) => {
+    console.error('Failed to fetch ObservedProperty:', error)
+    return null
+  })
+
+async function drawPlot(dataArray: DataArray) {
   // Observable Plot expects an array of objects so convert
   const data = dataArray.map(([dateString, value]) => ({
     date: new Date(dateString),
@@ -88,16 +97,6 @@ function drawPlot(dataArray: DataArray) {
   }))
 
   if (focusChart.value) {
-    const unitSymbol = datastream.value.unitId
-      ? `(${getUnitAttrById(datastream.value.unitId, 'symbol')})`
-      : ''
-
-    const yAxisLabel = datastream.value
-      ? `${getObservedPropertyAttrById(
-          datastream.value.observedPropertyId
-        )} ${unitSymbol} `
-      : ''
-
     const focusSVG = focus(data, yAxisLabel)
     focusChart.value.innerHTML = ''
     focusChart.value.appendChild(focusSVG)
@@ -137,6 +136,8 @@ onMounted(async () => {
   const startTime = await getStartTime(72)
   if (!datastream.value.phenomenonEndTime) return
   await obs72Store.getObservationsSince(datastream.value.id, startTime!)
+  const [unit, OP] = await Promise.all([fetchUnit, fetchObservedProperty])
+  yAxisLabel = datastream.value ? `${OP?.name} (${unit?.symbol}) ` : ''
   drawPlot(obs72Store.observations[datastream.value.id])
 })
 </script>

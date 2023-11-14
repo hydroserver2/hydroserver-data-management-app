@@ -199,7 +199,7 @@
               <v-autocomplete
                 v-model="datastream.timeAggregationIntervalUnitsId"
                 label="Select time aggregation unit *"
-                :items="unitStore.timeUnits"
+                :items="timeUnits"
                 item-title="name"
                 item-value="id"
                 :rules="rules.required"
@@ -233,7 +233,7 @@
               <v-autocomplete
                 v-model="datastream.intendedTimeSpacingUnitsId"
                 label="Select intended time spacing unit"
-                :items="unitStore.timeUnits"
+                :items="timeUnits"
                 item-title="name"
                 item-value="id"
                 no-data-text="No available units"
@@ -277,6 +277,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
@@ -291,10 +292,10 @@ import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import { Datastream } from '@/types'
-import { useThingStore } from '@/store/things'
+import { api } from '@/services/api'
 
-const unitStore = useUnitStore()
-const thingStore = useThingStore()
+const { sortUnits, setUnits } = useUnitStore()
+const { timeUnits } = storeToRefs(useUnitStore())
 
 const route = useRoute()
 const thingId = route.params.id.toString()
@@ -326,9 +327,13 @@ const handleMetadataUploaded = async (
 
 onMounted(async () => {
   window.scrollTo(0, 0)
-  // TODO: Get all the metadata for the primary owner of this datastream
-  // and the master list metadata
-  await unitStore.fetchUnits()
+  try {
+    const fetchedUnits = await api.fetchUnits()
+    setUnits(fetchedUnits)
+    sortUnits()
+  } catch (error) {
+    console.error('Error fetching units from DB.', error)
+  }
 })
 </script>
 
