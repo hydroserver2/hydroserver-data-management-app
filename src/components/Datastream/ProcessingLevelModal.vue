@@ -50,10 +50,10 @@
           </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="$emit('close')">Cancel</v-btn>
-            <v-btn color="primary" type="submit">{{
+            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+            <v-btn-primary type="submit">{{
               isEdit ? 'Update' : 'Save'
-            }}</v-btn>
+            }}</v-btn-primary>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { useProcessingLevelStore } from '@/store/processingLevels'
-import { useProcessingLevels } from '@/composables/useMetadata'
+import { useProcessingLevelModals } from '@/composables/useMetadataModals'
 
 const plStore = useProcessingLevelStore()
 const props = defineProps({ id: String })
@@ -77,7 +77,7 @@ const {
   myForm,
   valid,
   selectedEntity: processingLevel,
-} = useProcessingLevels(props.id)
+} = useProcessingLevelModals(props.id)
 
 async function uploadProcessingLevel() {
   await myForm.value?.validate()

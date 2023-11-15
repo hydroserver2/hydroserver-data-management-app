@@ -13,8 +13,9 @@
       class="elevation-3"
     >
       <template v-slot:top>
-        <v-toolbar flat>
+        <v-toolbar flat color="indigo">
           <v-text-field
+            class="mx-2"
             v-model="search"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -22,20 +23,20 @@
             hide-details
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn
-            prepend-icon="mdi-download-circle"
-            color="primary"
+          <v-btn-add
+            prepend-icon="mdi-download"
+            color="white"
             variant="elevated"
             :to="{
               name: 'HydroLoader',
             }"
           >
             Download Streaming Data Loader
-          </v-btn>
+          </v-btn-add>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn
+        <v-icon
           icon="mdi-delete"
           @click="handleDeleteDataLoader(item.raw.id)"
         />
@@ -62,14 +63,15 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="confirmDeleteOpen = false"> Cancel </v-btn>
-          <v-btn
-            color="red"
+          <v-btn-cancel @click="confirmDeleteOpen = false">
+            Cancel
+          </v-btn-cancel>
+          <v-btn-delete
             :disabled="dataLoaders.updatingDataLoader.value"
             @click="handleConfirmDeleteDataLoader()"
           >
             Delete
-          </v-btn>
+          </v-btn-delete>
         </v-card-actions>
       </v-card>
     </v-dialog>

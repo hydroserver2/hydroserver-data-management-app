@@ -56,10 +56,10 @@
           </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="$emit('close')">Cancel</v-btn>
-            <v-btn color="primary" type="submit">{{
+            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+            <v-btn-primary type="submit">{{
               isEdit ? 'Update' : 'Save'
-            }}</v-btn>
+            }}</v-btn-primary>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { rules } from '@/utils/rules'
-import { useObservedProperties } from '@/composables/useMetadata'
+import { useObservedPropertyModals } from '@/composables/useMetadataModals'
 import { OPVariableTypes, OPNameTypes } from '@/vocabularies'
 
 const OPNames = Object.keys(OPNameTypes)
@@ -84,7 +84,7 @@ const {
   myForm,
   valid,
   selectedEntity: observedProperty,
-} = useObservedProperties(props.id)
+} = useObservedPropertyModals(props.id)
 
 const handleNameUpdated = () => {
   const name = observedProperty.value.name

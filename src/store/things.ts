@@ -118,7 +118,7 @@ export const useThingStore = defineStore('things', {
     },
     async fetchPrimaryOwnerMetadataByThingId(id: string) {
       try {
-        const data = await api.fetch(ENDPOINTS.THINGS.METADATA(id))
+        const data = await api.fetch(ENDPOINTS.THINGS.USER_METADATA(id))
         this.$patch({ POMetadata: { ...this.POMetadata, [id]: data } })
       } catch (error) {
         console.error('Error fetching primary owner metadata', error)

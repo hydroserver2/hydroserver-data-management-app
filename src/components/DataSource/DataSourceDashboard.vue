@@ -13,8 +13,9 @@
       class="elevation-3"
     >
       <template v-slot:top>
-        <v-toolbar :flat="true">
+        <v-toolbar :flat="true" color="blue-grey">
           <v-text-field
+            class="mx-2"
             v-model="search"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -22,27 +23,27 @@
             hide-details
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn
-            color="secondary"
+          <v-btn-add
+            color="white"
             prepend-icon="mdi-plus"
             variant="elevated"
             @click="handleCreateDataSource"
           >
             Add Data Source
-          </v-btn>
+          </v-btn-add>
         </v-toolbar>
       </template>
       <template v-slot:item.status="{ item }">
-        <DataSourceStatus :status="item.columns.status" :paused="null"/>
+        <DataSourceStatus :status="item.columns.status" :paused="null" />
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn
+        <v-icon
           v-if="item.raw.paused === true"
           :disabled="dataSources.updatingDataSource.value"
           icon="mdi-play"
           @click="handleTogglePaused(item.raw.id)"
         />
-        <v-btn
+        <v-icon
           v-else
           :disabled="dataSources.updatingDataSource.value"
           icon="mdi-pause"
@@ -50,7 +51,7 @@
         />
         <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-dots-vertical" />
+            <v-icon v-bind="props" icon="mdi-dots-vertical" />
           </template>
           <v-list>
             <v-list-item
@@ -97,14 +98,16 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="confirmDeleteOpen = false"> Cancel </v-btn>
-          <v-btn
+          <v-btn-cancel @click="confirmDeleteOpen = false">
+            Cancel
+          </v-btn-cancel>
+          <v-btn-delete
             color="red"
             :disabled="dataSources.updatingDataSource.value"
             @click="handleConfirmDeleteDataSource()"
           >
             Delete
-          </v-btn>
+          </v-btn-delete>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -115,7 +118,7 @@
 import { ref } from 'vue'
 import { useDataSources } from '@/composables/useDataSources'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
-import DataSourceStatus from "@/components/DataSource/DataSourceStatus.vue";
+import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 
 const dataSources = useDataSources()
 
@@ -125,9 +128,9 @@ const confirmDeleteOpen = ref(false)
 
 async function handleTogglePaused(dataSourceId: any) {
   dataSources.selectedDataSource.value = dataSourceId
-  await dataSources.togglePaused().then(
-    dataSources.selectedDataSource.value = null
-  )
+  await dataSources
+    .togglePaused()
+    .then((dataSources.selectedDataSource.value = null))
 }
 
 function handleCreateDataSource() {
@@ -166,7 +169,7 @@ const headers = [
     title: 'Data Loader',
     align: 'start',
     sortable: true,
-    key: 'dataLoaderName'
+    key: 'dataLoaderName',
   },
   {
     title: 'Status',

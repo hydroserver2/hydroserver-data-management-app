@@ -126,8 +126,10 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn v-if="hasCancelButton" @click="emit('close')">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" type="submit">Save</v-btn>
+          <v-btn-cancel v-if="hasCancelButton" @click="emit('close')"
+            >Cancel</v-btn-cancel
+          >
+          <v-btn-primary type="submit">Save</v-btn-primary>
         </v-card-actions>
       </v-form>
     </v-card-text>

@@ -55,10 +55,10 @@
           </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="$emit('close')">Cancel</v-btn>
-            <v-btn color="primary" type="submit">{{
+            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+            <v-btn-primary type="submit">{{
               isEdit ? 'Update' : 'Save'
-            }}</v-btn>
+            }}</v-btn-primary>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { useUnitStore } from '@/store/unit'
-import { useUnits } from '@/composables/useMetadata'
+import { useUnitModals } from '@/composables/useMetadataModals'
 
 const unitStore = useUnitStore()
 const props = defineProps({ id: String })
@@ -81,7 +81,7 @@ const {
   myForm,
   valid,
   selectedEntity: unit,
-} = useUnits(props.id)
+} = useUnitModals(props.id)
 
 async function uploadUnit() {
   await myForm.value?.validate()

@@ -24,13 +24,15 @@ export const useAuthStore = defineStore({
     sendingVerificationEmail: false,
     loggedIn$: new Subject<void>(),
   }),
+  persist: true,
   getters: {
     isLoggedIn: (state) => !!state.accessToken,
     isVerified: (state) => state.user.isVerified,
   },
   actions: {
     resetState() {
-      useResetStore().all()
+      const resetStore = useResetStore()
+      resetStore.all()
       localStorage.clear()
     },
     async login(email: string, password: string) {
@@ -49,7 +51,7 @@ export const useAuthStore = defineStore({
         this.user = user
         await router.push({ name: 'Sites' })
       } catch (error) {
-        console.error('Error logging in', error)
+        console.error('Error logging in.', error)
       }
     },
     async logout() {
@@ -57,28 +59,25 @@ export const useAuthStore = defineStore({
         this.resetState()
         router.push({ name: 'Login' })
       } catch (error) {
-        console.error('Error logging out', error)
+        console.error('Error logging out.', error)
       }
     },
     isRefreshTokenExpired() {
-      if (!this.refreshToken) return false
-      const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
-      const currentTime = Date.now() / 1000
-      return decodedToken.exp < currentTime
-    },
-    checkTokenExpiry() {
-      if (this.isRefreshTokenExpired()) {
-        this.logout()
-        Notification.toast({
-          message: 'Session expired. Please login',
-          type: 'info',
-        })
+      if (!this.isLoggedIn || !this.refreshToken) return false
+
+      try {
+        const decodedToken = jwtDecode(this.refreshToken) as JWTPayload
+        const currentTime = Date.now() / 1000
+        return decodedToken.exp < currentTime
+      } catch (e) {
+        console.error('Invalid refresh token:', e)
+        return true
       }
     },
     async createUser(user: User) {
       try {
+        this.resetState()
         const data = await api.post(ENDPOINTS.USER, user)
-        // useResetStore().things()
         this.user = data.user
         this.accessToken = data.access
         this.refreshToken = data.refresh
@@ -99,6 +98,7 @@ export const useAuthStore = defineStore({
     },
     async activateAccount(uid: string, token: string) {
       try {
+        this.resetState()
         const data = await api.post(ENDPOINTS.ACCOUNT.ACTIVATE, {
           uid: uid,
           token: token,
@@ -118,8 +118,9 @@ export const useAuthStore = defineStore({
     async updateUser(user: User) {
       try {
         const data = await api.patch(ENDPOINTS.USER, user, this.user)
-        // things.organizations could be affected for many things so just invalidate cache
-        // useResetStore().things()
+        // things.organizations won't automatically update so invalidate cache
+        const resetStore = useResetStore()
+        resetStore.things()
         this.user = data as User
         if (!user.isVerified) {
           await router.push({ name: 'VerifyEmail' })

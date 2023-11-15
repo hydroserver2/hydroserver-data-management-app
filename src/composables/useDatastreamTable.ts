@@ -4,7 +4,7 @@ import { onMounted, ref, Ref, watch } from 'vue'
 import { Datastream } from '@/types'
 import Notification from '@/store/notifications'
 
-export function useDatastreams(thingId: string) {
+export function useDatastreamTable(thingId: string) {
   const datastreamStore = useDatastreamStore()
   const selectedDatastream: Ref<Datastream | null> = ref(null)
   const isDeleteModalOpen = ref(false)

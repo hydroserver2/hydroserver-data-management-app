@@ -31,10 +31,10 @@
           </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="$emit('close')">Cancel</v-btn>
-            <v-btn color="primary" type="submit">{{
+            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+            <v-btn-primary type="submit">{{
               isEdit ? 'Update' : 'Save'
-            }}</v-btn>
+            }}</v-btn-primary>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
-import { useResultQualifiers } from '@/composables/useMetadata'
+import { useResultQualifierModals } from '@/composables/useMetadataModals'
 
 const rqStore = useResultQualifierStore()
 const props = defineProps({ id: String })
@@ -56,7 +56,7 @@ const {
   myForm,
   valid,
   selectedEntity: resultQualifier,
-} = useResultQualifiers(props.id)
+} = useResultQualifierModals(props.id)
 
 async function uploadResultQualifier() {
   await myForm.value?.validate()
