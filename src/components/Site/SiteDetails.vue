@@ -59,14 +59,14 @@
       <v-col cols="12" md="4">
         <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
-            v-for="photo in photoStore.photos[thingId]"
+            v-for="photo in photos[thingId]"
             :key="photo.id"
             :src="photo.link"
             cover
           >
           </v-carousel-item>
         </v-carousel>
-        <div v-else-if="photoStore.loading" class="text-center">
+        <div v-else-if="loading" class="text-center">
           <p>
             Your photos are being uploaded. They will appear once the upload is
             complete.
@@ -136,12 +136,16 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 
 const thingId = useRoute().params.id.toString()
-const photoStore = usePhotosStore()
+const { fetchPhotos } = usePhotosStore()
+const { photos, loading } = storeToRefs(usePhotosStore())
 
-const hasPhotos = computed(() => {
-  const photos = photoStore.photos[thingId]
-  return !photoStore.loading && photos && photos.length > 0
-})
+const { deleteThing, fetchThingById } = useThingStore()
+const { things } = storeToRefs(useThingStore())
+const thing = computed(() => things.value[thingId])
+
+const hasPhotos = computed(
+  () => !loading.value && photos.value[thingId]?.length > 0
+)
 
 const { isOwner } = useThingOwnership(thingId)
 
@@ -159,10 +163,6 @@ async function onDeleteThing() {
   await router.push('/sites')
 }
 
-const { things } = storeToRefs(useThingStore())
-const { deleteThing, fetchThingById } = useThingStore()
-const thing = computed(() => things.value[thingId])
-
 const mapOptions = computed(() => {
   if (things.value[thingId])
     return {
@@ -176,7 +176,7 @@ const mapOptions = computed(() => {
 })
 
 onMounted(async () => {
-  photoStore.fetchPhotos(thingId)
-  await fetchThingById(thingId)
+  fetchPhotos(thingId)
+  fetchThingById(thingId)
 })
 </script>
