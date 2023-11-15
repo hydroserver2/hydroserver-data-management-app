@@ -143,7 +143,7 @@
             <v-list-item
               prepend-icon="mdi-download"
               title="Download Data"
-              @click="datastreamStore.downloadDatastream(item.raw.id)"
+              @click="downloadDatastream(item.raw.id)"
             />
           </v-list>
         </v-menu>
@@ -201,11 +201,10 @@ import Sparkline from '@/components/Sparkline.vue'
 import { useDatastreamTable } from '@/composables/useDatastreamTable'
 import { ref } from 'vue'
 import { useThingOwnership } from '@/composables/useThingOwnership'
-import { useDatastreamStore } from '@/store/datastreams'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
+import { api } from '@/services/api'
 
-const datastreamStore = useDatastreamStore()
 const obsStore72 = useObservationsLast72Hours()
 
 const props = defineProps({
@@ -231,6 +230,21 @@ const {
   isDeleteModalOpen: isDSDeleteModalOpen,
   deleteDatastreamInput,
 } = useDatastreamTable(props.thingId)
+
+const downloadDatastream = async (id: string) => {
+  try {
+    const data = await api.downloadDatastreamCSV(id)
+    const blob = new Blob([data], { type: 'text/csv' })
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    link.download = `datastream_${id}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (error) {
+    console.error('Error downloading datastream CSV', error)
+  }
+}
 
 const headers = [
   { title: 'DataStream Info', key: 'info', sortable: true },

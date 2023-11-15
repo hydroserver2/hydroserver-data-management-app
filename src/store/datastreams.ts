@@ -111,21 +111,6 @@ export const useDatastreamStore = defineStore('datastreams', () => {
     }
   }
 
-  const downloadDatastream = async (id: string) => {
-    try {
-      const data = await api.fetch(ENDPOINTS.DATASTREAMS.CSV(id))
-      const blob = new Blob([data], { type: 'text/csv' })
-      const link = document.createElement('a')
-      link.href = window.URL.createObjectURL(blob)
-      link.download = `datastream_${id}.csv`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } catch (error) {
-      console.error('Error downloading datastream CSV', error)
-    }
-  }
-
   return {
     datastreams,
     loaded,
@@ -139,6 +124,5 @@ export const useDatastreamStore = defineStore('datastreams', () => {
     updateDatastream,
     createDatastream,
     deleteDatastream,
-    downloadDatastream,
   }
 })

@@ -49,6 +49,9 @@ export const api = {
       isPrivate: thingPrivacy,
     }),
 
+  downloadDatastreamCSV: async (id: string) =>
+    apiMethods.fetch(`${DS_BASE}/${id}/csv`),
+
   getObservedProperty: async (id: string) =>
     apiMethods.fetch(`${OP_BASE}/${id}`),
 }
