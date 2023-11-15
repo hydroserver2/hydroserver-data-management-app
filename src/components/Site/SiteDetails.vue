@@ -42,48 +42,12 @@
           >Delete Site</v-btn
         >
         <v-dialog v-model="isDeleteModalOpen" width="40rem">
-          <v-card>
-            <v-card-title>
-              <span class="text-h5">Confirm Deletion</span>
-            </v-card-title>
-            <v-card-text>
-              This action will permanently delete the site along with all
-              associated datastreams and observations
-              <strong>for all users of this system</strong>. If you want to keep
-              your data, you can backup to HydroShare or download a local copy
-              before deletion. Alternatively, you can pass ownership of this
-              site to someone else on the
-              <v-btn
-                class="px-0"
-                variant="text"
-                @click="switchToAccessControlModal"
-                >Access Control</v-btn
-              >
-              page.
-            </v-card-text>
-            <v-card-text>
-              Please type the site name (<strong>{{ thing.name }}</strong
-              >) to confirm deletion:
-              <v-form>
-                <v-text-field
-                  class="pt-2"
-                  v-model="deleteInput"
-                  label="Site name"
-                  solo
-                  @keydown.enter.prevent="onDeleteThing"
-                ></v-text-field>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn-cancel @click="isDeleteModalOpen = false"
-                >Cancel</v-btn-cancel
-              >
-              <v-btn-delete color="delete" @click="onDeleteThing"
-                >Delete</v-btn-delete
-              >
-            </v-card-actions>
-          </v-card>
+          <SiteDeleteModal
+            :thing="things[thingId]"
+            @switch-to-access-control="switchToAccessControlModal"
+            @close="isDeleteModalOpen = false"
+            @delete="onDeleteThing"
+          />
         </v-dialog>
       </v-col>
     </v-row>
@@ -169,6 +133,7 @@ import { useThingStore } from '@/store/things'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
+import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 
 const thingId = useRoute().params.id.toString()
 const photoStore = usePhotosStore()
@@ -183,7 +148,6 @@ const { isOwner } = useThingOwnership(thingId)
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-const deleteInput = ref('')
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
@@ -191,14 +155,6 @@ function switchToAccessControlModal() {
 }
 
 async function onDeleteThing() {
-  if (!thing.value) {
-    console.error('Site could not be found.')
-    return
-  }
-  if (deleteInput.value !== thing.value.name) {
-    console.error('Site name does not match.')
-    return
-  }
   await deleteThing(thingId)
   await router.push('/sites')
 }
