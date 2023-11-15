@@ -1,7 +1,7 @@
-import { requestInterceptor } from '@/utils/api/requestInterceptor'
-import { responseInterceptor } from '@/utils/api/responseInterceptor'
-import { toastHandler } from '@/utils/api/toastHandler'
-import { createPatchObject } from '@/utils/api/createPatchObject'
+import { requestInterceptor } from '@/services/requestInterceptor'
+import { responseInterceptor } from '@/services/responseInterceptor'
+import { toastHandler } from '@/services/toastHandler'
+import { createPatchObject } from '@/services/createPatchObject'
 import { useAuthStore } from '@/store/authentication'
 
 async function interceptedFetch(endpoint: string, options: any) {

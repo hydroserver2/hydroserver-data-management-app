@@ -1,4 +1,4 @@
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { Datastream } from '@/types'
 import { useDatastreamStore } from '@/store/datastreams'
 import { VForm } from 'vuetify/components'
@@ -8,7 +8,7 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
   const valid = ref(false)
   const myForm = ref<VForm>()
   const datastreamStore = useDatastreamStore()
-  const selectedDatastreamID = ref(datastreamId)
+  const selectedDatastreamID = ref('')
   const datastream = reactive<Datastream>(new Datastream(thingId))
 
   watch(selectedDatastreamID, async () => {
@@ -38,13 +38,8 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
   })
 
   function populateForm(id: string) {
-    Object.assign(datastream, datastreamStore.getDatastreamById(id))
+    selectedDatastreamID.value = id
     datastream.thingId = thingId
-  }
-
-  async function loadDatastreams() {
-    await datastreamStore.fetchDatastreams()
-    if (datastreamId) populateForm(datastreamId)
   }
 
   async function uploadDatastream() {
@@ -55,7 +50,13 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
     await router.push({ name: 'SiteDetails', params: { id: thingId } })
   }
 
-  onMounted(async () => loadDatastreams())
+  onMounted(async () => {
+    await datastreamStore.fetchDatastreams()
+    if (datastreamId) {
+      populateForm(datastreamId)
+      datastream.id = datastreamId
+    }
+  })
 
   return {
     datastream,

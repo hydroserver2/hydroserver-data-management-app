@@ -28,7 +28,7 @@ export async function handle401(
   options._retry = true
   isRefreshing = true
 
-  const authStore = useAuthStore()
+  const { logout } = useAuthStore()
   try {
     await refreshAccessToken()
     processQueue(null)
@@ -36,7 +36,7 @@ export async function handle401(
   } catch (error) {
     processQueue(error)
     console.log('Session Expired. Logging out')
-    await authStore.logout()
+    await logout()
     return Promise.reject(error)
   } finally {
     isRefreshing = false
@@ -44,22 +44,21 @@ export async function handle401(
 }
 
 async function refreshAccessToken() {
-  const authStore = useAuthStore()
+  const { refreshToken, setTokens } = useAuthStore()
   const options = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      refresh: authStore.refreshToken,
+      refresh: refreshToken,
     }),
   }
   const response = await fetch(ENDPOINTS.ACCOUNT.JWT_REFRESH, options)
 
   if (response.ok) {
     const data = await response.json()
-    authStore.accessToken = data.access
-    authStore.refreshToken = data.refresh
+    setTokens(data.access, data.refresh)
     console.log('access token successfully refreshed')
   } else {
     throw new Error('Session Expired')

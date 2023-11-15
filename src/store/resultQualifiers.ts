@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ResultQualifier } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useResultQualifierStore = defineStore('resultQualifiers', {
@@ -18,7 +18,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', {
       this.resultQualifiers.sort((a, b) => a.code.localeCompare(b.code))
     },
     async fetchResultQualifiers() {
-      if (this.loaded) return
+      // if (this.loaded) return
       try {
         this.resultQualifiers = await api.fetch(ENDPOINTS.RESULT_QUALIFIERS)
         this.sortResultQualifiers()

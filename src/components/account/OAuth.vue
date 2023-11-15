@@ -55,15 +55,26 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
 import { OAuthProvider } from '@/types'
 import { useRoute, useRouter } from 'vue-router'
+import { ENDPOINTS } from '@/constants'
+import Notification from '@/store/notifications'
 import googleImg from '@/assets/google.png'
+import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from '@/store/user'
+import { api } from '@/services/apiMethods'
+
+const APP_URL = import.meta.env.VITE_APP_URL
+let OAuthLoginController = new AbortController()
+
 const route = useRoute()
 const router = useRouter()
 
+const { setTokens } = useAuthStore()
+const { setUser } = useUserStore()
+
 const openLogInDialog = async (provider: OAuthProvider) => {
-  await useAuthStore().OAuthLogin(provider, onLoggedIn)
+  await OAuthLogin(provider, onLoggedIn)
 }
 
 const onLoggedIn = () => {
@@ -72,5 +83,49 @@ const onLoggedIn = () => {
   } else {
     router.push({ name: 'Sites' })
   }
+}
+
+async function OAuthLogin(provider: OAuthProvider, callback?: () => any) {
+  const handleMessage = async (event: MessageEvent) => {
+    if (event.origin !== APP_URL || !event.data.hasOwnProperty('accessToken')) {
+      return
+    }
+
+    if (event.data.accessToken) {
+      setTokens(event.data.accessToken, event.data.refreshToken)
+      try {
+        const user = await api.fetch(ENDPOINTS.USER)
+        setUser(user)
+
+        Notification.toast({
+          message: 'You have logged in!',
+          type: 'success',
+        })
+        callback?.()
+      } catch (e) {
+        console.log('Failed to Log In')
+      }
+    } else {
+      Notification.toast({
+        message: 'Failed to Log In',
+        type: 'error',
+      })
+    }
+  }
+
+  window.open(
+    ENDPOINTS.ACCOUNT.OAUTH_LOGIN(provider),
+    '_blank',
+    'noopener=false'
+  )
+
+  console.info(`User: listening to login window...`)
+
+  // We need to re-instantiate the listener so that it uses current values in `handleMessage`
+  OAuthLoginController.abort()
+  OAuthLoginController = new AbortController()
+  window.addEventListener('message', handleMessage, {
+    signal: OAuthLoginController.signal, // Used to remove the listener
+  })
 }
 </script>

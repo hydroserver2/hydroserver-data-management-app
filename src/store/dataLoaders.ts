@@ -1,19 +1,19 @@
 import { defineStore } from 'pinia'
 import { DataLoader } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
 
 export const useDataLoaderStore = defineStore('dataLoaders', {
   state: () => ({
     dataLoaders: [] as DataLoader[],
-    loaded: false
+    loaded: false,
   }),
   actions: {
     sortDataLoaders() {
       this.dataLoaders.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchDataLoaders(reload = false) {
-      if (this.loaded && !reload) return
+      // if (this.loaded && !reload) return
       this.loaded = false
       try {
         this.dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
@@ -40,10 +40,7 @@ export const useDataLoaderStore = defineStore('dataLoaders', {
     },
     async createDataLoader(dataLoader: DataLoader) {
       try {
-        const data = await api.post(
-          ENDPOINTS.DATA_LOADERS,
-          dataLoader
-        )
+        const data = await api.post(ENDPOINTS.DATA_LOADERS, dataLoader)
         this.dataLoaders.push(data)
         this.sortDataLoaders()
         return data
@@ -54,9 +51,7 @@ export const useDataLoaderStore = defineStore('dataLoaders', {
     async deleteDataLoader(id: string) {
       try {
         await api.delete(ENDPOINTS.DATA_LOADERS.ID(id))
-        this.dataLoaders = this.dataLoaders.filter(
-          (dl) => dl.id !== id
-        )
+        this.dataLoaders = this.dataLoaders.filter((dl) => dl.id !== id)
         this.sortDataLoaders()
       } catch (error) {
         console.error('Error deleting data loader', error)
@@ -66,9 +61,8 @@ export const useDataLoaderStore = defineStore('dataLoaders', {
       const dataLoader = this.dataLoaders.find(
         (dl) => dl.id.toString() === id.toString()
       )
-      if (!dataLoader)
-        throw new Error(`Data Loader with id ${id} not found`)
+      if (!dataLoader) throw new Error(`Data Loader with id ${id} not found`)
       return dataLoader
     },
-  }
+  },
 })

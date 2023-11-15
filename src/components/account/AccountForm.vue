@@ -9,34 +9,34 @@
         ref="myForm"
         v-model="valid"
         validate-on="blur"
-        @submit.prevent="updateUser"
+        @submit.prevent="onUserUpdate"
       >
         <v-row>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.firstName"
+              v-model="userForm.firstName"
               label="First Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.middleName"
+              v-model="userForm.middleName"
               label="Middle Name"
               :rules="rules.name"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.lastName"
+              v-model="userForm.lastName"
               label="Last Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
 
-          <v-col cols="12" v-if="!user.isVerified">
+          <v-col cols="12" v-if="!userForm.isVerified">
             <v-text-field
-              v-model="user.email"
+              v-model="userForm.email"
               label="Email"
               :rules="rules.email"
             ></v-text-field>
@@ -44,7 +44,7 @@
 
           <v-col cols="12" sm="6">
             <v-text-field
-              v-model="user.phone"
+              v-model="userForm.phone"
               v-maska:[phoneMask]
               label="Phone Number"
               :rules="rules.phoneNumber"
@@ -53,7 +53,7 @@
 
           <v-col cols="12" sm="6">
             <v-autocomplete
-              v-model="user.type"
+              v-model="userForm.type"
               label="User Type *"
               :items="userTypes"
               :rules="rules.required"
@@ -61,14 +61,17 @@
           </v-col>
 
           <v-col cols="12">
-            <v-text-field v-model="user.address" label="Address"></v-text-field>
+            <v-text-field
+              v-model="userForm.address"
+              label="Address"
+            ></v-text-field>
           </v-col>
 
           <v-col>
             <v-text-field
-              v-model="user.link"
+              v-model="userForm.link"
               label="User's Link (URL)"
-              :rules="user.link ? rules.urlFormat : []"
+              :rules="userForm.link ? rules.urlFormat : []"
             >
             </v-text-field>
           </v-col>
@@ -81,17 +84,17 @@
           color="primary"
         ></v-switch>
 
-        <v-row v-if="user.organization && showOrg">
+        <v-row v-if="userForm.organization && showOrg">
           <v-col cols="12" sm="8">
             <v-text-field
-              v-model="user.organization.name"
+              v-model="userForm.organization.name"
               label="Organization Name *"
               :rules="rules.requiredName"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
-              v-model="user.organization.code"
+              v-model="userForm.organization.code"
               label="Organization Code *"
               :rules="rules.requiredName"
             ></v-text-field>
@@ -99,24 +102,24 @@
           <v-col cols="12" sm="6">
             <v-autocomplete
               :items="organizationTypes"
-              v-model="user.organization.type"
+              v-model="userForm.organization.type"
               label="Organization Type *"
               :rules="rules.requiredName"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field
-              v-model="user.organization.link"
+              v-model="userForm.organization.link"
               label="Organization Link"
-              :rules="user.organization.link ? rules.urlFormat : []"
+              :rules="userForm.organization.link ? rules.urlFormat : []"
             ></v-text-field>
           </v-col>
           <v-col cols="12">
             <v-textarea
-              v-model="user.organization.description"
+              v-model="userForm.organization.description"
               label="Organization Description"
               :rules="
-                user.organization.description ? rules.maxLength(2000) : []
+                userForm.organization.description ? rules.maxLength(2000) : []
               "
             ></v-textarea>
           </v-col>
@@ -139,37 +142,56 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
-import { useAuthStore } from '@/store/authentication'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
 import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
-
-const phoneMask = { mask: '(###) ###-####' }
-const authStore = useAuthStore()
+import { useUserStore } from '@/store/user'
+import router from '@/router/router'
+import Notification from '@/store/notifications'
+import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/apiMethods'
 
 defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
 })
 
-let user = reactive<User>(JSON.parse(JSON.stringify(authStore.user)))
-const showOrg = ref(!!user.organization)
+const { user, setUser } = useUserStore()
+let userForm = reactive<User>(JSON.parse(JSON.stringify(user)))
 
-watch(showOrg, (newVal) => {
-  if (newVal && !user.organization) user.organization = new Organization()
-  else if (!newVal) user.organization = null
-})
-
+const phoneMask = { mask: '(###) ###-####' }
 const valid = ref(false)
 const myForm = ref<VForm>()
+const showOrg = ref(!!userForm.organization)
+
+watch(showOrg, (newVal) => {
+  if (newVal && !userForm.organization)
+    userForm.organization = new Organization()
+  else if (!newVal) userForm.organization = null
+})
 
 const emit = defineEmits(['close'])
 
-const updateUser = async () => {
+const onUserUpdate = async () => {
   await myForm.value?.validate()
   if (!valid.value) return
-  await authStore.updateUser(user)
+
+  try {
+    userForm = await api.patch(ENDPOINTS.USER, userForm, user)
+    setUser(userForm)
+  } catch (error) {
+    console.error('Error updating user', error)
+  }
+
+  if (!user?.isVerified) {
+    await router.push({ name: 'VerifyEmail' })
+  } else {
+    Notification.toast({
+      message: 'Your changes have been saved.',
+      type: 'success',
+    })
+  }
   emit('close')
 }
 

@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { ObservedProperty } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from './user'
 
 export const useObservedPropertyStore = defineStore('observedProperties', {
   state: () => ({
@@ -11,10 +11,10 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
   }),
   getters: {
     ownedOP(): ObservedProperty[] {
-      const authStore = useAuthStore()
-      if (!authStore.user || !authStore.user.email) return []
+      const { user } = storeToRefs(useUserStore())
+      if (!user.value?.email) return []
       return this.observedProperties.filter(
-        (op) => op.owner === authStore.user.email
+        (op) => op.owner === user.value.email
       )
     },
     unownedOP(): ObservedProperty[] {
@@ -30,7 +30,7 @@ export const useObservedPropertyStore = defineStore('observedProperties', {
       this.observedProperties.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchObservedProperties() {
-      if (this.observedProperties.length > 0) return
+      // if (this.observedProperties.length > 0) return
       try {
         this.observedProperties = await api.fetch(ENDPOINTS.OBSERVED_PROPERTIES)
         this.sortObservedProperties()

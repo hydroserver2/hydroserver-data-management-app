@@ -109,7 +109,7 @@
           <strong v-if="owner.isPrimaryOwner">(Primary)</strong>
           <div v-else>
             <v-btn-delete
-              v-if="isPrimaryOwner || owner.email == authStore.user.email"
+              v-if="isPrimaryOwner || owner.email == user.email"
               @click="removeOwner(owner.email)"
               >Remove</v-btn-delete
             >
@@ -171,11 +171,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
 import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
+import { useUserStore } from '@/store/user'
+import { storeToRefs } from 'pinia'
 
-const authStore = useAuthStore()
+const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
 const props = defineProps<{
   thingId: string

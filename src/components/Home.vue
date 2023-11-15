@@ -14,10 +14,10 @@
         </h4>
       </div>
 
-      <div v-if="authStore.isLoggedIn">
+      <div v-if="isLoggedIn">
         <h5 class="text-h5 mb-8 has-text-shadow">
-          Logged in as {{ authStore.user.firstName }}
-          {{ authStore.user.lastName }}
+          Logged in as {{ user?.firstName }}
+          {{ user?.lastName }}
         </h5>
       </div>
       <div v-else>
@@ -213,8 +213,11 @@ import cirohLogo from '@/assets/CIROH_logo_transparent-min.png'
 import sensorThingsLogo from '@/assets/sensorThings-min.png'
 import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
 import { useAuthStore } from '@/store/authentication'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/store/user'
 
-const authStore = useAuthStore()
+const { isLoggedIn } = storeToRefs(useAuthStore())
+const { user } = storeToRefs(useUserStore())
 </script>
 
 <style scoped lang="scss">

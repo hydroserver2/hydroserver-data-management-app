@@ -1,18 +1,16 @@
-import { defineStore } from 'pinia'
-import { ProcessingLevel, Sensor } from '@/types'
-import { api } from '@/utils/api/apiMethods'
+import { defineStore, storeToRefs } from 'pinia'
+import { Sensor } from '@/types'
+import { api } from '@/services/apiMethods'
 import { ENDPOINTS } from '@/constants'
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from './user'
 
 export const useSensorStore = defineStore('sensor', {
   state: () => ({ sensors: [] as Sensor[], loaded: false }),
   getters: {
     ownedSensors(): Sensor[] {
-      const authStore = useAuthStore()
-      if (!authStore.user || !authStore.user.email) return []
-      return this.sensors.filter(
-        (sensor) => sensor.owner === authStore.user.email
-      )
+      const { user } = storeToRefs(useUserStore())
+      if (!user.value?.email) return []
+      return this.sensors.filter((sensor) => sensor.owner === user.value.email)
     },
     unownedSensors(): Sensor[] {
       return this.sensors.filter((sensor) => sensor.owner == null)
@@ -27,14 +25,14 @@ export const useSensorStore = defineStore('sensor', {
       this.sensors.sort((a, b) => a.name.localeCompare(b.name))
     },
     async fetchSensors() {
-      if (this.sensors.length > 0) return
+      // if (this.sensors.length > 0) return
       try {
         const data = await api.fetch(ENDPOINTS.SENSORS)
         this.sensors = data
         this.sortSensors()
         this.loaded = true
       } catch (error) {
-        console.error('Error fetching units from DB', error)
+        console.error('Error fetching sensors from DB', error)
       }
     },
     async updateSensor(sensor: Sensor) {

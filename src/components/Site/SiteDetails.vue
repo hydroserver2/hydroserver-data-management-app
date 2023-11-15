@@ -160,7 +160,9 @@
       </v-col>
     </v-row>
     <v-row class="pb-5">
-      <DatastreamTable :thing-id="thingId" />
+      <v-col>
+        <DatastreamTable :thing-id="thingId" />
+      </v-col>
     </v-row>
     <v-row v-if="thing?.dataDisclaimer" class="pt-2 pb-8">
       <h6 class="text-h6" style="color: #b71c1c">

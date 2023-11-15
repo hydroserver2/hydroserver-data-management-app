@@ -1,4 +1,4 @@
-import { createPatchObject } from '@/utils/api/createPatchObject'
+import { createPatchObject } from '@/services/createPatchObject'
 import { describe, it, expect } from 'vitest'
 
 describe('createPatchObject', () => {

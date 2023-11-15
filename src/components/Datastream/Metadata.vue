@@ -108,7 +108,7 @@
         <!--    Units Table and Modal-->
         <v-data-table
           :headers="UnitHeaders"
-          :items="unitStore.ownedUnits"
+          :items="ownedUnits"
           class="elevation-3"
         >
           <template v-slot:item.actions="{ item }">
@@ -129,7 +129,7 @@
             itemName="unit"
             :itemID="selectedUnit.id"
             parameter-name="unitId"
-            @delete="deleteUnit"
+            @delete="onUnitDelete"
             @close="isUnitDModalOpen = false"
           ></DeleteModal>
         </v-dialog>
@@ -177,7 +177,7 @@ import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useUnitStore } from '@/store/unit'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import {
   useSensorModals,
@@ -187,11 +187,19 @@ import {
   useResultQualifierModals,
 } from '@/composables/useMetadataModals'
 import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
+import { useDatastreamStore } from '@/store/datastreams'
+import { useThingStore } from '@/store/things'
+import { api } from '@/services/api'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/store/user'
+import { computed } from 'vue'
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
 const plStore = useProcessingLevelStore()
-const unitStore = useUnitStore()
+const { deleteUnit } = useUnitStore()
+const { user } = storeToRefs(useUserStore())
+const { units } = storeToRefs(useUnitStore())
 const rqStore = useResultQualifierStore()
 
 const {
@@ -207,12 +215,26 @@ const {
 const {
   isEntitySelected: isUnitSelected,
   selectedEntity: selectedUnit,
-  deleteSelectedEntity: deleteUnit,
   isCreateEditModalOpen: isUnitCEModalOpen,
   isDeleteModalOpen: isUnitDModalOpen,
   openDialog: openUnitDialog,
   openDeleteDialog: openUnitDeleteDialog,
 } = useUnitModals()
+
+const onUnitDelete = async () => {
+  try {
+    await api.deleteUnit(selectedUnit.value.id)
+    deleteUnit(selectedUnit.value.id)
+  } catch (error) {
+    console.error('Error deleting unit', error)
+  }
+}
+
+const ownedUnits = computed(() =>
+  user.value?.email
+    ? units.value.filter((u) => u.owner === user.value.email)
+    : []
+)
 
 const {
   isEntitySelected: isPLSelected,
@@ -303,6 +325,22 @@ const UnitHeaders = [
   { title: 'Symbol', key: 'symbol' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
+
+const datastreamStore = useDatastreamStore()
+const thingStore = useThingStore()
+const { sortUnits, setUnits } = useUnitStore()
+
+onMounted(async () => {
+  thingStore.fetchThings() // Things are used in the deleteModal
+  await datastreamStore.fetchUsersDatastreams()
+  try {
+    const units = await api.fetchUnits()
+    setUnits(units)
+    sortUnits()
+  } catch (error) {
+    console.error('Error fetching units from DB', error)
+  }
+})
 </script>
 
 <style scoped>
