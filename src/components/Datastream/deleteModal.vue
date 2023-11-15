@@ -46,7 +46,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn-cancel @click="emit('close')">Cancel</v-btn-cancel>
-      <v-btn-delete v-if="!hasDatastreams" @click="emit('delete')"
+      <v-btn-delete v-if="!hasDatastreams" @click="onDelete"
         >Delete</v-btn-delete
       >
     </v-card-actions>
@@ -68,6 +68,11 @@ const props = defineProps({
   itemID: String,
   parameterName: String,
 })
+
+const onDelete = () => {
+  emit('delete')
+  emit('close')
+}
 
 const datastreamsForItem = computed(() => {
   if (props.itemID && props.parameterName) {
@@ -100,9 +105,5 @@ const thingsWithDatastreams = computed(() => {
 
 const hasDatastreams = computed(() => {
   return datastreamsForItem.value && datastreamsForItem.value.length > 0
-})
-
-onMounted(async () => {
-  await datastreamStore.fetchUsersDatastreams()
 })
 </script>

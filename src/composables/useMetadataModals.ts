@@ -16,10 +16,10 @@ import {
 function useMetadata(
   entityStore: any,
   createEntity: () => any,
-  fetchEntities: string,
-  deleteEntity: string,
   getEntityByID: string,
-  id: string | null = null
+  id: string | null = null,
+  fetchEntities: string | null = null,
+  deleteEntity: string | null = null
 ) {
   const isCreateEditModalOpen = ref(false)
   const isDeleteModalOpen = ref(false)
@@ -30,7 +30,7 @@ function useMetadata(
   // selectedId is watched so that when it changes,
   // the form is populated with the data from selectedEntity
   const selectedId = ref(id)
-  const isEntitySelected = ref(false) // TODO: Can probably do without this
+  const isEntitySelected = ref(false)
   const selectedEntity = ref(createEntity())
 
   function openDialog(
@@ -49,6 +49,7 @@ function useMetadata(
 
   async function deleteSelectedEntity() {
     isDeleteModalOpen.value = false
+    if (!deleteEntity) return
     await entityStore[deleteEntity](selectedEntity.value.id)
   }
 
@@ -63,7 +64,7 @@ function useMetadata(
   }
 
   onMounted(async () => {
-    await entityStore[fetchEntities]()
+    if (fetchEntities) await entityStore[fetchEntities]()
     if (id) populateForm(id)
   })
 
@@ -86,32 +87,25 @@ export function useSensorModals(id: string | null = null) {
   return useMetadata(
     useSensorStore(),
     () => new Sensor(),
-    'fetchSensors',
-    'deleteSensor',
     'getSensorById',
-    id
+    id,
+    'fetchSensors',
+    'deleteSensor'
   )
 }
 
 export function useUnitModals(id: string | null = null) {
-  return useMetadata(
-    useUnitStore(),
-    () => new Unit(),
-    'fetchUnits',
-    'deleteUnit',
-    'getUnitById',
-    id
-  )
+  return useMetadata(useUnitStore(), () => new Unit(), 'getUnitById', id)
 }
 
 export function useResultQualifierModals(id: string | null = null) {
   return useMetadata(
     useResultQualifierStore(),
     () => new ResultQualifier(),
-    'fetchResultQualifiers',
-    'deleteResultQualifier',
     'getById',
-    id
+    id,
+    'fetchResultQualifiers',
+    'deleteResultQualifier'
   )
 }
 
@@ -119,10 +113,10 @@ export function useProcessingLevelModals(id: string | null = null) {
   const metadataFuncs = useMetadata(
     useProcessingLevelStore(),
     () => new ProcessingLevel(),
-    'fetchProcessingLevels',
-    'deleteProcessingLevel',
     'getById',
-    id
+    id,
+    'fetchProcessingLevels',
+    'deleteProcessingLevel'
   )
 
   const plStore = useProcessingLevelStore()
@@ -144,9 +138,9 @@ export function useObservedPropertyModals(id: string | null = null) {
   return useMetadata(
     useObservedPropertyStore(),
     () => new ObservedProperty(),
-    'fetchObservedProperties',
-    'deleteObservedProperty',
     'getById',
-    id
+    id,
+    'fetchObservedProperties',
+    'deleteObservedProperty'
   )
 }

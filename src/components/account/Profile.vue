@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="authStore.user">
+  <v-container v-if="user">
     <v-row>
       <v-col cols="12">
         <v-row class="d-flex justify-center">
@@ -13,9 +13,9 @@
                 >
                   <v-card-title :style="{ color: 'white' }">
                     <h5 class="text-h5 user-info">
-                      {{ authStore.user.firstName }}
-                      {{ authStore.user.middleName }}
-                      {{ authStore.user.lastName }}
+                      {{ user.firstName }}
+                      {{ user.middleName }}
+                      {{ user.lastName }}
                     </h5>
                   </v-card-title>
                 </v-col>
@@ -25,47 +25,47 @@
                     <tbody>
                       <tr>
                         <td class="pr-4"><strong>Email</strong></td>
-                        <td>{{ authStore.user.email }}</td>
+                        <td>{{ user.email }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Address</strong></td>
-                        <td>{{ authStore.user.address }}</td>
+                        <td>{{ user.address }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Phone</strong></td>
-                        <td>{{ authStore.user.phone }}</td>
+                        <td>{{ user.phone }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Type</strong></td>
-                        <td>{{ authStore.user.type }}</td>
+                        <td>{{ user.type }}</td>
                       </tr>
                       <tr>
                         <td class="pr-4"><strong>Link</strong></td>
-                        <td>{{ authStore.user.link }}</td>
+                        <td>{{ user.link }}</td>
                       </tr>
-                      <tr v-if="authStore.user.organization">
+                      <tr v-if="user.organization">
                         <td class="pr-4 text-nowrap">
                           <strong>Organization Name</strong>
                         </td>
-                        <td>{{ authStore.user.organization.name }}</td>
+                        <td>{{ user.organization.name }}</td>
                       </tr>
-                      <tr v-if="authStore.user.organization">
+                      <tr v-if="user.organization">
                         <td class="pr-4"><strong>Organization Code</strong></td>
-                        <td>{{ authStore.user.organization.code }}</td>
+                        <td>{{ user.organization.code }}</td>
                       </tr>
-                      <tr v-if="authStore.user.organization">
+                      <tr v-if="user.organization">
                         <td class="pr-4"><strong>Organization Link</strong></td>
-                        <td>{{ authStore.user.organization.link }}</td>
+                        <td>{{ user.organization.link }}</td>
                       </tr>
-                      <tr v-if="authStore.user.organization">
+                      <tr v-if="user.organization">
                         <td class="pr-4"><strong>Organization Type</strong></td>
-                        <td>{{ authStore.user.organization.type }}</td>
+                        <td>{{ user.organization.type }}</td>
                       </tr>
-                      <tr v-if="authStore.user.organization">
+                      <tr v-if="user.organization">
                         <td class="pr-4">
                           <strong>Organization description</strong>
                         </td>
-                        <td>{{ authStore.user.organization.description }}</td>
+                        <td>{{ user.organization.description }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -188,12 +188,17 @@
 <script setup lang="ts">
 import AccountForm from '@/components/account/AccountForm.vue'
 import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from '@/store/user'
 import { onMounted, ref } from 'vue'
 import Notification from '@/store/notifications'
 import { useThingStore } from '@/store/things'
 import HydroShareIcon from '@/assets/hydro.png'
+import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/apiMethods'
+import { storeToRefs } from 'pinia'
 
-const authStore = useAuthStore()
+const { logout } = useAuthStore()
+const { user } = storeToRefs(useUserStore())
 const thingStore = useThingStore()
 
 const deleteAccountDialog = ref(false)
@@ -205,7 +210,12 @@ async function deleteAccount() {
     Notification.toast({ message: "input doesn't match", type: 'error' })
     return
   }
-  await authStore.deleteAccount()
+  try {
+    await api.delete(ENDPOINTS.USER)
+    await logout()
+  } catch (error) {
+    console.error('Error deleting account', error)
+  }
   deleteAccountDialog.value = false
 }
 

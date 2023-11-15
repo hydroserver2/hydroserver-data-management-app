@@ -17,7 +17,7 @@
                 v-if="!isEdit"
                 v-model="selectedId"
                 label="Load a template unit"
-                :items="unitStore.unownedUnits"
+                :items="unownedUnits"
                 item-title="name"
                 item-value="id"
               ></v-autocomplete>
@@ -70,26 +70,41 @@
 import { rules } from '@/utils/rules'
 import { useUnitStore } from '@/store/unit'
 import { useUnitModals } from '@/composables/useMetadataModals'
+import { api } from '@/services/api'
+import { storeToRefs } from 'pinia'
+import { computed, ref } from 'vue'
 
-const unitStore = useUnitStore()
+const { updateUnit, sortUnits } = useUnitStore()
+const { units, unownedUnits } = storeToRefs(useUnitStore())
+
 const props = defineProps({ id: String })
 const emit = defineEmits(['uploaded', 'close'])
 
-const {
-  isEdit,
-  selectedId,
-  myForm,
-  valid,
-  selectedEntity: unit,
-} = useUnitModals(props.id)
+const isEdit = computed(() => props.id != null)
+const valid = ref(false)
+const { selectedId, myForm, selectedEntity: unit } = useUnitModals(props.id)
 
 async function uploadUnit() {
   await myForm.value?.validate()
   if (!valid.value) return
-  if (isEdit.value) await unitStore.updateUnit(unit.value)
-  else {
-    const newUnit = await unitStore.createUnit(unit.value)
-    emit('uploaded', newUnit.id)
+  if (isEdit.value) {
+    try {
+      const oldUnit = units.value.find((u) => u.id === unit.value.id)
+      const updatedUnit = await api.updateUnit(unit.value, oldUnit)
+      updateUnit(updatedUnit)
+    } catch (error) {
+      console.error('Error updating unit', error)
+    }
+  } else {
+    try {
+      console.log('new unit', unit.value)
+      const newUnit = await api.createUnit(unit.value)
+      updateUnit(newUnit)
+      sortUnits()
+      emit('uploaded', newUnit.id)
+    } catch (error) {
+      console.error('Error creating unit', error)
+    }
   }
   emit('close')
 }

@@ -1,6 +1,6 @@
-import {ENDPOINTS} from '@/constants'
-import {defineStore} from 'pinia'
-import {api} from '@/utils/api/apiMethods'
+import { ENDPOINTS } from '@/constants'
+import { defineStore } from 'pinia'
+import { api } from '@/services/apiMethods'
 
 interface LinkDataSourceForm {
   formLoaded: boolean

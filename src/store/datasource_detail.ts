@@ -1,6 +1,6 @@
 import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
-import { api } from '@/utils/api/apiMethods'
+import { api } from '@/services/apiMethods'
 
 interface DataSourceDetail {
   id?: string
@@ -71,9 +71,9 @@ export const useDataSourceDetailStore = defineStore(
         }
 
         this.timestampFormat =
-          (dataSource.timestampFormat === 'iso'
+          dataSource.timestampFormat === 'iso'
             ? 'ISO'
-            : dataSource.timestampFormat)
+            : dataSource.timestampFormat
         this.timestampColumn = dataSource.timestampColumn
         this.timezoneOffset = dataSource.timestampOffset
 

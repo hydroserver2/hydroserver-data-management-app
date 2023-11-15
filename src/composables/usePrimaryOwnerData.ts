@@ -1,37 +1,24 @@
-import { onMounted, computed } from 'vue'
-import { useThingStore } from '@/store/things'
-import {
-  ProcessingLevel,
-  Unit,
-  Sensor,
-  ObservedProperty,
-  DatastreamMetadata,
-} from '@/types'
+import { onMounted, computed, ref } from 'vue'
+import { ProcessingLevel, DatastreamMetadata } from '@/types'
+import { api } from '@/services/apiMethods'
+import { ENDPOINTS } from '@/constants'
 
 export function usePrimaryOwnerData(thingId: string) {
-  const thingStore = useThingStore()
+  const metadata = ref<DatastreamMetadata | null>()
 
-  // If the current user is the primary owner of the datastream, use their metadata,
-  // otherwise get the primary owner's
-  function getPOData(attribute: keyof DatastreamMetadata) {
-    const metadata = thingStore.POMetadata[thingId]
-    return metadata ? metadata[attribute] : []
-  }
-
-  function getAttributeById(
-    computedList: any,
-    id: string,
-    attributeName: string
-  ) {
-    if (!computedList || !computedList.value) return null
-    const entity = computedList.value.find((item: any) => item.id === id)
-    return entity ? entity[attributeName] : null
-  }
-
-  const sensors = computed(() => getPOData('sensors'))
-  const units = computed(() => getPOData('units'))
-  const observedProperties = computed(() => getPOData('observedProperties'))
-  const processingLevels = computed(() => getPOData('processingLevels'))
+  const sensors = computed(() => metadata.value?.sensors || [])
+  const units = computed(() => {
+    const allUnits = metadata.value?.units || []
+    return allUnits.filter(
+      (unit) => unit.type !== 'Time' && unit.owner !== null
+    )
+  })
+  const observedProperties = computed(
+    () => metadata.value?.observedProperties || []
+  )
+  const processingLevels = computed(
+    () => metadata.value?.processingLevels || []
+  )
 
   const formattedProcessingLevels = computed(() => {
     const pls = processingLevels.value as ProcessingLevel[]
@@ -43,30 +30,12 @@ export function usePrimaryOwnerData(thingId: string) {
     return []
   })
 
-  const getUnitAttrById = (id: string, attr: keyof Unit = 'name') => {
-    return getAttributeById(units, id, attr)
-  }
-
-  const getSensorAttrById = (id: string, attr: keyof Sensor = 'name') => {
-    return getAttributeById(sensors, id, attr)
-  }
-
-  const getObservedPropertyAttrById = (
-    id: string,
-    attr: keyof ObservedProperty = 'name'
-  ) => {
-    return getAttributeById(observedProperties, id, attr)
-  }
-
-  const getProcessingLevelAttrById = (
-    id: string,
-    attr: keyof ProcessingLevel = 'code'
-  ) => {
-    return getAttributeById(processingLevels, id, attr)
-  }
-
   onMounted(async () => {
-    thingStore.fetchPrimaryOwnerMetadataByThingId(thingId)
+    try {
+      metadata.value = await api.fetch(ENDPOINTS.THINGS.USER_METADATA(thingId))
+    } catch (error) {
+      console.error('Error fetching primary owner metadata', error)
+    }
   })
 
   return {
@@ -75,9 +44,5 @@ export function usePrimaryOwnerData(thingId: string) {
     observedProperties,
     processingLevels,
     formattedProcessingLevels,
-    getUnitAttrById,
-    getSensorAttrById,
-    getObservedPropertyAttrById,
-    getProcessingLevelAttrById,
   }
 }
