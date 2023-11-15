@@ -10,10 +10,7 @@
       <div ref="focusChart"></div>
       <div ref="contextChart"></div>
       <v-progress-linear
-        v-if="
-          obsStore.observations[datastreamId] &&
-          obsStore.observations[datastreamId].loading
-        "
+        v-if="observations[datastreamId]?.loading"
         color="primary"
         indeterminate
         :height="25"
@@ -46,7 +43,8 @@ import { storeToRefs } from 'pinia'
 import { useDatastreamStore } from '@/store/datastreams'
 import { computed } from 'vue'
 
-const obsStore = useObservationStore()
+const { getObservationsSince } = useObservationStore()
+const { observations } = storeToRefs(useObservationStore())
 const obs72Store = useObservationsLast72Hours()
 const { datastreams } = storeToRefs(useDatastreamStore())
 
@@ -132,11 +130,8 @@ async function getStartTime(hours: number) {
 async function drawObservationsSince(hours: number) {
   if (!datastream.value) return
   const startTime = await getStartTime(hours)
-  const observations = await obsStore.getObservationsSince(
-    datastream.value.id,
-    startTime!
-  )
-  if (observations) drawPlot(observations)
+  const obsSince = await getObservationsSince(datastream.value.id, startTime!)
+  if (obsSince) drawPlot(obsSince)
 }
 
 onMounted(async () => {
