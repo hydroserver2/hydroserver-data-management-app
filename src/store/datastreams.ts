@@ -10,11 +10,6 @@ export const useDatastreamStore = defineStore('datastreams', () => {
   const fetching = ref(false)
   const loadedUsersDatastreams = ref(false)
 
-  const getDatastreamsByParameter = (name: keyof Datastream, id: string) =>
-    Object.values(datastreams.value)
-      .flat()
-      .filter((ds) => ds[name] === id)
-
   const fetchDatastreams = async (reload = false) => {
     // if (this.datastreams && !reload) return
     try {
@@ -116,7 +111,6 @@ export const useDatastreamStore = defineStore('datastreams', () => {
     loaded,
     fetching,
     loadedUsersDatastreams,
-    getDatastreamsByParameter,
     fetchDatastreams,
     fetchUsersDatastreams,
     groupDatastreamsByThingId,

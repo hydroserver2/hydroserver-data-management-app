@@ -61,7 +61,7 @@ const sensorStore = useSensorStore()
 const plStore = useProcessingLevelStore()
 const opStore = useObservedPropertyStore()
 
-const datastreamStore = useDatastreamStore()
+const { fetchDatastreamsByThingId } = useDatastreamStore()
 const { fetchThings } = useThingStore()
 const { primaryOwnedThings } = storeToRefs(useThingStore())
 const selectedThingId = ref('')
@@ -73,8 +73,7 @@ watch(
   selectedThingId,
   async (newThingId) => {
     if (newThingId) {
-      datastreamsForThing.value =
-        await datastreamStore.fetchDatastreamsByThingId(newThingId)
+      datastreamsForThing.value = await fetchDatastreamsByThingId(newThingId)
     } else {
       datastreamsForThing.value = []
     }

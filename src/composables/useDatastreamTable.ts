@@ -4,10 +4,13 @@ import { useThingOwnership } from './useThingOwnership'
 import { Datastream } from '@/types'
 import Notification from '@/store/notifications'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
+import { storeToRefs } from 'pinia'
 
 export function useDatastreamTable(thingId: string) {
   const { isOwner } = useThingOwnership(thingId)
-  const datastreamStore = useDatastreamStore()
+  const { datastreams } = storeToRefs(useDatastreamStore())
+  const { updateDatastream, deleteDatastream, fetchDatastreamsByThingId } =
+    useDatastreamStore()
   const obs72HourStore = useObservationsLast72Hours()
 
   const selectedDatastream: Ref<Datastream | null> = ref(null)
@@ -15,13 +18,12 @@ export function useDatastreamTable(thingId: string) {
   const deleteDatastreamInput = ref('')
 
   const visibleDatastreams = computed(() => {
-    if (!datastreamStore.datastreams[thingId]) return []
+    if (!datastreams.value[thingId]) return []
 
-    return datastreamStore.datastreams[thingId]
-      .filter((datastream) => datastream.isVisible || isOwner.value)
-      .map((datastream) => ({
-        ...datastream,
-        // Add ability to open a modal for each
+    return datastreams.value[thingId]
+      .filter((d) => d.isVisible || isOwner.value)
+      .map((d) => ({
+        ...d,
         chartOpen: false,
       }))
   })
@@ -38,7 +40,7 @@ export function useDatastreamTable(thingId: string) {
 
   async function toggleVisibility(datastream: Datastream) {
     datastream.isVisible = !datastream.isVisible
-    await datastreamStore.updateDatastream(datastream)
+    await updateDatastream(datastream)
   }
 
   function openDeleteModal(datastream: Datastream) {
@@ -58,7 +60,7 @@ export function useDatastreamTable(thingId: string) {
     }
   })
 
-  async function deleteDatastream() {
+  async function onDeleteDatastream() {
     if (deleteDatastreamInput.value !== 'Delete') {
       Notification.toast({
         message: 'inputs do not match',
@@ -68,16 +70,13 @@ export function useDatastreamTable(thingId: string) {
     }
     isDeleteModalOpen.value = false
     if (selectedDatastream.value) {
-      await datastreamStore.deleteDatastream(
-        selectedDatastream.value.id,
-        thingId
-      )
+      await deleteDatastream(selectedDatastream.value.id, thingId)
     }
     deleteDatastreamInput.value = ''
   }
 
   onMounted(async () => {
-    await datastreamStore.fetchDatastreamsByThingId(thingId)
+    await fetchDatastreamsByThingId(thingId)
     await obs72HourStore.fetchObservationsBulk(visibleDatastreams.value)
   })
 
@@ -88,7 +87,7 @@ export function useDatastreamTable(thingId: string) {
     toggleVisibility,
     selectedDatastream,
     openDeleteModal,
-    deleteDatastream,
+    onDeleteDatastream,
     isDeleteModalOpen,
     deleteDatastreamInput,
   }

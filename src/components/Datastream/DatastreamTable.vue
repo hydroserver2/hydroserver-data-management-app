@@ -172,14 +172,14 @@
           <v-text-field
             v-model="deleteDatastreamInput"
             solo
-            @keydown.enter.prevent="deleteDatastream"
+            @keydown.enter.prevent="onDeleteDatastream"
           ></v-text-field>
         </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn @click="isDSDeleteModalOpen = false">Cancel</v-btn>
-        <v-btn color="delete" @click="deleteDatastream">Confirm</v-btn>
+        <v-btn color="delete" @click="onDeleteDatastream">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -226,7 +226,7 @@ const {
   toggleVisibility,
   selectedDatastream,
   openDeleteModal,
-  deleteDatastream,
+  onDeleteDatastream,
   isDeleteModalOpen: isDSDeleteModalOpen,
   deleteDatastreamInput,
 } = useDatastreamTable(props.thingId)
