@@ -1,5 +1,11 @@
 <template>
-  <v-card class="elevation-5">
+  <v-card
+    class="elevation-5"
+    :loading="obsStore.observations[datastreamId]?.loading"
+  >
+    <template v-slot:loader="{ isActive }">
+      <v-progress-linear color="primary" :active="isActive" indeterminate />
+    </template>
     <v-card-title>
       <div class="d-flex pt-2">
         <h5 class="flex-grow-1 pl-4 text-center text-h5">
@@ -11,16 +17,6 @@
     <v-card-text>
       <div ref="focusChart"></div>
       <div ref="contextChart"></div>
-      <v-progress-linear
-        v-if="
-          obsStore.observations[datastreamId] &&
-          obsStore.observations[datastreamId].loading
-        "
-        color="primary"
-        indeterminate
-        :height="25"
-        >Loading...</v-progress-linear
-      >
     </v-card-text>
 
     <v-card-actions class="my-3 d-flex justify-center">
