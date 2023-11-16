@@ -36,7 +36,7 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="obsStore72.loaded[item.raw.id]">
+      <div v-if="loaded[item.raw.id]">
         <div v-if="observations[item.raw.id]">
           <v-dialog v-model="item.raw.chartOpen" width="80rem">
             <FocusContextPlot
@@ -204,8 +204,9 @@ import { useThingOwnership } from '@/composables/useThingOwnership'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
+import { storeToRefs } from 'pinia'
 
-const obsStore72 = useObservationsLast72Hours()
+const { loaded } = storeToRefs(useObservationsLast72Hours())
 
 const props = defineProps({
   thingId: {

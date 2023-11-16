@@ -11,7 +11,10 @@ export function useDatastreamTable(thingId: string) {
   const { datastreams } = storeToRefs(useDatastreamStore())
   const { updateDatastream, deleteDatastream, fetchDatastreamsByThingId } =
     useDatastreamStore()
-  const obs72HourStore = useObservationsLast72Hours()
+  const { observations: obs72, mostRecentObs: recObs72 } = storeToRefs(
+    useObservationsLast72Hours()
+  )
+  const { fetchObservationsBulk } = useObservationsLast72Hours()
 
   const selectedDatastream: Ref<Datastream | null> = ref(null)
   const isDeleteModalOpen = ref(false)
@@ -29,13 +32,13 @@ export function useDatastreamTable(thingId: string) {
   })
 
   const observations = computed(() => {
-    if (Object.keys(obs72HourStore.observations).length === 0) return {}
-    return obs72HourStore.observations
+    if (Object.keys(obs72.value).length === 0) return {}
+    return obs72.value
   })
 
   const mostRecentObs = computed(() => {
-    if (Object.keys(obs72HourStore.mostRecentObs).length === 0) return {}
-    return obs72HourStore.mostRecentObs
+    if (Object.keys(recObs72.value).length === 0) return {}
+    return recObs72.value
   })
 
   async function toggleVisibility(datastream: Datastream) {
@@ -77,7 +80,7 @@ export function useDatastreamTable(thingId: string) {
 
   onMounted(async () => {
     await fetchDatastreamsByThingId(thingId)
-    await obs72HourStore.fetchObservationsBulk(visibleDatastreams.value)
+    await fetchObservationsBulk(visibleDatastreams.value)
   })
 
   return {
