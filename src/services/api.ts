@@ -1,5 +1,5 @@
 import { api as apiMethods } from '@/services/apiMethods'
-import { Unit } from '@/types'
+import { Unit, Thing } from '@/types'
 
 export const BASE_URL = `${
   import.meta.env.MODE === 'development'
@@ -29,6 +29,7 @@ export const api = {
   deleteUnit: async (id: string) => apiMethods.delete(`${UNIT_BASE}/${id}`),
   getUnit: async (id: string) => apiMethods.fetch(`${UNIT_BASE}/${id}`),
 
+  // Things
   removeThingOwner: async (id: string, email: string) =>
     apiMethods.delete(`${THINGS_BASE}/${id}/ownership`, {
       email: email,
@@ -48,6 +49,12 @@ export const api = {
     apiMethods.patch(`${THINGS_BASE}/${id}/privacy`, {
       isPrivate: thingPrivacy,
     }),
+  createThing: async (thing: Thing) => apiMethods.post(THINGS_BASE, thing),
+  fetchThings: async () => apiMethods.fetch(THINGS_BASE),
+  fetchThing: async (id: string) => apiMethods.fetch(`${THINGS_BASE}/${id}`),
+  updateThing: async (thing: Thing) =>
+    apiMethods.patch(`${THINGS_BASE}/${thing.id}`, thing),
+  deleteThing: async (id: string) => apiMethods.delete(`${THINGS_BASE}/${id}`),
 
   downloadDatastreamCSV: async (id: string) =>
     apiMethods.fetch(`${DS_BASE}/${id}/csv`),

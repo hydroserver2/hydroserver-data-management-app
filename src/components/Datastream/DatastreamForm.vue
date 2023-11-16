@@ -276,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
@@ -290,9 +290,9 @@ import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
-import { useThingOwnership } from '@/composables/useThingOwnership'
 import { Datastream } from '@/types'
 import { api } from '@/services/api'
+import { useThingStore } from '@/store/things'
 
 const { sortUnits, setUnits } = useUnitStore()
 const { timeUnits } = storeToRefs(useUnitStore())
@@ -300,7 +300,10 @@ const { timeUnits } = storeToRefs(useUnitStore())
 const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
-const { isPrimaryOwner } = useThingOwnership(thingId)
+
+const { fetchThingById } = useThingStore()
+const { things } = storeToRefs(useThingStore())
+const isPrimaryOwner = computed(() => things.value[thingId]?.isPrimaryOwner)
 
 const { sensors, units, observedProperties, formattedProcessingLevels } =
   usePrimaryOwnerData(thingId)
@@ -327,6 +330,7 @@ const handleMetadataUploaded = async (
 
 onMounted(async () => {
   window.scrollTo(0, 0)
+  await fetchThingById(thingId)
   try {
     const fetchedUnits = await api.fetchUnits()
     setUnits(fetchedUnits)
