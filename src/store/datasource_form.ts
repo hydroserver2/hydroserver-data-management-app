@@ -1,7 +1,5 @@
-import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
-import { api } from '@/services/apiMethods'
-import { DataSource } from '@/types'
+import { api } from '@/services/api'
 
 type scheduleTypeValues = 'interval' | 'crontab'
 type intervalUnitsValues = 'minutes' | 'hours' | 'days'
@@ -49,16 +47,14 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
   actions: {
     async fetchDataSource() {
       if (this.dataSourceId) {
-        const dataSource = await api.fetch(
-          ENDPOINTS.DATA_SOURCES.ID(this.dataSourceId)
-        )
+        const dataSource = await api.fetchDataSource(this.dataSourceId)
         this.dataSource = dataSource
       } else {
         this.dataSource = null
       }
     },
     async fetchDataLoaders() {
-      const dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
+      const dataLoaders = await api.fetchDataLoaders()
       this.dataLoaders = dataLoaders
     },
     async saveDataSource() {
@@ -86,12 +82,12 @@ export const useDataSourceFormStore = defineStore('data-source-form-store', {
       let response = null
 
       if (this.dataSourceId) {
-        response = await api.patch(
-          ENDPOINTS.DATA_SOURCES.ID(this.dataSourceId),
-          dataSourceBody
-        )
+        response = await api.updateDataSource({
+          id: this.dataSourceId,
+          ...dataSourceBody,
+        })
       } else {
-        response = await api.post(ENDPOINTS.DATA_SOURCES, dataSourceBody)
+        response = await api.createDataSource(dataSourceBody)
       }
       return true
     },

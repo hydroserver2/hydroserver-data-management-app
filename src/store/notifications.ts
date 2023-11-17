@@ -1,5 +1,6 @@
-import { DEFAULT_TOAST_DURATION } from '@/constants'
 import { Subject } from 'rxjs'
+
+export const DEFAULT_TOAST_DURATION = 5000
 
 export interface IToast {
   message: string

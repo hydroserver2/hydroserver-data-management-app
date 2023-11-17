@@ -39,8 +39,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 
 const { user } = storeToRefs(useUserStore())
@@ -50,7 +49,7 @@ async function sendVerificationEmail() {
   try {
     if (sendingVerificationEmail) return
     sendingVerificationEmail = true
-    await api.post(ENDPOINTS.ACCOUNT.SEND_VERIFICATION_EMAIL)
+    await api.sendVerificationEmail()
     sendingVerificationEmail = false
   } catch (error) {
     console.error('Error sending verification email', error)

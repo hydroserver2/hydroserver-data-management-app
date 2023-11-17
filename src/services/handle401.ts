@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/store/authentication'
-import { ENDPOINTS } from '@/constants'
+import { JWT_REFRESH } from '@/services/api'
 
 let isRefreshing = false
 let failedQueue: any[] = []
@@ -54,7 +54,7 @@ async function refreshAccessToken() {
       refresh: refreshToken,
     }),
   }
-  const response = await fetch(ENDPOINTS.ACCOUNT.JWT_REFRESH, options)
+  const response = await fetch(JWT_REFRESH, options)
 
   if (response.ok) {
     const data = await response.json()

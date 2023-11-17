@@ -1,6 +1,5 @@
-import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
-import { api } from '@/services/apiMethods'
+import { api } from '@/services/api'
 
 interface DataSourceDetail {
   id?: string
@@ -31,7 +30,7 @@ export const useDataSourceDetailStore = defineStore(
     actions: {
       async fetchDataSource() {
         // TODO: Are we sure this id will always be defined?
-        let dataSource = await api.fetch(ENDPOINTS.DATA_SOURCES.ID(this.id!))
+        let dataSource = await api.fetchDataSource(this.id!)
 
         let now = new Date()
         let scheduleStartTime = dataSource.startTime

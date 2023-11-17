@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Datastream } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export const useDatastreamStore = defineStore('datastreams', () => {
   const datastreams = ref<Record<string, Datastream[]>>({})
@@ -13,7 +12,7 @@ export const useDatastreamStore = defineStore('datastreams', () => {
   const fetchDatastreams = async (reload = false) => {
     // if (this.datastreams && !reload) return
     try {
-      const data = await api.fetch(ENDPOINTS.DATASTREAMS)
+      const data = await api.fetchDatastreams()
       let newDatastreams = groupDatastreamsByThingId(data)
       datastreams.value = newDatastreams
       loaded.value = true
@@ -26,7 +25,7 @@ export const useDatastreamStore = defineStore('datastreams', () => {
     // if (this.fetching || (this.loadedUsersDatastreams && !reload)) return
     try {
       fetching.value = true
-      const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_USER)
+      const data = await api.fetchUsersDatastreams()
       let datastreamMap = groupDatastreamsByThingId(data)
 
       // Replace the existing datastreams with the new set for each thingId
@@ -57,7 +56,7 @@ export const useDatastreamStore = defineStore('datastreams', () => {
     if (fetching.value) return
     fetching.value = true
     try {
-      const data = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(id))
+      const data = await api.fetchDatastreamsForThing(id)
       datastreams.value[id] = data
       return data
     } catch (error) {
@@ -68,10 +67,7 @@ export const useDatastreamStore = defineStore('datastreams', () => {
   }
   const updateDatastream = async (datastream: Datastream) => {
     try {
-      const data = await api.patch(
-        `${ENDPOINTS.DATASTREAMS}/${datastream.id}`,
-        datastream
-      )
+      const data = await api.updateDatastream(datastream)
       const datastreamsForThing = datastreams.value[data.thingId]
       const index = datastreamsForThing.findIndex((ds) => ds.id === data.id)
       if (index !== -1 && data) {
@@ -84,7 +80,7 @@ export const useDatastreamStore = defineStore('datastreams', () => {
 
   const createDatastream = async (newDatastream: Datastream) => {
     try {
-      const data = await api.post(ENDPOINTS.DATASTREAMS, newDatastream)
+      const data = await api.createDatastream(newDatastream)
       if (!datastreams.value[newDatastream.thingId]) {
         datastreams.value[newDatastream.thingId] = []
       }
@@ -96,11 +92,10 @@ export const useDatastreamStore = defineStore('datastreams', () => {
 
   const deleteDatastream = async (id: string, thingId: string) => {
     try {
-      await api.delete(`${ENDPOINTS.DATASTREAMS}/${id}`)
-      const updatedDatastreams = datastreams.value[thingId].filter(
-        (datastream) => datastream.id !== id
+      await api.deleteDatastream(id)
+      datastreams.value[thingId] = datastreams.value[thingId].filter(
+        (ds) => ds.id !== id
       )
-      datastreams.value[thingId] = updatedDatastreams
     } catch (error) {
       console.error(`Error deleting datastream with id ${id}`, error)
     }

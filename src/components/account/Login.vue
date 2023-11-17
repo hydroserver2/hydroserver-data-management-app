@@ -68,8 +68,7 @@ import { useAuthStore } from '@/store/authentication'
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 
@@ -86,12 +85,9 @@ const loginSubmit = async () => {
 
   try {
     // resetState()
-    const tokens = await api.post(ENDPOINTS.ACCOUNT.JWT_PAIR, {
-      email: email.value,
-      password: password.value,
-    })
+    const tokens = await api.login(email.value, password.value)
     setTokens(tokens.access, tokens.refresh)
-    const user = await api.fetch(ENDPOINTS.USER)
+    const user = await api.fetchUser()
     setUser(user)
     await router.push({ name: 'Sites' })
   } catch (error) {

@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { ObservedProperty } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 import { useUserStore } from './user'
 
 export const useObservedPropertyStore = defineStore(
@@ -26,9 +25,7 @@ export const useObservedPropertyStore = defineStore(
 
     const fetchObservedProperties = async () => {
       try {
-        observedProperties.value = await api.fetch(
-          ENDPOINTS.OBSERVED_PROPERTIES
-        )
+        observedProperties.value = await api.fetchObservedProperties()
         sortObservedProperties()
         loaded.value = true
       } catch (error) {
@@ -40,10 +37,7 @@ export const useObservedPropertyStore = defineStore(
       observedProperty: ObservedProperty
     ) => {
       try {
-        const data = await api.post(
-          ENDPOINTS.OBSERVED_PROPERTIES,
-          observedProperty
-        )
+        const data = await api.createObservedProperty(observedProperty)
         observedProperties.value.push(data)
         sortObservedProperties()
         return data
@@ -56,10 +50,7 @@ export const useObservedPropertyStore = defineStore(
       observedProperty: ObservedProperty
     ) => {
       try {
-        await api.patch(
-          ENDPOINTS.OBSERVED_PROPERTIES.ID(observedProperty.id),
-          observedProperty
-        )
+        await api.updateObservedProperty(observedProperty)
         const index = observedProperties.value.findIndex(
           (op) => op.id === observedProperty.id
         )
@@ -74,7 +65,7 @@ export const useObservedPropertyStore = defineStore(
 
     const deleteObservedProperty = async (id: string) => {
       try {
-        await api.delete(ENDPOINTS.OBSERVED_PROPERTIES.ID(id))
+        await api.deleteObservedProperty(id)
         observedProperties.value = observedProperties.value.filter(
           (op) => op.id !== id
         )

@@ -150,8 +150,7 @@ import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import router from '@/router/router'
 import Notification from '@/store/notifications'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import { api } from '@/services/api'
 
 defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
@@ -178,7 +177,7 @@ const onUserUpdate = async () => {
   if (!valid.value) return
 
   try {
-    userForm = await api.patch(ENDPOINTS.USER, userForm, user)
+    userForm = await api.updateUser(userForm, user)
     setUser(userForm)
   } catch (error) {
     console.error('Error updating user', error)

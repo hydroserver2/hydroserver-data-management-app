@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { ResultQualifier } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export const useResultQualifierStore = defineStore('resultQualifiers', () => {
   const resultQualifiers = ref<ResultQualifier[]>([])
@@ -18,7 +17,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', () => {
 
   const fetchResultQualifiers = async () => {
     try {
-      resultQualifiers.value = await api.fetch(ENDPOINTS.RESULT_QUALIFIERS)
+      resultQualifiers.value = await api.fetchResultQualifiers()
       sortResultQualifiers()
       loaded.value = true
     } catch (error) {
@@ -28,10 +27,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', () => {
 
   const updateResultQualifier = async (resultQualifier: ResultQualifier) => {
     try {
-      await api.patch(
-        ENDPOINTS.RESULT_QUALIFIERS.ID(resultQualifier.id),
-        resultQualifier
-      )
+      await api.updateResultQualifier(resultQualifier)
       const index = resultQualifiers.value.findIndex(
         (rq) => rq.id === resultQualifier.id
       )
@@ -44,7 +40,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', () => {
 
   const createResultQualifier = async (resultQualifier: ResultQualifier) => {
     try {
-      const data = await api.post(ENDPOINTS.RESULT_QUALIFIERS, resultQualifier)
+      const data = await api.createResultQualifier(resultQualifier)
       resultQualifiers.value.push(data)
       sortResultQualifiers()
       return data
@@ -55,7 +51,7 @@ export const useResultQualifierStore = defineStore('resultQualifiers', () => {
 
   const deleteResultQualifier = async (id: string) => {
     try {
-      await api.delete(ENDPOINTS.RESULT_QUALIFIERS.ID(id))
+      await api.deleteResultQualifier(id)
       resultQualifiers.value = resultQualifiers.value.filter(
         (rq) => rq.id !== id
       )

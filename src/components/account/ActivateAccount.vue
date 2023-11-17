@@ -12,8 +12,8 @@ import { useAuthStore } from '@/store/authentication'
 import { onMounted } from 'vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
+
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 
@@ -28,11 +28,7 @@ onMounted(async () => {
     const uid = (route.query.uid as string) || ''
     const token = (route.query.token as string) || ''
     // resetState()
-
-    const data = await api.post(ENDPOINTS.ACCOUNT.ACTIVATE, {
-      uid: uid,
-      token: token,
-    })
+    const data = await api.activateAccount(uid, token)
 
     if (!data.user.isVerified) return false
     setUser(data.user)

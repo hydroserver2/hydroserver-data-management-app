@@ -57,12 +57,11 @@
 <script setup lang="ts">
 import { OAuthProvider } from '@/types'
 import { useRoute, useRouter } from 'vue-router'
-import { ENDPOINTS } from '@/constants'
 import Notification from '@/store/notifications'
 import googleImg from '@/assets/google.png'
 import { useAuthStore } from '@/store/authentication'
 import { useUserStore } from '@/store/user'
-import { api } from '@/services/apiMethods'
+import { api, getOAuthLoginEndpoint } from '@/services/api'
 
 const APP_URL = import.meta.env.VITE_APP_URL
 let OAuthLoginController = new AbortController()
@@ -94,7 +93,7 @@ async function OAuthLogin(provider: OAuthProvider, callback?: () => any) {
     if (event.data.accessToken) {
       setTokens(event.data.accessToken, event.data.refreshToken)
       try {
-        const user = await api.fetch(ENDPOINTS.USER)
+        const user = await api.fetchUser()
         setUser(user)
 
         Notification.toast({
@@ -113,13 +112,7 @@ async function OAuthLogin(provider: OAuthProvider, callback?: () => any) {
     }
   }
 
-  window.open(
-    ENDPOINTS.ACCOUNT.OAUTH_LOGIN(provider),
-    '_blank',
-    'noopener=false'
-  )
-
-  console.info(`User: listening to login window...`)
+  window.open(getOAuthLoginEndpoint(provider), '_blank', 'noopener=false')
 
   // We need to re-instantiate the listener so that it uses current values in `handleMessage`
   OAuthLoginController.abort()

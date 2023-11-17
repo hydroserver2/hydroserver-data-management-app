@@ -193,8 +193,7 @@ import { onMounted, ref } from 'vue'
 import Notification from '@/store/notifications'
 import { useThingStore } from '@/store/things'
 import HydroShareIcon from '@/assets/hydro.png'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 
 const { logout } = useAuthStore()
@@ -212,7 +211,7 @@ async function deleteAccount() {
     return
   }
   try {
-    await api.delete(ENDPOINTS.USER)
+    await api.deleteUser()
     await logout()
   } catch (error) {
     console.error('Error deleting account', error)

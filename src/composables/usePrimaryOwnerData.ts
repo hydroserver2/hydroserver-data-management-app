@@ -1,7 +1,6 @@
 import { onMounted, computed, ref } from 'vue'
 import { ProcessingLevel, DatastreamMetadata } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export function usePrimaryOwnerData(thingId: string) {
   const metadata = ref<DatastreamMetadata | null>()
@@ -32,7 +31,7 @@ export function usePrimaryOwnerData(thingId: string) {
 
   onMounted(async () => {
     try {
-      metadata.value = await api.fetch(ENDPOINTS.THINGS.USER_METADATA(thingId))
+      metadata.value = await api.fetchMetadataForThingOwner(thingId)
     } catch (error) {
       console.error('Error fetching primary owner metadata', error)
     }
