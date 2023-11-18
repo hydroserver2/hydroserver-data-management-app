@@ -55,12 +55,13 @@
 
 <script setup lang="ts">
 import { Datastream } from '@/types'
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
 import { useThingStore } from '@/store/things'
+import { storeToRefs } from 'pinia'
 
-const thingStore = useThingStore()
-const datastreamStore = useDatastreamStore()
+const { things } = storeToRefs(useThingStore())
+const { datastreams } = storeToRefs(useDatastreamStore())
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
@@ -75,19 +76,19 @@ const onDelete = () => {
 }
 
 const datastreamsForItem = computed(() => {
-  if (props.itemID && props.parameterName) {
-    return datastreamStore.getDatastreamsByParameter(
-      props.parameterName as keyof Datastream,
-      props.itemID
+  if (!props.itemID || !props.parameterName) return
+  return Object.values(datastreams.value)
+    .flat()
+    .filter(
+      (ds) => ds[props.parameterName as keyof Datastream] === props.itemID
     )
-  }
 })
 
 const thingsWithDatastreams = computed(() => {
   let usageMap: any = {}
   if (datastreamsForItem.value) {
     for (const datastream of datastreamsForItem.value) {
-      const thing = thingStore.things[datastream.thingId]
+      const thing = things.value[datastream.thingId]
       if (!thing) continue
 
       if (!usageMap[thing.id]) {

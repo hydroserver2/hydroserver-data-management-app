@@ -6,23 +6,23 @@
           {{ formTitle }}
         </span>
       </v-card-title>
-      <v-card-item v-if="store.formLoaded === true">
+      <v-card-item v-if="formLoaded === true">
         <v-row class="pa-2">
           <v-col class="v-col-xs-12 v-col-sm-6">
             <v-autocomplete
-              v-model="store.selectedDataSource"
+              v-model="selectedDataSource"
               label="Data Source"
               placeholder="No Linked Data Source"
               persistent-placeholder
               hint="Select the data source for this datastream."
               persistent-hint
               clearable
-              :items="store.dataSources"
+              :items="dataSources"
               item-title="name"
               @update:modelValue="handleUpdateDataSource"
             />
           </v-col>
-          <v-col v-if="!store.selectedDataSource">
+          <v-col v-if="!selectedDataSource">
             <v-text-field
               label="Datastream Column"
               hint="Enter the column name/index containing values for this datastream."
@@ -33,12 +33,10 @@
           <v-col v-else>
             <v-text-field
               ref="datastreamColumnName"
-              v-model="store.selectedColumn"
+              v-model="selectedColumn"
               label="Datastream Column *"
               hint="Enter the column name/index containing values for this datastream."
-              :type="
-                store.selectedDataSource.headerRow === 0 ? 'number' : 'text'
-              "
+              :type="selectedDataSource.headerRow === 0 ? 'number' : 'text'"
               :rules="[
                 (val: string) => !!val || 'Must enter the column containing the datastream.'
               ]"
@@ -56,7 +54,7 @@
         <div class="text-subtitle-2">* indicates a required field.</div>
         <v-spacer></v-spacer>
         <v-btn-cancel @click="handleCancel"> Cancel </v-btn-cancel>
-        <v-btn-primary :disabled="!store.savable" @click="handleSave">
+        <v-btn-primary :disabled="!savable" @click="handleSave">
           Save
         </v-btn-primary>
       </v-card-actions>
@@ -67,23 +65,34 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useSiteLinkDataSourceFormStore } from '@/store/datasource_link'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps(['thingId', 'datastreamId', 'dataSourceId', 'column'])
 const emit = defineEmits(['closeDialog'])
 
-const store = useSiteLinkDataSourceFormStore()
+const { saveDataSource, fetchDatastreams, fetchDataSources, fillForm } =
+  useSiteLinkDataSourceFormStore()
+const {
+  formLoaded,
+  dataSources,
+  linkedDataSource,
+  selectedDataSource,
+  linkedColumn,
+  selectedColumn,
+  savable,
+} = storeToRefs(useSiteLinkDataSourceFormStore())
 const datastreamColumnName = ref()
 
-store.formLoaded = false
+formLoaded.value = false
 
-store.fetchDatastreams(props.thingId, props.datastreamId).then((datastream) => {
-  store.fillForm(
+fetchDatastreams(props.thingId, props.datastreamId).then((datastream) => {
+  fillForm(
     props.datastreamId,
     datastream.dataSourceId,
     datastream.dataSourceColumn
   )
-  store.fetchDataSources().then(() => {
-    store.formLoaded = true
+  fetchDataSources().then(() => {
+    formLoaded.value = true
   })
 })
 
@@ -92,10 +101,10 @@ let formTitle = props.dataSourceId
   : 'Link Data Source'
 
 function handleUpdateDataSource() {
-  if (store.selectedDataSource === (store.linkedDataSource || {}).name) {
-    store.selectedColumn = store.linkedColumn
+  if (selectedDataSource.value === (linkedDataSource.value || {}).name) {
+    selectedColumn.value = linkedColumn.value
   } else {
-    store.selectedColumn = undefined
+    selectedColumn.value = undefined
   }
 }
 
@@ -105,7 +114,7 @@ async function handleSave() {
     valid = await datastreamColumnName.value.validate()
   }
   if (valid.length === 0) {
-    await store.saveDataSource()
+    await saveDataSource()
     emit('closeDialog')
   }
 }

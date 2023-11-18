@@ -30,7 +30,8 @@ export const useAuthStore = defineStore(
 
     async function logout() {
       try {
-        resetState()
+        // resetState()
+        $reset()
         router.push({ name: 'Login' })
       } catch (error) {
         console.error('Error logging out.', error)

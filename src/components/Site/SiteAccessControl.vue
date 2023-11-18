@@ -39,7 +39,7 @@
             label="Secondary Owner's Email"
             required
           ></v-text-field>
-          <v-btn-primary @click="addSecondaryOwner">Submit</v-btn-primary>
+          <v-btn-primary @click="onAddSecondaryOwner">Submit</v-btn-primary>
         </v-col>
         <v-col cols="12" md="6">
           <h6 class="text-h6 my-4">
@@ -86,7 +86,7 @@
           >
           <v-btn-primary
             v-if="showPrimaryOwnerConfirmation"
-            @click="transferPrimaryOwnership"
+            @click="onTransferPrimaryOwnership"
             >Confirm</v-btn-primary
           >
           <v-btn-primary v-else @click="showPrimaryOwnerConfirmation = true"
@@ -110,7 +110,7 @@
           <div v-else>
             <v-btn-delete
               v-if="isPrimaryOwner || owner.email == user.email"
-              @click="removeOwner(owner.email)"
+              @click="onRemoveOwner(owner.email)"
               >Remove</v-btn-delete
             >
           </div>
@@ -171,10 +171,12 @@
 </template>
 
 <script setup lang="ts">
-import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
+import { useThingStore } from '@/store/things'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
+import { ref, computed } from 'vue'
+import { api } from '@/services/api'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -182,17 +184,62 @@ const props = defineProps<{
   thingId: string
 }>()
 
-const {
-  isPrimaryOwner,
-  newOwnerEmail,
-  newPrimaryOwnerEmail,
-  addSecondaryOwner,
-  showPrimaryOwnerConfirmation,
-  transferPrimaryOwnership,
-  removeOwner,
-} = useThingOwnership(props.thingId)
+const { isPrimaryOwner } = useThingOwnership(props.thingId)
 
-const { thing, toggleSitePrivacy } = useThing(props.thingId)
+const { things } = storeToRefs(useThingStore())
+
+const thing = computed(() => things.value[props.thingId])
+
+const newPrimaryOwnerEmail = ref('')
+const showPrimaryOwnerConfirmation = ref(false)
+const newOwnerEmail = ref('')
+
+async function onTransferPrimaryOwnership() {
+  if (!newPrimaryOwnerEmail.value) return
+  try {
+    const data = await api.transferPrimaryOwnership(
+      props.thingId,
+      newPrimaryOwnerEmail.value
+    )
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error transferring thing ownership', error)
+  }
+  newPrimaryOwnerEmail.value = ''
+  showPrimaryOwnerConfirmation.value = false
+}
+
+async function onAddSecondaryOwner() {
+  if (!newOwnerEmail.value) return
+  try {
+    const data = await api.addSecondaryOwner(props.thingId, newOwnerEmail.value)
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error adding secondary owner', error)
+  }
+  newOwnerEmail.value = ''
+}
+
+async function onRemoveOwner(email: string) {
+  try {
+    const data = await api.removeThingOwner(props.thingId, email)
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error removing owner from thing', error)
+  }
+}
+
+async function toggleSitePrivacy() {
+  try {
+    const data = await api.updateThingPrivacy(
+      props.thingId,
+      thing.value.isPrivate
+    )
+    things.value[props.thingId] = data
+  } catch (error) {
+    console.error('Error updating thing privacy', error)
+  }
+}
 
 const emitClose = () => emits('close')
 </script>

@@ -151,7 +151,7 @@
         sites, datastreams, and observations you have primary ownership of, user
         information, and preferences. This action cannot be undone.
       </v-card-text>
-      <v-card-text v-if="thingStore.primaryOwnedThings.length > 0">
+      <v-card-text v-if="primaryOwnedThings.length > 0">
         The following is a list of the sites you have primary ownership of that
         will be deleted with your account. If you have secondary owners, we
         strongly recommend transferring primary ownership to one of them before
@@ -160,7 +160,7 @@
         account.
       </v-card-text>
       <v-card-text>
-        <div v-for="thing in thingStore.primaryOwnedThings">
+        <div v-for="thing in primaryOwnedThings">
           {{ thing.name }}
         </div>
       </v-card-text>
@@ -199,7 +199,8 @@ import { storeToRefs } from 'pinia'
 
 const { logout } = useAuthStore()
 const { user } = storeToRefs(useUserStore())
-const thingStore = useThingStore()
+const { fetchThings } = useThingStore()
+const { primaryOwnedThings } = storeToRefs(useThingStore())
 
 const deleteAccountDialog = ref(false)
 const editAccountDialog = ref(false)
@@ -225,6 +226,6 @@ function cancelDeletion() {
 }
 
 onMounted(async () => {
-  await thingStore.fetchThings()
+  await fetchThings()
 })
 </script>

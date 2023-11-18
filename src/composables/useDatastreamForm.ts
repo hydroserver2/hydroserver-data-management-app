@@ -3,18 +3,21 @@ import { Datastream } from '@/types'
 import { useDatastreamStore } from '@/store/datastreams'
 import { VForm } from 'vuetify/components'
 import router from '@/router/router'
+import { storeToRefs } from 'pinia'
 
 export function useDatastreamForm(thingId: string, datastreamId: string) {
   const valid = ref(false)
   const myForm = ref<VForm>()
-  const datastreamStore = useDatastreamStore()
+  const { updateDatastream, createDatastream, fetchDatastreams } =
+    useDatastreamStore()
+  const { datastreams } = storeToRefs(useDatastreamStore())
   const selectedDatastreamID = ref('')
   const datastream = reactive<Datastream>(new Datastream(thingId))
 
   watch(selectedDatastreamID, async () => {
-    const sourceDatastream = datastreamStore.getDatastreamById(
-      selectedDatastreamID.value
-    )
+    const sourceDatastream = Object.values(datastreams.value)
+      .flat()
+      .find((ds) => ds.id === selectedDatastreamID.value)
     if (!sourceDatastream) return
     Object.assign(datastream, {
       ...datastream,
@@ -45,13 +48,13 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
   async function uploadDatastream() {
     await myForm.value?.validate()
     if (!valid.value) return
-    if (datastreamId) await datastreamStore.updateDatastream(datastream)
-    else await datastreamStore.createDatastream(datastream)
+    if (datastreamId) await updateDatastream(datastream)
+    else await createDatastream(datastream)
     await router.push({ name: 'SiteDetails', params: { id: thingId } })
   }
 
   onMounted(async () => {
-    await datastreamStore.fetchDatastreams()
+    await fetchDatastreams()
     if (datastreamId) {
       populateForm(datastreamId)
       datastream.id = datastreamId

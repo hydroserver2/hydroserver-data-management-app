@@ -3,17 +3,14 @@
     <v-card-title class="text-h5"
       >{{ thingId ? 'Edit' : 'Register a' }} Site</v-card-title
     >
-    <div v-if="thingId" class="flex-shrink-0" style="height: 20rem">
+    <div class="flex-shrink-0" style="height: 20rem">
       <GoogleMap
         v-if="loaded"
-        singleMarkerMode
+        :singleMarkerMode="true"
         @location-clicked="onMapLocationClicked"
-        :mapOptions="mapOptions"
-        :things="[thing]"
+        :mapOptions="thingId ? mapOptions : undefined"
+        :things="thingId ? [thing] : []"
       />
-    </div>
-    <div v-else class="flex-shrink-0" style="height: 20rem">
-      <GoogleMap singleMarkerMode @location-clicked="onMapLocationClicked" />
     </div>
     <v-divider></v-divider>
     <v-card-text
@@ -24,14 +21,14 @@
       site location data.
     </v-card-text>
 
-    <v-card-text>
-      <v-form
-        ref="myForm"
-        v-model="valid"
-        validate-on="blur"
-        @submit.prevent="uploadThing"
-        enctype="multipart/form-data"
-      >
+    <v-form
+      ref="myForm"
+      v-model="valid"
+      validate-on="blur"
+      @submit.prevent="uploadThing"
+      enctype="multipart/form-data"
+    >
+      <v-card-text>
         <v-row>
           <v-col cols="12" md="6">
             <h6 class="text-h6 my-4">Site Information</h6>
@@ -161,8 +158,8 @@
 
                 <div class="photo-container">
                   <div
-                    v-if="props.thingId && photoStore.photos[props.thingId]"
-                    v-for="photo in photoStore.photos[props.thingId]"
+                    v-if="thingId && photos[thingId]"
+                    v-for="photo in photos[thingId]"
                     :key="photo.id"
                     class="photo-wrapper"
                   >
@@ -198,13 +195,13 @@
             </v-row>
           </v-col>
         </v-row>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn-cancel @click="closeDialog">Cancel</v-btn-cancel>
-          <v-btn-primary @click="uploadThing">Save</v-btn-primary>
-        </v-card-actions>
-      </v-form>
-    </v-card-text>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn-cancel @click="closeDialog">Cancel</v-btn-cancel>
+        <v-btn-primary @click="uploadThing">Save</v-btn-primary>
+      </v-card-actions>
+    </v-form>
   </v-card>
 </template>
 
@@ -218,9 +215,13 @@ import { siteTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import Notification from '@/store/notifications'
+import { storeToRefs } from 'pinia'
 
-const thingStore = useThingStore()
-const photoStore = usePhotosStore()
+const { fetchThings, updateThing, createThing } = useThingStore()
+const { things } = storeToRefs(useThingStore())
+const { updatePhotos, fetchPhotos } = usePhotosStore()
+const { photos } = storeToRefs(usePhotosStore())
+
 const props = defineProps({ thingId: String })
 const emit = defineEmits(['close'])
 let loaded = ref(false)
@@ -298,12 +299,12 @@ function removeExistingPhoto(photoId: string) {
 }
 
 async function populateThing(id: string) {
-  await thingStore.fetchThings()
-  Object.assign(thing, thingStore.things[id])
+  await fetchThings()
+  Object.assign(thing, things.value[id])
   if (thing.latitude && thing.longitude)
     mapOptions.value = {
       center: { lat: thing.latitude, lng: thing.longitude },
-      zoom: 10,
+      zoom: 15,
       mapTypeId: 'satellite',
     }
   loaded.value = true
@@ -321,16 +322,11 @@ async function uploadThing() {
   if (thing) {
     if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
     if (props.thingId) {
-      await thingStore.updateThing(thing)
-      await photoStore.updatePhotos(
-        props.thingId,
-        newPhotos.value,
-        photosToDelete.value
-      )
+      await updateThing(thing)
+      await updatePhotos(props.thingId, newPhotos.value, photosToDelete.value)
     } else {
-      const newThing = await thingStore.createThing(thing)
-      if (newPhotos.value)
-        await photoStore.updatePhotos(newThing.id, newPhotos.value, [])
+      const newThing = await createThing(thing)
+      if (newPhotos.value) await updatePhotos(newThing.id, newPhotos.value, [])
     }
   }
 }
@@ -346,8 +342,10 @@ function onMapLocationClicked(locationData: Thing) {
 onMounted(async () => {
   if (props.thingId) {
     await populateThing(props.thingId)
-    await photoStore.fetchPhotos(props.thingId)
+    await fetchPhotos(props.thingId)
     includeDataDisclaimer.value = !!thing.dataDisclaimer
+  } else {
+    loaded.value = true
   }
 })
 </script>

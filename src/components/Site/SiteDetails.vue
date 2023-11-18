@@ -7,11 +7,7 @@
     </v-row>
     <v-row v-if="thing" style="height: 25rem">
       <v-col>
-        <GoogleMap
-          :key="stringThing"
-          :things="[thing]"
-          :mapOptions="mapOptions"
-        />
+        <GoogleMap :things="[thing]" :mapOptions="mapOptions" />
       </v-col>
     </v-row>
     <v-row class="justify-start" align="center">
@@ -38,10 +34,7 @@
           >Edit Site Information</v-btn
         >
         <v-dialog v-model="isRegisterModalOpen" width="80rem">
-          <SiteForm
-            @close="isRegisterModalOpen = false"
-            :thing-id="thingId"
-          ></SiteForm>
+          <SiteForm @close="isRegisterModalOpen = false" :thing-id="thingId" />
         </v-dialog>
       </v-col>
       <v-col cols="auto" v-if="isOwner">
@@ -49,76 +42,31 @@
           >Delete Site</v-btn
         >
         <v-dialog v-model="isDeleteModalOpen" width="40rem">
-          <v-card>
-            <v-card-title>
-              <span class="text-h5">Confirm Deletion</span>
-            </v-card-title>
-            <v-card-text>
-              This action will permanently delete the site along with all
-              associated datastreams and observations
-              <strong>for all users of this system</strong>. If you want to keep
-              your data, you can backup to HydroShare or download a local copy
-              before deletion. Alternatively, you can pass ownership of this
-              site to someone else on the
-              <v-btn
-                class="px-0"
-                variant="text"
-                @click="switchToAccessControlModal"
-                >Access Control</v-btn
-              >
-              page.
-            </v-card-text>
-            <v-card-text>
-              Please type the site name (<strong>{{ thing.name }}</strong
-              >) to confirm deletion:
-              <v-form>
-                <v-text-field
-                  class="pt-2"
-                  v-model="deleteInput"
-                  label="Site name"
-                  solo
-                  @keydown.enter.prevent="deleteThing"
-                ></v-text-field>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn-cancel @click="isDeleteModalOpen = false"
-                >Cancel</v-btn-cancel
-              >
-              <v-btn-delete color="delete" @click="deleteThing"
-                >Delete</v-btn-delete
-              >
-            </v-card-actions>
-          </v-card>
+          <SiteDeleteModal
+            :thing="things[thingId]"
+            @switch-to-access-control="switchToAccessControlModal"
+            @close="isDeleteModalOpen = false"
+            @delete="onDeleteThing"
+          />
         </v-dialog>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="8">
-        <v-data-table class="elevation-2">
-          <tbody>
-            <tr v-for="property in thingProperties" :key="property.label">
-              <td><i :class="property.icon"></i></td>
-              <td>{{ property.label }}</td>
-              <td>{{ property.value }}</td>
-            </tr>
-          </tbody>
-          <template v-slot:bottom></template>
-        </v-data-table>
+        <SiteDetailsTable :thing-id="thingId" />
       </v-col>
 
       <v-col cols="12" md="4">
         <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
-            v-for="photo in photoStore.photos[thingId]"
+            v-for="photo in photos[thingId]"
             :key="photo.id"
             :src="photo.link"
             cover
           >
           </v-carousel-item>
         </v-carousel>
-        <div v-else-if="photoStore.loading" class="text-center">
+        <div v-else-if="loading" class="text-center">
           <p>
             Your photos are being uploaded. They will appear once the upload is
             complete.
@@ -176,37 +124,59 @@
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
-import { useThing } from '@/composables/useThing'
 import { useThingOwnership } from '@/composables/useThingOwnership'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
+import { useThingStore } from '@/store/things'
+import { storeToRefs } from 'pinia'
+import router from '@/router/router'
+import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
+import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 
 const thingId = useRoute().params.id.toString()
-const photoStore = usePhotosStore()
+const { fetchPhotos } = usePhotosStore()
+const { photos, loading } = storeToRefs(usePhotosStore())
 
-const hasPhotos = computed(() => {
-  const photos = photoStore.photos[thingId]
-  return !photoStore.loading && photos && photos.length > 0
-})
+const { deleteThing, fetchThingById } = useThingStore()
+const { things } = storeToRefs(useThingStore())
+const thing = computed(() => things.value[thingId])
+
+const hasPhotos = computed(
+  () => !loading.value && photos.value[thingId]?.length > 0
+)
 
 const { isOwner } = useThingOwnership(thingId)
 
-const {
-  thing,
-  stringThing,
-  mapOptions,
-  deleteInput,
-  deleteThing,
-  thingProperties,
-  isRegisterModalOpen,
-  isDeleteModalOpen,
-  isAccessControlModalOpen,
-  switchToAccessControlModal,
-} = useThing(thingId)
+const isRegisterModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const isAccessControlModalOpen = ref(false)
+
+function switchToAccessControlModal() {
+  isDeleteModalOpen.value = false
+  isAccessControlModalOpen.value = true
+}
+
+async function onDeleteThing() {
+  await deleteThing(thingId)
+  await router.push('/sites')
+}
+
+const mapOptions = computed(() => {
+  if (things.value[thingId])
+    return {
+      center: {
+        lat: things.value[thingId].latitude,
+        lng: things.value[thingId].longitude,
+      },
+      zoom: 16,
+      mapTypeId: 'satellite',
+    }
+})
 
 onMounted(async () => {
-  photoStore.fetchPhotos(thingId)
+  fetchPhotos(thingId)
+  fetchThingById(thingId)
 })
 </script>

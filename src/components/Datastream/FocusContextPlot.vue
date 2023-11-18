@@ -1,18 +1,13 @@
 <template>
-  <v-card
-    class="elevation-5"
-    :loading="obsStore.observations[datastreamId]?.loading"
-  >
+  <v-card class="elevation-5" :loading="observations[datastreamId]?.loading">
     <template v-slot:loader="{ isActive }">
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
-    <v-card-title>
-      <div class="d-flex pt-2">
-        <h5 class="flex-grow-1 pl-4 text-center text-h5">
-          Datastream for {{ thing?.name }}
-        </h5>
-        <v-icon @click="$emit('close')">mdi-close</v-icon>
-      </div>
+    <v-card-title class="d-flex pt-4">
+      <h5 class="flex-grow-1 pl-4 text-center text-h5">
+        Datastream for {{ things[thingId]?.name }}
+      </h5>
+      <v-icon @click="$emit('close')">mdi-close</v-icon>
     </v-card-title>
     <v-card-text>
       <div ref="focusChart"></div>
@@ -33,17 +28,28 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useDatastream } from '@/composables/useDatastream'
-import { useThing } from '@/composables/useThing'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
 import { DataArray } from '@/types'
 import { calculateEffectiveStartTime } from '@/utils/observationsUtils'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
+import { useThingStore } from '@/store/things'
+import { storeToRefs } from 'pinia'
+import { useDatastreamStore } from '@/store/datastreams'
+import { computed } from 'vue'
 
-const obsStore = useObservationStore()
+const { getObservationsSince } = useObservationStore()
+const { observations } = storeToRefs(useObservationStore())
 const obs72Store = useObservationsLast72Hours()
+const { datastreams } = storeToRefs(useDatastreamStore())
+
+const datastream = computed(() => {
+  const thingDatastreams = datastreams.value[props.thingId]
+  return thingDatastreams
+    ? thingDatastreams.find((ds) => ds.id === props.datastreamId)
+    : null
+})
 
 const props = defineProps({
   thingId: {
@@ -66,20 +72,19 @@ const timeSelections = [
 const selectedTime = ref(72)
 const emit = defineEmits(['close'])
 
-const { thing } = useThing(props.thingId)
-const { datastream } = useDatastream(props.thingId, props.datastreamId)
+const { things } = storeToRefs(useThingStore())
 
 let focusChart = ref<any>(null)
 let contextChart = ref<any>(null)
 let yAxisLabel = ''
 
-const fetchUnit = api.getUnit(datastream.value.unitId).catch((error) => {
+const fetchUnit = api.getUnit(datastream.value!.unitId).catch((error) => {
   console.error('Failed to fetch Unit:', error)
   return null
 })
 
 const fetchObservedProperty = api
-  .getObservedProperty(datastream.value.observedPropertyId)
+  .getObservedProperty(datastream.value!.observedPropertyId)
   .catch((error) => {
     console.error('Failed to fetch ObservedProperty:', error)
     return null
@@ -107,8 +112,8 @@ async function drawPlot(dataArray: DataArray) {
 async function getStartTime(hours: number) {
   selectedTime.value = hours
   if (
-    datastream.value.phenomenonEndTime &&
-    datastream.value.phenomenonBeginTime
+    datastream.value?.phenomenonEndTime &&
+    datastream.value?.phenomenonBeginTime
   ) {
     return calculateEffectiveStartTime(
       datastream.value.phenomenonBeginTime,
@@ -119,18 +124,15 @@ async function getStartTime(hours: number) {
 }
 
 async function drawObservationsSince(hours: number) {
+  if (!datastream.value) return
   const startTime = await getStartTime(hours)
-  const observations = await obsStore.getObservationsSince(
-    datastream.value.id,
-    startTime!
-  )
-  if (observations) drawPlot(observations)
+  const obsSince = await getObservationsSince(datastream.value.id, startTime!)
+  if (obsSince) drawPlot(obsSince)
 }
 
 onMounted(async () => {
-  // Pull from the 72hourStore the first time since it should already by loaded
   const startTime = await getStartTime(72)
-  if (!datastream.value.phenomenonEndTime) return
+  if (!datastream.value?.phenomenonEndTime) return
   await obs72Store.getObservationsSince(datastream.value.id, startTime!)
   const [unit, OP] = await Promise.all([fetchUnit, fetchObservedProperty])
   yAxisLabel = datastream.value ? `${OP?.name} (${unit?.symbol}) ` : ''

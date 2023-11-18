@@ -1,69 +1,72 @@
-import { ENDPOINTS } from '@/constants'
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { ENDPOINTS } from '@/constants'
 import { api } from '@/services/apiMethods'
-
-interface LinkDataSourceForm {
-  formLoaded: boolean
-  datastreamId?: string
-  dataSources: any[]
-  linkedDataSource?: any | null
-  selectedDataSource?: any | null
-  linkedColumn?: string | number
-  selectedColumn?: string | number
-}
 
 export const useSiteLinkDataSourceFormStore = defineStore(
   'site-link-data-source-form-store',
-  {
-    state: (): LinkDataSourceForm => ({
-      formLoaded: false,
-      dataSources: [],
-    }),
-    getters: {
-      savable(state) {
-        return (
-          state.formLoaded &&
-          ((state.linkedDataSource || {}).name !== state.selectedDataSource ||
-            state.linkedColumn !== state.selectedColumn)
-        )
-      },
-    },
-    actions: {
-      async fetchDatastreams(thingId: string, datastreamId: string) {
-        const response = await api.fetch(
-          ENDPOINTS.DATASTREAMS.FOR_THING(thingId)
-        )
-        return response.filter((ds: any) => ds.id === datastreamId)[0]
-      },
-      async fetchDataSources() {
-        this.dataSources = await api.fetch(ENDPOINTS.DATA_SOURCES)
-      },
-      fillForm(datastreamId: string, dataSourceId: string, column: any) {
-        let dataSource = this.dataSources.filter(
-          (ds) => ds.id === dataSourceId
-        )[0]
-        this.datastreamId = datastreamId
-        this.linkedColumn = column
-        this.selectedColumn = column
-        this.linkedDataSource = dataSource
-        this.selectedDataSource = (dataSource || {}).name || null
-      },
-      async saveDataSource() {
-        let datastreamBody = {
-          dataSourceId:
-            (
-              this.dataSources.filter(
-                (ds) => ds.name === this.selectedDataSource
-              )[0] || {}
-            ).id || null,
-          dataSourceColumn: this.selectedColumn,
-        }
+  () => {
+    const formLoaded = ref(false)
+    const datastreamId = ref<string | undefined>()
+    const dataSources = ref<any[]>([])
+    const linkedDataSource = ref<any | null>(null)
+    const selectedDataSource = ref<any | null>(null)
+    const linkedColumn = ref<string | number | undefined>()
+    const selectedColumn = ref<string | number | undefined>()
 
-        return await api.patch(
-          `${ENDPOINTS.DATASTREAMS}/${this.datastreamId}`,
-          datastreamBody
-        )
-      },
-    },
+    const savable = computed(() => {
+      return (
+        formLoaded.value &&
+        ((linkedDataSource.value || {}).name !== selectedDataSource.value ||
+          linkedColumn.value !== selectedColumn.value)
+      )
+    })
+
+    const fetchDatastreams = async (thingId: string, dsId: string) => {
+      const response = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(thingId))
+      return response.filter((ds: any) => ds.id === dsId)[0]
+    }
+
+    const fetchDataSources = async () => {
+      dataSources.value = await api.fetch(ENDPOINTS.DATA_SOURCES)
+    }
+
+    const fillForm = (dsId: string, dataSourceId: string, column: any) => {
+      let dataSource = dataSources.value.find((ds) => ds.id === dataSourceId)
+      datastreamId.value = dsId
+      linkedColumn.value = column
+      selectedColumn.value = column
+      linkedDataSource.value = dataSource
+      selectedDataSource.value = dataSource ? dataSource.name : null
+    }
+
+    const saveDataSource = async () => {
+      let dataSource = dataSources.value.find(
+        (ds) => ds.name === selectedDataSource.value
+      )
+      let datastreamBody = {
+        dataSourceId: dataSource ? dataSource.id : null,
+        dataSourceColumn: selectedColumn.value,
+      }
+
+      return await api.patch(
+        `${ENDPOINTS.DATASTREAMS}/${datastreamId.value}`,
+        datastreamBody
+      )
+    }
+
+    return {
+      formLoaded,
+      dataSources,
+      linkedDataSource,
+      selectedDataSource,
+      linkedColumn,
+      selectedColumn,
+      savable,
+      fetchDatastreams,
+      fetchDataSources,
+      fillForm,
+      saveDataSource,
+    }
   }
 )

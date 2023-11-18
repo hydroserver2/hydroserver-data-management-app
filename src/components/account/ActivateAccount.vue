@@ -17,7 +17,7 @@ import { ENDPOINTS } from '@/constants'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 
-const { resetState, setTokens } = useAuthStore()
+const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 const route = useRoute()
 const isActivating = ref(true)
@@ -27,7 +27,7 @@ onMounted(async () => {
   try {
     const uid = (route.query.uid as string) || ''
     const token = (route.query.token as string) || ''
-    resetState()
+    // resetState()
 
     const data = await api.post(ENDPOINTS.ACCOUNT.ACTIVATE, {
       uid: uid,
