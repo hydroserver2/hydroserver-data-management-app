@@ -3,16 +3,13 @@
     class="elevation-3"
     :headers="headers"
     :items="visibleDatastreams"
+    v-model:sort-by="sortBy"
   >
     <template v-slot:item.info="{ item }">
       <v-col>
         <v-row style="font-size: 1.2em">
           <strong class="mr-2">Observed Property:</strong>
-          <strong>{{
-            observedProperties.find(
-              (op) => op.id === item.raw.observedPropertyId
-            )?.name
-          }}</strong>
+          <strong>{{ item.raw.OPName }}</strong>
         </v-row>
         <v-row>
           <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
@@ -43,7 +40,7 @@
               :thing-id="thingId"
               :datastream-id="item.raw.id"
               @close="item.raw.chartOpen = false"
-            ></FocusContextPlot>
+            />
           </v-dialog>
           <Sparkline
             @click="item.raw.chartOpen = true"
@@ -73,140 +70,28 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <v-row>
-        <v-tooltip bottom :openDelay="500" v-if="item.raw.isVisible">
-          <template v-slot:activator="{ props }" v-if="isOwner">
-            <v-icon
-              small
-              color="grey"
-              v-bind="props"
-              icon="mdi-eye"
-              @click="toggleVisibility(item.raw)"
-            />
-          </template>
-          <span
-            >Hide this datastream from guests of your site. Owners will still
-            see it</span
-          >
-        </v-tooltip>
-        <v-tooltip bottom :openDelay="500" v-else>
-          <template v-slot:activator="{ props }" v-if="isOwner">
-            <v-icon
-              small
-              color="grey-lighten-1"
-              v-bind="props"
-              icon="mdi-eye-off"
-              @click="toggleVisibility(item.raw)"
-            />
-          </template>
-          <span>Make this datastream publicly visible</span>
-        </v-tooltip>
-
-        <v-menu>
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" icon="mdi-dots-vertical" />
-          </template>
-          <v-list>
-            <v-list-item
-              v-if="isOwner"
-              prepend-icon="mdi-link-variant"
-              title="Link Data Source"
-              @click="
-                handleLinkDataSource(
-                  item.raw.id,
-                  item.raw.data_source_id,
-                  item.raw.column
-                )
-              "
-            />
-            <v-list-item
-              v-if="isOwner"
-              prepend-icon="mdi-pencil"
-              title="Edit Datastream Metadata"
-              :to="{
-                name: 'DatastreamForm',
-                params: { id: thingId, datastreamId: item.raw.id },
-              }"
-            />
-            <v-list-item
-              v-if="isOwner"
-              prepend-icon="mdi-chart-line"
-              title="View Time Series Plot"
-              @click="item.raw.chartOpen = true"
-            />
-            <v-list-item
-              v-if="isOwner"
-              prepend-icon="mdi-delete"
-              title="Delete Datastream"
-              @click="openDeleteModal(item.raw)"
-            />
-            <v-list-item
-              prepend-icon="mdi-download"
-              title="Download Data"
-              @click="downloadDatastream(item.raw.id)"
-            />
-          </v-list>
-        </v-menu>
-      </v-row>
+      <DatastreamTableActions
+        v-if="isOwner !== undefined"
+        :datastream="item.raw"
+        :is-owner="isOwner"
+        :thing-id="thingId"
+        @openPlot="item.raw.chartOpen = true"
+      />
     </template>
   </v-data-table>
-  <v-dialog
-    v-if="selectedDatastream"
-    v-model="isDSDeleteModalOpen"
-    width="40rem"
-  >
-    <v-card>
-      <v-card-title>
-        <span class="text-h5">Confirm Deletion</span>
-      </v-card-title>
-      <v-card-text>
-        Are you sure you want to permanently delete the this datastream and all
-        the observations associated with it?
-        <br />
-        <br />
-        <strong>ID:</strong> {{ selectedDatastream.id }} <br />
-      </v-card-text>
-      <v-card-text>
-        Please type <strong> Delete </strong> to confirm deletion:
-        <v-form>
-          <v-text-field
-            v-model="deleteDatastreamInput"
-            solo
-            @keydown.enter.prevent="onDeleteDatastream"
-          ></v-text-field>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn @click="isDSDeleteModalOpen = false">Cancel</v-btn>
-        <v-btn color="delete" @click="onDeleteDatastream">Confirm</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-  <v-dialog v-model="linkDataSourceDialogOpen" persistent>
-    <SiteLinkDataSourceForm
-      @close-dialog="handleCloseDataSourceDialog"
-      :thingId="thingId"
-      :datastreamId="linkFormDatastreamId"
-      :dataSourceId="linkFormDataSourceId"
-      :column="linkFormColumn"
-    />
-  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
-import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
+
 import Sparkline from '@/components/Sparkline.vue'
-import { useDatastreamTable } from '@/composables/useDatastreamTable'
-import { ref, computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
-import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/things'
-
-const { loaded } = storeToRefs(useObservationsLast72Hours())
+import { useDatastreamStore } from '@/store/datastreams'
+import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 
 const props = defineProps({
   thingId: {
@@ -215,69 +100,49 @@ const props = defineProps({
   },
 })
 
+const { fetchObservationsBulk } = useObservationsLast72Hours()
+const { loaded, observations, mostRecentObs } = storeToRefs(
+  useObservationsLast72Hours()
+)
+const { fetchDatastreamsByThingId } = useDatastreamStore()
+const { datastreams } = storeToRefs(useDatastreamStore())
+
 const { things } = storeToRefs(useThingStore())
 const isOwner = computed(() => things.value[props.thingId]?.ownsThing)
 
 const { sensors, units, observedProperties, processingLevels } =
   usePrimaryOwnerData(props.thingId)
 
-const {
-  visibleDatastreams,
-  observations,
-  mostRecentObs,
-  toggleVisibility,
-  selectedDatastream,
-  openDeleteModal,
-  onDeleteDatastream,
-  isDeleteModalOpen: isDSDeleteModalOpen,
-  deleteDatastreamInput,
-} = useDatastreamTable(props.thingId)
+const visibleDatastreams = computed(() => {
+  if (!datastreams.value[props.thingId]) return []
 
-const downloadDatastream = async (id: string) => {
-  try {
-    const data = await api.downloadDatastreamCSV(id)
-    const blob = new Blob([data], { type: 'text/csv' })
-    const link = document.createElement('a')
-    link.href = window.URL.createObjectURL(blob)
-    link.download = `datastream_${id}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  } catch (error) {
-    console.error('Error downloading datastream CSV', error)
-  }
-}
+  return datastreams.value[props.thingId]
+    .filter((d) => d.isVisible || isOwner.value)
+    .map((d) => ({
+      ...d,
+      chartOpen: false,
+      OPName: observedProperties.value.find(
+        (op) => op.id === d.observedPropertyId
+      )?.name,
+    }))
+})
 
+const sortBy = [{ key: 'OPName' }]
 const headers = [
-  { title: 'DataStream Info', key: 'info', sortable: true },
+  {
+    title: 'DataStream Info',
+    key: 'info',
+    value: 'OPName',
+    sortable: false,
+  },
   {
     title: 'Observations (Last 72 Hours)',
     key: 'observations',
     sortable: false,
   },
-  { title: 'Last Observation', key: 'last_observation' },
+  { title: 'Last Observation', key: 'last_observation', sortable: false },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
-
-const linkFormDatastreamId = ref()
-const linkFormDataSourceId = ref()
-const linkFormColumn = ref()
-const linkDataSourceDialogOpen = ref(false)
-
-function handleLinkDataSource(
-  datastreamId: string,
-  dataSourceId: string,
-  column: string | number
-) {
-  linkFormDatastreamId.value = datastreamId
-  linkFormDataSourceId.value = dataSourceId
-  linkFormColumn.value = column
-  linkDataSourceDialogOpen.value = true
-}
-
-function handleCloseDataSourceDialog() {
-  linkDataSourceDialogOpen.value = false
-}
 
 function formatDate(dateString: string) {
   return (
@@ -290,4 +155,9 @@ function isStale(timestamp: string) {
   let seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000)
   return endTime < seventyTwoHoursAgo
 }
+
+onMounted(async () => {
+  await fetchDatastreamsByThingId(props.thingId)
+  await fetchObservationsBulk(visibleDatastreams.value)
+})
 </script>
