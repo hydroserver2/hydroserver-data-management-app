@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { ProcessingLevel } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 import { useUserStore } from '@/store/user'
 
 export const useProcessingLevelStore = defineStore('processingLevels', () => {
@@ -28,7 +27,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', () => {
 
   const fetchProcessingLevels = async () => {
     try {
-      processingLevels.value = await api.fetch(ENDPOINTS.PROCESSING_LEVELS)
+      processingLevels.value = await api.fetchProcessingLevels()
       sortProcessingLevels()
       loaded.value = true
     } catch (error) {
@@ -38,7 +37,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', () => {
 
   const updateProcessingLevel = async (procLevel: ProcessingLevel) => {
     try {
-      await api.patch(ENDPOINTS.PROCESSING_LEVELS.ID(procLevel.id), procLevel)
+      await api.updateProcessingLevel(procLevel)
       const index = processingLevels.value.findIndex(
         (pl) => pl.id === procLevel.id
       )
@@ -51,7 +50,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', () => {
 
   const createProcessingLevel = async (processingLevel: ProcessingLevel) => {
     try {
-      const data = await api.post(ENDPOINTS.PROCESSING_LEVELS, processingLevel)
+      const data = await api.createProcessingLevel(processingLevel)
       processingLevels.value.push(data)
       sortProcessingLevels()
       return data
@@ -62,7 +61,7 @@ export const useProcessingLevelStore = defineStore('processingLevels', () => {
 
   const deleteProcessingLevel = async (id: string) => {
     try {
-      await api.delete(ENDPOINTS.PROCESSING_LEVELS.ID(id))
+      await api.deleteProcessingLevel(id)
       processingLevels.value = processingLevels.value.filter(
         (pl) => pl.id !== id
       )

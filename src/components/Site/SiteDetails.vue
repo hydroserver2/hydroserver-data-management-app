@@ -127,19 +127,19 @@ import SiteForm from '@/components/Site/SiteForm.vue'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
-import { useThingOwnership } from '@/composables/useThingOwnership'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
 import { useThingStore } from '@/store/things'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
+import { api } from '@/services/api'
 
 const thingId = useRoute().params.id.toString()
 const { fetchPhotos } = usePhotosStore()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
-const { deleteThing, fetchThingById } = useThingStore()
+const { fetchThingById } = useThingStore()
 const { things } = storeToRefs(useThingStore())
 const thing = computed(() => things.value[thingId])
 
@@ -147,7 +147,7 @@ const hasPhotos = computed(
   () => !loading.value && photos.value[thingId]?.length > 0
 )
 
-const { isOwner } = useThingOwnership(thingId)
+const isOwner = computed(() => things.value[thingId]?.ownsThing)
 
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
@@ -159,8 +159,13 @@ function switchToAccessControlModal() {
 }
 
 async function onDeleteThing() {
-  await deleteThing(thingId)
-  await router.push('/sites')
+  try {
+    await api.deleteThing(thingId)
+    delete things.value[thingId]
+    await router.push('/sites')
+  } catch (error) {
+    console.error('Error deleting thing', error)
+  }
 }
 
 const mapOptions = computed(() => {

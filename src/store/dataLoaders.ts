@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { DataLoader } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export const useDataLoaderStore = defineStore('dataLoaders', () => {
   const dataLoaders = ref<DataLoader[]>([])
@@ -15,7 +14,7 @@ export const useDataLoaderStore = defineStore('dataLoaders', () => {
   const fetchDataLoaders = async (reload = false) => {
     loaded.value = false
     try {
-      dataLoaders.value = await api.fetch(ENDPOINTS.DATA_LOADERS)
+      dataLoaders.value = await api.fetchDataLoaders()
       sortDataLoaders()
       loaded.value = true
     } catch (error) {
@@ -25,7 +24,7 @@ export const useDataLoaderStore = defineStore('dataLoaders', () => {
 
   const updateDataLoader = async (dataLoader: DataLoader) => {
     try {
-      await api.patch(ENDPOINTS.DATA_LOADERS.ID(dataLoader.id), dataLoader)
+      await api.updateDataLoader(dataLoader.id, dataLoader)
       const index = dataLoaders.value.findIndex((dl) => dl.id === dataLoader.id)
       if (index !== -1) dataLoaders.value[index] = dataLoader
       sortDataLoaders()
@@ -36,7 +35,7 @@ export const useDataLoaderStore = defineStore('dataLoaders', () => {
 
   const createDataLoader = async (dataLoader: DataLoader) => {
     try {
-      const data = await api.post(ENDPOINTS.DATA_LOADERS, dataLoader)
+      const data = await api.createDataLoader(dataLoader)
       dataLoaders.value.push(data)
       sortDataLoaders()
       return data
@@ -47,9 +46,8 @@ export const useDataLoaderStore = defineStore('dataLoaders', () => {
 
   const deleteDataLoader = async (id: string) => {
     try {
-      await api.delete(ENDPOINTS.DATA_LOADERS.ID(id))
+      await api.deleteDataLoader(id)
       dataLoaders.value = dataLoaders.value.filter((dl) => dl.id !== id)
-      sortDataLoaders()
     } catch (error) {
       console.error('Error deleting data loader', error)
     }

@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { DataSource } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export const useDataSourceStore = defineStore('dataSources', () => {
   const dataSources = ref<DataSource[]>([])
@@ -14,7 +13,7 @@ export const useDataSourceStore = defineStore('dataSources', () => {
 
   const fetchDataSources = async (reload = false) => {
     try {
-      dataSources.value = await api.fetch(ENDPOINTS.DATA_SOURCES)
+      dataSources.value = await api.fetchDataSources()
       sortDataSources()
       loaded.value = true
     } catch (error) {
@@ -24,7 +23,7 @@ export const useDataSourceStore = defineStore('dataSources', () => {
 
   const updateDataSource = async (dataSource: DataSource) => {
     try {
-      await api.patch(ENDPOINTS.DATA_SOURCES.ID(dataSource.id), dataSource)
+      await api.updateDataSource(dataSource)
       const index = dataSources.value.findIndex((ds) => ds.id === dataSource.id)
       if (index !== -1) dataSources.value[index] = dataSource
       sortDataSources()
@@ -35,7 +34,7 @@ export const useDataSourceStore = defineStore('dataSources', () => {
 
   const createDataSource = async (dataSource: DataSource) => {
     try {
-      const data = await api.post(ENDPOINTS.DATA_SOURCES, dataSource)
+      const data = await api.createDataSource(dataSource)
       dataSources.value.push(data)
       sortDataSources()
       return data
@@ -46,7 +45,7 @@ export const useDataSourceStore = defineStore('dataSources', () => {
 
   const deleteDataSource = async (id: string) => {
     try {
-      await api.delete(ENDPOINTS.DATA_SOURCES.ID(id))
+      await api.deleteDataSource(id)
       dataSources.value = dataSources.value.filter((ds) => ds.id !== id)
       sortDataSources()
     } catch (error) {

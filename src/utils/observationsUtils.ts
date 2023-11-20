@@ -1,6 +1,5 @@
 import { DataArray } from '@/types'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import { api, getObservationsEndpoint } from '@/services/api'
 
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)
@@ -14,17 +13,10 @@ export async function fetchObservations(
   endTime?: string
 ) {
   let allData: DataArray = []
-
-  let nextLink = endTime
-    ? ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS_BETWEEN_DATES(
-        id,
-        startTime,
-        endTime
-      )
-    : ENDPOINTS.SENSORTHINGS.DATASTREAMS.OBSERVATIONS(id, startTime)
+  let nextLink = getObservationsEndpoint(id, startTime, endTime)
 
   while (nextLink) {
-    const data = await api.fetch(nextLink)
+    const data = await api.fetchObservations(nextLink)
     if (data.value && data.value[0] && data.value[0].dataArray) {
       allData = allData.concat(data.value[0].dataArray)
     }

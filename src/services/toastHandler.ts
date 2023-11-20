@@ -1,5 +1,5 @@
-import { ENDPOINTS } from '@/constants'
 import Notification from '@/store/notifications'
+import { THINGS_BASE, USER_BASE, ACCOUNT_BASE } from '@/services/api'
 
 export function toastHandler(response: any, endpoint: string, method: string) {
   if (response instanceof TypeError) {
@@ -32,14 +32,8 @@ function getMessage(method: string, status: number, endpoint: string) {
     : undefined
 }
 
-// const THINGS_ID_PATTERN = new RegExp(`${ENDPOINTS.THINGS}/[a-zA-Z0-9]+`)
-
 function getEndpointMessages(endpoint: string): any {
-  if (endpoint.includes(ENDPOINTS.THINGS)) {
-    // if (endpoint == ENDPOINTS.THINGS) {
-    // } else if (THINGS_ID_PATTERN.test(endpoint)) {}
-    // else if (endpoint.includes('metadata')) {
-    // } else
+  if (endpoint.includes(THINGS_BASE)) {
     if (endpoint.includes('ownership')) {
       return {
         PATCH: {
@@ -51,10 +45,8 @@ function getEndpointMessages(endpoint: string): any {
         },
       }
     }
-    // else if (endpoint.includes('privacy')) {
-    // }
-  } else if (endpoint.includes(ENDPOINTS.USER)) {
-    if (endpoint == ENDPOINTS.USER) {
+  } else if (endpoint.includes(USER_BASE)) {
+    if (endpoint == USER_BASE) {
       return {
         GET: { 200: 'You have logged in!', 401: 'Invalid email or password.' },
         POST: {
@@ -75,14 +67,14 @@ function getEndpointMessages(endpoint: string): any {
         },
       }
     }
-  } else if (endpoint.includes(ENDPOINTS.ACCOUNT)) {
-    if (endpoint == ENDPOINTS.USER) {
+  } else if (endpoint.includes(ACCOUNT_BASE)) {
+    if (endpoint == USER_BASE) {
       return {
         DELETE: {
           200: 'Your account has been deleted',
         },
       }
-    } else if (endpoint.includes(ENDPOINTS.ACCOUNT.JWT_PAIR)) {
+    } else if (endpoint.includes(`${ACCOUNT_BASE}/jwt/pair`)) {
       return {
         POST: {
           401: 'No active account found with the given credentials.',

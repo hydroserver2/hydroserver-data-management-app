@@ -40,8 +40,7 @@
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useRoute } from 'vue-router'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import { api } from '@/services/api'
 import router from '@/router/router'
 
 const valid = ref(false)
@@ -54,11 +53,11 @@ const resetPassword = async () => {
   if (!valid.value) return
 
   try {
-    await api.post(ENDPOINTS.USER.RESET_PASSWORD, {
-      uid: route.params.uid.toString(),
-      token: route.params.token.toString(),
-      password: password.value,
-    })
+    await api.resetPassword(
+      route.params.uid.toString(),
+      route.params.token.toString(),
+      password.value
+    )
     await router.push({ name: 'Login' })
   } catch (error) {
     console.error('Error resetting password', error)

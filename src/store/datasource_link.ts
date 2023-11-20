@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import { api } from '@/services/api'
+import { Datastream } from '@/types'
 
 export const useSiteLinkDataSourceFormStore = defineStore(
   'site-link-data-source-form-store',
@@ -23,12 +23,12 @@ export const useSiteLinkDataSourceFormStore = defineStore(
     })
 
     const fetchDatastreams = async (thingId: string, dsId: string) => {
-      const response = await api.fetch(ENDPOINTS.DATASTREAMS.FOR_THING(thingId))
+      const response = await api.fetchDatastreamsForThing(thingId)
       return response.filter((ds: any) => ds.id === dsId)[0]
     }
 
     const fetchDataSources = async () => {
-      dataSources.value = await api.fetch(ENDPOINTS.DATA_SOURCES)
+      dataSources.value = await api.fetchDataSources()
     }
 
     const fillForm = (dsId: string, dataSourceId: string, column: any) => {
@@ -45,14 +45,12 @@ export const useSiteLinkDataSourceFormStore = defineStore(
         (ds) => ds.name === selectedDataSource.value
       )
       let datastreamBody = {
+        id: datastreamId.value,
         dataSourceId: dataSource ? dataSource.id : null,
         dataSourceColumn: selectedColumn.value,
       }
 
-      return await api.patch(
-        `${ENDPOINTS.DATASTREAMS}/${datastreamId.value}`,
-        datastreamBody
-      )
+      return await api.updateDatastream(datastreamBody as unknown as Datastream)
     }
 
     return {

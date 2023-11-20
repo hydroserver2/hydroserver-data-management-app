@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Sensor } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export const useSensorStore = defineStore('sensor', () => {
   const sensors = ref<Sensor[]>([])
@@ -14,7 +13,7 @@ export const useSensorStore = defineStore('sensor', () => {
 
   const fetchSensors = async () => {
     try {
-      const data = await api.fetch(ENDPOINTS.SENSORS)
+      const data = await api.fetchSensors()
       sensors.value = data
       sortSensors()
       loaded.value = true
@@ -25,7 +24,7 @@ export const useSensorStore = defineStore('sensor', () => {
 
   const updateSensor = async (sensor: Sensor) => {
     try {
-      const data = await api.patch(ENDPOINTS.SENSORS.ID(sensor.id), sensor)
+      const data = await api.updateSensor(sensor)
       const index = sensors.value.findIndex((s) => s.id === sensor.id)
       if (index !== -1 && data) sensors.value[index] = data
       sortSensors()
@@ -36,7 +35,7 @@ export const useSensorStore = defineStore('sensor', () => {
 
   const createSensor = async (sensor: Sensor) => {
     try {
-      const data = await api.post(ENDPOINTS.SENSORS, sensor)
+      const data = await api.createSensor(sensor)
       sensors.value.push(data)
       sortSensors()
       return data
@@ -47,7 +46,7 @@ export const useSensorStore = defineStore('sensor', () => {
 
   const deleteSensor = async (id: string) => {
     try {
-      await api.delete(ENDPOINTS.SENSORS.ID(id))
+      await api.deleteSensor(id)
       sensors.value = sensors.value.filter((sensor) => sensor.id !== id)
       sortSensors()
     } catch (error) {

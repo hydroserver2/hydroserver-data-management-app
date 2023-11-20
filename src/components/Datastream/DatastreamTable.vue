@@ -199,12 +199,12 @@ import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { useDatastreamTable } from '@/composables/useDatastreamTable'
-import { ref } from 'vue'
-import { useThingOwnership } from '@/composables/useThingOwnership'
+import { ref, computed } from 'vue'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
+import { useThingStore } from '@/store/things'
 
 const { loaded } = storeToRefs(useObservationsLast72Hours())
 
@@ -215,7 +215,8 @@ const props = defineProps({
   },
 })
 
-const { isOwner } = useThingOwnership(props.thingId)
+const { things } = storeToRefs(useThingStore())
+const isOwner = computed(() => things.value[props.thingId]?.ownsThing)
 
 const { sensors, units, observedProperties, processingLevels } =
   usePrimaryOwnerData(props.thingId)

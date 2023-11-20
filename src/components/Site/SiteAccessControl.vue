@@ -171,7 +171,6 @@
 </template>
 
 <script setup lang="ts">
-import { useThingOwnership } from '@/composables/useThingOwnership'
 import { useThingStore } from '@/store/things'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
@@ -184,9 +183,10 @@ const props = defineProps<{
   thingId: string
 }>()
 
-const { isPrimaryOwner } = useThingOwnership(props.thingId)
-
 const { things } = storeToRefs(useThingStore())
+const isPrimaryOwner = computed(
+  () => things.value[props.thingId]?.isPrimaryOwner
+)
 
 const thing = computed(() => things.value[props.thingId])
 

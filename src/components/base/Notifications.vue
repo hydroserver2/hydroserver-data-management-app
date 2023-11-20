@@ -35,10 +35,13 @@
 </template>
 
 <script lang="ts" setup>
-import { DEFAULT_TOAST_DURATION } from '@/constants'
 import { Subscription } from 'rxjs'
 import { reactive, onBeforeUnmount, computed } from 'vue'
-import Notification, { IDialog, IToast } from '@/store/notifications'
+import Notification, {
+  IDialog,
+  IToast,
+  DEFAULT_TOAST_DURATION,
+} from '@/store/notifications'
 
 const INITIAL_DIALOG = {
   title: '',

@@ -1,13 +1,15 @@
 import { useDatastreamStore } from '@/store/datastreams'
 import { onMounted, ref, Ref, watch, computed } from 'vue'
-import { useThingOwnership } from './useThingOwnership'
 import { Datastream } from '@/types'
 import Notification from '@/store/notifications'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
+import { useThingStore } from '@/store/things'
 
 export function useDatastreamTable(thingId: string) {
-  const { isOwner } = useThingOwnership(thingId)
+  const { things } = storeToRefs(useThingStore())
+  const isOwner = computed(() => things.value[thingId]?.ownsThing)
+
   const { datastreams } = storeToRefs(useDatastreamStore())
   const { updateDatastream, deleteDatastream, fetchDatastreamsByThingId } =
     useDatastreamStore()

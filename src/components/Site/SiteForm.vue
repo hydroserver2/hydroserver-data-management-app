@@ -216,8 +216,9 @@ import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import Notification from '@/store/notifications'
 import { storeToRefs } from 'pinia'
+import { api } from '@/services/api'
 
-const { fetchThings, updateThing, createThing } = useThingStore()
+const { fetchThings } = useThingStore()
 const { things } = storeToRefs(useThingStore())
 const { updatePhotos, fetchPhotos } = usePhotosStore()
 const { photos } = storeToRefs(usePhotosStore())
@@ -322,11 +323,21 @@ async function uploadThing() {
   if (thing) {
     if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
     if (props.thingId) {
-      await updateThing(thing)
+      try {
+        things.value[thing.id] = await api.updateThing(thing)
+      } catch (error) {
+        console.error('Error updating thing', error)
+      }
       await updatePhotos(props.thingId, newPhotos.value, photosToDelete.value)
     } else {
-      const newThing = await createThing(thing)
-      if (newPhotos.value) await updatePhotos(newThing.id, newPhotos.value, [])
+      try {
+        const newThing = await api.createThing(thing)
+        things.value[newThing.id] = newThing
+        if (newPhotos.value)
+          await updatePhotos(newThing.id, newPhotos.value, [])
+      } catch (error) {
+        console.error('Error creating thing', error)
+      }
     }
   }
 }

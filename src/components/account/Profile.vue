@@ -1,231 +1,28 @@
 <template>
-  <v-container v-if="user">
-    <v-row>
-      <v-col cols="12">
-        <v-row class="d-flex justify-center">
-          <v-col md="8">
-            <v-card color="surface" elevation="2">
-              <v-row no-gutters>
-                <v-col
-                  cols="12"
-                  class="d-flex align-center justify-center primary"
-                  style="background-color: #2196f3"
-                >
-                  <v-card-title :style="{ color: 'white' }">
-                    <h5 class="text-h5 user-info">
-                      {{ user.firstName }}
-                      {{ user.middleName }}
-                      {{ user.lastName }}
-                    </h5>
-                  </v-card-title>
-                </v-col>
+  <v-container>
+    <UserInfoTable />
 
-                <v-col cols="8" class="pl-2 pt-2 pb-2">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td class="pr-4"><strong>Email</strong></td>
-                        <td>{{ user.email }}</td>
-                      </tr>
-                      <tr>
-                        <td class="pr-4"><strong>Address</strong></td>
-                        <td>{{ user.address }}</td>
-                      </tr>
-                      <tr>
-                        <td class="pr-4"><strong>Phone</strong></td>
-                        <td>{{ user.phone }}</td>
-                      </tr>
-                      <tr>
-                        <td class="pr-4"><strong>Type</strong></td>
-                        <td>{{ user.type }}</td>
-                      </tr>
-                      <tr>
-                        <td class="pr-4"><strong>Link</strong></td>
-                        <td>{{ user.link }}</td>
-                      </tr>
-                      <tr v-if="user.organization">
-                        <td class="pr-4 text-nowrap">
-                          <strong>Organization Name</strong>
-                        </td>
-                        <td>{{ user.organization.name }}</td>
-                      </tr>
-                      <tr v-if="user.organization">
-                        <td class="pr-4"><strong>Organization Code</strong></td>
-                        <td>{{ user.organization.code }}</td>
-                      </tr>
-                      <tr v-if="user.organization">
-                        <td class="pr-4"><strong>Organization Link</strong></td>
-                        <td>{{ user.organization.link }}</td>
-                      </tr>
-                      <tr v-if="user.organization">
-                        <td class="pr-4"><strong>Organization Type</strong></td>
-                        <td>{{ user.organization.type }}</td>
-                      </tr>
-                      <tr v-if="user.organization">
-                        <td class="pr-4">
-                          <strong>Organization description</strong>
-                        </td>
-                        <td>{{ user.organization.description }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </v-col>
-              </v-row>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <v-row class="d-flex justify-center">
-          <v-col md="8">
-            <v-card
-              class="d-flex align-center"
-              @click="editAccountDialog = true"
-              color="surface"
-              elevation="2"
-            >
-              <v-card-text class="text--primary">
-                <div class="d-flex justify-content-between">
-                  <span class="text-truncate mr-4">Edit My Profile</span>
-                  <v-spacer></v-spacer>
-                  <v-icon color="primary" large
-                    >mdi-account-edit-outline</v-icon
-                  >
-                </div>
-              </v-card-text>
-            </v-card>
-            <v-dialog v-model="editAccountDialog" max-width="40rem">
-              <AccountForm @close="editAccountDialog = false"></AccountForm>
-            </v-dialog>
-          </v-col>
-          <v-col md="8">
-            <v-card
-              class="d-flex align-center"
-              @click="deleteAccountDialog = true"
-              color="surface"
-              elevation="2"
-            >
-              <v-card-text class="text--primary">
-                <div class="d-flex justify-content-between">
-                  <span class="text-truncate mr-4">Delete Account</span>
-                  <v-spacer></v-spacer>
-                  <v-icon color="error" large>mdi-account-remove</v-icon>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-          <!-- <v-col md="8">
-            <v-card
-              class="d-flex align-center"
-              @click="$router.push('/Sites')"
-              color="surface"
-              elevation="2"
-            >
-              <v-card-text class="text--primary">
-                <div class="d-flex justify-content-between">
-                  <span class="text-truncate mr-4"
-                    >Connect My HydroShare Account
-                  </span>
-                  <v-spacer></v-spacer>
-                  <img
-                    style="max-height: 1.5rem"
-                    :src="HydroShareIcon"
-                    alt="hydro share logo"
-                    class="site-information-image"
-                  />
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col> -->
-        </v-row>
-      </v-col>
-    </v-row>
+    <v-btn-primary class="mr-6" @click="openForm = true">
+      Edit account
+    </v-btn-primary>
+    <v-btn-delete @click="openDelete = true"> Delete Account</v-btn-delete>
   </v-container>
 
-  <v-dialog v-model="deleteAccountDialog" width="40rem">
-    <v-card>
-      <v-card-title class="headline">Confirm Account Deletion</v-card-title>
-      <v-card-text>
-        Are you sure you want to delete your account? This action will
-        permanently remove all your information from the system including all
-        sites, datastreams, and observations you have primary ownership of, user
-        information, and preferences. This action cannot be undone.
-      </v-card-text>
-      <v-card-text v-if="primaryOwnedThings.length > 0">
-        The following is a list of the sites you have primary ownership of that
-        will be deleted with your account. If you have secondary owners, we
-        strongly recommend transferring primary ownership to one of them before
-        deleting your account. Additionally, you have the option to store your
-        site data in hydroshare or download your data before deleting your
-        account.
-      </v-card-text>
-      <v-card-text>
-        <div v-for="thing in primaryOwnedThings">
-          {{ thing.name }}
-        </div>
-      </v-card-text>
+  <v-dialog v-model="openForm" width="40rem">
+    <AccountForm @close="openForm = false" />
+  </v-dialog>
 
-      <v-card-text>
-        Please type the following text to confirm deletion:
-        <strong> Delete my account and data </strong>
-        <v-form>
-          <v-text-field
-            v-model="deleteInput"
-            solo
-            @keydown.enter.prevent="deleteAccount"
-          ></v-text-field>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn-cancel @click="cancelDeletion">Cancel</v-btn-cancel>
-        <v-btn-delete @click="deleteAccount">Delete</v-btn-delete>
-      </v-card-actions>
-    </v-card>
+  <v-dialog v-model="openDelete" width="40rem">
+    <DeleteAccountCard @close="openDelete = false" />
   </v-dialog>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import AccountForm from '@/components/account/AccountForm.vue'
-import { useAuthStore } from '@/store/authentication'
-import { useUserStore } from '@/store/user'
-import { onMounted, ref } from 'vue'
-import Notification from '@/store/notifications'
-import { useThingStore } from '@/store/things'
-import HydroShareIcon from '@/assets/hydro.png'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
-import { storeToRefs } from 'pinia'
+import UserInfoTable from '@/components/account/UserInfoTable.vue'
+import DeleteAccountCard from '@/components/account/DeleteAccountCard.vue'
 
-const { logout } = useAuthStore()
-const { user } = storeToRefs(useUserStore())
-const { fetchThings } = useThingStore()
-const { primaryOwnedThings } = storeToRefs(useThingStore())
-
-const deleteAccountDialog = ref(false)
-const editAccountDialog = ref(false)
-const deleteInput = ref('')
-
-async function deleteAccount() {
-  if (deleteInput.value.toLowerCase() !== 'delete my account and data') {
-    Notification.toast({ message: "input doesn't match", type: 'error' })
-    return
-  }
-  try {
-    await api.delete(ENDPOINTS.USER)
-    await logout()
-  } catch (error) {
-    console.error('Error deleting account', error)
-  }
-  deleteAccountDialog.value = false
-}
-
-function cancelDeletion() {
-  deleteAccountDialog.value = false
-  deleteInput.value = ''
-}
-
-onMounted(async () => {
-  await fetchThings()
-})
+const openDelete = ref(false)
+const openForm = ref(false)
 </script>

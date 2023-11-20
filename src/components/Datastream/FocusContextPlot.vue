@@ -84,7 +84,7 @@ const fetchUnit = api.getUnit(datastream.value!.unitId).catch((error) => {
 })
 
 const fetchObservedProperty = api
-  .getObservedProperty(datastream.value!.observedPropertyId)
+  .fetchObservedProperty(datastream.value!.observedPropertyId)
   .catch((error) => {
     console.error('Failed to fetch ObservedProperty:', error)
     return null

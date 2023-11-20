@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Photo } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
 export const usePhotosStore = defineStore('photos', () => {
   const photos = ref<Record<string, Array<Photo>>>({})
@@ -10,9 +9,7 @@ export const usePhotosStore = defineStore('photos', () => {
 
   const fetchPhotos = async (thingId: string) => {
     try {
-      photos.value[thingId] = await api.fetch(
-        ENDPOINTS.PHOTOS.FOR_THING(thingId)
-      )
+      photos.value[thingId] = await api.fetchSitePhotos(thingId)
     } catch (error) {
       console.error('Error fetching photos from DB', error)
     }
@@ -29,13 +26,10 @@ export const usePhotosStore = defineStore('photos', () => {
       if (newPhotos.length > 0) {
         const data = new FormData()
         newPhotos.forEach((photo) => data.append('files', photo))
-        photos.value[thingId] = await api.post(
-          ENDPOINTS.PHOTOS.FOR_THING(thingId),
-          data
-        )
+        photos.value[thingId] = await api.uploadSitePhotos(thingId, data)
       }
       for (const photoId of photosToDelete) {
-        await api.delete(ENDPOINTS.PHOTOS.FOR_THING(thingId, photoId))
+        await api.deleteSitePhoto(thingId, photoId)
       }
       photos.value[thingId] = photos.value[thingId].filter(
         (photo) => !photosToDelete.includes(photo.id)

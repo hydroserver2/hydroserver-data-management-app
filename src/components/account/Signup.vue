@@ -203,8 +203,7 @@ import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
 import { organizationTypes } from '@/vocabularies'
 import OAuth from '@/components/account/OAuth.vue'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 
@@ -227,7 +226,7 @@ async function createUser() {
   if (!valid.value) return
   try {
     // resetState()
-    const data = await api.post(ENDPOINTS.USER, user)
+    const data = await api.createUser(user)
     setUser(data.user)
     setTokens(data.access, data.refresh)
     await router.push({ name: 'VerifyEmail' })
