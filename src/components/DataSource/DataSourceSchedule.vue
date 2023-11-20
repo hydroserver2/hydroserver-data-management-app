@@ -43,7 +43,7 @@
         <v-text-field
           ref="interval"
           v-model="store.interval"
-          label="Interval"
+          label="Interval *"
           hint="Enter the interval data should be loaded on."
           persistent-hint
           type="number"
