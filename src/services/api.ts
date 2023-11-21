@@ -17,8 +17,8 @@ export const BASE_URL = `${
     : import.meta.env.VITE_APP_PROXY_BASE_URL
 }/api`
 
-export const USER_BASE = `${BASE_URL}/account/user`
 export const ACCOUNT_BASE = `${BASE_URL}/account`
+export const USER_BASE = `${BASE_URL}/account/user`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
 export const THINGS_BASE = `${BASE_URL}/data/things`
@@ -52,17 +52,17 @@ export const api = {
   updateUser: async (user: User, oldUser: User) =>
     apiMethods.patch(USER_BASE, user, oldUser),
   deleteUser: async () => apiMethods.delete(USER_BASE),
+
   resetPassword: async (uid: string, token: string, password: string) =>
-    apiMethods.post(`${USER_BASE}/reset-password`, {
+    apiMethods.post(`${ACCOUNT_BASE}/reset-password`, {
       uid: uid,
       token: token,
       password: password,
     }),
   sendPasswordRestEmail: async (email: string) =>
-    apiMethods.post(`${USER_BASE}/send-password-reset-email`, {
+    apiMethods.post(`${ACCOUNT_BASE}/send-password-reset-email`, {
       email: email,
     }),
-
   login: async (email: string, password: string) =>
     apiMethods.post(`${ACCOUNT_BASE}/jwt/pair`, {
       email: email,
@@ -84,19 +84,19 @@ export const api = {
   getUnit: async (id: string) => apiMethods.fetch(`${UNIT_BASE}/${id}`),
 
   removeThingOwner: async (id: string, email: string) =>
-    apiMethods.delete(`${THINGS_BASE}/${id}/ownership`, {
+    apiMethods.patch(`${THINGS_BASE}/${id}/ownership`, {
       email: email,
       removeOwner: true,
     }),
   addSecondaryOwner: async (id: string, email: string) =>
-    apiMethods.post(`${THINGS_BASE}/${id}/ownership`, {
+    apiMethods.patch(`${THINGS_BASE}/${id}/ownership`, {
       email: email,
       makeOwner: true,
     }),
   transferPrimaryOwnership: async (id: string, email: string) =>
     apiMethods.patch(`${THINGS_BASE}/${id}/ownership`, {
       email: email,
-      makeOwner: true,
+      transferPrimary: true,
     }),
   updateThingPrivacy: async (id: string, thingPrivacy: boolean) =>
     apiMethods.patch(`${THINGS_BASE}/${id}/privacy`, {
@@ -118,12 +118,12 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
   deleteSitePhoto: async (thingId: string, photoId: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
+  fetchDatastreamsForThing: async (thingId: string) =>
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
 
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
   fetchDatastreams: async () => apiMethods.fetch(DS_BASE),
-  fetchDatastreamsForThing: async (thingId: string) =>
-    apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
   fetchUsersDatastreams: async () =>
     apiMethods.fetch(`${DS_BASE}?exclude_unowned=true`),
   updateDatastream: async (
@@ -181,7 +181,7 @@ export const api = {
     apiMethods.post(DATA_LOADERS_BASE, dataLoader),
   fetchDataLoaders: async () => apiMethods.fetch(DATA_LOADERS_BASE),
   updateDataLoader: async (id: string, dataLoader: DataLoader) =>
-    apiMethods.fetch(`${DATA_LOADERS_BASE}/${id}`, dataLoader),
+    apiMethods.patch(`${DATA_LOADERS_BASE}/${id}`, dataLoader),
   deleteDataLoader: async (id: string) =>
     apiMethods.delete(`${DATA_LOADERS_BASE}/${id}`),
 
@@ -193,7 +193,7 @@ export const api = {
   updateDataSource: async (newS: DataSource, oldS: DataSource | null = null) =>
     apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS, oldS),
   deleteDataSource: async (id: string) =>
-    apiMethods.delete(`${SENSOR_BASE}/${id}`),
+    apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
 }

@@ -97,7 +97,6 @@ async function uploadUnit() {
     }
   } else {
     try {
-      console.log('new unit', unit.value)
       const newUnit = await api.createUnit(unit.value)
       updateUnit(newUnit)
       sortUnits()

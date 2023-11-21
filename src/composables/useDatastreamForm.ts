@@ -50,7 +50,7 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
     if (!valid.value) return
     if (datastreamId) await updateDatastream(datastream)
     else await createDatastream(datastream)
-    await router.push({ name: 'SiteDetails', params: { id: thingId } })
+    router.push({ name: 'SiteDetails', params: { id: thingId } })
   }
 
   onMounted(async () => {
