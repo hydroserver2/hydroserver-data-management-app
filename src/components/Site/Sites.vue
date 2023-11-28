@@ -30,9 +30,7 @@
     >
     </v-data-table>
 
-    <p v-else class="text-body-1 text-medium-emphasis">
-      You have not registered any sites.
-    </p>
+    <h5 v-else class="text-h5">You have not registered any sites.</h5>
   </v-container>
 </template>
 

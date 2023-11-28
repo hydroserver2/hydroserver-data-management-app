@@ -17,11 +17,6 @@ describe('Sites', () => {
   it('links navigate to the correct pages', () => {
     cy.login('paul')
     cy.get('.owned-sites-table tbody tr').first().click()
-    cy.get('.single-site-name').should('be.visible')
+    cy.contains('Site Information')
   })
-
-  // it('creates a new site', () => {})
-  // it('notifies user if the server is down', () => {})
-  // it('renders empty content if server returns no results', () => {})
-  // it('shows loading state if server takes awhile', () => {})
 })

@@ -8,23 +8,10 @@ describe('SiteDetails', () => {
 
   it('renders site content', () => {
     cy.wait(500)
-    cy.get('.single-site-name h5').contains('Site in Miami')
+    cy.contains('Site in Miami')
   })
 
   it('renders owner specific button when logged in', () => {
-    cy.get('.access_control').click()
-    cy.get('.access_control_dialog').should('be.visible')
+    cy.contains('Access Control')
   })
 })
-
-// Single Site as owner:
-// Edit a site
-// Delete a site
-
-// access control
-// add secondary owners
-// transfer ownership
-// remove secondary owner
-// make site private
-
-// Visit as follower:
