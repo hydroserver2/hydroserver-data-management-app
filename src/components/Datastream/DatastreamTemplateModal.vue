@@ -1,13 +1,15 @@
 <template>
   <v-card>
     <v-card-title>Use an existing datastream as a template</v-card-title>
+
     <v-divider class="my-4"></v-divider>
+
     <v-card-text>
       <v-col cols="12">
         Filter datastreams by site
         <v-select
           v-model="selectedThingId"
-          :items="primaryOwnedThings"
+          :items="usersThings"
           item-title="name"
           item-value="id"
         >
@@ -24,13 +26,13 @@
             <p style="font-size: 1.2em">
               <strong class="mr-2">Observed Property:</strong>
               <strong>{{
-                opStore.getById(datastream.observedPropertyId).name
+                getOPById(datastream.observedPropertyId).name
               }}</strong>
             </p>
             <p><strong class="mr-2">Identifier:</strong> {{ datastream.id }}</p>
             <p>
               <strong class="mr-2">Processing Level:</strong>
-              {{ plStore.getById(datastream.processingLevelId).code }}
+              {{ getPLById(datastream.processingLevelId).code }}
             </p>
             <p>
               <strong class="mr-2">Sampled Medium:</strong>
@@ -38,7 +40,7 @@
             </p>
             <p>
               <strong class="mr-2">Sensor:</strong>
-              {{ sensorStore.getSensorById(datastream.sensorId).name }}
+              {{ getSensorById(datastream.sensorId).name }}
             </p>
           </v-card-text>
         </v-card>
@@ -48,24 +50,25 @@
 </template>
 
 <script setup lang="ts">
+import { api } from '@/services/api'
 import { useDatastreamStore } from '@/store/datastreams'
-import { useThingStore } from '@/store/things'
-import { watch, onMounted, ref } from 'vue'
-import { Datastream } from '@/types'
+import { watch, onMounted, ref, computed } from 'vue'
+import { Datastream, Thing } from '@/types'
 import { useSensorStore } from '@/store/sensors'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useObservedPropertyStore } from '@/store/observedProperties'
-import { storeToRefs } from 'pinia'
 
-const sensorStore = useSensorStore()
-const plStore = useProcessingLevelStore()
-const opStore = useObservedPropertyStore()
+const { fetchSensors, getSensorById } = useSensorStore()
+const { fetchProcessingLevels, getById: getPLById } = useProcessingLevelStore()
+const { fetchObservedProperties, getById: getOPById } =
+  useObservedPropertyStore()
 
 const { fetchDatastreamsByThingId } = useDatastreamStore()
-const { fetchThings } = useThingStore()
-const { primaryOwnedThings } = storeToRefs(useThingStore())
+
 const selectedThingId = ref('')
 const datastreamsForThing = ref<Datastream[]>([])
+const things = ref<Thing[]>([])
+const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 
@@ -87,11 +90,12 @@ function datastreamSelected(id: string) {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    fetchThings(),
-    sensorStore.fetchSensors(),
-    plStore.fetchProcessingLevels(),
-    opStore.fetchObservedProperties(),
+  const [fetchedThings] = await Promise.all([
+    api.fetchThings(),
+    fetchSensors(),
+    fetchProcessingLevels(),
+    fetchObservedProperties(),
   ])
+  things.value = fetchedThings
 })
 </script>

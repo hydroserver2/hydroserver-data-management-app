@@ -8,10 +8,6 @@ export const useThingStore = defineStore('things', () => {
   const loaded = ref(false)
   const fetching = ref(false)
 
-  const primaryOwnedThings = computed(() =>
-    Object.values(things.value).filter((thing) => thing.isPrimaryOwner)
-  )
-
   const ownedThings = computed(() =>
     Object.values(things.value).filter((thing) => thing.ownsThing)
   )
@@ -45,7 +41,6 @@ export const useThingStore = defineStore('things', () => {
     things,
     loaded,
     fetching,
-    primaryOwnedThings,
     ownedThings,
     fetchThings,
     fetchThingById,
