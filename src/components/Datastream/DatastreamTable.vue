@@ -44,19 +44,15 @@
           </v-dialog>
           <Sparkline
             @click="item.raw.chartOpen = true"
-            class="pt-2"
             :is-stale="isStale(item.raw.phenomenonEndTime)"
             :observations="observations[item.raw.id]"
           />
         </div>
         <div v-else>No data for this datastream</div>
       </div>
-      <div v-else>
-        <v-progress-linear color="secondary" indeterminate :height="25"
-          >Loading...</v-progress-linear
-        >
-      </div>
+      <v-progress-linear v-else color="secondary" indeterminate />
     </template>
+
     <template v-slot:item.last_observation="{ item }">
       <div v-if="mostRecentObs[item.raw.id]">
         <v-row>
