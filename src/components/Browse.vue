@@ -1,74 +1,66 @@
 <template>
   <div class="d-flex fill-height">
-    <v-navigation-drawer v-model="drawer" width="370">
-      <v-card v-if="drawer" flat>
-        <v-card-title class="d-flex justify-space-between align-start">
-          <div>Browse Data Collection Sites</div>
-          <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
-        </v-card-title>
+    <v-navigation-drawer v-model="drawer" width="400">
+      <v-card-title class="d-flex justify-space-between align-start">
+        Browse Data Collection Sites
+        <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
+      </v-card-title>
 
-        <v-divider></v-divider>
+      <v-divider></v-divider>
 
+      <div class="d-flex justify-end my-4 mx-2">
+        <v-btn-cancel elevation="3" @click="clearFilters"
+          >Clear Filters</v-btn-cancel
+        >
+      </div>
+
+      <v-card elevation="3" class="mx-4">
         <v-card-text>
-          <div class="d-flex justify-end">
-            <v-btn-cancel elevation="3" class="mb-2" @click="clearFilters"
-              >Clear Filters</v-btn-cancel
-            >
-          </div>
-          <v-card elevation="3">
-            <v-card-text>
-              <form @submit.prevent="filterOrganizations">
-                <v-text-field
-                  placeholder="Filter by Organizations"
-                  prepend-inner-icon="mdi-magnify"
-                  v-model="searchInput"
-                  clearable
-                  hide-details="auto"
-                  @click:clear="clearOrganizations"
-                />
-              </form>
-              <p v-if="!validFilter" class="text-error mt-2">
-                No results found
-              </p>
-            </v-card-text>
-            <v-card-text
-              class="py-0"
-              v-for="organizationName in filteredOrganizations"
-            >
-              {{ organizationName }}
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn-primary
-                :disabled="!searchInput"
-                @click="filterOrganizations"
-                >Filter</v-btn-primary
-              >
-            </v-card-actions>
-          </v-card>
-          <v-expansion-panels class="mt-4">
-            <v-expansion-panel title="Site Types">
-              <v-expansion-panel-text>
-                <template v-for="type in siteTypes" :key="type">
-                  <v-checkbox
-                    v-model="selectedSiteTypes"
-                    :label="type"
-                    :value="type"
-                    hide-details
-                    density="compact"
-                  />
-                </template>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
+          <form @submit.prevent="filterOrganizations">
+            <v-text-field
+              placeholder="Filter by Organizations"
+              prepend-inner-icon="mdi-magnify"
+              v-model="searchInput"
+              clearable
+              hide-details="auto"
+              @click:clear="clearOrganizations"
+            />
+          </form>
         </v-card-text>
+
+        <v-card-text v-if="!validFilter" class="text-error py-0">
+          No results found
+        </v-card-text>
+        <v-card-text class="py-0" v-for="orgName in filteredOrganizations">
+          {{ orgName }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn-primary :disabled="!searchInput" @click="filterOrganizations"
+            >Filter</v-btn-primary
+          >
+        </v-card-actions>
       </v-card>
+
+      <v-expansion-panels class="pa-4">
+        <v-expansion-panel title="Site Types">
+          <v-expansion-panel-text>
+            <v-checkbox
+              v-for="type in siteTypes"
+              v-model="selectedSiteTypes"
+              :label="type"
+              :value="type"
+              hide-details
+              density="compact"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </v-navigation-drawer>
 
     <div class="pa-2" v-if="!drawer">
-      <v-btn icon @click="drawer = !drawer">
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+      <v-icon @click="drawer = !drawer">mdi-menu</v-icon>
     </div>
 
     <GoogleMap
@@ -83,12 +75,8 @@ import GoogleMap from '@/components/GoogleMap.vue'
 import { computed, onMounted, ref } from 'vue'
 import { Ref } from 'vue'
 import { Thing } from '@/types'
-import { useThingStore } from '@/store/things'
 import { siteTypes } from '@/vocabularies'
-import { storeToRefs } from 'pinia'
-
-const { fetchThings } = useThingStore()
-const { things } = storeToRefs(useThingStore())
+import { api } from '@/services/api'
 
 const drawer = ref(true)
 const selectedSiteTypes: Ref<string[]> = ref([])
@@ -96,50 +84,43 @@ const filteredOrganizations = ref(new Set())
 const searchInput = ref('')
 const validFilter = ref(true)
 
-const organizations = computed(() => {
-  const allOrgs = new Set()
-  Object.values(things.value).forEach((t) => {
-    t.owners.forEach((owner) => {
-      if (owner.organizationName) allOrgs.add(owner.organizationName)
-    })
-  })
-  return Array.from(allOrgs)
-})
+const things = ref<Thing[]>([])
+const filteredThings = computed(() => things.value.filter(isThingValid))
+
+const organizations = computed(
+  () =>
+    new Set(
+      things.value
+        .flatMap((t) => t.owners.map((owner) => owner.organizationName))
+        .filter((name): name is string => Boolean(name))
+    )
+)
 
 const filterOrganizations = () => {
-  if (!searchInput || !searchInput.value) {
-    filteredOrganizations.value = new Set([...organizations.value])
-  } else {
-    const lowerCase = searchInput.value.toLowerCase()
-    filteredOrganizations.value = new Set([
-      ...organizations.value.filter((org: any) =>
-        org.toLowerCase().includes(lowerCase)
-      ),
-    ])
-  }
-  validFilter.value = filteredOrganizations.value.size === 0 ? false : true
-}
-
-const filteredThings: any = computed(() => {
-  if (typeof things.value !== 'object' || !things.value) return []
-  return Object.values(things.value).filter(isThingValid)
-})
-
-function isThingValid(thing: Thing) {
-  const orgValid =
-    filteredOrganizations.value.size === 0 ||
-    thing.owners.some(
-      (owner) =>
-        owner.isPrimaryOwner &&
-        owner.organizationName &&
-        filteredOrganizations.value.has(owner.organizationName)
+  const searchLower = searchInput.value.toLowerCase()
+  filteredOrganizations.value = new Set(
+    Array.from(organizations.value).filter((org) =>
+      org.toLowerCase().includes(searchLower)
     )
-  const siteTypeValid =
-    selectedSiteTypes.value.length === 0 ||
-    selectedSiteTypes.value.includes(thing.siteType)
-
-  return orgValid && siteTypeValid
+  )
+  validFilter.value = filteredOrganizations.value.size > 0
 }
+
+function isOrgValid(thing: Thing) {
+  if (filteredOrganizations.value.size === 0) return true
+  return thing.owners.some(
+    (o) =>
+      o.isPrimaryOwner &&
+      o.organizationName &&
+      filteredOrganizations.value.has(o.organizationName)
+  )
+}
+
+const isTypeValid = (thing: Thing) =>
+  selectedSiteTypes.value.length === 0 ||
+  selectedSiteTypes.value.includes(thing.siteType)
+
+const isThingValid = (thing: Thing) => isOrgValid(thing) && isTypeValid(thing)
 
 const clearOrganizations = () => {
   filteredOrganizations.value = new Set()
@@ -153,6 +134,6 @@ function clearFilters() {
 }
 
 onMounted(async () => {
-  await fetchThings()
+  things.value = await api.fetchThings()
 })
 </script>
