@@ -218,7 +218,6 @@ import Notification from '@/store/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 
-const { fetchThings } = useThingStore()
 const { things } = storeToRefs(useThingStore())
 const { updatePhotos, fetchPhotos } = usePhotosStore()
 const { photos } = storeToRefs(usePhotosStore())
@@ -300,7 +299,6 @@ function removeExistingPhoto(photoId: string) {
 }
 
 async function populateThing(id: string) {
-  await fetchThings()
   Object.assign(thing, things.value[id])
   if (thing.latitude && thing.longitude)
     mapOptions.value = {
