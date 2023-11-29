@@ -6,15 +6,16 @@ export function usePrimaryOwnerData(thingId: string) {
   const metadata = ref<DatastreamMetadata | null>()
 
   const sensors = computed(() => metadata.value?.sensors || [])
+
   const units = computed(() => {
     const allUnits = metadata.value?.units || []
-    return allUnits.filter(
-      (unit) => unit.type !== 'Time' && unit.owner !== null
-    )
+    return allUnits.filter((u) => u.type !== 'Time' && u.owner !== null)
   })
+
   const observedProperties = computed(
     () => metadata.value?.observedProperties || []
   )
+
   const processingLevels = computed(
     () => metadata.value?.processingLevels || []
   )
