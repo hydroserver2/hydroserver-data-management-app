@@ -276,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
@@ -292,7 +292,6 @@ import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
 import { Datastream } from '@/types'
 import { api } from '@/services/api'
-import { useThingStore } from '@/store/things'
 
 const { sortUnits, setUnits } = useUnitStore()
 const { timeUnits } = storeToRefs(useUnitStore())
@@ -301,9 +300,7 @@ const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
 
-const { fetchThingById } = useThingStore()
-const { things } = storeToRefs(useThingStore())
-const isPrimaryOwner = computed(() => things.value[thingId]?.isPrimaryOwner)
+const isPrimaryOwner = ref(false)
 
 const { sensors, units, observedProperties, formattedProcessingLevels } =
   usePrimaryOwnerData(thingId)
@@ -330,7 +327,8 @@ const handleMetadataUploaded = async (
 
 onMounted(async () => {
   window.scrollTo(0, 0)
-  await fetchThingById(thingId)
+  const thing = await api.fetchThing(thingId)
+  isPrimaryOwner.value = thing.isPrimaryOwner
   try {
     const fetchedUnits = await api.fetchUnits()
     setUnits(fetchedUnits)

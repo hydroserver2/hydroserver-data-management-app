@@ -54,13 +54,13 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream } from '@/types'
-import { computed } from 'vue'
+import { Datastream, Thing } from '@/types'
+import { computed, onMounted, ref } from 'vue'
 import { useDatastreamStore } from '@/store/datastreams'
-import { useThingStore } from '@/store/things'
 import { storeToRefs } from 'pinia'
+import { api } from '@/services/api'
 
-const { things } = storeToRefs(useThingStore())
+const things = ref<Thing[]>([])
 const { datastreams } = storeToRefs(useDatastreamStore())
 
 const emit = defineEmits(['delete', 'close'])
@@ -85,26 +85,26 @@ const datastreamsForItem = computed(() => {
 })
 
 const thingsWithDatastreams = computed(() => {
-  let usageMap: any = {}
-  if (datastreamsForItem.value) {
-    for (const datastream of datastreamsForItem.value) {
-      const thing = things.value[datastream.thingId]
-      if (!thing) continue
+  if (!datastreamsForItem.value) return {}
 
-      if (!usageMap[thing.id]) {
-        usageMap[thing.id] = {
-          name: thing.name,
-          datastreamIds: [],
-        }
-      }
-      usageMap[thing.id].datastreamIds.push(datastream.id)
-    }
-  }
-
-  return usageMap
+  return datastreamsForItem.value.reduce((acc: any, datastream) => {
+    const thing = things.value.find((t) => t.id === datastream.thingId)
+    if (!thing) return acc
+    if (!acc[thing.id]) acc[thing.id] = { name: thing.name, datastreamIds: [] }
+    acc[thing.id].datastreamIds.push(datastream.id)
+    return acc
+  }, {})
 })
 
 const hasDatastreams = computed(() => {
   return datastreamsForItem.value && datastreamsForItem.value.length > 0
+})
+
+onMounted(async () => {
+  try {
+    things.value = await api.fetchThings()
+  } catch (error) {
+    console.error('Error fetching things', error)
+  }
 })
 </script>

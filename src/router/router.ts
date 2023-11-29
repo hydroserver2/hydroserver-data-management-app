@@ -5,10 +5,10 @@ import {
 } from 'vue-router'
 import { routes } from '@/router/routes'
 import { useAuthStore } from '@/store/authentication'
-import { useThingStore } from '@/store/things'
 import Notification from '@/store/notifications'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
+import { api } from '@/services/api'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -74,13 +74,8 @@ const guards: ((
   // hasThingOwnershipGuard
   async (to, _from, _next) => {
     if (to.meta?.hasThingOwnershipGuard) {
-      const thingStore = useThingStore()
-      const id = to.params.id as string
-      await thingStore.fetchThingById(id)
-      const thing = thingStore.things[id]
-      if (!thing || !thing.ownsThing) {
-        return { name: 'PageNotFound' }
-      }
+      const thing = await api.fetchThing(to.params.id as string)
+      if (!thing?.ownsThing) return { name: 'PageNotFound' }
     }
     return null
   },

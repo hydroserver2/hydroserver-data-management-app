@@ -113,13 +113,6 @@
                   :rules="thing.state ? rules.name : []"
                 />
               </v-col>
-              <!--            <v-col cols="12" sm="6">-->
-              <!--              <v-text-field-->
-              <!--                disabled-->
-              <!--                label="Elevation Datum"-->
-              <!--                v-model="thing.elevation_datum"-->
-              <!--              />-->
-              <!--            </v-col>-->
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="County"
@@ -208,7 +201,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
 import GoogleMap from '../GoogleMap.vue'
-import { useThingStore } from '@/store/things'
+import { useThingStore } from '@/store/thing'
 import { usePhotosStore } from '@/store/photos'
 import { Thing } from '@/types'
 import { siteTypes } from '@/vocabularies'
@@ -218,7 +211,7 @@ import Notification from '@/store/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 
-const { things } = storeToRefs(useThingStore())
+const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos, fetchPhotos } = usePhotosStore()
 const { photos } = storeToRefs(usePhotosStore())
 
@@ -298,8 +291,8 @@ function removeExistingPhoto(photoId: string) {
   photosToDelete.value.push(photoId)
 }
 
-async function populateThing(id: string) {
-  Object.assign(thing, things.value[id])
+async function populateThing() {
+  Object.assign(thing, storedThing.value)
   if (thing.latitude && thing.longitude)
     mapOptions.value = {
       center: { lat: thing.latitude, lng: thing.longitude },
@@ -322,17 +315,16 @@ async function uploadThing() {
     if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
     if (props.thingId) {
       try {
-        things.value[thing.id] = await api.updateThing(thing)
+        storedThing.value = await api.updateThing(thing)
       } catch (error) {
         console.error('Error updating thing', error)
       }
       await updatePhotos(props.thingId, newPhotos.value, photosToDelete.value)
     } else {
       try {
-        const newThing = await api.createThing(thing)
-        things.value[newThing.id] = newThing
+        storedThing.value = await api.createThing(thing)
         if (newPhotos.value)
-          await updatePhotos(newThing.id, newPhotos.value, [])
+          await updatePhotos(storedThing.value!.id, newPhotos.value, [])
       } catch (error) {
         console.error('Error creating thing', error)
       }
@@ -350,7 +342,7 @@ function onMapLocationClicked(locationData: Thing) {
 
 onMounted(async () => {
   if (props.thingId) {
-    await populateThing(props.thingId)
+    await populateThing()
     await fetchPhotos(props.thingId)
     includeDataDisclaimer.value = !!thing.dataDisclaimer
   } else {

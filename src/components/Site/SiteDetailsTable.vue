@@ -14,14 +14,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useThingStore } from '@/store/things'
+import { useThingStore } from '@/store/thing'
 
-const props = defineProps<{
-  thingId: string
-}>()
-
-const { things } = storeToRefs(useThingStore())
-const thing = computed(() => things.value[props.thingId])
+const { thing } = storeToRefs(useThingStore())
 
 const thingProperties = computed(() => {
   if (!thing.value) return []

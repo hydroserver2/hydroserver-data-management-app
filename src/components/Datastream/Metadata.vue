@@ -188,7 +188,6 @@ import {
 } from '@/composables/useMetadataModals'
 import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
 import { useDatastreamStore } from '@/store/datastreams'
-import { useThingStore } from '@/store/things'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
@@ -327,11 +326,9 @@ const UnitHeaders = [
 ] as const
 
 const { fetchUsersDatastreams } = useDatastreamStore()
-const { fetchThings } = useThingStore()
 const { sortUnits, setUnits } = useUnitStore()
 
 onMounted(async () => {
-  fetchThings() // Things are used in the deleteModal
   await fetchUsersDatastreams()
   try {
     const units = await api.fetchUnits()

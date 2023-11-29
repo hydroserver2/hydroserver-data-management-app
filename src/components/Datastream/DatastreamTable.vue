@@ -38,6 +38,7 @@
           <v-dialog v-model="item.raw.chartOpen" width="80rem">
             <FocusContextPlot
               :thing-id="thingId"
+              :thing-name="thing?.name || 'Site'"
               :datastream-id="item.raw.id"
               @close="item.raw.chartOpen = false"
             />
@@ -85,7 +86,7 @@ import { computed, onMounted } from 'vue'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
-import { useThingStore } from '@/store/things'
+import { useThingStore } from '@/store/thing'
 import { useDatastreamStore } from '@/store/datastreams'
 import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 
@@ -103,8 +104,8 @@ const { loaded, observations, mostRecentObs } = storeToRefs(
 const { fetchDatastreamsByThingId } = useDatastreamStore()
 const { datastreams } = storeToRefs(useDatastreamStore())
 
-const { things } = storeToRefs(useThingStore())
-const isOwner = computed(() => things.value[props.thingId]?.ownsThing)
+const { thing } = storeToRefs(useThingStore())
+const isOwner = computed(() => thing.value?.ownsThing)
 
 const { sensors, units, observedProperties, processingLevels } =
   usePrimaryOwnerData(props.thingId)
