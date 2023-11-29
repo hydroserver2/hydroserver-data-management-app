@@ -51,7 +51,6 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import { useDatastreamStore } from '@/store/datastreams'
 import { watch, onMounted, ref, computed } from 'vue'
 import { Datastream, Thing } from '@/types'
 import { useSensorStore } from '@/store/sensors'
@@ -63,8 +62,6 @@ const { fetchProcessingLevels, getById: getPLById } = useProcessingLevelStore()
 const { fetchObservedProperties, getById: getOPById } =
   useObservedPropertyStore()
 
-const { fetchDatastreamsByThingId } = useDatastreamStore()
-
 const selectedThingId = ref('')
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
@@ -74,12 +71,10 @@ const emit = defineEmits(['selectedDatastreamId', 'close'])
 
 watch(
   selectedThingId,
-  async (newThingId) => {
-    if (newThingId) {
-      datastreamsForThing.value = await fetchDatastreamsByThingId(newThingId)
-    } else {
-      datastreamsForThing.value = []
-    }
+  async (newId) => {
+    datastreamsForThing.value = newId
+      ? await api.fetchDatastreamsForThing(newId)
+      : []
   },
   { immediate: true }
 )

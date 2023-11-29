@@ -1,14 +1,10 @@
 import { useDataSourceStore } from '@/store/dataSources'
 import { useDataLoaderStore } from '@/store/dataLoaders'
-import { useDatastreamStore } from '@/store/datastreams'
 import { computed, onMounted, ref, toRaw } from 'vue'
-import { storeToRefs } from 'pinia'
 
 export function useDataSources() {
   const dataSourceStore = useDataSourceStore()
   const dataLoaderStore = useDataLoaderStore()
-  const { fetchDatastreams } = useDatastreamStore()
-  const { datastreams } = storeToRefs(useDatastreamStore())
 
   const selectedDataSource = ref(null)
   const dataSourcesLoaded = computed(() => dataSourceStore.loaded)
@@ -55,17 +51,12 @@ export function useDataSources() {
           status = 'bad'
         }
 
-        let filteredDatastreams = Object.values(datastreams.value)
-          .flat(1)
-          .filter((ds) => ds.dataSourceId === dataSource.id)
-
         return {
           ...dataSource,
           status: status,
           statusTip: statusTip,
           dataLoaderName: dataLoader.name,
           dataLoader: dataLoader,
-          datastreams: filteredDatastreams,
         }
       }
     })
@@ -110,7 +101,6 @@ export function useDataSources() {
   async function reloadDataSources() {
     await dataSourceStore.fetchDataSources(true)
     await dataLoaderStore.fetchDataLoaders(true)
-    await fetchDatastreams(true)
   }
 
   onMounted(async () => {
@@ -119,10 +109,6 @@ export function useDataSources() {
 
   onMounted(async () => {
     await dataLoaderStore.fetchDataLoaders(true)
-  })
-
-  onMounted(async () => {
-    await fetchDatastreams(true)
   })
 
   return {

@@ -56,12 +56,10 @@
 <script setup lang="ts">
 import { Datastream, Thing } from '@/types'
 import { computed, onMounted, ref } from 'vue'
-import { useDatastreamStore } from '@/store/datastreams'
-import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 
 const things = ref<Thing[]>([])
-const { datastreams } = storeToRefs(useDatastreamStore())
+const datastreams = ref<Datastream[]>([])
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
@@ -77,11 +75,9 @@ const onDelete = () => {
 
 const datastreamsForItem = computed(() => {
   if (!props.itemID || !props.parameterName) return
-  return Object.values(datastreams.value)
-    .flat()
-    .filter(
-      (ds) => ds[props.parameterName as keyof Datastream] === props.itemID
-    )
+  return datastreams.value.filter(
+    (ds) => ds[props.parameterName as keyof Datastream] === props.itemID
+  )
 })
 
 const thingsWithDatastreams = computed(() => {
@@ -102,7 +98,10 @@ const hasDatastreams = computed(() => {
 
 onMounted(async () => {
   try {
+    // TODO: We only need the things the user is a primary owner of and their datastreams.
+    // Create an endpoint and use it
     things.value = await api.fetchThings()
+    datastreams.value = await api.fetchUsersDatastreams()
   } catch (error) {
     console.error('Error fetching things', error)
   }

@@ -187,7 +187,6 @@ import {
   useResultQualifierModals,
 } from '@/composables/useMetadataModals'
 import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
-import { useDatastreamStore } from '@/store/datastreams'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
@@ -325,11 +324,9 @@ const UnitHeaders = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 
-const { fetchUsersDatastreams } = useDatastreamStore()
 const { sortUnits, setUnits } = useUnitStore()
 
 onMounted(async () => {
-  await fetchUsersDatastreams()
   try {
     const units = await api.fetchUnits()
     setUnits(units)

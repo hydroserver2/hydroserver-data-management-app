@@ -109,9 +109,6 @@ import { Ref, ref, watch } from 'vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import { api } from '@/services/api'
 import Notification from '@/store/notifications'
-import { useDatastreamStore } from '@/store/datastreams'
-
-const { updateDatastream, deleteDatastream } = useDatastreamStore()
 
 const props = defineProps({
   datastream: {
@@ -128,7 +125,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['openPlot'])
+const emit = defineEmits(['openPlot', 'deleted'])
 
 const selectedDatastream: Ref<Datastream | null> = ref(null)
 const isDeleteModalOpen = ref(false)
@@ -147,7 +144,11 @@ watch(isDeleteModalOpen, (newValue) => {
 
 async function toggleVisibility(datastream: Datastream) {
   datastream.isVisible = !datastream.isVisible
-  await updateDatastream(datastream)
+  try {
+    await api.updateDatastream(datastream)
+  } catch (error) {
+    console.error('Error updating datastream', error)
+  }
 }
 
 function openDeleteModal(datastream: Datastream) {
@@ -178,11 +179,18 @@ async function onDeleteDatastream() {
     })
     return
   }
+
   isDeleteModalOpen.value = false
-  if (selectedDatastream.value) {
-    await deleteDatastream(selectedDatastream.value.id, props.thingId)
-  }
   deleteDatastreamInput.value = ''
+
+  if (selectedDatastream.value) {
+    try {
+      await api.deleteDatastream(selectedDatastream.value.id)
+      emit('deleted')
+    } catch (error) {
+      console.error(`Error deleting datastream`, error)
+    }
+  }
 }
 
 const linkFormDatastreamId = ref()
