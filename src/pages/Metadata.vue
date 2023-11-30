@@ -120,7 +120,7 @@
   </v-dialog>
 
   <v-dialog v-model="openRQCreate" width="60rem">
-    <ResultQualifierModal
+    <ResultQualifierFormCard
       @close="openRQCreate = false"
       @created="refreshRQTable"
     />
@@ -131,7 +131,6 @@
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
-import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
@@ -140,6 +139,7 @@ import { ref } from 'vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
+import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 
 import {
   useSensorModals,

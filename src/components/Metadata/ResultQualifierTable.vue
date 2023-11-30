@@ -7,7 +7,7 @@
   >
 
   <v-dialog v-model="openEdit" width="60rem">
-    <ResultQualifierModal
+    <ResultQualifierFormCard
       :result-qualifier="item"
       @close="openEdit = false"
       @updated="onUpdate"
@@ -30,7 +30,7 @@ import { api } from '@/services/api'
 import { ResultQualifier } from '@/types'
 import { useMetadataTable } from '@/composables/useMetadataTable'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
+import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 
 const {
   item,
