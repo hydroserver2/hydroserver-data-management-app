@@ -174,7 +174,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/metadata',
     name: 'Metadata',
-    component: () => import('@/components/Datastream/Metadata.vue'),
+    component: () => import('@/pages/Metadata.vue'),
     meta: { hasAuthGuard: true },
   },
   {
