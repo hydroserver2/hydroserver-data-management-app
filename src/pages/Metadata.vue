@@ -37,13 +37,13 @@
           ></SensorModal>
         </v-dialog>
         <v-dialog v-model="isSensorDModalOpen" width="40rem">
-          <DeleteModal
+          <DeleteMetadataCard
             itemName="sensor"
             :itemID="selectedSensor.id"
             parameter-name="sensorId"
             @delete="deleteSensor"
             @close="isSensorDModalOpen = false"
-          ></DeleteModal>
+          />
         </v-dialog>
       </v-window-item>
 
@@ -66,13 +66,13 @@
           ></ObservedPropertyModal>
         </v-dialog>
         <v-dialog v-model="isOPDModalOpen" width="40rem">
-          <DeleteModal
+          <DeleteMetadataCard
             itemName="Observed Property"
             :itemID="selectedOP.id"
             parameter-name="observedPropertyId"
             @delete="deleteOP"
             @close="isOPDModalOpen = false"
-          ></DeleteModal>
+          />
         </v-dialog>
       </v-window-item>
 
@@ -95,13 +95,13 @@
           ></ProcessingLevelModal>
         </v-dialog>
         <v-dialog v-model="isPLDModalOpen" width="40rem">
-          <DeleteModal
+          <DeleteMetadataCard
             itemName="processing level"
             :itemID="selectedPL.id"
             parameter-name="processingLevelId"
             @delete="deletePL"
             @close="isPLDModalOpen = false"
-          ></DeleteModal>
+          />
         </v-dialog>
       </v-window-item>
 
@@ -128,13 +128,13 @@
           ></ResultQualifierModal>
         </v-dialog>
         <v-dialog v-model="isRQDModalOpen" width="40rem">
-          <DeleteModal
+          <DeleteMetadataCard
             itemName="result qualifier"
             :itemID="selectedRq.id"
             parameter-name="resultQualifierId"
             @delete="deleteRQ"
             @close="isRQDModalOpen = false"
-          ></DeleteModal>
+          />
         </v-dialog>
       </v-window-item>
     </v-window>
@@ -153,7 +153,7 @@ import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
-import DeleteModal from '@/components/Datastream/deleteModal.vue'
+import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { ref } from 'vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'

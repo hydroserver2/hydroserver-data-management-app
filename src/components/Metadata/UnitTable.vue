@@ -15,7 +15,7 @@
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
-    <DeleteModal
+    <DeleteMetadataCard
       itemName="unit"
       :itemID="unit.id"
       parameter-name="unitId"
@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
-import DeleteModal from '@/components/Datastream/deleteModal.vue'
+import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
 import { computed, onMounted, ref } from 'vue'
