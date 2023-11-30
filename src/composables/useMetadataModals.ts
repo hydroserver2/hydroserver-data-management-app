@@ -1,7 +1,6 @@
-import { ref, onMounted, computed, watch, reactive } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { VForm } from 'vuetify/components'
 import { useSensorStore } from '@/store/sensors'
-import { useUnitStore } from '@/store/unit'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
@@ -43,7 +42,6 @@ function useMetadata(
 
   function openDeleteDialog(entity: any) {
     isDeleteModalOpen.value = true
-    isEntitySelected.value = true
     selectedEntity.value = entity
   }
 
@@ -92,10 +90,6 @@ export function useSensorModals(id: string | null = null) {
     'fetchSensors',
     'deleteSensor'
   )
-}
-
-export function useUnitModals(id: string | null = null) {
-  return useMetadata(useUnitStore(), () => new Unit(), 'getUnitById', id)
 }
 
 export function useResultQualifierModals(id: string | null = null) {

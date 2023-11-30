@@ -104,36 +104,11 @@
           ></DeleteModal>
         </v-dialog>
       </v-window-item>
+
       <v-window-item value="3">
-        <!--    Units Table and Modal-->
-        <v-data-table
-          :headers="UnitHeaders"
-          :items="ownedUnits"
-          class="elevation-3"
-        >
-          <template v-slot:item.actions="{ item }">
-            <v-icon @click="openUnitDialog(item.raw)"> mdi-pencil </v-icon>
-            <v-icon @click="openUnitDeleteDialog(item.raw)">
-              mdi-delete
-            </v-icon>
-          </template></v-data-table
-        >
-        <v-dialog v-model="isUnitCEModalOpen" width="60rem">
-          <UnitModal
-            :id="isUnitSelected ? selectedUnit.id : undefined"
-            @close="isUnitCEModalOpen = false"
-          ></UnitModal>
-        </v-dialog>
-        <v-dialog v-model="isUnitDModalOpen" width="40rem">
-          <DeleteModal
-            itemName="unit"
-            :itemID="selectedUnit.id"
-            parameter-name="unitId"
-            @delete="onUnitDelete"
-            @close="isUnitDModalOpen = false"
-          ></DeleteModal>
-        </v-dialog>
+        <UnitTable :key="unitKey" />
       </v-window-item>
+
       <v-window-item value="4">
         <!--    Result Qualifiers Table and Modal-->
         <v-data-table
@@ -164,40 +139,37 @@
       </v-window-item>
     </v-window>
   </v-container>
+
+  <v-dialog v-model="openUnitCreate" width="60rem">
+    <UnitModal @close="openUnitCreate = false" @created="refreshUnitTable" />
+  </v-dialog>
 </template>
 
 <script lang="ts" setup>
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
-import UnitModal from '@/components/Datastream/UnitModal.vue'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
-import { useUnitStore } from '@/store/unit'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
+import UnitModal from '@/components/Datastream/UnitModal.vue'
+import UnitTable from '@/components/Metadata/UnitTable.vue'
 
 import {
   useSensorModals,
-  useUnitModals,
   useProcessingLevelModals,
   useObservedPropertyModals,
   useResultQualifierModals,
 } from '@/composables/useMetadataModals'
+
 import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
-import { api } from '@/services/api'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
-import { computed } from 'vue'
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
 const plStore = useProcessingLevelStore()
-const { deleteUnit } = useUnitStore()
-const { user } = storeToRefs(useUserStore())
-const { units } = storeToRefs(useUnitStore())
 const rqStore = useResultQualifierStore()
 
 const {
@@ -209,30 +181,6 @@ const {
   openDialog: openSensorDialog,
   openDeleteDialog: openSensorDeleteDialog,
 } = useSensorModals()
-
-const {
-  isEntitySelected: isUnitSelected,
-  selectedEntity: selectedUnit,
-  isCreateEditModalOpen: isUnitCEModalOpen,
-  isDeleteModalOpen: isUnitDModalOpen,
-  openDialog: openUnitDialog,
-  openDeleteDialog: openUnitDeleteDialog,
-} = useUnitModals()
-
-const onUnitDelete = async () => {
-  try {
-    await api.deleteUnit(selectedUnit.value.id)
-    deleteUnit(selectedUnit.value.id)
-  } catch (error) {
-    console.error('Error deleting unit', error)
-  }
-}
-
-const ownedUnits = computed(() =>
-  user.value?.email
-    ? units.value.filter((u) => u.owner === user.value.email)
-    : []
-)
 
 const {
   isEntitySelected: isPLSelected,
@@ -264,6 +212,10 @@ const {
   openDeleteDialog: openOPDeleteDialog,
 } = useObservedPropertyModals()
 
+const openUnitCreate = ref(false)
+const unitKey = ref(0)
+const refreshUnitTable = () => (unitKey.value += 1)
+
 const metaMap: Record<string, any> = {
   0: {
     name: 'Sensors',
@@ -280,7 +232,11 @@ const metaMap: Record<string, any> = {
     openDialog: openPLDialog,
     singularName: 'processing level',
   },
-  3: { name: 'Units', openDialog: openUnitDialog, singularName: 'unit' },
+  3: {
+    name: 'Units',
+    openDialog: () => (openUnitCreate.value = true),
+    singularName: 'unit',
+  },
   4: {
     name: 'Result Qualifiers',
     openDialog: openRQDialog,
@@ -316,25 +272,6 @@ const ResultQualifierHeaders = [
   { title: 'Description', key: 'description' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
-
-const UnitHeaders = [
-  { title: 'Name', key: 'name' },
-  { title: 'Type', key: 'type' },
-  { title: 'Symbol', key: 'symbol' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-] as const
-
-const { sortUnits, setUnits } = useUnitStore()
-
-onMounted(async () => {
-  try {
-    const units = await api.fetchUnits()
-    setUnits(units)
-    sortUnits()
-  } catch (error) {
-    console.error('Error fetching units from DB', error)
-  }
-})
 </script>
 
 <style scoped>

@@ -98,7 +98,7 @@
             <v-btn-add @click="showUnitModal = true">Add New</v-btn-add>
             <v-dialog v-model="showUnitModal" width="60rem">
               <UnitModal
-                @uploaded="handleMetadataUploaded('unitId', $event)"
+                @created="handleMetadataUploaded('unitId', $event)"
                 @close="showUnitModal = false"
                 >Add New</UnitModal
               >
@@ -277,24 +277,21 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import UnitModal from '@/components/Datastream/UnitModal.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
-import { useUnitStore } from '@/store/unit'
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
-import { Datastream } from '@/types'
+import { Datastream, Unit } from '@/types'
 import { api } from '@/services/api'
 
-const { sortUnits, setUnits } = useUnitStore()
-const { timeUnits } = storeToRefs(useUnitStore())
+const timeUnits = ref<Unit[]>([])
 
 const route = useRoute()
 const thingId = route.params.id.toString()
@@ -330,9 +327,8 @@ onMounted(async () => {
   const thing = await api.fetchThing(thingId)
   isPrimaryOwner.value = thing.isPrimaryOwner
   try {
-    const fetchedUnits = await api.fetchUnits()
-    setUnits(fetchedUnits)
-    sortUnits()
+    const fetchedUnits: Unit[] = await api.fetchUnits()
+    timeUnits.value = fetchedUnits.filter((u) => u.type === 'Time')
   } catch (error) {
     console.error('Error fetching units from DB.', error)
   }
