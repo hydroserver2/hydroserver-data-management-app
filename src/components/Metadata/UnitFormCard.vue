@@ -44,7 +44,7 @@
       <v-divider />
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
         <v-btn-primary type="submit">{{
           isEdit ? 'Update' : 'Save'
