@@ -110,32 +110,7 @@
       </v-window-item>
 
       <v-window-item value="4">
-        <!--    Result Qualifiers Table and Modal-->
-        <v-data-table
-          :headers="ResultQualifierHeaders"
-          :items="rqStore.ownedResultQualifiers"
-          class="elevation-3"
-        >
-          <template v-slot:item.actions="{ item }">
-            <v-icon @click="openRQDialog(item.raw)"> mdi-pencil </v-icon>
-            <v-icon @click="openRQDeleteDialog(item.raw)"> mdi-delete </v-icon>
-          </template></v-data-table
-        >
-        <v-dialog v-model="isRQCEModalOpen" width="60rem">
-          <ResultQualifierModal
-            :id="isRQSelected ? selectedRq.id : undefined"
-            @close="isRQCEModalOpen = false"
-          ></ResultQualifierModal>
-        </v-dialog>
-        <v-dialog v-model="isRQDModalOpen" width="40rem">
-          <DeleteMetadataCard
-            itemName="result qualifier"
-            :itemID="selectedRq.id"
-            parameter-name="resultQualifierId"
-            @delete="deleteRQ"
-            @close="isRQDModalOpen = false"
-          />
-        </v-dialog>
+        <ResultQualifierTable :key="qualifierKey" />
       </v-window-item>
     </v-window>
   </v-container>
@@ -143,34 +118,38 @@
   <v-dialog v-model="openUnitCreate" width="60rem">
     <UnitFormCard @close="openUnitCreate = false" @created="refreshUnitTable" />
   </v-dialog>
+
+  <v-dialog v-model="openRQCreate" width="60rem">
+    <ResultQualifierModal
+      @close="openRQCreate = false"
+      @created="refreshRQTable"
+    />
+  </v-dialog>
 </template>
 
 <script lang="ts" setup>
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
+import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
 import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
-import { useResultQualifierStore } from '@/store/resultQualifiers'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { ref } from 'vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
+import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
 
 import {
   useSensorModals,
   useProcessingLevelModals,
   useObservedPropertyModals,
-  useResultQualifierModals,
 } from '@/composables/useMetadataModals'
-
-import ResultQualifierModal from '@/components/Datastream/ResultQualifierModal.vue'
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
 const plStore = useProcessingLevelStore()
-const rqStore = useResultQualifierStore()
 
 const {
   isEntitySelected: isSensorSelected,
@@ -193,16 +172,6 @@ const {
 } = useProcessingLevelModals()
 
 const {
-  isEntitySelected: isRQSelected,
-  selectedEntity: selectedRq,
-  deleteSelectedEntity: deleteRQ,
-  isCreateEditModalOpen: isRQCEModalOpen,
-  isDeleteModalOpen: isRQDModalOpen,
-  openDialog: openRQDialog,
-  openDeleteDialog: openRQDeleteDialog,
-} = useResultQualifierModals()
-
-const {
   isEntitySelected: isOPSelected,
   selectedEntity: selectedOP,
   deleteSelectedEntity: deleteOP,
@@ -215,6 +184,10 @@ const {
 const openUnitCreate = ref(false)
 const unitKey = ref(0)
 const refreshUnitTable = () => (unitKey.value += 1)
+
+const openRQCreate = ref(false)
+const qualifierKey = ref(0)
+const refreshRQTable = () => (qualifierKey.value += 1)
 
 const metaMap: Record<string, any> = {
   0: {
@@ -239,7 +212,7 @@ const metaMap: Record<string, any> = {
   },
   4: {
     name: 'Result Qualifiers',
-    openDialog: openRQDialog,
+    openDialog: () => (openRQCreate.value = true),
     singularName: 'result qualifier',
   },
 }
@@ -264,12 +237,6 @@ const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },
   { title: 'Definition', key: 'definition' },
   { title: 'Explanation', key: 'explanation' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-] as const
-
-const ResultQualifierHeaders = [
-  { title: 'Code', key: 'code' },
-  { title: 'Description', key: 'description' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 </script>

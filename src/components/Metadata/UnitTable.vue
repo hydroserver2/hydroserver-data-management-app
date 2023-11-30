@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :headers="UnitHeaders" :items="ownedUnits" class="elevation-3">
+  <v-data-table :headers="UnitHeaders" :items="ownedUnits">
     <template v-slot:item.actions="{ item }">
       <v-icon @click="openDialog(item.raw, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item.raw, 'delete')"> mdi-delete </v-icon>

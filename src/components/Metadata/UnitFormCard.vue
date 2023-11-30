@@ -61,13 +61,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { VForm } from 'vuetify/components'
 import { Unit } from '@/types'
 
-const props = defineProps({
-  unit: Object as () => Unit,
-})
+const props = defineProps({ unit: Object as () => Unit })
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const unit = ref<Unit>(new Unit())
 const unownedUnits = ref<Unit[]>([])
+
 const isEdit = computed(() => props.unit != null)
 const valid = ref(false)
 const myForm = ref<VForm>()

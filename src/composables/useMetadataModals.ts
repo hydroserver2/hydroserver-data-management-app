@@ -3,14 +3,7 @@ import { VForm } from 'vuetify/components'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useProcessingLevelStore } from '@/store/processingLevels'
-import { useResultQualifierStore } from '@/store/resultQualifiers'
-import {
-  Sensor,
-  Unit,
-  ObservedProperty,
-  ProcessingLevel,
-  ResultQualifier,
-} from '@/types'
+import { Sensor, Unit, ObservedProperty, ProcessingLevel } from '@/types'
 
 function useMetadata(
   entityStore: any,
@@ -26,8 +19,7 @@ function useMetadata(
   const valid = ref(false)
   const myForm = ref<VForm>()
 
-  // selectedId is watched so that when it changes,
-  // the form is populated with the data from selectedEntity
+  // selectedId is watched so that when it changes, the form is populated with the data from selectedEntity
   const selectedId = ref(id)
   const isEntitySelected = ref(false)
   const selectedEntity = ref(createEntity())
@@ -89,17 +81,6 @@ export function useSensorModals(id: string | null = null) {
     id,
     'fetchSensors',
     'deleteSensor'
-  )
-}
-
-export function useResultQualifierModals(id: string | null = null) {
-  return useMetadata(
-    useResultQualifierStore(),
-    () => new ResultQualifier(),
-    'getById',
-    id,
-    'fetchResultQualifiers',
-    'deleteResultQualifier'
   )
 }
 

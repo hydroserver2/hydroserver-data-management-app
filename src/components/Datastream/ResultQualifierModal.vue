@@ -1,70 +1,67 @@
 <template>
   <v-card>
     <v-card-title>
-      <span class="headline"
-        >{{ isEdit ? 'Edit' : 'Add' }} Result Qualifier</span
-      >
+      {{ isEdit ? 'Edit' : 'Add' }} Result Qualifier
     </v-card-title>
-    <v-card-text>
-      <v-container>
-        <v-form
-          @submit.prevent="uploadResultQualifier"
-          ref="myForm"
-          v-model="valid"
-          validate-on="blur"
-        >
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="resultQualifier.code"
-                label="Code *"
-                :rules="rules.requiredCode"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-textarea
-                v-model="resultQualifier.description"
-                label="Description"
-                :rules="rules.maxLength(2000)"
-              ></v-textarea>
-            </v-col>
-          </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
-            <v-btn-primary type="submit">{{
-              isEdit ? 'Update' : 'Save'
-            }}</v-btn-primary>
-          </v-card-actions>
-        </v-form>
-      </v-container>
-    </v-card-text>
+
+    <v-form
+      @submit.prevent="onSubmit"
+      ref="myForm"
+      v-model="valid"
+      validate-on="blur"
+    >
+      <v-card-text>
+        <v-text-field
+          v-model="item.code"
+          label="Code *"
+          :rules="rules.requiredCode"
+        ></v-text-field>
+
+        <v-textarea
+          v-model="item.description"
+          label="Description"
+          :rules="rules.maxLength(2000)"
+        ></v-textarea>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+          <v-btn-primary type="submit">{{
+            isEdit ? 'Update' : 'Save'
+          }}</v-btn-primary>
+        </v-card-actions>
+      </v-card-text>
+    </v-form>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { useResultQualifierStore } from '@/store/resultQualifiers'
-import { useResultQualifierModals } from '@/composables/useMetadataModals'
+import { VForm } from 'vuetify/components'
+import { ResultQualifier } from '@/types'
+import { useFormLogic } from '@/composables/useFormLogic'
+import { api } from '@/services/api'
 
-const rqStore = useResultQualifierStore()
-const props = defineProps({ id: String })
-const emit = defineEmits(['uploaded', 'close'])
+const props = defineProps({ resultQualifier: Object as () => ResultQualifier })
+const emit = defineEmits(['updated', 'created', 'close'])
 
-const {
-  isEdit,
-  myForm,
-  valid,
-  selectedEntity: resultQualifier,
-} = useResultQualifierModals(props.id)
+const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
+  api.fetchResultQualifiers,
+  api.createResultQualifier,
+  api.updateResultQualifier,
+  ResultQualifier,
+  props.resultQualifier || undefined,
+  false
+)
 
-async function uploadResultQualifier() {
-  await myForm.value?.validate()
-  if (!valid.value) return
-  if (isEdit.value) await rqStore.updateResultQualifier(resultQualifier.value)
-  else {
-    const newRq = await rqStore.createResultQualifier(resultQualifier.value)
-    emit('uploaded', newRq.id)
+async function onSubmit() {
+  try {
+    const newItem = await uploadItem()
+    if (!newItem) return
+    if (isEdit.value) emit('updated')
+    else emit('created', newItem.id)
+  } catch (error) {
+    console.error('Error uploading item', error)
   }
   emit('close')
 }
