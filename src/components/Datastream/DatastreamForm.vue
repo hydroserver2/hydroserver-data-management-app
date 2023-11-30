@@ -95,12 +95,12 @@
             class="py-2"
           ></v-autocomplete>
           <div v-if="isPrimaryOwner">
-            <v-btn-add @click="showUnitModal = true">Add New</v-btn-add>
-            <v-dialog v-model="showUnitModal" width="60rem">
-              <UnitModal
+            <v-btn-add @click="openUnitForm = true">Add New</v-btn-add>
+            <v-dialog v-model="openUnitForm" width="60rem">
+              <UnitFormCard
                 @created="handleMetadataUploaded('unitId', $event)"
-                @close="showUnitModal = false"
-                >Add New</UnitModal
+                @close="openUnitForm = false"
+                >Add New</UnitFormCard
               >
             </v-dialog>
           </div>
@@ -207,16 +207,14 @@
                 class="pb-1"
               ></v-autocomplete>
               <div v-if="isPrimaryOwner">
-                <v-btn-add @click="showTimeAggUnitModal = true"
-                  >Add New</v-btn-add
-                >
-                <v-dialog v-model="showTimeAggUnitModal" width="60rem">
-                  <UnitModal
+                <v-btn-add @click="openAggUnitForm = true">Add New</v-btn-add>
+                <v-dialog v-model="openAggUnitForm" width="60rem">
+                  <UnitFormCard
                     @uploaded="
                       datastream.timeAggregationIntervalUnitsId = $event
                     "
-                    @close="showTimeAggUnitModal = false"
-                    >Add New</UnitModal
+                    @close="openAggUnitForm = false"
+                    >Add New</UnitFormCard
                   >
                 </v-dialog>
               </div>
@@ -241,14 +239,12 @@
                 clearable
               ></v-autocomplete>
               <div v-if="isPrimaryOwner">
-                <v-btn-add @click="showIntendedTimeModal = true"
-                  >Add New</v-btn-add
-                >
-                <v-dialog v-model="showIntendedTimeModal" width="60rem">
-                  <UnitModal
+                <v-btn-add @click="openITUnitForm = true">Add New</v-btn-add>
+                <v-dialog v-model="openITUnitForm" width="60rem">
+                  <UnitFormCard
                     @uploaded="datastream.intendedTimeSpacingUnitsId = $event"
-                    @close="showIntendedTimeModal = false"
-                    >Add New</UnitModal
+                    @close="openITUnitForm = false"
+                    >Add New</UnitFormCard
                   >
                 </v-dialog>
               </div>
@@ -281,7 +277,7 @@ import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
-import UnitModal from '@/components/Datastream/UnitModal.vue'
+import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
@@ -307,11 +303,11 @@ const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
 
 const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
-const showUnitModal = ref(false)
 const showPLModal = ref(false)
 const showOPModal = ref(false)
-const showTimeAggUnitModal = ref(false)
-const showIntendedTimeModal = ref(false)
+const openUnitForm = ref(false)
+const openAggUnitForm = ref(false)
+const openITUnitForm = ref(false)
 
 const handleMetadataUploaded = async (
   updateId: keyof Datastream,

@@ -141,7 +141,7 @@
   </v-container>
 
   <v-dialog v-model="openUnitCreate" width="60rem">
-    <UnitModal @close="openUnitCreate = false" @created="refreshUnitTable" />
+    <UnitFormCard @close="openUnitCreate = false" @created="refreshUnitTable" />
   </v-dialog>
 </template>
 
@@ -155,7 +155,7 @@ import { useObservedPropertyStore } from '@/store/observedProperties'
 import { useResultQualifierStore } from '@/store/resultQualifiers'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
 import { ref } from 'vue'
-import UnitModal from '@/components/Datastream/UnitModal.vue'
+import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
 
 import {

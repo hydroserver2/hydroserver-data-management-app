@@ -7,7 +7,11 @@
   </v-data-table>
 
   <v-dialog v-model="openEdit" width="60rem">
-    <UnitModal :unit="unit" @close="openEdit = false" @updated="onUnitUpdate" />
+    <UnitFormCard
+      :unit="unit"
+      @close="openEdit = false"
+      @updated="onUnitUpdate"
+    />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
@@ -22,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import UnitModal from '@/components/Datastream/UnitModal.vue'
+import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import DeleteModal from '@/components/Datastream/deleteModal.vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
