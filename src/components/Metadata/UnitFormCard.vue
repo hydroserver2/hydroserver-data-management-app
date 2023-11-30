@@ -113,6 +113,7 @@ onMounted(async () => {
   try {
     const fetchedUnits: Unit[] = await api.fetchUnits()
     unownedUnits.value = fetchedUnits.filter((u) => !u.owner)
+    unownedUnits.value.sort((a, b) => a.name.localeCompare(b.name))
   } catch (error) {
     console.error('Error fetching units from DB.', error)
   }
