@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card v-if="loaded">
     <v-card-title class="text-h5">
       {{
         hasDatastreams
@@ -8,37 +8,30 @@
       }}
     </v-card-title>
 
-    <v-divider class="my-4"></v-divider>
+    <v-divider class="my-4" />
 
-    <v-card-text>
-      <template v-if="hasDatastreams">
-        This {{ itemName }} cannot be deleted because it's being referenced by
-        some of your datastreams. Before deletion, all of the following
-        datastreams need to be deleted or use a different {{ itemName }}:
-        <div
-          class="my-4"
-          v-for="(thing, thingId) in thingsWithDatastreams"
-          :key="thingId"
-        >
-          <p>
-            <router-link :to="`/sites/${thingId}`">
-              <strong>{{ thing.name }}</strong>
-            </router-link>
-            has the following datastreams using this {{ itemName }}:
-          </p>
-          <v-list>
-            <v-list-item v-for="id in thing.datastreamIds" :key="id">
-              <router-link :to="`/sites/${thingId}/datastreams/form/${id}`">{{
-                id
-              }}</router-link>
-            </v-list-item>
-          </v-list>
-        </div>
-      </template>
-      <template v-else>
-        This {{ itemName }} isn't being used by any datastreams and is safe to
-        delete.
-      </template>
+    <v-card-text v-if="hasDatastreams">
+      This {{ itemName }} cannot be deleted because it's being referenced by
+      some of your datastreams. Before deletion, all of the following
+      datastreams need to be deleted or use a different {{ itemName }}:
+      <div class="my-4" v-for="(thing, thingId) in thingMap" :key="thingId">
+        <router-link :to="`/sites/${thingId}`">
+          {{ thing.name }}
+        </router-link>
+        has the following datastreams using this {{ itemName }}:
+
+        <v-list>
+          <v-list-item v-for="id in thing.datastreamIds" :key="id">
+            <router-link :to="`/sites/${thingId}/datastreams/form/${id}`">{{
+              id
+            }}</router-link>
+          </v-list-item>
+        </v-list>
+      </div>
+    </v-card-text>
+    <v-card-text v-else>
+      This {{ itemName }} isn't being used by any datastreams and is safe to
+      delete.
     </v-card-text>
 
     <v-divider class="my-4"></v-divider>
@@ -60,6 +53,7 @@ import { api } from '@/services/api'
 
 const things = ref<Thing[]>([])
 const datastreams = ref<Datastream[]>([])
+const loaded = ref(false)
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
@@ -80,7 +74,7 @@ const datastreamsForItem = computed(() => {
   )
 })
 
-const thingsWithDatastreams = computed(() => {
+const thingMap = computed(() => {
   if (!datastreamsForItem.value) return {}
 
   return datastreamsForItem.value.reduce((acc: any, datastream) => {
@@ -100,8 +94,13 @@ onMounted(async () => {
   try {
     // TODO: We only need the things the user is a primary owner of and their datastreams.
     // Create an endpoint and use it
-    things.value = await api.fetchThings()
-    datastreams.value = await api.fetchUsersDatastreams()
+    const [fetchedThings, fetchedDatastreams] = await Promise.all([
+      api.fetchThings(),
+      api.fetchUsersDatastreams(),
+    ])
+    things.value = fetchedThings
+    datastreams.value = fetchedDatastreams
+    loaded.value = true
   } catch (error) {
     console.error('Error fetching things', error)
   }
