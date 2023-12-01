@@ -77,32 +77,7 @@
       </v-window-item>
 
       <v-window-item value="2">
-        <!--    Processing Levels Table and Modal-->
-        <v-data-table
-          :headers="ProcLevelHeaders"
-          :items="plStore.ownedProcessingLevels"
-          class="elevation-3"
-        >
-          <template v-slot:item.actions="{ item }">
-            <v-icon @click="openPLDialog(item.raw)"> mdi-pencil </v-icon>
-            <v-icon @click="openPLDeleteDialog(item.raw)"> mdi-delete </v-icon>
-          </template></v-data-table
-        >
-        <v-dialog v-model="isPLCEModalOpen" width="60rem">
-          <ProcessingLevelModal
-            :id="isPLSelected ? selectedPL.id : undefined"
-            @close="isPLCEModalOpen = false"
-          ></ProcessingLevelModal>
-        </v-dialog>
-        <v-dialog v-model="isPLDModalOpen" width="40rem">
-          <DeleteMetadataCard
-            itemName="processing level"
-            :itemID="selectedPL.id"
-            parameter-name="processingLevelId"
-            @delete="deletePL"
-            @close="isPLDModalOpen = false"
-          />
-        </v-dialog>
+        <ProcessingLevelTable :key="PLKey" />
       </v-window-item>
 
       <v-window-item value="3">
@@ -125,31 +100,37 @@
       @created="refreshRQTable"
     />
   </v-dialog>
+
+  <v-dialog v-model="openPLCreate" width="60rem">
+    <ProcessingLevelFormCard
+      @close="openPLCreate = false"
+      @created="refreshPLTable"
+    />
+  </v-dialog>
 </template>
 
 <script lang="ts" setup>
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
-import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
-import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { ref } from 'vue'
-import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
+import ProcessingLevelTable from '@/components/Metadata/ProcessingLevelTable.vue'
+
+import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
+import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 
 import {
   useSensorModals,
-  useProcessingLevelModals,
   useObservedPropertyModals,
 } from '@/composables/useMetadataModals'
 
 const sensorStore = useSensorStore()
 const opStore = useObservedPropertyStore()
-const plStore = useProcessingLevelStore()
 
 const {
   isEntitySelected: isSensorSelected,
@@ -160,16 +141,6 @@ const {
   openDialog: openSensorDialog,
   openDeleteDialog: openSensorDeleteDialog,
 } = useSensorModals()
-
-const {
-  isEntitySelected: isPLSelected,
-  selectedEntity: selectedPL,
-  deleteSelectedEntity: deletePL,
-  isCreateEditModalOpen: isPLCEModalOpen,
-  isDeleteModalOpen: isPLDModalOpen,
-  openDialog: openPLDialog,
-  openDeleteDialog: openPLDeleteDialog,
-} = useProcessingLevelModals()
 
 const {
   isEntitySelected: isOPSelected,
@@ -189,6 +160,10 @@ const openRQCreate = ref(false)
 const qualifierKey = ref(0)
 const refreshRQTable = () => (qualifierKey.value += 1)
 
+const openPLCreate = ref(false)
+const PLKey = ref(0)
+const refreshPLTable = () => (PLKey.value += 1)
+
 const metaMap: Record<string, any> = {
   0: {
     name: 'Sensors',
@@ -202,7 +177,7 @@ const metaMap: Record<string, any> = {
   },
   2: {
     name: 'Processing Levels',
-    openDialog: openPLDialog,
+    openDialog: () => (openPLCreate.value = true),
     singularName: 'processing level',
   },
   3: {
@@ -230,13 +205,6 @@ const OPHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Type', key: 'type' },
   { title: 'Code', key: 'code' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-] as const
-
-const ProcLevelHeaders = [
-  { title: 'Code', key: 'code' },
-  { title: 'Definition', key: 'definition' },
-  { title: 'Explanation', key: 'explanation' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 </script>

@@ -123,12 +123,10 @@
             <template v-slot:append v-if="isPrimaryOwner">
               <v-btn-add @click="showPLModal = true">Add New</v-btn-add>
               <v-dialog v-model="showPLModal" width="60rem">
-                <ProcessingLevelModal
-                  @uploaded="
-                    handleMetadataUploaded('processingLevelId', $event)
-                  "
+                <ProcessingLevelFormCard
+                  @created="handleMetadataUploaded('processingLevelId', $event)"
                   @close="showPLModal = false"
-                  >Add New</ProcessingLevelModal
+                  >Add New</ProcessingLevelFormCard
                 >
               </v-dialog>
             </template>
@@ -285,13 +283,13 @@ import SensorModal from '@/components/Datastream/SensorModal.vue'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
-import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
+import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
-import { Datastream, Unit } from '@/types'
+import { Unit } from '@/types'
 import { api } from '@/services/api'
 
 const route = useRoute()
@@ -309,19 +307,20 @@ const showSensorModal = ref(false)
 const showPLModal = ref(false)
 const showOPModal = ref(false)
 
-const { sensors, units, observedProperties, formattedProcessingLevels } =
-  usePrimaryOwnerData(thingId)
+const {
+  sensors,
+  units,
+  observedProperties,
+  formattedProcessingLevels,
+  fetchMetadata,
+} = usePrimaryOwnerData(thingId)
 
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
   useDatastreamForm(thingId, datastreamId)
 
-const handleMetadataUploaded = async (
-  updateId: keyof Datastream,
-  newId: string
-) => {
-  if (datastream && updateId in datastream) {
-    ;(datastream[updateId] as unknown as string) = newId
-  }
+const handleMetadataUploaded = async (dsKey: string, newId: string) => {
+  await fetchMetadata()
+  ;(datastream as any)[dsKey] = newId
 }
 
 onMounted(async () => {

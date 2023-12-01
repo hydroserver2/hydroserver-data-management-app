@@ -1,4 +1,4 @@
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, ComputedRef } from 'vue'
 import { ProcessingLevel, DatastreamMetadata } from '@/types'
 import { api } from '@/services/api'
 
@@ -16,27 +16,27 @@ export function usePrimaryOwnerData(thingId: string) {
     () => metadata.value?.observedProperties || []
   )
 
-  const processingLevels = computed(
+  const processingLevels: ComputedRef<ProcessingLevel[]> = computed(
     () => metadata.value?.processingLevels || []
   )
 
-  const formattedProcessingLevels = computed(() => {
-    const pls = processingLevels.value as ProcessingLevel[]
-    if (pls)
-      return pls.map((pl) => ({
+  const formattedProcessingLevels = computed(
+    () =>
+      processingLevels.value?.map((pl) => ({
         id: pl.id,
         title: `${pl.code} : ${pl.definition}`,
-      }))
-    return []
-  })
+      })) || []
+  )
 
-  onMounted(async () => {
+  const fetchMetadata = async () => {
     try {
       metadata.value = await api.fetchMetadataForThingOwner(thingId)
     } catch (error) {
       console.error('Error fetching primary owner metadata', error)
     }
-  })
+  }
+
+  onMounted(async () => await fetchMetadata())
 
   return {
     sensors,
@@ -44,5 +44,6 @@ export function usePrimaryOwnerData(thingId: string) {
     observedProperties,
     processingLevels,
     formattedProcessingLevels,
+    fetchMetadata,
   }
 }

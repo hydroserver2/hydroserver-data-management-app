@@ -84,31 +84,6 @@ export function useSensorModals(id: string | null = null) {
   )
 }
 
-export function useProcessingLevelModals(id: string | null = null) {
-  const metadataFuncs = useMetadata(
-    useProcessingLevelStore(),
-    () => new ProcessingLevel(),
-    'getById',
-    id,
-    'fetchProcessingLevels',
-    'deleteProcessingLevel'
-  )
-
-  const plStore = useProcessingLevelStore()
-
-  const formattedProcessingLevels = computed(() => {
-    return plStore.unownedProcessingLevels.map((pl) => ({
-      id: pl.id,
-      title: `${pl.code} : ${pl.definition}`,
-    }))
-  })
-
-  return {
-    ...metadataFuncs,
-    formattedProcessingLevels,
-  }
-}
-
 export function useObservedPropertyModals(id: string | null = null) {
   return useMetadata(
     useObservedPropertyStore(),
