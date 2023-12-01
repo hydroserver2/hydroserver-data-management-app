@@ -17,34 +17,7 @@
 
     <v-window v-model="tab" class="elevation-3">
       <v-window-item value="0">
-        <!--    Sensor Table and Modal-->
-        <v-data-table
-          :headers="sensorHeaders"
-          :items="sensorStore.sensors"
-          class="elevation-3"
-        >
-          <template v-slot:item.actions="{ item }">
-            <v-icon @click="openSensorDialog(item.raw)"> mdi-pencil </v-icon>
-            <v-icon @click="openSensorDeleteDialog(item.raw)">
-              mdi-delete
-            </v-icon>
-          </template></v-data-table
-        >
-        <v-dialog v-model="isSensorCEModalOpen" width="60rem">
-          <SensorModal
-            :id="isSensorSelected ? selectedSensor.id : undefined"
-            @close="isSensorCEModalOpen = false"
-          ></SensorModal>
-        </v-dialog>
-        <v-dialog v-model="isSensorDModalOpen" width="40rem">
-          <DeleteMetadataCard
-            itemName="sensor"
-            :itemID="selectedSensor.id"
-            parameter-name="sensorId"
-            @delete="deleteSensor"
-            @close="isSensorDModalOpen = false"
-          />
-        </v-dialog>
+        <SensorTable :key="sensorKey" />
       </v-window-item>
 
       <v-window-item value="1">
@@ -67,6 +40,13 @@
 
   <v-dialog v-model="openUnitCreate" width="60rem">
     <UnitFormCard @close="openUnitCreate = false" @created="refreshUnitTable" />
+  </v-dialog>
+
+  <v-dialog v-model="openSensorCreate" width="60rem">
+    <SensorFormCard
+      @close="openSensorCreate = false"
+      @created="refreshSensorTable"
+    />
   </v-dialog>
 
   <v-dialog v-model="openRQCreate" width="60rem">
@@ -92,33 +72,20 @@
 </template>
 
 <script lang="ts" setup>
-import SensorModal from '@/components/Datastream/SensorModal.vue'
-import { useSensorStore } from '@/store/sensors'
-import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { ref } from 'vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
+import SensorTable from '@/components/Metadata/SensorTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
 import ProcessingLevelTable from '@/components/Metadata/ProcessingLevelTable.vue'
 import ObservedPropertyTable from '@/components/Metadata/ObservedPropertyTable.vue'
 
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
+import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 
-import { useSensorModals } from '@/composables/useMetadataModals'
-
-const sensorStore = useSensorStore()
-
-const {
-  isEntitySelected: isSensorSelected,
-  selectedEntity: selectedSensor,
-  deleteSelectedEntity: deleteSensor,
-  isCreateEditModalOpen: isSensorCEModalOpen,
-  isDeleteModalOpen: isSensorDModalOpen,
-  openDialog: openSensorDialog,
-  openDeleteDialog: openSensorDeleteDialog,
-} = useSensorModals()
+const tab = ref(0)
 
 const openUnitCreate = ref(false)
 const unitKey = ref(0)
@@ -136,10 +103,14 @@ const openOPCreate = ref(false)
 const OPKey = ref(0)
 const refreshOPTable = () => (OPKey.value += 1)
 
+const openSensorCreate = ref(false)
+const sensorKey = ref(0)
+const refreshSensorTable = () => (sensorKey.value += 1)
+
 const metaMap: Record<string, any> = {
   0: {
     name: 'Sensors',
-    openDialog: openSensorDialog,
+    openDialog: () => (openSensorCreate.value = true),
     singularName: 'sensor',
   },
   1: {
@@ -163,19 +134,4 @@ const metaMap: Record<string, any> = {
     singularName: 'result qualifier',
   },
 }
-const tab = ref(0)
-
-const sensorHeaders = [
-  { title: 'Name', key: 'name' },
-  { title: 'Method Type', key: 'methodType' },
-  { title: 'Method Code', key: 'methodCode' },
-  { title: 'UUID', key: 'id' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-] as const
 </script>
-
-<style scoped>
-.v-icon {
-  color: rgb(var(--v-theme-cancel));
-}
-</style>
