@@ -4,38 +4,38 @@
     <v-divider />
 
     <v-form
-      @submit.prevent="uploadUnit"
+      @submit.prevent="onSubmit"
       ref="myForm"
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-text v-if="unit">
+      <v-card-text v-if="item">
         <v-autocomplete
           v-if="!isEdit"
           v-model="selectedId"
           label="Load a template unit"
-          :items="unownedUnits"
+          :items="sortedItems"
           item-title="name"
           item-value="id"
         />
 
         <v-text-field
-          v-model="unit.name"
+          v-model="item.name"
           label="Name *"
           :rules="rules.requiredName"
         />
         <v-text-field
-          v-model="unit.symbol"
+          v-model="item.symbol"
           label="Symbol *"
           :rules="rules.required"
         />
         <v-text-field
-          v-model="unit.definition"
+          v-model="item.definition"
           label="Definition *"
           :rules="rules.requiredDescription"
         />
         <v-text-field
-          v-model="unit.type"
+          v-model="item.type"
           label="Unit Type *"
           :rules="rules.requiredName"
         />
@@ -57,64 +57,39 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
-import { computed, onMounted, ref, watch } from 'vue'
 import { VForm } from 'vuetify/components'
+import { useFormLogic } from '@/composables/useFormLogic'
+
 import { Unit } from '@/types'
+import { computed } from 'vue'
 
 const props = defineProps({ unit: Object as () => Unit })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-const unit = ref<Unit>(new Unit())
-const unownedUnits = ref<Unit[]>([])
+// TODO: fetch only unownedUnits
+const { item, items, selectedId, isEdit, valid, myForm, uploadItem } =
+  useFormLogic(
+    api.fetchUnits,
+    api.createUnit,
+    api.updateUnit,
+    Unit,
+    props.unit || undefined
+  )
 
-const isEdit = computed(() => props.unit != null)
-const valid = ref(false)
-const myForm = ref<VForm>()
-const selectedId = ref(props.unit?.id)
-
-watch(selectedId, async () => {
-  if (!selectedId.value) return
-  await populateForm(selectedId.value)
-  await myForm.value?.validate()
-})
-
-async function populateForm(id: string) {
-  const newUnit = unownedUnits.value.find((u) => u.id === id)
-  Object.assign(unit.value, newUnit)
-}
-
-async function uploadUnit() {
-  await myForm.value?.validate()
-  if (!valid.value) return
-  if (isEdit.value) {
-    try {
-      const updatedUnit = await api.updateUnit(unit.value, props.unit)
-      emit('updated', updatedUnit)
-    } catch (error) {
-      console.error('Error updating unit', error)
-    }
-  } else {
-    try {
-      const newUnit = await api.createUnit(unit.value)
-      emit('created', newUnit.id)
-    } catch (error) {
-      console.error('Error creating unit', error)
-    }
+async function onSubmit() {
+  try {
+    const newItem = await uploadItem()
+    if (!newItem) return
+    if (isEdit.value) emit('updated', newItem)
+    else emit('created', newItem.id)
+  } catch (error) {
+    console.error('Error uploading unit', error)
   }
   emit('close')
 }
 
-onMounted(async () => {
-  if (isEdit.value) {
-    unit.value = JSON.parse(JSON.stringify(props.unit))
-    return
-  }
-  try {
-    const fetchedUnits: Unit[] = await api.fetchUnits()
-    unownedUnits.value = fetchedUnits.filter((u) => !u.owner)
-    unownedUnits.value.sort((a, b) => a.name.localeCompare(b.name))
-  } catch (error) {
-    console.error('Error fetching units from DB.', error)
-  }
+const sortedItems = computed(() => {
+  const unownedUnits = items.value.filter((u) => !u.owner)
+  return unownedUnits.sort((a, b) => a.name.localeCompare(b.name))
 })
 </script>

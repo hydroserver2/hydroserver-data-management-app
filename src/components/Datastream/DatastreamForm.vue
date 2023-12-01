@@ -216,7 +216,7 @@
                 <v-btn-add @click="openAggUnitForm = true">Add New</v-btn-add>
                 <v-dialog v-model="openAggUnitForm" width="60rem">
                   <UnitFormCard
-                    @uploaded="
+                    @created="
                       datastream.timeAggregationIntervalUnitsId = $event
                     "
                     @close="openAggUnitForm = false"
@@ -249,7 +249,7 @@
                 <v-btn-add @click="openITUnitForm = true">Add New</v-btn-add>
                 <v-dialog v-model="openITUnitForm" width="60rem">
                   <UnitFormCard
-                    @uploaded="datastream.intendedTimeSpacingUnitsId = $event"
+                    @created="datastream.intendedTimeSpacingUnitsId = $event"
                     @close="openITUnitForm = false"
                     >Add New</UnitFormCard
                   >

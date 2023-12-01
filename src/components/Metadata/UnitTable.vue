@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :headers="UnitHeaders" :items="ownedUnits">
+  <v-data-table :headers="UnitHeaders" :items="sortedItems">
     <template v-slot:item.actions="{ item }">
       <v-icon @click="openDialog(item.raw, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item.raw, 'delete')"> mdi-delete </v-icon>
@@ -7,19 +7,15 @@
   </v-data-table>
 
   <v-dialog v-model="openEdit" width="60rem">
-    <UnitFormCard
-      :unit="unit"
-      @close="openEdit = false"
-      @updated="onUnitUpdate"
-    />
+    <UnitFormCard :unit="item" @close="openEdit = false" @updated="onUpdate" />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
     <DeleteMetadataCard
       itemName="unit"
-      :itemID="unit.id"
+      :itemID="item.id"
       parameter-name="unitId"
-      @delete="onUnitDelete"
+      @delete="onDelete"
       @close="openDelete = false"
     />
   </v-dialog>
@@ -28,45 +24,21 @@
 <script setup lang="ts">
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
-import { computed, onMounted, ref } from 'vue'
 import { api } from '@/services/api'
 import { Unit } from '@/types'
+import { useMetadataTable } from '@/composables/useMetadataTable'
+import { computed } from 'vue'
 
-const { user } = storeToRefs(useUserStore())
-
-const openEdit = ref(false)
-const openDelete = ref(false)
-const unit = ref(new Unit())
-const units = ref<Unit[]>([])
-
-const ownedUnits = computed(() =>
-  user.value?.email
-    ? units.value.filter((u) => u.owner === user.value.email)
-    : []
-)
-
-function openDialog(selectedUnit: Unit, dialog: string) {
-  unit.value = selectedUnit
-  if (dialog === 'edit') openEdit.value = true
-  else if (dialog === 'delete') openDelete.value = true
-}
-
-const onUnitUpdate = (updatedUnit: Unit) => {
-  const index = units.value.findIndex((u) => u.id === updatedUnit.id)
-  if (index !== -1) units.value[index] = updatedUnit
-}
-
-const onUnitDelete = async () => {
-  try {
-    await api.deleteUnit(unit.value.id)
-    units.value = units.value.filter((u) => u.id !== unit.value.id)
-    openDelete.value = false
-  } catch (error) {
-    console.error('Error deleting unit', error)
-  }
-}
+// TODO: Only fetch the units the user is the primary owner of
+const {
+  item,
+  ownedItems,
+  openEdit,
+  openDelete,
+  openDialog,
+  onUpdate,
+  onDelete,
+} = useMetadataTable(api.fetchUnits, api.deleteUnit, Unit)
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },
@@ -75,13 +47,7 @@ const UnitHeaders = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 
-onMounted(async () => {
-  try {
-    // TODO: Just grab the primary owned units
-    units.value = await api.fetchUnits()
-    units.value.sort((a, b) => a.name.localeCompare(b.name))
-  } catch (error) {
-    console.error('Error fetching units from DB', error)
-  }
-})
+const sortedItems = computed(() =>
+  ownedItems.value.sort((a, b) => a.name.localeCompare(b.name))
+)
 </script>
