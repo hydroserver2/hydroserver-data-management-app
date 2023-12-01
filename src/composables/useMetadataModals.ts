@@ -2,7 +2,6 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { VForm } from 'vuetify/components'
 import { useSensorStore } from '@/store/sensors'
 import { useObservedPropertyStore } from '@/store/observedProperties'
-import { useProcessingLevelStore } from '@/store/processingLevels'
 import { Sensor, Unit, ObservedProperty, ProcessingLevel } from '@/types'
 
 function useMetadata(

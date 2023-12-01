@@ -32,7 +32,11 @@
             <p><strong class="mr-2">Identifier:</strong> {{ datastream.id }}</p>
             <p>
               <strong class="mr-2">Processing Level:</strong>
-              {{ getPLById(datastream.processingLevelId).code }}
+              {{
+                processingLevels.find(
+                  (pl) => pl.id === datastream.processingLevelId
+                )?.code
+              }}
             </p>
             <p>
               <strong class="mr-2">Sampled Medium:</strong>
@@ -52,23 +56,24 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { watch, onMounted, ref, computed } from 'vue'
-import { Datastream, Thing } from '@/types'
+import { Datastream, ProcessingLevel, Thing } from '@/types'
 import { useSensorStore } from '@/store/sensors'
-import { useProcessingLevelStore } from '@/store/processingLevels'
 import { useObservedPropertyStore } from '@/store/observedProperties'
 
 const { fetchSensors, getSensorById } = useSensorStore()
-const { fetchProcessingLevels, getById: getPLById } = useProcessingLevelStore()
 const { fetchObservedProperties, getById: getOPById } =
   useObservedPropertyStore()
 
 const selectedThingId = ref('')
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
+const processingLevels = ref<ProcessingLevel[]>([])
 const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 
+// TODO: Instead of fetching all the metadata onMounted,
+// fetch only the metadata for the selected thing
 watch(
   selectedThingId,
   async (newId) => {
@@ -85,12 +90,13 @@ function datastreamSelected(id: string) {
 }
 
 onMounted(async () => {
-  const [fetchedThings] = await Promise.all([
+  const [fetchedThings, fetchedPLs] = await Promise.all([
     api.fetchThings(),
+    api.fetchProcessingLevels(),
     fetchSensors(),
-    fetchProcessingLevels(),
     fetchObservedProperties(),
   ])
   things.value = fetchedThings
+  processingLevels.value = fetchedPLs
 })
 </script>
