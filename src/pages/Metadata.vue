@@ -2,18 +2,19 @@
   <v-container>
     <h5 class="text-h5 mb-4">Manage Metadata</h5>
 
-    <v-tabs v-model="tab" bg-color="brown" color="white" scrollable>
-      <v-tab v-for="metadata in metaMap">{{ metadata.name }}</v-tab>
-      <v-spacer></v-spacer>
-      <div class="d-flex align-center pr-4">
-        <v-btn-add
-          prependIcon="mdi-plus"
-          color="white"
-          @click="metaMap[tab]?.openDialog()"
-          >Add New {{ metaMap[tab]?.singularName }}</v-btn-add
-        >
-      </div>
-    </v-tabs>
+    <v-toolbar color="brown">
+      <v-tabs v-model="tab" color="white" scrollable>
+        <v-tab v-for="item in metaMap">{{ item.name }}</v-tab>
+      </v-tabs>
+      <v-spacer />
+
+      <v-btn-add
+        prependIcon="mdi-plus"
+        color="white"
+        @click="metaMap[tab]?.openDialog()"
+        >Add New {{ metaMap[tab]?.singularName }}</v-btn-add
+      >
+    </v-toolbar>
 
     <v-window v-model="tab" class="elevation-3">
       <v-window-item value="0">
