@@ -76,8 +76,8 @@
             <template v-slot:append v-if="isPrimaryOwner">
               <v-btn-add @click="showOPModal = true">Add New</v-btn-add>
               <v-dialog v-model="showOPModal" width="60rem">
-                <ObservedPropertyModal
-                  @uploaded="
+                <ObservedPropertyFormCard
+                  @created="
                     handleMetadataUploaded('observedPropertyId', $event)
                   "
                   @close="showOPModal = false"
@@ -281,7 +281,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SensorModal from '@/components/Datastream/SensorModal.vue'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
-import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
+import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'

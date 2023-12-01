@@ -26,7 +26,9 @@
             <p style="font-size: 1.2em">
               <strong class="mr-2">Observed Property:</strong>
               <strong>{{
-                getOPById(datastream.observedPropertyId).name
+                observedProperties.find(
+                  (pl) => pl.id === datastream.observedPropertyId
+                )?.name
               }}</strong>
             </p>
             <p><strong class="mr-2">Identifier:</strong> {{ datastream.id }}</p>
@@ -56,18 +58,16 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { watch, onMounted, ref, computed } from 'vue'
-import { Datastream, ProcessingLevel, Thing } from '@/types'
+import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
 import { useSensorStore } from '@/store/sensors'
-import { useObservedPropertyStore } from '@/store/observedProperties'
 
 const { fetchSensors, getSensorById } = useSensorStore()
-const { fetchObservedProperties, getById: getOPById } =
-  useObservedPropertyStore()
 
 const selectedThingId = ref('')
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
 const processingLevels = ref<ProcessingLevel[]>([])
+const observedProperties = ref<ObservedProperty[]>([])
 const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
@@ -90,13 +90,14 @@ function datastreamSelected(id: string) {
 }
 
 onMounted(async () => {
-  const [fetchedThings, fetchedPLs] = await Promise.all([
+  const [fetchedThings, fetchedPLs, fetchedOPs] = await Promise.all([
     api.fetchThings(),
     api.fetchProcessingLevels(),
+    api.fetchObservedProperties(),
     fetchSensors(),
-    fetchObservedProperties(),
   ])
   things.value = fetchedThings
   processingLevels.value = fetchedPLs
+  observedProperties.value = fetchedOPs
 })
 </script>

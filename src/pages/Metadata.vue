@@ -48,32 +48,7 @@
       </v-window-item>
 
       <v-window-item value="1">
-        <!--    Observed Properties Table and Modal-->
-        <v-data-table
-          :headers="OPHeaders"
-          :items="opStore.ownedOP"
-          class="elevation-3"
-        >
-          <template v-slot:item.actions="{ item }">
-            <v-icon @click="openOPDialog(item.raw)"> mdi-pencil </v-icon>
-            <v-icon @click="openOPDeleteDialog(item.raw)"> mdi-delete </v-icon>
-          </template></v-data-table
-        >
-        <v-dialog v-model="isOPCEModalOpen" width="60rem">
-          <ObservedPropertyModal
-            :id="isOPSelected ? selectedOP.id : null"
-            @close="isOPCEModalOpen = false"
-          ></ObservedPropertyModal>
-        </v-dialog>
-        <v-dialog v-model="isOPDModalOpen" width="40rem">
-          <DeleteMetadataCard
-            itemName="Observed Property"
-            :itemID="selectedOP.id"
-            parameter-name="observedPropertyId"
-            @delete="deleteOP"
-            @close="isOPDModalOpen = false"
-          />
-        </v-dialog>
+        <ObservedPropertyTable :key="OPKey" />
       </v-window-item>
 
       <v-window-item value="2">
@@ -101,6 +76,13 @@
     />
   </v-dialog>
 
+  <v-dialog v-model="openOPCreate" width="60rem">
+    <ObservedPropertyFormCard
+      @close="openOPCreate = false"
+      @created="refreshOPTable"
+    />
+  </v-dialog>
+
   <v-dialog v-model="openPLCreate" width="60rem">
     <ProcessingLevelFormCard
       @close="openPLCreate = false"
@@ -111,26 +93,22 @@
 
 <script lang="ts" setup>
 import SensorModal from '@/components/Datastream/SensorModal.vue'
-import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
 import { useSensorStore } from '@/store/sensors'
-import { useObservedPropertyStore } from '@/store/observedProperties'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { ref } from 'vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
 import ProcessingLevelTable from '@/components/Metadata/ProcessingLevelTable.vue'
+import ObservedPropertyTable from '@/components/Metadata/ObservedPropertyTable.vue'
 
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
+import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 
-import {
-  useSensorModals,
-  useObservedPropertyModals,
-} from '@/composables/useMetadataModals'
+import { useSensorModals } from '@/composables/useMetadataModals'
 
 const sensorStore = useSensorStore()
-const opStore = useObservedPropertyStore()
 
 const {
   isEntitySelected: isSensorSelected,
@@ -141,16 +119,6 @@ const {
   openDialog: openSensorDialog,
   openDeleteDialog: openSensorDeleteDialog,
 } = useSensorModals()
-
-const {
-  isEntitySelected: isOPSelected,
-  selectedEntity: selectedOP,
-  deleteSelectedEntity: deleteOP,
-  isCreateEditModalOpen: isOPCEModalOpen,
-  isDeleteModalOpen: isOPDModalOpen,
-  openDialog: openOPDialog,
-  openDeleteDialog: openOPDeleteDialog,
-} = useObservedPropertyModals()
 
 const openUnitCreate = ref(false)
 const unitKey = ref(0)
@@ -164,6 +132,10 @@ const openPLCreate = ref(false)
 const PLKey = ref(0)
 const refreshPLTable = () => (PLKey.value += 1)
 
+const openOPCreate = ref(false)
+const OPKey = ref(0)
+const refreshOPTable = () => (OPKey.value += 1)
+
 const metaMap: Record<string, any> = {
   0: {
     name: 'Sensors',
@@ -172,7 +144,7 @@ const metaMap: Record<string, any> = {
   },
   1: {
     name: 'Observed Properties',
-    openDialog: openOPDialog,
+    openDialog: () => (openOPCreate.value = true),
     singularName: 'observed property',
   },
   2: {
@@ -198,13 +170,6 @@ const sensorHeaders = [
   { title: 'Method Type', key: 'methodType' },
   { title: 'Method Code', key: 'methodCode' },
   { title: 'UUID', key: 'id' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-] as const
-
-const OPHeaders = [
-  { title: 'Name', key: 'name' },
-  { title: 'Type', key: 'type' },
-  { title: 'Code', key: 'code' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 </script>

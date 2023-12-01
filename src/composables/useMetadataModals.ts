@@ -1,7 +1,6 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { VForm } from 'vuetify/components'
 import { useSensorStore } from '@/store/sensors'
-import { useObservedPropertyStore } from '@/store/observedProperties'
 import { Sensor, Unit, ObservedProperty, ProcessingLevel } from '@/types'
 
 function useMetadata(
@@ -80,16 +79,5 @@ export function useSensorModals(id: string | null = null) {
     id,
     'fetchSensors',
     'deleteSensor'
-  )
-}
-
-export function useObservedPropertyModals(id: string | null = null) {
-  return useMetadata(
-    useObservedPropertyStore(),
-    () => new ObservedProperty(),
-    'getById',
-    id,
-    'fetchObservedProperties',
-    'deleteObservedProperty'
   )
 }
