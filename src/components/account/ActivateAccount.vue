@@ -27,7 +27,6 @@ onMounted(async () => {
   try {
     const uid = (route.query.uid as string) || ''
     const token = (route.query.token as string) || ''
-    // resetState()
     const data = await api.activateAccount(uid, token)
 
     if (!data.user.isVerified) return false

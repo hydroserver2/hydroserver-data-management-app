@@ -84,7 +84,6 @@ const loginSubmit = async () => {
   if (!valid) return
 
   try {
-    // resetState()
     const tokens = await api.login(email.value, password.value)
     setTokens(tokens.access, tokens.refresh)
     const user = await api.fetchUser()

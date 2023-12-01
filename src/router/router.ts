@@ -23,17 +23,15 @@ const guards: ((
 ) => any | null)[] = [
   // Check if the refresh token is expired each page change
   (_to, _from, _next) => {
-    const { isRefreshTokenExpired, resetState, $reset } = useAuthStore()
+    const { isRefreshTokenExpired, logout } = useAuthStore()
 
     if (isRefreshTokenExpired()) {
-      // resetState()
-      $reset()
       Notification.toast({
         message: 'Session expired. Please login',
         type: 'info',
         duration: 1000,
       })
-      return { name: 'Login' }
+      logout()
     }
     return null
   },
