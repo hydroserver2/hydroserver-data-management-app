@@ -207,7 +207,7 @@ import { Thing } from '@/types'
 import { siteTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 

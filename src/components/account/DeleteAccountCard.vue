@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 import { useAuthStore } from '@/store/authentication'
 import { computed, onMounted, ref } from 'vue'
 import { Thing } from '@/types'

@@ -1,4 +1,4 @@
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 import { THINGS_BASE, USER_BASE, ACCOUNT_BASE } from '@/services/api'
 
 export function toastHandler(response: any, endpoint: string, method: string) {

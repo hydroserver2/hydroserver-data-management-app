@@ -108,7 +108,7 @@ import { Datastream } from '@/types'
 import { Ref, ref, watch } from 'vue'
 import SiteLinkDataSourceForm from '@/components/Site/SiteLinkDataSourceForm.vue'
 import { api } from '@/services/api'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 
 const props = defineProps({
   datastream: {

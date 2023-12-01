@@ -5,7 +5,7 @@ import {
 } from 'vue-router'
 import { routes } from '@/router/routes'
 import { useAuthStore } from '@/store/authentication'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
