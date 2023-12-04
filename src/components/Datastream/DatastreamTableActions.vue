@@ -15,9 +15,9 @@
         />
       </template>
       <span v-if="datastream.isDataVisible"
-        >Hide the data for this datastream from guests of your site. Owners will
-        still see it and the metadata for your site will still be public</span
-      >
+        >Hide the data for this datastream from guests of your site while
+        keeping the metadata public. Owners will still see it
+      </span>
       <span v-else>Make the data for this datastream publicly visible</span>
     </v-tooltip>
 
@@ -178,6 +178,7 @@ watch(isDeleteModalOpen, (newValue) => {
 
 async function toggleDataVisibility(datastream: Datastream) {
   datastream.isDataVisible = !datastream.isDataVisible
+  if (datastream.isDataVisible) datastream.isVisible = true
   onUpdate(datastream)
 }
 
