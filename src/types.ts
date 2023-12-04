@@ -188,7 +188,7 @@ export class ProcessingLevel {
 
 export class ResultQualifier {
   id: string
-  owner: Owner | null
+  owner: string | null
   code: string
   description: string
 

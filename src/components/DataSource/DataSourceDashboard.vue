@@ -1,10 +1,7 @@
 <template>
   <v-container>
-    <v-row class="mb-4">
-      <v-col cols="auto">
-        <h5 class="text-h5">Manage Data Sources</h5>
-      </v-col>
-    </v-row>
+    <h5 class="text-h5 mb-4">Manage Data Sources</h5>
+
     <v-data-table
       :headers="headers"
       :items="dataSources.dataSources.value"

@@ -161,7 +161,7 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import appLogo from '@/assets/hydroserver-icon-min.png'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 
 const { logout } = useAuthStore()
 const { isLoggedIn } = storeToRefs(useAuthStore())

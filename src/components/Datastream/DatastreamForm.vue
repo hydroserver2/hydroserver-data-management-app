@@ -8,19 +8,21 @@
       class="outlined-container mb-10"
       v-if="!datastreamId && isPrimaryOwner"
     >
-      <v-card-text class="text-subtitle-2 text-medium-emphasis"
-        >Use an existing datastream as a template
-      </v-card-text>
-      <v-card-text>
-        <v-btn @click="showTemplateModal = true">Load template</v-btn>
-        <v-dialog v-model="showTemplateModal" width="60rem">
-          <DatastreamTemplateModal
-            @selected-datastream-id="selectedDatastreamID = $event"
-            @close="showTemplateModal = false"
-          />
-        </v-dialog>
-      </v-card-text>
+      <v-card-actions class="text-subtitle-2 text-medium-emphasis">
+        Use an existing datastream as a template
+        <v-spacer />
+        <v-btn-primary @click="showTemplateModal = true"
+          >Load template</v-btn-primary
+        >
+      </v-card-actions>
     </v-card>
+
+    <v-dialog v-model="showTemplateModal" width="60rem">
+      <DatastreamTemplateModal
+        @selected-datastream-id="selectedDatastreamID = $event"
+        @close="showTemplateModal = false"
+      />
+    </v-dialog>
 
     <v-form
       v-if="datastream"
@@ -38,7 +40,7 @@
           <router-link to="/Metadata"> Manage Metadata page. </router-link>
         </v-card-text>
 
-        <v-card-item>
+        <v-card-text>
           <v-autocomplete
             :key="datastream.sensorId"
             v-model="datastream.sensorId"
@@ -48,20 +50,20 @@
             item-value="id"
             :rules="rules.required"
             no-data-text="No available sensors"
-            class="py-2"
-          ></v-autocomplete>
-          <div v-if="isPrimaryOwner">
-            <v-btn-add @click="showSensorModal = true">Add New</v-btn-add>
-            <v-dialog v-model="showSensorModal" width="60rem">
-              <SensorModal
-                @uploaded="handleMetadataUploaded('sensorId', $event)"
-                @close="showSensorModal = false"
-              ></SensorModal>
-            </v-dialog>
-          </div>
-        </v-card-item>
+          >
+            <template v-slot:append v-if="isPrimaryOwner">
+              <v-btn-add @click="showSensorModal = true">Add New</v-btn-add>
+              <v-dialog v-model="showSensorModal" width="60rem">
+                <SensorFormCard
+                  @created="handleMetadataUploaded('sensorId', $event)"
+                  @close="showSensorModal = false"
+                />
+              </v-dialog>
+            </template>
+          </v-autocomplete>
+        </v-card-text>
 
-        <v-card-item>
+        <v-card-text>
           <v-autocomplete
             v-model="datastream.observedPropertyId"
             label="Select observed property *"
@@ -70,20 +72,22 @@
             item-value="id"
             :rules="rules.required"
             no-data-text="No available properties"
-            class="py-2"
-          ></v-autocomplete>
-          <div v-if="isPrimaryOwner">
-            <v-btn-add @click="showOPModal = true">Add New</v-btn-add>
-            <v-dialog v-model="showOPModal" width="60rem">
-              <ObservedPropertyModal
-                @uploaded="handleMetadataUploaded('observedPropertyId', $event)"
-                @close="showOPModal = false"
-              ></ObservedPropertyModal>
-            </v-dialog>
-          </div>
-        </v-card-item>
+          >
+            <template v-slot:append v-if="isPrimaryOwner">
+              <v-btn-add @click="showOPModal = true">Add New</v-btn-add>
+              <v-dialog v-model="showOPModal" width="60rem">
+                <ObservedPropertyFormCard
+                  @created="
+                    handleMetadataUploaded('observedPropertyId', $event)
+                  "
+                  @close="showOPModal = false"
+                />
+              </v-dialog>
+            </template>
+          </v-autocomplete>
+        </v-card-text>
 
-        <v-card-item>
+        <v-card-text>
           <v-autocomplete
             v-model="datastream.unitId"
             label="Select unit *"
@@ -92,21 +96,21 @@
             item-value="id"
             :rules="rules.required"
             no-data-text="No available units"
-            class="py-2"
-          ></v-autocomplete>
-          <div v-if="isPrimaryOwner">
-            <v-btn-add @click="showUnitModal = true">Add New</v-btn-add>
-            <v-dialog v-model="showUnitModal" width="60rem">
-              <UnitModal
-                @uploaded="handleMetadataUploaded('unitId', $event)"
-                @close="showUnitModal = false"
-                >Add New</UnitModal
-              >
-            </v-dialog>
-          </div>
-        </v-card-item>
+          >
+            <template v-slot:append v-if="isPrimaryOwner">
+              <v-btn-add @click="openUnitForm = true">Add New</v-btn-add>
+              <v-dialog v-model="openUnitForm" width="60rem">
+                <UnitFormCard
+                  @created="handleMetadataUploaded('unitId', $event)"
+                  @close="openUnitForm = false"
+                  >Add New</UnitFormCard
+                >
+              </v-dialog>
+            </template>
+          </v-autocomplete>
+        </v-card-text>
 
-        <v-card-item>
+        <v-card-text>
           <v-autocomplete
             v-model="datastream.processingLevelId"
             label="Select processing level *"
@@ -115,19 +119,19 @@
             item-value="id"
             :rules="rules.required"
             no-data-text="No available processing level"
-            class="py-2"
-          ></v-autocomplete>
-          <div v-if="isPrimaryOwner">
-            <v-btn-add @click="showPLModal = true">Add New</v-btn-add>
-            <v-dialog v-model="showPLModal" width="60rem">
-              <ProcessingLevelModal
-                @uploaded="handleMetadataUploaded('processingLevelId', $event)"
-                @close="showPLModal = false"
-                >Add New</ProcessingLevelModal
-              >
-            </v-dialog>
-          </div>
-        </v-card-item>
+          >
+            <template v-slot:append v-if="isPrimaryOwner">
+              <v-btn-add @click="showPLModal = true">Add New</v-btn-add>
+              <v-dialog v-model="showPLModal" width="60rem">
+                <ProcessingLevelFormCard
+                  @created="handleMetadataUploaded('processingLevelId', $event)"
+                  @close="showPLModal = false"
+                  >Add New</ProcessingLevelFormCard
+                >
+              </v-dialog>
+            </template>
+          </v-autocomplete>
+        </v-card-text>
       </v-card>
 
       <v-card class="outlined-container mb-10">
@@ -175,7 +179,7 @@
             label="No data value"
             :rules="datastream.noDataValue ? rules.maxLength(255) : []"
             type="number"
-          ></v-text-field>
+          />
         </v-card-text>
       </v-card>
 
@@ -207,16 +211,14 @@
                 class="pb-1"
               ></v-autocomplete>
               <div v-if="isPrimaryOwner">
-                <v-btn-add @click="showTimeAggUnitModal = true"
-                  >Add New</v-btn-add
-                >
-                <v-dialog v-model="showTimeAggUnitModal" width="60rem">
-                  <UnitModal
-                    @uploaded="
+                <v-btn-add @click="openAggUnitForm = true">Add New</v-btn-add>
+                <v-dialog v-model="openAggUnitForm" width="60rem">
+                  <UnitFormCard
+                    @created="
                       datastream.timeAggregationIntervalUnitsId = $event
                     "
-                    @close="showTimeAggUnitModal = false"
-                    >Add New</UnitModal
+                    @close="openAggUnitForm = false"
+                    >Add New</UnitFormCard
                   >
                 </v-dialog>
               </div>
@@ -240,15 +242,14 @@
                 class="pb-1"
                 clearable
               ></v-autocomplete>
+
               <div v-if="isPrimaryOwner">
-                <v-btn-add @click="showIntendedTimeModal = true"
-                  >Add New</v-btn-add
-                >
-                <v-dialog v-model="showIntendedTimeModal" width="60rem">
-                  <UnitModal
-                    @uploaded="datastream.intendedTimeSpacingUnitsId = $event"
-                    @close="showIntendedTimeModal = false"
-                    >Add New</UnitModal
+                <v-btn-add @click="openITUnitForm = true">Add New</v-btn-add>
+                <v-dialog v-model="openITUnitForm" width="60rem">
+                  <UnitFormCard
+                    @created="datastream.intendedTimeSpacingUnitsId = $event"
+                    @close="openITUnitForm = false"
+                    >Add New</UnitFormCard
                   >
                 </v-dialog>
               </div>
@@ -276,65 +277,59 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import SensorModal from '@/components/Datastream/SensorModal.vue'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
-import ObservedPropertyModal from '@/components/Datastream/ObservedPropertyModal.vue'
-import UnitModal from '@/components/Datastream/UnitModal.vue'
-import ProcessingLevelModal from '@/components/Datastream/ProcessingLevelModal.vue'
-import { useUnitStore } from '@/store/unit'
+import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
+import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
+import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
+import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
-import { Datastream } from '@/types'
+import { Unit } from '@/types'
 import { api } from '@/services/api'
-import { useThingStore } from '@/store/things'
-
-const { sortUnits, setUnits } = useUnitStore()
-const { timeUnits } = storeToRefs(useUnitStore())
 
 const route = useRoute()
 const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
 
-const { fetchThingById } = useThingStore()
-const { things } = storeToRefs(useThingStore())
-const isPrimaryOwner = computed(() => things.value[thingId]?.isPrimaryOwner)
+const timeUnits = ref<Unit[]>([])
+const openUnitForm = ref(false)
+const openAggUnitForm = ref(false)
+const openITUnitForm = ref(false)
 
-const { sensors, units, observedProperties, formattedProcessingLevels } =
-  usePrimaryOwnerData(thingId)
+const isPrimaryOwner = ref(false)
+const showTemplateModal = ref(false)
+const showSensorModal = ref(false)
+const showPLModal = ref(false)
+const showOPModal = ref(false)
+
+const {
+  sensors,
+  units,
+  observedProperties,
+  formattedProcessingLevels,
+  fetchMetadata,
+} = usePrimaryOwnerData(thingId)
 
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
   useDatastreamForm(thingId, datastreamId)
 
-const showTemplateModal = ref(false)
-const showSensorModal = ref(false)
-const showUnitModal = ref(false)
-const showPLModal = ref(false)
-const showOPModal = ref(false)
-const showTimeAggUnitModal = ref(false)
-const showIntendedTimeModal = ref(false)
-
-const handleMetadataUploaded = async (
-  updateId: keyof Datastream,
-  newId: string
-) => {
-  if (datastream && updateId in datastream) {
-    ;(datastream[updateId] as unknown as string) = newId
-  }
+const handleMetadataUploaded = async (dsKey: string, newId: string) => {
+  await fetchMetadata()
+  ;(datastream as any)[dsKey] = newId
 }
 
 onMounted(async () => {
   window.scrollTo(0, 0)
-  await fetchThingById(thingId)
+  const thing = await api.fetchThing(thingId)
+  isPrimaryOwner.value = thing.isPrimaryOwner
   try {
-    const fetchedUnits = await api.fetchUnits()
-    setUnits(fetchedUnits)
-    sortUnits()
+    const fetchedUnits: Unit[] = await api.fetchUnits()
+    timeUnits.value = fetchedUnits.filter((u) => u.type === 'Time')
   } catch (error) {
     console.error('Error fetching units from DB.', error)
   }

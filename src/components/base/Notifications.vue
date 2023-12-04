@@ -41,7 +41,7 @@ import Notification, {
   IDialog,
   IToast,
   DEFAULT_TOAST_DURATION,
-} from '@/store/notifications'
+} from '@/utils/notifications'
 
 const INITIAL_DIALOG = {
   title: '',

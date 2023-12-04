@@ -36,9 +36,9 @@
         <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete Site</v-btn
         >
-        <v-dialog v-model="isDeleteModalOpen" width="40rem">
+        <v-dialog v-model="isDeleteModalOpen" v-if="thing" width="40rem">
           <SiteDeleteModal
-            :thing="things[thingId]"
+            :thing="thing"
             @switch-to-access-control="switchToAccessControlModal"
             @close="isDeleteModalOpen = false"
             @delete="onDeleteThing"
@@ -49,7 +49,7 @@
 
     <v-row>
       <v-col cols="12" md="8">
-        <SiteDetailsTable :thing-id="thingId" />
+        <SiteDetailsTable />
       </v-col>
 
       <v-col cols="12" md="4">
@@ -98,7 +98,7 @@ import { onMounted, computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
-import { useThingStore } from '@/store/things'
+import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
@@ -109,9 +109,7 @@ const thingId = useRoute().params.id.toString()
 const { fetchPhotos } = usePhotosStore()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
-const { fetchThingById } = useThingStore()
-const { things } = storeToRefs(useThingStore())
-const thing = computed(() => things.value[thingId])
+const { thing } = storeToRefs(useThingStore())
 const isOwner = computed(() => thing.value?.ownsThing)
 
 const hasPhotos = computed(
@@ -130,7 +128,7 @@ function switchToAccessControlModal() {
 async function onDeleteThing() {
   try {
     await api.deleteThing(thingId)
-    delete things.value[thingId]
+    delete thing.value
     await router.push('/sites')
   } catch (error) {
     console.error('Error deleting thing', error)
@@ -149,6 +147,10 @@ const mapOptions = computed(() =>
 
 onMounted(async () => {
   fetchPhotos(thingId)
-  fetchThingById(thingId)
+  try {
+    thing.value = await api.fetchThing(thingId)
+  } catch (error) {
+    console.error('Error fetching thing', error)
+  }
 })
 </script>

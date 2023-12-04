@@ -1,13 +1,15 @@
 <template>
   <v-card>
     <v-card-title>Use an existing datastream as a template</v-card-title>
+
     <v-divider class="my-4"></v-divider>
+
     <v-card-text>
       <v-col cols="12">
         Filter datastreams by site
         <v-select
           v-model="selectedThingId"
-          :items="primaryOwnedThings"
+          :items="usersThings"
           item-title="name"
           item-value="id"
         >
@@ -24,13 +26,19 @@
             <p style="font-size: 1.2em">
               <strong class="mr-2">Observed Property:</strong>
               <strong>{{
-                opStore.getById(datastream.observedPropertyId).name
+                observedProperties.find(
+                  (pl) => pl.id === datastream.observedPropertyId
+                )?.name
               }}</strong>
             </p>
             <p><strong class="mr-2">Identifier:</strong> {{ datastream.id }}</p>
             <p>
               <strong class="mr-2">Processing Level:</strong>
-              {{ plStore.getById(datastream.processingLevelId).code }}
+              {{
+                processingLevels.find(
+                  (pl) => pl.id === datastream.processingLevelId
+                )?.code
+              }}
             </p>
             <p>
               <strong class="mr-2">Sampled Medium:</strong>
@@ -38,7 +46,7 @@
             </p>
             <p>
               <strong class="mr-2">Sensor:</strong>
-              {{ sensorStore.getSensorById(datastream.sensorId).name }}
+              {{ sensors.find((pl) => pl.id === datastream.sensorId)?.name }}
             </p>
           </v-card-text>
         </v-card>
@@ -48,35 +56,35 @@
 </template>
 
 <script setup lang="ts">
-import { useDatastreamStore } from '@/store/datastreams'
-import { useThingStore } from '@/store/things'
-import { watch, onMounted, ref } from 'vue'
-import { Datastream } from '@/types'
-import { useSensorStore } from '@/store/sensors'
-import { useProcessingLevelStore } from '@/store/processingLevels'
-import { useObservedPropertyStore } from '@/store/observedProperties'
-import { storeToRefs } from 'pinia'
+import { api } from '@/services/api'
+import { watch, onMounted, ref, computed } from 'vue'
+import {
+  Datastream,
+  ObservedProperty,
+  ProcessingLevel,
+  Sensor,
+  Thing,
+} from '@/types'
 
-const sensorStore = useSensorStore()
-const plStore = useProcessingLevelStore()
-const opStore = useObservedPropertyStore()
-
-const { fetchDatastreamsByThingId } = useDatastreamStore()
-const { fetchThings } = useThingStore()
-const { primaryOwnedThings } = storeToRefs(useThingStore())
-const selectedThingId = ref('')
+const processingLevels = ref<ProcessingLevel[]>([])
+const observedProperties = ref<ObservedProperty[]>([])
+const sensors = ref<Sensor[]>([])
 const datastreamsForThing = ref<Datastream[]>([])
+
+const things = ref<Thing[]>([])
+const selectedThingId = ref('')
+const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 
+// TODO: Instead of fetching all the metadata onMounted,
+// fetch only the metadata for the selected thing
 watch(
   selectedThingId,
-  async (newThingId) => {
-    if (newThingId) {
-      datastreamsForThing.value = await fetchDatastreamsByThingId(newThingId)
-    } else {
-      datastreamsForThing.value = []
-    }
+  async (newId) => {
+    datastreamsForThing.value = newId
+      ? await api.fetchDatastreamsForThing(newId)
+      : []
   },
   { immediate: true }
 )
@@ -87,11 +95,16 @@ function datastreamSelected(id: string) {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    fetchThings(),
-    sensorStore.fetchSensors(),
-    plStore.fetchProcessingLevels(),
-    opStore.fetchObservedProperties(),
-  ])
+  const [fetchedThings, fetchedPLs, fetchedOPs, fetchSensors] =
+    await Promise.all([
+      api.fetchThings(),
+      api.fetchProcessingLevels(),
+      api.fetchObservedProperties(),
+      api.fetchSensors(),
+    ])
+  things.value = fetchedThings
+  processingLevels.value = fetchedPLs
+  observedProperties.value = fetchedOPs
+  sensors.value = fetchSensors
 })
 </script>

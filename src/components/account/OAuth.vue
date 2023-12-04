@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { OAuthProvider } from '@/types'
 import { useRoute, useRouter } from 'vue-router'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 import googleImg from '@/assets/google.png'
 import { useAuthStore } from '@/store/authentication'
 import { useUserStore } from '@/store/user'

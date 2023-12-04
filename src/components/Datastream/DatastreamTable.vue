@@ -37,8 +37,8 @@
         <div v-if="observations[item.raw.id]">
           <v-dialog v-model="item.raw.chartOpen" width="80rem">
             <FocusContextPlot
-              :thing-id="thingId"
-              :datastream-id="item.raw.id"
+              :thing-name="thing?.name || 'Site'"
+              :datastream="item.raw"
               @close="item.raw.chartOpen = false"
             />
           </v-dialog>
@@ -72,6 +72,7 @@
         :is-owner="isOwner"
         :thing-id="thingId"
         @openPlot="item.raw.chartOpen = true"
+        @deleted="onDeleteDatastream(item.raw.id)"
       />
     </template>
   </v-data-table>
@@ -81,13 +82,14 @@
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 
 import Sparkline from '@/components/Sparkline.vue'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
-import { useThingStore } from '@/store/things'
-import { useDatastreamStore } from '@/store/datastreams'
+import { useThingStore } from '@/store/thing'
 import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
+import { api } from '@/services/api'
+import { Datastream } from '@/types'
 
 const props = defineProps({
   thingId: {
@@ -100,19 +102,16 @@ const { fetchObservationsBulk } = useObservationsLast72Hours()
 const { loaded, observations, mostRecentObs } = storeToRefs(
   useObservationsLast72Hours()
 )
-const { fetchDatastreamsByThingId } = useDatastreamStore()
-const { datastreams } = storeToRefs(useDatastreamStore())
+const datastreams = ref<Datastream[]>([])
 
-const { things } = storeToRefs(useThingStore())
-const isOwner = computed(() => things.value[props.thingId]?.ownsThing)
+const { thing } = storeToRefs(useThingStore())
+const isOwner = computed(() => thing.value?.ownsThing)
 
 const { sensors, units, observedProperties, processingLevels } =
   usePrimaryOwnerData(props.thingId)
 
-const visibleDatastreams = computed(() => {
-  if (!datastreams.value[props.thingId]) return []
-
-  return datastreams.value[props.thingId]
+const visibleDatastreams = computed(() =>
+  datastreams.value
     .filter((d) => d.isVisible || isOwner.value)
     .map((d) => ({
       ...d,
@@ -121,7 +120,7 @@ const visibleDatastreams = computed(() => {
         (op) => op.id === d.observedPropertyId
       )?.name,
     }))
-})
+)
 
 const sortBy = [{ key: 'OPName' }]
 const headers = [
@@ -152,8 +151,12 @@ function isStale(timestamp: string) {
   return endTime < seventyTwoHoursAgo
 }
 
+function onDeleteDatastream(id: string) {
+  datastreams.value = datastreams.value.filter((ds) => ds.id !== id)
+}
+
 onMounted(async () => {
-  await fetchDatastreamsByThingId(props.thingId)
+  datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
   await fetchObservationsBulk(visibleDatastreams.value)
 })
 </script>

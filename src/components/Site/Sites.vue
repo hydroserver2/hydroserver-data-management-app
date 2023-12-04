@@ -1,6 +1,6 @@
 <template>
   <div class="mb-8 flex-shrink-0" style="height: 25rem">
-    <GoogleMap v-if="ownedThings" :things="ownedThings"></GoogleMap>
+    <GoogleMap v-if="ownedThings" :things="ownedThings" />
   </div>
 
   <v-container>
@@ -38,12 +38,13 @@
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
-import { useThingStore } from '@/store/things'
-import { storeToRefs } from 'pinia'
+import { ref, onMounted, computed } from 'vue'
+import { api } from '@/services/api'
+import { Thing } from '@/types'
 
-const { fetchThings } = useThingStore()
-const { ownedThings } = storeToRefs(useThingStore())
+const things = ref<Thing[]>([])
+const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
+
 const showSiteForm = ref(false)
 const router = useRouter()
 
@@ -67,5 +68,5 @@ const onRowClick = (event: Event, item: any) => {
   router.push({ name: 'SiteDetails', params: { id: thing.id } })
 }
 
-onMounted(async () => fetchThings())
+onMounted(async () => (things.value = await api.fetchThings()))
 </script>

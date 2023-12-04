@@ -149,7 +149,7 @@ import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import router from '@/router/router'
-import Notification from '@/store/notifications'
+import Notification from '@/utils/notifications'
 import { api } from '@/services/api'
 
 defineProps({

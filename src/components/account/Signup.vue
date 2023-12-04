@@ -225,7 +225,6 @@ const phoneMask = { mask: '(###) ###-####' }
 async function createUser() {
   if (!valid.value) return
   try {
-    // resetState()
     const data = await api.createUser(user)
     setUser(data.user)
     setTokens(data.access, data.refresh)

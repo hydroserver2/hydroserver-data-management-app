@@ -1,6 +1,8 @@
 <template>
   <v-card>
     <v-card-title class="text-h5">Access Control</v-card-title>
+    <v-divider />
+
     <v-card-text>
       <v-row v-if="isPrimaryOwner">
         <v-col cols="12" md="6">
@@ -97,7 +99,7 @@
 
       <h6 class="text-h6 my-4">Current Owners</h6>
 
-      <v-row v-for="owner in thing.owners" class="my-1">
+      <v-row v-for="owner in thing?.owners" class="my-1">
         <v-col cols="auto" class="py-0">
           {{ owner.firstName }} {{ owner.lastName }} -
           {{
@@ -150,7 +152,7 @@
         </v-col>
       </v-row>
 
-      <v-row>
+      <v-row v-if="thing">
         <v-col cols="auto" class="py-0">
           <v-switch
             v-model="thing.isPrivate"
@@ -163,6 +165,8 @@
       </v-row>
     </v-card-text>
 
+    <v-divider />
+
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn-cancel @click="emitClose">Close</v-btn-cancel>
@@ -171,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { useThingStore } from '@/store/things'
+import { useThingStore } from '@/store/thing'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
@@ -183,12 +187,8 @@ const props = defineProps<{
   thingId: string
 }>()
 
-const { things } = storeToRefs(useThingStore())
-const isPrimaryOwner = computed(
-  () => things.value[props.thingId]?.isPrimaryOwner
-)
-
-const thing = computed(() => things.value[props.thingId])
+const { thing } = storeToRefs(useThingStore())
+const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 
 const newPrimaryOwnerEmail = ref('')
 const showPrimaryOwnerConfirmation = ref(false)
@@ -197,11 +197,10 @@ const newOwnerEmail = ref('')
 async function onTransferPrimaryOwnership() {
   if (!newPrimaryOwnerEmail.value) return
   try {
-    const data = await api.transferPrimaryOwnership(
+    thing.value = await api.transferPrimaryOwnership(
       props.thingId,
       newPrimaryOwnerEmail.value
     )
-    things.value[props.thingId] = data
   } catch (error) {
     console.error('Error transferring thing ownership', error)
   }
@@ -212,8 +211,10 @@ async function onTransferPrimaryOwnership() {
 async function onAddSecondaryOwner() {
   if (!newOwnerEmail.value) return
   try {
-    const data = await api.addSecondaryOwner(props.thingId, newOwnerEmail.value)
-    things.value[props.thingId] = data
+    thing.value = await api.addSecondaryOwner(
+      props.thingId,
+      newOwnerEmail.value
+    )
   } catch (error) {
     console.error('Error adding secondary owner', error)
   }
@@ -222,8 +223,7 @@ async function onAddSecondaryOwner() {
 
 async function onRemoveOwner(email: string) {
   try {
-    const data = await api.removeThingOwner(props.thingId, email)
-    things.value[props.thingId] = data
+    thing.value = await api.removeThingOwner(props.thingId, email)
   } catch (error) {
     console.error('Error removing owner from thing', error)
   }
@@ -231,11 +231,10 @@ async function onRemoveOwner(email: string) {
 
 async function toggleSitePrivacy() {
   try {
-    const data = await api.updateThingPrivacy(
+    thing.value = await api.updateThingPrivacy(
       props.thingId,
-      thing.value.isPrivate
+      thing.value!.isPrivate
     )
-    things.value[props.thingId] = data
   } catch (error) {
     console.error('Error updating thing privacy', error)
   }
