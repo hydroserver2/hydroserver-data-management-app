@@ -37,7 +37,7 @@ export const getObservationsEndpoint = (
   startTime: string,
   endTime?: string
 ) => {
-  let url = `${SENSORTHINGS_BASE}/Datastreams('${id}')/Observations?$resultFormat=dataArray&$top=10000`
+  let url = `${SENSORTHINGS_BASE}/Datastreams('${id}')/Observations?$resultFormat=dataArray&$top=100000`
   url += `&$filter=phenomenonTime%20ge%20${startTime}`
   if (endTime) url += `%20and%20phenomenonTime%20lt%20${endTime}`
   return url
