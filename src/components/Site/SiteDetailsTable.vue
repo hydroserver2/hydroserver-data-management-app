@@ -91,11 +91,11 @@ const thingProperties = computed(() => {
 })
 
 const materialColors = [
-  'green',
-  'yellow',
   'light-blue',
-  'orange',
+  'yellow-darken-3',
+  'green',
   'purple',
+  'orange',
   'pink',
   'lime',
   'blue',
@@ -103,10 +103,10 @@ const materialColors = [
   'deep-purple',
   'blue-grey',
   'cyan',
-  'teal',
   'indigo',
   'light-green',
   'amber',
+  'teal',
   'deep-orange',
   'brown',
   'grey',

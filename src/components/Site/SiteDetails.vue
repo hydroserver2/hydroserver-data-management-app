@@ -55,7 +55,7 @@
       <v-col cols="12" md="4">
         <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
-            v-for="photo in photos[thingId]"
+            v-for="photo in photos"
             :key="photo.id"
             :src="photo.link"
             cover
@@ -106,15 +106,11 @@ import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import { api } from '@/services/api'
 
 const thingId = useRoute().params.id.toString()
-const { fetchPhotos } = usePhotosStore()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
 const { thing } = storeToRefs(useThingStore())
 const isOwner = computed(() => thing.value?.ownsThing)
-
-const hasPhotos = computed(
-  () => !loading.value && photos.value[thingId]?.length > 0
-)
+const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
@@ -146,9 +142,14 @@ const mapOptions = computed(() =>
 )
 
 onMounted(async () => {
-  fetchPhotos(thingId)
+  photos.value = []
+  api
+    .fetchSitePhotos(thingId)
+    .then((data) => (photos.value = data))
+    .catch((error) => console.error('Error fetching photos from DB', error))
   try {
     thing.value = await api.fetchThing(thingId)
+    console.log(photos.value)
   } catch (error) {
     console.error('Error fetching thing', error)
   }
