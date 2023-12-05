@@ -20,7 +20,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/sites',
     name: 'Sites',
-    component: () => import('@/components/Site/Sites.vue'),
+    component: () => import('@/pages/Sites.vue'),
     meta: {
       hasAuthGuard: true,
       title: 'My Sites',
@@ -35,7 +35,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/sites/:id',
     name: 'SiteDetails',
-    component: () => import('@/components/Site/SiteDetails.vue'),
+    component: () => import('@/pages/SiteDetails.vue'),
     meta: {
       title: 'Site',
       metaTags: [
