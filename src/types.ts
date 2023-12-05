@@ -21,6 +21,7 @@ export interface Owner {
 }
 
 export interface Tag {
+  id: string
   key: string
   value: string
 }

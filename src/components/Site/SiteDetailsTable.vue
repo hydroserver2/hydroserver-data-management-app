@@ -4,7 +4,27 @@
       <tr v-for="property in thingProperties" :key="property.label">
         <td><i :class="property.icon"></i></td>
         <td>{{ property.label }}</td>
-        <td>{{ property.value }}</td>
+        <td>
+          <template
+            v-if="
+              property.label === 'Additional Metadata' &&
+              Array.isArray(property.value)
+            "
+          >
+            <v-chip
+              v-for="(tag, index) in property.value"
+              rounded="true"
+              :color="materialColors[index % materialColors.length]"
+              :key="tag.id"
+              class="ma-1"
+            >
+              {{ tag.key }}: {{ tag.value }}
+            </v-chip>
+          </template>
+          <template v-else>
+            {{ property.value }}
+          </template>
+        </td>
       </tr>
     </tbody>
     <template v-slot:bottom></template>
@@ -32,6 +52,7 @@ const thingProperties = computed(() => {
     county,
     isPrivate,
     owners,
+    tags,
   } = thing.value
 
   return [
@@ -65,6 +86,29 @@ const thingProperties = computed(() => {
         )
         .join(', '),
     },
+    { icon: 'fas fa-tags', label: 'Additional Metadata', value: tags },
   ]
 })
+
+const materialColors = [
+  'green',
+  'yellow',
+  'light-blue',
+  'orange',
+  'purple',
+  'pink',
+  'lime',
+  'blue',
+  'red',
+  'deep-purple',
+  'blue-grey',
+  'cyan',
+  'teal',
+  'indigo',
+  'light-green',
+  'amber',
+  'deep-orange',
+  'brown',
+  'grey',
+]
 </script>
