@@ -35,6 +35,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
+import { materialColors } from '@/utils/materialColors'
 
 const { thing } = storeToRefs(useThingStore())
 
@@ -89,26 +90,4 @@ const thingProperties = computed(() => {
     { icon: 'fas fa-tags', label: 'Additional Metadata', value: tags },
   ]
 })
-
-const materialColors = [
-  'light-blue',
-  'yellow-darken-3',
-  'green',
-  'purple',
-  'orange',
-  'pink',
-  'lime',
-  'blue',
-  'red',
-  'deep-purple',
-  'blue-grey',
-  'cyan',
-  'indigo',
-  'light-green',
-  'amber',
-  'teal',
-  'deep-orange',
-  'brown',
-  'grey',
-]
 </script>

@@ -121,6 +121,13 @@
                 />
               </v-col>
             </v-row>
+
+            <v-row>
+              <v-col>
+                <SiteTagManager :is-edit="!!thingId" />
+              </v-col>
+            </v-row>
+
             <v-row>
               <v-col>
                 <SitePhotoManager :thing-id="thingId" />
@@ -149,10 +156,13 @@ import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 import SitePhotoManager from '@/components/Site/SitePhotoManager.vue'
+import SiteTagManager from '@/components/Site/SiteTagManager.vue'
 import { usePhotosStore } from '@/store/photos'
+import { useTagStore } from '@/store/tags'
 
 const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
+const { updateTags } = useTagStore()
 
 const props = defineProps({ thingId: String })
 const emit = defineEmits(['close'])
@@ -197,25 +207,19 @@ function closeDialog() {
 async function uploadThing() {
   await myForm.value?.validate()
   if (!valid.value) return
-
   emit('close')
-  if (thing) {
-    if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
-    if (props.thingId) {
-      try {
-        storedThing.value = await api.updateThing(thing)
-        await updatePhotos(storedThing.value!.id)
-      } catch (error) {
-        console.error('Error updating thing', error)
-      }
-    } else {
-      try {
-        storedThing.value = await api.createThing(thing)
-        await updatePhotos(storedThing.value!.id)
-      } catch (error) {
-        console.error('Error creating thing', error)
-      }
-    }
+  if (!thing) return
+  if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
+
+  try {
+    storedThing.value = props.thingId
+      ? await api.updateThing(thing)
+      : await api.createThing(thing)
+
+    await updateTags(storedThing.value!.id)
+    await updatePhotos(storedThing.value!.id)
+  } catch (error) {
+    console.error('Error updating thing', error)
   }
 }
 

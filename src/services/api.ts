@@ -9,6 +9,7 @@ import {
   ObservedProperty,
   Datastream,
   DataSource,
+  Tag,
 } from '@/types'
 
 export const BASE_URL = `${
@@ -118,6 +119,15 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
   deleteSitePhoto: async (thingId: string, photoId: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
+
+  uploadSiteTags: async (thingId: string, data: Tag[]) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/tags`, data),
+  fetchSiteTags: async (thingId: string) =>
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
+  fetchUsersSiteTags: async () => apiMethods.fetch(`${THINGS_BASE}/tags`),
+  deleteSiteTag: async (thingId: string, tagId: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags/${tagId}`),
+
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
 
