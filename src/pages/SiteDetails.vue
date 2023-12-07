@@ -49,7 +49,7 @@
 
     <v-row>
       <v-col cols="12" md="8">
-        <SiteDetailsTable />
+        <SiteDetailsTable :thing-id="thingId" />
       </v-col>
 
       <v-col cols="12" md="4">

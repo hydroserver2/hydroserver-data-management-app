@@ -30,7 +30,7 @@
     :color="materialColors[index % materialColors.length]"
     :key="tag.id"
     closable
-    class="mr-1"
+    class="mr-1 mb-1"
     @click:close="removeTag(index)"
   >
     {{ tag.key }}: {{ tag.value }}
@@ -38,19 +38,33 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { materialColors } from '@/utils/materialColors'
 import { storeToRefs } from 'pinia'
 import { useTagStore } from '@/store/tags'
 import { api } from '@/services/api'
+import { Tag } from '@/types'
 
 const props = defineProps({ thingId: String })
 const { tags, previewTags } = storeToRefs(useTagStore())
 
 const formKey = ref('')
 const formValue = ref('')
-const keyList = ref(['1', '2'])
-const valueList = ref([])
+const userTags = ref<Tag[]>([])
+
+const keyList = computed(() => {
+  const keys = userTags.value.map((tag) => tag.key)
+  return Array.from(new Set(keys))
+})
+
+const valueList = computed(() => {
+  const filteredTags = formKey.value
+    ? userTags.value.filter((tag) => tag.key === formKey.value)
+    : userTags.value
+
+  const values = filteredTags.map((tag) => tag.value)
+  return Array.from(new Set(values))
+})
 
 const addTag = () => {
   if (formKey.value === '' || formValue.value === '') {
@@ -65,10 +79,8 @@ const removeTag = (index: number) => previewTags.value.splice(index, 1)
 
 onMounted(async () => {
   if (props.thingId) {
-    tags.value = await api.fetchSiteTags(props.thingId)
-    previewTags.value = tags.value
-    const userTags = api.fetchUsersSiteTags()
-    //  {keyList, valueList} = userTags
+    previewTags.value = [...tags.value]
+    userTags.value = await api.fetchUsersSiteTags()
   }
 })
 </script>

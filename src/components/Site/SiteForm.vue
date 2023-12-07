@@ -124,7 +124,7 @@
 
             <v-row>
               <v-col>
-                <SiteTagManager :is-edit="!!thingId" />
+                <SiteTagManager :thing-id="thingId" />
               </v-col>
             </v-row>
 

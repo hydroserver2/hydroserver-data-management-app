@@ -21,26 +21,35 @@ export const useTagStore = defineStore('tags', () => {
 
   const uploadNewTags = async (thingId: string) => {
     if (newTags.value.length <= 0) return
-    tags.value = await api.uploadSiteTags(thingId, newTags.value)
+    try {
+      const requests = newTags.value.map((tag) =>
+        api.createSiteTag(thingId, tag)
+      )
+      await Promise.all(requests)
+    } catch (error) {
+      console.error('Failed to upload tags:', error)
+    }
   }
 
   const deleteSelectedTags = async (thingId: string) => {
-    for (const tag of deletedTags.value) {
-      await api.deleteSiteTag(thingId, tag.id)
+    if (deletedTags.value.length <= 0) return
+    try {
+      const requests = deletedTags.value.map((tag) =>
+        api.deleteSiteTag(thingId, tag.id)
+      )
+      await Promise.all(requests)
+    } catch (error) {
+      console.error('Failed to upload tags:', error)
     }
-    tags.value = tags.value.filter(
-      (t) => !deletedTags.value.some((d) => d.id === t.id)
-    )
   }
 
   const updateTags = async (thingId: string) => {
     try {
       await uploadNewTags(thingId)
       await deleteSelectedTags(thingId)
+      tags.value = await api.fetchSiteTags(thingId)
     } catch (error) {
       console.error('Error updating tags', error)
-    } finally {
-      tags.value = []
     }
   }
 
