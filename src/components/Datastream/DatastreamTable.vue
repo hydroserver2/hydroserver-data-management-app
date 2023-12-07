@@ -34,7 +34,10 @@
 
     <template v-slot:item.observations="{ item }">
       <div v-if="loaded[item.raw.id]">
-        <div v-if="observations[item.raw.id]">
+        <div v-if="!isOwner && !item.raw.isDataVisible">
+          Data is private for this datastream
+        </div>
+        <div v-else-if="observations[item.raw.id]">
           <v-dialog v-model="item.raw.chartOpen" width="80rem">
             <FocusContextPlot
               :thing-name="thing?.name || 'Site'"

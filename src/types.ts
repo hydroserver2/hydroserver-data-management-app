@@ -75,6 +75,7 @@ export class Datastream {
   sensorId: string
   processingLevelId: string
   isVisible: boolean
+  isDataVisible: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
@@ -101,6 +102,7 @@ export class Datastream {
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
     this.isVisible = true
+    this.isDataVisible = true
   }
 }
 
