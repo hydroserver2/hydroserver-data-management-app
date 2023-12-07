@@ -9,6 +9,7 @@ import {
   ObservedProperty,
   Datastream,
   DataSource,
+  ThingArchive
 } from '@/types'
 
 export const BASE_URL = `${
@@ -76,6 +77,9 @@ export const api = {
   sendVerificationEmail: async () =>
     apiMethods.post(`${ACCOUNT_BASE}/send-verification-email`),
 
+  disconnectFromHydroShare: async () =>
+    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/disconnect`),
+
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
   updateUnit: async (newUnit: Unit, oldUnit: Unit | null = null) =>
@@ -120,6 +124,8 @@ export const api = {
     apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
+  postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/archive`, thingArchive),
 
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),

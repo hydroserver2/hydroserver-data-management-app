@@ -283,6 +283,7 @@ export class User {
   type: string
   isVerified: boolean
   link: string
+  hydroShareConnected: boolean
 
   constructor() {
     this.id = ''
@@ -296,6 +297,7 @@ export class User {
     this.type = ''
     this.isVerified = false
     this.link = ''
+    this.hydroShareConnected = false
   }
 }
 
@@ -316,4 +318,20 @@ export interface Photo {
 export enum OAuthProvider {
   google = 'google',
   orcid = 'orcid',
+}
+
+export class ThingArchive {
+  resourceTitle: string
+  resourceAbstract: string
+  resourceKeywords: string[]
+  publicResource: boolean
+  datastreams: string[]
+
+  constructor() {
+    this.resourceTitle = ''
+    this.resourceAbstract = ''
+    this.resourceKeywords = []
+    this.publicResource = false
+    this.datastreams = []
+  }
 }
