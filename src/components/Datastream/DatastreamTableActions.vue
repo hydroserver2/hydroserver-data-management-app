@@ -3,6 +3,27 @@
     <v-tooltip bottom :openDelay="500" v-if="isOwner">
       <template v-slot:activator="{ props }">
         <v-icon
+          :icon="
+            datastream.isDataVisible
+              ? 'mdi-file-eye-outline'
+              : 'mdi-file-remove'
+          "
+          :color="datastream.isDataVisible ? 'grey' : 'grey-lighten-1'"
+          small
+          v-bind="props"
+          @click="toggleDataVisibility(datastream)"
+        />
+      </template>
+      <span v-if="datastream.isDataVisible"
+        >Hide the data for this datastream from guests of your site while
+        keeping the metadata public. Owners will still see it
+      </span>
+      <span v-else>Make the data for this datastream publicly visible</span>
+    </v-tooltip>
+
+    <v-tooltip bottom :openDelay="500" v-if="isOwner">
+      <template v-slot:activator="{ props }">
+        <v-icon
           :icon="datastream.isVisible ? 'mdi-eye' : 'mdi-eye-off'"
           :color="datastream.isVisible ? 'grey' : 'grey-lighten-1'"
           small
@@ -17,7 +38,18 @@
       <span v-else>Make this datastream publicly visible</span>
     </v-tooltip>
 
-    <v-menu>
+    <v-tooltip
+      v-if="!isOwner && !datastream.isDataVisible"
+      bottom
+      :openDelay="100"
+    >
+      <template v-slot:activator="{ props }">
+        <v-icon v-bind="props" icon="mdi-lock" />
+      </template>
+      <span>The data for this datastream is private </span>
+    </v-tooltip>
+
+    <v-menu v-else>
       <template v-slot:activator="{ props }">
         <v-icon v-bind="props" icon="mdi-dots-vertical" />
       </template>
@@ -43,17 +75,19 @@
             }"
           />
           <v-list-item
-            prepend-icon="mdi-chart-line"
-            title="View Time Series Plot"
-            @click="emit('openPlot')"
-          />
-          <v-list-item
             prepend-icon="mdi-delete"
             title="Delete Datastream"
             @click="openDeleteModal(datastream)"
           />
         </div>
         <v-list-item
+          v-if="datastream.isDataVisible"
+          prepend-icon="mdi-chart-line"
+          title="View Time Series Plot"
+          @click="emit('openPlot')"
+        />
+        <v-list-item
+          v-if="datastream.isDataVisible"
           prepend-icon="mdi-download"
           title="Download Data"
           @click="downloadDatastreamCSV(datastream.id)"
@@ -142,8 +176,19 @@ watch(isDeleteModalOpen, (newValue) => {
   }
 })
 
+async function toggleDataVisibility(datastream: Datastream) {
+  datastream.isDataVisible = !datastream.isDataVisible
+  if (datastream.isDataVisible) datastream.isVisible = true
+  onUpdate(datastream)
+}
+
 async function toggleVisibility(datastream: Datastream) {
   datastream.isVisible = !datastream.isVisible
+  if (!datastream.isVisible) datastream.isDataVisible = false
+  onUpdate(datastream)
+}
+
+const onUpdate = async (datastream: Datastream) => {
   try {
     await api.updateDatastream(datastream)
   } catch (error) {
