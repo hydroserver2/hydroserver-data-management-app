@@ -165,7 +165,7 @@ const { updatePhotos } = usePhotosStore()
 const { updateTags } = useTagStore()
 
 const props = defineProps({ thingId: String })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'created'])
 let loaded = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
@@ -216,6 +216,7 @@ async function uploadThing() {
       ? await api.updateThing(thing)
       : await api.createThing(thing)
 
+    if (!props.thingId) emit('created')
     await updateTags(storedThing.value!.id)
     await updatePhotos(storedThing.value!.id)
   } catch (error) {

@@ -46,7 +46,7 @@
   </v-container>
 
   <v-dialog v-model="showSiteForm" width="60rem">
-    <SiteForm @close="showSiteForm = false" />
+    <SiteForm @close="showSiteForm = false" @created="refreshThings" />
   </v-dialog>
 </template>
 
@@ -105,6 +105,8 @@ const onRowClick = (event: Event, item: any) => {
   router.push({ name: 'SiteDetails', params: { id: thing.id } })
 }
 
+const refreshThings = async () => (things.value = await api.fetchThings())
+
 // TODO: Fetch owned things
-onMounted(async () => (things.value = await api.fetchThings()))
+onMounted(async () => refreshThings())
 </script>
