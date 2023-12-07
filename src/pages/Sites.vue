@@ -4,6 +4,14 @@
   </div>
 
   <v-container>
+    <v-card v-if="showFilter" class="mb-6" elevation="2">
+      <v-card-text>
+        <v-row>
+          <SiteFilterTool @filter="handleFilter" />
+        </v-row>
+      </v-card-text>
+    </v-card>
+
     <v-row class="mb-4">
       <v-col cols="auto">
         <h5 class="text-h5">My Registered Sites</h5>
@@ -12,14 +20,16 @@
       <v-spacer />
 
       <v-col cols="auto">
+        <v-btn-primary
+          class="mr-2"
+          @click="showFilter = !showFilter"
+          prependIcon="mdi-filter"
+          >Filter Sites</v-btn-primary
+        >
         <v-btn-secondary @click="showSiteForm = true" prependIcon="mdi-plus"
           >Register a new site</v-btn-secondary
         >
       </v-col>
-    </v-row>
-
-    <v-row class="mt-8">
-      <SiteFilterTool @filter="handleFilter" />
     </v-row>
 
     <v-data-table
@@ -68,6 +78,7 @@ const filteredThings = computed(() =>
 )
 
 const showSiteForm = ref(false)
+const showFilter = ref(false)
 const router = useRouter()
 
 const headers = [

@@ -7,24 +7,14 @@ export const useTagStore = defineStore('tags', () => {
   const tags = ref<Tag[]>([])
   const previewTags = ref<Tag[]>([])
 
-  const deletedTags = computed(() =>
-    tags.value.filter(
-      (storedTag) => !previewTags.value.some((t) => t.id === storedTag.id)
-    )
-  )
-  const newTags = computed(() =>
-    previewTags.value.filter(
+  const uploadNewTags = async (thingId: string) => {
+    const newTags = previewTags.value.filter(
       (pt) =>
         !tags.value.some((st) => st.key === pt.key && st.value === pt.value)
     )
-  )
-
-  const uploadNewTags = async (thingId: string) => {
-    if (newTags.value.length <= 0) return
+    if (newTags.length <= 0) return
     try {
-      const requests = newTags.value.map((tag) =>
-        api.createSiteTag(thingId, tag)
-      )
+      const requests = newTags.map((tag) => api.createSiteTag(thingId, tag))
       await Promise.all(requests)
     } catch (error) {
       console.error('Failed to upload tags:', error)
@@ -32,9 +22,12 @@ export const useTagStore = defineStore('tags', () => {
   }
 
   const deleteSelectedTags = async (thingId: string) => {
-    if (deletedTags.value.length <= 0) return
+    const deletedTags = tags.value.filter(
+      (storedTag) => !previewTags.value.some((t) => t.id === storedTag.id)
+    )
+    if (deletedTags.length <= 0) return
     try {
-      const requests = deletedTags.value.map((tag) =>
+      const requests = deletedTags.map((tag) =>
         api.deleteSiteTag(thingId, tag.id)
       )
       await Promise.all(requests)

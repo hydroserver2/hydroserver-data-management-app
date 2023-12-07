@@ -1,5 +1,5 @@
 <template>
-  <h6 class="text-h6 mb-4 mt-7">Add Photos</h6>
+  <h6 class="text-h6 mb-4">Add Photos</h6>
   <v-card-text
     id="drop-area"
     @dragover.prevent

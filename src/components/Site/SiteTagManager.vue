@@ -38,33 +38,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { materialColors } from '@/utils/materialColors'
 import { storeToRefs } from 'pinia'
 import { useTagStore } from '@/store/tags'
-import { api } from '@/services/api'
-import { Tag } from '@/types'
+import { useUserTags } from '@/composables/useUserTags'
 
 const props = defineProps({ thingId: String })
 const { tags, previewTags } = storeToRefs(useTagStore())
-
-const formKey = ref('')
-const formValue = ref('')
-const userTags = ref<Tag[]>([])
-
-const keyList = computed(() => {
-  const keys = userTags.value.map((tag) => tag.key)
-  return Array.from(new Set(keys))
-})
-
-const valueList = computed(() => {
-  const filteredTags = formKey.value
-    ? userTags.value.filter((tag) => tag.key === formKey.value)
-    : userTags.value
-
-  const values = filteredTags.map((tag) => tag.value)
-  return Array.from(new Set(values))
-})
+const { formKey, formValue, keyList, valueList } = useUserTags()
 
 const addTag = () => {
   if (formKey.value === '' || formValue.value === '') {
@@ -78,9 +60,6 @@ const addTag = () => {
 const removeTag = (index: number) => previewTags.value.splice(index, 1)
 
 onMounted(async () => {
-  if (props.thingId) {
-    previewTags.value = [...tags.value]
-    userTags.value = await api.fetchUsersSiteTags()
-  }
+  previewTags.value = props.thingId ? [...tags.value] : []
 })
 </script>
