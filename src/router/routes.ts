@@ -166,12 +166,6 @@ export const routes: RouteRecordRaw[] = [
     meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
   },
   {
-    path: '/callback',
-    name: 'Callback',
-    meta: { hideFooter: true, hideNavBar: true },
-    component: () => import('@/components/account/LoginCallback.vue'),
-  },
-  {
     path: '/metadata',
     name: 'Metadata',
     component: () => import('@/pages/Metadata.vue'),

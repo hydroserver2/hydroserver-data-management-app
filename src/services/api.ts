@@ -43,7 +43,7 @@ export const getObservationsEndpoint = (
   return url
 }
 
-export const getOAuthLoginEndpoint = (provider: string) =>
+export const OAUTH_ENDPOINT = (provider: string) =>
   `${ACCOUNT_BASE}/${provider}/login`
 
 export const api = {

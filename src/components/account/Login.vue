@@ -1,5 +1,5 @@
 <template>
-  <v-container class="mt-10">
+  <v-container class="mt-10" v-if="loaded">
     <v-row justify="center" align="center" class="mt-10">
       <v-col cols="12" sm="8" md="6">
         <v-card class="login-card">
@@ -8,7 +8,7 @@
           <v-form
             class="login-form"
             ref="form"
-            @submit.prevent="loginSubmit"
+            @submit.prevent="formLogin"
             v-model="valid"
           >
             <v-card-text>
@@ -65,32 +65,59 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/store/authentication'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
 import { api } from '@/services/api'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
+import { useRoute } from 'vue-router'
+import Notification from '@/utils/notifications'
 
 const email = ref('')
 const password = ref('')
 const form = ref(null)
 const valid = ref(false)
+const loaded = ref(false)
+const route = useRoute()
 
 const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 
-const loginSubmit = async () => {
+const login = async (accessToken: string, refreshToken: string) => {
+  try {
+    setTokens(accessToken, refreshToken)
+    const user = await api.fetchUser()
+    setUser(user)
+    Notification.toast({
+      message: 'You have logged in!',
+      type: 'success',
+    })
+    await router.push({ name: 'Sites' })
+  } catch (e) {
+    console.log('Failed to fetch user info')
+  }
+}
+
+const formLogin = async () => {
   if (!valid) return
 
   try {
     const tokens = await api.login(email.value, password.value)
-    setTokens(tokens.access, tokens.refresh)
-    const user = await api.fetchUser()
-    setUser(user)
-    await router.push({ name: 'Sites' })
+    login(tokens.access, tokens.refresh)
   } catch (error) {
     console.error('Error logging in.', error)
   }
 }
+
+const tryOAuthLogin = async () => {
+  const accessToken = (route.query.t as string) || ''
+  const refreshToken = (route.query.rt as string) || ''
+  if (accessToken && refreshToken) await login(accessToken, refreshToken)
+}
+
+onMounted(async () => {
+  await tryOAuthLogin()
+  loaded.value = true
+})
 </script>

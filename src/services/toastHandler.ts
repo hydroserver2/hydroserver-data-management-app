@@ -48,7 +48,7 @@ function getEndpointMessages(endpoint: string): any {
   } else if (endpoint.includes(USER_BASE)) {
     if (endpoint == USER_BASE) {
       return {
-        GET: { 200: 'You have logged in!', 401: 'Invalid email or password.' },
+        GET: { 401: 'Invalid email or password.' },
         POST: {
           200: 'Account successfully created.',
           409: 'A user with this email already exists.',
