@@ -180,7 +180,9 @@ const updateUser = async () => {
 
   try {
     userForm = await api.updateUser(userForm, user.value)
-    setUser(userForm)
+    if (userForm !== undefined) {
+      setUser(userForm)
+    }
   } catch (error) {
     console.error('Error updating user', error)
   }
