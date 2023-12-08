@@ -113,7 +113,14 @@ async function getStartTime(hours: number) {
 async function drawObservationsSince(hours: number) {
   if (!props.datastream) return
   const startTime = await getStartTime(hours)
-  const obsSince = await getObservationsSince(props.datastream.id, startTime!)
+
+  const isBig = hours <= 0 && props.datastream.valueCount > 100_000
+  const obsSince = await getObservationsSince(
+    props.datastream,
+    startTime!,
+    isBig
+  )
+
   if (obsSince) drawPlot(obsSince)
 }
 
