@@ -9,6 +9,7 @@ import {
   ObservedProperty,
   Datastream,
   DataSource,
+  Tag,
 } from '@/types'
 
 export const BASE_URL = `${
@@ -18,6 +19,7 @@ export const BASE_URL = `${
 }/api`
 
 export const ACCOUNT_BASE = `${BASE_URL}/account`
+export const TAG_BASE = `${BASE_URL}/data/tags`
 export const USER_BASE = `${BASE_URL}/account/user`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
@@ -118,6 +120,15 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
   deleteSitePhoto: async (thingId: string, photoId: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
+
+  createSiteTag: async (thingId: string, tag: Tag) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/tags`, tag),
+  fetchSiteTags: async (thingId: string) =>
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
+  fetchUsersSiteTags: async () => apiMethods.fetch(`${TAG_BASE}`),
+  deleteSiteTag: async (thingId: string, tagId: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags/${tagId}`),
+
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
 

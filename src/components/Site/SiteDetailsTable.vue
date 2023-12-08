@@ -4,7 +4,25 @@
       <tr v-for="property in thingProperties" :key="property.label">
         <td><i :class="property.icon"></i></td>
         <td>{{ property.label }}</td>
-        <td>{{ property.value }}</td>
+        <td>
+          {{ property.value }}
+        </td>
+      </tr>
+
+      <tr>
+        <td><i :class="tagProperty.icon"></i></td>
+        <td>{{ tagProperty.label }}</td>
+        <td>
+          <v-chip
+            v-for="(tag, index) in tagProperty.value"
+            rounded="true"
+            :color="materialColors[index % materialColors.length]"
+            :key="tag.id"
+            class="ma-1"
+          >
+            {{ tag.key }}: {{ tag.value }}
+          </v-chip>
+        </td>
       </tr>
     </tbody>
     <template v-slot:bottom></template>
@@ -12,59 +30,88 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
+import { materialColors } from '@/utils/materialColors'
+import { useTagStore } from '@/store/tags'
+import { api } from '@/services/api'
 
 const { thing } = storeToRefs(useThingStore())
+const { tags } = storeToRefs(useTagStore())
+const props = defineProps({
+  thingId: {
+    type: String,
+    required: true,
+  },
+})
 
 const thingProperties = computed(() => {
-  if (!thing.value) return []
-  const {
-    id,
-    samplingFeatureCode,
-    latitude,
-    longitude,
-    elevation_m,
-    description,
-    siteType,
-    state,
-    county,
-    isPrivate,
-    owners,
-  } = thing.value
+  return thing.value
+    ? [
+        { icon: 'fas fa-id-badge', label: 'ID', value: thing.value.id },
+        {
+          icon: 'fas fa-barcode',
+          label: 'Site Code',
+          value: thing.value.samplingFeatureCode,
+        },
+        { icon: 'fas fa-map', label: 'Latitude', value: thing.value.latitude },
+        {
+          icon: 'fas fa-map',
+          label: 'Longitude',
+          value: thing.value.longitude,
+        },
+        {
+          icon: 'fas fa-mountain',
+          label: 'Elevation',
+          value: thing.value.elevation_m,
+        },
+        {
+          icon: 'fas fa-file-alt',
+          label: 'Description',
+          value: thing.value.description,
+        },
+        {
+          icon: 'fas fa-map-pin',
+          label: 'Site Type',
+          value: thing.value.siteType,
+        },
+        { icon: 'fas fa-flag-usa', label: 'State', value: thing.value.state },
+        { icon: 'fas fa-flag-usa', label: 'County', value: thing.value.county },
+        {
+          icon: thing.value.isPrivate ? 'fas fa-lock' : 'fas fa-globe',
+          label: 'Privacy',
+          value: thing.value.isPrivate ? 'Private' : 'Public',
+        },
+        {
+          icon: 'fas fa-user',
+          label: 'Site Owners',
+          value: thing.value.owners
+            .map(
+              (o) =>
+                `${o.firstName} ${o.lastName} (${
+                  o.organizationName ? o.organizationName : 'No Organization'
+                })`
+            )
+            .join(', '),
+        },
+      ]
+    : []
+})
 
-  return [
-    { icon: 'fas fa-id-badge', label: 'ID', value: id },
-    {
-      icon: 'fas fa-barcode',
-      label: 'Site Code',
-      value: samplingFeatureCode,
-    },
-    { icon: 'fas fa-map', label: 'Latitude', value: latitude },
-    { icon: 'fas fa-map', label: 'Longitude', value: longitude },
-    { icon: 'fas fa-mountain', label: 'Elevation', value: elevation_m },
-    { icon: 'fas fa-file-alt', label: 'Description', value: description },
-    { icon: 'fas fa-map-pin', label: 'Site Type', value: siteType },
-    { icon: 'fas fa-flag-usa', label: 'State', value: state },
-    { icon: 'fas fa-flag-usa', label: 'County', value: county },
-    {
-      icon: isPrivate ? 'fas fa-lock' : 'fas fa-globe',
-      label: 'Privacy',
-      value: isPrivate ? 'Private' : 'Public',
-    },
-    {
-      icon: 'fas fa-user',
-      label: 'Site Owners',
-      value: owners
-        .map(
-          (o) =>
-            `${o.firstName} ${o.lastName} (${
-              o.organizationName ? o.organizationName : 'No Organization'
-            })`
-        )
-        .join(', '),
-    },
-  ]
+const tagProperty = computed(() => {
+  return {
+    icon: 'fas fa-tags',
+    label: 'Additional Metadata',
+    value: tags.value || [],
+  }
+})
+
+onMounted(async () => {
+  try {
+    tags.value = await api.fetchSiteTags(props.thingId)
+  } catch (error) {
+    console.error('Error fetching thing', error)
+  }
 })
 </script>

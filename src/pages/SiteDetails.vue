@@ -49,13 +49,13 @@
 
     <v-row>
       <v-col cols="12" md="8">
-        <SiteDetailsTable />
+        <SiteDetailsTable :thing-id="thingId" />
       </v-col>
 
       <v-col cols="12" md="4">
         <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
-            v-for="photo in photos[thingId]"
+            v-for="photo in photos"
             :key="photo.id"
             :src="photo.link"
             cover
@@ -91,30 +91,26 @@
 </template>
 
 <script setup lang="ts">
-import GoogleMap from '@/components/GoogleMap.vue'
-import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
-import SiteForm from '@/components/Site/SiteForm.vue'
 import { onMounted, computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
-import DatastreamTable from '../Datastream/DatastreamTable.vue'
 import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
+import { api } from '@/services/api'
 import router from '@/router/router'
+import GoogleMap from '@/components/GoogleMap.vue'
+import SiteForm from '@/components/Site/SiteForm.vue'
+import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
+import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
-import { api } from '@/services/api'
 
 const thingId = useRoute().params.id.toString()
-const { fetchPhotos } = usePhotosStore()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
 const { thing } = storeToRefs(useThingStore())
 const isOwner = computed(() => thing.value?.ownsThing)
-
-const hasPhotos = computed(
-  () => !loading.value && photos.value[thingId]?.length > 0
-)
+const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
@@ -146,7 +142,11 @@ const mapOptions = computed(() =>
 )
 
 onMounted(async () => {
-  fetchPhotos(thingId)
+  photos.value = []
+  api
+    .fetchSitePhotos(thingId)
+    .then((data) => (photos.value = data))
+    .catch((error) => console.error('Error fetching photos from DB', error))
   try {
     thing.value = await api.fetchThing(thingId)
   } catch (error) {
