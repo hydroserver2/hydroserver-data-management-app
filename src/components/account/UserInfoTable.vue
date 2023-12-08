@@ -22,7 +22,7 @@
           <v-btn v-if="hydroShareConnected" class="mr-6" density="compact" variant="outlined" @click="disconnectFromHydroShare" >
             Disconnect
           </v-btn>
-          <v-btn v-else class="mr-6" density="compact" variant="outlined" @click="connectToHydroShare" >
+          <v-btn v-else class="mr-6" density="compact" variant="outlined" @click="OAuthLogin(OAuthProvider.hydroshare)" >
             Connect
           </v-btn>
         </td>
@@ -35,46 +35,43 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
-import {api, getOAuthLoginEndpoint} from '@/services/api'
-import router from "@/router/router";
-import {OAuthProvider} from "@/types";
-import Notification from "@/utils/notifications";
+import { computed, onMounted, ref } from 'vue'
+import { api } from '@/services/api'
+import { OAuthProvider } from '@/types'
+import { OAUTH_ENDPOINT } from '@/services/api'
+import { useRoute } from 'vue-router'
 
 const { user } = storeToRefs(useUserStore())
-const APP_URL = import.meta.env.VITE_APP_URL
-let OAuthLoginController = new AbortController()
+const { setUser } = useUserStore()
+const loaded = ref(false)
+const route = useRoute()
 
-async function connectToHydroShare(callback?: () => any) {
-  const handleMessage = async (event: MessageEvent) => {
-    if (event.origin !== APP_URL || !event.data.hasOwnProperty('accessToken')) {
-      return
-    }
-    try {
-      Notification.toast({
-        message: 'You have linked HydroServer to your HydroShare account!',
-        type: 'success',
-      })
-      callback?.()
-    } catch (e) {
-      console.log('Failed to connect to HydroShare')
-    }
-  }
-
-  window.open(getOAuthLoginEndpoint('hydroshare'), '_blank', 'noopener=false')
-
-  // We need to re-instantiate the listener so that it uses current values in `handleMessage`
-  OAuthLoginController.abort()
-  OAuthLoginController = new AbortController()
-
-  window.addEventListener('message', handleMessage, {
-    signal: OAuthLoginController.signal, // Used to remove the listener
-  })
+const OAuthLogin = async (provider: OAuthProvider) => {
+  let token = await api.connectToHydroShare()
+  window.location.href = OAUTH_ENDPOINT(provider, token.uid, token.token)
 }
 
 async function disconnectFromHydroShare() {
-  await api.disconnectFromHydroShare()
+  let response = await api.disconnectFromHydroShare()
+  if (response === null) {
+    user.value.hydroShareConnected = false
+  }
 }
+
+const tryUserRefresh = async () => {
+  const refresh = (route.query.refresh as boolean) || false
+  if (refresh) {
+    let user = await api.fetchUser()
+    if (user !== undefined) {
+      setUser(user)
+    }
+  }
+}
+
+onMounted(async () => {
+  await tryUserRefresh()
+  loaded.value = true
+})
 
 const hydroShareConnected = computed(() => {
   if (!user.value) return false

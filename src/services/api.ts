@@ -44,8 +44,13 @@ export const getObservationsEndpoint = (
   return url
 }
 
-export const OAUTH_ENDPOINT = (provider: string) =>
-  `${ACCOUNT_BASE}/${provider}/login`
+export const OAUTH_ENDPOINT = (provider: string, uid?: string, token?: string) => {
+  let url = `${ACCOUNT_BASE}/${provider}/login`
+  if (uid && token) {
+    url += `?uid=${uid}&token=${token}`
+  }
+  return url
+}
 
 export const api = {
   createUser: async (user: User) => apiMethods.post(USER_BASE, user),
@@ -77,6 +82,8 @@ export const api = {
   sendVerificationEmail: async () =>
     apiMethods.post(`${ACCOUNT_BASE}/send-verification-email`),
 
+  connectToHydroShare: async () =>
+    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/connect`),
   disconnectFromHydroShare: async () =>
     apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/disconnect`),
 

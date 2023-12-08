@@ -320,6 +320,7 @@ export interface Photo {
 export enum OAuthProvider {
   google = 'google',
   orcid = 'orcid',
+  hydroshare = 'hydroshare'
 }
 
 export class ThingArchive {
