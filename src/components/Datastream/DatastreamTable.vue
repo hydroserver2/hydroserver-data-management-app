@@ -57,7 +57,9 @@
     </template>
 
     <template v-slot:item.last_observation="{ item }">
-      <div v-if="mostRecentObs[item.raw.id]">
+      <div
+        v-if="mostRecentObs[item.raw.id] && (isOwner || item.raw.isDataVisible)"
+      >
         <v-row>
           {{ formatDate(mostRecentObs[item.raw.id][0]) }}
         </v-row>
