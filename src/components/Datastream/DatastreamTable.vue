@@ -85,7 +85,7 @@
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 
 import Sparkline from '@/components/Sparkline.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
@@ -109,12 +109,13 @@ const datastreams = ref<Datastream[]>([])
 
 const { thing } = storeToRefs(useThingStore())
 const isOwner = computed(() => thing.value?.ownsThing)
+let fetchedObs = false
 
 const { sensors, units, observedProperties, processingLevels } =
   usePrimaryOwnerData(props.thingId)
 
-const visibleDatastreams = computed(() =>
-  datastreams.value
+const visibleDatastreams = computed(() => {
+  return datastreams.value
     .filter((d) => d.isVisible || isOwner.value)
     .map((d) => ({
       ...d,
@@ -123,6 +124,26 @@ const visibleDatastreams = computed(() =>
         (op) => op.id === d.observedPropertyId
       )?.name,
     }))
+})
+
+// Wait to call fetchObservationsBulk until visible datastreams is finished computing. Then only call once.
+// Otherwise visibleDatastreams will filter out non visible datastreams because isOwner is undefined onMounted
+// TODO: Is there a better way to do this?
+watch(
+  () => visibleDatastreams.value,
+  async () => {
+    if (
+      isOwner.value !== undefined &&
+      observedProperties.value !== undefined &&
+      datastreams.value !== undefined &&
+      !fetchedObs
+    ) {
+      console.log('attempt')
+      fetchedObs = true
+      await fetchObservationsBulk(visibleDatastreams.value)
+    }
+  },
+  { immediate: true }
 )
 
 const sortBy = [{ key: 'OPName' }]
@@ -160,6 +181,5 @@ function onDeleteDatastream(id: string) {
 
 onMounted(async () => {
   datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
-  await fetchObservationsBulk(visibleDatastreams.value)
 })
 </script>
