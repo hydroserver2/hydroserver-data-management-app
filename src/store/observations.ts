@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { ObservationRecord } from '@/types'
-import { fetchObservations } from '@/utils/observationsUtils'
+import { Datastream, ObservationRecord } from '@/types'
+import {
+  fetchObservations,
+  fetchObservationsParallel,
+} from '@/utils/observationsUtils'
 
 export const useObservationStore = defineStore('observations', () => {
   const observations = ref<Record<string, ObservationRecord>>({})
@@ -18,7 +21,12 @@ export const useObservationStore = defineStore('observations', () => {
     }
   }
 
-  const getObservationsSince = async (id: string, beginTime: string) => {
+  const getObservationsSince = async (
+    datastream: Datastream,
+    beginTime: string,
+    useParallel: boolean
+  ) => {
+    const id = datastream.id
     if (!observations.value[id]?.dataArray) {
       observations.value[id] = new ObservationRecord()
     } else {
@@ -38,7 +46,11 @@ export const useObservationStore = defineStore('observations', () => {
     }
 
     observations.value[id].loading = true
-    const fetchedData = await fetchObservations(id, beginTime)
+
+    const fetchedData = useParallel
+      ? await fetchObservationsParallel(datastream, beginTime)
+      : await fetchObservations(id, beginTime)
+
     updateObservations(id, fetchedData, beginTime)
     return observations.value[id].dataArray
   }

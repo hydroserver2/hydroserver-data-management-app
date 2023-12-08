@@ -84,6 +84,7 @@ export class Datastream {
   timeAggregationIntervalUnitsId: string
   dataSourceId?: string
   dataSourceColumn?: string | number
+  valueCount: number
 
   constructor(thingId: string) {
     this.id = ''
@@ -102,6 +103,7 @@ export class Datastream {
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
     this.isVisible = true
+    this.valueCount = 0
     this.isDataVisible = true
   }
 }
