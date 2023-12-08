@@ -138,7 +138,6 @@ watch(
       datastreams.value !== undefined &&
       !fetchedObs
     ) {
-      console.log('attempt')
       fetchedObs = true
       await fetchObservationsBulk(visibleDatastreams.value)
     }
