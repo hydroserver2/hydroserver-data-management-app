@@ -15,11 +15,6 @@ export const useObservationsLast72Hours = defineStore(
 
     const getObservationsSince = async (id: string, startTime: string) => {
       try {
-        if (observations.value[id]) {
-          loaded.value[id] = true
-          return
-        }
-
         let allData: DataArray = await fetchObservations(id, startTime)
         if (!allData || !allData.length) return
 
@@ -32,10 +27,8 @@ export const useObservationsLast72Hours = defineStore(
     }
 
     const updateObservations = (id: string, data: DataArray) => {
-      const mostRecent = data[data.length - 1]
       observations.value[id] = data
-      mostRecentObs.value[id] = mostRecent
-      loaded.value[id] = true
+      mostRecentObs.value[id] = data[data.length - 1]
     }
 
     const fetchObservationsBulk = async (datastreams: Datastream[]) => {
@@ -62,7 +55,6 @@ export const useObservationsLast72Hours = defineStore(
       mostRecentObs,
       loaded,
       getObservationsSince,
-      updateObservations,
       fetchObservationsBulk,
     }
   }

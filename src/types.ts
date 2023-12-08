@@ -20,10 +20,17 @@ export interface Owner {
   email: string
 }
 
+export interface Tag {
+  id: string
+  key: string
+  value: string
+}
+
 export class Thing {
   id: string
   name: string
   owners: Owner[]
+  tags: Tag[]
   siteType: string
   samplingFeatureCode: string
   isPrivate: boolean
@@ -44,6 +51,7 @@ export class Thing {
     this.id = ''
     this.name = ''
     this.owners = []
+    this.tags = []
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
