@@ -13,6 +13,20 @@
         </td>
         <td>{{ property?.value }}</td>
       </tr>
+      <tr>
+        <td><i class="fas fa-database"></i></td>
+        <td>
+          <strong>HydroShare Account</strong>
+        </td>
+        <td>
+          <v-btn v-if="hydroShareConnected" class="mr-6" density="compact" variant="outlined" @click="disconnectFromHydroShare" >
+            Disconnect
+          </v-btn>
+          <v-btn v-else class="mr-6" density="compact" variant="outlined" @click="OAuthLogin(OAuthProvider.hydroshare)" >
+            Connect
+          </v-btn>
+        </td>
+      </tr>
     </tbody>
     <template v-slot:bottom></template>
   </v-data-table>
@@ -21,9 +35,48 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { api } from '@/services/api'
+import { OAuthProvider } from '@/types'
+import { OAUTH_ENDPOINT } from '@/services/api'
+import { useRoute } from 'vue-router'
 
 const { user } = storeToRefs(useUserStore())
+const { setUser } = useUserStore()
+const loaded = ref(false)
+const route = useRoute()
+
+const OAuthLogin = async (provider: OAuthProvider) => {
+  let token = await api.connectToHydroShare()
+  window.location.href = OAUTH_ENDPOINT(provider, token.uid, token.token)
+}
+
+async function disconnectFromHydroShare() {
+  let response = await api.disconnectFromHydroShare()
+  if (response === null) {
+    user.value.hydroShareConnected = false
+  }
+}
+
+const tryUserRefresh = async () => {
+  const refresh = (route.query.refresh as boolean) || false
+  if (refresh) {
+    let user = await api.fetchUser()
+    if (user !== undefined) {
+      setUser(user)
+    }
+  }
+}
+
+onMounted(async () => {
+  await tryUserRefresh()
+  loaded.value = true
+})
+
+const hydroShareConnected = computed(() => {
+  if (!user.value) return false
+  return user.value.hydroShareConnected
+})
 
 const userInformation = computed(() => {
   if (!user.value) return []
