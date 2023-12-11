@@ -1,4 +1,4 @@
-import { DataArray } from '@/types'
+import { DataArray, Datastream } from '@/types'
 import { api, getObservationsEndpoint } from '@/services/api'
 
 export function subtractHours(timestamp: string, hours: number): string {
@@ -13,7 +13,8 @@ export async function fetchObservations(
   endTime?: string
 ) {
   let allData: DataArray = []
-  let nextLink = getObservationsEndpoint(id, startTime, endTime)
+  const pageSize = 100_000
+  let nextLink = getObservationsEndpoint(id, pageSize, startTime, endTime)
 
   while (nextLink) {
     const data = await api.fetchObservations(nextLink)
@@ -24,6 +25,45 @@ export async function fetchObservations(
   }
 
   return allData
+}
+
+export const fetchObservationsParallel = async (
+  datastream: Datastream,
+  startTime: string | null = null
+) => {
+  const { id, phenomenonBeginTime, phenomenonEndTime, valueCount } = datastream
+  if (!phenomenonBeginTime || !phenomenonEndTime) return
+
+  const pageSize = 50_000
+  const endpoints: string[] = []
+  let skipCount = 0
+  while (skipCount < valueCount) {
+    endpoints.push(
+      getObservationsEndpoint(
+        id,
+        pageSize,
+        startTime ? startTime : phenomenonBeginTime,
+        phenomenonEndTime,
+        skipCount
+      )
+    )
+    skipCount += pageSize
+  }
+
+  try {
+    const results = await Promise.all(
+      endpoints.map((endpoint) => api.fetchObservations(endpoint))
+    )
+    return results.reduce((acc, data) => {
+      if (data?.value?.length > 0 && data.value[0].dataArray) {
+        return acc.concat(data.value[0].dataArray)
+      }
+      return acc
+    }, [])
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return Promise.reject(error)
+  }
 }
 
 /**

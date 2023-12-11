@@ -9,7 +9,8 @@ import {
   ObservedProperty,
   Datastream,
   DataSource,
-  ThingArchive
+  ThingArchive,
+  Tag,
 } from '@/types'
 
 export const BASE_URL = `${
@@ -19,6 +20,7 @@ export const BASE_URL = `${
 }/api`
 
 export const ACCOUNT_BASE = `${BASE_URL}/account`
+export const TAG_BASE = `${BASE_URL}/data/tags`
 export const USER_BASE = `${BASE_URL}/account/user`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
@@ -29,18 +31,22 @@ const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
-const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
+export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
 export const JWT_REFRESH = `${ACCOUNT_BASE}/jwt/refresh`
 
 export const getObservationsEndpoint = (
   id: string,
+  pageSize: number,
   startTime: string,
-  endTime?: string
+  endTime?: string,
+  skipCount?: number
 ) => {
-  let url = `${SENSORTHINGS_BASE}/Datastreams('${id}')/Observations?$resultFormat=dataArray&$top=100000`
+  let url = `${SENSORTHINGS_BASE}/Datastreams('${id}')/Observations?$resultFormat=dataArray`
+  url += `&$top=${pageSize}`
   url += `&$filter=phenomenonTime%20ge%20${startTime}`
   if (endTime) url += `%20and%20phenomenonTime%20lt%20${endTime}`
+  if (skipCount) url += `&$skip=${skipCount}`
   return url
 }
 
@@ -129,6 +135,15 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
   deleteSitePhoto: async (thingId: string, photoId: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
+
+  createSiteTag: async (thingId: string, tag: Tag) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/tags`, tag),
+  fetchSiteTags: async (thingId: string) =>
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
+  fetchUsersSiteTags: async () => apiMethods.fetch(`${TAG_BASE}`),
+  deleteSiteTag: async (thingId: string, tagId: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags/${tagId}`),
+
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
   postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) =>

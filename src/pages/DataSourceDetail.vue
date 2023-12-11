@@ -171,8 +171,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useDataSources } from '@/composables/useDataSources'
 import { DataSource, Datastream } from '@/types'
+import { useDataSources } from '@/composables/useDataSources'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { api } from '@/services/api'

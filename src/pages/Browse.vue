@@ -71,12 +71,12 @@
 </template>
 
 <script setup lang="ts">
-import GoogleMap from '@/components/GoogleMap.vue'
 import { computed, onMounted, ref } from 'vue'
 import { Ref } from 'vue'
 import { Thing } from '@/types'
 import { siteTypes } from '@/vocabularies'
 import { api } from '@/services/api'
+import GoogleMap from '@/components/GoogleMap.vue'
 
 const drawer = ref(true)
 const selectedSiteTypes: Ref<string[]> = ref([])

@@ -4,11 +4,11 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/browse',
     name: 'Browse',
-    component: () => import('@/components/Browse.vue'),
+    component: () => import('@/pages/Browse.vue'),
     meta: {
       hideFooter: true,
       isFullScreen: true,
-      title: 'Browse Monigoring Sites',
+      title: 'Browse Monitoring Sites',
       metaTags: [
         {
           name: 'keywords',
@@ -20,7 +20,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/sites',
     name: 'Sites',
-    component: () => import('@/components/Site/Sites.vue'),
+    component: () => import('@/pages/Sites.vue'),
     meta: {
       hasAuthGuard: true,
       title: 'My Sites',
@@ -35,7 +35,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/sites/:id',
     name: 'SiteDetails',
-    component: () => import('@/components/Site/SiteDetails.vue'),
+    component: () => import('@/pages/SiteDetails.vue'),
     meta: {
       title: 'Site',
       metaTags: [
@@ -47,20 +47,15 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/visualization/:id/:datastreamId',
-    name: 'FocusContextPlot',
-    component: () => import('@/components/Datastream/FocusContextPlot.vue'),
-  },
-  {
     path: '/sites/:id/datastreams/form/:datastreamId?',
     name: 'DatastreamForm',
-    component: () => import('@/components/Datastream/DatastreamForm.vue'),
+    component: () => import('@/pages/DatastreamForm.vue'),
     meta: { hasThingOwnershipGuard: true },
   },
   {
     path: '/contact',
     name: 'Contact',
-    component: () => import('@/components/Contact.vue'),
+    component: () => import('@/pages/Contact.vue'),
     meta: {
       title: 'Contact Us',
       metaTags: [
@@ -74,35 +69,29 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/data-sources',
     name: 'DataSources',
-    component: () => import('@/components/DataSource/DataSourceDashboard.vue'),
+    component: () => import('@/pages/DataSourceDashboard.vue'),
     meta: { hasAuthGuard: true },
   },
   {
     path: '/data-sources/:id',
     name: 'DataSource',
-    component: () => import('@/components/DataSource/DataSourceDetail.vue'),
+    component: () => import('@/pages/DataSourceDetail.vue'),
   },
   {
     path: '/data-loaders',
     name: 'DataLoaders',
-    component: () => import('@/components/DataSource/DataLoaderDashboard.vue'),
+    component: () => import('@/pages/DataLoaderDashboard.vue'),
     meta: { hasAuthGuard: true },
   },
   {
     path: '/hydroloader/download',
     name: 'HydroLoader',
-    component: () => import('@/components/DataSource/HydroLoaderDownload.vue'),
-  },
-  {
-    path: '/sites/:id/datastreams/:datastreamId/datasource',
-    name: 'DataSourceForm',
-    component: () => import('@/components/DataSource/DataSourceForm.vue'),
-    meta: { hasThingOwnershipGuard: true },
+    component: () => import('@/pages/HydroLoaderDownload.vue'),
   },
   {
     path: '/sign-up',
     name: 'SignUp',
-    component: () => import('@/components/account/Signup.vue'),
+    component: () => import('@/pages/account/Signup.vue'),
     meta: {
       hasLoggedOutGuard: true,
       title: 'Sign Up',
@@ -117,7 +106,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/components/account/Login.vue'),
+    component: () => import('@/pages/account/Login.vue'),
     meta: {
       title: 'Login',
       hasLoggedOutGuard: true,
@@ -127,7 +116,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/password_reset',
     name: 'PasswordResetRequest',
     component: () =>
-      import('@/components/account/PasswordRecovery/PasswordResetRequest.vue'),
+      import('@/pages/account/PasswordRecovery/PasswordResetRequest.vue'),
     meta: {
       title: 'Reset Password',
     },
@@ -136,7 +125,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/password_reset/:uid/:token',
     name: 'PasswordReset',
     component: () =>
-      import('@/components/account/PasswordRecovery/PasswordReset.vue'),
+      import('@/pages/account/PasswordRecovery/PasswordReset.vue'),
     meta: {
       title: 'Reset Password',
     },
@@ -144,25 +133,25 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/profile',
     name: 'Profile',
-    component: () => import('@/components/account/Profile.vue'),
+    component: () => import('@/pages/account/Profile.vue'),
     meta: { hasAuthGuard: true, title: 'Profile' },
   },
   {
     path: '/complete-profile',
     name: 'CompleteProfile',
-    component: () => import('@/components/account/CompleteProfile.vue'),
+    component: () => import('@/pages/account/CompleteProfile.vue'),
     meta: { hasUnverifiedAuthGuard: true, title: 'Complete Profile' },
   },
   {
     path: '/verify-email',
     name: 'VerifyEmail',
-    component: () => import('@/components/account/VerifyEmail.vue'),
+    component: () => import('@/pages/account/VerifyEmail.vue'),
     meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
   },
   {
     path: '/activate',
     name: 'ActivateAccount',
-    component: () => import('@/components/account/ActivateAccount.vue'),
+    component: () => import('@/pages/account/ActivateAccount.vue'),
     meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
   },
   {
@@ -174,13 +163,13 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/components/Home.vue'),
+    component: () => import('@/pages/Home.vue'),
     meta: { title: 'Home' },
   },
   {
     path: '/:catchAll(.*)*',
     name: 'PageNotFound',
-    component: () => import('@/components/base/PageNotFound.vue'),
+    component: () => import('@/pages/PageNotFound.vue'),
     meta: { title: 'Page Not Found' },
   },
 ]

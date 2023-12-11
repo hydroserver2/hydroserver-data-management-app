@@ -20,10 +20,17 @@ export interface Owner {
   email: string
 }
 
+export interface Tag {
+  id: string
+  key: string
+  value: string
+}
+
 export class Thing {
   id: string
   name: string
   owners: Owner[]
+  tags: Tag[]
   siteType: string
   samplingFeatureCode: string
   isPrivate: boolean
@@ -45,6 +52,7 @@ export class Thing {
     this.id = ''
     this.name = ''
     this.owners = []
+    this.tags = []
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
@@ -86,6 +94,7 @@ export class Datastream {
   timeAggregationIntervalUnitsId: string
   dataSourceId?: string
   dataSourceColumn?: string | number
+  valueCount: number
 
   constructor(thingId: string) {
     this.id = ''
@@ -104,6 +113,7 @@ export class Datastream {
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
     this.isVisible = true
+    this.valueCount = 0
     this.isDataVisible = true
   }
 }
