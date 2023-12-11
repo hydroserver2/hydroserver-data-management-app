@@ -23,6 +23,16 @@
         </v-dialog>
       </v-col>
 
+      <v-col cols="auto" v-if="isOwner && hydroShareConnected">
+        <v-btn @click="isHydroShareArchiveModalOpen = true">Archive to HydroShare</v-btn>
+        <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
+          <SiteHydroShareArchivalModal
+            @close="isHydroShareArchiveModalOpen = false"
+            :thing-id="thingId"
+          />
+        </v-dialog>
+      </v-col>
+
       <v-col cols="auto" v-if="isOwner">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit Site Information</v-btn
@@ -99,10 +109,12 @@ import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
 import DatastreamTable from '../Datastream/DatastreamTable.vue'
 import { useThingStore } from '@/store/thing'
+import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
+import SiteHydroShareArchivalModal from '@/components/Site/SiteHydroShareArchivalModal.vue'
 import { api } from '@/services/api'
 
 const thingId = useRoute().params.id.toString()
@@ -110,7 +122,9 @@ const { fetchPhotos } = usePhotosStore()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
 const { thing } = storeToRefs(useThingStore())
+const { user } = storeToRefs(useUserStore())
 const isOwner = computed(() => thing.value?.ownsThing)
+const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
 
 const hasPhotos = computed(
   () => !loading.value && photos.value[thingId]?.length > 0
@@ -119,6 +133,7 @@ const hasPhotos = computed(
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
+const isHydroShareArchiveModalOpen = ref(false)
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false

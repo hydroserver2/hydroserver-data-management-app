@@ -39,6 +39,7 @@ export class Thing {
   county: string
   isPrimaryOwner: boolean
   dataDisclaimer: string
+  hydroShareArchiveResourceId: string
 
   constructor() {
     this.id = ''
@@ -56,6 +57,7 @@ export class Thing {
     this.county = ''
     this.isPrimaryOwner = false
     this.dataDisclaimer = ''
+    this.hydroShareArchiveResourceId = ''
   }
 }
 
