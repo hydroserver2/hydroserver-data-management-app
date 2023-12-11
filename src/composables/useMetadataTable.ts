@@ -59,6 +59,7 @@ export function useMetadataTable<T extends WithId>(
     openEdit,
     openDelete,
     item,
+    items,
     openDialog,
     onUpdate,
     onDelete,

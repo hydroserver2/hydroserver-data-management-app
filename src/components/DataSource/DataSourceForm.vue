@@ -46,8 +46,8 @@ import DataSourceLocation from '@/components/DataSource/DataSourceLocation.vue'
 import DataSourceSchedule from '@/components/DataSource/DataSourceSchedule.vue'
 import DataSourceTimestamp from '@/components/DataSource/DataSourceTimestamp.vue'
 
-const props = defineProps(['dataSourceId'])
-const emit = defineEmits(['closeDialog'])
+const props = defineProps(['id'])
+const emit = defineEmits(['created', 'updated', 'close'])
 
 const step = ref(1)
 const store = useDataSourceFormStore()
@@ -59,7 +59,7 @@ const dataSourceScheduleForm = ref()
 const dataSourceTimestampForm = ref()
 const formTitle = ref()
 
-store.dataSourceId = props.dataSourceId || null
+store.dataSourceId = props.id || null
 store.formReady = false
 
 store.fetchDataSource().then(() => {
@@ -80,7 +80,7 @@ async function handleSaveChanges() {
   if (valid === true) {
     let saved = await store.saveDataSource()
     if (saved) {
-      emit('closeDialog')
+      emit('close')
     } else {
       alert('Encountered an unexpected error while saving this data source.')
     }
@@ -112,7 +112,7 @@ async function handleNextPage() {
 }
 
 function handleCancel() {
-  emit('closeDialog')
+  emit('close')
 }
 </script>
 
