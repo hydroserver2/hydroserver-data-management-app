@@ -196,6 +196,8 @@ export const api = {
   createDataLoader: async (dataLoader: DataLoader) =>
     apiMethods.post(DATA_LOADERS_BASE, dataLoader),
   fetchDataLoaders: async () => apiMethods.fetch(DATA_LOADERS_BASE),
+  fetchDataLoader: async (id: string) =>
+    apiMethods.fetch(`${DATA_LOADERS_BASE}/${id}`),
   updateDataLoader: async (id: string, dataLoader: DataLoader) =>
     apiMethods.patch(`${DATA_LOADERS_BASE}/${id}`, dataLoader),
   deleteDataLoader: async (id: string) =>
