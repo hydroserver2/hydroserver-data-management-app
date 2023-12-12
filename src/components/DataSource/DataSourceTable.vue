@@ -44,16 +44,20 @@
     </template>
   </v-data-table>
 
-  <v-dialog v-model="openEdit" :persistent="true">
+  <v-dialog v-model="openEdit">
     <DataSourceForm
-      :dataSourceId="item.id"
+      :data-source="item"
       @close="openEdit = false"
-      @updated="onUpdated"
+      @updated="onUpdate"
     />
   </v-dialog>
 
   <v-dialog v-model="openDelete" max-width="500">
-    <DeleteDataSourceCard @delete="onDelete" @close="openDelete = false" />
+    <DeleteDataSourceCard
+      :item-name="item.name"
+      @delete="onDelete"
+      @close="openDelete = false"
+    />
   </v-dialog>
 </template>
 
@@ -67,12 +71,11 @@ import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
 import { useMetadataTable } from '@/composables/useMetadataTable'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
-import { onUpdated } from 'vue'
 
 const search = ref()
 const dataLoaders = ref<DataLoader[]>([])
 
-const { item, items, openEdit, openDelete, openDialog, onDelete } =
+const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
   useMetadataTable(api.fetchDataSources, api.deleteDataSource, DataSource)
 
 const tableData = computed(() =>

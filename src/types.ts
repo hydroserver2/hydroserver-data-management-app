@@ -216,49 +216,48 @@ export class DataSource {
   id: string
   name: string
   path: string
-  url: string
-  headerRow: number
+  url: string | null
+  headerRow?: number
   dataStartRow: number
   delimiter: string
-  interval: number
-  intervalUnits: string
+  interval: number | null
+  intervalUnits: string | null
   crontab: string
-  startTime: string
-  endTime: string
+  startTime: string | null
+  endTime: string | null
   paused: boolean
   timestampColumn: string | number
   timestampFormat: string
   timestampOffset: string
   dataLoaderId: string
-  dataSourceThru: string
+  dataSourceThru: string | null
   lastSyncSuccessful: boolean
   lastSyncMessage: string
-  lastSynced: string
-  nextSync: string
+  lastSynced: string | null
+  nextSync: string | null
 
   constructor() {
     this.id = ''
     this.name = ''
     this.path = ''
-    this.url = ''
-    this.headerRow = 0
-    this.dataStartRow = 0
-    this.delimiter = ''
-    this.interval = 0
-    this.intervalUnits = ''
+    this.url = null
+    this.dataStartRow = 1
+    this.delimiter = ','
+    this.interval = null
+    this.intervalUnits = null
     this.crontab = ''
-    this.startTime = ''
-    this.endTime = ''
+    this.startTime = null
+    this.endTime = null
     this.paused = false
     this.timestampColumn = ''
     this.timestampFormat = ''
     this.timestampOffset = ''
     this.dataLoaderId = ''
-    this.dataSourceThru = ''
+    this.dataSourceThru = null
     this.lastSyncSuccessful = false
     this.lastSyncMessage = ''
-    this.lastSynced = ''
-    this.nextSync = ''
+    this.lastSynced = null
+    this.nextSync = null
   }
 }
 

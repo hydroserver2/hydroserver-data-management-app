@@ -17,7 +17,7 @@
       </v-btn-add>
     </v-toolbar>
 
-    <DataSourceTable />
+    <DataSourceTable :key="key" />
   </v-container>
 
   <v-dialog v-model="openCreate">
