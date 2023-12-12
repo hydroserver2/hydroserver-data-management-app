@@ -7,12 +7,12 @@
     class="elevation-2"
   >
     <template v-slot:item.status="{ item }">
-      <DataSourceStatus :status="item.raw.status" :paused="null" />
+      <DataSourceStatus :status="item.raw.status" :paused="item.raw.paused" />
     </template>
 
     <template v-slot:item.actions="{ item }">
       <v-icon
-        :icon="item.raw.paused ? 'mdi-pause' : 'mdi-play'"
+        :icon="item.raw.paused ? 'mdi-play' : 'mdi-pause'"
         @click="togglePaused(item.raw)"
       />
 
