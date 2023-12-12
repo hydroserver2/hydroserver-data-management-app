@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { ResultQualifier } from '@/types'
-import { useMetadataTable } from '@/composables/useMetadataTable'
+import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 
@@ -40,7 +40,7 @@ const {
   openDialog,
   onUpdate,
   onDelete,
-} = useMetadataTable(
+} = useTableLogic(
   api.fetchResultQualifiers,
   api.deleteResultQualifier,
   ResultQualifier

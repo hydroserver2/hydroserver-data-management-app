@@ -6,7 +6,7 @@ interface WithId {
   id: string
 }
 
-export function useMetadataTable<T extends WithId>(
+export function useTableLogic<T extends WithId>(
   apiFetchFunction: () => Promise<T[]>,
   apiDeleteFunction: (id: string) => Promise<any>,
   ItemClass: new () => T

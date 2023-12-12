@@ -30,7 +30,7 @@ import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyForm
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
 import { ObservedProperty } from '@/types'
-import { useMetadataTable } from '@/composables/useMetadataTable'
+import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
 // TODO: Only fetch the observedProperties the user is the primary owner of
@@ -42,7 +42,7 @@ const {
   openDialog,
   onUpdate,
   onDelete,
-} = useMetadataTable(
+} = useTableLogic(
   api.fetchObservedProperties,
   api.deleteObservedProperty,
   ObservedProperty

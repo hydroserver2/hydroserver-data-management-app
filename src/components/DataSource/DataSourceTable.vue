@@ -69,14 +69,14 @@ import { DataLoader, DataSource } from '@/types'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
-import { useMetadataTable } from '@/composables/useMetadataTable'
+import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 
 const search = ref()
 const dataLoaders = ref<DataLoader[]>([])
 
 const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
-  useMetadataTable(api.fetchDataSources, api.deleteDataSource, DataSource)
+  useTableLogic(api.fetchDataSources, api.deleteDataSource, DataSource)
 
 const tableData = computed(() =>
   items.value

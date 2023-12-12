@@ -30,7 +30,7 @@ import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCa
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
 import { ProcessingLevel } from '@/types'
-import { useMetadataTable } from '@/composables/useMetadataTable'
+import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
 // TODO: Only fetch the PLs the user is the primary owner of
@@ -42,7 +42,7 @@ const {
   openDialog,
   onUpdate,
   onDelete,
-} = useMetadataTable(
+} = useTableLogic(
   api.fetchProcessingLevels,
   api.deleteProcessingLevel,
   ProcessingLevel

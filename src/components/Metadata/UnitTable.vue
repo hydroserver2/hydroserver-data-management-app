@@ -26,7 +26,7 @@ import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
 import { Unit } from '@/types'
-import { useMetadataTable } from '@/composables/useMetadataTable'
+import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
 // TODO: Only fetch the units the user is the primary owner of
@@ -38,7 +38,7 @@ const {
   openDialog,
   onUpdate,
   onDelete,
-} = useMetadataTable(api.fetchUnits, api.deleteUnit, Unit)
+} = useTableLogic(api.fetchUnits, api.deleteUnit, Unit)
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },

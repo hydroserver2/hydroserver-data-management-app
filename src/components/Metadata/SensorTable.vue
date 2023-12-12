@@ -30,7 +30,7 @@ import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
 import { Sensor } from '@/types'
-import { useMetadataTable } from '@/composables/useMetadataTable'
+import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
 // TODO: Only fetch the observedProperties the user is the primary owner of
@@ -42,7 +42,7 @@ const {
   openDialog,
   onUpdate,
   onDelete,
-} = useMetadataTable(api.fetchSensors, api.deleteSensor, Sensor)
+} = useTableLogic(api.fetchSensors, api.deleteSensor, Sensor)
 
 const headers = [
   { title: 'Name', key: 'name' },
