@@ -11,7 +11,7 @@
         @submit.prevent="archiveThing"
         :disabled="loading"
       >
-        <div v-if="!thing.hydroShareArchiveResourceId">
+        <div v-if="!thing?.hydroShareArchiveResourceId">
           <h6 class="text-h6 my-4">Resource Metadata</h6>
           <v-row>
             <v-col>
@@ -51,7 +51,7 @@
               <p>
                 A HydroShare archive resource has been created for this site and can be accessed
                 <a
-                  :href="`https://www.hydroshare.org/resource/${thing.hydroShareArchiveResourceId}/`"
+                  :href="`https://www.hydroshare.org/resource/${thing?.hydroShareArchiveResourceId}/`"
                   target="_blank"
                 >
                   here.
@@ -79,7 +79,7 @@
             ></v-autocomplete>
           </v-col>
         </v-row>
-        <div v-if="!thing.hydroShareArchiveResourceId">
+        <div v-if="!thing?.hydroShareArchiveResourceId">
           <h6 class="text-h6 my-4">Resource Sharing Status</h6>
           <v-row>
             <v-col cols="auto" class="py-0">
@@ -127,11 +127,11 @@ const loading = ref(false)
 const archiveForm = ref<VForm>()
 const archive = reactive<ThingArchive>(new ThingArchive())
 
-const datastreamTitle = (item) => `${item.description} - ${item.id}`
+const datastreamTitle = (item: Datastream) => `${item.description} - ${item.id}`
 
 async function populateArchive() {
 
-  let keywords = []
+  let keywords = [] as string[]
 
   datastreams.value.forEach((datastream) => {
     if (
@@ -159,16 +159,10 @@ async function archiveThing() {
   await archiveForm.value?.validate()
   if (!valid.value) return
 
-  if (archive) {
+  if (archive && thing.value !== undefined) {
     try {
       loading.value = true
-      thing.value.hydroShareArchiveResourceId = await api.postHydroShareArchive(thing.value.id, {
-        resourceTitle: archive.resourceTitle,
-        resourceAbstract: archive.resourceAbstract,
-        resourceKeywords: archive.resourceKeywords,
-        publicResource: archive.publicResource,
-        datastreams: archive.datastreams.map(datastream => datastream.id)
-      })
+      thing.value.hydroShareArchiveResourceId = await api.postHydroShareArchive(thing.value.id, archive)
       loading.value = false
       Notification.toast({
         message: 'Finished uploading site data to HydroShare.',

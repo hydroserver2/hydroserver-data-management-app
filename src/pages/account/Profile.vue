@@ -5,6 +5,7 @@
     <v-btn-primary class="mr-6" @click="openForm = true">
       Edit account
     </v-btn-primary>
+    <HydroShareConnectionButton />
     <v-btn-delete @click="openDelete = true"> Delete Account</v-btn-delete>
   </v-container>
 
@@ -22,6 +23,7 @@ import { ref } from 'vue'
 import AccountForm from '@/components/account/AccountForm.vue'
 import UserInfoTable from '@/components/account/UserInfoTable.vue'
 import DeleteAccountCard from '@/components/account/DeleteAccountCard.vue'
+import HydroShareConnectionButton from "@/components/account/HydroShareConnectionButton.vue";
 
 const openDelete = ref(false)
 const openForm = ref(false)

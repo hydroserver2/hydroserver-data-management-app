@@ -146,9 +146,15 @@ export const api = {
 
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
-  postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) =>
-    apiMethods.post(`${THINGS_BASE}/${thingId}/archive`, thingArchive),
-
+  postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) => apiMethods.post(
+    `${THINGS_BASE}/${thingId}/archive`,
+    {
+      resourceTitle: thingArchive.resourceTitle,
+      resourceAbstract: thingArchive.resourceAbstract,
+      resourceKeywords: thingArchive.resourceKeywords,
+      publicResource: thingArchive.publicResource,
+      datastreams: thingArchive.datastreams.map(datastream => datastream.id)
+    }),
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
   fetchDatastreams: async () => apiMethods.fetch(DS_BASE),

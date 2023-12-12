@@ -340,7 +340,7 @@ export class ThingArchive {
   resourceAbstract: string
   resourceKeywords: string[]
   publicResource: boolean
-  datastreams: string[]
+  datastreams: Datastream[]
 
   constructor() {
     this.resourceTitle = ''
