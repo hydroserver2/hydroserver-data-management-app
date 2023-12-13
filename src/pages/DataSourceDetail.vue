@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div v-if="dataSourcesLoaded && dataSource">
+    <div v-if="dataSource">
       <v-row>
         <v-col>
           <h4 class="text-h4 mb-4">{{ dataSource.name }}</h4>
@@ -56,7 +56,7 @@
                   </tr>
                   <tr>
                     <td style="width: 220px">Data Loader</td>
-                    <td>{{ dataSource.dataLoaderName }}</td>
+                    <td>{{ dataLoader?.name }}</td>
                   </tr>
                   <tr>
                     <td style="width: 220px">Local File Path</td>
@@ -115,14 +115,14 @@
                     <td style="width: 220px">Status</td>
                     <td>
                       <DataSourceStatus
-                        :status="dataSource.status"
+                        :status="status"
                         :paused="dataSource.paused"
                       />
                     </td>
                   </tr>
                   <tr>
                     <td style="width: 220px">Schedule</td>
-                    <td>{{ getScheduleString(dataSource) }}</td>
+                    <td>{{ scheduleString }}</td>
                   </tr>
                   <tr>
                     <td style="width: 220px">Last Synced</td>
@@ -162,7 +162,7 @@
     <v-dialog v-model="dataSourceFormOpen" :persistent="true">
       <DataSourceForm
         @close-dialog="dataSourceFormOpen = false"
-        :dataSourceId="selectedDataSource"
+        :dataSourceId="dataSource.id"
       />
     </v-dialog>
   </v-container>
@@ -171,84 +171,76 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { DataSource, Datastream } from '@/types'
-import { useDataSources } from '@/composables/useDataSources'
+import { DataLoader, DataSource, Datastream } from '@/types'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { api } from '@/services/api'
 import { computed } from 'vue'
-
-const { dataSourcesLoaded, selectedDataSource, dataSources } = useDataSources()
+import { getStatus } from '@/utils/dataSourceUtils'
 
 const route = useRoute()
 const dataSourceFormOpen = ref(false)
 const datastreams = ref<Datastream[]>([])
+const dataLoader = ref<DataLoader>(new DataLoader())
+const dataSource = ref<DataSource>(new DataSource())
 
-const dataSource = computed(() =>
-  dataSources.value.find(
-    (ds) => ds.id.toString() === route.params.id.toString()
-  )
+const status = computed(() =>
+  dataSource.value ? getStatus(dataSource.value) : 'pending'
 )
 
-function getScheduleString(ds: DataSource) {
-  let scheduleString = ''
-  if (ds.interval) {
-    scheduleString = scheduleString.concat(
-      `Every ${ds.interval} ${ds.intervalUnits}`
-    )
-  } else {
-    scheduleString = scheduleString.concat(`Crontab: ${ds.crontab}`)
-  }
+const scheduleString = computed(() => {
+  if (!dataSource.value) return ''
+  const ds = dataSource.value
+  let string = ''
 
-  if (ds.startTime && ds.endTime) {
-    scheduleString = scheduleString.concat(
-      ` from ${ds.startTime} to ${ds.endTime}`
-    )
-  } else if (ds.startTime) {
-    scheduleString = scheduleString.concat(` beginning ${ds.startTime}`)
-  } else if (ds.endTime) {
-    scheduleString = scheduleString.concat(` until ${ds.endTime}`)
-  }
-  return scheduleString
-}
+  if (ds.interval) string += `Every ${ds.interval} ${ds.intervalUnits}`
+  else string += `Crontab: ${ds.crontab}`
+
+  if (ds.startTime && ds.endTime)
+    string += ` from ${ds.startTime} to ${ds.endTime}`
+  else if (ds.startTime) string += ` beginning ${ds.startTime}`
+  else if (ds.endTime) string += ` until ${ds.endTime}`
+
+  return string
+})
 
 const linkedDatastreamColumns = [
   {
     title: 'ID',
-    align: 'start',
-    sortable: true,
     key: 'name',
   },
   {
     title: 'Name',
-    align: 'start',
-    sortable: true,
     key: 'description',
   },
   {
     title: 'Status',
-    align: 'start',
-    sortable: true,
     key: 'status',
   },
   {
     title: 'Last Loaded Timestamp',
-    align: 'start',
-    sortable: true,
     key: 'phenomenonEndTime',
   },
   {
     title: 'Data Source Column',
-    align: 'start',
-    sortable: true,
     key: 'dataSourceColumn',
   },
 ] as const
 
 onMounted(async () => {
-  const data: Datastream[] = await api.fetchDatastreams()
-  datastreams.value = data.filter(
-    (ds) => ds.dataSourceId === dataSource.value?.id
-  )
+  try {
+    const [data, source] = await Promise.all([
+      api.fetchDatastreams(),
+      api.fetchDataSource(route.params.id.toString()),
+    ])
+
+    dataSource.value = source
+    dataLoader.value = await api.fetchDataLoader(dataSource.value.dataLoaderId)
+    datastreams.value = (data as Datastream[]).filter(
+      (d) => d.dataSourceId === dataSource.value.id
+    )
+  } catch (e) {
+    console.log('error fetching dataSource', e)
+  }
 })
 </script>

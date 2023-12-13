@@ -12,7 +12,8 @@
         :things="thingId ? [thing] : []"
       />
     </div>
-    <v-divider></v-divider>
+    <v-divider />
+
     <v-card-text
       class="text-subtitle-2 text-medium-emphasis d-flex align-center"
     >
