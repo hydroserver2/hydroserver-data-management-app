@@ -24,7 +24,9 @@
       </v-col>
 
       <v-col cols="auto" v-if="isOwner && hydroShareConnected">
-        <v-btn @click="isHydroShareArchiveModalOpen = true">Archive to HydroShare</v-btn>
+        <v-btn @click="isHydroShareArchiveModalOpen = true"
+          >Archive to HydroShare</v-btn
+        >
         <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
           <SiteHydroShareArchivalModal
             @close="isHydroShareArchiveModalOpen = false"
@@ -92,7 +94,12 @@
         >
       </v-col>
     </v-row>
-    <DatastreamTable class="my-6" :thing-id="thingId" />
+    <DatastreamTable
+      v-if="thing"
+      class="my-6"
+      :is-owner="thing.ownsThing"
+      :thing-id="thingId"
+    />
 
     <h6 class="text-h6" style="color: #b71c1c">
       {{ thing?.dataDisclaimer }}

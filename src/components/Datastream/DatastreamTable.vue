@@ -101,17 +101,18 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  isOwner: {
+    type: Boolean,
+    required: true,
+  },
 })
 
 const { fetchObservationsBulk } = useObservationsLast72Hours()
 const { loaded, observations, mostRecentObs } = storeToRefs(
   useObservationsLast72Hours()
 )
-const datastreams = ref<Datastream[]>([])
-
 const { thing } = storeToRefs(useThingStore())
-const isOwner = computed(() => thing.value?.ownsThing)
-let fetchedObs = false
+const datastreams = ref<Datastream[]>([])
 
 const { sensors, units, observedProperties, processingLevels } = useMetadata(
   props.thingId
@@ -119,7 +120,7 @@ const { sensors, units, observedProperties, processingLevels } = useMetadata(
 
 const visibleDatastreams = computed(() => {
   return datastreams.value
-    .filter((d) => d.isVisible || isOwner.value)
+    .filter((d) => d.isVisible || props.isOwner)
     .map((d) => ({
       ...d,
       chartOpen: false,
@@ -128,25 +129,6 @@ const visibleDatastreams = computed(() => {
       )?.name,
     }))
 })
-
-// Wait to call fetchObservationsBulk until visible datastreams is finished computing. Then only call once.
-// Otherwise visibleDatastreams will filter out non visible datastreams because isOwner is undefined onMounted
-// TODO: Is there a better way to do this?
-watch(
-  () => visibleDatastreams.value,
-  async () => {
-    if (
-      isOwner.value !== undefined &&
-      observedProperties.value !== undefined &&
-      datastreams.value !== undefined &&
-      !fetchedObs
-    ) {
-      fetchedObs = true
-      await fetchObservationsBulk(visibleDatastreams.value)
-    }
-  },
-  { immediate: true }
-)
 
 const sortBy = [{ key: 'OPName' }]
 const headers = [
@@ -183,5 +165,6 @@ function onDeleteDatastream(id: string) {
 
 onMounted(async () => {
   datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
+  await fetchObservationsBulk(visibleDatastreams.value)
 })
 </script>
