@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="thing">
     <h5 class="text-h5 my-4">{{ thing?.name }}</h5>
 
     <v-row v-if="thing" style="height: 25rem">
@@ -104,6 +104,9 @@
     <h6 class="text-h6" style="color: #b71c1c">
       {{ thing?.dataDisclaimer }}
     </h6>
+  </v-container>
+  <v-container v-else>
+    <h5 class="text-h5 my-4">Loading Site Details...</h5>
   </v-container>
 </template>
 
