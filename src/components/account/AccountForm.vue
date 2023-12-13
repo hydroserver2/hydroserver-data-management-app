@@ -9,7 +9,7 @@
         ref="myForm"
         v-model="valid"
         validate-on="blur"
-        @submit.prevent="onUserUpdate"
+        @submit.prevent="updateUser"
       >
         <v-row>
           <v-col cols="12" sm="4">
@@ -37,7 +37,7 @@
           <v-col cols="12" v-if="!userForm.isVerified">
             <v-text-field
               v-model="userForm.email"
-              label="Email"
+              label="Email *"
               :rules="rules.email"
             ></v-text-field>
           </v-col>
@@ -149,16 +149,17 @@ import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import router from '@/router/router'
-import Notification from '@/store/notifications'
-import { ENDPOINTS } from '@/constants'
-import { api } from '@/services/apiMethods'
+import Notification from '@/utils/notifications'
+import { api } from '@/services/api'
+import { storeToRefs } from 'pinia'
 
 defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
 })
 
-const { user, setUser } = useUserStore()
-let userForm = reactive<User>(JSON.parse(JSON.stringify(user)))
+const { setUser } = useUserStore()
+const { user } = storeToRefs(useUserStore())
+let userForm = reactive<User>(JSON.parse(JSON.stringify(user.value)))
 
 const phoneMask = { mask: '(###) ###-####' }
 const valid = ref(false)
@@ -173,18 +174,20 @@ watch(showOrg, (newVal) => {
 
 const emit = defineEmits(['close'])
 
-const onUserUpdate = async () => {
+const updateUser = async () => {
   await myForm.value?.validate()
   if (!valid.value) return
 
   try {
-    userForm = await api.patch(ENDPOINTS.USER, userForm, user)
-    setUser(userForm)
+    userForm = await api.updateUser(userForm, user.value)
+    if (userForm !== undefined) {
+      setUser(userForm)
+    }
   } catch (error) {
     console.error('Error updating user', error)
   }
 
-  if (!user?.isVerified) {
+  if (!user.value?.isVerified) {
     await router.push({ name: 'VerifyEmail' })
   } else {
     Notification.toast({

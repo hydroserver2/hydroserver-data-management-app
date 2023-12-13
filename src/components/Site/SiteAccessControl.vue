@@ -1,6 +1,8 @@
 <template>
   <v-card>
     <v-card-title class="text-h5">Access Control</v-card-title>
+    <v-divider />
+
     <v-card-text>
       <v-row v-if="isPrimaryOwner">
         <v-col cols="12" md="6">
@@ -39,7 +41,7 @@
             label="Secondary Owner's Email"
             required
           ></v-text-field>
-          <v-btn-primary @click="addSecondaryOwner">Submit</v-btn-primary>
+          <v-btn-primary @click="onAddSecondaryOwner">Submit</v-btn-primary>
         </v-col>
         <v-col cols="12" md="6">
           <h6 class="text-h6 my-4">
@@ -86,7 +88,7 @@
           >
           <v-btn-primary
             v-if="showPrimaryOwnerConfirmation"
-            @click="transferPrimaryOwnership"
+            @click="onTransferPrimaryOwnership"
             >Confirm</v-btn-primary
           >
           <v-btn-primary v-else @click="showPrimaryOwnerConfirmation = true"
@@ -97,7 +99,7 @@
 
       <h6 class="text-h6 my-4">Current Owners</h6>
 
-      <v-row v-for="owner in thing.owners" class="my-1">
+      <v-row v-for="owner in thing?.owners" class="my-1">
         <v-col cols="auto" class="py-0">
           {{ owner.firstName }} {{ owner.lastName }} -
           {{
@@ -110,7 +112,7 @@
           <div v-else>
             <v-btn-delete
               v-if="isPrimaryOwner || owner.email == user.email"
-              @click="removeOwner(owner.email)"
+              @click="onRemoveOwner(owner.email)"
               >Remove</v-btn-delete
             >
           </div>
@@ -150,7 +152,7 @@
         </v-col>
       </v-row>
 
-      <v-row>
+      <v-row v-if="thing">
         <v-col cols="auto" class="py-0">
           <v-switch
             v-model="thing.isPrivate"
@@ -163,6 +165,8 @@
       </v-row>
     </v-card-text>
 
+    <v-divider />
+
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn-cancel @click="emitClose">Close</v-btn-cancel>
@@ -171,10 +175,11 @@
 </template>
 
 <script setup lang="ts">
-import { useThing } from '@/composables/useThing'
-import { useThingOwnership } from '@/composables/useThingOwnership'
+import { useThingStore } from '@/store/thing'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
+import { ref, computed } from 'vue'
+import { api } from '@/services/api'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -182,17 +187,58 @@ const props = defineProps<{
   thingId: string
 }>()
 
-const {
-  isPrimaryOwner,
-  newOwnerEmail,
-  newPrimaryOwnerEmail,
-  addSecondaryOwner,
-  showPrimaryOwnerConfirmation,
-  transferPrimaryOwnership,
-  removeOwner,
-} = useThingOwnership(props.thingId)
+const { thing } = storeToRefs(useThingStore())
+const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 
-const { thing, toggleSitePrivacy } = useThing(props.thingId)
+const newPrimaryOwnerEmail = ref('')
+const showPrimaryOwnerConfirmation = ref(false)
+const newOwnerEmail = ref('')
+
+async function onTransferPrimaryOwnership() {
+  if (!newPrimaryOwnerEmail.value) return
+  try {
+    thing.value = await api.transferPrimaryOwnership(
+      props.thingId,
+      newPrimaryOwnerEmail.value
+    )
+  } catch (error) {
+    console.error('Error transferring thing ownership', error)
+  }
+  newPrimaryOwnerEmail.value = ''
+  showPrimaryOwnerConfirmation.value = false
+}
+
+async function onAddSecondaryOwner() {
+  if (!newOwnerEmail.value) return
+  try {
+    thing.value = await api.addSecondaryOwner(
+      props.thingId,
+      newOwnerEmail.value
+    )
+  } catch (error) {
+    console.error('Error adding secondary owner', error)
+  }
+  newOwnerEmail.value = ''
+}
+
+async function onRemoveOwner(email: string) {
+  try {
+    thing.value = await api.removeThingOwner(props.thingId, email)
+  } catch (error) {
+    console.error('Error removing owner from thing', error)
+  }
+}
+
+async function toggleSitePrivacy() {
+  try {
+    thing.value = await api.updateThingPrivacy(
+      props.thingId,
+      thing.value!.isPrivate
+    )
+  } catch (error) {
+    console.error('Error updating thing privacy', error)
+  }
+}
 
 const emitClose = () => emits('close')
 </script>

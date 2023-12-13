@@ -1,55 +1,50 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import { Photo } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { api } from '@/services/api'
 
-export const usePhotosStore = defineStore({
-  id: 'photos',
+export const usePhotosStore = defineStore('photos', () => {
+  const photos = ref<Photo[]>([])
+  const newPhotos = ref<File[]>([])
+  const photosToDelete = ref<string[]>([])
+  const loading = ref(false)
 
-  state: () => ({
-    // Keyed by thingId
-    photos: {} as Record<string, Array<Photo>>,
-    loading: false,
-  }),
+  const uploadNewPhotos = async (thingId: string) => {
+    if (newPhotos.value.length > 0) {
+      const data = new FormData()
+      newPhotos.value.forEach((photo) => data.append('files', photo))
+      photos.value = await api.uploadSitePhotos(thingId, data)
+    }
+  }
 
-  actions: {
-    async fetchPhotos(thingId: string) {
-      try {
-        this.photos[thingId] = await api.fetch(
-          ENDPOINTS.PHOTOS.FOR_THING(thingId)
-        )
-      } catch (error) {
-        console.error('Error fetching photos from DB', error)
-      }
-    },
+  const deleteSelectedPhotos = async (thingId: string) => {
+    for (const photoId of photosToDelete.value) {
+      await api.deleteSitePhoto(thingId, photoId)
+    }
+    photos.value = photos.value.filter(
+      (p) => !photosToDelete.value.includes(p.id)
+    )
+  }
 
-    async updatePhotos(
-      thingId: string,
-      newPhotos: File[],
-      photosToDelete: string[]
-    ) {
-      try {
-        this.loading = true
-        if (newPhotos.length === 0 && photosToDelete.length === 0) return
-        if (newPhotos.length > 0) {
-          const data = new FormData()
-          newPhotos.forEach((photo) => data.append('files', photo))
-          this.photos[thingId] = await api.post(
-            ENDPOINTS.PHOTOS.FOR_THING(thingId),
-            data
-          )
-        }
-        for (const photoId of photosToDelete) {
-          await api.delete(ENDPOINTS.PHOTOS.FOR_THING(thingId, photoId))
-        }
-        this.photos[thingId] = this.photos[thingId].filter(
-          (photo) => !photosToDelete.includes(photo.id)
-        )
-      } catch (error) {
-        console.error('Error updating photos', error)
-      } finally {
-        this.loading = false
-      }
-    },
-  },
+  const updatePhotos = async (thingId: string) => {
+    try {
+      loading.value = true
+      await uploadNewPhotos(thingId)
+      await deleteSelectedPhotos(thingId)
+    } catch (error) {
+      console.error('Error updating photos', error)
+    } finally {
+      loading.value = false
+      newPhotos.value = []
+      photosToDelete.value = []
+    }
+  }
+
+  return {
+    photos,
+    newPhotos,
+    photosToDelete,
+    loading,
+    updatePhotos,
+  }
 })

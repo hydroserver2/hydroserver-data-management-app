@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useResetStore } from '@/store/resetStore'
 import router from '@/router/router'
 import jwtDecode from 'jwt-decode'
 
@@ -15,14 +14,6 @@ export const useAuthStore = defineStore(
     const refreshToken = ref('')
     const isLoggedIn = computed(() => !!accessToken.value)
 
-    const $reset = () => setTokens('', '')
-
-    function resetState() {
-      const resetStore = useResetStore()
-      resetStore.all()
-      localStorage.clear()
-    }
-
     function setTokens(access: string, refresh: string) {
       accessToken.value = access
       refreshToken.value = refresh
@@ -30,7 +21,8 @@ export const useAuthStore = defineStore(
 
     async function logout() {
       try {
-        resetState()
+        setTokens('', '')
+        localStorage.clear()
         router.push({ name: 'Login' })
       } catch (error) {
         console.error('Error logging out.', error)
@@ -53,11 +45,9 @@ export const useAuthStore = defineStore(
       accessToken,
       refreshToken,
       isLoggedIn,
-      resetState,
       setTokens,
       logout,
       isRefreshTokenExpired,
-      $reset,
     }
   },
   {

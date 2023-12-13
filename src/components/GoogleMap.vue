@@ -3,11 +3,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Thing } from '@/types'
 import { loadMap } from '@/utils/googleMaps/loadMap'
 import { loadMarkers } from '@/utils/googleMaps/markers'
-import { useSingleMarkerMode } from '@/utils/googleMaps/mapUtils'
+import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -22,6 +22,16 @@ const emit = defineEmits(['location-clicked'])
 let map: google.maps.Map | null = null
 let markers: google.maps.Marker[] = []
 const mapContainer = ref<HTMLElement>()
+
+watch(
+  () => props.things,
+  (newThings) => {
+    if (props.singleMarkerMode) return
+    clearMarkers(markers)
+    markers = loadMarkers(newThings, map)
+  },
+  { deep: true }
+)
 
 onMounted(async () => {
   if (mapContainer && mapContainer.value) {

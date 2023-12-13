@@ -33,6 +33,9 @@ export async function responseInterceptor(
         throw new Error('Unknown response type')
       }
     } else {
+      // const errorBody = await response.json()
+      // console.error('Error:', errorBody)
+      // throw new Error('API call failed', errorBody)
       throw new Error('API call failed')
     }
   }

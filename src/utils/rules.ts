@@ -25,6 +25,20 @@ export const maxLength = (max: number) => [
     !value || `${value}`.length <= max || `Maximum ${max} characters allowed.`,
 ]
 
+export const lessThan = (max: number, name?: string) => [
+  (value: number) =>
+    value == null ||
+    value < max ||
+    `Value must be less than ${name ? name : max}`,
+]
+
+export const greaterThan = (min: number, name?: string) => [
+  (value: number) =>
+    value == null ||
+    value > min ||
+    `Value must be greater than ${name ? name : min}`,
+]
+
 export const emailFormat = [
   (value: string) => /.+@.+\..+/.test(value) || 'Email must be valid.',
 ]
@@ -88,6 +102,8 @@ export const urlFormat = [
 export const rules = {
   minLength,
   maxLength,
+  lessThan,
+  greaterThan,
   alphanumeric,
   nameRules,
   passwordMatch,

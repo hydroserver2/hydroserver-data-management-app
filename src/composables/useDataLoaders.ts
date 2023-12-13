@@ -1,6 +1,5 @@
 import { useDataLoaderStore } from '@/store/dataLoaders'
-import {computed, onMounted, ref} from 'vue'
-import { DataLoader } from '@/types'
+import { computed, onMounted, ref } from 'vue'
 
 export function useDataLoaders() {
   const dataLoaderStore = useDataLoaderStore()
@@ -37,6 +36,6 @@ export function useDataLoaders() {
     reloadDataLoaders,
     dataLoadersLoaded,
     dataLoaders,
-    deleteDataLoader
+    deleteDataLoader,
   }
 }

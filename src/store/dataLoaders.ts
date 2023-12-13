@@ -1,68 +1,74 @@
 import { defineStore } from 'pinia'
-import { DataLoader } from '@/types'
-import { api } from '@/services/apiMethods'
-import { ENDPOINTS } from '@/constants'
+import { ref } from 'vue'
+import type { DataLoader } from '@/types'
+import { api } from '@/services/api'
 
-export const useDataLoaderStore = defineStore('dataLoaders', {
-  state: () => ({
-    dataLoaders: [] as DataLoader[],
-    loaded: false,
-  }),
-  actions: {
-    sortDataLoaders() {
-      this.dataLoaders.sort((a, b) => a.name.localeCompare(b.name))
-    },
-    async fetchDataLoaders(reload = false) {
-      // if (this.loaded && !reload) return
-      this.loaded = false
-      try {
-        this.dataLoaders = await api.fetch(ENDPOINTS.DATA_LOADERS)
-        this.loaded = true
-      } catch (error) {
-        console.error('Error fetching data loaders from DB', error)
-      }
-    },
-    async updateDataLoader(dataLoader: DataLoader) {
-      try {
-        await api.patch(
-          ENDPOINTS.DATA_LOADERS.ID(dataLoader.id),
-          dataLoader,
-          this.getById(dataLoader.id)
-        )
-        const index = this.dataLoaders.findIndex(
-          (dl) => dl.id === dataLoader.id
-        )
-        if (index !== -1) this.dataLoaders[index] = dataLoader
-        this.sortDataLoaders()
-      } catch (error) {
-        console.error(`Error updating data loader with id`, error)
-      }
-    },
-    async createDataLoader(dataLoader: DataLoader) {
-      try {
-        const data = await api.post(ENDPOINTS.DATA_LOADERS, dataLoader)
-        this.dataLoaders.push(data)
-        this.sortDataLoaders()
-        return data
-      } catch (error) {
-        console.error('Error creating data loader', error)
-      }
-    },
-    async deleteDataLoader(id: string) {
-      try {
-        await api.delete(ENDPOINTS.DATA_LOADERS.ID(id))
-        this.dataLoaders = this.dataLoaders.filter((dl) => dl.id !== id)
-        this.sortDataLoaders()
-      } catch (error) {
-        console.error('Error deleting data loader', error)
-      }
-    },
-    getById(id: string) {
-      const dataLoader = this.dataLoaders.find(
-        (dl) => dl.id.toString() === id.toString()
-      )
-      if (!dataLoader) throw new Error(`Data Loader with id ${id} not found`)
-      return dataLoader
-    },
-  },
+export const useDataLoaderStore = defineStore('dataLoaders', () => {
+  const dataLoaders = ref<DataLoader[]>([])
+  const loaded = ref(false)
+
+  const sortDataLoaders = () => {
+    dataLoaders.value.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  const fetchDataLoaders = async (reload = false) => {
+    loaded.value = false
+    try {
+      dataLoaders.value = await api.fetchDataLoaders()
+      sortDataLoaders()
+      loaded.value = true
+    } catch (error) {
+      console.error('Error fetching data loaders from DB', error)
+    }
+  }
+
+  const updateDataLoader = async (dataLoader: DataLoader) => {
+    try {
+      await api.updateDataLoader(dataLoader.id, dataLoader)
+      const index = dataLoaders.value.findIndex((dl) => dl.id === dataLoader.id)
+      if (index !== -1) dataLoaders.value[index] = dataLoader
+      sortDataLoaders()
+    } catch (error) {
+      console.error(`Error updating data loader with id`, error)
+    }
+  }
+
+  const createDataLoader = async (dataLoader: DataLoader) => {
+    try {
+      const data = await api.createDataLoader(dataLoader)
+      dataLoaders.value.push(data)
+      sortDataLoaders()
+      return data
+    } catch (error) {
+      console.error('Error creating data loader', error)
+    }
+  }
+
+  const deleteDataLoader = async (id: string) => {
+    try {
+      await api.deleteDataLoader(id)
+      dataLoaders.value = dataLoaders.value.filter((dl) => dl.id !== id)
+    } catch (error) {
+      console.error('Error deleting data loader', error)
+    }
+  }
+
+  const getById = (id: string) => {
+    const dataLoader = dataLoaders.value.find(
+      (dl) => dl.id.toString() === id.toString()
+    )
+    if (!dataLoader) throw new Error(`Data Loader with id ${id} not found`)
+    return dataLoader
+  }
+
+  return {
+    dataLoaders,
+    loaded,
+    sortDataLoaders,
+    fetchDataLoaders,
+    updateDataLoader,
+    createDataLoader,
+    deleteDataLoader,
+    getById,
+  }
 })

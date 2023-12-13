@@ -1,38 +1,34 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { Datastream } from '@/types'
-import { useDatastreamStore } from '@/store/datastreams'
 import { VForm } from 'vuetify/components'
 import router from '@/router/router'
+import { api } from '@/services/api'
 
 export function useDatastreamForm(thingId: string, datastreamId: string) {
   const valid = ref(false)
   const myForm = ref<VForm>()
-  const datastreamStore = useDatastreamStore()
   const selectedDatastreamID = ref('')
   const datastream = reactive<Datastream>(new Datastream(thingId))
 
   watch(selectedDatastreamID, async () => {
-    const sourceDatastream = datastreamStore.getDatastreamById(
-      selectedDatastreamID.value
-    )
-    if (!sourceDatastream) return
+    const fetchedDS = await api.fetchDatastream(selectedDatastreamID.value)
+    if (!fetchedDS) return
     Object.assign(datastream, {
       ...datastream,
-      sensorId: sourceDatastream.sensorId,
-      observedPropertyId: sourceDatastream.observedPropertyId,
-      processingLevelId: sourceDatastream.processingLevelId,
-      unitId: sourceDatastream.unitId,
-      timeAggregationIntervalUnitsId:
-        sourceDatastream.timeAggregationIntervalUnitsId,
-      intendedTimeSpacingUnitsId: sourceDatastream.intendedTimeSpacingUnitsId,
-      name: sourceDatastream.name,
-      description: sourceDatastream.description,
-      sampledMedium: sourceDatastream.sampledMedium,
-      noDataValue: sourceDatastream.noDataValue,
-      aggregationStatistic: sourceDatastream.aggregationStatistic,
-      status: sourceDatastream.status,
-      timeAggregationInterval: sourceDatastream.timeAggregationInterval,
-      intendedTimeSpacing: sourceDatastream.intendedTimeSpacing,
+      sensorId: fetchedDS.sensorId,
+      observedPropertyId: fetchedDS.observedPropertyId,
+      processingLevelId: fetchedDS.processingLevelId,
+      unitId: fetchedDS.unitId,
+      timeAggregationIntervalUnitsId: fetchedDS.timeAggregationIntervalUnitsId,
+      intendedTimeSpacingUnitsId: fetchedDS.intendedTimeSpacingUnitsId,
+      name: fetchedDS.name,
+      description: fetchedDS.description,
+      sampledMedium: fetchedDS.sampledMedium,
+      noDataValue: fetchedDS.noDataValue,
+      aggregationStatistic: fetchedDS.aggregationStatistic,
+      status: fetchedDS.status,
+      timeAggregationInterval: fetchedDS.timeAggregationInterval,
+      intendedTimeSpacing: fetchedDS.intendedTimeSpacing,
     })
     await myForm.value?.validate()
   })
@@ -45,13 +41,23 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
   async function uploadDatastream() {
     await myForm.value?.validate()
     if (!valid.value) return
-    if (datastreamId) await datastreamStore.updateDatastream(datastream)
-    else await datastreamStore.createDatastream(datastream)
-    await router.push({ name: 'SiteDetails', params: { id: thingId } })
+    if (datastreamId) {
+      try {
+        await api.updateDatastream(datastream)
+      } catch (error) {
+        console.error('Error updating datastream', error)
+      }
+    } else {
+      try {
+        await api.createDatastream(datastream)
+      } catch (error) {
+        console.error('Error creating datastream', error)
+      }
+    }
+    router.push({ name: 'SiteDetails', params: { id: thingId } })
   }
 
   onMounted(async () => {
-    await datastreamStore.fetchDatastreams()
     if (datastreamId) {
       populateForm(datastreamId)
       datastream.id = datastreamId

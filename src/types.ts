@@ -20,10 +20,17 @@ export interface Owner {
   email: string
 }
 
+export interface Tag {
+  id: string
+  key: string
+  value: string
+}
+
 export class Thing {
   id: string
   name: string
   owners: Owner[]
+  tags: Tag[]
   siteType: string
   samplingFeatureCode: string
   isPrivate: boolean
@@ -39,11 +46,13 @@ export class Thing {
   county: string
   isPrimaryOwner: boolean
   dataDisclaimer: string
+  hydroShareArchiveResourceId: string
 
   constructor() {
     this.id = ''
     this.name = ''
     this.owners = []
+    this.tags = []
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
@@ -56,6 +65,7 @@ export class Thing {
     this.county = ''
     this.isPrimaryOwner = false
     this.dataDisclaimer = ''
+    this.hydroShareArchiveResourceId = ''
   }
 }
 
@@ -75,6 +85,7 @@ export class Datastream {
   sensorId: string
   processingLevelId: string
   isVisible: boolean
+  isDataVisible: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
@@ -83,6 +94,7 @@ export class Datastream {
   timeAggregationIntervalUnitsId: string
   dataSourceId?: string
   dataSourceColumn?: string | number
+  valueCount: number
 
   constructor(thingId: string) {
     this.id = ''
@@ -101,6 +113,8 @@ export class Datastream {
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnitsId = ''
     this.isVisible = true
+    this.valueCount = 0
+    this.isDataVisible = true
   }
 }
 
@@ -188,7 +202,7 @@ export class ProcessingLevel {
 
 export class ResultQualifier {
   id: string
-  owner: Owner | null
+  owner: string | null
   code: string
   description: string
 
@@ -204,49 +218,48 @@ export class DataSource {
   id: string
   name: string
   path: string
-  url: string
-  headerRow: number
+  url: string | null
+  headerRow?: number
   dataStartRow: number
   delimiter: string
-  interval: number
-  intervalUnits: string
+  interval: number | null
+  intervalUnits: string | null
   crontab: string
-  startTime: string
-  endTime: string
+  startTime: string | null
+  endTime: string | null
   paused: boolean
   timestampColumn: string | number
   timestampFormat: string
   timestampOffset: string
   dataLoaderId: string
-  dataSourceThru: string
+  dataSourceThru: string | null
   lastSyncSuccessful: boolean
   lastSyncMessage: string
-  lastSynced: string
-  nextSync: string
+  lastSynced: string | null
+  nextSync: string | null
 
   constructor() {
     this.id = ''
     this.name = ''
     this.path = ''
-    this.url = ''
-    this.headerRow = 0
-    this.dataStartRow = 0
-    this.delimiter = ''
-    this.interval = 0
-    this.intervalUnits = ''
+    this.url = null
+    this.dataStartRow = 1
+    this.delimiter = ','
+    this.interval = null
+    this.intervalUnits = null
     this.crontab = ''
-    this.startTime = ''
-    this.endTime = ''
+    this.startTime = null
+    this.endTime = null
     this.paused = false
     this.timestampColumn = ''
     this.timestampFormat = ''
     this.timestampOffset = ''
     this.dataLoaderId = ''
-    this.dataSourceThru = ''
+    this.dataSourceThru = null
     this.lastSyncSuccessful = false
     this.lastSyncMessage = ''
-    this.lastSynced = ''
-    this.nextSync = ''
+    this.lastSynced = null
+    this.nextSync = null
   }
 }
 
@@ -283,6 +296,7 @@ export class User {
   type: string
   isVerified: boolean
   link: string
+  hydroShareConnected: boolean
 
   constructor() {
     this.id = ''
@@ -296,6 +310,7 @@ export class User {
     this.type = ''
     this.isVerified = false
     this.link = ''
+    this.hydroShareConnected = false
   }
 }
 
@@ -316,4 +331,21 @@ export interface Photo {
 export enum OAuthProvider {
   google = 'google',
   orcid = 'orcid',
+  hydroshare = 'hydroshare'
+}
+
+export class ThingArchive {
+  resourceTitle: string
+  resourceAbstract: string
+  resourceKeywords: string[]
+  publicResource: boolean
+  datastreams: Datastream[]
+
+  constructor() {
+    this.resourceTitle = ''
+    this.resourceAbstract = ''
+    this.resourceKeywords = []
+    this.publicResource = false
+    this.datastreams = []
+  }
 }

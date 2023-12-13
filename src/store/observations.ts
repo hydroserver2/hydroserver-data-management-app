@@ -1,55 +1,63 @@
 import { defineStore } from 'pinia'
-import { ObservationRecord } from '@/types'
-import { fetchObservations } from '@/utils/observationsUtils'
-import { DataArray } from '@/types'
+import { ref } from 'vue'
+import { Datastream, ObservationRecord } from '@/types'
+import {
+  fetchObservations,
+  fetchObservationsParallel,
+} from '@/utils/observationsUtils'
 
-export const useObservationStore = defineStore('observations', {
-  state: () => ({
-    observations: {} as Record<string, ObservationRecord>,
-  }),
-  persist: false,
-  actions: {
-    updateObservations(id: string, fetchedData: DataArray, beginTime: string) {
-      this.$patch({
-        observations: {
-          ...this.observations,
-          [id]: {
-            dataArray: fetchedData,
-            beginTime: beginTime,
-            loading: false,
-          },
-        },
-      })
-    },
-    async getObservationsSince(id: string, beginTime: string) {
-      if (!this.observations[id]) {
-        this.observations[id] = new ObservationRecord()
-        this.observations[id].loading = true
-        const fetchedData = await fetchObservations(id, beginTime)
-        this.updateObservations(id, fetchedData, beginTime)
-        return fetchedData
-      }
+export const useObservationStore = defineStore('observations', () => {
+  const observations = ref<Record<string, ObservationRecord>>({})
 
-      this.observations[id].loading = true
-      const storedBeginTime = this.observations[id].beginTime
+  const updateObservations = (
+    id: string,
+    fetchedData: any[],
+    beginTime: string
+  ) => {
+    observations.value[id] = {
+      dataArray: fetchedData,
+      beginTime: beginTime,
+      loading: false,
+    }
+  }
+
+  const getObservationsSince = async (
+    datastream: Datastream,
+    beginTime: string,
+    useParallel: boolean
+  ) => {
+    const id = datastream.id
+    if (!observations.value[id]?.dataArray) {
+      observations.value[id] = new ObservationRecord()
+    } else {
+      const storedBeginTime = observations.value[id].beginTime
       const storedBeginDate = new Date(storedBeginTime).getTime()
       const beginDate = new Date(beginTime).getTime()
 
       if (beginDate === storedBeginDate) {
-        this.observations[id].loading = false
-        return this.observations[id].dataArray
+        observations.value[id].loading = false
+        return observations.value[id].dataArray
       } else if (beginDate > storedBeginDate) {
-        this.observations[id].loading = false
-        return this.observations[id].dataArray.filter(([dateString, _]) => {
+        observations.value[id].loading = false
+        return observations.value[id].dataArray.filter(([dateString, _]) => {
           return beginDate < new Date(dateString).getTime()
         })
       }
+    }
 
-      const newData = await fetchObservations(id, beginTime, storedBeginTime)
-      const aggregatedData = [...newData, ...this.observations[id].dataArray]
-      this.updateObservations(id, aggregatedData, beginTime)
+    observations.value[id].loading = true
 
-      return this.observations[id].dataArray
-    },
-  },
+    const fetchedData = useParallel
+      ? await fetchObservationsParallel(datastream, beginTime)
+      : await fetchObservations(id, beginTime)
+
+    updateObservations(id, fetchedData, beginTime)
+    return observations.value[id].dataArray
+  }
+
+  return {
+    observations,
+    updateObservations,
+    getObservationsSince,
+  }
 })
