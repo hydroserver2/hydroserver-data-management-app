@@ -88,7 +88,7 @@ import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, onMounted, ref, watch } from 'vue'
-import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
+import { useMetadata } from '@/composables/useMetadata'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
@@ -113,8 +113,9 @@ const { thing } = storeToRefs(useThingStore())
 const isOwner = computed(() => thing.value?.ownsThing)
 let fetchedObs = false
 
-const { sensors, units, observedProperties, processingLevels } =
-  usePrimaryOwnerData(props.thingId)
+const { sensors, units, observedProperties, processingLevels } = useMetadata(
+  props.thingId
+)
 
 const visibleDatastreams = computed(() => {
   return datastreams.value

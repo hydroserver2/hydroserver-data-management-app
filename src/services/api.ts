@@ -50,7 +50,11 @@ export const getObservationsEndpoint = (
   return url
 }
 
-export const OAUTH_ENDPOINT = (provider: string, uid?: string, token?: string) => {
+export const OAUTH_ENDPOINT = (
+  provider: string,
+  uid?: string,
+  token?: string
+) => {
   let url = `${ACCOUNT_BASE}/${provider}/login`
   if (uid && token) {
     url += `?uid=${uid}&token=${token}`
@@ -129,6 +133,8 @@ export const api = {
     apiMethods.fetch(
       `${THINGS_BASE}/${thingId}/metadata?include_assignable_metadata=true`
     ),
+  fetchMetadataForThing: async (thingId: string) =>
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/metadata`),
   uploadSitePhotos: async (thingId: string, data: FormData) =>
     apiMethods.post(`${THINGS_BASE}/${thingId}/photos`, data),
   fetchSitePhotos: async (thingId: string) =>
@@ -146,14 +152,13 @@ export const api = {
 
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
-  postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) => apiMethods.post(
-    `${THINGS_BASE}/${thingId}/archive`,
-    {
+  postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/archive`, {
       resourceTitle: thingArchive.resourceTitle,
       resourceAbstract: thingArchive.resourceAbstract,
       resourceKeywords: thingArchive.resourceKeywords,
       publicResource: thingArchive.publicResource,
-      datastreams: thingArchive.datastreams.map(datastream => datastream.id)
+      datastreams: thingArchive.datastreams.map((datastream) => datastream.id),
     }),
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
