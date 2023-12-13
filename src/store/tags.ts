@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { Tag } from '@/types'
 import { api } from '@/services/api'
 
@@ -41,6 +41,7 @@ export const useTagStore = defineStore('tags', () => {
       await uploadNewTags(thingId)
       await deleteSelectedTags(thingId)
       tags.value = await api.fetchSiteTags(thingId)
+      previewTags.value = []
     } catch (error) {
       console.error('Error updating tags', error)
     }

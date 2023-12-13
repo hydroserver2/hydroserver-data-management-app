@@ -286,7 +286,7 @@ import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
-import { usePrimaryOwnerData } from '@/composables/usePrimaryOwnerData'
+import { useMetadata } from '@/composables/useMetadata'
 import { useDatastreamForm } from '@/composables/useDatastreamForm'
 import { onMounted } from 'vue'
 import { Unit } from '@/types'
@@ -313,13 +313,13 @@ const {
   observedProperties,
   formattedProcessingLevels,
   fetchMetadata,
-} = usePrimaryOwnerData(thingId)
+} = useMetadata(thingId, true)
 
 const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
   useDatastreamForm(thingId, datastreamId)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
-  await fetchMetadata()
+  await fetchMetadata(thingId, true)
   ;(datastream as any)[dsKey] = newId
 }
 
