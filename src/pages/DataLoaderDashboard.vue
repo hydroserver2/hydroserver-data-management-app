@@ -16,16 +16,13 @@
       <v-btn-add
         prepend-icon="mdi-download"
         color="white"
-        variant="elevated"
-        :to="{
-          name: 'HydroLoader',
-        }"
+        :to="{ name: 'HydroLoader' }"
       >
         Download Streaming Data Loader
       </v-btn-add>
     </v-toolbar>
 
-    <DataLoaderTable :search="search" :key="key" />
+    <DataLoaderTable :search="search" />
   </v-container>
 </template>
 
@@ -34,6 +31,4 @@ import { ref } from 'vue'
 import DataLoaderTable from '@/components/DataLoader/DataLoaderTable.vue'
 
 const search = ref()
-const key = ref(0)
-const refreshTable = () => (key.value += 1)
 </script>
