@@ -42,7 +42,7 @@ export function useTableLogic<T extends WithId>(
       items.value = items.value.filter((u: any) => u.id !== item.value.id)
       openDelete.value = false
     } catch (error) {
-      console.error(`Error deleting metadata`, error)
+      console.error(`Error deleting table item`, error)
     }
   }
 
@@ -50,7 +50,7 @@ export function useTableLogic<T extends WithId>(
     try {
       items.value = await apiFetchFunction()
     } catch (error) {
-      console.error(`Error fetching metadata`, error)
+      console.error(`Error fetching table items`, error)
     }
   })
 
