@@ -1,6 +1,6 @@
 import { requestInterceptor } from '@/services/requestInterceptor'
 import { responseInterceptor } from '@/services/responseInterceptor'
-import { toastHandler } from '@/services/toastHandler'
+import { Snackbar } from '@/utils/notifications'
 import { createPatchObject } from '@/services/createPatchObject'
 import { useAuthStore } from '@/store/authentication'
 
@@ -12,7 +12,7 @@ async function interceptedFetch(endpoint: string, options: any) {
     return await responseInterceptor(response, interceptedFetch, endpoint, opts)
   } catch (error: any) {
     if (error instanceof TypeError)
-      toastHandler(error, endpoint, options.method)
+      Snackbar.error('Network error. Please check your connection.')
     throw error
   }
 }

@@ -54,7 +54,7 @@ import { api } from '@/services/api'
 import { rules } from '@/utils/rules'
 import { DataSource, Datastream } from '@/types'
 import { useFormLogic } from '@/composables/useFormLogic'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 
 const props = defineProps({
   datastream: {
@@ -89,10 +89,7 @@ async function updateLink(patchBody: {}) {
   emit('close')
   try {
     await api.updateDatastream(patchBody as Datastream)
-    Notification.toast({
-      message: 'Successfully updated DataSource link!',
-      type: 'success',
-    })
+    Snackbar.success('Updated DataSource link')
     emit('updated', patchBody)
   } catch (e) {
     console.error('Error updating DataSource Link', e)

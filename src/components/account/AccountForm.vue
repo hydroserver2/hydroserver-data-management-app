@@ -149,7 +149,7 @@ import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import router from '@/router/router'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 
@@ -190,10 +190,7 @@ const updateUser = async () => {
   if (!user.value?.isVerified) {
     await router.push({ name: 'VerifyEmail' })
   } else {
-    Notification.toast({
-      message: 'Your changes have been saved.',
-      type: 'success',
-    })
+    Snackbar.success('Your changes have been saved.')
   }
   emit('close')
 }

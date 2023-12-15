@@ -62,7 +62,7 @@
 import { usePhotosStore } from '@/store/photos'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 
 const { photos, newPhotos, photosToDelete } = storeToRefs(usePhotosStore())
 
@@ -81,10 +81,7 @@ function handleDrop(e: DragEvent) {
     if (filteredFiles.length > 0) {
       previewPhotos(filteredFiles)
     } else {
-      Notification.toast({
-        message: 'only JPEG and PNG images are allowed',
-        type: 'error',
-      })
+      Snackbar.error('only JPEG and PNG images are allowed')
     }
   }
 }

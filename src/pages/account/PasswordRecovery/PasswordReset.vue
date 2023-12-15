@@ -42,6 +42,7 @@ import { rules } from '@/utils/rules'
 import { useRoute } from 'vue-router'
 import { api } from '@/services/api'
 import router from '@/router/router'
+import { Snackbar } from '@/utils/notifications'
 
 const valid = ref(false)
 const myForm = ref(null)
@@ -58,6 +59,7 @@ const resetPassword = async () => {
       route.params.token.toString(),
       password.value
     )
+    Snackbar.success('Password has been reset')
     await router.push({ name: 'Login' })
   } catch (error) {
     console.error('Error resetting password', error)

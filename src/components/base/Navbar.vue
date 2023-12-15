@@ -161,7 +161,7 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import appLogo from '@/assets/hydroserver-icon-min.png'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 
 const { logout } = useAuthStore()
 const { isLoggedIn } = storeToRefs(useAuthStore())
@@ -238,7 +238,7 @@ const paths: {
 
 function onLogout() {
   logout()
-  Notification.toast({ message: 'You have logged out', type: 'info' })
+  Snackbar.info('You have logged out')
 }
 function openInNewTab(event: MouseEvent, href: string | undefined) {
   event.preventDefault()

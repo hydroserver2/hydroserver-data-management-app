@@ -180,6 +180,7 @@ import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
+import { Snackbar } from '@/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -201,6 +202,7 @@ async function onTransferPrimaryOwnership() {
       props.thingId,
       newPrimaryOwnerEmail.value
     )
+    Snackbar.success('Transferred site ownership')
   } catch (error) {
     console.error('Error transferring thing ownership', error)
   }

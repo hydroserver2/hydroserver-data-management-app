@@ -20,10 +20,10 @@ const theme: ThemeDefinition = {
     secondary: '#4CAF50', // green
     default: '#757575', // grey-darken-1
     delete: '#F44336', // red
-    error: '#B71C1C', // red-darken-4
+    error: '#F44336', // red
     info: '#03A9F4', // light-blue
-    success: '#66BB6A', // green-lighten-1
-    warning: '#FFC107', // amber
+    success: '#4CAF50', // green
+    warning: '#FF9800', // orange
   },
 }
 

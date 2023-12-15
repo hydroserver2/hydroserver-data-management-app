@@ -72,7 +72,7 @@ import { api } from '@/services/api'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 import { useRoute } from 'vue-router'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 
 const email = ref('')
 const password = ref('')
@@ -89,10 +89,7 @@ const login = async (accessToken: string, refreshToken: string) => {
     setTokens(accessToken, refreshToken)
     const user = await api.fetchUser()
     setUser(user)
-    Notification.toast({
-      message: 'You have logged in!',
-      type: 'success',
-    })
+    Snackbar.success('You have logged in!')
     await router.push({ name: 'Sites' })
   } catch (e) {
     console.log('Failed to fetch user info')
