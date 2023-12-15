@@ -17,7 +17,7 @@ async function interceptedFetch(endpoint: string, options: any) {
   }
 }
 
-export const api = {
+export const apiMethods = {
   async fetch(endpoint: string, options: any = {}): Promise<any> {
     options.method = 'GET'
     return await interceptedFetch(endpoint, options)

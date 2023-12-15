@@ -1,4 +1,4 @@
-import { api as apiMethods } from '@/services/apiMethods'
+import { apiMethods } from '@/services/apiMethods'
 import {
   Unit,
   Thing,
