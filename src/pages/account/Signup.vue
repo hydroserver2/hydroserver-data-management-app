@@ -233,6 +233,9 @@ async function createUser() {
     await router.push({ name: 'VerifyEmail' })
   } catch (error) {
     console.error('Error creating user', error)
+    if ((error as Error).message === '409') {
+      Snackbar.warn('A user with this email already exists.')
+    }
   }
 }
 </script>

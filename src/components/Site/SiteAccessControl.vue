@@ -219,6 +219,14 @@ async function onAddSecondaryOwner() {
     )
   } catch (error) {
     console.error('Error adding secondary owner', error)
+    if ((error as Error).message === '404') {
+      Snackbar.warn(
+        'Email address does not have a valid user account.' +
+          ' Please input the email for a valid user.'
+      )
+    } else if ((error as Error).message === '422') {
+      Snackbar.error('Specified user is already an owner of this site')
+    }
   }
   newOwnerEmail.value = ''
 }

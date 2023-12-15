@@ -104,6 +104,9 @@ const formLogin = async () => {
     login(tokens.access, tokens.refresh)
   } catch (error) {
     console.error('Error logging in.', error)
+    if ((error as Error).message === '401') {
+      Snackbar.warn('No active account found with the given credentials.')
+    }
   }
 }
 
