@@ -24,13 +24,15 @@
       </v-col>
     </v-row>
 
-    <v-card v-if="showFilter" class="mb-6" elevation="2">
-      <v-card-text>
-        <v-row>
-          <SiteFilterTool @filter="handleFilter" />
-        </v-row>
-      </v-card-text>
-    </v-card>
+    <KeepAlive>
+      <v-card v-if="showFilter" class="mb-6" elevation="2">
+        <v-card-text>
+          <v-row>
+            <SiteFilterTool @filter="handleFilter" />
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </KeepAlive>
 
     <v-data-table
       v-if="ownedThings?.length"
