@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="thing">
+  <v-container v-if="loaded">
     <h5 class="text-h5 my-4">{{ thing?.name }}</h5>
 
     <v-row v-if="thing" style="height: 25rem">
@@ -130,6 +130,7 @@ import SiteHydroShareArchivalModal from '@/components/Site/SiteHydroShareArchiva
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
+const loaded = ref(false)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
 const isOwner = computed(() => thing.value?.ownsThing)
@@ -149,7 +150,6 @@ function switchToAccessControlModal() {
 async function onDeleteThing() {
   try {
     await api.deleteThing(thingId)
-    delete thing.value
     await router.push('/sites')
   } catch (error) {
     console.error('Error deleting thing', error)
@@ -176,6 +176,8 @@ onMounted(async () => {
     thing.value = await api.fetchThing(thingId)
   } catch (error) {
     console.error('Error fetching thing', error)
+  } finally {
+    loaded.value = true
   }
 })
 </script>
