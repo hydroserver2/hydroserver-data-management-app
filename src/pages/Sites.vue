@@ -1,18 +1,10 @@
 <template>
-  <div class="mb-8 flex-shrink-0" style="height: 25rem">
+  <div class="mb-4 flex-shrink-0" style="height: 25rem">
     <GoogleMap v-if="ownedThings" :things="filteredThings" />
   </div>
 
   <v-container>
-    <v-card v-if="showFilter" class="mb-6" elevation="2">
-      <v-card-text>
-        <v-row>
-          <SiteFilterTool @filter="handleFilter" />
-        </v-row>
-      </v-card-text>
-    </v-card>
-
-    <v-row class="mb-4">
+    <v-row class="mb-2">
       <v-col cols="auto">
         <h5 class="text-h5">My Registered Sites</h5>
       </v-col>
@@ -31,6 +23,14 @@
         >
       </v-col>
     </v-row>
+
+    <v-card v-if="showFilter" class="mb-6" elevation="2">
+      <v-card-text>
+        <v-row>
+          <SiteFilterTool @filter="handleFilter" />
+        </v-row>
+      </v-card-text>
+    </v-card>
 
     <v-data-table
       v-if="ownedThings?.length"
