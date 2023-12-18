@@ -1,11 +1,11 @@
 <template>
-  <v-btn-primary
+  <v-btn-secondary
     v-if="!hydroShareConnected"
     class="mr-6"
     @click="OAuthLogin(OAuthProvider.hydroshare)"
   >
     Connect to HydroShare
-  </v-btn-primary>
+  </v-btn-secondary>
   <v-btn-delete v-else class="mr-6" @click="disconnectFromHydroShare">
     Disconnect from HydroShare
   </v-btn-delete>
