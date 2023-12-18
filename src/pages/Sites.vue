@@ -66,18 +66,27 @@ const filterCriteria = ref({ key: '', value: '' })
 
 const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
 
-const filteredThings = computed(() =>
-  ownedThings.value.filter((thing) => {
-    const filterByKey = filterCriteria.value.key
-      ? thing.tags.some((tag) => tag.key === filterCriteria.value.key)
-      : true
-    const filterByValue = filterCriteria.value.value
-      ? thing.tags.some((tag) => tag.value === filterCriteria.value.value)
-      : true
+const filteredThings = computed(() => {
+  const hasKey = !!filterCriteria.value.key
+  const hasValue = !!filterCriteria.value.value
+  if (!hasKey && !hasValue) return ownedThings.value
 
-    return filterByKey && filterByValue
-  })
-)
+  const filterFunction = (thing: Thing) => {
+    if (hasKey && hasValue) {
+      return thing.tags.some(
+        (tag) =>
+          tag.key === filterCriteria.value.key &&
+          tag.value === filterCriteria.value.value
+      )
+    } else if (hasKey) {
+      return thing.tags.some((tag) => tag.key === filterCriteria.value.key)
+    } else {
+      return thing.tags.some((tag) => tag.value === filterCriteria.value.value)
+    }
+  }
+
+  return ownedThings.value.filter(filterFunction)
+})
 
 const showSiteForm = ref(false)
 const showFilter = ref(false)
