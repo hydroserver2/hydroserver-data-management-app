@@ -193,7 +193,11 @@ v-col
         <v-row>
           <v-col class="v-col-xs-12 v-col-sm-6">
             <v-radio-group v-model="timestampFormatType" inline>
-              <v-radio label="ISO 8601 Format" value="iso" />
+              <v-radio
+                label="ISO 8601 Format"
+                value="iso"
+                @click="item.timestampFormat = 'iso'"
+              />
               <v-radio label="Custom Format" value="custom" />
             </v-radio-group>
           </v-col>
@@ -368,6 +372,7 @@ const initializeForm = () => {
 }
 
 onMounted(async () => {
+  console.log('datasource', props.dataSource)
   dataLoaders.value = await api.fetchDataLoaders()
   if (isEdit.value) initializeForm()
   loaded.value = true
