@@ -112,7 +112,11 @@
   <v-container v-else>Loading...</v-container>
 
   <v-dialog v-model="openEdit" width="80rem">
-    <DataSourceForm @close="openEdit = false" :dataSource="dataSource" />
+    <DataSourceForm
+      @close="openEdit = false"
+      :dataSource="dataSource"
+      @updated="fetchData"
+    />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
@@ -184,7 +188,7 @@ const linkedDatastreamColumns = [
   },
 ] as const
 
-onMounted(async () => {
+const fetchData = async () => {
   try {
     const [data, source] = await Promise.all([
       api.fetchDatastreams(),
@@ -199,5 +203,9 @@ onMounted(async () => {
   } catch (e) {
     console.log('error fetching dataSource', e)
   }
+}
+
+onMounted(async () => {
+  await fetchData()
 })
 </script>

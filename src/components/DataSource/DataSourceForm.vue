@@ -48,7 +48,6 @@ v-col
               v-model="item.delimiter"
               label="File Delimiter *"
               hint="Select the type of delimiter used for this data file."
-              persistent-hint
               :items="intervalDelimiterValues"
               variant="outlined"
               density="comfortable"
@@ -333,8 +332,6 @@ const timezoneOffsets = ref([
 
 async function onSubmit() {
   try {
-    console.log('uploaded item', item.value)
-
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)
