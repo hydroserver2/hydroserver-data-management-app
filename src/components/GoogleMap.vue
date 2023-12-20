@@ -3,17 +3,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, PropType } from 'vue'
 import { Thing } from '@/types'
 import { loadMap } from '@/utils/googleMaps/loadMap'
-import { loadMarkers } from '@/utils/googleMaps/markers'
+import { loadMarkers, addColorToMarkers } from '@/utils/googleMaps/markers'
 import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
+
+interface FilterCriteria {
+  key: string
+  value: string
+}
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
   mapOptions: {
     type: Object,
     default: { center: { lat: 39, lng: -100 }, zoom: 4 },
+  },
+  useColors: Boolean,
+  filterCriteria: {
+    type: Object as PropType<FilterCriteria>,
+    default: () => ({ key: '', value: '' }),
   },
   singleMarkerMode: Boolean,
 })
@@ -28,7 +38,10 @@ watch(
   (newThings) => {
     if (props.singleMarkerMode) return
     clearMarkers(markers)
-    markers = loadMarkers(newThings, map)
+    const coloredThings = props.useColors
+      ? addColorToMarkers(newThings, props.filterCriteria)
+      : newThings
+    markers = loadMarkers(coloredThings, map)
   },
   { deep: true }
 )

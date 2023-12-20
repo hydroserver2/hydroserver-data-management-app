@@ -10,6 +10,8 @@ export const loadMap = async (
 ) => {
   const loader = new Loader({
     apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
+    version: 'beta',
+    libraries: ['marker'],
   })
   const google = await loader.load()
 
@@ -31,6 +33,7 @@ export const loadMap = async (
 
   return new google.maps.Map(container, {
     ...mapOptions,
+    mapId: 'DEMO_MAP_ID',
     styles: mapOptions.styles ?? defaultStyles,
   })
 }

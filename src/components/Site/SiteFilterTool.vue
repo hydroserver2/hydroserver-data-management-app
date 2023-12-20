@@ -5,6 +5,7 @@
       v-model="formKey"
       :items="keyList"
       label="Key"
+      clearable
       hide-details
     >
       <template v-slot:prepend>
@@ -18,6 +19,7 @@
       v-model="formValue"
       :items="valueList"
       label="Value"
+      clearable
       hide-details
     >
       <template v-slot:append>

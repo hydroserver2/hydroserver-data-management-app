@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
-    "@googlemaps/js-api-loader": "^1.15.1",
+    "@googlemaps/js-api-loader": "^1.16.2",
     "@mdi/js": "^7.2.96",
     "@observablehq/plot": "^0.6.10",
     "d3": "^7.8.5",
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@mdi/font": "^7.2.96",
     "@types/d3": "^7.4.0",
-    "@types/google.maps": "^3.52.6",
+    "@types/google.maps": "^3.54.10",
     "@types/node": "^18.16.0",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vue/compiler-sfc": "^3.2.47",

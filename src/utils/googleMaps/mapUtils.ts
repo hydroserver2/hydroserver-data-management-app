@@ -1,10 +1,14 @@
-export const clearMarkers = (markers: google.maps.Marker[]) => {
+type Map = google.maps.Map
+type Marker = google.maps.Marker
+type LatLngLiteral = google.maps.LatLngLiteral
+
+export const clearMarkers = (markers: Marker[]) => {
   if (!markers) return
   markers.forEach((marker) => marker.setMap(null))
   markers.splice(0, markers.length)
 }
 
-export async function getElevation(position: google.maps.LatLngLiteral) {
+export async function getElevation(position: LatLngLiteral) {
   const elevator = new google.maps.ElevationService()
   const { results } = await elevator.getElevationForLocations({
     locations: [position],
@@ -13,7 +17,7 @@ export async function getElevation(position: google.maps.LatLngLiteral) {
   return results[0]
 }
 
-export async function getGeoData(position: google.maps.LatLngLiteral) {
+export async function getGeoData(position: LatLngLiteral) {
   try {
     const geocoder = new google.maps.Geocoder()
     const { results } = await geocoder.geocode({
@@ -38,15 +42,15 @@ export async function getGeoData(position: google.maps.LatLngLiteral) {
 }
 
 export function addMarker(
-  map: google.maps.Map,
-  markers: google.maps.Marker[],
-  position: google.maps.LatLngLiteral
+  map: Map,
+  markers: Marker[],
+  position: LatLngLiteral
 ) {
   const marker = new google.maps.Marker({ position, map })
   markers.push(marker)
 }
 
-export async function fetchLocationData(position: google.maps.LatLngLiteral) {
+export async function fetchLocationData(position: LatLngLiteral) {
   const { elevation }: any = await getElevation(position)
   const { state, county }: any = await getGeoData(position)
 
@@ -60,8 +64,8 @@ export async function fetchLocationData(position: google.maps.LatLngLiteral) {
 }
 
 export function useSingleMarkerMode(
-  map: google.maps.Map,
-  markers: google.maps.Marker[],
+  map: Map,
+  markers: Marker[],
   onLocationFetched: (locationData: any) => void
 ) {
   map.addListener('click', async (mapsMouseEvent: any) => {

@@ -1,6 +1,11 @@
 <template>
   <div class="mb-4 flex-shrink-0" style="height: 25rem">
-    <GoogleMap v-if="ownedThings" :things="filteredThings" />
+    <GoogleMap
+      v-if="ownedThings"
+      :useColors="useColors"
+      :filter-criteria="filterCriteria"
+      :things="filteredThings"
+    />
   </div>
 
   <v-container>
@@ -30,6 +35,13 @@
           <v-row>
             <SiteFilterTool @filter="handleFilter" />
           </v-row>
+        </v-card-text>
+        <v-card-text>
+          <v-switch
+            color="primary"
+            v-model="useColors"
+            label="Color Map Markers by Filter"
+          ></v-switch>
         </v-card-text>
       </v-card>
     </KeepAlive>
@@ -62,6 +74,7 @@ import { api } from '@/services/api'
 import { Thing } from '@/types'
 
 const things = ref<Thing[]>([])
+const useColors = ref(false)
 const filterCriteria = ref({ key: '', value: '' })
 
 const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
