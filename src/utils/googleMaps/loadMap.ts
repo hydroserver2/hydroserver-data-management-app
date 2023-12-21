@@ -11,7 +11,6 @@ export const loadMap = async (
   })
   const google = await loader.load()
 
-  console.log('map Options', import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID)
   return new google.maps.Map(container, {
     ...mapOptions,
     // mapId: import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID,
