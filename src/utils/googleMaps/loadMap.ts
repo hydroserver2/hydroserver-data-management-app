@@ -13,7 +13,6 @@ export const loadMap = async (
 
   return new google.maps.Map(container, {
     ...mapOptions,
-    // mapId: import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID,
-    mapId: 'DEMO_MAP_ID ',
+    mapId: import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID,
   })
 }
