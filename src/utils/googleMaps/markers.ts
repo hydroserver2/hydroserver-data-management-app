@@ -31,8 +31,9 @@ export const addColorToMarkers = (
 export const loadMarkers = (things: Thing[], map: google.maps.Map | null) => {
   if (!things || !map) return []
 
-  map.addListener('click', () => {
+  map.addListener('click', (e: any) => {
     if (infoWindow) infoWindow.close()
+    e.stop() // Prevents map labels from opening infoWindows when clicked
   })
 
   return things
@@ -69,10 +70,11 @@ const createMarker = (
 
   const content = generateMarkerContent(markerData)
 
-  marker.addEventListener('gmp-click', () => {
+  marker.addEventListener('gmp-click', (e: any) => {
     if (infoWindow) infoWindow.close()
     infoWindow = new google.maps.InfoWindow({ content })
     infoWindow.open({ anchor: marker, map: map })
+    // e.stop()
   })
   return marker
 }

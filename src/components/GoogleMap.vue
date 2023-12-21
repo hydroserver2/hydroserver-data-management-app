@@ -30,7 +30,7 @@ const props = defineProps({
 const emit = defineEmits(['location-clicked'])
 
 let map: google.maps.Map | null = null
-let markers: google.maps.Marker[] = []
+let markers: google.maps.marker.AdvancedMarkerElement[] = []
 const mapContainer = ref<HTMLElement>()
 
 watch(

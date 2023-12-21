@@ -1,12 +1,8 @@
 import { Loader } from '@googlemaps/js-api-loader'
 
-type MapOptions = {
-  styles?: google.maps.MapTypeStyle[]
-}
-
 export const loadMap = async (
   container: HTMLElement,
-  mapOptions: MapOptions = {}
+  mapOptions: google.maps.MapOptions = {}
 ) => {
   const loader = new Loader({
     apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
@@ -15,25 +11,10 @@ export const loadMap = async (
   })
   const google = await loader.load()
 
-  const defaultStyles: google.maps.MapTypeStyle[] = [
-    {
-      featureType: 'poi',
-      stylers: [{ visibility: 'off' }],
-    },
-    {
-      featureType: 'transit',
-      stylers: [{ visibility: 'off' }],
-    },
-    {
-      featureType: 'landscape',
-      elementType: 'labels',
-      stylers: [{ visibility: 'off' }],
-    },
-  ]
-
+  console.log('map Options', import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID)
   return new google.maps.Map(container, {
     ...mapOptions,
-    mapId: 'DEMO_MAP_ID',
-    styles: mapOptions.styles ?? defaultStyles,
+    // mapId: import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID,
+    mapId: 'DEMO_MAP_ID ',
   })
 }
