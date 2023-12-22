@@ -1,5 +1,6 @@
 import { Thing } from '@/types'
 import { googlePinColors } from '@/utils/materialColors'
+import { ThingWithColor } from '@/types'
 
 let infoWindow: google.maps.InfoWindow | null = null
 
@@ -22,7 +23,7 @@ export const addColorToMarkers = (
         )
         colorIndex++
       }
-      return { ...thing, color: colorMap.get(tagValue) }
+      return { ...thing, color: colorMap.get(tagValue), tagValue: tagValue }
     }
     return thing
   })
@@ -42,14 +43,6 @@ export const loadMarkers = (things: Thing[], map: google.maps.Map | null) => {
       (marker): marker is google.maps.marker.AdvancedMarkerElement =>
         marker !== null
     )
-}
-
-interface ThingWithColor extends Thing {
-  color?: {
-    borderColor: string
-    background: string
-    glyphColor: string
-  }
 }
 
 const createMarker = (
@@ -74,7 +67,6 @@ const createMarker = (
     if (infoWindow) infoWindow.close()
     infoWindow = new google.maps.InfoWindow({ content })
     infoWindow.open({ anchor: marker, map: map })
-    // e.stop()
   })
   return marker
 }

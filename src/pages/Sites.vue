@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-4 flex-shrink-0" style="height: 25rem">
+  <div class="map-container flex-shrink-0">
     <GoogleMap
       v-if="ownedThings"
       :useColors="useColors"
@@ -9,7 +9,7 @@
   </div>
 
   <v-container>
-    <v-row class="mb-2">
+    <v-row class="my-2">
       <v-col cols="auto">
         <h5 class="text-h5">My Registered Sites</h5>
       </v-col>
@@ -38,10 +38,10 @@
         </v-card-text>
         <v-card-text>
           <v-switch
-            color="primary"
             v-model="useColors"
+            color="primary"
             label="Color Map Markers by Filter"
-          ></v-switch>
+          />
         </v-card-text>
       </v-card>
     </KeepAlive>
@@ -134,3 +134,11 @@ const refreshThings = async () => (things.value = await api.fetchThings())
 // TODO: Fetch owned things
 onMounted(async () => refreshThings())
 </script>
+
+<style scoped>
+.map-container {
+  /* The legend won't appear without a relative position */
+  position: relative;
+  height: 25rem;
+}
+</style>
