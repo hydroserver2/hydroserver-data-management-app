@@ -1,18 +1,10 @@
 <template>
-  <div class="mb-8 flex-shrink-0" style="height: 25rem">
+  <div class="mb-4 flex-shrink-0" style="height: 25rem">
     <GoogleMap v-if="ownedThings" :things="filteredThings" />
   </div>
 
   <v-container>
-    <v-card v-if="showFilter" class="mb-6" elevation="2">
-      <v-card-text>
-        <v-row>
-          <SiteFilterTool @filter="handleFilter" />
-        </v-row>
-      </v-card-text>
-    </v-card>
-
-    <v-row class="mb-4">
+    <v-row class="mb-2">
       <v-col cols="auto">
         <h5 class="text-h5">My Registered Sites</h5>
       </v-col>
@@ -31,6 +23,16 @@
         >
       </v-col>
     </v-row>
+
+    <KeepAlive>
+      <v-card v-if="showFilter" class="mb-6" elevation="2">
+        <v-card-text>
+          <v-row>
+            <SiteFilterTool @filter="handleFilter" />
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </KeepAlive>
 
     <v-data-table
       v-if="ownedThings?.length"
@@ -64,18 +66,27 @@ const filterCriteria = ref({ key: '', value: '' })
 
 const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
 
-const filteredThings = computed(() =>
-  ownedThings.value.filter((thing) => {
-    const filterByKey = filterCriteria.value.key
-      ? thing.tags.some((tag) => tag.key === filterCriteria.value.key)
-      : true
-    const filterByValue = filterCriteria.value.value
-      ? thing.tags.some((tag) => tag.value === filterCriteria.value.value)
-      : true
+const filteredThings = computed(() => {
+  const hasKey = !!filterCriteria.value.key
+  const hasValue = !!filterCriteria.value.value
+  if (!hasKey && !hasValue) return ownedThings.value
 
-    return filterByKey && filterByValue
-  })
-)
+  const filterFunction = (thing: Thing) => {
+    if (hasKey && hasValue) {
+      return thing.tags.some(
+        (tag) =>
+          tag.key === filterCriteria.value.key &&
+          tag.value === filterCriteria.value.value
+      )
+    } else if (hasKey) {
+      return thing.tags.some((tag) => tag.key === filterCriteria.value.key)
+    } else {
+      return thing.tags.some((tag) => tag.value === filterCriteria.value.value)
+    }
+  }
+
+  return ownedThings.value.filter(filterFunction)
+})
 
 const showSiteForm = ref(false)
 const showFilter = ref(false)
