@@ -92,15 +92,15 @@ export class Datastream {
   intendedTimeSpacingUnitsId?: string
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
-  dataSourceId?: string
-  dataSourceColumn?: string | number
+  dataSourceId?: string | null
+  dataSourceColumn?: string | number | null
   valueCount: number
 
-  constructor(thingId: string) {
+  constructor(thingId?: string) {
     this.id = ''
     this.name = 'Datastream'
     this.description = 'Site Datastream'
-    this.thingId = thingId
+    this.thingId = thingId || ''
     this.observationType = 'OM_Measurement'
     this.resultType = 'Time Series Coverage'
     this.sampledMedium = ''
@@ -331,7 +331,7 @@ export interface Photo {
 export enum OAuthProvider {
   google = 'google',
   orcid = 'orcid',
-  hydroshare = 'hydroshare'
+  hydroshare = 'hydroshare',
 }
 
 export class ThingArchive {

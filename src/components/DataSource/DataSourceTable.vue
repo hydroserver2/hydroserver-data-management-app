@@ -72,7 +72,7 @@ import { getStatus } from '@/utils/dataSourceUtils'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 
-const search = ref()
+defineProps({ search: String })
 const dataLoaders = ref<DataLoader[]>([])
 
 const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =

@@ -72,12 +72,14 @@
 
     <template v-slot:item.actions="{ item }">
       <DatastreamTableActions
+        :key="actionKey"
         v-if="isOwner !== undefined"
         :datastream="item.raw"
         :is-owner="isOwner"
         :thing-id="thingId"
         @openPlot="item.raw.chartOpen = true"
         @deleted="onDeleteDatastream(item.raw.id)"
+        @linkUpdated="loadDatastreams"
       />
     </template>
   </v-data-table>
@@ -87,7 +89,7 @@
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 
 import Sparkline from '@/components/Sparkline.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
@@ -113,6 +115,7 @@ const { loaded, observations, mostRecentObs } = storeToRefs(
 )
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
+const actionKey = ref(1)
 
 const { sensors, units, observedProperties, processingLevels } = useMetadata(
   props.thingId
@@ -163,8 +166,17 @@ function onDeleteDatastream(id: string) {
   datastreams.value = datastreams.value.filter((ds) => ds.id !== id)
 }
 
+const loadDatastreams = async () => {
+  try {
+    datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
+    actionKey.value += 1
+  } catch (e) {
+    console.error('Error fetching datastreams', e)
+  }
+}
+
 onMounted(async () => {
-  datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
+  await loadDatastreams()
   await fetchObservationsBulk(visibleDatastreams.value)
 })
 </script>
