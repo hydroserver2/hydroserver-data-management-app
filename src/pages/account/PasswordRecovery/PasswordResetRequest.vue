@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { api } from '@/services/api'
+import { Snackbar } from '@/utils/notifications'
 
 const email = ref('')
 const resetEmailSent = ref(false)
@@ -41,6 +42,9 @@ const submitForm = async () => {
     resetEmailSent.value = await api.sendPasswordRestEmail(email.value)
   } catch (error) {
     console.error('Error requesting password reset', error)
+    if ((error as Error).message === '404') {
+      Snackbar.warn('No account was found for the email you specified')
+    }
   }
 }
 </script>

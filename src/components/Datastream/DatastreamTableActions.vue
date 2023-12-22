@@ -130,7 +130,7 @@
 import { Datastream } from '@/types'
 import { ref } from 'vue'
 import { api } from '@/services/api'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 import DatastreamSourceLinker from './DatastreamSourceLinker.vue'
 
 const props = defineProps({
@@ -205,10 +205,7 @@ const downloadDatastreamCSV = async (id: string) => {
 
 async function onDeleteDatastream() {
   if (deleteDatastreamInput.value.toLocaleLowerCase() !== 'delete') {
-    Notification.toast({
-      message: 'inputs do not match',
-      type: 'error',
-    })
+    Snackbar.error('inputs do not match')
     return
   }
 

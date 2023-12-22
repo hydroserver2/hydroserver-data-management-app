@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Thing } from '@/types'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 
 const emit = defineEmits(['switchToAccessControl', 'delete', 'close'])
 const props = defineProps({
@@ -53,11 +53,7 @@ const deleteInput = ref('')
 
 const onDeleteThing = () => {
   if (deleteInput.value !== props.thing.name) {
-    console.error('Site name does not match.')
-    Notification.toast({
-      message: 'Site name does not match.',
-      type: 'error',
-    })
+    Snackbar.warn('Site name does not match.')
     return
   }
   emit('delete')

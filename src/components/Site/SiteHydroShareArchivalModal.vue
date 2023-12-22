@@ -49,17 +49,20 @@
           <v-row>
             <v-col>
               <p>
-                A HydroShare archive resource has been created for this site and can be accessed
+                A HydroShare archive resource has been created for this site and
+                can be accessed
                 <a
                   :href="`https://www.hydroshare.org/resource/${thing?.hydroShareArchiveResourceId}/`"
                   target="_blank"
                 >
                   here.
                 </a>
-              </p><br>
+              </p>
+              <br />
               <p class="text-break">
-                Use this form if you want to re-upload updated datastreams from HydroServer to HydroShare. Otherwise,
-                please use the HydroShare link above to make any other changes to the resource.
+                Use this form if you want to re-upload updated datastreams from
+                HydroServer to HydroShare. Otherwise, please use the HydroShare
+                link above to make any other changes to the resource.
               </p>
             </v-col>
           </v-row>
@@ -85,7 +88,11 @@
             <v-col cols="auto" class="py-0">
               <v-switch
                 v-model="archive.publicResource"
-                :label="archive.publicResource ? 'Public Resource' : 'Private Resource'"
+                :label="
+                  archive.publicResource
+                    ? 'Public Resource'
+                    : 'Private Resource'
+                "
                 color="primary"
                 hide-details
               ></v-switch>
@@ -98,7 +105,9 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn-cancel @click="emitClose">Close</v-btn-cancel>
-      <v-btn-primary @click="archiveThing" :loading="loading">Save</v-btn-primary>
+      <v-btn-primary @click="archiveThing" :loading="loading"
+        >Save</v-btn-primary
+      >
     </v-card-actions>
   </v-card>
 </template>
@@ -112,7 +121,7 @@ import { Datastream, ThingArchive } from '@/types'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -130,7 +139,6 @@ const archive = reactive<ThingArchive>(new ThingArchive())
 const datastreamTitle = (item: Datastream) => `${item.description} - ${item.id}`
 
 async function populateArchive() {
-
   let keywords = [] as string[]
 
   datastreams.value.forEach((datastream) => {
@@ -144,14 +152,19 @@ async function populateArchive() {
 
   Object.assign(archive, {
     resourceTitle: `HydroServer Archive: ${thing.value?.name}`,
-    resourceAbstract: `This HydroShare resource serves as an archive for monitoring data collected at ` +
+    resourceAbstract:
+      `This HydroShare resource serves as an archive for monitoring data collected at ` +
       `${thing.value?.name}. The datasets contained herein represent a collection of hydrologic observations ` +
       `collected at this location. The purpose of this archive is to provide a centralized repository for the ` +
       `hydrologic data recorded at this site, facilitating accessibility, analysis, and collaboration among ` +
       `researchers and stakeholders.`,
-    resourceKeywords: ['HydroServer Site Archive', thing.value?.siteType, ...keywords],
+    resourceKeywords: [
+      'HydroServer Site Archive',
+      thing.value?.siteType,
+      ...keywords,
+    ],
     publicResource: !thing.value?.isPrivate,
-    datastreams: datastreams.value
+    datastreams: datastreams.value,
   })
 }
 
@@ -162,20 +175,18 @@ async function archiveThing() {
   if (archive && thing.value !== undefined) {
     try {
       loading.value = true
-      thing.value.hydroShareArchiveResourceId = await api.postHydroShareArchive(thing.value.id, archive)
+      thing.value.hydroShareArchiveResourceId = await api.postHydroShareArchive(
+        thing.value.id,
+        archive
+      )
       loading.value = false
-      Notification.toast({
-        message: 'Finished uploading site data to HydroShare.',
-        type: 'success'
-      })
+      Snackbar.success('Uploaded site data to HydroShare.')
+
       emitClose()
     } catch (error) {
-      console.error('Error creating HydroShare archive.')
+      console.error('Error creating HydroShare archive.', error)
+      Snackbar.error('Failed to upload site data to HydroShare.')
       loading.value = false
-      Notification.toast({
-        message: 'Failed to upload site data to HydroShare.',
-        type: 'error'
-      })
     }
   }
 }

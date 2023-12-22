@@ -16,6 +16,7 @@ import { api } from '@/services/api'
 
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
+import { Snackbar } from '@/utils/notifications'
 
 const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
@@ -33,6 +34,7 @@ onMounted(async () => {
     setUser(data.user)
     setTokens(data.access, data.refresh)
     wasActivated.value = true
+    Snackbar.success('Your HydroServer account has been activated.')
     await router.push({ name: 'Sites' })
   } catch (e) {
     console.error('Error activating account', e)

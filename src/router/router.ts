@@ -5,7 +5,7 @@ import {
 } from 'vue-router'
 import { routes } from '@/router/routes'
 import { useAuthStore } from '@/store/authentication'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
@@ -26,11 +26,7 @@ const guards: ((
     const { isRefreshTokenExpired, logout } = useAuthStore()
 
     if (isRefreshTokenExpired()) {
-      Notification.toast({
-        message: 'Session expired. Please login',
-        type: 'info',
-        duration: 1000,
-      })
+      Snackbar.info('Session expired. Please login')
       logout()
     }
     return null
