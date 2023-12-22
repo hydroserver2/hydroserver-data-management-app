@@ -49,6 +49,7 @@
             @click="item.raw.chartOpen = true"
             :is-stale="isStale(item.raw.phenomenonEndTime)"
             :observations="observations[item.raw.id]"
+            :no-data-value="item.raw.noDataValue"
           />
         </div>
         <div v-else>No data for this datastream</div>
