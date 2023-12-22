@@ -176,8 +176,8 @@
         <v-card-text>
           <v-text-field
             v-model="datastream.noDataValue"
-            label="No data value"
-            :rules="datastream.noDataValue ? rules.maxLength(255) : []"
+            label="No data value *"
+            :rules="rules.required"
             type="number"
           />
         </v-card-text>
