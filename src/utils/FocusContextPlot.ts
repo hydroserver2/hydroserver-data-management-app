@@ -1,10 +1,6 @@
 import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
-
-type DataPoint = {
-  date: Date
-  value: number
-}
+import { DataPoint } from '@/types'
 
 const dispatch = d3.dispatch('timeWindow')
 

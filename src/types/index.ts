@@ -1,3 +1,8 @@
+export type DataPoint = {
+  date: Date
+  value: number
+}
+
 export type DataArray = [string, number][]
 
 export class ObservationRecord {

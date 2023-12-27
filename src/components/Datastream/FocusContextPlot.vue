@@ -31,7 +31,11 @@ import { ref, onMounted } from 'vue'
 import { focus, context } from '@/utils/FocusContextPlot'
 import { useObservationStore } from '@/store/observations'
 import { DataArray } from '@/types'
-import { calculateEffectiveStartTime } from '@/utils/observationsUtils'
+import {
+  calculateEffectiveStartTime,
+  convertToDataObjects,
+  replaceNoDataValues,
+} from '@/utils/observationsUtils'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
@@ -79,10 +83,8 @@ const fetchObservedProperty = api
 
 async function drawPlot(dataArray: DataArray) {
   // Observable Plot expects an array of objects so convert
-  const data = dataArray.map(([dateString, value]) => ({
-    date: new Date(dateString),
-    value,
-  }))
+  let data = convertToDataObjects(dataArray)
+  data = replaceNoDataValues(data, props.datastream.noDataValue)
 
   if (focusChart.value) {
     const focusSVG = focus(data, yAxisLabel)

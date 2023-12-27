@@ -8,12 +8,17 @@ import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
 import { PropType } from 'vue'
 import { DataArray } from '@/types'
+import {
+  convertToDataObjects,
+  replaceNoDataValues,
+} from '@/utils/observationsUtils'
 
 const props = defineProps({
   observations: {
     type: Array as PropType<DataArray>,
     required: true,
   },
+  noDataValue: Number,
   isStale: Boolean,
 })
 
@@ -26,12 +31,9 @@ function drawChart() {
     ? { line: '#9E9E9E', fill: '#F5F5F5' } // Grey and grey-lighten-4
     : { line: '#4CAF50', fill: '#E8F5E9' } // Green and green-lighten-5
 
-  const observations = props.observations.map((item: [string, number]) => {
-    return {
-      date: new Date(item[0]),
-      value: item[1],
-    }
-  })
+  let observations = convertToDataObjects(props.observations)
+  if (props.noDataValue)
+    observations = replaceNoDataValues(observations, props.noDataValue)
 
   const [minY, maxY] = d3.extent(observations, (d) => d.value)
 

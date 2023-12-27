@@ -1,4 +1,4 @@
-import { DataArray, Datastream } from '@/types'
+import { DataArray, DataPoint, Datastream } from '@/types'
 import { api, getObservationsEndpoint } from '@/services/api'
 
 export function subtractHours(timestamp: string, hours: number): string {
@@ -86,4 +86,19 @@ export function calculateEffectiveStartTime(
     }
   }
   return effectiveStartTime
+}
+
+export function convertToDataObjects(dataArray: DataArray) {
+  return dataArray.map(([dateString, value]) => ({
+    date: new Date(dateString),
+    value,
+  }))
+}
+
+// Function to replace 'no data' values with NaN
+export function replaceNoDataValues(data: DataPoint[], noDataValue: number) {
+  return data.map((d) => ({
+    ...d,
+    value: d.value === noDataValue ? NaN : d.value,
+  }))
 }
