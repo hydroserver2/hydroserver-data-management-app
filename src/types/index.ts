@@ -69,6 +69,15 @@ export class Thing {
   }
 }
 
+export interface ThingWithColor extends Thing {
+  color?: {
+    borderColor: string
+    background: string
+    glyphColor: string
+  }
+  tagValue?: string
+}
+
 export class Datastream {
   id: string
   name: string

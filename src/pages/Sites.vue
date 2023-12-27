@@ -1,10 +1,15 @@
 <template>
-  <div class="mb-4 flex-shrink-0" style="height: 25rem">
-    <GoogleMap v-if="ownedThings" :things="filteredThings" />
+  <div class="map-container flex-shrink-0">
+    <GoogleMap
+      v-if="ownedThings"
+      :useColors="useColors"
+      :filter-criteria="filterCriteria"
+      :things="filteredThings"
+    />
   </div>
 
   <v-container>
-    <v-row class="mb-2">
+    <v-row class="my-2">
       <v-col cols="auto">
         <h5 class="text-h5">My Registered Sites</h5>
       </v-col>
@@ -30,6 +35,13 @@
           <v-row>
             <SiteFilterTool @filter="handleFilter" />
           </v-row>
+        </v-card-text>
+        <v-card-text>
+          <v-switch
+            v-model="useColors"
+            color="primary"
+            label="Color Map Markers by Filter"
+          />
         </v-card-text>
       </v-card>
     </KeepAlive>
@@ -62,6 +74,7 @@ import { api } from '@/services/api'
 import { Thing } from '@/types'
 
 const things = ref<Thing[]>([])
+const useColors = ref(false)
 const filterCriteria = ref({ key: '', value: '' })
 
 const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
@@ -121,3 +134,11 @@ const refreshThings = async () => (things.value = await api.fetchThings())
 // TODO: Fetch owned things
 onMounted(async () => refreshThings())
 </script>
+
+<style scoped>
+.map-container {
+  /* The legend won't appear without a relative position */
+  position: relative;
+  height: 25rem;
+}
+</style>
