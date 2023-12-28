@@ -47,9 +47,8 @@
           </v-dialog>
           <Sparkline
             @click="item.raw.chartOpen = true"
-            :is-stale="isStale(item.raw.phenomenonEndTime)"
             :observations="observations[item.raw.id]"
-            :no-data-value="item.raw.noDataValue"
+            :datastream="item.raw"
           />
         </div>
         <div v-else>No data for this datastream</div>
@@ -155,12 +154,6 @@ function formatDate(dateString: string) {
   return (
     new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
   )
-}
-
-function isStale(timestamp: string) {
-  let endTime = new Date(timestamp)
-  let seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000)
-  return endTime < seventyTwoHoursAgo
 }
 
 function onDeleteDatastream(id: string) {

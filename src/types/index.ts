@@ -17,6 +17,8 @@ export class ObservationRecord {
   }
 }
 
+export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
+
 export interface Owner {
   firstName: string
   lastName: string
