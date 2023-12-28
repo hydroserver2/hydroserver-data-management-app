@@ -198,18 +198,18 @@
                 :rules="rules.requiredNumber"
                 type="number"
                 class="mb-4"
-              ></v-text-field>
+              />
 
               <v-autocomplete
                 v-model="datastream.timeAggregationIntervalUnitsId"
-                label="Select time aggregation unit *"
+                label="Time aggregation unit *"
                 :items="timeUnits"
                 item-title="name"
                 item-value="id"
                 :rules="rules.required"
                 no-data-text="No available units"
                 class="pb-1"
-              ></v-autocomplete>
+              />
               <div v-if="isPrimaryOwner">
                 <v-btn-add @click="openAggUnitForm = true">Add New</v-btn-add>
                 <v-dialog v-model="openAggUnitForm" width="60rem">
@@ -233,26 +233,13 @@
               ></v-text-field>
 
               <v-autocomplete
-                v-model="datastream.intendedTimeSpacingUnitsId"
-                label="Select intended time spacing unit"
-                :items="timeUnits"
-                item-title="name"
-                item-value="id"
+                v-model="datastream.intendedTimeSpacingUnits"
+                label="Intended time spacing unit"
+                :items="intendedTimeUnits"
                 no-data-text="No available units"
                 class="pb-1"
                 clearable
-              ></v-autocomplete>
-
-              <div v-if="isPrimaryOwner">
-                <v-btn-add @click="openITUnitForm = true">Add New</v-btn-add>
-                <v-dialog v-model="openITUnitForm" width="60rem">
-                  <UnitFormCard
-                    @created="datastream.intendedTimeSpacingUnitsId = $event"
-                    @close="openITUnitForm = false"
-                    >Add New</UnitFormCard
-                  >
-                </v-dialog>
-              </div>
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -265,7 +252,7 @@
             Return to previous page
           </v-btn-cancel>
         </v-col>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-col cols="auto">
           <v-btn-primary type="submit">{{
             datastreamId ? 'Update' : 'Save'
@@ -297,9 +284,9 @@ const thingId = route.params.id.toString()
 const datastreamId = route.params.datastreamId?.toString() || ''
 
 const timeUnits = ref<Unit[]>([])
+const intendedTimeUnits = ['seconds', 'minutes', 'hours', 'days']
 const openUnitForm = ref(false)
 const openAggUnitForm = ref(false)
-const openITUnitForm = ref(false)
 
 const isPrimaryOwner = ref(false)
 const showTemplateModal = ref(false)

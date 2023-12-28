@@ -103,7 +103,7 @@ export class Datastream {
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
-  intendedTimeSpacingUnitsId?: string
+  intendedTimeSpacingUnits?: string | null
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
   dataSourceId?: string | null
