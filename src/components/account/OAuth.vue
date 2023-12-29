@@ -21,7 +21,8 @@
       >
         <v-img
           :src="googleImg"
-          class="fill-width mr-1"
+          class="mr-1"
+          width="100%"
           max-width="1.5rem"
           alt="SensorThings Database Schema"
         ></v-img>

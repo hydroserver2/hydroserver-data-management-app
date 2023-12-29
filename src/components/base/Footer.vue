@@ -1,7 +1,7 @@
 <template>
   <v-footer color="surface-darken-1">
     <v-container class="py-8 text-body-2">
-      <div class="d-flex justify-space-between flex-column flex-md-row gap-3">
+      <div class="d-flex justify-space-between flex-column flex-md-row">
         <div>
           <h5 class="text-h5 mb-4">Contact Us</h5>
           <router-link class="d-block mb-3" to="/contact">Contact</router-link>
