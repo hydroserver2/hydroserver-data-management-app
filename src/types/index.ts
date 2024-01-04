@@ -17,6 +17,8 @@ export class ObservationRecord {
   }
 }
 
+export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
+
 export interface Owner {
   firstName: string
   lastName: string
@@ -103,7 +105,7 @@ export class Datastream {
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
-  intendedTimeSpacingUnitsId?: string
+  intendedTimeSpacingUnits?: string | null
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
   dataSourceId?: string | null

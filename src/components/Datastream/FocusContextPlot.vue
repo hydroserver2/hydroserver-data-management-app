@@ -33,8 +33,7 @@ import { useObservationStore } from '@/store/observations'
 import { DataArray } from '@/types'
 import {
   calculateEffectiveStartTime,
-  convertToDataObjects,
-  replaceNoDataValues,
+  preProcessData,
 } from '@/utils/observationsUtils'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
@@ -82,9 +81,7 @@ const fetchObservedProperty = api
   })
 
 async function drawPlot(dataArray: DataArray) {
-  // Observable Plot expects an array of objects so convert
-  let data = convertToDataObjects(dataArray)
-  data = replaceNoDataValues(data, props.datastream.noDataValue)
+  let data = preProcessData(dataArray, props.datastream)
 
   if (focusChart.value) {
     const focusSVG = focus(data, yAxisLabel)
