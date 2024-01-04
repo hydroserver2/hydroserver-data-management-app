@@ -12,8 +12,18 @@
         </div>
         <div>
           <h5 class="text-h5 mb-4">Policies</h5>
-          <a class="d-block mb-3" href="#">Terms of Use</a>
-          <a class="d-block" href="#">Privacy</a>
+          <a
+            class="d-block mb-3"
+            href="https://github.com/hydroserver2/hydroserver/blob/main/terms-of-use.md"
+            target="_blank"
+            >Terms of Use</a
+          >
+          <a
+            class="d-block"
+            href="https://github.com/hydroserver2/hydroserver/blob/main/privacy-policy.md"
+            target="_blank"
+            >Privacy</a
+          >
         </div>
         <div class="text-left text-md-center flex-shrink-0">
           <h5 class="text-h5 mb-4">Developed By</h5>
