@@ -7,7 +7,7 @@
     class="elevation-3"
   >
     <template v-slot:item.actions="{ item }">
-      <v-icon @click="openDialog(item.raw, 'delete')"> mdi-delete </v-icon>
+      <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
   </v-data-table>
 

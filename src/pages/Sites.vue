@@ -125,8 +125,7 @@ const handleFilter = (criteria: { key: string; value: string }) => {
 }
 
 const onRowClick = (event: Event, item: any) => {
-  const thing = item.item.raw
-  router.push({ name: 'SiteDetails', params: { id: thing.id } })
+  router.push({ name: 'SiteDetails', params: { id: item.item.id } })
 }
 
 const refreshThings = async () => (things.value = await api.fetchThings())

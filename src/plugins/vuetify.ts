@@ -5,10 +5,7 @@ import 'vuetify/styles'
 import { createVuetify, ThemeDefinition } from 'vuetify'
 import { VBtn } from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import { VDataTable } from 'vuetify/labs/VDataTable'
-
 import { md3 } from 'vuetify/blueprints'
-import { VTooltip } from 'v-tooltip'
 
 // Material theme Colors: https://vuetifyjs.com/en/styles/colors/
 const theme: ThemeDefinition = {
@@ -41,10 +38,6 @@ export default createVuetify({
     VBtnCancel: VBtn,
     VBtnDelete: VBtn,
     VBtnAdd: VBtn,
-  },
-  components: {
-    VDataTable,
-    VTooltip,
   },
   defaults: {
     VTextField: textFieldAttrs,
