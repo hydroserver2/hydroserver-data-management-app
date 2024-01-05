@@ -29,5 +29,10 @@ export default defineConfig({
   test: {
     globals: true,
     environmentMatchGlobs: [['src/components/**', 'jsdom']],
+    server: {
+      deps: {
+        inline: ['vuetify'],
+      },
+    },
   },
 })
