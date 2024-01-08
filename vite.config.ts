@@ -34,5 +34,16 @@ export default defineConfig({
         inline: ['vuetify'],
       },
     },
+    coverage: {
+      exclude: [
+        '**/src/App.vue',
+        '**/src/main.ts',
+        '**/src/vocabularies.ts',
+        '**/*.d.ts',
+        '**/postcss.config.js',
+      ],
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+    },
   },
 })
