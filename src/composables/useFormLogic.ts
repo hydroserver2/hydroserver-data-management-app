@@ -40,19 +40,18 @@ export function useFormLogic<T extends WithId>(
     return await createItem(item.value)
   }
 
-  onMounted(async () => {
-    if (initialItem) {
-      item.value = JSON.parse(JSON.stringify(initialItem))
-      return
-    }
-
+  async function init() {
+    if (initialItem) item.value = JSON.parse(JSON.stringify(initialItem))
     if (!hasTemplateSelect) return
+
     try {
       items.value = await fetchItems()
     } catch (error) {
       console.error('Error fetching items from DB.', error)
     }
-  })
+  }
 
-  return { item, items, isEdit, valid, myForm, selectedId, uploadItem }
+  onMounted(init)
+
+  return { item, items, isEdit, valid, myForm, selectedId, init, uploadItem }
 }
