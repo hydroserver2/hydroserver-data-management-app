@@ -57,7 +57,7 @@ const props = defineProps({
 const currentColor = ref(props.useColors)
 
 const updateColors = () => {
-  emit('update:useColors', currentColor)
+  emit('update:useColors', currentColor.value)
   filter()
 }
 

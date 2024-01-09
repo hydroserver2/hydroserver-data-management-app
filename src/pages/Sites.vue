@@ -33,7 +33,7 @@
       <SiteFilterTool
         v-if="showFilter"
         :useColors="useColors"
-        @update:useColors="useColors = $event"
+        @update:useColors="updateColors"
         @filter="handleFilter"
       />
     </KeepAlive>
@@ -41,12 +41,23 @@
     <v-data-table
       v-if="ownedThings?.length"
       :headers="headers"
-      :items="filteredThings"
+      :items="coloredThings"
       hover
       item-value="id"
       class="elevation-3 owned-sites-table"
       @click:row="onRowClick"
-    />
+    >
+      <template v-slot:item.tagValue="{ item }">
+        <template v-for="(tag, index) in item.tags">
+          <v-chip
+            :color="item.color?.background"
+            v-if="tag.key === filterCriteria.key"
+          >
+            {{ item.tagValue }}
+          </v-chip>
+        </template>
+      </template>
+    </v-data-table>
 
     <h5 v-else class="text-h5">You have not registered any sites.</h5>
   </v-container>
@@ -64,9 +75,12 @@ import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
 import { api } from '@/services/api'
 import { Thing } from '@/types'
+import { addColorToMarkers } from '@/utils/googleMaps/markers'
+import { ThingWithColor } from '@/types'
 
 const things = ref<Thing[]>([])
 const useColors = ref(true)
+const isFiltered = ref(false)
 const filterCriteria = ref({ key: '', value: '' })
 
 const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
@@ -74,7 +88,10 @@ const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
 const filteredThings = computed(() => {
   const hasKey = !!filterCriteria.value.key
   const hasValue = !!filterCriteria.value.value
-  if (!hasKey && !hasValue) return ownedThings.value
+  if (!hasKey && !hasValue) {
+    isFiltered.value = false
+    return ownedThings.value
+  }
 
   const filterFunction = (thing: Thing) => {
     if (hasKey && hasValue) {
@@ -84,6 +101,7 @@ const filteredThings = computed(() => {
           tag.value === filterCriteria.value.value
       )
     } else if (hasKey) {
+      isFiltered.value = true
       return thing.tags.some((tag) => tag.key === filterCriteria.value.key)
     } else {
       return thing.tags.some((tag) => tag.value === filterCriteria.value.value)
@@ -93,24 +111,31 @@ const filteredThings = computed(() => {
   return ownedThings.value.filter(filterFunction)
 })
 
+const coloredThings = computed<ThingWithColor[]>(() =>
+  addColorToMarkers(filteredThings.value, filterCriteria.value)
+)
+
 const showSiteForm = ref(false)
 const showFilter = ref(false)
 const router = useRouter()
 
-const headers = [
-  {
-    title: 'Site Code',
-    key: 'samplingFeatureCode',
-  },
-  {
-    title: 'Site Name',
-    key: 'name',
-  },
-  {
-    title: 'Site Type',
-    key: 'siteType',
-  },
-] as const
+const headers = computed(() => {
+  const baseHeaders = [
+    { title: 'Site Code', key: 'samplingFeatureCode' },
+    { title: 'Site Name', key: 'name' },
+    { title: 'Site Type', key: 'siteType' },
+  ]
+
+  if (isFiltered.value && useColors.value) {
+    baseHeaders.push({ title: 'Additional Metadata', key: 'tagValue' })
+  }
+
+  return baseHeaders
+})
+
+const updateColors = (newColor: boolean) => {
+  useColors.value = newColor
+}
 
 const handleFilter = (criteria: { key: string; value: string }) => {
   filterCriteria.value = criteria
