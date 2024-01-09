@@ -30,20 +30,12 @@
     </v-row>
 
     <KeepAlive>
-      <v-card v-if="showFilter" class="mb-6" elevation="2">
-        <v-card-text>
-          <v-row>
-            <SiteFilterTool @filter="handleFilter" />
-          </v-row>
-        </v-card-text>
-        <v-card-text>
-          <v-switch
-            v-model="useColors"
-            color="primary"
-            label="Color Map Markers by Filter"
-          />
-        </v-card-text>
-      </v-card>
+      <SiteFilterTool
+        v-if="showFilter"
+        :useColors="useColors"
+        @update:useColors="useColors = $event"
+        @filter="handleFilter"
+      />
     </KeepAlive>
 
     <v-data-table
@@ -74,7 +66,7 @@ import { api } from '@/services/api'
 import { Thing } from '@/types'
 
 const things = ref<Thing[]>([])
-const useColors = ref(false)
+const useColors = ref(true)
 const filterCriteria = ref({ key: '', value: '' })
 
 const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
