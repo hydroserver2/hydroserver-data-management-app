@@ -14,14 +14,11 @@
           <h5 class="text-h5 mb-4">Policies</h5>
           <a
             class="d-block mb-3"
-            href="https://github.com/hydroserver2/hydroserver/blob/main/terms-of-use.md"
+            :href="policyConfig.termsOfUse"
             target="_blank"
             >Terms of Use</a
           >
-          <a
-            class="d-block"
-            href="https://github.com/hydroserver2/hydroserver/blob/main/privacy-policy.md"
-            target="_blank"
+          <a class="d-block" :href="policyConfig.privacyPolicy" target="_blank"
             >Privacy</a
           >
         </div>
@@ -73,6 +70,7 @@
 
 <script setup lang="ts">
 import uwrlLogo from '@/assets/UWRL-min.png'
+import policyConfig from '@/config/policyConfig'
 
 const version = import.meta.env.VITE_APP_VERSION || '0.0.1'
 </script>
