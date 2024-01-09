@@ -15,6 +15,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
     "@googlemaps/js-api-loader": "^1.16.2",
+    "@googlemaps/markerclusterer": "^2.5.2",
     "@mdi/js": "^7.2.96",
     "@observablehq/plot": "^0.6.10",
     "d3": "^7.8.5",

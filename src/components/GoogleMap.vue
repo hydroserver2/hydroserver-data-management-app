@@ -22,6 +22,7 @@ import { loadMap } from '@/utils/googleMaps/loadMap'
 import { loadMarkers, addColorToMarkers } from '@/utils/googleMaps/markers'
 import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
 import { ThingWithColor } from '@/types'
+import { MarkerClusterer } from '@googlemaps/markerclusterer'
 
 interface FilterCriteria {
   key: string
@@ -40,11 +41,13 @@ const props = defineProps({
     default: () => ({ key: '', value: '' }),
   },
   singleMarkerMode: Boolean,
+  useMarkerClusterer: Boolean,
 })
 const emit = defineEmits(['location-clicked'])
 
 let map: google.maps.Map | null = null
 let markers: google.maps.marker.AdvancedMarkerElement[] = []
+let markerClusterer: MarkerClusterer | null = null
 const mapContainer = ref<HTMLElement>()
 const coloredThings = ref<ThingWithColor[]>([])
 
@@ -52,14 +55,20 @@ watch(
   () => props.things,
   (newThings) => {
     if (props.singleMarkerMode) return
+
     clearMarkers(markers)
-    coloredThings.value = []
-    if (props.useColors)
-      coloredThings.value = addColorToMarkers(newThings, props.filterCriteria)
-    markers = loadMarkers(
-      coloredThings.value.length ? coloredThings.value : newThings,
-      map
-    )
+    if (markerClusterer) markerClusterer.clearMarkers()
+
+    coloredThings.value = props.useColors
+      ? addColorToMarkers(newThings, props.filterCriteria)
+      : newThings
+    markers = loadMarkers(coloredThings.value, map, markerClusterer)
+
+    if (props.useMarkerClusterer) {
+      if (!markerClusterer)
+        markerClusterer = new MarkerClusterer({ markers, map })
+      else markerClusterer.addMarkers(markers)
+    }
   },
   { deep: true }
 )
@@ -79,7 +88,7 @@ const uniqueColoredThings = computed(() => {
 onMounted(async () => {
   if (mapContainer && mapContainer.value) {
     map = await loadMap(mapContainer.value, props.mapOptions)
-    markers = loadMarkers(props.things, map)
+    markers = loadMarkers(props.things, map, markerClusterer)
 
     if (props.singleMarkerMode && map) {
       useSingleMarkerMode(map, markers, (locationData) =>
