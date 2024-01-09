@@ -9,7 +9,7 @@
           alt="Hydro Logo"
           style="max-width: 500px; width: 100%"
         />
-        <h4 class="text-h4 font-weight mb-8 has-text-shadow">
+        <h4 class="text-h4 mb-8 has-text-shadow">
           Collect and Manage Your Operational Hydrologic Data
         </h4>
       </div>
@@ -42,10 +42,8 @@
 
     <v-row>
       <v-col cols="12" sm="6" class="mb-4">
-        <div
-          class="d-flex flex-column flex-sm-row gap-1 text-center text-sm-left"
-        >
-          <div class="text-center">
+        <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
+          <div class="text-center mr-4">
             <v-icon icon="mdi-resistor" size="4rem" />
           </div>
           <div>
@@ -61,10 +59,8 @@
       </v-col>
 
       <v-col cols="12" sm="6" class="mb-4">
-        <div
-          class="d-flex flex-column flex-sm-row gap-1 text-center text-sm-left"
-        >
-          <div class="text-center">
+        <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
+          <div class="text-center mr-4">
             <v-icon icon="mdi-database-outline" size="4rem" />
           </div>
           <div>
@@ -80,10 +76,8 @@
       </v-col>
 
       <v-col cols="12" sm="6" class="mb-4">
-        <div
-          class="d-flex flex-column flex-sm-row gap-1 text-center text-sm-left"
-        >
-          <div class="text-center">
+        <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
+          <div class="text-center mr-4">
             <v-icon icon="mdi-cog-outline" size="4rem" />
           </div>
           <div>
@@ -99,10 +93,8 @@
       </v-col>
 
       <v-col cols="12" sm="6" class="mb-4">
-        <div
-          class="d-flex flex-column flex-sm-row gap-1 text-center text-sm-left"
-        >
-          <div class="text-center">
+        <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
+          <div class="text-center mr-4">
             <v-icon icon="mdi-lock-open-outline" size="4rem" />
           </div>
           <div>
@@ -124,7 +116,7 @@
   <v-container class="my-8">
     <v-row>
       <v-col
-        class="d-flex flex-column justify-center align-center gap-2"
+        class="d-flex flex-column justify-center align-center"
         cols="12"
         sm="5"
         order="last"
@@ -133,13 +125,14 @@
         <v-img
           :src="noaaLogo"
           max-width="12rem"
-          class="fill-width"
+          class="mb-8"
+          width="100%"
           alt="NOAA Logo"
         ></v-img>
         <v-img
           :src="owpLogo"
           max-width="18rem"
-          class="fill-width"
+          width="100%"
           alt="OWP Logo"
         ></v-img>
       </v-col>
@@ -177,10 +170,10 @@
           ></v-img>
         </div>
       </v-col>
-      <v-col cols="12" sm="6" class="d-flex flex-column align-center gap-2">
+      <v-col cols="12" sm="6" class="d-flex flex-column align-center">
         <v-img
           :src="sensorThingsLogo"
-          class="fill-width"
+          width="100%"
           max-width="35rem"
           alt="SensorThings Database Schema"
         ></v-img>
@@ -191,10 +184,11 @@
 
   <v-divider> </v-divider>
 
-  <v-container class="d-flex flex-column align-center my-8 gap-2">
+  <v-container class="d-flex flex-column align-center my-8">
     <v-img
       :src="cirohLogo"
-      class="fill-width"
+      class="mb-8"
+      width="100%"
       max-width="14rem"
       alt="CIROH Logo"
     ></v-img>
@@ -229,6 +223,10 @@ p {
   max-width: 40rem;
 }
 
+.has-text-shadow {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.65);
+}
+
 $gradient: linear-gradient(
     180deg,
     rgba(55, 104, 155, 0.47) 10%,
@@ -243,13 +241,5 @@ $gradient: linear-gradient(
   background-repeat: no-repeat;
   background-position: center;
   height: 37rem;
-
-  // @media (min-width: 768px) {
-  //   background-image: $gradient, url(@/assets/banner_50.jpg);
-  // }
-
-  // @media (min-width: 1200px) {
-  //   background-image: $gradient, url(@/assets/banner_25.jpg);
-  // }
 }
 </style>

@@ -103,6 +103,9 @@ a:hover {
 </style>
 
 <style scoped>
+.fill-width {
+  width: 100%;
+}
 .legend {
   position: absolute;
   bottom: 10px; /* Adjust as needed */

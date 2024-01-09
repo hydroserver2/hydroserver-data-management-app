@@ -7,13 +7,13 @@
     class="elevation-2"
   >
     <template v-slot:item.status="{ item }">
-      <DataSourceStatus :status="item.raw.status" :paused="item.raw.paused" />
+      <DataSourceStatus :status="item.status" :paused="item.paused" />
     </template>
 
     <template v-slot:item.actions="{ item }">
       <v-icon
-        :icon="item.raw.paused ? 'mdi-play' : 'mdi-pause'"
-        @click="togglePaused(item.raw)"
+        :icon="item.paused ? 'mdi-play' : 'mdi-pause'"
+        @click="togglePaused(item)"
       />
 
       <v-menu>
@@ -26,18 +26,18 @@
             prepend-icon="mdi-information"
             :to="{
               name: 'DataSource',
-              params: { id: item.raw.id },
+              params: { id: item.id },
             }"
           />
           <v-list-item
             title="Edit Data Source"
             prepend-icon="mdi-pencil"
-            @click="openDialog(item.raw, 'edit')"
+            @click="openDialog(item, 'edit')"
           />
           <v-list-item
             title="Delete Data Source"
             prepend-icon="mdi-delete"
-            @click="openDialog(item.raw, 'delete')"
+            @click="openDialog(item, 'delete')"
           />
         </v-list>
       </v-menu>

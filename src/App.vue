@@ -2,11 +2,9 @@
   <v-app>
     <Navbar v-if="!route.meta.hideNavBar" />
 
-    <v-main
-      class="flex-grow-1"
-      :class="{ 'is-full-screen': route.meta.isFullScreen }"
-      ><router-view
-    /></v-main>
+    <v-main :class="`is-full-screen:${route.meta.isFullScreen} flex-grow-1`">
+      <router-view />
+    </v-main>
 
     <Footer v-if="!route.meta.hideFooter" class="flex-grow-0" />
     <Notifications />
@@ -31,22 +29,5 @@ setupRouteGuards()
 <style scoped lang="scss">
 .v-main.is-full-screen {
   height: 100vh;
-}
-</style>
-
-<style>
-.is-required .v-label.v-field-label::after {
-  display: inline;
-  content: '*';
-  margin-left: 0.15rem;
-}
-
-/* TODO: This needs to be done by overriding SASS variables.
-https://vuetifyjs.com/en/features/sass-variables/#sass
-https://vuetifyjs.com/en/api/v-tooltip/#sass */
-/* Make tooltips easier to read */
-.v-tooltip > .v-overlay__content {
-  background-color: rgba(var(--v-theme-surface-variant), 1) !important;
-  font-size: 1.1em !important;
 }
 </style>

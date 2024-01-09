@@ -1,8 +1,8 @@
 <template>
   <v-data-table :headers="UnitHeaders" :items="sortedItems">
     <template v-slot:item.actions="{ item }">
-      <v-icon @click="openDialog(item.raw, 'edit')"> mdi-pencil </v-icon>
-      <v-icon @click="openDialog(item.raw, 'delete')"> mdi-delete </v-icon>
+      <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
+      <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
   </v-data-table>
 
