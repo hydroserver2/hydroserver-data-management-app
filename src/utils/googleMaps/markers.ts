@@ -1,6 +1,7 @@
 import { Thing } from '@/types'
 import { googlePinColors } from '@/utils/materialColors'
 import { ThingWithColor } from '@/types'
+import { MarkerClusterer } from '@googlemaps/markerclusterer'
 
 let infoWindow: google.maps.InfoWindow | null = null
 
@@ -29,7 +30,11 @@ export const addColorToMarkers = (
   })
 }
 
-export const loadMarkers = (things: Thing[], map: google.maps.Map | null) => {
+export const loadMarkers = (
+  things: Thing[],
+  map: google.maps.Map | null,
+  markerClusterer: MarkerClusterer | null
+) => {
   if (!things || !map) return []
 
   map.addListener('click', (e: any) => {
@@ -38,7 +43,7 @@ export const loadMarkers = (things: Thing[], map: google.maps.Map | null) => {
   })
 
   return things
-    .map((thing) => createMarker(thing, map))
+    .map((thing) => createMarker(thing, map, markerClusterer))
     .filter(
       (marker): marker is google.maps.marker.AdvancedMarkerElement =>
         marker !== null
@@ -47,7 +52,8 @@ export const loadMarkers = (things: Thing[], map: google.maps.Map | null) => {
 
 const createMarker = (
   markerData: ThingWithColor,
-  map: google.maps.Map | null
+  map: google.maps.Map | null,
+  markerClusterer: MarkerClusterer | null
 ) => {
   if (!markerData || !map || !markerData.latitude || !markerData.longitude)
     return null
@@ -60,6 +66,8 @@ const createMarker = (
     map: map,
     content: pin.element,
   })
+
+  if (markerClusterer) markerClusterer.addMarker(marker)
 
   const content = generateMarkerContent(markerData)
 

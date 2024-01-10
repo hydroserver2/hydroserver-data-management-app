@@ -66,6 +66,7 @@
     <GoogleMap
       :things="filteredThings"
       :mapOptions="{ center: { lat: 39, lng: -100 }, zoom: 4 }"
+      useMarkerClusterer
     />
   </div>
 </template>
