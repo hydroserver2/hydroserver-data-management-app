@@ -1,6 +1,4 @@
-import { Ref, computed, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
+import { Ref, onMounted, ref } from 'vue'
 
 interface WithId {
   id: string
@@ -11,18 +9,10 @@ export function useTableLogic<T extends WithId>(
   apiDeleteFunction: (id: string) => Promise<any>,
   ItemClass: new () => T
 ) {
-  const { user } = storeToRefs(useUserStore())
-
   const openEdit = ref(false)
   const openDelete = ref(false)
   const item = ref(new ItemClass()) as Ref<T>
   const items: Ref<T[]> = ref([])
-
-  const ownedItems = computed(() =>
-    user.value?.email
-      ? items.value.filter((u: any) => u.owner === user.value.email)
-      : []
-  )
 
   function openDialog(selectedItem: T, dialog: string) {
     item.value = selectedItem
@@ -55,7 +45,6 @@ export function useTableLogic<T extends WithId>(
   })
 
   return {
-    ownedItems,
     openEdit,
     openDelete,
     item,

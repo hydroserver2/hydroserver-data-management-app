@@ -33,20 +33,12 @@ import { ObservedProperty } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
-// TODO: Only fetch the observedProperties the user is the primary owner of
-const {
-  item,
-  ownedItems,
-  openEdit,
-  openDelete,
-  openDialog,
-  onUpdate,
-  onDelete,
-} = useTableLogic(
-  api.fetchObservedProperties,
-  api.deleteObservedProperty,
-  ObservedProperty
-)
+const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
+  useTableLogic(
+    api.fetchOwnedObservedProperties,
+    api.deleteObservedProperty,
+    ObservedProperty
+  )
 
 const headers = [
   { title: 'Name', key: 'name' },
@@ -56,6 +48,6 @@ const headers = [
 ] as const
 
 const sortedItems = computed(() =>
-  ownedItems.value.sort((a, b) => a.name.localeCompare(b.name))
+  items.value.sort((a, b) => a.name.localeCompare(b.name))
 )
 </script>

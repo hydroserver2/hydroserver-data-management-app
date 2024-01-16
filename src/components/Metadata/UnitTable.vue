@@ -29,16 +29,8 @@ import { Unit } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
-// TODO: Only fetch the units the user is the primary owner of
-const {
-  item,
-  ownedItems,
-  openEdit,
-  openDelete,
-  openDialog,
-  onUpdate,
-  onDelete,
-} = useTableLogic(api.fetchUnits, api.deleteUnit, Unit)
+const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
+  useTableLogic(api.fetchOwnedUnits, api.deleteUnit, Unit)
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },
@@ -48,6 +40,6 @@ const UnitHeaders = [
 ] as const
 
 const sortedItems = computed(() =>
-  ownedItems.value.sort((a, b) => a.name.localeCompare(b.name))
+  items.value.sort((a, b) => a.name.localeCompare(b.name))
 )
 </script>

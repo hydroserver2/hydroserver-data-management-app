@@ -33,20 +33,12 @@ import { ProcessingLevel } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
-// TODO: Only fetch the PLs the user is the primary owner of
-const {
-  item,
-  ownedItems,
-  openEdit,
-  openDelete,
-  openDialog,
-  onUpdate,
-  onDelete,
-} = useTableLogic(
-  api.fetchProcessingLevels,
-  api.deleteProcessingLevel,
-  ProcessingLevel
-)
+const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
+  useTableLogic(
+    api.fetchOwnedProcessingLevels,
+    api.deleteProcessingLevel,
+    ProcessingLevel
+  )
 
 const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },
@@ -56,6 +48,6 @@ const ProcLevelHeaders = [
 ] as const
 
 const sortedItems = computed(() =>
-  ownedItems.value.sort((a, b) => a.code.localeCompare(b.code))
+  items.value.sort((a, b) => a.code.localeCompare(b.code))
 )
 </script>
