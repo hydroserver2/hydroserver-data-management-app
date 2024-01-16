@@ -76,9 +76,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-// TODO: fetch only unownedUnits
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchObservedProperties,
+  api.fetchUnownedObservedProperties,
   api.createObservedProperty,
   api.updateObservedProperty,
   ObservedProperty,

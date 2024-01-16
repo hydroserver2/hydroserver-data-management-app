@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :headers="headers" :items="ownedItems">
+  <v-data-table :headers="headers" :items="items">
     <template v-slot:item.actions="{ item }">
       <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
@@ -32,19 +32,12 @@ import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 
-const {
-  item,
-  ownedItems,
-  openEdit,
-  openDelete,
-  openDialog,
-  onUpdate,
-  onDelete,
-} = useTableLogic(
-  api.fetchResultQualifiers,
-  api.deleteResultQualifier,
-  ResultQualifier
-)
+const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
+  useTableLogic(
+    api.fetchOwnedResultQualifiers,
+    api.deleteResultQualifier,
+    ResultQualifier
+  )
 
 const headers = [
   { title: 'Code', key: 'code' },

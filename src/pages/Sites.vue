@@ -78,12 +78,10 @@ import { Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
 import { ThingWithColor } from '@/types'
 
-const things = ref<Thing[]>([])
+const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)
 const isFiltered = ref(false)
 const filterCriteria = ref({ key: '', value: '' })
-
-const ownedThings = computed(() => things.value.filter((t) => t.ownsThing))
 
 const filteredThings = computed(() => {
   const hasKey = !!filterCriteria.value.key
@@ -145,9 +143,9 @@ const onRowClick = (event: Event, item: any) => {
   router.push({ name: 'SiteDetails', params: { id: item.item.id } })
 }
 
-const refreshThings = async () => (things.value = await api.fetchThings())
+const refreshThings = async () =>
+  (ownedThings.value = await api.fetchOwnedThings())
 
-// TODO: Fetch owned things
 onMounted(async () => refreshThings())
 </script>
 
