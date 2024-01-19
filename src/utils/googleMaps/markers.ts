@@ -71,7 +71,7 @@ const createMarker = (
 
   const content = generateMarkerContent(markerData)
 
-  marker.addEventListener('gmp-click', (e: any) => {
+  marker.addListener('click', (e: any) => {
     if (infoWindow) infoWindow.close()
     infoWindow = new google.maps.InfoWindow({ content })
     infoWindow.open({ anchor: marker, map: map })
