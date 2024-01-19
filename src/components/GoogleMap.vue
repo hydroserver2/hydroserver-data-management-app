@@ -18,7 +18,11 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, PropType, computed } from 'vue'
 import { Thing } from '@/types'
-import { loadMap } from '@/utils/googleMaps/loadMap'
+import {
+  loadMap,
+  getBoundedMapOptions,
+  zoomAndCenterMap,
+} from '@/utils/googleMaps/loadMap'
 import { loadMarkers, addColorToMarkers } from '@/utils/googleMaps/markers'
 import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
 import { ThingWithColor } from '@/types'
@@ -37,6 +41,7 @@ const props = defineProps({
     default: defaultMapOptions,
   },
   useColors: Boolean,
+  useBounds: Boolean,
   filterCriteria: {
     type: Object as PropType<FilterCriteria>,
     default: () => ({ key: '', value: '' }),
@@ -65,6 +70,9 @@ watch(
       : newThings
     markers = loadMarkers(coloredThings.value, map, markerClusterer)
 
+    if (props.useBounds)
+      zoomAndCenterMap(map, mapContainer.value!, props.things, props.mapOptions)
+
     if (props.useMarkerClusterer) {
       if (!markerClusterer)
         markerClusterer = new MarkerClusterer({ markers, map })
@@ -88,7 +96,10 @@ const uniqueColoredThings = computed(() => {
 
 onMounted(async () => {
   if (mapContainer && mapContainer.value) {
-    map = await loadMap(mapContainer.value, props.mapOptions)
+    const initialMapOptions = props.useBounds
+      ? getBoundedMapOptions(mapContainer.value, props.things, props.mapOptions)
+      : props.mapOptions
+    map = await loadMap(mapContainer.value, initialMapOptions)
     markers = loadMarkers(props.things, map, markerClusterer)
 
     if (props.singleMarkerMode && map) {

@@ -5,6 +5,7 @@
       :useColors="useColors"
       :filter-criteria="filterCriteria"
       :things="filteredThings"
+      useBounds
     />
   </div>
 
