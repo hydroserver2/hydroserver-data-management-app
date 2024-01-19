@@ -23,6 +23,7 @@ import { loadMarkers, addColorToMarkers } from '@/utils/googleMaps/markers'
 import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
 import { ThingWithColor } from '@/types'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
+import { defaultMapOptions } from '@/config/googleMapsConfig'
 
 interface FilterCriteria {
   key: string
@@ -33,7 +34,7 @@ const props = defineProps({
   things: { type: Array<Thing>, default: [] },
   mapOptions: {
     type: Object,
-    default: { center: { lat: 39, lng: -100 }, zoom: 4 },
+    default: defaultMapOptions,
   },
   useColors: Boolean,
   filterCriteria: {
