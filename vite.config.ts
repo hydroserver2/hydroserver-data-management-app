@@ -13,6 +13,9 @@ export default defineConfig({
       styles: { configFile: 'src/styles/settings.scss' },
     }),
   ],
+  optimizeDeps: {
+    exclude: ['vuetify'],
+  },
   server: {
     host: '127.0.0.1',
     port: 5173,
