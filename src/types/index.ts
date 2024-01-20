@@ -51,6 +51,7 @@ export class Thing {
   samplingFeatureType: string
   state: string
   county: string
+  country: string
   isPrimaryOwner: boolean
   dataDisclaimer: string
   hydroShareArchiveResourceId: string
@@ -70,6 +71,7 @@ export class Thing {
     this.samplingFeatureType = 'Site'
     this.state = ''
     this.county = ''
+    this.country = ''
     this.isPrimaryOwner = false
     this.dataDisclaimer = ''
     this.hydroShareArchiveResourceId = ''
