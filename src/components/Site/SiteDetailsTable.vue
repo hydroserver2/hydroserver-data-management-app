@@ -76,8 +76,21 @@ const thingProperties = computed(() => {
           label: 'Site Type',
           value: thing.value.siteType,
         },
-        { icon: 'fas fa-flag-usa', label: 'State', value: thing.value.state },
-        { icon: 'fas fa-flag-usa', label: 'County', value: thing.value.county },
+        {
+          icon: 'fas fa-flag-usa',
+          label: 'State/Province/Region',
+          value: thing.value.state,
+        },
+        {
+          icon: 'fas fa-flag-usa',
+          label: 'County/District',
+          value: thing.value.county,
+        },
+        {
+          icon: 'fas fa-flag-usa',
+          label: 'Country',
+          value: thing.value.country,
+        },
         {
           icon: thing.value.isPrivate ? 'fas fa-lock' : 'fas fa-globe',
           label: 'Privacy',

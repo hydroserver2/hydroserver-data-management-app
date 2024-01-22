@@ -20,22 +20,22 @@ export async function getElevation(position: LatLng) {
 export async function getGeoData(position: LatLng) {
   try {
     const geocoder = new google.maps.Geocoder()
-    const { results } = await geocoder.geocode({
-      location: position,
-    })
+    const { results } = await geocoder.geocode({ location: position })
 
-    const { state, county } = results[0].address_components.reduce(
+    const { state, county, country } = results[0].address_components.reduce(
       (acc: any, component: any) => {
         if (component.types.includes('administrative_area_level_1'))
           acc.state = component.short_name
         if (component.types.includes('administrative_area_level_2'))
           acc.county = component.short_name
+        if (component.types.includes('country'))
+          acc.country = component.short_name //  2-letter country code
         return acc
       },
-      { state: '', county: '' }
+      { state: '', county: '', country: '' }
     )
 
-    return { state, county }
+    return { state, county, country }
   } catch (error) {
     console.error(`Failed to get geolocation data: ${error}`)
   }
@@ -48,7 +48,7 @@ export function addMarker(map: Map, markers: Marker[], position: LatLng) {
 
 export async function fetchLocationData(position: LatLng) {
   const { elevation }: any = await getElevation(position)
-  const { state, county }: any = await getGeoData(position)
+  const { state, county, country }: any = await getGeoData(position)
 
   return {
     latitude: position.lat.toFixed(6),
@@ -56,6 +56,7 @@ export async function fetchLocationData(position: LatLng) {
     elevation_m: Math.round(elevation),
     state: state,
     county: county,
+    country: country,
   }
 }
 
