@@ -8,7 +8,7 @@
         v-if="loaded"
         :singleMarkerMode="true"
         @location-clicked="onMapLocationClicked"
-        :mapOptions="thingId ? mapOptions : undefined"
+        :mapOptions="mapOptions"
         :things="thingId ? [thing] : []"
       />
     </div>
@@ -187,14 +187,8 @@ const emit = defineEmits(['close', 'created'])
 let loaded = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
-
-const mapOptions = ref({
-  center: { lat: 39, lng: -100 },
-  zoom: 4,
-  mapTypeId: 'roadmap',
-})
+const mapOptions = ref<any>(undefined)
 const thing = reactive<Thing>(new Thing())
-
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
 
 watch(
