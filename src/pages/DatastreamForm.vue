@@ -385,7 +385,10 @@ const defaultDescription = computed(() => {
   const sensorName = sensors.value.find(
     (pl) => pl.id === datastream.value.sensorId
   )?.name
-  return `A datastream of ${OP} at ${thing.value?.name} with processing level ${PL} and sampled medium ${datastream.value.sampledMedium} created using a method with name ${sensorName}`
+  const unitName = units.value.find(
+    (pl) => pl.id === datastream.value.unitId
+  )?.name
+  return `A datastream of ${OP} at ${thing.value?.name} with processing level ${PL} and sampled medium ${datastream.value.sampledMedium} created using a method with name ${sensorName} having units of ${unitName}`
 })
 
 watchEffect(() => {
