@@ -33,35 +33,47 @@
     >
       <v-card class="outlined-container mb-10">
         <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          Specify a name and description for this datastream. Defaults are
-          provided for you.
+          Enter a name and description for this datastream, or opt to use the
+          default text. If you select the defaults, they will dynamically update
+          based on the information you provide in other sections of the form.
         </v-card-text>
 
         <v-card-text>
-          <v-text-field
-            v-model="datastream.name"
-            :disabled="datastream.useDefaultName"
-            label="Datastream name *"
-          />
-          <v-switch
-            color="primary"
-            label="Use default"
-            v-model="datastream.useDefaultName"
-          />
+          <v-row align="center" no-gutters>
+            <v-col cols="auto" class="flex-grow-1">
+              <v-text-field
+                v-model="datastream.name"
+                :disabled="datastream.useDefaultName"
+                label="Datastream name *"
+              />
+            </v-col>
+            <v-col cols="auto" class="ml-2">
+              <v-switch
+                color="primary"
+                label="Use default"
+                v-model="datastream.useDefaultName"
+              />
+            </v-col>
+          </v-row>
         </v-card-text>
 
         <v-card-text>
-          <v-textarea
-            v-model="datastream.description"
-            :disabled="datastream.useDefaultDescription"
-            label="Datastream description *"
-          >
-          </v-textarea>
-          <v-switch
-            color="primary"
-            label="Use Default"
-            v-model="datastream.useDefaultDescription"
-          />
+          <v-row align="center" no-gutters>
+            <v-col cols="auto" class="flex-grow-1">
+              <v-textarea
+                v-model="datastream.description"
+                :disabled="datastream.useDefaultDescription"
+                label="Datastream description *"
+              />
+            </v-col>
+            <v-col cols="auto" class="ml-2">
+              <v-switch
+                color="primary"
+                label="Use Default"
+                v-model="datastream.useDefaultDescription"
+              />
+            </v-col>
+          </v-row>
         </v-card-text>
       </v-card>
 
@@ -352,7 +364,7 @@ const handleMetadataUploaded = async (dsKey: string, newId: string) => {
 const originalName = ref('')
 const originalDescription = ref('')
 
-const defaultNameText = () => {
+const defaultName = computed(() => {
   const OP = observedProperties.value.find(
     (pl) => pl.id === datastream.value.observedPropertyId
   )?.name
@@ -360,9 +372,9 @@ const defaultNameText = () => {
     (pl) => pl.id === datastream.value.processingLevelId
   )?.code
   return `${OP} at ${thing.value?.samplingFeatureCode} with processing level ${PL}`
-}
+})
 
-const defaultDescriptionText = () => {
+const defaultDescription = computed(() => {
   const OP = observedProperties.value.find(
     (pl) => pl.id === datastream.value.observedPropertyId
   )?.name
@@ -374,17 +386,7 @@ const defaultDescriptionText = () => {
     (pl) => pl.id === datastream.value.sensorId
   )?.name
   return `A datastream of ${OP} at ${thing.value?.name} with processing level ${PL} and sampled medium ${datastream.value.sampledMedium} created using a method with name ${sensorName}`
-}
-
-const defaultName = computed(() =>
-  datastream.value.useDefaultName ? defaultNameText() : datastream.value.name
-)
-
-const defaultDescription = computed(() =>
-  datastream.value.useDefaultDescription
-    ? defaultDescriptionText()
-    : datastream.value.description
-)
+})
 
 watchEffect(() => {
   const currentDefaultName = defaultName.value
