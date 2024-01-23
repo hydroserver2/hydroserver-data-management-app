@@ -50,7 +50,7 @@
             <v-col cols="auto" class="ml-2">
               <v-switch
                 color="primary"
-                label="Use default"
+                label="Use Default"
                 v-model="datastream.useDefaultName"
               />
             </v-col>
