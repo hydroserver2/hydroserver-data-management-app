@@ -90,7 +90,9 @@ export interface ThingWithColor extends Thing {
 export class Datastream {
   id: string
   name: string
+  useDefaultName: boolean
   description: string
+  useDefaultDescription: boolean
   thingId: string
   observationType: string
   resultType?: string
@@ -116,8 +118,10 @@ export class Datastream {
 
   constructor(thingId?: string) {
     this.id = ''
-    this.name = 'Datastream'
-    this.description = 'Site Datastream'
+    this.name = ''
+    this.useDefaultName = true
+    this.description = ''
+    this.useDefaultDescription = true
     this.thingId = thingId || ''
     this.observationType = 'OM_Measurement'
     this.resultType = 'Time Series Coverage'
