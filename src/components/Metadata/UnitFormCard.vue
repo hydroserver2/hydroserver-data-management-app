@@ -66,10 +66,9 @@ import { computed } from 'vue'
 const props = defineProps({ unit: Object as () => Unit })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-// TODO: fetch only unownedUnits
 const { item, items, selectedId, isEdit, valid, myForm, uploadItem } =
   useFormLogic(
-    api.fetchUnits,
+    api.fetchUnownedUnits,
     api.createUnit,
     api.updateUnit,
     Unit,

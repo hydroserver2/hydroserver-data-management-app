@@ -1,8 +1,8 @@
 <template>
   <v-data-table :headers="ProcLevelHeaders" :items="sortedItems">
     <template v-slot:item.actions="{ item }">
-      <v-icon @click="openDialog(item.raw, 'edit')"> mdi-pencil </v-icon>
-      <v-icon @click="openDialog(item.raw, 'delete')"> mdi-delete </v-icon>
+      <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
+      <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
   </v-data-table>
 
@@ -33,20 +33,12 @@ import { ProcessingLevel } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
-// TODO: Only fetch the PLs the user is the primary owner of
-const {
-  item,
-  ownedItems,
-  openEdit,
-  openDelete,
-  openDialog,
-  onUpdate,
-  onDelete,
-} = useTableLogic(
-  api.fetchProcessingLevels,
-  api.deleteProcessingLevel,
-  ProcessingLevel
-)
+const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
+  useTableLogic(
+    api.fetchOwnedProcessingLevels,
+    api.deleteProcessingLevel,
+    ProcessingLevel
+  )
 
 const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },
@@ -56,6 +48,6 @@ const ProcLevelHeaders = [
 ] as const
 
 const sortedItems = computed(() =>
-  ownedItems.value.sort((a, b) => a.code.localeCompare(b.code))
+  items.value.sort((a, b) => a.code.localeCompare(b.code))
 )
 </script>

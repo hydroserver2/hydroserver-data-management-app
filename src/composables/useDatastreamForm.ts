@@ -20,7 +20,7 @@ export function useDatastreamForm(thingId: string, datastreamId: string) {
       processingLevelId: fetchedDS.processingLevelId,
       unitId: fetchedDS.unitId,
       timeAggregationIntervalUnitsId: fetchedDS.timeAggregationIntervalUnitsId,
-      intendedTimeSpacingUnitsId: fetchedDS.intendedTimeSpacingUnitsId,
+      intendedTimeSpacingUnits: fetchedDS.intendedTimeSpacingUnits,
       name: fetchedDS.name,
       description: fetchedDS.description,
       sampledMedium: fetchedDS.sampledMedium,

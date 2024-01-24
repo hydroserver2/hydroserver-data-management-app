@@ -9,46 +9,43 @@
       <v-col>
         <v-row style="font-size: 1.2em">
           <strong class="mr-2">Observed Property:</strong>
-          <strong>{{ item.raw.OPName }}</strong>
+          <strong>{{ item.OPName }}</strong>
         </v-row>
-        <v-row>
-          <strong class="mr-2">Identifier:</strong> {{ item.raw.id }}
-        </v-row>
+        <v-row> <strong class="mr-2">Identifier:</strong> {{ item.id }} </v-row>
         <v-row>
           <strong class="mr-2">Processing Level:</strong>
           {{
-            processingLevels.find((p) => p.id === item.raw.processingLevelId)
-              ?.code
+            processingLevels.find((p) => p.id === item.processingLevelId)?.code
           }}
         </v-row>
         <v-row>
           <strong class="mr-2">Sampled Medium:</strong>
-          {{ item.raw.sampledMedium }}
+          {{ item.sampledMedium }}
         </v-row>
         <v-row>
           <strong class="mr-2">Sensor:</strong>
-          {{ sensors.find((s) => s.id === item.raw.sensorId)?.name }}
+          {{ sensors.find((s) => s.id === item.sensorId)?.name }}
         </v-row>
       </v-col>
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="loaded[item.raw.id]">
-        <div v-if="!isOwner && !item.raw.isDataVisible">
+      <div v-if="loaded[item.id]">
+        <div v-if="!isOwner && !item.isDataVisible">
           Data is private for this datastream
         </div>
-        <div v-else-if="observations[item.raw.id]">
-          <v-dialog v-model="item.raw.chartOpen" width="80rem">
+        <div v-else-if="observations[item.id]">
+          <v-dialog v-model="item.chartOpen" width="80rem">
             <FocusContextPlot
               :thing-name="thing?.name || 'Site'"
-              :datastream="item.raw"
-              @close="item.raw.chartOpen = false"
+              :datastream="item"
+              @close="item.chartOpen = false"
             />
           </v-dialog>
           <Sparkline
-            @click="item.raw.chartOpen = true"
-            :is-stale="isStale(item.raw.phenomenonEndTime)"
-            :observations="observations[item.raw.id]"
+            @click="item.chartOpen = true"
+            :observations="observations[item.id]"
+            :datastream="item"
           />
         </div>
         <div v-else>No data for this datastream</div>
@@ -57,27 +54,27 @@
     </template>
 
     <template v-slot:item.last_observation="{ item }">
-      <div
-        v-if="mostRecentObs[item.raw.id] && (isOwner || item.raw.isDataVisible)"
-      >
+      <div v-if="mostRecentObs[item.id] && (isOwner || item.isDataVisible)">
         <v-row>
-          {{ formatDate(mostRecentObs[item.raw.id][0]) }}
+          {{ formatDate(mostRecentObs[item.id][0]) }}
         </v-row>
         <v-row>
-          {{ mostRecentObs[item.raw.id][1] }}&nbsp;
-          {{ units.find((u) => u.id === item.raw.unitId)?.name }}
+          {{ mostRecentObs[item.id][1] }}&nbsp;
+          {{ units.find((u) => u.id === item.unitId)?.name }}
         </v-row>
       </div>
     </template>
 
     <template v-slot:item.actions="{ item }">
       <DatastreamTableActions
+        :key="actionKey"
         v-if="isOwner !== undefined"
-        :datastream="item.raw"
+        :datastream="item"
         :is-owner="isOwner"
         :thing-id="thingId"
-        @openPlot="item.raw.chartOpen = true"
-        @deleted="onDeleteDatastream(item.raw.id)"
+        @openPlot="item.chartOpen = true"
+        @deleted="onDeleteDatastream(item.id)"
+        @linkUpdated="loadDatastreams"
       />
     </template>
   </v-data-table>
@@ -87,7 +84,7 @@
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 
 import Sparkline from '@/components/Sparkline.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
 import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { storeToRefs } from 'pinia'
@@ -113,6 +110,7 @@ const { loaded, observations, mostRecentObs } = storeToRefs(
 )
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
+const actionKey = ref(1)
 
 const { sensors, units, observedProperties, processingLevels } = useMetadata(
   props.thingId
@@ -153,18 +151,21 @@ function formatDate(dateString: string) {
   )
 }
 
-function isStale(timestamp: string) {
-  let endTime = new Date(timestamp)
-  let seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000)
-  return endTime < seventyTwoHoursAgo
-}
-
 function onDeleteDatastream(id: string) {
   datastreams.value = datastreams.value.filter((ds) => ds.id !== id)
 }
 
+const loadDatastreams = async () => {
+  try {
+    datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
+    actionKey.value += 1
+  } catch (e) {
+    console.error('Error fetching datastreams', e)
+  }
+}
+
 onMounted(async () => {
-  datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
+  await loadDatastreams()
   await fetchObservationsBulk(visibleDatastreams.value)
 })
 </script>

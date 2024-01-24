@@ -39,16 +39,6 @@ describe('Login Component', () => {
     cy.url().should('include', '/login')
   })
 
-  // TODO
-  it('logs in on-click of submit button', () => {
-    cy.login('john')
-  })
-
-  // TODO
-  // it('logs in on-enter of focused email or password field', () => {
-  //   cy.login('john')
-  // })
-
   it('logging in redirects to sites page', () => {
     cy.login('paul')
     cy.url().should('include', '/sites')

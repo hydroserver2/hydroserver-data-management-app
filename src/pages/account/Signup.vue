@@ -206,6 +206,7 @@ import OAuth from '@/components/account/OAuth.vue'
 import { api } from '@/services/api'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
+import { Snackbar } from '@/utils/notifications'
 
 const valid = ref(false)
 const confirmPassword = ref('')
@@ -228,9 +229,13 @@ async function createUser() {
     const data = await api.createUser(user)
     setUser(data.user)
     setTokens(data.access, data.refresh)
+    Snackbar.success('Account created.')
     await router.push({ name: 'VerifyEmail' })
   } catch (error) {
     console.error('Error creating user', error)
+    if ((error as Error).message === '409') {
+      Snackbar.warn('A user with this email already exists.')
+    }
   }
 }
 </script>

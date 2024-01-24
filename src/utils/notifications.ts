@@ -1,47 +1,90 @@
 import { Subject } from 'rxjs'
 
-export const DEFAULT_TOAST_DURATION = 5000
+export const DEFAULT_SNACK_DURATION = 3000
 
-export interface IToast {
-  message: string
-  duration?: number
-  position?: 'center' | 'left'
-  isInfinite?: boolean
-  type?: 'success' | 'error' | 'info' | 'default'
-  // isPersistent?: boolean // Currently has no effect
+enum SnackType {
+  Warning = 'Warning',
+  Success = 'Success',
+  Error = 'Error',
+  Info = 'Info',
 }
 
-export interface IDialog {
-  title: string
-  content: string
-  confirmText?: string
-  secondaryActionText?: string
-  cancelText?: string
-  onConfirm: () => any
-  onSecondaryAction?: () => any
-  onCancel?: () => any
+export enum SnackColor {
+  Warning = 'warning',
+  Success = 'success',
+  Error = 'error',
+  Info = 'info',
 }
 
-export default class Notification {
-  static entity = 'notification'
-  static toast$ = new Subject<IToast>()
-  static dialog$ = new Subject<IDialog>()
+export enum SnackIcon {
+  Success = 'mdi-checkbox-marked-circle',
+  Warning = 'mdi-alert',
+  Error = 'mdi-alert-circle',
+  Info = 'mdi-information',
+  None = 'none',
+}
 
-  static toast(params: IToast) {
-    this.toast$.next({
-      ...params,
-      duration:
-        params.duration !== undefined
-          ? params.duration
-          : DEFAULT_TOAST_DURATION,
-      position: params.position || 'center',
-      isInfinite: !!params.isInfinite,
-      type: params.type,
-      // isPersistent: params.isPersistent !== undefined ? params.isPersistent : true,
-    })
+export enum SnackTitle {
+  Warning = 'Warning',
+  Success = 'Success',
+  Error = 'Error',
+  Info = 'Info',
+}
+
+export enum Position {
+  Center = 'center',
+  Left = 'left',
+  Right = 'right',
+  Bottom = 'bottom',
+  Top = 'top',
+}
+
+export class Snack {
+  constructor(
+    public message: string = '',
+    public color: SnackColor = SnackColor.Info,
+    public icon: SnackIcon = SnackIcon.None,
+    public title: SnackTitle = SnackTitle.Info,
+    public timeout: number = DEFAULT_SNACK_DURATION,
+    public position: Position = Position.Center,
+    public visible: boolean = false
+  ) {}
+}
+
+export class Snackbar {
+  private static subject = new Subject<Snack>()
+
+  static get snack$() {
+    return this.subject.asObservable()
   }
 
-  static openDialog(params: IDialog) {
-    this.dialog$.next(params)
+  private static createSnackbar(message: string, type: SnackType): void {
+    this.subject.next(
+      new Snack(
+        message,
+        SnackColor[type],
+        SnackIcon[type],
+        SnackTitle[type],
+        DEFAULT_SNACK_DURATION,
+        Position.Bottom,
+        true
+      )
+    )
+  }
+
+  static success(message: string): void {
+    this.createSnackbar(message, SnackType.Success)
+  }
+
+  static warn(message: string): void {
+    this.createSnackbar(message, SnackType.Warning)
+  }
+
+  static error(message: string): void {
+    this.createSnackbar(message, SnackType.Error)
+  }
+
+  static info(message: string): void {
+    this.createSnackbar(message, SnackType.Info)
   }
 }

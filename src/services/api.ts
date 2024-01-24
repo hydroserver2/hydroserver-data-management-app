@@ -1,4 +1,4 @@
-import { api as apiMethods } from '@/services/apiMethods'
+import { apiMethods } from '@/services/apiMethods'
 import {
   Unit,
   Thing,
@@ -15,7 +15,7 @@ import {
 
 export const BASE_URL = `${
   import.meta.env.MODE === 'development'
-    ? 'http://127.0.0.1:8000'
+    ? 'http://127.0.0.1:3030'
     : import.meta.env.VITE_APP_PROXY_BASE_URL
 }/api`
 
@@ -99,6 +99,8 @@ export const api = {
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
+  fetchUnownedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owned=false`),
+  fetchOwnedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owned=true`),
   updateUnit: async (newUnit: Unit, oldUnit: Unit | null = null) =>
     apiMethods.patch(`${UNIT_BASE}/${newUnit.id}`, newUnit, oldUnit),
   deleteUnit: async (id: string) => apiMethods.delete(`${UNIT_BASE}/${id}`),
@@ -125,6 +127,10 @@ export const api = {
     }),
   createThing: async (thing: Thing) => apiMethods.post(THINGS_BASE, thing),
   fetchThings: async () => apiMethods.fetch(THINGS_BASE),
+  fetchPrimaryOwnedThings: async () =>
+    apiMethods.fetch(`${THINGS_BASE}?primary_owned_only=true`),
+  fetchOwnedThings: async () =>
+    apiMethods.fetch(`${THINGS_BASE}?owned_only=true`),
   fetchThing: async (id: string) => apiMethods.fetch(`${THINGS_BASE}/${id}`),
   updateThing: async (thing: Thing) =>
     apiMethods.patch(`${THINGS_BASE}/${thing.id}`, thing),
@@ -166,6 +172,8 @@ export const api = {
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),
   fetchUsersDatastreams: async () =>
     apiMethods.fetch(`${DS_BASE}?exclude_unowned=true`),
+  fetchPrimaryOwnedDatastreams: async () =>
+    apiMethods.fetch(`${DS_BASE}?primary_owned_only=true`),
   updateDatastream: async (
     newDS: Datastream,
     oldDS: Datastream | null = null
@@ -179,6 +187,10 @@ export const api = {
   fetchObservedProperty: async (id: string) =>
     apiMethods.fetch(`${OP_BASE}/${id}`),
   fetchObservedProperties: async () => apiMethods.fetch(OP_BASE),
+  fetchUnownedObservedProperties: async () =>
+    apiMethods.fetch(`${OP_BASE}?owned=false`),
+  fetchOwnedObservedProperties: async () =>
+    apiMethods.fetch(`${OP_BASE}?owned=true`),
   updateObservedProperty: async (
     newOP: ObservedProperty,
     oldOP: ObservedProperty | null = null
@@ -189,6 +201,10 @@ export const api = {
   createProcessingLevel: async (pl: ProcessingLevel) =>
     apiMethods.post(PL_BASE, pl),
   fetchProcessingLevels: async () => apiMethods.fetch(PL_BASE),
+  fetchUnownedProcessingLevels: async () =>
+    apiMethods.fetch(`${PL_BASE}?owned=false`),
+  fetchOwnedProcessingLevels: async () =>
+    apiMethods.fetch(`${PL_BASE}?owned=true`),
   updateProcessingLevel: async (
     newPL: ProcessingLevel,
     oldPL: ProcessingLevel | null = null
@@ -198,6 +214,7 @@ export const api = {
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
   fetchSensors: async () => apiMethods.fetch(SENSOR_BASE),
+  fetchOwnedSensors: async () => apiMethods.fetch(`${SENSOR_BASE}?owned=true`),
   updateSensor: async (newSensor: Sensor, oldSensor: Sensor | null = null) =>
     apiMethods.patch(`${SENSOR_BASE}/${newSensor.id}`, newSensor, oldSensor),
   deleteSensor: async (id: string) => apiMethods.delete(`${SENSOR_BASE}/${id}`),
@@ -205,6 +222,8 @@ export const api = {
   createResultQualifier: async (resultQualifier: ResultQualifier) =>
     apiMethods.post(RQ_BASE, resultQualifier),
   fetchResultQualifiers: async () => apiMethods.fetch(RQ_BASE),
+  fetchOwnedResultQualifiers: async () =>
+    apiMethods.fetch(`${RQ_BASE}?owned=true`),
   updateResultQualifier: async (
     newResultQualifier: ResultQualifier,
     oldResultQualifier: ResultQualifier | null = null

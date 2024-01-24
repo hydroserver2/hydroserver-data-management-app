@@ -63,10 +63,7 @@
       <v-icon @click="drawer = !drawer">mdi-menu</v-icon>
     </div>
 
-    <GoogleMap
-      :things="filteredThings"
-      :mapOptions="{ center: { lat: 39, lng: -100 }, zoom: 4 }"
-    />
+    <GoogleMap :things="filteredThings" useMarkerClusterer />
   </div>
 </template>
 

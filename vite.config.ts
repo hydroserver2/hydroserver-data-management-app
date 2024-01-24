@@ -1,4 +1,6 @@
-import { defineConfig } from 'vitest/config'
+/// <reference types="vitest" />
+
+import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
@@ -6,8 +8,14 @@ import vuetify from 'vite-plugin-vuetify'
 export default defineConfig({
   plugins: [
     vue(),
-    vuetify({ styles: { configFile: 'src/assets/css/variables.scss' } }),
+    vuetify({
+      autoImport: true,
+      styles: { configFile: 'src/styles/settings.scss' },
+    }),
   ],
+  optimizeDeps: {
+    exclude: ['vuetify'],
+  },
   server: {
     host: '127.0.0.1',
     port: 5173,
@@ -24,5 +32,21 @@ export default defineConfig({
   test: {
     globals: true,
     environmentMatchGlobs: [['src/components/**', 'jsdom']],
+    server: {
+      deps: {
+        inline: ['vuetify'],
+      },
+    },
+    coverage: {
+      exclude: [
+        '**/src/App.vue',
+        '**/src/main.ts',
+        '**/src/vocabularies.ts',
+        '**/*.d.ts',
+        '**/postcss.config.js',
+      ],
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+    },
   },
 })

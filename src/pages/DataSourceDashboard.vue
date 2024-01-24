@@ -17,7 +17,7 @@
       </v-btn-add>
     </v-toolbar>
 
-    <DataSourceTable :key="key" />
+    <DataSourceTable :search="search" :key="key" />
   </v-container>
 
   <v-dialog v-model="openCreate">

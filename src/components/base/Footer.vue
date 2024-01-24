@@ -1,7 +1,7 @@
 <template>
   <v-footer color="surface-darken-1">
     <v-container class="py-8 text-body-2">
-      <div class="d-flex justify-space-between flex-column flex-md-row gap-3">
+      <div class="d-flex justify-space-between flex-column flex-md-row">
         <div>
           <h5 class="text-h5 mb-4">Contact Us</h5>
           <router-link class="d-block mb-3" to="/contact">Contact</router-link>
@@ -12,8 +12,15 @@
         </div>
         <div>
           <h5 class="text-h5 mb-4">Policies</h5>
-          <a class="d-block mb-3" href="#">Terms of Use</a>
-          <a class="d-block" href="#">Privacy</a>
+          <a
+            class="d-block mb-3"
+            :href="policyConfig.termsOfUse"
+            target="_blank"
+            >Terms of Use</a
+          >
+          <a class="d-block" :href="policyConfig.privacyPolicy" target="_blank"
+            >Privacy</a
+          >
         </div>
         <div class="text-left text-md-center flex-shrink-0">
           <h5 class="text-h5 mb-4">Developed By</h5>
@@ -63,6 +70,7 @@
 
 <script setup lang="ts">
 import uwrlLogo from '@/assets/UWRL-min.png'
+import policyConfig from '@/config/policyConfig'
 
 const version = import.meta.env.VITE_APP_VERSION || '0.0.1'
 </script>

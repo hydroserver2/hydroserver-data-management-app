@@ -180,6 +180,7 @@ import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
+import { Snackbar } from '@/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
@@ -201,6 +202,7 @@ async function onTransferPrimaryOwnership() {
       props.thingId,
       newPrimaryOwnerEmail.value
     )
+    Snackbar.success('Transferred site ownership')
   } catch (error) {
     console.error('Error transferring thing ownership', error)
   }
@@ -217,6 +219,14 @@ async function onAddSecondaryOwner() {
     )
   } catch (error) {
     console.error('Error adding secondary owner', error)
+    if ((error as Error).message === '404') {
+      Snackbar.warn(
+        'Email address does not have a valid user account.' +
+          ' Please input the email for a valid user.'
+      )
+    } else if ((error as Error).message === '422') {
+      Snackbar.error('Specified user is already an owner of this site')
+    }
   }
   newOwnerEmail.value = ''
 }

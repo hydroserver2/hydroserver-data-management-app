@@ -8,7 +8,7 @@
         v-if="loaded"
         :singleMarkerMode="true"
         @location-clicked="onMapLocationClicked"
-        :mapOptions="thingId ? mapOptions : undefined"
+        :mapOptions="mapOptions"
         :things="thingId ? [thing] : []"
       />
     </div>
@@ -109,16 +109,26 @@
               /></v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  label="State"
+                  label="State/Province/Region"
                   v-model="thing.state"
                   :rules="thing.state ? rules.name : []"
                 />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  label="County"
+                  label="County/District"
                   v-model="thing.county"
-                  :rules="thing.state ? rules.name : []"
+                  :rules="thing.county ? rules.name : []"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-select
+                  label="Country"
+                  :items="countries"
+                  :item-title="countryTitle"
+                  item-value="code"
+                  clearable
+                  v-model="thing.country"
                 />
               </v-col>
             </v-row>
@@ -160,6 +170,13 @@ import SitePhotoManager from '@/components/Site/SitePhotoManager.vue'
 import SiteTagManager from '@/components/Site/SiteTagManager.vue'
 import { usePhotosStore } from '@/store/photos'
 import { useTagStore } from '@/store/tags'
+import countryList from 'country-list'
+
+const countries = ref<{ name: string; code: string }[]>([])
+const countryTitle = (item: { name: string; code: string } | undefined) => {
+  if (item && item.code && item.name) return `${item.code} - ${item.name}`
+  return ''
+}
 
 const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
@@ -170,14 +187,8 @@ const emit = defineEmits(['close', 'created'])
 let loaded = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
-
-const mapOptions = ref({
-  center: { lat: 39, lng: -100 },
-  zoom: 4,
-  mapTypeId: 'roadmap',
-})
+const mapOptions = ref<any>(undefined)
 const thing = reactive<Thing>(new Thing())
-
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
 
 watch(
@@ -231,9 +242,11 @@ function onMapLocationClicked(locationData: Thing) {
   thing.elevation_m = locationData.elevation_m
   thing.state = locationData.state
   thing.county = locationData.county
+  thing.country = locationData.country
 }
 
 onMounted(async () => {
+  countries.value = countryList.getData()
   if (props.thingId) {
     await populateThing()
     includeDataDisclaimer.value = !!thing.dataDisclaimer

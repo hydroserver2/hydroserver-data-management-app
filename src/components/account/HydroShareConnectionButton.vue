@@ -1,7 +1,11 @@
 <template>
-  <v-btn-primary v-if="!hydroShareConnected" class="mr-6" @click="OAuthLogin(OAuthProvider.hydroshare)">
+  <v-btn-secondary
+    v-if="!hydroShareConnected"
+    class="mr-6"
+    @click="OAuthLogin(OAuthProvider.hydroshare)"
+  >
     Connect to HydroShare
-  </v-btn-primary>
+  </v-btn-secondary>
   <v-btn-delete v-else class="mr-6" @click="disconnectFromHydroShare">
     Disconnect from HydroShare
   </v-btn-delete>
@@ -14,7 +18,7 @@ import { OAuthProvider } from '@/types'
 import { OAUTH_ENDPOINT } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
-import Notification from "@/utils/notifications";
+import { Snackbar } from '@/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 
@@ -27,10 +31,7 @@ async function disconnectFromHydroShare() {
   let response = await api.disconnectFromHydroShare()
   if (response === null) {
     user.value.hydroShareConnected = false
-    Notification.toast({
-      message: 'Your HydroShare account has been disconnected.',
-      type: 'info'
-    })
+    Snackbar.info('Your HydroShare account has been disconnected.')
   }
 }
 
@@ -38,8 +39,4 @@ const hydroShareConnected = computed(() => {
   if (!user.value) return false
   return user.value.hydroShareConnected
 })
-
 </script>
-
-<style scoped>
-</style>

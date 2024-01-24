@@ -48,7 +48,6 @@ v-col
               v-model="item.delimiter"
               label="File Delimiter *"
               hint="Select the type of delimiter used for this data file."
-              persistent-hint
               :items="intervalDelimiterValues"
               variant="outlined"
               density="comfortable"
@@ -193,7 +192,11 @@ v-col
         <v-row>
           <v-col class="v-col-xs-12 v-col-sm-6">
             <v-radio-group v-model="timestampFormatType" inline>
-              <v-radio label="ISO 8601 Format" value="iso" />
+              <v-radio
+                label="ISO 8601 Format"
+                value="iso"
+                @click="item.timestampFormat = 'iso'"
+              />
               <v-radio label="Custom Format" value="custom" />
             </v-radio-group>
           </v-col>
@@ -329,8 +332,6 @@ const timezoneOffsets = ref([
 
 async function onSubmit() {
   try {
-    console.log('uploaded item', item.value)
-
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)
@@ -368,6 +369,7 @@ const initializeForm = () => {
 }
 
 onMounted(async () => {
+  console.log('datasource', props.dataSource)
   dataLoaders.value = await api.fetchDataLoaders()
   if (isEdit.value) initializeForm()
   loaded.value = true

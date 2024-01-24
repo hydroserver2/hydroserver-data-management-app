@@ -1,3 +1,8 @@
+export type DataPoint = {
+  date: Date
+  value: number
+}
+
 export type DataArray = [string, number][]
 
 export class ObservationRecord {
@@ -11,6 +16,8 @@ export class ObservationRecord {
     this.loading = false
   }
 }
+
+export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
 
 export interface Owner {
   firstName: string
@@ -44,6 +51,7 @@ export class Thing {
   samplingFeatureType: string
   state: string
   county: string
+  country: string
   isPrimaryOwner: boolean
   dataDisclaimer: string
   hydroShareArchiveResourceId: string
@@ -63,10 +71,20 @@ export class Thing {
     this.samplingFeatureType = 'Site'
     this.state = ''
     this.county = ''
+    this.country = ''
     this.isPrimaryOwner = false
     this.dataDisclaimer = ''
     this.hydroShareArchiveResourceId = ''
   }
+}
+
+export interface ThingWithColor extends Thing {
+  color?: {
+    borderColor: string
+    background: string
+    glyphColor: string
+  }
+  tagValue?: string
 }
 
 export class Datastream {
@@ -89,18 +107,18 @@ export class Datastream {
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
-  intendedTimeSpacingUnitsId?: string
+  intendedTimeSpacingUnits?: string | null
   timeAggregationInterval: number | null
   timeAggregationIntervalUnitsId: string
-  dataSourceId?: string
-  dataSourceColumn?: string | number
+  dataSourceId?: string | null
+  dataSourceColumn?: string | number | null
   valueCount: number
 
-  constructor(thingId: string) {
+  constructor(thingId?: string) {
     this.id = ''
     this.name = 'Datastream'
     this.description = 'Site Datastream'
-    this.thingId = thingId
+    this.thingId = thingId || ''
     this.observationType = 'OM_Measurement'
     this.resultType = 'Time Series Coverage'
     this.sampledMedium = ''
@@ -331,7 +349,7 @@ export interface Photo {
 export enum OAuthProvider {
   google = 'google',
   orcid = 'orcid',
-  hydroshare = 'hydroshare'
+  hydroshare = 'hydroshare',
 }
 
 export class ThingArchive {

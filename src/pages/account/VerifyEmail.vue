@@ -41,6 +41,7 @@
 import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
+import { Snackbar } from '@/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 let sendingVerificationEmail = false
@@ -50,6 +51,7 @@ async function sendVerificationEmail() {
     if (sendingVerificationEmail) return
     sendingVerificationEmail = true
     await api.sendVerificationEmail()
+    Snackbar.success('Verification email sent successfully.')
     sendingVerificationEmail = false
   } catch (error) {
     console.error('Error sending verification email', error)

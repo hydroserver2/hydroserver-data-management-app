@@ -92,11 +92,9 @@ const hasDatastreams = computed(() => {
 
 onMounted(async () => {
   try {
-    // TODO: We only need the things the user is a primary owner of and their datastreams.
-    // Create an endpoint and use it
     const [fetchedThings, fetchedDatastreams] = await Promise.all([
-      api.fetchThings(),
-      api.fetchUsersDatastreams(),
+      api.fetchPrimaryOwnedThings(),
+      api.fetchPrimaryOwnedDatastreams(),
     ])
     things.value = fetchedThings
     datastreams.value = fetchedDatastreams

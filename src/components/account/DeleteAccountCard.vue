@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import Notification from '@/utils/notifications'
+import { Snackbar } from '@/utils/notifications'
 import { useAuthStore } from '@/store/authentication'
 import { computed, onMounted, ref } from 'vue'
 import { Thing } from '@/types'
@@ -62,13 +62,14 @@ const deleteInput = ref('')
 
 async function deleteAccount() {
   if (deleteInput.value.toLowerCase() !== 'delete my account and data') {
-    Notification.toast({ message: "input doesn't match", type: 'error' })
+    Snackbar.error("input doesn't match")
     return
   }
   try {
     emit('close')
     await api.deleteUser()
     await logout()
+    Snackbar.info('Your account has been deleted')
   } catch (error) {
     console.error('Error deleting account', error)
   }

@@ -62,10 +62,9 @@ import { computed } from 'vue'
 const props = defineProps({ processingLevel: Object as () => ProcessingLevel })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-// TODO: fetch only unownedUnits
 const { item, items, selectedId, isEdit, valid, myForm, uploadItem } =
   useFormLogic(
-    api.fetchProcessingLevels,
+    api.fetchUnownedProcessingLevels,
     api.createProcessingLevel,
     api.updateProcessingLevel,
     ProcessingLevel,
