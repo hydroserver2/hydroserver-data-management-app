@@ -1,6 +1,6 @@
 export default {
   termsOfUse:
-    'https://github.com/hydroserver2/hydroserver/blob/main/terms-of-use.md',
+    'https://github.com/hydroserver2/hydroserver-webapp-front/blob/main/src/assets/terms-of-use-example.md',
   privacyPolicy:
-    'https://github.com/hydroserver2/hydroserver/blob/main/privacy-policy.md',
+    'https://github.com/hydroserver2/hydroserver-webapp-front/blob/main/src/assets/privacy-policy-example.md',
 }
