@@ -33,52 +33,6 @@
     >
       <v-card class="outlined-container mb-10">
         <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          Enter a name and description for this datastream, or opt to use the
-          default text. If you select the defaults, they will dynamically update
-          based on the information you provide in other sections of the form.
-        </v-card-text>
-
-        <v-card-text>
-          <v-row align="center" no-gutters>
-            <v-col cols="auto" class="flex-grow-1">
-              <v-text-field
-                v-model="datastream.name"
-                :disabled="datastream.useDefaultName"
-                label="Datastream name *"
-              />
-            </v-col>
-            <v-col cols="auto" class="ml-2">
-              <v-switch
-                color="primary"
-                label="Use Default"
-                v-model="datastream.useDefaultName"
-              />
-            </v-col>
-          </v-row>
-        </v-card-text>
-
-        <v-card-text>
-          <v-row align="center" no-gutters>
-            <v-col cols="auto" class="flex-grow-1">
-              <v-textarea
-                v-model="datastream.description"
-                :disabled="datastream.useDefaultDescription"
-                label="Datastream description *"
-              />
-            </v-col>
-            <v-col cols="auto" class="ml-2">
-              <v-switch
-                color="primary"
-                label="Use Default"
-                v-model="datastream.useDefaultDescription"
-              />
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-
-      <v-card class="outlined-container mb-10">
-        <v-card-text class="text-subtitle-2 text-medium-emphasis">
           Select the appropriate metadata to describe the the datastream you are
           adding to the monitoring site. If you want to modify the values
           available in the drop down menus below, click the “Add New” button or
@@ -291,6 +245,53 @@
         </v-card-text>
       </v-card>
 
+      <v-card class="outlined-container mb-10">
+        <v-card-text class="text-subtitle-2 text-medium-emphasis">
+          Enter a name and description for this datastream, or opt to auto-fill
+          with default text. If you choose the defaults, make sure you've first
+          filled out the rest of the form correctly as the website will generate
+          text based on the current form fields.
+        </v-card-text>
+
+        <v-card-text>
+          <v-text-field
+            v-model="datastream.name"
+            label="Datastream name *"
+            :rules="rules.required"
+          />
+
+          <v-btn-cancel
+            :disabled="datastream.name === originalName"
+            @click="datastream.name = originalName"
+          >
+            Revert
+          </v-btn-cancel>
+          <v-btn class="ml-2" @click="datastream.name = generateDefaultName()"
+            >Auto-Fill from Form</v-btn
+          >
+        </v-card-text>
+
+        <v-card-text>
+          <v-textarea
+            v-model="datastream.description"
+            label="Datastream description *"
+            :rules="rules.required"
+          />
+
+          <v-btn-cancel
+            :disabled="datastream.description === originalDescription"
+            @click="datastream.description = originalDescription"
+          >
+            Revert
+          </v-btn-cancel>
+          <v-btn
+            class="ml-2"
+            @click="datastream.description = generateDefaultDescription()"
+            >Auto-Fill from Form</v-btn
+          >
+        </v-card-text>
+      </v-card>
+
       <v-row>
         <v-col cols="auto">
           <v-btn-cancel @click="$router.go(-1)">
@@ -364,7 +365,7 @@ const handleMetadataUploaded = async (dsKey: string, newId: string) => {
 const originalName = ref('')
 const originalDescription = ref('')
 
-const defaultName = computed(() => {
+const generateDefaultName = () => {
   const OP = observedProperties.value.find(
     (pl) => pl.id === datastream.value.observedPropertyId
   )?.name
@@ -372,9 +373,9 @@ const defaultName = computed(() => {
     (pl) => pl.id === datastream.value.processingLevelId
   )?.code
   return `${OP} at ${thing.value?.samplingFeatureCode} with processing level ${PL}`
-})
+}
 
-const defaultDescription = computed(() => {
+const generateDefaultDescription = () => {
   const OP = observedProperties.value.find(
     (pl) => pl.id === datastream.value.observedPropertyId
   )?.name
@@ -389,31 +390,7 @@ const defaultDescription = computed(() => {
     (pl) => pl.id === datastream.value.unitId
   )?.name
   return `A datastream of ${OP} at ${thing.value?.name} with processing level ${PL} and sampled medium ${datastream.value.sampledMedium} created using a method with name ${sensorName} having units of ${unitName}`
-})
-
-watchEffect(() => {
-  const currentDefaultName = defaultName.value
-
-  if (datastream.value.useDefaultName) {
-    datastream.value.name = currentDefaultName
-  } else {
-    datastream.value.name = originalName.value
-      ? originalName.value
-      : currentDefaultName
-  }
-})
-
-watchEffect(() => {
-  const currentDefaultDescription = defaultDescription.value
-
-  if (datastream.value.useDefaultDescription) {
-    datastream.value.description = currentDefaultDescription
-  } else {
-    datastream.value.description = originalDescription.value
-      ? originalDescription.value
-      : currentDefaultDescription
-  }
-})
+}
 
 watch(selectedDatastreamID, async () => {
   try {
@@ -428,9 +405,7 @@ watch(selectedDatastreamID, async () => {
       timeAggregationIntervalUnitsId: fetchedDS.timeAggregationIntervalUnitsId,
       intendedTimeSpacingUnits: fetchedDS.intendedTimeSpacingUnits,
       name: fetchedDS.name,
-      useDefaultName: fetchedDS.useDefaultName,
       description: fetchedDS.description,
-      useDefaultDescription: fetchedDS.useDefaultDescription,
       sampledMedium: fetchedDS.sampledMedium,
       noDataValue: fetchedDS.noDataValue,
       aggregationStatistic: fetchedDS.aggregationStatistic,
@@ -479,10 +454,8 @@ onMounted(async () => {
 
     if (fetchedDatastream) {
       datastream.value = fetchedDatastream
-      if (!datastream.value.useDefaultName)
-        originalName.value = datastream.value.name
-      if (!datastream.value.useDefaultDescription)
-        originalDescription.value = datastream.value.description
+      originalName.value = datastream.value.name
+      originalDescription.value = datastream.value.description
     }
     thing.value = fetchedThing
     timeUnits.value = fetchedUnits.filter((u: Unit) => u.type === 'Time')
