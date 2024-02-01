@@ -1,6 +1,11 @@
 <template>
-  <div class="d-flex fill-height">
+  <v-container>
+    <h5 class="text-h5 mb-4">Browse Data Collection Sites</h5>
+
     <BrowseFilterTool :things="things" @filter="updateFilteredThings" />
+  </v-container>
+
+  <div class="d-flex fill-height">
     <GoogleMap :things="filteredThings" useMarkerClusterer />
   </div>
 </template>

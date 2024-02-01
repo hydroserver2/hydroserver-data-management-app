@@ -1,66 +1,70 @@
 <template>
-  <v-navigation-drawer v-model="drawer" width="400">
-    <v-card-title class="d-flex justify-space-between align-start">
-      Browse Data Collection Sites
-      <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
-    </v-card-title>
+  <v-card>
+    <v-card-text>
+      <v-row>
+        <v-col cols="auto" class="align-self-center">
+          <v-card-title>Filter By</v-card-title>
+        </v-col>
 
-    <v-divider></v-divider>
-
-    <div class="d-flex justify-end my-4 mx-2">
-      <v-btn-cancel elevation="3" @click="clearFilters"
-        >Clear Filters</v-btn-cancel
-      >
-    </div>
-
-    <v-card elevation="3" class="mx-4">
-      <v-card-text>
-        <form @submit.prevent="filterOrganizations">
-          <v-text-field
-            placeholder="Filter by Organizations"
-            prepend-inner-icon="mdi-magnify"
-            v-model="searchInput"
+        <v-col cols="4">
+          <v-autocomplete
+            v-model="selectedOrganizations"
+            :items="organizations"
+            label="Organizations"
+            multiple
             clearable
-            hide-details="auto"
-            @click:clear="clearOrganizations"
-          />
-        </form>
-      </v-card-text>
-
-      <v-card-text v-if="!validFilter" class="text-error py-0">
-        No results found
-      </v-card-text>
-      <v-card-text class="py-0" v-for="orgName in filteredOrganizations">
-        {{ orgName }}
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn-primary :disabled="!searchInput" @click="filterOrganizations"
-          >Filter</v-btn-primary
-        >
-      </v-card-actions>
-    </v-card>
-
-    <v-expansion-panels class="pa-4">
-      <v-expansion-panel title="Site Types">
-        <v-expansion-panel-text>
-          <v-checkbox
-            v-for="type in siteTypes"
-            v-model="selectedSiteTypes"
-            :label="type"
-            :value="type"
             hide-details
-            density="compact"
-          />
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-  </v-navigation-drawer>
+            autocomplete
+          >
+            <template v-slot:selection="{ item, index }">
+              <v-chip
+                v-if="selectedOrganizations.length === 1"
+                color="green"
+                rounded
+              >
+                <span>{{ truncateText(item.title, 25) }}</span>
+              </v-chip>
 
-  <div class="pa-2" v-if="!drawer">
-    <v-icon @click="drawer = !drawer">mdi-menu</v-icon>
-  </div>
+              <span v-else-if="index === 0">
+                Organizations
+                <v-chip color="green" rounded>
+                  {{ selectedOrganizations.length }}
+                </v-chip>
+              </span>
+            </template>
+          </v-autocomplete>
+        </v-col>
+
+        <v-col cols="4">
+          <v-autocomplete
+            v-model="selectedSiteTypes"
+            :items="siteTypes"
+            label="Site Types"
+            multiple
+            clearable
+            hide-details
+          >
+            <template v-slot:selection="{ item, index }">
+              <v-chip
+                v-if="selectedSiteTypes.length === 1"
+                color="green"
+                rounded
+              >
+                <span>{{ truncateText(item.title, 25) }}</span>
+              </v-chip>
+
+              <span v-else-if="index === 0">
+                Types
+                <v-chip color="green" rounded>
+                  {{ selectedSiteTypes.length }}
+                </v-chip>
+              </span>
+            </template>
+          </v-autocomplete>
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -69,11 +73,8 @@ import { Ref } from 'vue'
 import { Thing } from '@/types'
 import { siteTypes } from '@/vocabularies'
 
-const drawer = ref(true)
 const selectedSiteTypes: Ref<string[]> = ref([])
-const filteredOrganizations = ref(new Set())
-const searchInput = ref('')
-const validFilter = ref(true)
+const selectedOrganizations: Ref<string[]> = ref([])
 
 const emit = defineEmits(['filter'])
 const props = defineProps({
@@ -83,58 +84,40 @@ const props = defineProps({
   },
 })
 
-const organizations = computed(
-  () =>
+const organizations = computed(() =>
+  Array.from(
     new Set(
       props.things
         .flatMap((t) => t.owners.map((owner) => owner.organizationName))
         .filter((name): name is string => Boolean(name))
     )
+  ).sort((a, b) => a.localeCompare(b))
 )
 
-const filterOrganizations = () => {
-  const searchLower = searchInput.value.toLowerCase()
-  filteredOrganizations.value = new Set(
-    Array.from(organizations.value).filter((org) =>
-      org.toLowerCase().includes(searchLower)
-    )
-  )
-  validFilter.value = filteredOrganizations.value.size > 0
-  emitFilteredThings()
-}
-
-function isOrgValid(thing: Thing) {
-  if (filteredOrganizations.value.size === 0) return true
-  return thing.owners.some(
+const isOrgValid = (thing: Thing) =>
+  selectedOrganizations.value.length === 0 ||
+  thing.owners.some(
     (o) =>
       o.isPrimaryOwner &&
       o.organizationName &&
-      filteredOrganizations.value.has(o.organizationName)
+      selectedOrganizations.value.includes(o.organizationName)
   )
-}
 
 const isTypeValid = (thing: Thing) =>
   selectedSiteTypes.value.length === 0 ||
   selectedSiteTypes.value.includes(thing.siteType)
 
-const clearOrganizations = () => {
-  filteredOrganizations.value = new Set()
-  validFilter.value = true
-  searchInput.value = ''
-}
-
-function clearFilters() {
-  selectedSiteTypes.value = []
-  clearOrganizations()
-}
-
 const emitFilteredThings = () => {
-  console.log('emitting')
   const filteredThings = props.things.filter(
     (thing) => isOrgValid(thing) && isTypeValid(thing)
   )
   emit('filter', filteredThings)
 }
 
-watch([selectedSiteTypes], emitFilteredThings)
+watch([selectedSiteTypes, selectedOrganizations], emitFilteredThings)
+
+function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + '...'
+}
 </script>
