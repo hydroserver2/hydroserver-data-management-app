@@ -1,12 +1,12 @@
 <template>
-  <v-card>
+  <v-card elevation="2">
     <v-card-text>
       <v-row>
         <v-col cols="auto" class="align-self-center">
           <v-card-title>Filter By</v-card-title>
         </v-col>
 
-        <v-col cols="4">
+        <v-col cols="4" class="align-self-center">
           <v-autocomplete
             v-model="selectedOrganizations"
             :items="organizations"
@@ -14,7 +14,8 @@
             multiple
             clearable
             hide-details
-            autocomplete
+            rounded
+            density="compact"
           >
             <template v-slot:selection="{ item, index }">
               <v-chip
@@ -35,14 +36,16 @@
           </v-autocomplete>
         </v-col>
 
-        <v-col cols="4">
+        <v-col cols="4" class="align-self-center">
           <v-autocomplete
             v-model="selectedSiteTypes"
             :items="siteTypes"
             label="Site Types"
             multiple
             clearable
+            rounded
             hide-details
+            density="compact"
           >
             <template v-slot:selection="{ item, index }">
               <v-chip
