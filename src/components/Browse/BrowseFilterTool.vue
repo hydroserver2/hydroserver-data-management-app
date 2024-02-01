@@ -15,6 +15,7 @@
             clearable
             hide-details
             rounded
+            color="green"
             density="compact"
           >
             <template v-slot:selection="{ item, index }">
@@ -43,8 +44,9 @@
             label="Site Types"
             multiple
             clearable
-            rounded
             hide-details
+            rounded
+            color="green"
             density="compact"
           >
             <template v-slot:selection="{ item, index }">
