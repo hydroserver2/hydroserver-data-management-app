@@ -1,6 +1,8 @@
 <template>
   <v-container>
-    <h5 class="text-h5 mb-4">Browse Data Collection Sites</h5>
+    <h5 class="text-h4 font-weight-bold mb-6 mt-4">
+      Browse Data Collection Sites
+    </h5>
 
     <BrowseFilterTool :things="things" @filter="updateFilteredThings" />
 

@@ -3,10 +3,10 @@
     <v-card-text>
       <v-row>
         <v-col cols="auto" class="align-self-center">
-          <v-card-title>Filter By</v-card-title>
+          <v-card-subtitle class="font-weight-bold">Filter By</v-card-subtitle>
         </v-col>
 
-        <v-col cols="4" class="align-self-center">
+        <v-col cols="12" md="4" class="align-self-center">
           <v-autocomplete
             v-model="selectedOrganizations"
             :items="organizations"
@@ -36,7 +36,7 @@
           </v-autocomplete>
         </v-col>
 
-        <v-col cols="4" class="align-self-center">
+        <v-col cols="12" md="4" class="align-self-center">
           <v-autocomplete
             v-model="selectedSiteTypes"
             :items="siteTypes"
