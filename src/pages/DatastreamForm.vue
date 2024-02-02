@@ -245,6 +245,53 @@
         </v-card-text>
       </v-card>
 
+      <v-card class="outlined-container mb-10">
+        <v-card-text class="text-subtitle-2 text-medium-emphasis">
+          Enter a name and description for this datastream, or opt to auto-fill
+          with default text. If you choose the defaults, make sure you've first
+          filled out the rest of the form correctly as the website will generate
+          text based on the current form fields.
+        </v-card-text>
+
+        <v-card-text>
+          <v-text-field
+            v-model="datastream.name"
+            label="Datastream name *"
+            :rules="rules.required"
+          />
+
+          <v-btn-cancel
+            :disabled="datastream.name === originalName"
+            @click="datastream.name = originalName"
+          >
+            Revert
+          </v-btn-cancel>
+          <v-btn class="ml-2" @click="datastream.name = generateDefaultName()"
+            >Auto-Fill from Form</v-btn
+          >
+        </v-card-text>
+
+        <v-card-text>
+          <v-textarea
+            v-model="datastream.description"
+            label="Datastream description *"
+            :rules="rules.required"
+          />
+
+          <v-btn-cancel
+            :disabled="datastream.description === originalDescription"
+            @click="datastream.description = originalDescription"
+          >
+            Revert
+          </v-btn-cancel>
+          <v-btn
+            class="ml-2"
+            @click="datastream.description = generateDefaultDescription()"
+            >Auto-Fill from Form</v-btn
+          >
+        </v-card-text>
+      </v-card>
+
       <v-row>
         <v-col cols="auto">
           <v-btn-cancel @click="$router.go(-1)">
@@ -264,7 +311,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
@@ -274,13 +321,15 @@ import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCa
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { useMetadata } from '@/composables/useMetadata'
-import { useDatastreamForm } from '@/composables/useDatastreamForm'
-import { onMounted } from 'vue'
-import { Unit } from '@/types'
+import { Thing, Unit } from '@/types'
 import { api } from '@/services/api'
+import { Datastream } from '@/types'
+import { VForm } from 'vuetify/components'
+import router from '@/router/router'
 
 const route = useRoute()
 const thingId = route.params.id.toString()
+const thing = ref<Thing>()
 const datastreamId = route.params.datastreamId?.toString() || ''
 
 const timeUnits = ref<Unit[]>([])
@@ -288,37 +337,130 @@ const intendedTimeUnits = ['seconds', 'minutes', 'hours', 'days']
 const openUnitForm = ref(false)
 const openAggUnitForm = ref(false)
 
-const isPrimaryOwner = ref(false)
+const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
 const showPLModal = ref(false)
 const showOPModal = ref(false)
 
+const valid = ref(false)
+const myForm = ref<VForm>()
+const selectedDatastreamID = ref('')
+const datastream = ref<Datastream>(new Datastream(thingId))
+
 const {
   sensors,
   units,
   observedProperties,
+  processingLevels,
   formattedProcessingLevels,
   fetchMetadata,
 } = useMetadata(thingId, true)
-
-const { datastream, selectedDatastreamID, uploadDatastream, valid, myForm } =
-  useDatastreamForm(thingId, datastreamId)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
   await fetchMetadata(thingId, true)
   ;(datastream as any)[dsKey] = newId
 }
 
+const originalName = ref('')
+const originalDescription = ref('')
+
+const generateDefaultName = () => {
+  const OP = observedProperties.value.find(
+    (pl) => pl.id === datastream.value.observedPropertyId
+  )?.name
+  const PL = processingLevels.value.find(
+    (pl) => pl.id === datastream.value.processingLevelId
+  )?.code
+  return `${OP} at ${thing.value?.samplingFeatureCode} with processing level ${PL}`
+}
+
+const generateDefaultDescription = () => {
+  const OP = observedProperties.value.find(
+    (pl) => pl.id === datastream.value.observedPropertyId
+  )?.name
+  console.log('computing description', OP)
+  const PL = processingLevels.value.find(
+    (pl) => pl.id === datastream.value.processingLevelId
+  )?.code
+  const sensorName = sensors.value.find(
+    (pl) => pl.id === datastream.value.sensorId
+  )?.name
+  const unitName = units.value.find(
+    (pl) => pl.id === datastream.value.unitId
+  )?.name
+  return `A datastream of ${OP} at ${thing.value?.name} with processing level ${PL} and sampled medium ${datastream.value.sampledMedium} created using a method with name ${sensorName} having units of ${unitName}`
+}
+
+watch(selectedDatastreamID, async () => {
+  try {
+    const fetchedDS = await api.fetchDatastream(selectedDatastreamID.value)
+    if (!fetchedDS) return
+    Object.assign(datastream.value, {
+      ...datastream,
+      sensorId: fetchedDS.sensorId,
+      observedPropertyId: fetchedDS.observedPropertyId,
+      processingLevelId: fetchedDS.processingLevelId,
+      unitId: fetchedDS.unitId,
+      timeAggregationIntervalUnitsId: fetchedDS.timeAggregationIntervalUnitsId,
+      intendedTimeSpacingUnits: fetchedDS.intendedTimeSpacingUnits,
+      name: fetchedDS.name,
+      description: fetchedDS.description,
+      sampledMedium: fetchedDS.sampledMedium,
+      noDataValue: fetchedDS.noDataValue,
+      aggregationStatistic: fetchedDS.aggregationStatistic,
+      status: fetchedDS.status,
+      timeAggregationInterval: fetchedDS.timeAggregationInterval,
+      intendedTimeSpacing: fetchedDS.intendedTimeSpacing,
+    })
+  } catch (error) {
+    console.error('Error loading datastream template', error)
+  }
+  await myForm.value?.validate()
+})
+
+async function uploadDatastream() {
+  await myForm.value?.validate()
+  if (!valid.value) return
+  datastream.value.thingId = thingId
+  if (datastreamId) {
+    try {
+      await api.updateDatastream(datastream.value)
+    } catch (error) {
+      console.error('Error updating datastream', error)
+    }
+  } else {
+    try {
+      await api.createDatastream(datastream.value)
+    } catch (error) {
+      console.error('Error creating datastream', error)
+    }
+  }
+  router.push({ name: 'SiteDetails', params: { id: thingId } })
+}
+
 onMounted(async () => {
   window.scrollTo(0, 0)
-  const thing = await api.fetchThing(thingId)
-  isPrimaryOwner.value = thing.isPrimaryOwner
+
+  let promises = [api.fetchThing(thingId), api.fetchUnits()]
+  if (datastreamId) promises.push(api.fetchDatastream(datastreamId))
+
   try {
-    const fetchedUnits: Unit[] = await api.fetchUnits()
-    timeUnits.value = fetchedUnits.filter((u) => u.type === 'Time')
+    const results = await Promise.all(promises)
+
+    let fetchedDatastream, fetchedThing, fetchedUnits
+    if (datastreamId) [fetchedThing, fetchedUnits, fetchedDatastream] = results
+    else [fetchedThing, fetchedUnits] = results
+
+    if (fetchedDatastream) {
+      datastream.value = fetchedDatastream
+      originalName.value = datastream.value.name
+      originalDescription.value = datastream.value.description
+    }
+    thing.value = fetchedThing
+    timeUnits.value = fetchedUnits.filter((u: Unit) => u.type === 'Time')
   } catch (error) {
-    console.error('Error fetching units from DB.', error)
+    console.error('Error fetching datastream data from DB.', error)
   }
 })
 </script>
