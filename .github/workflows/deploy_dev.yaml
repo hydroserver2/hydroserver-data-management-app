@@ -1,11 +1,11 @@
-name: hs-webapp Dev AWS S3 Deployment
-run-name: Deploying dev to AWS S3 on ${{ github.ref }}
+name: Deploy to AWS S3 Dev
+run-name: Deploying to AWS S3 Dev on ${{ github.ref }}
 
 on:
   workflow_run:
     workflows: ['Run Unit Tests']
     branches:
-      - dev
+      - main
     types:
       - completed
 
