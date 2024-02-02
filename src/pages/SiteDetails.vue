@@ -106,7 +106,7 @@
     </h6>
   </v-container>
   <v-container v-else>
-    <h5 class="text-h5 my-4">Loading Site Details...</h5>
+    <WaterLoadingAnimation />
   </v-container>
 </template>
 
@@ -126,6 +126,7 @@ import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import SiteHydroShareArchivalModal from '@/components/Site/SiteHydroShareArchivalModal.vue'
+import WaterLoadingAnimation from '@/components/base/WaterLoadingAnimation.vue'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
