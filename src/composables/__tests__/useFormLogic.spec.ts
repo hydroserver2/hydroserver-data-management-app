@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Unit } from '@/types'
-import { nextTick } from 'vue'
+import { flushPromises, mount } from '@vue/test-utils'
+import { defineComponent, nextTick } from 'vue'
 
 const unit1 = {
   id: 'unit1',
@@ -23,122 +24,121 @@ const unit2 = {
 
 const unitList = [unit1, unit2]
 
+// Default mock functions that can be overridden
+const defaultMockFetchItems: () => Promise<Unit[]> = vi.fn(() =>
+  Promise.resolve([])
+)
+const defaultCreateItem = vi.fn()
+const defaultUpdateItem = vi.fn()
+let defaultInitialUnit: Unit | null = null
+
 describe('useFormLogic', () => {
+  // onMounted won't work outside of the context of script setup, therefore
+  // wrap composable with dummy component
+  const createDummyComponent = ({
+    mockFetchItems = defaultMockFetchItems,
+    createItem = defaultCreateItem,
+    updateItem = defaultUpdateItem,
+    initialUnit = defaultInitialUnit,
+  } = {}) =>
+    defineComponent({
+      setup() {
+        return useFormLogic(
+          mockFetchItems,
+          createItem,
+          updateItem,
+          Unit,
+          initialUnit
+        )
+      },
+      template: '<div>{{item}}</div>',
+    })
+
   it('initializes correctly without initialItem', async () => {
-    const mockFetchItems = vi.fn(() => Promise.resolve([]))
-    const createItem = vi.fn()
-    const updateItem = vi.fn()
-
-    const { item, items, isEdit, valid, selectedId } = useFormLogic(
-      mockFetchItems,
-      createItem,
-      updateItem,
-      Unit
-    )
-
-    expect(item.value).toBeInstanceOf(Unit)
-    expect(items.value).toEqual([])
-    expect(isEdit.value).toBe(false)
-    expect(valid.value).toBe(false)
-    expect(selectedId.value).toBeUndefined()
+    const wrapper = mount(createDummyComponent())
+    expect(wrapper.vm.item).toBeInstanceOf(Unit)
+    expect(wrapper.vm.items).toEqual([])
+    expect(wrapper.vm.isEdit).toBe(false)
+    expect(wrapper.vm.valid).toBe(false)
+    expect(wrapper.vm.selectedId).toBeUndefined()
   })
 
   it('initializes correctly with initialItem', async () => {
     let initialUnit = new Unit()
     Object.assign(initialUnit, unit1)
 
-    const mockFetchItems = vi.fn(() => Promise.resolve(unitList))
-    const createItem = vi.fn()
-    const updateItem = vi.fn()
-
-    const { item, init, items, isEdit, selectedId } = useFormLogic(
-      mockFetchItems,
-      createItem,
-      updateItem,
-      Unit,
-      initialUnit
+    const wrapper = mount(
+      createDummyComponent({
+        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        initialUnit: initialUnit,
+      })
     )
 
-    await init()
-
-    expect(selectedId.value).toEqual(initialUnit.id)
-    expect(items.value).toEqual(unitList)
-    expect(item.value).toEqual(initialUnit)
-    expect(isEdit.value).toBe(true)
+    await flushPromises()
+    expect(wrapper.vm.selectedId).toEqual(initialUnit.id)
+    expect(wrapper.vm.items).toEqual(unitList)
+    expect(wrapper.vm.item).toEqual(initialUnit)
+    expect(wrapper.vm.isEdit).toBe(true)
   })
 
   it('updates item when selectedId changes', async () => {
-    const mockFetchItems = vi.fn(() => Promise.resolve(unitList))
-    const createItem = vi.fn()
-    const updateItem = vi.fn()
-
-    const { init, item, selectedId } = useFormLogic(
-      mockFetchItems,
-      createItem,
-      updateItem,
-      Unit,
-      unit1
+    const wrapper = mount(
+      createDummyComponent({
+        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+      })
     )
 
-    await init()
-    selectedId.value = 'unit2'
+    await flushPromises()
+    wrapper.vm.selectedId = 'unit2'
     await nextTick()
 
-    expect(item.value).toEqual(unit2)
+    expect(wrapper.vm.item).toEqual(unit2)
   })
 
   it('Calls update() when in edit mode', async () => {
-    const mockFetchItems = vi.fn(() => Promise.resolve(unitList))
-    const createItem = vi.fn()
-    const updateItem = vi.fn(() => Promise.resolve(unit2))
-
-    const { init, item, selectedId, uploadItem, valid } = useFormLogic(
-      mockFetchItems,
-      createItem,
-      updateItem,
-      Unit,
-      unit2
+    const wrapper = mount(
+      createDummyComponent({
+        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        updateItem: vi.fn(() => Promise.resolve(unit2)),
+        initialUnit: unit2,
+      })
     )
 
-    await init()
-    valid.value = true
-    const newItem = await uploadItem()
+    await flushPromises()
+    wrapper.vm.valid = true
+    const newItem = await wrapper.vm.uploadItem()
     await nextTick()
     expect(newItem).toEqual(unit2)
   })
 
   it('Calls create() when in create mode', async () => {
-    const mockFetchItems = vi.fn(() => Promise.resolve(unitList))
-    const createItem = vi.fn(() => Promise.resolve(unit1))
-    const updateItem = vi.fn()
-
-    const { init, item, selectedId, uploadItem, valid } = useFormLogic(
-      mockFetchItems,
-      createItem,
-      updateItem,
-      Unit
+    const wrapper = mount(
+      createDummyComponent({
+        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        createItem: vi.fn(() => Promise.resolve(unit1)),
+      })
     )
 
-    await init()
-    valid.value = true
-    const newItem = await uploadItem()
+    await flushPromises()
+    wrapper.vm.valid = true
+    const newItem = await wrapper.vm.uploadItem()
     await nextTick()
     expect(newItem).toEqual(unit1)
   })
 
   it('Handles errors properly', async () => {
     const mockError = new Error('Failed to fetch items')
-    const mockFetchItems = vi.fn(() => Promise.reject(mockError))
-    const createItem = vi.fn()
-    const updateItem = vi.fn()
+    const wrapper = mount(
+      createDummyComponent({
+        mockFetchItems: vi.fn(() => Promise.reject(mockError)),
+      })
+    )
 
     const consoleErrorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {})
 
-    const { init } = useFormLogic(mockFetchItems, createItem, updateItem, Unit)
-
-    await init()
+    await flushPromises()
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Error fetching items from DB.',
       mockError
