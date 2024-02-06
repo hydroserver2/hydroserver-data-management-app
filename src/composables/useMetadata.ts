@@ -1,8 +1,17 @@
 import { onMounted, computed, ref, ComputedRef } from 'vue'
 import { ProcessingLevel, DatastreamMetadata } from '@/types'
-import { api } from '@/services/api'
+import { api as defaultApi } from '@/services/api'
 
-export function useMetadata(thingId?: string, forUser?: boolean) {
+interface Api {
+  fetchMetadataForThing: (id: string) => Promise<DatastreamMetadata>
+  fetchMetadataForThingOwner: (id: string) => Promise<DatastreamMetadata>
+}
+
+export function useMetadata(
+  thingId?: string | null,
+  forUser?: boolean,
+  api: Api = defaultApi
+) {
   const metadata = ref<DatastreamMetadata | null>()
 
   const sensors = computed(() => metadata.value?.sensors || [])

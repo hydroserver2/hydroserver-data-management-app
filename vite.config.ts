@@ -48,7 +48,6 @@ export default defineConfig({
         '**/src/types/**',
         '**/src/config/**',
         '**/src/services/api.ts',
-        '**/src/composables/useMetadata.ts',
         '**/src/services/apiMethods.ts',
         '**/src/utils/mdi-icons.ts',
         '**/src/utils/materialColors.ts',
