@@ -3,26 +3,9 @@ import { useFormLogic } from '@/composables/useFormLogic'
 import { Unit } from '@/types'
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, nextTick } from 'vue'
+import unitFixtures from '@/utils/test/fixtures/unitFixtures'
 
-const unit1 = {
-  id: 'unit1',
-  name: 'Unit One',
-  definition: 'First unit for testing.',
-  symbol: 'U1',
-  type: 'TestType',
-  owner: 'Owner1',
-}
-
-const unit2 = {
-  id: 'unit2',
-  name: 'Unit Two',
-  definition: 'Second unit for testing.',
-  symbol: 'U2',
-  type: 'TestType',
-  owner: 'Owner2',
-}
-
-const unitList = [unit1, unit2]
+const [unit1, unit2] = unitFixtures
 
 // Default mock functions that can be overridden
 const defaultMockFetchItems: () => Promise<Unit[]> = vi.fn(() =>
@@ -69,14 +52,14 @@ describe('useFormLogic', () => {
 
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
         initialUnit: initialUnit,
       })
     )
 
     await flushPromises()
     expect(wrapper.vm.selectedId).toEqual(initialUnit.id)
-    expect(wrapper.vm.items).toEqual(unitList)
+    expect(wrapper.vm.items).toEqual(unitFixtures)
     expect(wrapper.vm.item).toEqual(initialUnit)
     expect(wrapper.vm.isEdit).toBe(true)
   })
@@ -84,7 +67,7 @@ describe('useFormLogic', () => {
   it('updates item when selectedId changes', async () => {
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
       })
     )
 
@@ -98,7 +81,7 @@ describe('useFormLogic', () => {
   it('Calls update() when in edit mode', async () => {
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
         updateItem: vi.fn(() => Promise.resolve(unit2)),
         initialUnit: unit2,
       })
@@ -114,7 +97,7 @@ describe('useFormLogic', () => {
   it('Calls create() when in create mode', async () => {
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitList)),
+        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
         createItem: vi.fn(() => Promise.resolve(unit1)),
       })
     )
