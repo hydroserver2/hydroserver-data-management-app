@@ -35,13 +35,10 @@ const api: Api = {
 let defaultThingId: string | null = 'thing1'
 // onMounted won't work outside of the context of script setup, therefore
 // wrap composable with dummy component
-const createDummyComponent = ({
-  thingId = defaultThingId,
-  forUser = false,
-} = {}) =>
+const createDummyComponent = ({ thingId = defaultThingId } = {}) =>
   defineComponent({
     setup() {
-      return useMetadata(thingId, forUser, api)
+      return useMetadata(thingId, api)
     },
     template: '<div>{{sensors}}</div>',
   })
@@ -62,12 +59,6 @@ describe('useMetadata', () => {
     expect(wrapper.vm.observedProperties.length).toBe(
       observedPropertyFixtures.length
     )
-  })
-
-  it('fetches linked metadata for the primary owner of a thing', async () => {
-    const wrapper = mount(createDummyComponent({ forUser: true }))
-    await flushPromises()
-    expect(wrapper.vm.sensors).toEqual(metadataMock2.sensors)
   })
 
   it('formats processing levels correctly', async () => {

@@ -7,11 +7,7 @@ interface Api {
   fetchMetadataForThingOwner: (id: string) => Promise<DatastreamMetadata>
 }
 
-export function useMetadata(
-  thingId?: string | null,
-  forUser?: boolean,
-  api: Api = defaultApi
-) {
+export function useMetadata(thingId?: string | null, api: Api = defaultApi) {
   const metadata = ref<DatastreamMetadata | null>()
 
   const sensors = computed(() => metadata.value?.sensors || [])
@@ -37,18 +33,16 @@ export function useMetadata(
       })) || []
   )
 
-  const fetchMetadata = async (id: string, forUser?: boolean) => {
+  const fetchMetadata = async (id: string) => {
     try {
-      metadata.value = forUser
-        ? await api.fetchMetadataForThingOwner(id)
-        : await api.fetchMetadataForThing(id)
+      metadata.value = await api.fetchMetadataForThing(id)
     } catch (error) {
       console.error('Error fetching metadata', error)
     }
   }
 
   onMounted(async () => {
-    if (thingId) await fetchMetadata(thingId, forUser)
+    if (thingId) await fetchMetadata(thingId)
   })
 
   return {
