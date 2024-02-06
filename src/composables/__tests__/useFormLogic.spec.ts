@@ -86,4 +86,64 @@ describe('useFormLogic', () => {
 
     expect(item.value).toEqual(unit2)
   })
+
+  it('Calls update() when in edit mode', async () => {
+    const mockFetchItems = vi.fn(() => Promise.resolve(unitList))
+    const createItem = vi.fn()
+    const updateItem = vi.fn(() => Promise.resolve(unit2))
+
+    const { init, item, selectedId, uploadItem, valid } = useFormLogic(
+      mockFetchItems,
+      createItem,
+      updateItem,
+      Unit,
+      unit2
+    )
+
+    await init()
+    valid.value = true
+    const newItem = await uploadItem()
+    await nextTick()
+    expect(newItem).toEqual(unit2)
+  })
+
+  it('Calls create() when in create mode', async () => {
+    const mockFetchItems = vi.fn(() => Promise.resolve(unitList))
+    const createItem = vi.fn(() => Promise.resolve(unit1))
+    const updateItem = vi.fn()
+
+    const { init, item, selectedId, uploadItem, valid } = useFormLogic(
+      mockFetchItems,
+      createItem,
+      updateItem,
+      Unit
+    )
+
+    await init()
+    valid.value = true
+    const newItem = await uploadItem()
+    await nextTick()
+    expect(newItem).toEqual(unit1)
+  })
+
+  it('Handles errors properly', async () => {
+    const mockError = new Error('Failed to fetch items')
+    const mockFetchItems = vi.fn(() => Promise.reject(mockError))
+    const createItem = vi.fn()
+    const updateItem = vi.fn()
+
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
+    const { init } = useFormLogic(mockFetchItems, createItem, updateItem, Unit)
+
+    await init()
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error fetching items from DB.',
+      mockError
+    )
+
+    consoleErrorSpy.mockRestore()
+  })
 })
