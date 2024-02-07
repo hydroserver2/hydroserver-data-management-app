@@ -4,7 +4,6 @@ import dataSourceFixtures from '../test/fixtures/dataSourceFixtures'
 
 describe('getStatus', () => {
   it('returns "pending" if lastSynced is not set', () => {
-    console.log(dataSourceFixtures[1])
     let dataSource = JSON.parse(JSON.stringify(dataSourceFixtures[0]))
     dataSource = { ...dataSource, lastSynced: null }
     expect(getStatus(dataSource)).toBe('pending')
