@@ -42,6 +42,7 @@ export default defineConfig({
       exclude: [
         '**/src/**/*.vue',
         '!**/src/components/base/Footer.vue',
+        '**/src/composables/useUserTags.ts',
         '**/src/plugins/**',
         '**/src/router/**',
         '**/src/store/**',
@@ -49,6 +50,7 @@ export default defineConfig({
         '**/src/config/**',
         '**/src/services/api.ts',
         '**/src/services/apiMethods.ts',
+        '**/src/services/handle401.ts',
         '**/src/utils/mdi-icons.ts',
         '**/src/utils/materialColors.ts',
         '**/src/utils/test/**',
@@ -58,7 +60,6 @@ export default defineConfig({
         '**/*.d.ts',
         '**/postcss.config.js',
       ],
-      // include: ['**/src/components/base/Footer.vue'],
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
     },
