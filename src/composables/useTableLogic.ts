@@ -20,6 +20,7 @@ export function useTableLogic<T extends WithId>(
     else if (dialog === 'delete') openDelete.value = true
   }
 
+  // For emitting the updated item to parent. Assume child calls api update.
   const onUpdate = (updatedItem: T) => {
     const index = items.value.findIndex((u: any) => u.id === updatedItem.id)
     if (index !== -1) items.value[index] = updatedItem
