@@ -11,7 +11,7 @@
     "test": "vitest",
     "test-e2e": "cypress open",
     "test-e2e:run": "cypress run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage --environment jsdom"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
