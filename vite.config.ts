@@ -53,6 +53,7 @@ export default defineConfig({
         '**/src/services/handle401.ts',
         '**/src/utils/mdi-icons.ts',
         '**/src/utils/materialColors.ts',
+        '**/src/utils/FocusContextPlot.ts',
         '**/src/utils/test/**',
         '**/src/App.vue',
         '**/src/main.ts',
