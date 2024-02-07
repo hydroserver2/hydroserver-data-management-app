@@ -40,7 +40,7 @@ export default defineConfig({
     environment: 'jsdom',
     coverage: {
       exclude: [
-        // '**/src/**/*.vue',
+        '**/src/**/*.vue',
         '!**/src/components/base/Footer.vue',
         '**/src/composables/useUserTags.ts',
         '**/src/plugins/**',
