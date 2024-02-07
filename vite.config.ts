@@ -55,6 +55,8 @@ export default defineConfig({
         '**/src/utils/materialColors.ts',
         '**/src/utils/FocusContextPlot.ts',
         '**/src/utils/test/**',
+        '**/src/utils/googleMaps/**',
+        '**/src/utils/rules.ts',
         '**/src/App.vue',
         '**/src/main.ts',
         '**/src/vocabularies.ts',
