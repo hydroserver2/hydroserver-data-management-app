@@ -20,6 +20,8 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm run test
+      - name: Check coverage
+        run: npm run coverage
 
   Deploy-Dev:
     name: Deploy to AWS S3 Dev

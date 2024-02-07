@@ -63,6 +63,12 @@ export default defineConfig({
         '**/*.d.ts',
         '**/postcss.config.js',
       ],
+      thresholds: {
+        lines: 80,
+        statements: 80,
+        functions: 80,
+        branches: 80,
+      },
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
     },
