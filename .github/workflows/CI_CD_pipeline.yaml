@@ -23,7 +23,6 @@ jobs:
 
   Run-Tests:
     name: Run Unit Tests
-    needs: Build-Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -43,7 +42,7 @@ jobs:
 
   Deploy-Dev:
     name: Deploy to AWS S3 Dev
-    needs: Run-Tests
+    needs: [Build-Check, Run-Tests]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
