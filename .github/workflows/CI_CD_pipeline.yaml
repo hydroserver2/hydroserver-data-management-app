@@ -20,7 +20,7 @@ jobs:
         run: npm ci
 
       - name: Add Environment Variables
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           cat << EOF > .env
           VITE_APP_VERSION=${{ secrets.VITE_APP_VERSION }}
@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Cache Build Artifacts
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/cache@v2
         with:
           path: dist
