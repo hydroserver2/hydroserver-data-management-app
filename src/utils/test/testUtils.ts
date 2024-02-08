@@ -1,9 +1,14 @@
-import type { RouteLocationRaw, Router } from 'vue-router'
-import router from '@/router/router'
+import {
+  createMemoryHistory,
+  createRouter,
+  type RouteLocationRaw,
+  type Router,
+} from 'vue-router'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import ResizeObserverPolyfill from 'resize-observer-polyfill'
+import { routes } from '@/router/routes'
 
 const vuetify = createVuetify({
   components,
@@ -11,6 +16,13 @@ const vuetify = createVuetify({
 })
 
 global.ResizeObserver = ResizeObserverPolyfill
+
+export function createTestRouter(base?: string): Router {
+  return createRouter({
+    routes,
+    history: createMemoryHistory(base),
+  })
+}
 
 interface RenderOptionsArgs {
   props: Record<string, unknown>
@@ -24,11 +36,13 @@ interface RenderOptionsArgs {
 }
 
 export function renderOptions(args: Partial<RenderOptionsArgs> = {}) {
+  const localRouter = args.router || createTestRouter()
+
   const result = {
     props: args.props,
     slots: args.slots,
     global: {
-      plugins: [vuetify, router],
+      plugins: [vuetify, localRouter],
     },
   }
 
