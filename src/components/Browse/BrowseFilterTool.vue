@@ -62,10 +62,12 @@ import { computed, ref, watch } from 'vue'
 import { Ref } from 'vue'
 import { Thing } from '@/types'
 import { siteTypes } from '@/vocabularies'
+import { useDisplay } from 'vuetify/lib/framework.mjs'
 
+const { smAndDown } = useDisplay()
 const selectedSiteTypes: Ref<string[]> = ref([])
 const selectedOrganizations: Ref<string[]> = ref([])
-const drawer = ref(true)
+const drawer = ref(!!smAndDown)
 
 const emit = defineEmits(['filter'])
 const props = defineProps({
