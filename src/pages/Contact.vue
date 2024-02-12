@@ -45,7 +45,10 @@
           </v-card-text>
 
           <v-card-actions class="justify-end">
-            <v-btn-primary href="https://github.com/hydroserver2/hydroserver">
+            <v-btn-primary
+              target="_blank"
+              href="https://github.com/hydroserver2/hydroserver"
+            >
               Go to Github
             </v-btn-primary>
           </v-card-actions>
