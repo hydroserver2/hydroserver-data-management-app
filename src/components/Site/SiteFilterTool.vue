@@ -16,9 +16,10 @@
         <v-col cols="12" md="4" class="align-self-center">
           <v-autocomplete
             density="compact"
-            v-model="formValue"
+            v-model="selectedTagValues"
             :items="valueList"
             label="Value"
+            multiple
             clearable
             :disabled="!formKey"
             hide-details
@@ -46,7 +47,8 @@
 import { useUserTags } from '@/composables/useUserTags'
 import { ref, watch } from 'vue'
 
-const { formKey, formValue, keyList, valueList } = useUserTags()
+const { formKey, keyList, valueList } = useUserTags()
+const selectedTagValues = ref<string[]>([])
 
 const emit = defineEmits(['filter', 'update:useColors'])
 const props = defineProps({
@@ -60,13 +62,13 @@ const updateColors = () => {
 }
 
 const emitFilteredTags = () => {
-  emit('filter', { key: formKey.value, value: formValue.value })
+  emit('filter', { key: formKey.value, values: selectedTagValues.value })
 }
 
 const clear = () => {
   formKey.value = ''
-  formValue.value = ''
+  selectedTagValues.value = []
 }
 
-watch([formKey, formValue], emitFilteredTags)
+watch([formKey, selectedTagValues], emitFilteredTags)
 </script>

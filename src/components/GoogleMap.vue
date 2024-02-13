@@ -41,11 +41,8 @@ const props = defineProps({
     default: defaultMapOptions,
   },
   useColors: Boolean,
+  colorKey: { type: String, default: '' },
   useBounds: Boolean,
-  filterCriteria: {
-    type: Object as PropType<FilterCriteria>,
-    default: () => ({ key: '', value: '' }),
-  },
   singleMarkerMode: Boolean,
   useMarkerClusterer: Boolean,
 })
@@ -66,7 +63,7 @@ watch(
     if (markerClusterer) markerClusterer.clearMarkers()
 
     coloredThings.value = props.useColors
-      ? addColorToMarkers(newThings, props.filterCriteria)
+      ? addColorToMarkers(newThings, props.colorKey)
       : newThings
     markers = loadMarkers(coloredThings.value, map, markerClusterer)
 
