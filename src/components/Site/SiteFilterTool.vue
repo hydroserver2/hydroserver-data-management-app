@@ -9,6 +9,7 @@
             :items="keyList"
             label="Key"
             clearable
+            @click:clear="clear"
             hide-details
           />
         </v-col>
