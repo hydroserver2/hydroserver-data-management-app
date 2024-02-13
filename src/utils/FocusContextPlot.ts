@@ -23,7 +23,8 @@ export function focus(data: DataPoint[], yAxisLabel: string): SVGSVGElement {
       }),
       Plot.areaY(data, {
         x: 'date',
-        y: 'value',
+        y1: (d) => minY,
+        y2: 'value',
         fill: '#E8F5E9',
         stroke: '#4CAF50',
         clip: true,
