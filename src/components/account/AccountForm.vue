@@ -129,7 +129,8 @@
           <v-alert type="warning" dense>
             Warning: Disabling organization affiliation will permanently remove
             its data from your profile. However, you can re-enter details later
-            to affiliate with an organization again.
+            to affiliate with an organization again. Click the Cancel button if
+            you do not want to remove your organization information.
           </v-alert>
         </v-card-text>
 
