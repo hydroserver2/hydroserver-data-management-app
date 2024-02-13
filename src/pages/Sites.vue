@@ -2,8 +2,7 @@
   <div class="map-container flex-shrink-0">
     <GoogleMap
       v-if="ownedThings"
-      :useColors="useColors"
-      :colorKey="filterCriteria.key"
+      :colorKey="useColors ? filterCriteria.key : ''"
       :things="filteredThings"
       useBounds
     />
