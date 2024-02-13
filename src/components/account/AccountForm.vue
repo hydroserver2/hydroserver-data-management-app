@@ -125,6 +125,14 @@
           </v-col>
         </v-row>
 
+        <v-card-text v-if="hadOrgInitially && !showOrg">
+          <v-alert type="warning" dense>
+            Warning: Disabling organization affiliation will permanently remove
+            its data from your profile. However, you can re-enter details later
+            to affiliate with an organization again.
+          </v-alert>
+        </v-card-text>
+
         <v-divider></v-divider>
 
         <v-card-actions>
@@ -165,11 +173,23 @@ const phoneMask = { mask: '(###) ###-####' }
 const valid = ref(false)
 const myForm = ref<VForm>()
 const showOrg = ref(!!userForm.organization)
+const hadOrgInitially = ref<boolean>(!!userForm.organization)
+const tempOrganization = ref<Organization | null>(null)
 
 watch(showOrg, (newVal) => {
-  if (newVal && !userForm.organization)
-    userForm.organization = new Organization()
-  else if (!newVal) userForm.organization = null
+  if (newVal) {
+    if (tempOrganization.value) {
+      userForm.organization = JSON.parse(JSON.stringify(tempOrganization.value))
+      tempOrganization.value = null
+    } else if (!userForm.organization) {
+      userForm.organization = new Organization()
+    }
+  } else {
+    if (userForm.organization) {
+      tempOrganization.value = JSON.parse(JSON.stringify(userForm.organization))
+      userForm.organization = null
+    }
+  }
 })
 
 const emit = defineEmits(['close'])
