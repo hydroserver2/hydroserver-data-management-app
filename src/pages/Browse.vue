@@ -1,15 +1,8 @@
 <template>
-  <v-container>
-    <h5 class="text-h4 font-weight-bold mb-6 mt-4">
-      Browse Data Collection Sites
-    </h5>
-
+  <div class="d-flex fill-height">
     <BrowseFilterTool :things="things" @filter="updateFilteredThings" />
-
-    <v-card class="mt-6 map-container" elevation="3">
-      <GoogleMap :things="filteredThings" useMarkerClusterer />
-    </v-card>
-  </v-container>
+    <GoogleMap :things="filteredThings" useMarkerClusterer />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -31,10 +24,3 @@ onMounted(async () => {
   filteredThings.value = things.value
 })
 </script>
-
-<style>
-.map-container {
-  position: relative;
-  height: 70rem;
-}
-</style>
