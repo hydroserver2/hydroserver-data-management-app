@@ -154,6 +154,6 @@ onMounted(async () => refreshThings())
 .map-container {
   /* The legend won't appear without a relative position */
   position: relative;
-  height: 25rem;
+  height: 33rem;
 }
 </style>
