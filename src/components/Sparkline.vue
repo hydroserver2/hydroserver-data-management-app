@@ -56,7 +56,8 @@ function drawChart() {
     marks: [
       Plot.areaY(observations, {
         x: 'date',
-        y: 'value',
+        y1: (d) => minY,
+        y2: 'value',
         stroke: colors.line,
         fill: colors.fill,
       }),
