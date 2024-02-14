@@ -41,7 +41,6 @@ export default defineConfig({
     coverage: {
       exclude: [
         '**/src/**/*.vue',
-        '!**/src/components/base/Footer.vue',
         '**/src/composables/useUserTags.ts',
         '**/src/plugins/**',
         '**/src/router/**',
