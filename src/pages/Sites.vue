@@ -59,11 +59,14 @@
       </template>
     </v-data-table>
 
-    <h5 v-else class="text-h5">You have not registered any sites.</h5>
+    <h5 v-if="!sitesLoaded" class="text-h5">Loading sites...</h5>
+    <h5 v-else-if="!ownedThings.length" class="text-h5">
+      You have not registered any sites.
+    </h5>
   </v-container>
 
   <v-dialog v-model="showSiteForm" width="60rem">
-    <SiteForm @close="showSiteForm = false" @created="refreshThings" />
+    <SiteForm @close="showSiteForm = false" @created="loadThings" />
   </v-dialog>
 </template>
 
@@ -81,6 +84,7 @@ import { ThingWithColor } from '@/types'
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)
 const isFiltered = ref(false)
+const sitesLoaded = ref(false)
 const filterCriteria = ref({ key: '', values: [] as string[] })
 
 const filteredThings = computed(() => {
@@ -141,10 +145,12 @@ const onRowClick = (event: Event, item: any) => {
   router.push({ name: 'SiteDetails', params: { id: item.item.id } })
 }
 
-const refreshThings = async () =>
-  (ownedThings.value = await api.fetchOwnedThings())
+const loadThings = async () => {
+  ownedThings.value = await api.fetchOwnedThings()
+  sitesLoaded.value = true
+}
 
-onMounted(async () => refreshThings())
+onMounted(async () => loadThings())
 </script>
 
 <style scoped>
