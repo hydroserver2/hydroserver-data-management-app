@@ -122,14 +122,18 @@
                 />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-select
+                <v-autocomplete
                   label="Country"
                   :items="countries"
                   :item-title="countryTitle"
                   item-value="code"
                   clearable
                   v-model="thing.country"
-                />
+                >
+                  <template v-slot:selection="{ item, index }">
+                    <span>{{ thing.country }}</span>
+                  </template></v-autocomplete
+                >
               </v-col>
             </v-row>
 

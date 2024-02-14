@@ -5,28 +5,22 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer'
 
 let infoWindow: google.maps.InfoWindow | null = null
 
-export const addColorToMarkers = (
-  things: Thing[],
-  filterCriteria: { key: string; value: string }
-) => {
+export const addColorToMarkers = (things: Thing[], key: string) => {
   let colorIndex = 0
   const colorMap = new Map()
 
   return things.map((thing) => {
-    const tagValue = thing.tags.find(
-      (tag) => tag.key === filterCriteria.key
-    )?.value
-    if (tagValue !== undefined) {
-      if (!colorMap.has(tagValue)) {
-        colorMap.set(
-          tagValue,
-          googlePinColors[colorIndex % googlePinColors.length]
-        )
-        colorIndex++
-      }
-      return { ...thing, color: colorMap.get(tagValue), tagValue: tagValue }
+    const tagValue = thing.tags.find((tag) => tag.key === key)?.value
+    if (tagValue === undefined) return thing
+
+    if (!colorMap.has(tagValue)) {
+      colorMap.set(
+        tagValue,
+        googlePinColors[colorIndex % googlePinColors.length]
+      )
+      colorIndex++
     }
-    return thing
+    return { ...thing, color: colorMap.get(tagValue), tagValue: tagValue }
   })
 }
 
