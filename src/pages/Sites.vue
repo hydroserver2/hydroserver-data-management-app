@@ -2,8 +2,7 @@
   <div class="map-container flex-shrink-0">
     <GoogleMap
       v-if="ownedThings"
-      :useColors="useColors"
-      :filter-criteria="filterCriteria"
+      :colorKey="useColors ? filterCriteria.key : ''"
       :things="filteredThings"
       useBounds
     />
@@ -82,28 +81,26 @@ import { ThingWithColor } from '@/types'
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)
 const isFiltered = ref(false)
-const filterCriteria = ref({ key: '', value: '' })
+const filterCriteria = ref({ key: '', values: [] as string[] })
 
 const filteredThings = computed(() => {
   const hasKey = !!filterCriteria.value.key
-  const hasValue = !!filterCriteria.value.value
-  if (!hasKey && !hasValue) {
+  const hasValues = filterCriteria.value.values.length > 0
+  if (!hasKey && !hasValues) {
     isFiltered.value = false
     return ownedThings.value
   }
 
   const filterFunction = (thing: Thing) => {
-    if (hasKey && hasValue) {
+    if (hasKey && hasValues) {
       return thing.tags.some(
         (tag) =>
           tag.key === filterCriteria.value.key &&
-          tag.value === filterCriteria.value.value
+          filterCriteria.value.values.includes(tag.value)
       )
     } else if (hasKey) {
       isFiltered.value = true
       return thing.tags.some((tag) => tag.key === filterCriteria.value.key)
-    } else {
-      return thing.tags.some((tag) => tag.value === filterCriteria.value.value)
     }
   }
 
@@ -111,7 +108,7 @@ const filteredThings = computed(() => {
 })
 
 const coloredThings = computed<ThingWithColor[]>(() =>
-  addColorToMarkers(filteredThings.value, filterCriteria.value)
+  addColorToMarkers(filteredThings.value, filterCriteria.value.key)
 )
 
 const showSiteForm = ref(false)
@@ -136,7 +133,7 @@ const updateColors = (newColor: boolean) => {
   useColors.value = newColor
 }
 
-const handleFilter = (criteria: { key: string; value: string }) => {
+const handleFilter = (criteria: { key: string; values: string[] }) => {
   filterCriteria.value = criteria
 }
 

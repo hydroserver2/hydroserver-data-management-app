@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, PropType, computed } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { Thing } from '@/types'
 import {
   loadMap,
@@ -29,23 +29,14 @@ import { ThingWithColor } from '@/types'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { defaultMapOptions } from '@/config/googleMapsConfig'
 
-interface FilterCriteria {
-  key: string
-  value: string
-}
-
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
   mapOptions: {
     type: Object,
     default: defaultMapOptions,
   },
-  useColors: Boolean,
+  colorKey: { type: String, default: '' },
   useBounds: Boolean,
-  filterCriteria: {
-    type: Object as PropType<FilterCriteria>,
-    default: () => ({ key: '', value: '' }),
-  },
   singleMarkerMode: Boolean,
   useMarkerClusterer: Boolean,
 })
@@ -65,8 +56,8 @@ watch(
     clearMarkers(markers)
     if (markerClusterer) markerClusterer.clearMarkers()
 
-    coloredThings.value = props.useColors
-      ? addColorToMarkers(newThings, props.filterCriteria)
+    coloredThings.value = props.colorKey
+      ? addColorToMarkers(newThings, props.colorKey)
       : newThings
     markers = loadMarkers(coloredThings.value, map, markerClusterer)
 
