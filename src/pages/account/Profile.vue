@@ -10,7 +10,7 @@
   </v-container>
 
   <v-dialog v-model="openForm" width="40rem">
-    <AccountForm @close="openForm = false" />
+    <AccountForm @close="openForm = false" :is-edit="true" />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
