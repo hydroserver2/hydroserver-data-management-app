@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <AccountForm v-if="loaded" :has-cancel-button="false">
+    <AccountForm
+      v-if="loaded"
+      :has-cancel-button="false"
+      :is-edit="true"
+      @close="navigateToSites()"
+    >
       <template v-slot:header>
         <v-card-title align="center" class="mb-2 signup-title">
           Successfully authenticated!
@@ -21,11 +26,16 @@ import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import router from '@/router/router'
 
 const route = useRoute()
 const { user } = storeToRefs(useUserStore())
 const { setTokens } = useAuthStore()
 const loaded = ref(false)
+
+const navigateToSites = async () => {
+  await router.push({ name: 'Sites' })
+}
 
 onMounted(async () => {
   const accessToken = (route.query.t as string) || ''
