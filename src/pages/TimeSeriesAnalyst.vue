@@ -2,7 +2,12 @@
   <TSAFiltersDrawer />
 
   <div class="my-4 mx-4">
-    <FocusContextPlot :thing-name="'Temp'" :datastream="tempDS" />
+    <!-- <div v-if="selectedDatastreams.length"> -->
+    <MultiAxisFocusContextPlot
+      :datastreams="selectedDatastreams"
+      :begin-date="beginDate"
+      :end-date="endDate"
+    />
 
     <v-row class="mt-4" align="center">
       <v-col>
@@ -23,20 +28,23 @@
     </v-row>
 
     <v-divider class="my-8" />
+    <!-- </div> -->
 
     <TSADatasetsTable />
   </div>
 </template>
 
 <script setup lang="ts">
-import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
 import { Datastream } from '@/types'
 import { ref } from 'vue'
 import { materialColors } from '@/utils/materialColors'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
+import MultiAxisFocusContextPlot from '@/components/TimeSeriesAnalyst/MultiAxisFocusContextPlot.vue'
+import { onMounted } from 'vue'
+import { api } from '@/services/api'
 
-const tempDS = ref<Datastream>(new Datastream())
+const selectedDatastreams = ref<Datastream[]>([])
 
 const legendNames = ref<string[]>([
   'abs254_SUNA: Absorbance LR_Mendon_AA: Logan River at Mendon Road (600 South) Raw Data',
@@ -45,4 +53,21 @@ const legendNames = ref<string[]>([
   'Datastream 4',
   'Datastream 5',
 ])
+
+// TODO: Clean up hardcoded data
+const endDate = ref<Date>(new Date())
+const beginDate = ref<Date>(new Date())
+beginDate.value.setMonth(beginDate.value.getMonth() - 6)
+
+onMounted(async () => {
+  const miami_gaps = await api.fetchDatastream(
+    '10ab62a4-1908-410c-91d2-2d99d6fec1e8'
+  )
+  const miami_50 = await api.fetchDatastream(
+    '6db96e5d-2e50-412c-b64c-06371d63891e'
+  )
+
+  selectedDatastreams.value = [miami_gaps, miami_50]
+  // console.log('Loaded', selectedDatastreams.value)
+})
 </script>

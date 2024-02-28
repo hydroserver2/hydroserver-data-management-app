@@ -1,70 +1,54 @@
 import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
-import { DataPoint } from '@/types'
+import { DataPoint, GraphSeries } from '@/types'
 
 const dispatch = d3.dispatch('timeWindow')
 
-export function focus(data: DataPoint[], yAxisLabel: string): SVGSVGElement {
-  const [minX, maxX] = d3.extent(data, (d) => d.date)
-  const [minY, maxY] = d3.extent(data, (d) => d.value)
+export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
+  const marks: any[] = []
+  const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+  const height = 250
+
+  graphSeriesArray.forEach((series, index) => {
+    const [minY, maxY] = d3.extent(series.data, (d) => d.value)!
+    const yAxisAlign = index % 2 === 0 ? 'left' : 'right'
+    const color = series.lineColor || colorScale(index.toString())
+    const yScale = d3.scaleLinear([minY!, maxY!], [0, height])
+
+    // Prepare the mark for each series
+    marks.push(
+      Plot.lineY(series.data, {
+        x: 'date',
+        y: (d) => yScale(d.value),
+        stroke: color,
+        clip: true,
+      }),
+      //   TODO: Make hover work
+      //   Plot.dot(
+      //     series.data,
+      //     Plot.pointerX({ x: 'date', y: (d) => yScaled(d.value), stroke: 'grey' })
+      //   ),
+      Plot.axisY(yScale.ticks(), {
+        color: color,
+        anchor: yAxisAlign,
+        label: series.yAxisLabel,
+        labelAnchor: 'center',
+        y: yScale,
+        // TODO Make labels and ticks format well
+        tickFormat: yScale.tickFormat(),
+      })
+    )
+  })
+
   const spec = {
-    height: 250,
+    height: height,
     grid: true,
     marginBottom: 45,
     marginLeft: 60,
-    x: { type: 'utc', label: 'Date/Time' },
-    y: { label: yAxisLabel, domain: [minY, maxY] },
-    marks: [
-      Plot.axisX({ labelAnchor: 'center', labelOffset: 40 }),
-      Plot.axisY({
-        labelAnchor: 'center',
-        tickFormat: (d: number) =>
-          d.toString().length > 4 ? d.toExponential() : d,
-      }),
-      Plot.areaY(data, {
-        x: 'date',
-        y1: (d) => minY,
-        y2: 'value',
-        fill: '#E8F5E9',
-        stroke: '#4CAF50',
-        clip: true,
-      }),
-      // We need to overlay a rectangle in order for the ruleX mouseover
-      // to be responsive above the areaY line.
-      Plot.rect([{ minX, maxX, minY, maxY }], {
-        x1: (d) => d.minX,
-        x2: (d) => d.maxX,
-        y1: (d) => d.minY,
-        y2: (d) => d.maxY,
-        fillOpacity: 0,
-        clip: true,
-      }),
-      Plot.ruleX(
-        data,
-        Plot.pointerX({
-          x: 'date',
-          py: 'value',
-          stroke: 'grey',
-        })
-      ),
-      Plot.dot(data, Plot.pointerX({ x: 'date', y: 'value', stroke: 'grey' })),
-      Plot.text(
-        data,
-        Plot.pointerX({
-          px: 'date',
-          py: 'value',
-          dy: -17,
-          frameAnchor: 'top-left',
-          fontVariant: 'tabular-nums',
-          text: (d) =>
-            [
-              `Date/Time ${Plot.formatIsoDate(d.date)}`,
-              `${yAxisLabel} ${d.value}`,
-            ].join('   '),
-        })
-      ),
-    ],
-  } as Plot.PlotOptions
+    x: { type: 'utc' as any, label: 'Date/Time' },
+    // y: { label: yAxisLabel, domain: [minY, maxY] },
+    marks: [...marks, Plot.axisX({ labelAnchor: 'center', labelOffset: 40 })],
+  }
 
   let chart = Plot.plot(spec)
 

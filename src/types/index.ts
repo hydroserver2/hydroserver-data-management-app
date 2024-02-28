@@ -17,6 +17,13 @@ export class ObservationRecord {
   }
 }
 
+export interface GraphSeries {
+  id: string
+  data: DataPoint[]
+  yAxisLabel: string
+  lineColor: string
+}
+
 export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
 
 export interface Owner {
