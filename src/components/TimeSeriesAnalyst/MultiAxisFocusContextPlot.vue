@@ -40,9 +40,9 @@ function renderPlot() {
     focusChart.value.appendChild(focusSVG)
   }
   if (contextChart.value) {
-    // const contextSVG = context(data)
-    // contextChart.value.innerHTML = ''
-    // contextChart.value.appendChild(contextSVG)
+    const contextSVG = context(graphSeriesArray.value)
+    contextChart.value.innerHTML = ''
+    contextChart.value.appendChild(contextSVG)
   }
 }
 

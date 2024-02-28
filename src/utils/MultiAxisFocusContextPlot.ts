@@ -7,7 +7,7 @@ const dispatch = d3.dispatch('timeWindow')
 export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
   const marks: any[] = []
   const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
-  const height = 250
+  const height = 300
 
   graphSeriesArray.forEach((series, index) => {
     const [minY, maxY] = d3.extent(series.data, (d) => d.value)!
@@ -113,22 +113,32 @@ export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
   return wrapper
 }
 
-export function context(data: DataPoint[]): SVGSVGElement {
-  const [minY, maxY] = d3.extent(data, (d) => d.value)
+export function context(graphSeriesArray: GraphSeries[]): SVGSVGElement {
+  const marks: any[] = []
+  const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+  const height = 65
+
+  graphSeriesArray.forEach((series, index) => {
+    const [minY, maxY] = d3.extent(series.data, (d) => d.value)!
+    const color = series.lineColor || colorScale(index.toString())
+    const yScale = d3.scaleLinear([minY!, maxY!], [0, height])
+
+    // Prepare the mark for each series
+    marks.push(
+      Plot.lineY(series.data, {
+        x: 'date',
+        y: (d) => yScale(d.value),
+        stroke: color,
+        clip: true,
+      })
+    )
+  })
 
   const chart = Plot.plot({
-    height: 65,
+    height: height,
     marginTop: 5,
     marginLeft: 60,
-    marks: [
-      Plot.areaY(data, {
-        x: 'date',
-        y1: (d) => minY,
-        y2: 'value',
-        fill: '#E8F5E9',
-      }),
-    ],
-    y: { ticks: 0, label: null, domain: [minY, maxY] },
+    marks: marks,
   })
 
   const x = chart.scale('x')

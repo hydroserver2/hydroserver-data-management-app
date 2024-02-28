@@ -57,17 +57,22 @@ const legendNames = ref<string[]>([
 // TODO: Clean up hardcoded data
 const endDate = ref<Date>(new Date())
 const beginDate = ref<Date>(new Date())
-beginDate.value.setMonth(beginDate.value.getMonth() - 6)
+beginDate.value.setMonth(beginDate.value.getMonth() - 12)
 
 onMounted(async () => {
   const miami_gaps = await api.fetchDatastream(
     '10ab62a4-1908-410c-91d2-2d99d6fec1e8'
   )
+
   const miami_50 = await api.fetchDatastream(
     '6db96e5d-2e50-412c-b64c-06371d63891e'
   )
 
-  selectedDatastreams.value = [miami_gaps, miami_50]
+  const miami_normal = await api.fetchDatastream(
+    '4c8dfc06-6be5-4650-91e1-30b6d4463bcf'
+  )
+
+  selectedDatastreams.value = [miami_gaps, miami_normal]
   // console.log('Loaded', selectedDatastreams.value)
 })
 </script>
