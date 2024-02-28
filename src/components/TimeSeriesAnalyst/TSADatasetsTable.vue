@@ -27,13 +27,54 @@
   </v-toolbar>
   <v-data-table
     :headers="headers"
+    :items="datastreams"
     class="elevation-2"
     color="green"
-  ></v-data-table>
+  >
+    <template v-slot:item.plot="{ item }">
+      <v-checkbox
+        class="d-flex align-self-center"
+        @change="() => updateSelectedDatastreamIds(item.id)"
+      />
+    </template>
+    <template v-slot:item.siteCode="{ item }">
+      {{ things.find((t) => t.id === item.thingId)?.name }}
+    </template>
+    <template v-slot:item.observedProperty="{ item }">
+      {{
+        observedProperties.find((p) => p.id === item.observedPropertyId)?.code
+      }}
+    </template>
+    <template v-slot:item.qualityControlLevel="{ item }">
+      {{
+        processingLevels.find((p) => p.id === item.processingLevelId)
+          ?.definition
+      }}
+    </template>
+  </v-data-table>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { api } from '@/services/api'
+import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
+import { PropType, onMounted, ref } from 'vue'
+
+const props = defineProps({
+  datastreams: {
+    type: Array as PropType<Datastream[]>,
+    required: true,
+  },
+  things: {
+    type: Array as PropType<Thing[]>,
+    required: true,
+  },
+})
+const emit = defineEmits(['update:selectedDatastreamIds'])
+
+const selectedDatastreamIds = ref<string[]>([])
+
+const observedProperties = ref<ObservedProperty[]>([])
+const processingLevels = ref<ProcessingLevel[]>([])
 
 const search = ref()
 const headers = [
@@ -41,7 +82,27 @@ const headers = [
   { title: 'Site Code', key: 'siteCode' },
   { title: 'Observed Property', key: 'observedProperty' },
   { title: 'Quality Control Level', key: 'qualityControlLevel' },
-  { title: 'Number Observations', key: 'numberObservations' },
-  { title: 'Date Last Updated', key: 'dateLastUpdated' },
+  {
+    title: 'Number Observations',
+    key: 'numberObservations',
+    value: 'valueCount',
+  },
+  {
+    title: 'Date Last Updated',
+    key: 'dateLastUpdated',
+    value: 'phenomenonEndTime',
+  },
 ] as const
+
+function updateSelectedDatastreamIds(id: string) {
+  const i = selectedDatastreamIds.value.indexOf(id)
+  if (i === -1) selectedDatastreamIds.value.push(id)
+  else selectedDatastreamIds.value.splice(i, 1)
+  emit('update:selectedDatastreamIds', selectedDatastreamIds.value)
+}
+
+onMounted(async () => {
+  observedProperties.value = await api.fetchOwnedObservedProperties()
+  processingLevels.value = await api.fetchProcessingLevels()
+})
 </script>

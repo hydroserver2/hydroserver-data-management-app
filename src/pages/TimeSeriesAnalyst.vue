@@ -30,13 +30,17 @@
     <v-divider class="my-8" />
     <!-- </div> -->
 
-    <TSADatasetsTable />
+    <TSADatasetsTable
+      :datastreams="filteredDatastreams"
+      :things="things"
+      @update:selected-datastream-ids="updateSelectedDatastreamIds"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
-import { Datastream } from '@/types'
+import { Datastream, Thing } from '@/types'
 import { computed, ref } from 'vue'
 import { materialColorsHex } from '@/utils/materialColors'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
@@ -44,30 +48,40 @@ import MultiAxisFocusContextPlot from '@/components/TimeSeriesAnalyst/MultiAxisF
 import { onMounted } from 'vue'
 import { api } from '@/services/api'
 
-const selectedDatastreams = ref<Datastream[]>([])
+const things = ref<Thing[]>([])
 
-const legendNames = computed(() => {
-  return selectedDatastreams.value.map((ds) => ds.name)
+const beginDate = ref<Date>(new Date())
+const endDate = ref<Date>(new Date())
+const filteredDatastreams = ref<Datastream[]>([])
+const datastreams = ref<Datastream[]>([])
+// const selectedDatastreams = ref<Datastream[]>([])
+const selectedDatastreams = computed(() => {
+  return datastreams.value.filter((ds) =>
+    selectedDatastreamIds.value.includes(ds.id)
+  )
 })
 
+// TODO: This may need to be a prop instead since we want to avoid filtering datastreams rows off the table
+//       while having them still selected
+const selectedDatastreamIds = ref<string[]>([])
+const selectedObservedPropertyIDs = ref<string[]>([])
+const selectedQualityControlLevelIDs = ref<string[]>([])
+
+const legendNames = computed(() =>
+  selectedDatastreams.value.map((ds) => ds.name)
+)
+
+const updateSelectedDatastreamIds = (ids: string[]) => {
+  selectedDatastreamIds.value = [...ids]
+}
+
 // TODO: Clean up hardcoded data
-const endDate = ref<Date>(new Date())
-const beginDate = ref<Date>(new Date())
 beginDate.value.setMonth(beginDate.value.getMonth() - 12)
 
 onMounted(async () => {
-  const miami_gaps = await api.fetchDatastream(
-    '10ab62a4-1908-410c-91d2-2d99d6fec1e8'
-  )
-
-  const miami_50 = await api.fetchDatastream(
-    '6db96e5d-2e50-412c-b64c-06371d63891e'
-  )
-
-  const miami_normal = await api.fetchDatastream(
-    '4c8dfc06-6be5-4650-91e1-30b6d4463bcf'
-  )
-
-  selectedDatastreams.value = [miami_gaps, miami_normal]
+  things.value = await api.fetchThings()
+  datastreams.value = await api.fetchUsersDatastreams()
+  console.log('datastreams', datastreams.value)
+  filteredDatastreams.value = [...datastreams.value]
 })
 </script>
