@@ -13,7 +13,7 @@
       <v-col>
         <div v-for="(key, index) in legendNames">
           <v-chip
-            :color="materialColors[index]"
+            :color="materialColorsHex[index]"
             class="mr-2"
             variant="elevated"
             density="compact"
@@ -37,8 +37,8 @@
 <script setup lang="ts">
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
 import { Datastream } from '@/types'
-import { ref } from 'vue'
-import { materialColors } from '@/utils/materialColors'
+import { computed, ref } from 'vue'
+import { materialColorsHex } from '@/utils/materialColors'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import MultiAxisFocusContextPlot from '@/components/TimeSeriesAnalyst/MultiAxisFocusContextPlot.vue'
 import { onMounted } from 'vue'
@@ -46,13 +46,9 @@ import { api } from '@/services/api'
 
 const selectedDatastreams = ref<Datastream[]>([])
 
-const legendNames = ref<string[]>([
-  'abs254_SUNA: Absorbance LR_Mendon_AA: Logan River at Mendon Road (600 South) Raw Data',
-  'Datastream 2',
-  'Datastream 3',
-  'Datastream 4',
-  'Datastream 5',
-])
+const legendNames = computed(() => {
+  return selectedDatastreams.value.map((ds) => ds.name)
+})
 
 // TODO: Clean up hardcoded data
 const endDate = ref<Date>(new Date())
@@ -73,6 +69,5 @@ onMounted(async () => {
   )
 
   selectedDatastreams.value = [miami_gaps, miami_normal]
-  // console.log('Loaded', selectedDatastreams.value)
 })
 </script>
