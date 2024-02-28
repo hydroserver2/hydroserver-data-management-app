@@ -20,6 +20,28 @@ export const materialColors = [
   'grey',
 ]
 
+export const materialColorsHex = [
+  '#03A9F4', // light-blue
+  '#4CAF50', // green
+  '#9C27B0', // purple
+  '#795548', // brown
+  '#F44336', // red
+  '#E91E63', // pink
+  '#F9A825', // yellow-darken-3, assuming "yellow" with a darker shade
+  '#CDDC39', // lime
+  '#2196F3', // blue
+  '#673AB7', // deep-purple
+  '#FF9800', // orange
+  '#607D8B', // blue-grey
+  '#00BCD4', // cyan
+  '#3F51B5', // indigo
+  '#8BC34A', // light-green
+  '#FFC107', // amber
+  '#009688', // teal
+  '#FF5722', // deep-orange
+  '#9E9E9E', // grey
+]
+
 export const googlePinColors = [
   { borderColor: '#B71C1C', background: '#F44336', glyphColor: '#B71C1C' }, // Red
   { borderColor: '#0D47A1', background: '#2196F3', glyphColor: '#0D47A1' }, // Blue

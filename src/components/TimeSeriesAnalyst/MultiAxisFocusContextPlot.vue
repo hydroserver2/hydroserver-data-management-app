@@ -12,12 +12,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, PropType, watch } from 'vue'
+import { ref, PropType, watch } from 'vue'
 import { focus, context } from '@/utils/MultiAxisFocusContextPlot'
-import { DataPoint, Datastream } from '@/types'
+import { Datastream } from '@/types'
 import { fetchObservations, preProcessData } from '@/utils/observationsUtils'
 import { api } from '@/services/api'
 import { GraphSeries } from '@/types'
+import { materialColorsHex } from '@/utils/materialColors'
 
 const graphSeriesArray = ref<GraphSeries[]>([])
 
@@ -60,7 +61,7 @@ const updateState = async (
   // TODO: Use fetchObservationsParallel
   // TODO: Make sure this returns the true date range and not the last 6 months of data each set has
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
-    datastreams.map(async (ds) => {
+    datastreams.map(async (ds, index) => {
       const observationsPromise = fetchObservations(ds.id, start, end)
       const fetchUnitPromise = api.getUnit(ds.unitId).catch((error) => {
         console.error('Failed to fetch Unit:', error)
@@ -86,8 +87,7 @@ const updateState = async (
           ? `${observedProperty.name} (${unit.symbol})`
           : 'Unknown'
 
-      // TODO: Assign Colors
-      const lineColor = '#2196F3'
+      const lineColor = materialColorsHex[index % materialColorsHex.length]
 
       return {
         id: ds.id,
