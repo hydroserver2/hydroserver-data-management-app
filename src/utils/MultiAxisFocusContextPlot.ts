@@ -34,8 +34,8 @@ export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
         label: series.yAxisLabel,
         labelAnchor: 'center',
         y: yScale,
-        // TODO Make labels and ticks format well
-        tickFormat: yScale.tickFormat(),
+        tickFormat: (d: number) =>
+          d.toString().length > 4 ? d.toExponential() : d,
       })
     )
   })
@@ -46,7 +46,6 @@ export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
     marginBottom: 45,
     marginLeft: 60,
     x: { type: 'utc' as any, label: 'Date/Time' },
-    // y: { label: yAxisLabel, domain: [minY, maxY] },
     marks: [...marks, Plot.axisX({ labelAnchor: 'center', labelOffset: 40 })],
   }
 
