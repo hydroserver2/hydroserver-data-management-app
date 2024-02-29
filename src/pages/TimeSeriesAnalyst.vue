@@ -1,5 +1,8 @@
 <template>
-  <TSAFiltersDrawer @update:time-range="updateTimeRange" />
+  <TSAFiltersDrawer
+    @update:time-range="updateTimeRange"
+    @update:selected-things="updateSelectedThings"
+  />
 
   <div class="my-4 mx-4">
     <!-- <div v-if="selectedDatastreams.length"> -->
@@ -32,7 +35,7 @@
 
     <TSADatasetsTable
       :datastreams="filteredDatastreams"
-      :things="things"
+      :things="selectedThings.length ? selectedThings : things"
       @update:selected-datastream-ids="updateSelectedDatastreamIds"
     />
   </div>
@@ -64,8 +67,23 @@ const selectedDatastreams = computed(() => {
 // TODO: This may need to be a prop instead since we want to avoid filtering datastreams rows off the table
 //       while having them still selected
 const selectedDatastreamIds = ref<string[]>([])
+
+const selectedThings = ref<Thing[]>([])
 const selectedObservedPropertyIDs = ref<string[]>([])
 const selectedQualityControlLevelIDs = ref<string[]>([])
+
+const updateSelectedThings = (updatedThings: Thing[]) => {
+  selectedThings.value = [...updatedThings]
+
+  if (!updatedThings.length) {
+    filteredDatastreams.value = [...datastreams.value]
+  } else {
+    const selectedThingIds = updatedThings.map((thing) => thing.id)
+    filteredDatastreams.value = datastreams.value.filter((d) =>
+      selectedThingIds.includes(d.thingId)
+    )
+  }
+}
 
 const legendNames = computed(() =>
   selectedDatastreams.value.map((ds) => ds.name)

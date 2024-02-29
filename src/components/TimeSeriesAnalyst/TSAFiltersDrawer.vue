@@ -99,22 +99,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { Ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Thing } from '@/types'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { onMounted } from 'vue'
 import { api } from '@/services/api'
 import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
 
-const emit = defineEmits(['update:timeRange'])
+const emit = defineEmits(['update:timeRange', 'update:selectedThings'])
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
 const drawer = ref(!!smAndDown)
 
-const selectedThings: Ref<string[]> = ref([])
 const things = ref<Thing[]>([])
+const selectedThings = ref<Thing[]>([])
+
+const emitSelectedThings = () => {
+  emit('update:selectedThings', selectedThings.value)
+}
+
+watch([selectedThings], emitSelectedThings)
 
 const endDate = ref<Date>(new Date())
 const oneWeek = 7 * 24 * 60 * 60 * 1000
