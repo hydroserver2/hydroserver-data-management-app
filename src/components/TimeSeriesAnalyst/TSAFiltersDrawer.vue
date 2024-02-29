@@ -30,20 +30,27 @@
       <v-expansion-panel title="Time">
         <v-expansion-panel-text>
           <div class="d-flex justify-center mb-3">
-            <v-btn color="blue-grey-lighten-4">All</v-btn>
-            <v-btn color="blue-grey-lighten-4" class="mx-1">Last Month</v-btn>
-            <v-btn color="blue-grey-lighten-4">Last Week</v-btn>
+            <v-btn
+              v-for="option in dateOptions"
+              :key="option.id"
+              :color="
+                selectedRangeId === option.id ? 'blue' : 'blue-grey-lighten-4'
+              "
+              @click="setDateRange(option.id)"
+            >
+              {{ option.label }}
+            </v-btn>
           </div>
 
           <DatePickerField
             :model-value="beginDate"
             placeholder="Begin Date"
-            @update:model-value="beginDate = $event"
+            @update:model-value="handleCustomDateSelection('begin', $event)"
           />
           <DatePickerField
             :model-value="endDate"
             placeholder="End Date"
-            @update:model-value="endDate = $event"
+            @update:model-value="handleCustomDateSelection('end', $event)"
           />
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -113,17 +120,56 @@ const endDate = ref<Date>(new Date())
 const oneWeek = 7 * 24 * 60 * 60 * 1000
 const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneWeek))
 
-const onClearFilters = () => {}
-
-// TODO: When both are changed at the same time, we only want to emit the new values once.
-//       Probably this should be a function instead of a watcher
-watch(
-  [beginDate, endDate],
-  ([newBeginDate, newEndDate]) => {
-    emit('update:timeRange', { beginDate: newBeginDate, endDate: newEndDate })
+const selectedRangeId = ref(2)
+const dateOptions = [
+  {
+    id: 0,
+    label: 'All',
+    calculateBeginDate: () => new Date('1850-01-01'),
   },
-  { deep: true, immediate: true }
-)
+  {
+    id: 1,
+    label: 'Last Month',
+    calculateBeginDate: () => {
+      const now = new Date()
+      return new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+    },
+  },
+  {
+    id: 2,
+    label: 'Last Week',
+    calculateBeginDate: () => {
+      const now = new Date()
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+    },
+  },
+]
+
+const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
+  if (type === 'begin') beginDate.value = date
+  else endDate.value = date
+  selectedRangeId.value = -1
+
+  emit('update:timeRange', {
+    beginDate: beginDate.value,
+    endDate: endDate.value,
+  })
+}
+
+const setDateRange = (selectedId: number) => {
+  const selectedOption = dateOptions.find((option) => option.id === selectedId)
+  if (selectedOption && selectedId !== selectedRangeId.value) {
+    beginDate.value = selectedOption.calculateBeginDate()
+    endDate.value = new Date()
+    selectedRangeId.value = selectedId
+    emit('update:timeRange', {
+      beginDate: beginDate.value,
+      endDate: endDate.value,
+    })
+  }
+}
+
+const onClearFilters = () => {}
 
 onMounted(async () => {
   things.value = await api.fetchOwnedThings()

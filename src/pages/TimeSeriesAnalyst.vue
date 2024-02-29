@@ -84,7 +84,6 @@ const updateTimeRange = ({
   beginDate: newBeginDate,
   endDate: newEndDate,
 }: DateRange) => {
-  console.log('updateTimeRange', newBeginDate)
   beginDate.value = new Date(newBeginDate)
   endDate.value = new Date(newEndDate)
 }
@@ -95,7 +94,6 @@ beginDate.value.setMonth(beginDate.value.getMonth() - 12)
 onMounted(async () => {
   things.value = await api.fetchThings()
   datastreams.value = await api.fetchUsersDatastreams()
-  console.log('datastreams', datastreams.value)
   filteredDatastreams.value = [...datastreams.value]
 })
 </script>

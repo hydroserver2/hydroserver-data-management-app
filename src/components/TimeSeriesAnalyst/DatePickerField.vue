@@ -29,12 +29,18 @@ const emit = defineEmits(['update:modelValue'])
 const showDatePicker = ref(false)
 const localDate = ref<Date>(props.modelValue)
 
-watch(localDate, (newValue) => {
-  emit('update:modelValue', newValue)
-})
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue !== localDate.value) {
+      localDate.value = newValue
+    }
+  }
+)
 
 const dateSelected = (newDate: Date) => {
   localDate.value = newDate
+  emit('update:modelValue', newDate)
   showDatePicker.value = false
 }
 
