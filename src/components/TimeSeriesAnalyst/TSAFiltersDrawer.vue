@@ -35,22 +35,16 @@
             <v-btn color="blue-grey-lighten-4">Last Week</v-btn>
           </div>
 
-          <v-text-field
-            density="compact"
-            class="mb-2"
-            hide-details
-            append-inner-icon="mdi-calendar"
-          >
-            Begin Date
-          </v-text-field>
-
-          <v-text-field
-            density="compact"
-            hide-details
-            append-inner-icon="mdi-calendar"
-          >
-            End Date
-          </v-text-field>
+          <DatePickerField
+            :model-value="beginDate"
+            placeholder="Begin Date"
+            @update:model-value="beginDate = $event"
+          />
+          <DatePickerField
+            :model-value="endDate"
+            placeholder="End Date"
+            @update:model-value="endDate = $event"
+          />
         </v-expansion-panel-text>
       </v-expansion-panel>
 
@@ -98,12 +92,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Ref } from 'vue'
 import { Thing } from '@/types'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { onMounted } from 'vue'
 import { api } from '@/services/api'
+import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
+
+const emit = defineEmits(['update:timeRange'])
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
@@ -112,7 +109,21 @@ const drawer = ref(!!smAndDown)
 const selectedThings: Ref<string[]> = ref([])
 const things = ref<Thing[]>([])
 
+const endDate = ref<Date>(new Date())
+const oneWeek = 7 * 24 * 60 * 60 * 1000
+const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneWeek))
+
 const onClearFilters = () => {}
+
+// TODO: When both are changed at the same time, we only want to emit the new values once.
+//       Probably this should be a function instead of a watcher
+watch(
+  [beginDate, endDate],
+  ([newBeginDate, newEndDate]) => {
+    emit('update:timeRange', { beginDate: newBeginDate, endDate: newEndDate })
+  },
+  { deep: true, immediate: true }
+)
 
 onMounted(async () => {
   things.value = await api.fetchOwnedThings()

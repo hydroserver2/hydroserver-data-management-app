@@ -1,5 +1,5 @@
 <template>
-  <TSAFiltersDrawer />
+  <TSAFiltersDrawer @update:time-range="updateTimeRange" />
 
   <div class="my-4 mx-4">
     <!-- <div v-if="selectedDatastreams.length"> -->
@@ -73,6 +73,20 @@ const legendNames = computed(() =>
 
 const updateSelectedDatastreamIds = (ids: string[]) => {
   selectedDatastreamIds.value = [...ids]
+}
+
+interface DateRange {
+  beginDate: Date
+  endDate: Date
+}
+
+const updateTimeRange = ({
+  beginDate: newBeginDate,
+  endDate: newEndDate,
+}: DateRange) => {
+  console.log('updateTimeRange', newBeginDate)
+  beginDate.value = new Date(newBeginDate)
+  endDate.value = new Date(newEndDate)
 }
 
 // TODO: Clean up hardcoded data

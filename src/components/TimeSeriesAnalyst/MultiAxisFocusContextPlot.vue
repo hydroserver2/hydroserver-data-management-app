@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, watch } from 'vue'
+import { ref, PropType, watch, computed } from 'vue'
 import { focus, context } from '@/utils/MultiAxisFocusContextPlot'
 import { Datastream } from '@/types'
 import { fetchObservations, preProcessData } from '@/utils/observationsUtils'
@@ -59,7 +59,6 @@ const updateState = async (
 
   // Fetch observations, units and processing levels
   // TODO: Use fetchObservationsParallel
-  // TODO: Make sure this returns the true date range and not the last 6 months of data each set has
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
     datastreams.map(async (ds, index) => {
       const observationsPromise = fetchObservations(ds.id, start, end)
@@ -102,11 +101,29 @@ const updateState = async (
   console.log('graphSeriesArray', graphSeriesArray.value)
 }
 
+// Combine the targets so the chart updates only once per user input
+const watchTargets = computed(() => ({
+  beginDate: props.beginDate,
+  endDate: props.endDate,
+  datastreams: props.datastreams,
+}))
+
 watch(
-  () => props.datastreams,
-  async () => {
-    if (props.beginDate && props.endDate && props.datastreams.length) {
-      await updateState(props.datastreams, props.beginDate, props.endDate)
+  watchTargets,
+  async (newValue, oldValue) => {
+    if (
+      !newValue.beginDate ||
+      !newValue.endDate ||
+      !newValue.datastreams.length
+    )
+      return
+
+    if (
+      newValue.beginDate !== oldValue.beginDate ||
+      newValue.endDate !== oldValue.endDate ||
+      newValue.datastreams !== oldValue.datastreams
+    ) {
+      await updateState(props.datastreams, newValue.beginDate, newValue.endDate)
       renderPlot()
     }
   },
