@@ -174,9 +174,11 @@ const setDateRange = (selectedId: number) => {
   }
 }
 
-const onClearFilters = () => {}
+const onClearFilters = () => {
+  selectedThings.value = []
+}
 
 onMounted(async () => {
-  things.value = await api.fetchOwnedThings()
+  things.value = await api.fetchThings()
 })
 </script>

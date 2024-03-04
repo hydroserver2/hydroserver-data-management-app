@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
-import { PropType, onMounted, ref } from 'vue'
+import { PropType, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   datastreams: {
@@ -93,6 +93,18 @@ const headers = [
     value: 'phenomenonEndTime',
   },
 ] as const
+
+// If the parent component filters out some currently selected datastreams, deselect them and emit
+watch(
+  () => props.datastreams,
+  (newDatastreams) => {
+    selectedDatastreamIds.value = selectedDatastreamIds.value.filter((id) =>
+      newDatastreams.some((datastream) => datastream.id === id)
+    )
+    emit('update:selectedDatastreamIds', selectedDatastreamIds.value)
+  },
+  { deep: true }
+)
 
 function updateSelectedDatastreamIds(id: string) {
   const i = selectedDatastreamIds.value.indexOf(id)

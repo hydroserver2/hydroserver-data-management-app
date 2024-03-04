@@ -52,13 +52,12 @@ const updateState = async (
   beginDate: Date,
   endDate: Date
 ) => {
-  // TODO: Only fetch data we don't already have
-
   const start = beginDate.toISOString()
   const end = endDate.toISOString()
 
   // Fetch observations, units and processing levels
   // TODO: Use fetchObservationsParallel
+  // TODO: Only fetch data we don't already have
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
     datastreams.map(async (ds, index) => {
       const observationsPromise = fetchObservations(ds.id, start, end)
@@ -101,32 +100,13 @@ const updateState = async (
   console.log('graphSeriesArray', graphSeriesArray.value)
 }
 
-// Combine the targets so the chart updates only once per user input
-const watchTargets = computed(() => ({
-  beginDate: props.beginDate,
-  endDate: props.endDate,
-  datastreams: props.datastreams,
-}))
-
 watch(
-  watchTargets,
-  async (newValue, oldValue) => {
-    if (
-      !newValue.beginDate ||
-      !newValue.endDate ||
-      !newValue.datastreams.length
-    )
-      return
-
-    if (
-      newValue.beginDate !== oldValue.beginDate ||
-      newValue.endDate !== oldValue.endDate ||
-      newValue.datastreams !== oldValue.datastreams
-    ) {
-      await updateState(props.datastreams, newValue.beginDate, newValue.endDate)
-      renderPlot()
-    }
+  [() => props.datastreams, () => props.beginDate, () => props.endDate],
+  async ([newDatastreams, newBeginDate, newEndDate]) => {
+    if (!newBeginDate || !newEndDate || !newDatastreams.length) return
+    await updateState(newDatastreams, newBeginDate, newEndDate)
+    renderPlot()
   },
-  { deep: true }
+  { deep: true, immediate: true }
 )
 </script>

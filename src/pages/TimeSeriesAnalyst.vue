@@ -5,33 +5,33 @@
   />
 
   <div class="my-4 mx-4">
-    <!-- <div v-if="selectedDatastreams.length"> -->
-    <MultiAxisFocusContextPlot
-      :datastreams="selectedDatastreams"
-      :begin-date="beginDate"
-      :end-date="endDate"
-    />
+    <div v-if="selectedDatastreams.length">
+      <MultiAxisFocusContextPlot
+        :datastreams="selectedDatastreams"
+        :begin-date="beginDate"
+        :end-date="endDate"
+      />
 
-    <v-row class="mt-4" align="center">
-      <v-col>
-        <div v-for="(key, index) in legendNames">
-          <v-chip
-            :color="materialColorsHex[index]"
-            class="mr-2"
-            variant="elevated"
-            density="compact"
-          />
-          <span>{{ key }}</span>
-        </div>
-      </v-col>
+      <v-row class="mt-4" align="center">
+        <v-col>
+          <div v-for="(key, index) in legendNames">
+            <v-chip
+              :color="materialColorsHex[index]"
+              class="mr-2"
+              variant="elevated"
+              density="compact"
+            />
+            <span>{{ key }}</span>
+          </div>
+        </v-col>
 
-      <v-col cols="auto">
-        <v-btn>Export as PNG</v-btn>
-      </v-col>
-    </v-row>
+        <v-col cols="auto">
+          <v-btn>Export as PNG</v-btn>
+        </v-col>
+      </v-row>
 
-    <v-divider class="my-8" />
-    <!-- </div> -->
+      <v-divider class="my-8" />
+    </div>
 
     <TSADatasetsTable
       :datastreams="filteredDatastreams"
@@ -111,7 +111,7 @@ beginDate.value.setMonth(beginDate.value.getMonth() - 12)
 
 onMounted(async () => {
   things.value = await api.fetchThings()
-  datastreams.value = await api.fetchUsersDatastreams()
+  datastreams.value = await api.fetchDatastreams()
   filteredDatastreams.value = [...datastreams.value]
 })
 </script>
