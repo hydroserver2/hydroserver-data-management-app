@@ -5,7 +5,7 @@ import { DataPoint, GraphSeries } from '@/types'
 const dispatch = d3.dispatch('timeWindow')
 
 export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
-  const marks: any[] = []
+  const marks: any[] = [Plot.axisX({ labelAnchor: 'center', labelOffset: 40 })]
   const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
   const height = 300
 
@@ -44,9 +44,10 @@ export function focus(graphSeriesArray: GraphSeries[]): SVGSVGElement {
     height: height,
     grid: true,
     marginBottom: 45,
-    marginLeft: 60,
+    marginLeft: 70,
+    marginRight: graphSeriesArray.length > 1 ? 70 : 20,
     x: { type: 'utc' as any, label: 'Date/Time' },
-    marks: [...marks, Plot.axisX({ labelAnchor: 'center', labelOffset: 40 })],
+    marks: marks,
   }
 
   let chart = Plot.plot(spec)
