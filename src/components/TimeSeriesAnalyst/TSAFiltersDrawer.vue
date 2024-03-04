@@ -180,5 +180,9 @@ const onClearFilters = () => {
 
 onMounted(async () => {
   things.value = await api.fetchThings()
+  emit('update:timeRange', {
+    beginDate: beginDate.value,
+    endDate: endDate.value,
+  })
 })
 </script>
