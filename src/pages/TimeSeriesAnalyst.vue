@@ -1,8 +1,5 @@
 <template>
-  <TSAFiltersDrawer
-    @update:time-range="updateTimeRange"
-    @update:selected-things="updateSelectedThings"
-  />
+  <TSAFiltersDrawer />
 
   <div class="my-4 mx-4">
     <div v-if="selectedDatastreams.length">
@@ -33,85 +30,40 @@
       <v-divider class="my-8" />
     </div>
 
-    <TSADatasetsTable
-      :datastreams="filteredDatastreams"
-      :things="selectedThings.length ? selectedThings : things"
-      @update:selected-datastream-ids="updateSelectedDatastreamIds"
-    />
+    <TSADatasetsTable />
   </div>
 </template>
 
 <script setup lang="ts">
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
-import { Datastream, Thing } from '@/types'
-import { computed, ref } from 'vue'
-import { materialColorsHex } from '@/utils/materialColors'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import MultiAxisFocusContextPlot from '@/components/TimeSeriesAnalyst/MultiAxisFocusContextPlot.vue'
-import { onMounted } from 'vue'
+import { materialColorsHex } from '@/utils/materialColors'
+import { onMounted, computed } from 'vue'
 import { api } from '@/services/api'
+import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { storeToRefs } from 'pinia'
 
-const things = ref<Thing[]>([])
-
-const beginDate = ref<Date>(new Date())
-const endDate = ref<Date>(new Date())
-const filteredDatastreams = ref<Datastream[]>([])
-const datastreams = ref<Datastream[]>([])
-// const selectedDatastreams = ref<Datastream[]>([])
-const selectedDatastreams = computed(() => {
-  return datastreams.value.filter((ds) =>
-    selectedDatastreamIds.value.includes(ds.id)
-  )
-})
-
-// TODO: This may need to be a prop instead since we want to avoid filtering datastreams rows off the table
-//       while having them still selected
-const selectedDatastreamIds = ref<string[]>([])
-
-const selectedThings = ref<Thing[]>([])
-const selectedObservedPropertyIDs = ref<string[]>([])
-const selectedQualityControlLevelIDs = ref<string[]>([])
-
-const updateSelectedThings = (updatedThings: Thing[]) => {
-  selectedThings.value = [...updatedThings]
-
-  if (!updatedThings.length) {
-    filteredDatastreams.value = [...datastreams.value]
-  } else {
-    const selectedThingIds = updatedThings.map((thing) => thing.id)
-    filteredDatastreams.value = datastreams.value.filter((d) =>
-      selectedThingIds.includes(d.thingId)
-    )
-  }
-}
+const {
+  things,
+  processingLevels,
+  observedProperties,
+  selectedDatastreams,
+  datastreams,
+  beginDate,
+  endDate,
+} = storeToRefs(useTSAStore())
 
 const legendNames = computed(() =>
   selectedDatastreams.value.map((ds) => ds.name)
 )
 
-const updateSelectedDatastreamIds = (ids: string[]) => {
-  selectedDatastreamIds.value = [...ids]
-}
-
-interface DateRange {
-  beginDate: Date
-  endDate: Date
-}
-
-const updateTimeRange = ({
-  beginDate: newBeginDate,
-  endDate: newEndDate,
-}: DateRange) => {
-  beginDate.value = new Date(newBeginDate)
-  endDate.value = new Date(newEndDate)
-}
-
-// TODO: Clean up hardcoded data
-beginDate.value.setMonth(beginDate.value.getMonth() - 12)
-
 onMounted(async () => {
   things.value = await api.fetchThings()
   datastreams.value = await api.fetchDatastreams()
-  filteredDatastreams.value = [...datastreams.value]
+  // TODO: How do we get the processing levels that don't belong to the user? There will be multiple 'Raw Data' variations
+  processingLevels.value = await api.fetchOwnedProcessingLevels()
+  // TODO: Similarly, there will be duplicates of observed properties between users
+  observedProperties.value = await api.fetchOwnedObservedProperties()
 })
 </script>

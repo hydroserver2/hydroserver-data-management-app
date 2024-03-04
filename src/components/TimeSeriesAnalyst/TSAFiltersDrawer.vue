@@ -8,7 +8,7 @@
     <v-divider />
 
     <div class="d-flex justify-end my-4 mx-2">
-      <v-btn color="blue-grey-lighten-4" elevation="3" @click="onClearFilters"
+      <v-btn color="blue-grey-lighten-4" elevation="3" @click="clearFilters"
         >Clear Filters</v-btn
       >
     </div>
@@ -58,17 +58,10 @@
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-checkbox
-            label="Nitrate-N, Nitrogen, dissolved nitrate (NO3)"
-            hide-details
-            density="compact"
-          />
-          <v-checkbox
-            label="fDOM, Colored Dissolved Organic Matter"
-            hide-details
-            density="compact"
-          />
-          <v-checkbox
-            label="Chlorophyll, Chlorophyll Fluorescence"
+            v-for="op in observedProperties"
+            v-model="selectedObservedProperties"
+            :label="op.name"
+            :value="op"
             hide-details
             density="compact"
           />
@@ -77,14 +70,11 @@
 
       <v-expansion-panel title="Quality Control Level">
         <v-expansion-panel-text>
-          <v-checkbox label="Raw Data" hide-details density="compact" />
           <v-checkbox
-            label="Quality Controlled Data"
-            hide-details
-            density="compact"
-          />
-          <v-checkbox
-            label="Double Quality Controlled Data"
+            v-for="pl in processingLevels"
+            v-model="selectedProcessingLevels"
+            :label="pl.definition"
+            :value="pl"
             hide-details
             density="compact"
           />
@@ -99,32 +89,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { Thing } from '@/types'
+import { ref } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { onMounted } from 'vue'
-import { api } from '@/services/api'
 import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
+import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { storeToRefs } from 'pinia'
 
-const emit = defineEmits(['update:timeRange', 'update:selectedThings'])
+const { clearFilters } = useTSAStore()
+const {
+  things,
+  processingLevels,
+  observedProperties,
+  selectedThings,
+  selectedObservedProperties,
+  selectedProcessingLevels,
+  beginDate,
+  endDate,
+} = storeToRefs(useTSAStore())
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
 const drawer = ref(!!smAndDown)
-
-const things = ref<Thing[]>([])
-const selectedThings = ref<Thing[]>([])
-
-const emitSelectedThings = () => {
-  emit('update:selectedThings', selectedThings.value)
-}
-
-watch([selectedThings], emitSelectedThings)
-
-const endDate = ref<Date>(new Date())
-const oneWeek = 7 * 24 * 60 * 60 * 1000
-const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneWeek))
-
 const selectedRangeId = ref(2)
 const dateOptions = [
   {
@@ -154,11 +139,6 @@ const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
   if (type === 'begin') beginDate.value = date
   else endDate.value = date
   selectedRangeId.value = -1
-
-  emit('update:timeRange', {
-    beginDate: beginDate.value,
-    endDate: endDate.value,
-  })
 }
 
 const setDateRange = (selectedId: number) => {
@@ -167,22 +147,13 @@ const setDateRange = (selectedId: number) => {
     beginDate.value = selectedOption.calculateBeginDate()
     endDate.value = new Date()
     selectedRangeId.value = selectedId
-    emit('update:timeRange', {
-      beginDate: beginDate.value,
-      endDate: endDate.value,
-    })
   }
 }
 
-const onClearFilters = () => {
-  selectedThings.value = []
-}
-
-onMounted(async () => {
-  things.value = await api.fetchThings()
-  emit('update:timeRange', {
-    beginDate: beginDate.value,
-    endDate: endDate.value,
-  })
-})
+// onMounted(async () => {
+// TODO: How do we get the processing levels that don't belong to the user? There will be multiple 'Raw Data' variations
+// processingLevels.value = await api.fetchOwnedProcessingLevels()
+// TODO: Similarly, there will be duplicates of observed properties between users
+// observedProperties.value = await api.fetchOwnedObservedProperties()
+// })
 </script>

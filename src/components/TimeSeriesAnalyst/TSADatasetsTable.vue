@@ -27,14 +27,14 @@
   </v-toolbar>
   <v-data-table
     :headers="headers"
-    :items="datastreams"
+    :items="filteredDatastreams"
     class="elevation-2"
     color="green"
   >
     <template v-slot:item.plot="{ item }">
       <v-checkbox
         class="d-flex align-self-center"
-        @change="() => updateSelectedDatastreamIds(item.id)"
+        @change="() => updateSelectedDatastreams(item)"
       />
     </template>
     <template v-slot:item.siteCode="{ item }">
@@ -56,22 +56,14 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
+import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
-import { PropType, onMounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { onMounted, ref } from 'vue'
 
-const props = defineProps({
-  datastreams: {
-    type: Array as PropType<Datastream[]>,
-    required: true,
-  },
-  things: {
-    type: Array as PropType<Thing[]>,
-    required: true,
-  },
-})
-const emit = defineEmits(['update:selectedDatastreamIds'])
-
-const selectedDatastreamIds = ref<string[]>([])
+const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
+  useTSAStore()
+)
 
 const observedProperties = ref<ObservedProperty[]>([])
 const processingLevels = ref<ProcessingLevel[]>([])
@@ -94,23 +86,12 @@ const headers = [
   },
 ] as const
 
-// If the parent component filters out some currently selected datastreams, deselect them and emit
-watch(
-  () => props.datastreams,
-  (newDatastreams) => {
-    selectedDatastreamIds.value = selectedDatastreamIds.value.filter((id) =>
-      newDatastreams.some((datastream) => datastream.id === id)
-    )
-    emit('update:selectedDatastreamIds', selectedDatastreamIds.value)
-  },
-  { deep: true }
-)
-
-function updateSelectedDatastreamIds(id: string) {
-  const i = selectedDatastreamIds.value.indexOf(id)
-  if (i === -1) selectedDatastreamIds.value.push(id)
-  else selectedDatastreamIds.value.splice(i, 1)
-  emit('update:selectedDatastreamIds', selectedDatastreamIds.value)
+function updateSelectedDatastreams(datastream: Datastream) {
+  const index = selectedDatastreams.value.findIndex(
+    (ds) => ds.id === datastream.id
+  )
+  if (index === -1) selectedDatastreams.value.push(datastream)
+  else selectedDatastreams.value.splice(index, 1)
 }
 
 onMounted(async () => {
