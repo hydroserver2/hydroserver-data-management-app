@@ -1,6 +1,6 @@
 import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 export const useTSAStore = defineStore('TSAStore', () => {
   const things = ref<Thing[]>([])
@@ -35,6 +35,17 @@ export const useTSAStore = defineStore('TSAStore', () => {
       return matchesThing && matchesObservedProperty && matchesProcessingLevel
     })
   })
+
+  // If currently selected datastreams are no longer in filteredDatastreams, deselect them
+  watch(
+    () => filteredDatastreams.value,
+    (newDatastreams) => {
+      selectedDatastreams.value = selectedDatastreams.value.filter((ds) =>
+        newDatastreams.some((datastream) => datastream.id === ds.id)
+      )
+    },
+    { deep: true }
+  )
 
   const clearFilters = () => {
     selectedThings.value = []

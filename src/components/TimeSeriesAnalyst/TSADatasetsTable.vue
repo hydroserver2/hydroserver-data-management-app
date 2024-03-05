@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
-import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
+import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
