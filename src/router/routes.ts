@@ -161,7 +161,7 @@ export const routes: RouteRecordRaw[] = [
     meta: { hasAuthGuard: true },
   },
   {
-    path: '/time-series-analyst',
+    path: '/time-series-analyst/:thingId?',
     name: 'TimeSeriesAnalyst',
     component: () => import('@/pages/TimeSeriesAnalyst.vue'),
     meta: {

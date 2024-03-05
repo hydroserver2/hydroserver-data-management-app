@@ -43,9 +43,14 @@ import { onMounted, computed } from 'vue'
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const thingId = route.params.thingId?.toString() || ''
 
 const {
   things,
+  selectedThings,
   processingLevels,
   observedProperties,
   selectedDatastreams,
@@ -60,6 +65,10 @@ const legendNames = computed(() =>
 
 onMounted(async () => {
   things.value = await api.fetchThings()
+  if (thingId) {
+    const foundThing = things.value.find((thing) => thing.id === thingId)
+    if (foundThing) selectedThings.value = [foundThing]
+  }
   datastreams.value = await api.fetchDatastreams()
   // TODO: How do we get the processing levels that don't belong to the user? There will be multiple 'Raw Data' variations
   processingLevels.value = await api.fetchOwnedProcessingLevels()
