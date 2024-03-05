@@ -2,9 +2,22 @@
   <h5 class="text-h5">Datasets</h5>
 
   <div class="d-flex align-center my-4">
-    <v-btn color="blue-grey-lighten-4">Show All</v-btn>
-    <v-btn color="blue-grey-lighten-4" class="mx-2">Show Selected</v-btn>
-    <v-btn color="blue-grey-lighten-4">Clear Selected</v-btn>
+    <v-btn
+      :color="showOnlySelected ? 'blue-grey-lighten-4' : 'primary'"
+      @click="showOnlySelected = false"
+    >
+      Show All
+    </v-btn>
+    <v-btn
+      :color="!showOnlySelected ? 'blue-grey-lighten-4' : 'primary'"
+      class="mx-2"
+      @click="showOnlySelected = true"
+    >
+      Show Selected
+    </v-btn>
+    <v-btn color="blue-grey-lighten-4" @click="clearSelected"
+      >Clear Selected</v-btn
+    >
 
     <v-spacer />
 
@@ -27,12 +40,13 @@
   </v-toolbar>
   <v-data-table
     :headers="headers"
-    :items="filteredDatastreams"
+    :items="displayDatastreams"
     class="elevation-2"
     color="green"
   >
     <template v-slot:item.plot="{ item }">
       <v-checkbox
+        :model-value="isChecked(item)"
         class="d-flex align-self-center"
         @change="() => updateSelectedDatastreams(item)"
       />
@@ -59,7 +73,7 @@ import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
   useTSAStore()
@@ -67,6 +81,28 @@ const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
 
 const observedProperties = ref<ObservedProperty[]>([])
 const processingLevels = ref<ProcessingLevel[]>([])
+const showOnlySelected = ref(false)
+
+const displayDatastreams = computed(() => {
+  if (showOnlySelected.value) {
+    return filteredDatastreams.value.filter((ds) =>
+      selectedDatastreams.value.some((sds) => sds.id === ds.id)
+    )
+  } else {
+    return filteredDatastreams.value
+  }
+})
+
+function clearSelected() {
+  showOnlySelected.value = false
+  selectedDatastreams.value = []
+}
+
+const isChecked = (item: Datastream) => {
+  return computed(() =>
+    selectedDatastreams.value.some((sds) => sds.id === item.id)
+  ).value
+}
 
 const search = ref()
 const headers = [
