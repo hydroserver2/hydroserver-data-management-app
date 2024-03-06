@@ -21,7 +21,22 @@
 
     <v-spacer />
 
-    <v-btn color="blue-grey-lighten-4">Show/Hide Columns</v-btn>
+    <v-select
+      label="Show/Hide Columns"
+      v-model="selectedHeaders"
+      :items="headers"
+      item-text="title"
+      item-value="key"
+      multiple
+      item-color="green"
+      density="compact"
+      variant="solo"
+      hide-details
+    >
+      <template v-slot:selection="{ item, index }">
+        <!-- Leave blank so nothing appears in the v-select box -->
+      </template>
+    </v-select>
   </div>
 
   <v-toolbar flat color="secondary">
@@ -39,7 +54,7 @@
     <v-btn prepend-icon="mdi-download">Download Selected</v-btn>
   </v-toolbar>
   <v-data-table
-    :headers="headers"
+    :headers="headers.filter((header) => header.visible)"
     :items="displayDatastreams"
     class="elevation-2"
     color="green"
@@ -73,7 +88,7 @@ import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
   useTSAStore()
@@ -105,22 +120,34 @@ const isChecked = (item: Datastream) => {
 }
 
 const search = ref()
-const headers = [
-  { title: 'Plot', key: 'plot' },
-  { title: 'Site Code', key: 'siteCode' },
-  { title: 'Observed Property', key: 'observedProperty' },
-  { title: 'Quality Control Level', key: 'qualityControlLevel' },
+const headers = reactive([
+  { title: 'Plot', key: 'plot', visible: true },
+  { title: 'Site Code', key: 'siteCode', visible: true },
+  { title: 'Observed Property', key: 'observedProperty', visible: true },
+  { title: 'Quality Control Level', key: 'qualityControlLevel', visible: true },
   {
     title: 'Number Observations',
     key: 'numberObservations',
     value: 'valueCount',
+    visible: true,
   },
   {
     title: 'Date Last Updated',
     key: 'dateLastUpdated',
     value: 'phenomenonEndTime',
+    visible: true,
   },
-] as const
+])
+
+const selectedHeaders = computed({
+  get: () =>
+    headers.filter((header) => header.visible).map((header) => header.key),
+  set: (keys) => {
+    headers.forEach((header) => {
+      header.visible = keys.includes(header.key)
+    })
+  },
+})
 
 function updateSelectedDatastreams(datastream: Datastream) {
   const index = selectedDatastreams.value.findIndex(
