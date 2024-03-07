@@ -42,6 +42,14 @@ export const materialColorsHex = [
   '#9E9E9E', // grey
 ]
 
+export const EChartsColors = [
+  '#5571c7', // blue
+  '#91cc75', // green
+  '#ee6464', // red
+  '#fac857', // yellow
+  '#80d4f4', // light blue
+]
+
 export const googlePinColors = [
   { borderColor: '#B71C1C', background: '#F44336', glyphColor: '#B71C1C' }, // Red
   { borderColor: '#0D47A1', background: '#2196F3', glyphColor: '#0D47A1' }, // Blue

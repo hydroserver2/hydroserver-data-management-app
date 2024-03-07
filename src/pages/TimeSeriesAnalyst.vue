@@ -13,7 +13,7 @@
         <v-col>
           <div v-for="(key, index) in legendNames">
             <v-chip
-              :color="materialColorsHex[index]"
+              :color="EChartsColors[index % EChartsColors.length]"
               class="mr-2"
               variant="elevated"
               density="compact"
@@ -38,7 +38,7 @@
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import MultiAxisFocusContextPlot from '@/components/TimeSeriesAnalyst/MultiAxisFocusContextPlot.vue'
-import { materialColorsHex } from '@/utils/materialColors'
+import { EChartsColors } from '@/utils/materialColors'
 import { onMounted, computed } from 'vue'
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'

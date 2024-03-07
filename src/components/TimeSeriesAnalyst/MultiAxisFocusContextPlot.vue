@@ -5,22 +5,24 @@
     </template>
 
     <v-card-text>
-      <div ref="focusChart"></div>
-      <div ref="contextChart"></div>
+      <vue-echarts :option="option" style="height: 600px" ref="chart" />
     </v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, watch, computed } from 'vue'
-import { focus, context } from '@/utils/MultiAxisFocusContextPlot'
+import { ref, PropType, watch } from 'vue'
 import { Datastream } from '@/types'
 import { fetchObservations, preProcessData } from '@/utils/observationsUtils'
 import { api } from '@/services/api'
 import { GraphSeries } from '@/types'
-import { materialColorsHex } from '@/utils/materialColors'
+import { EChartsColors } from '@/utils/materialColors'
+import { VueEcharts } from 'vue3-echarts'
+import { EChartsOption } from 'echarts'
+import { createEChartsOption } from '@/utils/echarts'
 
 const graphSeriesArray = ref<GraphSeries[]>([])
+const option = ref<EChartsOption | undefined>()
 
 const props = defineProps({
   datastreams: {
@@ -31,20 +33,8 @@ const props = defineProps({
   endDate: Date,
 })
 
-let focusChart = ref<any>(null)
-let contextChart = ref<any>(null)
-
 function renderPlot() {
-  if (focusChart.value) {
-    const focusSVG = focus(graphSeriesArray.value)
-    focusChart.value.innerHTML = ''
-    focusChart.value.appendChild(focusSVG)
-  }
-  if (contextChart.value) {
-    const contextSVG = context(graphSeriesArray.value)
-    contextChart.value.innerHTML = ''
-    contextChart.value.appendChild(contextSVG)
-  }
+  option.value = createEChartsOption(graphSeriesArray.value)
 }
 
 const updateState = async (
@@ -85,7 +75,7 @@ const updateState = async (
           ? `${observedProperty.name} (${unit.symbol})`
           : 'Unknown'
 
-      const lineColor = materialColorsHex[index % materialColorsHex.length]
+      const lineColor = EChartsColors[index % EChartsColors.length]
 
       return {
         id: ds.id,
@@ -97,6 +87,7 @@ const updateState = async (
   )
 
   graphSeriesArray.value = updatedGraphSeries
+
   console.log('graphSeriesArray', graphSeriesArray.value)
 }
 
