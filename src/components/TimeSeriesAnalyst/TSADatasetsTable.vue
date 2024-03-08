@@ -51,7 +51,11 @@
 
     <v-spacer />
 
-    <v-btn prepend-icon="mdi-download">Download Selected</v-btn>
+    <v-btn
+      prepend-icon="mdi-download"
+      @click="downloadSelectedDatastreamsCSVs(selectedDatastreams)"
+      >Download Selected</v-btn
+    >
   </v-toolbar>
   <v-data-table
     :headers="headers.filter((header) => header.visible)"
@@ -90,6 +94,7 @@ import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, reactive, ref } from 'vue'
+import JSZip from 'jszip'
 
 const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
   useTSAStore()
@@ -156,6 +161,34 @@ function updateSelectedDatastreams(datastream: Datastream) {
   )
   if (index === -1) selectedDatastreams.value.push(datastream)
   else selectedDatastreams.value.splice(index, 1)
+}
+
+const downloadSelectedDatastreamsCSVs = async (
+  selectedDatastreams: Datastream[]
+) => {
+  const zip = new JSZip()
+
+  try {
+    const csvPromises = selectedDatastreams.map(async (d) => {
+      const data = await api.downloadDatastreamCSV(d.id)
+      const blob = new Blob([data], { type: 'text/csv' })
+      zip.file(`datastream_${d.id}.csv`, blob)
+    })
+
+    await Promise.all(csvPromises)
+
+    // Generate the zip file
+    zip.generateAsync({ type: 'blob' }).then(function (content) {
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(content)
+      link.download = 'datastreams.zip'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    })
+  } catch (error) {
+    console.error('Error downloading datastreams CSVs', error)
+  }
 }
 
 onMounted(async () => {
