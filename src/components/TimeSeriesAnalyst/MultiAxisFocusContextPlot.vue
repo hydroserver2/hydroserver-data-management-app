@@ -8,17 +8,8 @@
       <vue-echarts :option="option" style="height: 600px" ref="chart" />
     </v-card-text>
     <div v-else style="min-height: 632px">
-      <v-img
-        class="text-white"
-        height="300"
-        src="https://cdn.vuetifyjs.com/docs/images/cards/purple-flowers.jpg"
-        cover
-      >
-        <v-card-title> Time Series Analyst </v-card-title>
-      </v-img>
+      <v-card-title> Time Series Analyst </v-card-title>
       <v-card-text>
-        <!-- <div class="font-weight-bold ms-1 mb-2">Today</div> -->
-
         <v-timeline align="start" density="compact">
           <v-timeline-item size="x-small" dot-color="primary">
             <div>
