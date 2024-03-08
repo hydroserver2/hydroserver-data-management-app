@@ -62,6 +62,7 @@
     <template v-slot:item.plot="{ item }">
       <v-checkbox
         :model-value="isChecked(item)"
+        :disabled="selectedDatastreams.length >= 5 && !isChecked(item)"
         class="d-flex align-self-center"
         @change="() => updateSelectedDatastreams(item)"
       />
@@ -88,7 +89,7 @@ import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 
 const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
   useTSAStore()
