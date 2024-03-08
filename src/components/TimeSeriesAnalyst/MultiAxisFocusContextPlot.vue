@@ -4,9 +4,54 @@
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
 
-    <v-card-text>
+    <v-card-text v-if="option">
       <vue-echarts :option="option" style="height: 600px" ref="chart" />
     </v-card-text>
+    <div v-else style="min-height: 632px">
+      <v-img
+        class="text-white"
+        height="300"
+        src="https://cdn.vuetifyjs.com/docs/images/cards/purple-flowers.jpg"
+        cover
+      >
+        <v-card-title> Time Series Analyst </v-card-title>
+      </v-img>
+      <v-card-text>
+        <!-- <div class="font-weight-bold ms-1 mb-2">Today</div> -->
+
+        <v-timeline align="start" density="compact">
+          <v-timeline-item size="x-small" dot-color="primary">
+            <div>
+              <strong> Filter: </strong>
+            </div>
+            <div>
+              Filter the dataset table items with the filter drawer on the left
+              and the search bar on the top of the datasets table.
+            </div>
+          </v-timeline-item>
+          <v-timeline-item size="x-small" dot-color="secondary">
+            <div>
+              <strong> Adjust the time range: </strong>
+            </div>
+            <div>
+              Adjust the time range to cover the desired period you wish to
+              observe. (Note: if a dataset has no data within the time range,
+              the legend and axes will display but no data will be shown)
+            </div>
+          </v-timeline-item>
+          <v-timeline-item size="x-small" dot-color="blue-grey">
+            <div>
+              <strong> Select up to 5 datasets: </strong>
+            </div>
+            <div>
+              The plot allows up to 5 datasets to be shown at once. If two
+              datasets share the same observed property and unit, they'll share
+              a y-axis.
+            </div>
+          </v-timeline-item>
+        </v-timeline>
+      </v-card-text>
+    </div>
   </v-card>
 </template>
 

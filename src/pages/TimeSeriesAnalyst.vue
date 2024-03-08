@@ -2,13 +2,13 @@
   <TSAFiltersDrawer />
 
   <div class="my-4 mx-4">
-    <div v-if="selectedDatastreams.length">
-      <MultiAxisFocusContextPlot
-        :datastreams="selectedDatastreams"
-        :begin-date="beginDate"
-        :end-date="endDate"
-      />
+    <MultiAxisFocusContextPlot
+      :datastreams="selectedDatastreams"
+      :begin-date="beginDate"
+      :end-date="endDate"
+    />
 
+    <div v-if="selectedDatastreams.length">
       <v-row class="mt-4" align="center">
         <v-col>
           <div v-for="(key, index) in legendNames">
@@ -21,14 +21,9 @@
             <span>{{ key }}</span>
           </div>
         </v-col>
-
-        <v-col cols="auto">
-          <v-btn>Export as PNG</v-btn>
-        </v-col>
       </v-row>
-
-      <v-divider class="my-8" />
     </div>
+    <v-divider class="my-8" />
 
     <TSADatasetsTable />
   </div>
