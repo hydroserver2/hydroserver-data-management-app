@@ -59,31 +59,20 @@
   </v-toolbar>
   <v-data-table
     :headers="headers.filter((header) => header.visible)"
-    :items="displayDatastreams"
+    :items="tableItems"
+    :sort-by="sortBy"
     class="elevation-2"
     color="green"
+    density="compact"
   >
     <template v-slot:item.plot="{ item }">
       <v-checkbox
         :model-value="isChecked(item)"
         :disabled="selectedDatastreams.length >= 5 && !isChecked(item)"
         class="d-flex align-self-center"
+        density="compact"
         @change="() => updateSelectedDatastreams(item)"
       />
-    </template>
-    <template v-slot:item.siteCode="{ item }">
-      {{ things.find((t) => t.id === item.thingId)?.name }}
-    </template>
-    <template v-slot:item.observedProperty="{ item }">
-      {{
-        observedProperties.find((p) => p.id === item.observedPropertyId)?.code
-      }}
-    </template>
-    <template v-slot:item.qualityControlLevel="{ item }">
-      {{
-        processingLevels.find((p) => p.id === item.processingLevelId)
-          ?.definition
-      }}
     </template>
   </v-data-table>
 </template>
@@ -114,6 +103,24 @@ const displayDatastreams = computed(() => {
   }
 })
 
+const tableItems = computed(() => {
+  return displayDatastreams.value.map((ds) => {
+    const thing = things.value.find((t) => t.id === ds.thingId)
+    const observedProperty = observedProperties.value.find(
+      (p) => p.id === ds.observedPropertyId
+    )
+    const processingLevel = processingLevels.value.find(
+      (p) => p.id === ds.processingLevelId
+    )
+    return {
+      ...ds,
+      siteCodeName: thing?.samplingFeatureCode,
+      observedPropertyCode: observedProperty?.code,
+      qualityControlLevelDefinition: processingLevel?.definition,
+    }
+  })
+})
+
 function clearSelected() {
   showOnlySelected.value = false
   selectedDatastreams.value = []
@@ -128,23 +135,34 @@ const isChecked = (item: Datastream) => {
 const search = ref()
 const headers = reactive([
   { title: 'Plot', key: 'plot', visible: true },
-  { title: 'Site Code', key: 'siteCode', visible: true },
-  { title: 'Observed Property', key: 'observedProperty', visible: true },
-  { title: 'Quality Control Level', key: 'qualityControlLevel', visible: true },
+  {
+    title: 'Site Code',
+    key: 'siteCodeName',
+    visible: true,
+  },
+  {
+    title: 'Observed Property',
+    key: 'observedPropertyCode',
+    visible: true,
+  },
+  {
+    title: 'Quality Control Level',
+    key: 'qualityControlLevelDefinition',
+    visible: true,
+  },
   {
     title: 'Number Observations',
-    key: 'numberObservations',
-    value: 'valueCount',
+    key: 'valueCount',
     visible: true,
   },
   {
     title: 'Date Last Updated',
-    key: 'dateLastUpdated',
-    value: 'phenomenonEndTime',
+    key: 'phenomenonEndTime',
     visible: true,
   },
 ])
 
+const sortBy = [{ key: 'siteCodeName' }]
 const selectedHeaders = computed({
   get: () =>
     headers.filter((header) => header.visible).map((header) => header.key),
