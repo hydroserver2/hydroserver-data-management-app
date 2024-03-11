@@ -61,6 +61,7 @@
     :headers="headers.filter((header) => header.visible)"
     :items="tableItems"
     :sort-by="sortBy"
+    :search="search"
     class="elevation-2"
     color="green"
     density="compact"
