@@ -132,6 +132,7 @@ import { ref } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import DatastreamSourceLinker from './DatastreamSourceLinker.vue'
+import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 
 const props = defineProps({
   datastream: {
@@ -185,21 +186,6 @@ const onUpdate = async (patchBody: {}) => {
     await api.updateDatastream(patchBody as Datastream)
   } catch (error) {
     console.error('Error updating datastream', error)
-  }
-}
-
-const downloadDatastreamCSV = async (id: string) => {
-  try {
-    const data = await api.downloadDatastreamCSV(id)
-    const blob = new Blob([data], { type: 'text/csv' })
-    const link = document.createElement('a')
-    link.href = window.URL.createObjectURL(blob)
-    link.download = `datastream_${id}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  } catch (error) {
-    console.error('Error downloading datastream CSV', error)
   }
 }
 

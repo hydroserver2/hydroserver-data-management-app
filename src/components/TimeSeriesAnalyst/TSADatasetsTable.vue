@@ -76,6 +76,8 @@
     class="elevation-2"
     color="green"
     density="compact"
+    @click:row="onRowClick"
+    hover
   >
     <template v-slot:item.plot="{ item }">
       <v-checkbox
@@ -87,6 +89,13 @@
       />
     </template>
   </v-data-table-virtual>
+
+  <v-dialog v-model="openInfoCard" width="50rem" v-if="selectedDatastream">
+    <DatastreamInformationCard
+      :datastream="selectedDatastream"
+      @close="openInfoCard = false"
+    />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -95,7 +104,8 @@ import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, reactive, ref } from 'vue'
-import JSZip from 'jszip'
+import DatastreamInformationCard from './DatastreamInformationCard.vue'
+import { downloadSelectedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
 
 const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
   useTSAStore()
@@ -104,6 +114,23 @@ const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
 const observedProperties = ref<ObservedProperty[]>([])
 const processingLevels = ref<ProcessingLevel[]>([])
 const showOnlySelected = ref(false)
+const openInfoCard = ref(false)
+const selectedDatastream = ref<Datastream | null>(null)
+
+const onRowClick = (event: Event, item: any) => {
+  // If the click came from a checkbox, do nothing.
+  let targetElement = event.target as HTMLElement
+  if (targetElement.id && targetElement.id.startsWith('checkbox-')) return
+
+  const selectedDatastreamId = item.item.id
+  const foundDatastream = filteredDatastreams.value.find(
+    (d) => d.id === selectedDatastreamId
+  )
+  if (foundDatastream) {
+    selectedDatastream.value = foundDatastream
+    openInfoCard.value = true
+  } else selectedDatastream.value = null
+}
 
 const displayDatastreams = computed(() => {
   if (showOnlySelected.value) {
@@ -191,34 +218,6 @@ function updateSelectedDatastreams(datastream: Datastream) {
   )
   if (index === -1) selectedDatastreams.value.push(datastream)
   else selectedDatastreams.value.splice(index, 1)
-}
-
-const downloadSelectedDatastreamsCSVs = async (
-  selectedDatastreams: Datastream[]
-) => {
-  const zip = new JSZip()
-
-  try {
-    const csvPromises = selectedDatastreams.map(async (d) => {
-      const data = await api.downloadDatastreamCSV(d.id)
-      const blob = new Blob([data], { type: 'text/csv' })
-      zip.file(`datastream_${d.id}.csv`, blob)
-    })
-
-    await Promise.all(csvPromises)
-
-    // Generate the zip file
-    zip.generateAsync({ type: 'blob' }).then(function (content) {
-      const link = document.createElement('a')
-      link.href = window.URL.createObjectURL(content)
-      link.download = 'datastreams.zip'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    })
-  } catch (error) {
-    console.error('Error downloading datastreams CSVs', error)
-  }
 }
 
 onMounted(async () => {
