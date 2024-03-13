@@ -1,5 +1,9 @@
 import { EChartsOption, YAXisComponentOption, SeriesOption } from 'echarts'
 import { GraphSeries } from '@/types'
+import { storeToRefs } from 'pinia'
+import { useTSAStore } from '@/store/timeSeriesAnalyst'
+
+const { showSummaryStatistics } = storeToRefs(useTSAStore())
 
 type yAxisConfigurationMap = Map<
   string,
@@ -79,6 +83,15 @@ export const createEChartsOption = (
     },
     toolbox: {
       feature: {
+        mySummaryStatistics: {
+          show: true,
+          title: 'Summary Statistics',
+          icon: 'path://M3,2 L17,2 L21,6 L21,22 L3,22 L3,2 M17,2 L17,6 L21,6',
+
+          onclick: function () {
+            showSummaryStatistics.value = true
+          },
+        },
         dataZoom: {
           yAxisIndex: 'none',
         },

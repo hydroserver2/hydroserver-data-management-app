@@ -19,6 +19,7 @@ export class ObservationRecord {
 
 export interface GraphSeries {
   id: string
+  name: string
   data: DataPoint[]
   yAxisLabel: string
   lineColor: string

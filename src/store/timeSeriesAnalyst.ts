@@ -1,4 +1,5 @@
 import { Datastream, ObservedProperty, ProcessingLevel, Thing } from '@/types'
+import { SummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
@@ -12,6 +13,8 @@ export const useTSAStore = defineStore('TSAStore', () => {
   const selectedDatastreams = ref<Datastream[]>([])
   const selectedObservedProperties = ref<ObservedProperty[]>([])
   const selectedProcessingLevels = ref<ProcessingLevel[]>([])
+  const showSummaryStatistics = ref(false)
+  const summaryStatisticsArray = ref<SummaryStatistics[]>([])
 
   const endDate = ref<Date>(new Date())
   const oneWeek = 7 * 24 * 60 * 60 * 1000
@@ -65,6 +68,8 @@ export const useTSAStore = defineStore('TSAStore', () => {
     selectedDatastreams,
     beginDate,
     endDate,
+    showSummaryStatistics,
+    summaryStatisticsArray,
     clearFilters,
   }
 })

@@ -4,10 +4,18 @@
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
 
-    <v-card-text v-if="option">
+    <div v-if="showSummaryStatistics">
+      <SummaryStatisticsTable />
+    </div>
+
+    <v-card-text v-if="option && !showSummaryStatistics">
       <vue-echarts :option="option" style="height: 600px" ref="chart" />
     </v-card-text>
-    <div v-else style="min-height: 632px">
+
+    <div
+      v-else-if="!option && !showSummaryStatistics"
+      style="min-height: 632px"
+    >
       <v-card-title> Time Series Analyst </v-card-title>
       <v-card-text>
         <v-timeline align="start" density="compact">
@@ -56,6 +64,14 @@ import { EChartsColors } from '@/utils/materialColors'
 import { VueEcharts } from 'vue3-echarts'
 import { EChartsOption } from 'echarts'
 import { createEChartsOption } from '@/utils/echarts'
+import { calculateSummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
+import { storeToRefs } from 'pinia'
+import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
+
+const { showSummaryStatistics, summaryStatisticsArray } = storeToRefs(
+  useTSAStore()
+)
 
 const graphSeriesArray = ref<GraphSeries[]>([])
 const option = ref<EChartsOption | undefined>()
@@ -115,6 +131,7 @@ const updateState = async (
 
       return {
         id: ds.id,
+        name: ds.name,
         data: processedData,
         yAxisLabel,
         lineColor,
@@ -123,8 +140,8 @@ const updateState = async (
   )
 
   graphSeriesArray.value = updatedGraphSeries
-
   console.log('graphSeriesArray', graphSeriesArray.value)
+  summaryStatisticsArray.value = calculateSummaryStatistics(updatedGraphSeries)
 }
 
 watch(
