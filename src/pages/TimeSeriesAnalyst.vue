@@ -2,7 +2,7 @@
   <TSAFiltersDrawer />
 
   <div class="my-4 mx-4">
-    <MultiAxisFocusContextPlot
+    <TSAVisualizationCard
       :datastreams="selectedDatastreams"
       :begin-date="beginDate"
       :end-date="endDate"
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
-import MultiAxisFocusContextPlot from '@/components/TimeSeriesAnalyst/MultiAxisFocusContextPlot.vue'
+import TSAVisualizationCard from '@/components/TimeSeriesAnalyst/TSAVisualizationCard.vue'
 import { EChartsColors } from '@/utils/materialColors'
 import { onMounted, computed } from 'vue'
 import { api } from '@/services/api'
