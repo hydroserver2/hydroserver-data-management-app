@@ -8,14 +8,13 @@
       <SummaryStatisticsTable />
     </div>
 
-    <v-card-text v-if="option && !showSummaryStatistics">
-      <vue-echarts :option="option" style="height: 600px" ref="chart" />
-    </v-card-text>
+    <keep-alive>
+      <v-card-text v-if="option && !showSummaryStatistics">
+        <vue-echarts :option="option" style="height: 600px" ref="chart" />
+      </v-card-text>
+    </keep-alive>
 
-    <div
-      v-else-if="!option && !showSummaryStatistics"
-      style="min-height: 632px"
-    >
+    <div v-if="!option && !showSummaryStatistics" style="min-height: 632px">
       <v-card-title> Time Series Analyst </v-card-title>
       <v-card-text>
         <v-timeline align="start" density="compact">
