@@ -143,10 +143,19 @@ const updateState = async (
   summaryStatisticsArray.value = calculateSummaryStatistics(updatedGraphSeries)
 }
 
+const clearState = () => {
+  graphSeriesArray.value = []
+  showSummaryStatistics.value = false
+  option.value = undefined
+}
+
 watch(
   [() => props.datastreams, () => props.beginDate, () => props.endDate],
   async ([newDatastreams, newBeginDate, newEndDate]) => {
-    if (!newBeginDate || !newEndDate || !newDatastreams.length) return
+    if (!newBeginDate || !newEndDate || !newDatastreams.length) {
+      clearState()
+      return
+    }
     await updateState(newDatastreams, newBeginDate, newEndDate)
     renderPlot()
   },
