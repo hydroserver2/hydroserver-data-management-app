@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { ref, PropType, watch } from 'vue'
 import { Datastream } from '@/types'
-import { fetchObservations, preProcessData } from '@/utils/observationsUtils'
+import { preProcessData } from '@/utils/observationsUtils'
 import { api } from '@/services/api'
 import { GraphSeries } from '@/types'
 import { EChartsColors } from '@/utils/materialColors'
@@ -72,7 +72,9 @@ import { storeToRefs } from 'pinia'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
 import { EChartsOption } from 'echarts'
+import { useObservationStore } from '@/store/observations'
 
+const { fetchObservationsInRange } = useObservationStore()
 const {
   showSummaryStatistics,
   summaryStatisticsArray,
@@ -124,11 +126,10 @@ const updateState = async (
   const end = endDate.toISOString()
 
   // Fetch observations, units and processing levels
-  // TODO: Use fetchObservationsParallel
   // TODO: Only fetch data we don't already have
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
     datastreams.map(async (ds, index) => {
-      const observationsPromise = fetchObservations(ds.id, start, end)
+      const observationsPromise = fetchObservationsInRange(ds, start, end)
       const fetchUnitPromise = api.getUnit(ds.unitId).catch((error) => {
         console.error('Failed to fetch Unit:', error)
         return null

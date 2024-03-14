@@ -8,11 +8,13 @@ export type DataArray = [string, number][]
 export class ObservationRecord {
   dataArray: DataArray
   beginTime: string
+  endTime: string
   loading: boolean
 
   constructor() {
     this.dataArray = []
     this.beginTime = ''
+    this.endTime = ''
     this.loading = false
   }
 }
