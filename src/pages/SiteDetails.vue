@@ -98,7 +98,7 @@
           color="blue-grey-lighten-2"
           prependIcon="mdi-chart-line"
           variant="elevated"
-          :to="{ name: 'TimeSeriesAnalyst', params: { thingId: thingId } }"
+          :to="{ name: 'TimeSeriesAnalyst', query: { sites: thingId } }"
           >View on Time Series Analyst</v-btn
         >
       </v-col>

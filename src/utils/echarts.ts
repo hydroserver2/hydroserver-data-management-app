@@ -3,8 +3,6 @@ import { GraphSeries } from '@/types'
 import { storeToRefs } from 'pinia'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 
-const { showSummaryStatistics } = storeToRefs(useTSAStore())
-
 type yAxisConfigurationMap = Map<
   string,
   { index: number; yAxisLabel: string; color: string }
@@ -42,6 +40,10 @@ function createYAxisConfigurations(data: GraphSeries[]): yAxisConfigurationMap {
 export const createEChartsOption = (
   seriesArray: GraphSeries[]
 ): EChartsOption => {
+  const { showSummaryStatistics, dataZoomStart, dataZoomEnd } = storeToRefs(
+    useTSAStore()
+  )
+
   const yAxisConfigurations = createYAxisConfigurations(seriesArray)
 
   const yAxisOptions: YAXisComponentOption[] = Array.from(
@@ -117,6 +119,8 @@ export const createEChartsOption = (
     dataZoom: [
       {
         type: 'slider', // Creates a 'brush/context' zoom window
+        start: dataZoomStart.value,
+        end: dataZoomEnd.value,
       },
       {
         type: 'inside', // For mouse scrolling in the chart

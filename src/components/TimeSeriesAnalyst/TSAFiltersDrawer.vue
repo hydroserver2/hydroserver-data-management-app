@@ -34,7 +34,7 @@
               v-for="option in dateOptions"
               :key="option.id"
               :color="
-                selectedRangeId === option.id ? 'blue' : 'blue-grey-lighten-4'
+                selectedDateBtnId === option.id ? 'blue' : 'blue-grey-lighten-4'
               "
               @click="setDateRange(option.id)"
             >
@@ -95,7 +95,7 @@ import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
 
-const { clearFilters } = useTSAStore()
+const { clearFilters, setDateRange } = useTSAStore()
 const {
   things,
   processingLevels,
@@ -105,55 +105,17 @@ const {
   selectedProcessingLevels,
   beginDate,
   endDate,
+  dateOptions,
+  selectedDateBtnId,
 } = storeToRefs(useTSAStore())
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
 const drawer = ref(!!smAndDown)
-const selectedRangeId = ref(2)
-const dateOptions = [
-  {
-    id: 0,
-    label: 'All',
-    calculateBeginDate: () => new Date('1850-01-01'),
-  },
-  {
-    id: 1,
-    label: 'Last Month',
-    calculateBeginDate: () => {
-      const now = new Date()
-      return new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-    },
-  },
-  {
-    id: 2,
-    label: 'Last Week',
-    calculateBeginDate: () => {
-      const now = new Date()
-      return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
-    },
-  },
-]
 
 const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
   if (type === 'begin') beginDate.value = date
   else endDate.value = date
-  selectedRangeId.value = -1
+  selectedDateBtnId.value = -1
 }
-
-const setDateRange = (selectedId: number) => {
-  const selectedOption = dateOptions.find((option) => option.id === selectedId)
-  if (selectedOption && selectedId !== selectedRangeId.value) {
-    beginDate.value = selectedOption.calculateBeginDate()
-    endDate.value = new Date()
-    selectedRangeId.value = selectedId
-  }
-}
-
-// onMounted(async () => {
-// TODO: How do we get the processing levels that don't belong to the user? There will be multiple 'Raw Data' variations
-// processingLevels.value = await api.fetchOwnedProcessingLevels()
-// TODO: Similarly, there will be duplicates of observed properties between users
-// observedProperties.value = await api.fetchOwnedObservedProperties()
-// })
 </script>

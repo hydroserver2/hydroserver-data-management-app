@@ -10,7 +10,12 @@
 
     <keep-alive>
       <v-card-text v-if="option && !showSummaryStatistics">
-        <vue-echarts :option="option" style="height: 600px" ref="chart" />
+        <vue-echarts
+          :option="option"
+          @datazoom="handleDataZoom"
+          style="height: 600px"
+          ref="chart"
+        />
       </v-card-text>
     </keep-alive>
 
@@ -61,16 +66,19 @@ import { api } from '@/services/api'
 import { GraphSeries } from '@/types'
 import { EChartsColors } from '@/utils/materialColors'
 import { VueEcharts } from 'vue3-echarts'
-import { EChartsOption } from 'echarts'
 import { createEChartsOption } from '@/utils/echarts'
 import { calculateSummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { storeToRefs } from 'pinia'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
+import { EChartsOption } from 'echarts'
 
-const { showSummaryStatistics, summaryStatisticsArray } = storeToRefs(
-  useTSAStore()
-)
+const {
+  showSummaryStatistics,
+  summaryStatisticsArray,
+  dataZoomStart,
+  dataZoomEnd,
+} = storeToRefs(useTSAStore())
 
 const graphSeriesArray = ref<GraphSeries[]>([])
 const option = ref<EChartsOption | undefined>()
@@ -86,6 +94,25 @@ const props = defineProps({
 
 function renderPlot() {
   option.value = createEChartsOption(graphSeriesArray.value)
+}
+
+function handleDataZoom(event: any) {
+  let start, end
+
+  if (event.batch && event.batch.length) {
+    // Handle scroll wheel events
+    start = event.batch[0].start
+    end = event.batch[0].end
+  } else if (event.start !== undefined && event.end !== undefined) {
+    // Handle zoom box drag events
+    start = event.start
+    end = event.end
+  } else {
+    console.error('Unexpected event structure for dataZoom:', event)
+    return
+  }
+  dataZoomStart.value = start
+  dataZoomEnd.value = end
 }
 
 const updateState = async (

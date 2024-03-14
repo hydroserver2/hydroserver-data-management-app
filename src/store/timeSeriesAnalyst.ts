@@ -19,6 +19,9 @@ export const useTSAStore = defineStore('TSAStore', () => {
   const endDate = ref<Date>(new Date())
   const oneWeek = 7 * 24 * 60 * 60 * 1000
   const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneWeek))
+  const selectedDateBtnId = ref(2)
+  const dataZoomStart = ref(0)
+  const dataZoomEnd = ref(100)
 
   const filteredDatastreams = computed(() => {
     return datastreams.value.filter((datastream) => {
@@ -38,6 +41,41 @@ export const useTSAStore = defineStore('TSAStore', () => {
       return matchesThing && matchesObservedProperty && matchesProcessingLevel
     })
   })
+
+  const dateOptions = ref([
+    {
+      id: 0,
+      label: 'All',
+      calculateBeginDate: () => new Date('1850-01-01'),
+    },
+    {
+      id: 1,
+      label: 'Last Month',
+      calculateBeginDate: () => {
+        const now = new Date()
+        return new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+      },
+    },
+    {
+      id: 2,
+      label: 'Last Week',
+      calculateBeginDate: () => {
+        const now = new Date()
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+      },
+    },
+  ])
+
+  const setDateRange = (selectedId: number) => {
+    const selectedOption = dateOptions.value.find(
+      (option) => option.id === selectedId
+    )
+    if (selectedOption && selectedId !== selectedDateBtnId.value) {
+      beginDate.value = selectedOption.calculateBeginDate()
+      endDate.value = new Date()
+      selectedDateBtnId.value = selectedId
+    }
+  }
 
   // If currently selected datastreams are no longer in filteredDatastreams, deselect them
   watch(
@@ -68,8 +106,13 @@ export const useTSAStore = defineStore('TSAStore', () => {
     selectedDatastreams,
     beginDate,
     endDate,
+    dataZoomStart,
+    dataZoomEnd,
+    dateOptions,
+    selectedDateBtnId,
     showSummaryStatistics,
     summaryStatisticsArray,
+    setDateRange,
     clearFilters,
   }
 })
