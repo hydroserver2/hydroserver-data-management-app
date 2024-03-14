@@ -17,7 +17,7 @@
       <v-expansion-panel title="Sites">
         <v-expansion-panel-text>
           <v-checkbox
-            v-for="thing in things"
+            v-for="thing in sortedThings"
             v-model="selectedThings"
             :label="thing.name"
             :value="thing"
@@ -58,7 +58,7 @@
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-checkbox
-            v-for="op in observedProperties"
+            v-for="op in sortedObservedProperties"
             v-model="selectedObservedProperties"
             :label="op.name"
             :value="op"
@@ -71,7 +71,7 @@
       <v-expansion-panel title="Quality Control Level">
         <v-expansion-panel-text>
           <v-checkbox
-            v-for="pl in processingLevels"
+            v-for="pl in sortedProcessingLevels"
             v-model="selectedProcessingLevels"
             :label="pl.definition"
             :value="pl"
@@ -89,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
@@ -108,6 +108,24 @@ const {
   dateOptions,
   selectedDateBtnId,
 } = storeToRefs(useTSAStore())
+
+const sortedThings = computed(() => {
+  return things.value.slice().sort((a, b) => {
+    return a.name.localeCompare(b.name)
+  })
+})
+
+const sortedObservedProperties = computed(() => {
+  return observedProperties.value.slice().sort((a, b) => {
+    return a.name.localeCompare(b.name)
+  })
+})
+
+const sortedProcessingLevels = computed(() => {
+  return processingLevels.value.slice().sort((a, b) => {
+    return a.definition.localeCompare(b.definition)
+  })
+})
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
