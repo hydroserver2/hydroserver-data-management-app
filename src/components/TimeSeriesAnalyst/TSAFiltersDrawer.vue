@@ -16,14 +16,21 @@
     <v-expansion-panels multiple v-model="panels">
       <v-expansion-panel title="Sites">
         <v-expansion-panel-text>
-          <v-checkbox
-            v-for="thing in sortedThings"
-            v-model="selectedThings"
-            :label="thing.name"
-            :value="thing"
-            hide-details
-            density="compact"
-          />
+          <v-virtual-scroll
+            :items="sortedThings"
+            :height="sortedThings.length < 6 ? sortedThings.length * 40 : 250"
+          >
+            <template #default="{ item, index }">
+              <v-checkbox
+                :key="item.id"
+                v-model="selectedThings"
+                :label="item.name"
+                :value="item"
+                hide-details
+                density="compact"
+              />
+            </template>
+          </v-virtual-scroll>
         </v-expansion-panel-text>
       </v-expansion-panel>
 
@@ -57,27 +64,49 @@
 
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
-          <v-checkbox
-            v-for="op in sortedObservedProperties"
-            v-model="selectedObservedProperties"
-            :label="op.name"
-            :value="op"
-            hide-details
-            density="compact"
-          />
+          <v-virtual-scroll
+            :items="sortedObservedProperties"
+            :height="
+              sortedObservedProperties.length < 6
+                ? sortedObservedProperties.length * 40
+                : 250
+            "
+          >
+            <template #default="{ item, index }">
+              <v-checkbox
+                :key="item.id"
+                v-model="selectedObservedProperties"
+                :label="item.name"
+                :value="item"
+                hide-details
+                density="compact"
+              />
+            </template>
+          </v-virtual-scroll>
         </v-expansion-panel-text>
       </v-expansion-panel>
 
       <v-expansion-panel title="Quality Control Level">
         <v-expansion-panel-text>
-          <v-checkbox
-            v-for="pl in sortedProcessingLevels"
-            v-model="selectedProcessingLevels"
-            :label="pl.definition"
-            :value="pl"
-            hide-details
-            density="compact"
-          />
+          <v-virtual-scroll
+            :items="sortedProcessingLevels"
+            :height="
+              sortedProcessingLevels.length < 6
+                ? sortedProcessingLevels.length * 40
+                : 250
+            "
+          >
+            <template #default="{ item, index }">
+              <v-checkbox
+                :key="item.id"
+                v-model="selectedProcessingLevels"
+                :label="item.definition"
+                :value="item"
+                hide-details
+                density="compact"
+              />
+            </template>
+          </v-virtual-scroll>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
