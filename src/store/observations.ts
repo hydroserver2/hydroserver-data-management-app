@@ -19,7 +19,6 @@ export const useObservationStore = defineStore('observations', () => {
 
     // If nothing is stored yet, create a new record and fetch the data in range
     if (!observations.value[id]?.dataArray) {
-      console.log('creating new obs')
       observations.value[id] = {
         dataArray: [],
         beginTime,
@@ -48,8 +47,6 @@ export const useObservationStore = defineStore('observations', () => {
 
       // Check if new data before the stored data is needed
       if (newBeginTime < storedBeginTime) {
-        console.log('fetching new beginning data')
-
         beginDataPromise = fetchObservationsParallel(
           datastream,
           beginTime,
@@ -59,8 +56,6 @@ export const useObservationStore = defineStore('observations', () => {
 
       // Check if new data after the stored data is needed
       if (newEndTime > storedEndTime) {
-        console.log('New End data')
-
         endDataPromise = fetchObservationsParallel(
           datastream,
           existingRecord.endTime,

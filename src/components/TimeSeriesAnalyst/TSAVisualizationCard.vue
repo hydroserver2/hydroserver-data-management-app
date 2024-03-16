@@ -117,14 +117,11 @@ function handleDataZoom(event: any) {
   dataZoomEnd.value = end
 }
 
-const updateState = async (
+const fetchGraphSeries = async (
   datastreams: Datastream[],
-  beginDate: Date,
-  endDate: Date
+  start: string,
+  end: string
 ) => {
-  const start = beginDate.toISOString()
-  const end = endDate.toISOString()
-
   // Fetch observations, units and processing levels
   // TODO: Only fetch data we don't already have
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
@@ -166,9 +163,78 @@ const updateState = async (
     })
   )
 
-  graphSeriesArray.value = updatedGraphSeries
+  return updatedGraphSeries
+}
+
+const prevDatastreamIds = ref<string[]>([])
+const prevBeginDate = ref<string>('')
+const prevEndDate = ref<string>('')
+
+const updateState = async (
+  datastreams: Datastream[],
+  beginDate: Date,
+  endDate: Date
+) => {
+  const start = beginDate.toISOString()
+  const end = endDate.toISOString()
+
+  const isDateRangeChanged =
+    prevBeginDate.value !== start || prevEndDate.value !== end
+
+  // Identify new and removed datastreams
+  const currentIds = datastreams.map((ds) => ds.id)
+
+  const newIds = currentIds.filter(
+    (id) => !prevDatastreamIds.value.includes(id)
+  )
+  const removedIds = prevDatastreamIds.value.filter(
+    (id) => !currentIds.includes(id)
+  )
+
+  // Directly remove graph series for datastreams that have been removed
+  if (removedIds.length > 0) {
+    graphSeriesArray.value = graphSeriesArray.value.filter(
+      (series) => !removedIds.includes(series.id)
+    )
+  }
+
+  // Determine if there are any new datastreams or if the date range has changed, requiring data fetching
+  if (newIds.length > 0 || isDateRangeChanged) {
+    const datastreamsToFetch = isDateRangeChanged
+      ? datastreams
+      : datastreams.filter((ds) => newIds.includes(ds.id))
+
+    const newSeriesArray = await fetchGraphSeries(
+      datastreamsToFetch,
+      start,
+      end
+    )
+
+    // If the date range has changed, replace all series. Otherwise, append new series.
+    if (isDateRangeChanged) {
+      graphSeriesArray.value = newSeriesArray
+    } else {
+      // Remove any existing series that match the new ones to avoid duplicates
+      graphSeriesArray.value = graphSeriesArray.value.filter(
+        (series) => !newIds.includes(series.id)
+      )
+      graphSeriesArray.value.push(...newSeriesArray)
+    }
+  }
+
+  // update colors
+  graphSeriesArray.value.forEach((series, index) => {
+    series.lineColor = EChartsColors[index % EChartsColors.length]
+  })
+
   console.log('graphSeriesArray', graphSeriesArray.value)
-  summaryStatisticsArray.value = calculateSummaryStatistics(updatedGraphSeries)
+  summaryStatisticsArray.value = calculateSummaryStatistics(
+    graphSeriesArray.value
+  )
+
+  prevBeginDate.value = start
+  prevEndDate.value = end
+  prevDatastreamIds.value = currentIds
 }
 
 const clearState = () => {
