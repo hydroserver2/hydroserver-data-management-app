@@ -1,5 +1,10 @@
 import { GraphSeries } from '@/types'
 
+// Math References:
+//      ArithmeticMean - https://www.geeksforgeeks.org/geometric-mean-two-methods/
+//      Standard Deviation - https://stackoverflow.com/questions/7343890/standard-deviation-javascript
+//      Quantile - https://www.geeksforgeeks.org/d3-js-d3-quantile-function/
+
 export class SummaryStatistics {
   name: string
   maximum: number
@@ -26,7 +31,7 @@ export class SummaryStatistics {
     this.minimum = this.sortedData[0]
     this.arithmeticMean = this.computeArithmeticMean()
     this.geometricMean = this.computeGeometricMean()
-    this.standardDeviation = this.computeStandardDeviation(this.arithmeticMean)
+    this.standardDeviation = this.computeStandardDeviation()
     this.coefficientOfVariation = this.standardDeviation / this.arithmeticMean
     this.quantile10 = this.computeQuantile(0.1)
     this.quantile25 = this.computeQuantile(0.25)
@@ -41,31 +46,33 @@ export class SummaryStatistics {
   }
 
   private computeGeometricMean(): number {
-    const logSum =
-      this.sortedData.reduce((sum, value) => sum + Math.log(value), 0) /
-      this.observations
-    return Math.exp(logSum)
+    const product = this.sortedData.reduce((a, b) => a * b, 1)
+    return Math.pow(product, 1 / this.observations)
   }
 
-  private computeStandardDeviation(mean: number): number {
-    const variance =
-      this.sortedData.reduce(
-        (sum, value) => sum + Math.pow(value - mean, 2),
-        0
-      ) / this.observations
-    return Math.sqrt(variance)
+  private computeStandardDeviation(): number {
+    if (this.observations === 0) return NaN
+    return Math.sqrt(
+      this.sortedData
+        .map((x) => Math.pow(x - this.arithmeticMean, 2))
+        .reduce((a, b) => a + b) / this.observations
+    )
   }
 
   private computeQuantile(quantile: number): number {
-    const pos = (this.observations - 1) * quantile
-    const base = Math.floor(pos)
-    const rest = pos - base
-    if (base + 1 < this.sortedData.length)
-      return (
-        this.sortedData[base] +
-        rest * (this.sortedData[base + 1] - this.sortedData[base])
-      )
-    else return this.sortedData[base]
+    const position = (this.sortedData.length - 1) * quantile
+    const lowerIndex = Math.floor(position)
+    const upperIndex = Math.ceil(position)
+
+    // If the position is an integer, return the value at that position.
+    // This will also handle array of length: 0 or 1.
+    if (lowerIndex === upperIndex) return this.sortedData[lowerIndex]
+
+    // Perform linear interpolation between the two surrounding values
+    const lowerValue = this.sortedData[lowerIndex]
+    const upperValue = this.sortedData[upperIndex]
+    const t = position - lowerIndex
+    return lowerValue + t * (upperValue - lowerValue)
   }
 }
 
