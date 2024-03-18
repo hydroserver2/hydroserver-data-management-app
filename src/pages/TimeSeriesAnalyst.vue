@@ -111,7 +111,6 @@ const copyStateToClipboard = async () => {
     const stateUrl = generateStateUrl()
     await navigator.clipboard.writeText(stateUrl)
     Snackbar.info('Copied URL to clipboard')
-    console.log('State URL copied to clipboard:', stateUrl)
   } catch (err) {
     console.error('Failed to copy URL:', err)
   }
@@ -147,7 +146,6 @@ const parseUrlAndSetState = () => {
 
   const OPIdString = (route.query.OPs as string) || ''
   const OPIds = OPIdString.split(',')
-  console.log('OPIds', OPIds)
   if (OPIds)
     selectedObservedProperties.value = observedProperties.value.filter((op) =>
       OPIds.includes(op.id)
