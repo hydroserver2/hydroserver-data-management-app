@@ -17,7 +17,7 @@
       <tr v-for="header in summaryStatsHeaders" :key="header.key">
         <td>{{ header.title }}</td>
         <td v-for="stats in summaryStatisticsArray">
-          {{ stats[header.key as keyof SummaryStatistics] }}
+          {{ formatNumber(stats[header.key as keyof SummaryStatistics]) }}
         </td>
       </tr>
     </tbody>
@@ -33,6 +33,18 @@ import { useTSAStore } from '@/store/timeSeriesAnalyst'
 const { showSummaryStatistics, summaryStatisticsArray } = storeToRefs(
   useTSAStore()
 )
+
+const formatNumber = (value: string | number): string => {
+  if (typeof value === 'number') {
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+    return formatter.format(value)
+  }
+
+  return value?.toString()
+}
 
 const summaryStatsHeaders = [
   { title: 'Name', key: 'name' },
