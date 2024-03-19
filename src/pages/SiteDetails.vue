@@ -84,7 +84,7 @@
     </v-row>
 
     <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
-    <v-row class="pb-2" v-if="isOwner">
+    <v-row class="pb-4" v-if="isOwner">
       <v-col>
         <v-btn-secondary
           prependIcon="mdi-plus"
@@ -94,16 +94,17 @@
         >
       </v-col>
     </v-row>
-    <DatastreamTable
-      v-if="thing"
-      class="my-6"
-      :is-owner="thing.ownsThing"
-      :thing-id="thingId"
-    />
 
     <h6 class="text-h6" style="color: #b71c1c">
       {{ thing?.dataDisclaimer }}
     </h6>
+
+    <DatastreamTable
+      v-if="thing"
+      class="my-4"
+      :is-owner="thing.ownsThing"
+      :thing-id="thingId"
+    />
   </v-container>
   <v-container v-else>
     <h5 class="text-h5 my-4">Loading Site Details...</h5>
