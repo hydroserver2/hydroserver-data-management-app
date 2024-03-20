@@ -1,5 +1,30 @@
 <template>
-  <h6 class="text-h6 my-5">Add Additional Metadata</h6>
+  <h6 class="text-h6 my-5">
+    Add Additional Metadata
+    <v-tooltip>
+      <template v-slot:activator="{ props }">
+        <v-icon small class="ml-2" color="grey lighten-1" v-bind="props">
+          mdi-help-circle-outline
+        </v-icon>
+      </template>
+      <template v-slot:default>
+        <p>
+          Use site metadata tags to add additional metadata to a site. Specify a
+          key and value for each metadata property.
+        </p>
+        <p>
+          On the 'My Sites' page, you'll be able to filter and color your sites
+          by these metadata tags. For example, you can filter by only the sites
+          that have a specific key and color code the markers on the map by the
+          values of that key.
+        </p>
+        <p>
+          Additionally, if a URL is added as a value, it will be clickable from
+          the Site Details page, allowing direct access to relevant links.
+        </p>
+      </template>
+    </v-tooltip>
+  </h6>
 
   <v-row class="mt-8" align="center">
     <v-col cols="5">

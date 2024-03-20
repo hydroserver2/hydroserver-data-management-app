@@ -20,7 +20,11 @@
             :key="tag.id"
             class="ma-1"
           >
-            {{ tag.key }}: {{ tag.value }}
+            {{ tag.key }}:
+            <span v-if="isUrl(tag.value)">
+              <a :href="tag.value" target="_blank">{{ tag.value }}</a>
+            </span>
+            <span v-else>{{ tag.value }}</span>
           </v-chip>
         </td>
       </tr>
@@ -45,6 +49,15 @@ const props = defineProps({
     required: true,
   },
 })
+
+const isUrl = (value: string): boolean => {
+  try {
+    new URL(value)
+    return true
+  } catch (_) {
+    return false
+  }
+}
 
 const thingProperties = computed(() => {
   return thing.value
