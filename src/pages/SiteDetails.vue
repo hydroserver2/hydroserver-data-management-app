@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="loaded">
+  <v-container v-if="loaded && authorized">
     <h5 class="text-h5 my-4">{{ thing?.name }}</h5>
 
     <v-row v-if="thing" style="height: 25rem">
@@ -105,6 +105,11 @@
       {{ thing?.dataDisclaimer }}
     </h6>
   </v-container>
+  <v-container v-else-if="loaded && !authorized">
+    <h5 class="text-h5 my-4">
+      You are not authorized to view this private site.
+    </h5>
+  </v-container>
   <v-container v-else>
     <h5 class="text-h5 my-4">Loading Site Details...</h5>
   </v-container>
@@ -131,6 +136,7 @@ const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
 const loaded = ref(false)
+const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
 const isOwner = computed(() => thing.value?.ownsThing)
@@ -175,7 +181,11 @@ onMounted(async () => {
   try {
     thing.value = await api.fetchThing(thingId)
   } catch (error) {
-    console.error('Error fetching thing', error)
+    if (error instanceof Error && parseInt(error.message) === 403) {
+      authorized.value = false
+    } else {
+      console.error('Error fetching thing', error)
+    }
   } finally {
     loaded.value = true
   }
