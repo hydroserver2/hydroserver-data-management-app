@@ -8,22 +8,6 @@
       :end-date="endDate"
     />
 
-    <!-- <v-row class="mt-4" align="center"> -->
-    <!-- <v-col v-if="selectedDatastreams.length">
-        <div v-for="(key, index) in legendNames">
-          <v-chip
-            :color="EChartsColors[index % EChartsColors.length]"
-            class="mr-2"
-            variant="elevated"
-            density="compact"
-          />
-          <span>{{ key }}</span>
-        </div>
-      </v-col> -->
-
-    <!-- <v-spacer /> -->
-    <!-- </v-row> -->
-    <!-- <v-divider class="my-4" /> -->
     <div class="mt-6">
       <TSADatasetsTable @copy-state="copyStateToClipboard" />
     </div>
@@ -34,8 +18,7 @@
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import TSAVisualizationCard from '@/components/TimeSeriesAnalyst/TSAVisualizationCard.vue'
-import { EChartsColors } from '@/utils/materialColors'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
@@ -60,10 +43,6 @@ const {
   dataZoomEnd,
   selectedDateBtnId,
 } = storeToRefs(useTSAStore())
-
-// const legendNames = computed(() =>
-//   selectedDatastreams.value.map((ds) => ds.name)
-// )
 
 const generateStateUrl = () => {
   const BASE_URL = `${
@@ -167,9 +146,9 @@ onMounted(async () => {
   things.value = await api.fetchThings()
   datastreams.value = await api.fetchDatastreams()
   // TODO: How do we get the processing levels that don't belong to the user? There will be multiple 'Raw Data' variations
-  processingLevels.value = await api.fetchOwnedProcessingLevels()
+  processingLevels.value = await api.fetchProcessingLevels()
   // TODO: Similarly, there will be duplicates of observed properties between users
-  observedProperties.value = await api.fetchOwnedObservedProperties()
+  observedProperties.value = await api.fetchObservedProperties()
 
   parseUrlAndSetState()
 })

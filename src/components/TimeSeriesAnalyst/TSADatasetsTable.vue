@@ -111,20 +111,22 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
-import { Datastream, ObservedProperty, ProcessingLevel } from '@/types'
+import { Datastream, ProcessingLevel } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { downloadSelectedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
 
-const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
-  useTSAStore()
-)
+const {
+  things,
+  filteredDatastreams,
+  selectedDatastreams,
+  observedProperties,
+  processingLevels,
+} = storeToRefs(useTSAStore())
 
 const emit = defineEmits(['copyState'])
 
-const observedProperties = ref<ObservedProperty[]>([])
-const processingLevels = ref<ProcessingLevel[]>([])
 const showOnlySelected = ref(false)
 const openInfoCard = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
@@ -170,7 +172,7 @@ const tableItems = computed(() => {
     return {
       ...ds,
       siteCodeName: thing?.samplingFeatureCode,
-      observedPropertyCode: observedProperty?.code,
+      observedPropertyName: observedProperty?.name,
       qualityControlLevelDefinition: processingLevel?.definition,
     }
   })
@@ -197,7 +199,7 @@ const headers = reactive([
   },
   {
     title: 'Observed Property',
-    key: 'observedPropertyCode',
+    key: 'observedPropertyName',
     visible: true,
   },
   {
@@ -235,9 +237,4 @@ function updateSelectedDatastreams(datastream: Datastream) {
   if (index === -1) selectedDatastreams.value.push(datastream)
   else selectedDatastreams.value.splice(index, 1)
 }
-
-onMounted(async () => {
-  observedProperties.value = await api.fetchOwnedObservedProperties()
-  processingLevels.value = await api.fetchProcessingLevels()
-})
 </script>
