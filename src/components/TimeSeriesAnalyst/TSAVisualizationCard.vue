@@ -13,6 +13,7 @@
         <v-chart
           :option="option"
           @datazoom="handleDataZoom"
+          autoresize
           style="height: 600px"
         />
       </v-card-text>

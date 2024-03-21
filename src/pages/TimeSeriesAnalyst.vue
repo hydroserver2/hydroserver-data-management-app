@@ -9,7 +9,7 @@
     />
 
     <v-row class="mt-4" align="center">
-      <v-col v-if="selectedDatastreams.length">
+      <!-- <v-col v-if="selectedDatastreams.length">
         <div v-for="(key, index) in legendNames">
           <v-chip
             :color="EChartsColors[index % EChartsColors.length]"
@@ -19,7 +19,7 @@
           />
           <span>{{ key }}</span>
         </div>
-      </v-col>
+      </v-col> -->
 
       <v-spacer />
 

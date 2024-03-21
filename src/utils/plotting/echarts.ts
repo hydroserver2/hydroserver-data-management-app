@@ -58,7 +58,7 @@ export function generateSeriesOptions(
   yAxisConfigurations: yAxisConfigurationMap
 ): SeriesOption[] {
   return seriesArray.map((series) => ({
-    name: series.id,
+    name: series.name,
     type: 'line',
     data: series.data.map((dp) => [dp.date.getTime(), dp.value]),
     yAxisIndex: yAxisConfigurations.get(series.yAxisLabel)?.index,
@@ -118,10 +118,14 @@ export const createEChartsOption = (
     gridRightPadding += (yAxisConfigurations.size - 1) * 85
 
   return {
+    legend: {
+      orient: 'vertical',
+      left: 'auto',
+    },
     grid: {
       bottom: 80,
       right: gridRightPadding,
-      top: 80,
+      top: 50 + 15 * seriesArray.length,
     },
     toolbox: toolboxOptions,
     tooltip: {
