@@ -203,7 +203,7 @@ const headers = reactive([
     visible: true,
   },
   {
-    title: 'Quality Control Level',
+    title: 'Processing Level',
     key: 'qualityControlLevelDefinition',
     visible: true,
   },

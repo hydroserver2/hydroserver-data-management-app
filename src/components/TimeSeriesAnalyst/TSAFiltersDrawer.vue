@@ -85,7 +85,7 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
 
-      <v-expansion-panel title="Quality Control Level">
+      <v-expansion-panel title="Processing Levels">
         <v-expansion-panel-text>
           <v-virtual-scroll
             :items="sortedProcessingLevelNames"
