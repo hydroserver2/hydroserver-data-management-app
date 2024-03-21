@@ -28,6 +28,16 @@
       </v-btn>
     </v-col>
 
+    <v-col cols="12" sm="auto">
+      <v-btn
+        color="blue-lighten-3"
+        prepend-icon="mdi-content-copy"
+        block
+        @click="copyStateToClipboard"
+        >Copy State as URL</v-btn
+      >
+    </v-col>
+
     <v-col cols="12" sm="3" class="ml-auto">
       <v-select
         label="Show/Hide Columns"
@@ -111,11 +121,17 @@ const { things, filteredDatastreams, selectedDatastreams } = storeToRefs(
   useTSAStore()
 )
 
+const emit = defineEmits(['copyState'])
+
 const observedProperties = ref<ObservedProperty[]>([])
 const processingLevels = ref<ProcessingLevel[]>([])
 const showOnlySelected = ref(false)
 const openInfoCard = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
+
+const copyStateToClipboard = async () => {
+  emit('copyState')
+}
 
 const onRowClick = (event: Event, item: any) => {
   // If the click came from a checkbox, do nothing.

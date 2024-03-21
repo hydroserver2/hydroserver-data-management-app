@@ -126,6 +126,7 @@ export const createEChartsOption = (
       bottom: 80,
       right: gridRightPadding,
       top: 50 + 15 * seriesArray.length,
+      left: 80,
     },
     toolbox: toolboxOptions,
     tooltip: {

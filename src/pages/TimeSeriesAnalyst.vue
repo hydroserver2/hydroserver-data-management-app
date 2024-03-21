@@ -8,8 +8,8 @@
       :end-date="endDate"
     />
 
-    <v-row class="mt-4" align="center">
-      <!-- <v-col v-if="selectedDatastreams.length">
+    <!-- <v-row class="mt-4" align="center"> -->
+    <!-- <v-col v-if="selectedDatastreams.length">
         <div v-for="(key, index) in legendNames">
           <v-chip
             :color="EChartsColors[index % EChartsColors.length]"
@@ -21,17 +21,12 @@
         </div>
       </v-col> -->
 
-      <v-spacer />
-
-      <v-col cols="auto">
-        <v-btn prepend-icon="mdi-content-copy" @click="copyStateToClipboard"
-          >Copy State as URL</v-btn
-        >
-      </v-col>
-    </v-row>
-    <v-divider class="my-8" />
-
-    <TSADatasetsTable />
+    <!-- <v-spacer /> -->
+    <!-- </v-row> -->
+    <!-- <v-divider class="my-4" /> -->
+    <div class="mt-6">
+      <TSADatasetsTable @copy-state="copyStateToClipboard" />
+    </div>
   </div>
 </template>
 
@@ -66,9 +61,9 @@ const {
   selectedDateBtnId,
 } = storeToRefs(useTSAStore())
 
-const legendNames = computed(() =>
-  selectedDatastreams.value.map((ds) => ds.name)
-)
+// const legendNames = computed(() =>
+//   selectedDatastreams.value.map((ds) => ds.name)
+// )
 
 const generateStateUrl = () => {
   const BASE_URL = `${

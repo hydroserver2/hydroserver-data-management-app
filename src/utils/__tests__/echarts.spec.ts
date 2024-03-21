@@ -80,7 +80,7 @@ describe('generateSeriesOptions', () => {
     const result = generateSeriesOptions(seriesArray, yAxisConfigurations)
     expect(result.length).toBe(1)
     expect(result[0]).toMatchObject({
-      name: '1',
+      name: 'Series 1',
       type: 'line',
       yAxisIndex: 0,
       itemStyle: { color: '#FF0000' },
