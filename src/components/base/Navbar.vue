@@ -96,6 +96,7 @@
           class="signup-btn"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
+          v-if="disableAccountCreation !== 'true'"
           :rounded="false"
           density="default"
           >Sign Up</v-btn
@@ -147,7 +148,7 @@
 
       <template v-else>
         <v-list-item prepend-icon="mdi-login" to="/Login">Login</v-list-item>
-        <v-list-item prepend-icon="mdi-account-plus-outline" to="/sign-up"
+        <v-list-item prepend-icon="mdi-account-plus-outline" to="/sign-up" v-if="disableAccountCreation !== 'true'"
           >Sign Up</v-list-item
         >
       </template>
@@ -167,6 +168,7 @@ const { logout } = useAuthStore()
 const { isLoggedIn } = storeToRefs(useAuthStore())
 const { smAndDown } = useDisplay()
 const drawer = ref(false)
+const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 const paths: {
   name: string

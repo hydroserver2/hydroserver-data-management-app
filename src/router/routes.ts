@@ -1,5 +1,8 @@
 import { RouteRecordRaw } from 'vue-router'
 
+
+const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
+
 export const routes: RouteRecordRaw[] = [
   {
     path: '/browse',
@@ -91,7 +94,13 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/sign-up',
     name: 'SignUp',
-    component: () => import('@/pages/account/Signup.vue'),
+    component: () => {
+      if (disableAccountCreation === 'true') {
+        return import('@/pages/PageNotFound.vue');
+      } else {
+        return import('@/pages/account/Signup.vue');
+      }
+    },
     meta: {
       hasLoggedOutGuard: true,
       title: 'Sign Up',
