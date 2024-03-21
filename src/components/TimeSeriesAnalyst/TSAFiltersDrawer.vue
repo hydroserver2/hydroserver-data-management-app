@@ -65,18 +65,17 @@
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-virtual-scroll
-            :items="sortedObservedProperties"
+            :items="sortedObservedPropertyNames"
             :height="
-              sortedObservedProperties.length < 6
-                ? sortedObservedProperties.length * 40
+              sortedObservedPropertyNames.length < 6
+                ? sortedObservedPropertyNames.length * 40
                 : 250
             "
           >
-            <template #default="{ item, index }">
+            <template #default="{ item }">
               <v-checkbox
-                :key="item.id"
-                v-model="selectedObservedProperties"
-                :label="item.name"
+                v-model="selectedObservedPropertyNames"
+                :label="item"
                 :value="item"
                 hide-details
                 density="compact"
@@ -89,18 +88,17 @@
       <v-expansion-panel title="Quality Control Level">
         <v-expansion-panel-text>
           <v-virtual-scroll
-            :items="sortedProcessingLevels"
+            :items="sortedProcessingLevelNames"
             :height="
-              sortedProcessingLevels.length < 6
-                ? sortedProcessingLevels.length * 40
+              sortedProcessingLevelNames.length < 6
+                ? sortedProcessingLevelNames.length * 40
                 : 250
             "
           >
-            <template #default="{ item, index }">
+            <template #default="{ item }">
               <v-checkbox
-                :key="item.id"
-                v-model="selectedProcessingLevels"
-                :label="item.definition"
+                v-model="selectedProcessingLevelNames"
+                :label="item"
                 :value="item"
                 hide-details
                 density="compact"
@@ -130,13 +128,18 @@ const {
   processingLevels,
   observedProperties,
   selectedThings,
-  selectedObservedProperties,
-  selectedProcessingLevels,
+  selectedObservedPropertyNames,
+  selectedProcessingLevelNames,
   beginDate,
   endDate,
   dateOptions,
   selectedDateBtnId,
 } = storeToRefs(useTSAStore())
+
+const sortedProcessingLevelNames = computed(() => {
+  const names = processingLevels.value.map((pl) => pl.definition)
+  return [...new Set(names)].sort()
+})
 
 const sortedThings = computed(() => {
   return things.value.slice().sort((a, b) => {
@@ -144,16 +147,9 @@ const sortedThings = computed(() => {
   })
 })
 
-const sortedObservedProperties = computed(() => {
-  return observedProperties.value.slice().sort((a, b) => {
-    return a.name.localeCompare(b.name)
-  })
-})
-
-const sortedProcessingLevels = computed(() => {
-  return processingLevels.value.slice().sort((a, b) => {
-    return a.definition.localeCompare(b.definition)
-  })
+const sortedObservedPropertyNames = computed(() => {
+  const names = observedProperties.value.map((pl) => pl.name)
+  return [...new Set(names)].sort()
 })
 
 const { smAndDown } = useDisplay()

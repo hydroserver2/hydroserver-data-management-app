@@ -32,8 +32,8 @@ const {
   things,
   selectedThings,
   selectedDatastreams,
-  selectedObservedProperties,
-  selectedProcessingLevels,
+  selectedObservedPropertyNames,
+  selectedProcessingLevelNames,
   processingLevels,
   observedProperties,
   datastreams,
@@ -61,11 +61,11 @@ const generateStateUrl = () => {
     .join(',')
   if (datastreamIds) queryParams.append('datastreams', datastreamIds)
 
-  const PLIds = selectedProcessingLevels.value.map((pl) => pl.id).join(',')
-  if (PLIds) queryParams.append('PLs', PLIds)
+  if (selectedProcessingLevelNames.value.length)
+    queryParams.append('PLs', selectedProcessingLevelNames.value.join(','))
 
-  const OPIds = selectedObservedProperties.value.map((op) => op.id).join(',')
-  if (OPIds) queryParams.append('OPs', OPIds)
+  if (selectedObservedPropertyNames.value.length)
+    queryParams.append('OPs', selectedObservedPropertyNames.value.join(','))
 
   if (selectedDateBtnId.value < 0) {
     queryParams.append('beginDate', beginDate.value.toISOString())
@@ -120,19 +120,13 @@ const parseUrlAndSetState = () => {
   if (siteIds)
     selectedThings.value = things.value.filter((t) => siteIds.includes(t.id))
 
-  const OPIdString = (route.query.OPs as string) || ''
-  const OPIds = OPIdString.split(',')
-  if (OPIds)
-    selectedObservedProperties.value = observedProperties.value.filter((op) =>
-      OPIds.includes(op.id)
-    )
+  const OPNameString = (route.query.OPs as string) || ''
+  const OPNames = OPNameString ? OPNameString.split(',') : []
+  if (OPNames.length) selectedObservedPropertyNames.value = OPNames
 
-  const PLIdString = (route.query.PLs as string) || ''
-  const PLIds = PLIdString.split(',')
-  if (PLIds)
-    selectedProcessingLevels.value = processingLevels.value.filter((t) =>
-      PLIds.includes(t.id)
-    )
+  const PLNamesString = (route.query.PLs as string) || ''
+  const PLNames = PLNamesString ? PLNamesString.split(',') : []
+  if (PLNames.length) selectedProcessingLevelNames.value = PLNames
 
   const start = (route.query.dataZoomStart as string) || ''
   if (start) dataZoomStart.value = +start
@@ -142,13 +136,22 @@ const parseUrlAndSetState = () => {
 }
 
 onMounted(async () => {
-  // TODO: Promise.all
-  things.value = await api.fetchThings()
-  datastreams.value = await api.fetchDatastreams()
-  // TODO: How do we get the processing levels that don't belong to the user? There will be multiple 'Raw Data' variations
-  processingLevels.value = await api.fetchProcessingLevels()
-  // TODO: Similarly, there will be duplicates of observed properties between users
-  observedProperties.value = await api.fetchObservedProperties()
+  const [
+    thingsResponse,
+    datastreamsResponse,
+    processingLevelsResponse,
+    observedPropertiesResponse,
+  ] = await Promise.all([
+    api.fetchThings(),
+    api.fetchDatastreams(),
+    api.fetchProcessingLevels(),
+    api.fetchObservedProperties(),
+  ])
+
+  things.value = thingsResponse
+  datastreams.value = datastreamsResponse
+  processingLevels.value = processingLevelsResponse
+  observedProperties.value = observedPropertiesResponse
 
   parseUrlAndSetState()
 })

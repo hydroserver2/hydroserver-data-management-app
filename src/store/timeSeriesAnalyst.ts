@@ -11,8 +11,9 @@ export const useTSAStore = defineStore('TSAStore', () => {
 
   const selectedThings = ref<Thing[]>([])
   const selectedDatastreams = ref<Datastream[]>([])
-  const selectedObservedProperties = ref<ObservedProperty[]>([])
-  const selectedProcessingLevels = ref<ProcessingLevel[]>([])
+  const selectedObservedPropertyNames = ref<string[]>([])
+  const selectedProcessingLevelNames = ref<string[]>([])
+
   const showSummaryStatistics = ref(false)
   const summaryStatisticsArray = ref<SummaryStatistics[]>([])
 
@@ -28,16 +29,25 @@ export const useTSAStore = defineStore('TSAStore', () => {
       const matchesThing =
         selectedThings.value.length === 0 ||
         selectedThings.value.some((thing) => thing.id === datastream.thingId)
+
+      const OPName = observedProperties.value.find(
+        (op) => op.id === datastream.observedPropertyId
+      )?.name
+
       const matchesObservedProperty =
-        selectedObservedProperties.value.length === 0 ||
-        selectedObservedProperties.value.some(
-          (op) => op.id === datastream.observedPropertyId
-        )
+        selectedObservedPropertyNames.value.length === 0 ||
+        (OPName !== undefined &&
+          selectedObservedPropertyNames.value.includes(OPName))
+
+      const processingLevelName = processingLevels.value.find(
+        (pl) => pl.id === datastream.processingLevelId
+      )?.definition
+
       const matchesProcessingLevel =
-        selectedProcessingLevels.value.length === 0 ||
-        selectedProcessingLevels.value.some(
-          (pl) => pl.id === datastream.processingLevelId
-        )
+        selectedProcessingLevelNames.value.length === 0 ||
+        (processingLevelName !== undefined &&
+          selectedProcessingLevelNames.value.includes(processingLevelName))
+
       return matchesThing && matchesObservedProperty && matchesProcessingLevel
     })
   })
@@ -90,8 +100,8 @@ export const useTSAStore = defineStore('TSAStore', () => {
 
   const clearFilters = () => {
     selectedThings.value = []
-    selectedObservedProperties.value = []
-    selectedProcessingLevels.value = []
+    selectedObservedPropertyNames.value = []
+    selectedProcessingLevelNames.value = []
   }
 
   return {
@@ -100,8 +110,8 @@ export const useTSAStore = defineStore('TSAStore', () => {
     processingLevels,
     observedProperties,
     selectedThings,
-    selectedObservedProperties,
-    selectedProcessingLevels,
+    selectedObservedPropertyNames,
+    selectedProcessingLevelNames,
     filteredDatastreams,
     selectedDatastreams,
     beginDate,
