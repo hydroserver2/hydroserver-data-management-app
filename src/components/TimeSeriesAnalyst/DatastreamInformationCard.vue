@@ -106,12 +106,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 
-const {
-  processingLevels,
-  observedProperties,
-  selectedThings,
-  selectedDatastreams,
-} = storeToRefs(useTSAStore())
+const { processingLevels, observedProperties, things, selectedDatastreams } =
+  storeToRefs(useTSAStore())
 
 const addToPlot = (datastream: Datastream) => {
   const index = selectedDatastreams.value.findIndex(
@@ -130,7 +126,7 @@ const clearAndPlot = (datastream: Datastream) => {
 const unit = ref<Unit | null>(null)
 
 const matchingThing = computed(() => {
-  return selectedThings.value.find((t) => t.id === props.datastream.thingId)
+  return things.value.find((t) => t.id === props.datastream.thingId)
 })
 
 const primaryOwnerOrganizationName = computed(() => {
