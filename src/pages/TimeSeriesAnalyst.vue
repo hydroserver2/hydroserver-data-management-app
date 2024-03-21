@@ -82,7 +82,9 @@ const generateStateUrl = () => {
   const siteIds = selectedThings.value.map((t) => t.id).join(',')
   if (siteIds) queryParams.append('sites', siteIds)
 
-  const datastreamIds = selectedDatastreams.value.map((ds) => ds.id).join(',')
+  const datastreamIds = selectedDatastreams.value
+    .map((ds) => encodeURIComponent(ds.id))
+    .join(',')
   if (datastreamIds) queryParams.append('datastreams', datastreamIds)
 
   const PLIds = selectedProcessingLevels.value.map((pl) => pl.id).join(',')

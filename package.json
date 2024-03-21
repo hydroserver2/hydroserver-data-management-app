@@ -29,6 +29,7 @@
     "jsdom": "^22.1.0",
     "jszip": "^3.10.1",
     "jwt-decode": "^3.1.2",
+    "lodash-es": "^4.17.21",
     "lottie-web": "^5.12.2",
     "maska": "^2.1.10",
     "npm": "^10.2.5",
@@ -36,8 +37,8 @@
     "pinia-plugin-persistedstate": "^3.1.0",
     "tslib": "^2.5.0",
     "vue": "^3.3.4",
+    "vue-echarts": "^6.6.9",
     "vue-router": "^4.2.4",
-    "vue3-echarts": "^1.1.0",
     "vuetify": "^3.4.9"
   },
   "devDependencies": {

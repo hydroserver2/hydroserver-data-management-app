@@ -10,11 +10,10 @@
 
     <keep-alive>
       <v-card-text v-if="option && !showSummaryStatistics">
-        <vue-echarts
+        <v-chart
           :option="option"
           @datazoom="handleDataZoom"
           style="height: 600px"
-          ref="chart"
         />
       </v-card-text>
     </keep-alive>
@@ -64,14 +63,15 @@ import { Datastream } from '@/types'
 import { preProcessData } from '@/utils/observationsUtils'
 import { api } from '@/services/api'
 import { GraphSeries } from '@/types'
+import { EChartsOption } from 'echarts'
+import 'echarts'
+import VChart from 'vue-echarts'
 import { EChartsColors } from '@/utils/materialColors'
-import { VueEcharts } from 'vue3-echarts'
 import { createEChartsOption } from '@/utils/plotting/echarts'
 import { calculateSummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { storeToRefs } from 'pinia'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
-import { EChartsOption } from 'echarts'
 import { useObservationStore } from '@/store/observations'
 
 const { fetchObservationsInRange } = useObservationStore()
@@ -122,8 +122,6 @@ const fetchGraphSeries = async (
   start: string,
   end: string
 ) => {
-  // Fetch observations, units and processing levels
-  // TODO: Only fetch data we don't already have
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
     datastreams.map(async (ds, index) => {
       const observationsPromise = fetchObservationsInRange(ds, start, end)
@@ -175,6 +173,7 @@ const updateState = async (
   beginDate: Date,
   endDate: Date
 ) => {
+  updating.value = true
   const start = beginDate.toISOString()
   const end = endDate.toISOString()
 
@@ -235,6 +234,7 @@ const updateState = async (
   prevBeginDate.value = start
   prevEndDate.value = end
   prevDatastreamIds.value = currentIds
+  updating.value = false
 }
 
 const clearState = () => {
@@ -243,6 +243,8 @@ const clearState = () => {
   option.value = undefined
 }
 
+const updating = ref(false)
+
 watch(
   [() => props.datastreams, () => props.beginDate, () => props.endDate],
   async ([newDatastreams, newBeginDate, newEndDate]) => {
@@ -250,8 +252,10 @@ watch(
       clearState()
       return
     }
-    await updateState(newDatastreams, newBeginDate, newEndDate)
-    renderPlot()
+    if (!updating.value) {
+      await updateState(newDatastreams, newBeginDate, newEndDate)
+      renderPlot()
+    }
   },
   { deep: true, immediate: true }
 )
