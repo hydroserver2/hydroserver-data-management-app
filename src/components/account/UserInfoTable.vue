@@ -29,6 +29,7 @@ const { user } = storeToRefs(useUserStore())
 const { setUser } = useUserStore()
 const loaded = ref(false)
 const route = useRoute()
+const hydroShareOauthEnabled = import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
 
 
 const tryUserRefresh = async () => {
@@ -102,11 +103,13 @@ const userInformation = computed(() => {
           value: user.value.organization.description,
         }
       : null,
-    {
-      icon: 'fas fa-database',
-      label: 'HydroShare Account',
-      value: user.value.hydroShareConnected === true ? 'Connected' : 'Not Connected'
-    }
+    hydroShareOauthEnabled === 'true'
+      ? {
+          icon: 'fas fa-database',
+          label: 'HydroShare Account',
+          value: user.value.hydroShareConnected === true ? 'Connected' : 'Not Connected'
+        }
+      : null
   ].filter(Boolean)
 })
 </script>
