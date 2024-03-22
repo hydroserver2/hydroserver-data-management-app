@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="loaded">
+  <v-container v-if="loaded && authorized">
     <h5 class="text-h5 my-4">{{ thing?.name }}</h5>
 
     <v-row v-if="thing" style="height: 25rem">
@@ -84,8 +84,9 @@
     </v-row>
 
     <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
-    <v-row class="pb-2" v-if="isOwner">
-      <v-col cols="auto">
+
+    <v-row class="pb-4" v-if="isOwner">
+      <v-col>
         <v-btn-secondary
           prependIcon="mdi-plus"
           variant="elevated"
@@ -103,16 +104,22 @@
         >
       </v-col>
     </v-row>
-    <DatastreamTable
-      v-if="thing"
-      class="my-6"
-      :is-owner="thing.ownsThing"
-      :thing-id="thingId"
-    />
 
     <h6 class="text-h6" style="color: #b71c1c">
       {{ thing?.dataDisclaimer }}
     </h6>
+
+    <DatastreamTable
+      v-if="thing"
+      class="my-4"
+      :is-owner="thing.ownsThing"
+      :thing-id="thingId"
+    />
+  </v-container>
+  <v-container v-else-if="loaded && !authorized">
+    <h5 class="text-h5 my-4">
+      You are not authorized to view this private site.
+    </h5>
   </v-container>
   <v-container v-else>
     <h5 class="text-h5 my-4">Loading Site Details...</h5>
@@ -140,6 +147,7 @@ const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
 
 const loaded = ref(false)
+const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
 const isOwner = computed(() => thing.value?.ownsThing)
@@ -184,7 +192,11 @@ onMounted(async () => {
   try {
     thing.value = await api.fetchThing(thingId)
   } catch (error) {
-    console.error('Error fetching thing', error)
+    if (error instanceof Error && parseInt(error.message) === 403) {
+      authorized.value = false
+    } else {
+      console.error('Error fetching thing', error)
+    }
   } finally {
     loaded.value = true
   }

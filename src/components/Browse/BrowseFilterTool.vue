@@ -88,8 +88,9 @@ const organizations = computed(() =>
 )
 
 const removeOrganization = (item: any) => {
-  const index = selectedOrganizations.value.findIndex((o) => o === item.title)
-  if (index > -1) selectedOrganizations.value.splice(index, 1)
+  selectedOrganizations.value = selectedOrganizations.value.filter(
+    (o) => o !== item.title
+  )
 }
 
 const isOrgValid = (thing: Thing) =>
