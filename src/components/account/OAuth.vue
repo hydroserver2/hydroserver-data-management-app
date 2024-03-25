@@ -1,5 +1,5 @@
 <template>
-  <v-row justify="center" v-if="googleOauthEnabled === 'true' || orcidOauthEnabled === 'true'">
+  <v-row justify="center" v-if="(googleOauthEnabled === 'true' || orcidOauthEnabled === 'true') && disableAccountCreation !== 'true'">
     <v-col cols="2">
       <v-divider class="mt-3" />
     </v-col>
@@ -9,7 +9,7 @@
     </v-col>
   </v-row>
 
-  <v-row justify="center" v-if="googleOauthEnabled === 'true'" >
+  <v-row justify="center" v-if="googleOauthEnabled === 'true' && disableAccountCreation !== 'true'" >
     <v-col cols="12" sm="8" md="6">
       <v-btn
         @click="OAuthLogin(OAuthProvider.google)"
@@ -31,7 +31,7 @@
     </v-col>
   </v-row>
 
-  <v-row justify="center" v-if="orcidOauthEnabled === 'true'">
+  <v-row justify="center" v-if="orcidOauthEnabled === 'true' && disableAccountCreation !== 'true'">
     <v-col cols="12" sm="8" md="6">
       <v-btn
         @click="OAuthLogin(OAuthProvider.orcid)"
@@ -64,6 +64,7 @@ const OAuthLogin = async (provider: OAuthProvider) => {
   window.location.href = OAUTH_ENDPOINT(provider)
 }
 
+const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 const googleOauthEnabled = import.meta.env.VITE_APP_GOOGLE_OAUTH_ENABLED || 'false'
 const orcidOauthEnabled = import.meta.env.VITE_APP_ORCID_OAUTH_ENABLED || 'false'
 

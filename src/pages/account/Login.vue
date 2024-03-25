@@ -46,7 +46,7 @@
       </v-col>
     </v-row>
 
-    <v-row justify="center" class="mt-6">
+    <v-row justify="center" class="mt-6" v-if="disableAccountCreation !== 'true'">
       <span class="mr-2">Don't have an account?</span>
       <router-link to="/sign-up" class="light-text signup-link"
         >Sign Up</router-link
@@ -80,6 +80,7 @@ const form = ref(null)
 const valid = ref(false)
 const loaded = ref(false)
 const route = useRoute()
+const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()

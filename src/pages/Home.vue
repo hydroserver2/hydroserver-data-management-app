@@ -20,7 +20,7 @@
           {{ user?.lastName }}
         </h5>
       </div>
-      <div v-else>
+      <div v-else-if="disableAccountCreation !== 'true'">
         <h5 class="text-h5 mb-8 has-text-shadow">
           Create an account to get started
         </h5>
@@ -212,6 +212,7 @@ import { useUserStore } from '@/store/user'
 
 const { isLoggedIn } = storeToRefs(useAuthStore())
 const { user } = storeToRefs(useUserStore())
+const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 </script>
 
 <style scoped lang="scss">
