@@ -35,13 +35,11 @@ import {
   calculateEffectiveStartTime,
   preProcessData,
 } from '@/utils/observationsUtils'
-import { useObservationsLast72Hours } from '@/store/observations72Hours'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 
-const { getObservationsSince } = useObservationStore()
+const { fetchObservationsInRange } = useObservationStore()
 const { observations } = storeToRefs(useObservationStore())
-const obs72Store = useObservationsLast72Hours()
 
 const props = defineProps({
   thingName: {
@@ -113,22 +111,19 @@ async function drawObservationsSince(hours: number) {
   if (!props.datastream) return
   const startTime = await getStartTime(hours)
 
-  const isBig = hours <= 0 && props.datastream.valueCount > 100_000
-  const obsSince = await getObservationsSince(
+  const obsSince = await fetchObservationsInRange(
     props.datastream,
     startTime!,
-    isBig
+    props.datastream.phenomenonEndTime
   )
 
   if (obsSince) drawPlot(obsSince)
 }
 
 onMounted(async () => {
-  const startTime = await getStartTime(72)
   if (!props.datastream.phenomenonEndTime) return
-  await obs72Store.getObservationsSince(props.datastream.id, startTime!)
   const [unit, OP] = await Promise.all([fetchUnit, fetchObservedProperty])
   yAxisLabel = props.datastream ? `${OP?.name} (${unit?.symbol}) ` : ''
-  drawPlot(obs72Store.observations[props.datastream.id])
+  await drawObservationsSince(72)
 })
 </script>

@@ -48,13 +48,6 @@ export function focus(data: DataPoint[], yAxisLabel: string): SVGSVGElement {
         })
       ),
       Plot.dot(data, Plot.pointerX({ x: 'date', y: 'value', stroke: 'grey' })),
-      // Plot.tip(
-      //   data,
-      //   Plot.pointerX({
-      //     x: 'date',
-      //     y: 'value',
-      //   })
-      // ),
       Plot.text(
         data,
         Plot.pointerX({

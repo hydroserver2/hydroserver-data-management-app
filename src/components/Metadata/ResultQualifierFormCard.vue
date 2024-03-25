@@ -46,7 +46,7 @@ const props = defineProps({ resultQualifier: Object as () => ResultQualifier })
 const emit = defineEmits(['updated', 'created', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchResultQualifiers,
+  () => Promise.resolve([]), // No need to fetch RQs so do nothing
   api.createResultQualifier,
   api.updateResultQualifier,
   ResultQualifier,

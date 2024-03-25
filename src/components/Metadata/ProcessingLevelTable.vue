@@ -35,7 +35,7 @@ import { computed } from 'vue'
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
-    api.fetchOwnedProcessingLevels,
+    api.fetchCurrentUserProcessingLevels,
     api.deleteProcessingLevel,
     ProcessingLevel
   )

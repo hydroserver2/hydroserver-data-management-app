@@ -99,8 +99,10 @@ export const api = {
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
-  fetchUnownedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owned=false`),
-  fetchOwnedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owned=true`),
+  fetchUnownedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=noUser`),
+  fetchOwnedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=anyUser`),
+  fetchCurrentUserUnits: async () =>
+    apiMethods.fetch(`${UNIT_BASE}?owner=currentUser`),
   updateUnit: async (newUnit: Unit, oldUnit: Unit | null = null) =>
     apiMethods.patch(`${UNIT_BASE}/${newUnit.id}`, newUnit, oldUnit),
   deleteUnit: async (id: string) => apiMethods.delete(`${UNIT_BASE}/${id}`),
@@ -188,9 +190,13 @@ export const api = {
     apiMethods.fetch(`${OP_BASE}/${id}`),
   fetchObservedProperties: async () => apiMethods.fetch(OP_BASE),
   fetchUnownedObservedProperties: async () =>
-    apiMethods.fetch(`${OP_BASE}?owned=false`),
+    apiMethods.fetch(`${OP_BASE}?owner=noUser`),
   fetchOwnedObservedProperties: async () =>
-    apiMethods.fetch(`${OP_BASE}?owned=true`),
+    apiMethods.fetch(`${OP_BASE}?owner=anyUser`),
+  fetchCurrentUserObservedProperties: async () =>
+    apiMethods.fetch(`${OP_BASE}?owner=currentUser`),
+  fetchCurrentUserOrNoUserObservedProperties: async () =>
+    apiMethods.fetch(`${OP_BASE}?owner=currentUserOrNoUser`),
   updateObservedProperty: async (
     newOP: ObservedProperty,
     oldOP: ObservedProperty | null = null
@@ -202,9 +208,13 @@ export const api = {
     apiMethods.post(PL_BASE, pl),
   fetchProcessingLevels: async () => apiMethods.fetch(PL_BASE),
   fetchUnownedProcessingLevels: async () =>
-    apiMethods.fetch(`${PL_BASE}?owned=false`),
+    apiMethods.fetch(`${PL_BASE}?owner=noUser`),
   fetchOwnedProcessingLevels: async () =>
-    apiMethods.fetch(`${PL_BASE}?owned=true`),
+    apiMethods.fetch(`${PL_BASE}?owner=anyUser`),
+  fetchCurrentUserProcessingLevels: async () =>
+    apiMethods.fetch(`${PL_BASE}?owner=currentUser`),
+  fetchCurrentUserOrUnownedProcessingLevels: async () =>
+    apiMethods.fetch(`${PL_BASE}?owner=currentUserOrNoUser`),
   updateProcessingLevel: async (
     newPL: ProcessingLevel,
     oldPL: ProcessingLevel | null = null
@@ -214,7 +224,10 @@ export const api = {
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
   fetchSensors: async () => apiMethods.fetch(SENSOR_BASE),
-  fetchOwnedSensors: async () => apiMethods.fetch(`${SENSOR_BASE}?owned=true`),
+  fetchOwnedSensors: async () =>
+    apiMethods.fetch(`${SENSOR_BASE}?owner=anyUser`),
+  fetchCurrentUserSensors: async () =>
+    apiMethods.fetch(`${SENSOR_BASE}?owner=currentUser`),
   updateSensor: async (newSensor: Sensor, oldSensor: Sensor | null = null) =>
     apiMethods.patch(`${SENSOR_BASE}/${newSensor.id}`, newSensor, oldSensor),
   deleteSensor: async (id: string) => apiMethods.delete(`${SENSOR_BASE}/${id}`),
@@ -222,8 +235,8 @@ export const api = {
   createResultQualifier: async (resultQualifier: ResultQualifier) =>
     apiMethods.post(RQ_BASE, resultQualifier),
   fetchResultQualifiers: async () => apiMethods.fetch(RQ_BASE),
-  fetchOwnedResultQualifiers: async () =>
-    apiMethods.fetch(`${RQ_BASE}?owned=true`),
+  fetchCurrentUserResultQualifiers: async () =>
+    apiMethods.fetch(`${RQ_BASE}?owner=currentUser`),
   updateResultQualifier: async (
     newResultQualifier: ResultQualifier,
     oldResultQualifier: ResultQualifier | null = null

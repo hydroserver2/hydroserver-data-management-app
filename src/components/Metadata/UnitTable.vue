@@ -30,7 +30,7 @@ import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
-  useTableLogic(api.fetchOwnedUnits, api.deleteUnit, Unit)
+  useTableLogic(api.fetchCurrentUserUnits, api.deleteUnit, Unit)
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },

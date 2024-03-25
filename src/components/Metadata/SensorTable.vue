@@ -34,7 +34,7 @@ import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
-  useTableLogic(api.fetchOwnedSensors, api.deleteSensor, Sensor)
+  useTableLogic(api.fetchCurrentUserSensors, api.deleteSensor, Sensor)
 
 const headers = [
   { title: 'Name', key: 'name' },

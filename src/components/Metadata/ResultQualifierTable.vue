@@ -34,7 +34,7 @@ import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCa
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
-    api.fetchOwnedResultQualifiers,
+    api.fetchCurrentUserResultQualifiers,
     api.deleteResultQualifier,
     ResultQualifier
   )
