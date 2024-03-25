@@ -5,7 +5,7 @@
     <v-btn-primary class="mr-6" @click="openForm = true">
       Edit account
     </v-btn-primary>
-    <HydroShareConnectionButton />
+    <HydroShareConnectionButton v-if="hydroShareOauthEnabled === 'true'"/>
     <v-btn-delete @click="openDelete = true"> Delete Account</v-btn-delete>
   </v-container>
 
@@ -27,4 +27,6 @@ import HydroShareConnectionButton from '@/components/account/HydroShareConnectio
 
 const openDelete = ref(false)
 const openForm = ref(false)
+
+const hydroShareOauthEnabled = import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
 </script>
