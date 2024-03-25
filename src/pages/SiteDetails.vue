@@ -84,6 +84,7 @@
     </v-row>
 
     <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
+
     <v-row class="pb-4" v-if="isOwner">
       <v-col>
         <v-btn-secondary
@@ -91,6 +92,15 @@
           variant="elevated"
           :to="{ name: 'DatastreamForm', params: { id: thingId } }"
           >Add New Datastream</v-btn-secondary
+        >
+      </v-col>
+      <v-col>
+        <v-btn
+          color="blue-grey-lighten-2"
+          prependIcon="mdi-chart-line"
+          variant="elevated"
+          :to="{ name: 'TimeSeriesAnalyst', query: { sites: thingId } }"
+          >View on Time Series Analyst</v-btn
         >
       </v-col>
     </v-row>

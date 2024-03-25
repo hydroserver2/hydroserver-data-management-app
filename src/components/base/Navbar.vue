@@ -1,6 +1,6 @@
 <template>
   <v-app-bar app elevation="2">
-    <template v-if="smAndDown" v-slot:append>
+    <template v-if="mdAndDown" v-slot:append>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
     </template>
 
@@ -8,7 +8,7 @@
       <v-img class="mx-4" :src="appLogo" alt="HydroServer home" width="10rem" />
     </router-link>
 
-    <template v-if="!smAndDown">
+    <template v-if="!mdAndDown">
       <div v-for="path of paths" :key="path.name">
         <v-btn
           v-if="!path.menu"
@@ -106,7 +106,7 @@
   </v-app-bar>
 
   <v-navigation-drawer
-    v-if="smAndDown"
+    v-if="mdAndDown"
     temporary
     v-model="drawer"
     location="right"
@@ -166,7 +166,7 @@ import { Snackbar } from '@/utils/notifications'
 
 const { logout } = useAuthStore()
 const { isLoggedIn } = storeToRefs(useAuthStore())
-const { smAndDown } = useDisplay()
+const { mdAndDown } = useDisplay()
 const drawer = ref(false)
 const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
@@ -196,6 +196,12 @@ const paths: {
     attrs: { to: '/sites' },
     label: 'My Sites',
     icon: 'mdi-map-marker-multiple',
+  },
+  {
+    name: 'visualizeData',
+    attrs: { to: '/time-series-analyst' },
+    label: 'Visualize Data',
+    icon: 'mdi-chart-line',
   },
   {
     name: 'management',
@@ -231,11 +237,6 @@ const paths: {
     label: 'Contact Us',
     icon: 'mdi-email',
   },
-  // {
-  //   attrs: { to: '/sites' },
-  //   label: 'Visualize Data',
-  //   icon: 'mdi-chart-timeline-variant',
-  // },
 ]
 
 function onLogout() {

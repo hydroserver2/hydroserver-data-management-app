@@ -29,7 +29,8 @@ export async function fetchObservations(
 
 export const fetchObservationsParallel = async (
   datastream: Datastream,
-  startTime: string | null = null
+  startTime: string | null = null,
+  endTime: string | null = null
 ) => {
   const { id, phenomenonBeginTime, phenomenonEndTime, valueCount } = datastream
   if (!phenomenonBeginTime || !phenomenonEndTime) return
@@ -43,7 +44,7 @@ export const fetchObservationsParallel = async (
         id,
         pageSize,
         startTime ? startTime : phenomenonBeginTime,
-        phenomenonEndTime,
+        endTime ? endTime : phenomenonEndTime,
         skipCount
       )
     )

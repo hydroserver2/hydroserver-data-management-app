@@ -8,13 +8,23 @@ export type DataArray = [string, number][]
 export class ObservationRecord {
   dataArray: DataArray
   beginTime: string
+  endTime: string
   loading: boolean
 
   constructor() {
     this.dataArray = []
     this.beginTime = ''
+    this.endTime = ''
     this.loading = false
   }
+}
+
+export interface GraphSeries {
+  id: string
+  name: string
+  data: DataPoint[]
+  yAxisLabel: string
+  lineColor: string
 }
 
 export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
