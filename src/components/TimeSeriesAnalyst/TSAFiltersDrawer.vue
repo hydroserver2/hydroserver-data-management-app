@@ -125,6 +125,7 @@ import { storeToRefs } from 'pinia'
 const { clearFilters, setDateRange } = useTSAStore()
 const {
   things,
+  datastreams,
   processingLevels,
   observedProperties,
   selectedThings,
@@ -136,19 +137,26 @@ const {
   selectedDateBtnId,
 } = storeToRefs(useTSAStore())
 
+// Only show list items that are referenced by at least one datastream
 const sortedProcessingLevelNames = computed(() => {
-  const names = processingLevels.value.map((pl) => pl.definition)
+  const filteredPLs = processingLevels.value.filter((pl) =>
+    datastreams.value.some((ds) => ds.processingLevelId === pl.id)
+  )
+  const names = filteredPLs.map((pl) => pl.definition)
   return [...new Set(names)].sort()
 })
 
 const sortedThings = computed(() => {
-  return things.value.slice().sort((a, b) => {
-    return a.name.localeCompare(b.name)
-  })
+  return things.value
+    .filter((thing) => datastreams.value.some((ds) => ds.thingId === thing.id))
+    .sort((a, b) => a.name.localeCompare(b.name))
 })
 
 const sortedObservedPropertyNames = computed(() => {
-  const names = observedProperties.value.map((pl) => pl.name)
+  const filteredProperties = observedProperties.value.filter((op) =>
+    datastreams.value.some((ds) => ds.observedPropertyId === op.id)
+  )
+  const names = filteredProperties.map((pl) => pl.name)
   return [...new Set(names)].sort()
 })
 
