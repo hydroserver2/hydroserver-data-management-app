@@ -42,34 +42,6 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
 
-      <v-expansion-panel title="Time">
-        <v-expansion-panel-text>
-          <div class="d-flex justify-center mb-3">
-            <v-btn
-              v-for="option in dateOptions"
-              :key="option.id"
-              :color="
-                selectedDateBtnId === option.id ? 'blue' : 'blue-grey-lighten-4'
-              "
-              @click="setDateRange(option.id)"
-            >
-              {{ option.label }}
-            </v-btn>
-          </div>
-
-          <DatePickerField
-            :model-value="beginDate"
-            placeholder="Begin Date"
-            @update:model-value="handleCustomDateSelection('begin', $event)"
-          />
-          <DatePickerField
-            :model-value="endDate"
-            placeholder="End Date"
-            @update:model-value="handleCustomDateSelection('end', $event)"
-          />
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-text-field
@@ -142,12 +114,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
 
 const {
-  setDateRange,
   matchesSelectedObservedProperty,
   matchesSelectedProcessingLevel,
   matchesSelectedThing,
@@ -160,10 +130,6 @@ const {
   selectedThings,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
-  beginDate,
-  endDate,
-  dateOptions,
-  selectedDateBtnId,
 } = storeToRefs(useTSAStore())
 
 const searchThing = ref('')
@@ -235,10 +201,4 @@ const clearFilters = () => {
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
 const drawer = ref(!!smAndDown)
-
-const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
-  if (type === 'begin') beginDate.value = date
-  else endDate.value = date
-  selectedDateBtnId.value = -1
-}
 </script>

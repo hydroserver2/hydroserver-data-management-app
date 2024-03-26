@@ -8,7 +8,10 @@
       :end-date="endDate"
     />
 
-    <div class="mt-6">
+    <TSATimeFilters />
+    <v-divider />
+
+    <div class="mt-1">
       <TSADatasetsTable @copy-state="copyStateToClipboard" />
     </div>
   </div>
@@ -18,6 +21,7 @@
 import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import TSAVisualizationCard from '@/components/TimeSeriesAnalyst/TSAVisualizationCard.vue'
+import TSATimeFilters from '@/components/TimeSeriesAnalyst/TSATimeFilters.vue'
 import { onMounted } from 'vue'
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
