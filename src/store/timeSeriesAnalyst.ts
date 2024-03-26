@@ -24,32 +24,46 @@ export const useTSAStore = defineStore('TSAStore', () => {
   const dataZoomStart = ref(0)
   const dataZoomEnd = ref(100)
 
+  function matchesSelectedObservedProperty(datastream: Datastream) {
+    if (selectedObservedPropertyNames.value.length === 0) return true
+
+    const OPName = observedProperties.value.find(
+      (op) => op.id === datastream.observedPropertyId
+    )?.name
+    return (
+      OPName !== undefined &&
+      selectedObservedPropertyNames.value.includes(OPName)
+    )
+  }
+
+  function matchesSelectedProcessingLevel(datastream: Datastream) {
+    if (selectedProcessingLevelNames.value.length === 0) return true
+
+    const PLName = processingLevels.value.find(
+      (pl) => pl.id === datastream.processingLevelId
+    )?.definition
+    return (
+      PLName !== undefined &&
+      selectedProcessingLevelNames.value.includes(PLName)
+    )
+  }
+
+  function matchesSelectedThing(datastream: Datastream) {
+    if (selectedThings.value.length === 0) return true
+
+    return (
+      selectedThings.value.length === 0 ||
+      selectedThings.value.some((thing) => thing.id === datastream.thingId)
+    )
+  }
+
   const filteredDatastreams = computed(() => {
-    return datastreams.value.filter((datastream) => {
-      const matchesThing =
-        selectedThings.value.length === 0 ||
-        selectedThings.value.some((thing) => thing.id === datastream.thingId)
-
-      const OPName = observedProperties.value.find(
-        (op) => op.id === datastream.observedPropertyId
-      )?.name
-
-      const matchesObservedProperty =
-        selectedObservedPropertyNames.value.length === 0 ||
-        (OPName !== undefined &&
-          selectedObservedPropertyNames.value.includes(OPName))
-
-      const processingLevelName = processingLevels.value.find(
-        (pl) => pl.id === datastream.processingLevelId
-      )?.definition
-
-      const matchesProcessingLevel =
-        selectedProcessingLevelNames.value.length === 0 ||
-        (processingLevelName !== undefined &&
-          selectedProcessingLevelNames.value.includes(processingLevelName))
-
-      return matchesThing && matchesObservedProperty && matchesProcessingLevel
-    })
+    return datastreams.value.filter(
+      (datastream) =>
+        matchesSelectedThing(datastream) &&
+        matchesSelectedObservedProperty(datastream) &&
+        matchesSelectedProcessingLevel(datastream)
+    )
   })
 
   const dateOptions = ref([
@@ -122,6 +136,9 @@ export const useTSAStore = defineStore('TSAStore', () => {
     selectedDateBtnId,
     showSummaryStatistics,
     summaryStatisticsArray,
+    matchesSelectedObservedProperty,
+    matchesSelectedProcessingLevel,
+    matchesSelectedThing,
     setDateRange,
     clearFilters,
   }

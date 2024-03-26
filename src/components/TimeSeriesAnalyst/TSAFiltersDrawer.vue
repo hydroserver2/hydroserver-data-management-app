@@ -122,7 +122,13 @@ import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
 
-const { clearFilters, setDateRange } = useTSAStore()
+const {
+  clearFilters,
+  setDateRange,
+  matchesSelectedObservedProperty,
+  matchesSelectedProcessingLevel,
+  matchesSelectedThing,
+} = useTSAStore()
 const {
   things,
   datastreams,
@@ -138,9 +144,15 @@ const {
 } = storeToRefs(useTSAStore())
 
 // Only show list items that are referenced by at least one datastream
+// Then mutually filter the lists by selected filters.
 const sortedProcessingLevelNames = computed(() => {
   const filteredPLs = processingLevels.value.filter((pl) =>
-    datastreams.value.some((ds) => ds.processingLevelId === pl.id)
+    datastreams.value.some(
+      (ds) =>
+        ds.processingLevelId === pl.id &&
+        matchesSelectedThing(ds) &&
+        matchesSelectedObservedProperty(ds)
+    )
   )
   const names = filteredPLs.map((pl) => pl.definition)
   return [...new Set(names)].sort()
@@ -148,14 +160,27 @@ const sortedProcessingLevelNames = computed(() => {
 
 const sortedThings = computed(() => {
   return things.value
-    .filter((thing) => datastreams.value.some((ds) => ds.thingId === thing.id))
+    .filter((thing) =>
+      datastreams.value.some(
+        (ds) =>
+          ds.thingId === thing.id &&
+          matchesSelectedObservedProperty(ds) &&
+          matchesSelectedProcessingLevel(ds)
+      )
+    )
     .sort((a, b) => a.name.localeCompare(b.name))
 })
 
 const sortedObservedPropertyNames = computed(() => {
   const filteredProperties = observedProperties.value.filter((op) =>
-    datastreams.value.some((ds) => ds.observedPropertyId === op.id)
+    datastreams.value.some(
+      (ds) =>
+        ds.observedPropertyId === op.id &&
+        matchesSelectedThing(ds) &&
+        matchesSelectedProcessingLevel(ds)
+    )
   )
+
   const names = filteredProperties.map((pl) => pl.name)
   return [...new Set(names)].sort()
 })
