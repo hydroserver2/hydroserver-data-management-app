@@ -240,6 +240,7 @@ const updateState = async (
 
 const clearState = () => {
   graphSeriesArray.value = []
+  prevDatastreamIds.value = []
   showSummaryStatistics.value = false
   option.value = undefined
 }
