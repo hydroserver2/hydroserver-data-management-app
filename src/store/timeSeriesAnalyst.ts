@@ -112,12 +112,6 @@ export const useTSAStore = defineStore('TSAStore', () => {
     { deep: true }
   )
 
-  const clearFilters = () => {
-    selectedThings.value = []
-    selectedObservedPropertyNames.value = []
-    selectedProcessingLevelNames.value = []
-  }
-
   return {
     things,
     datastreams,
@@ -140,6 +134,5 @@ export const useTSAStore = defineStore('TSAStore', () => {
     matchesSelectedProcessingLevel,
     matchesSelectedThing,
     setDateRange,
-    clearFilters,
   }
 })
