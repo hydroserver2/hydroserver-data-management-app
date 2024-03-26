@@ -1,31 +1,7 @@
 <template>
-  <h5 class="text-h5">Datasets</h5>
-
   <v-row class="my-2" align="center">
-    <v-col cols="12" sm="auto">
-      <v-btn
-        :color="showOnlySelected ? 'blue-grey-lighten-4' : 'primary'"
-        block
-        @click="showOnlySelected = false"
-      >
-        Show All
-      </v-btn>
-    </v-col>
-
-    <v-col cols="12" sm="auto">
-      <v-btn
-        :color="!showOnlySelected ? 'blue-grey-lighten-4' : 'primary'"
-        block
-        @click="showOnlySelected = true"
-      >
-        Show Selected
-      </v-btn>
-    </v-col>
-
-    <v-col cols="12" sm="auto">
-      <v-btn color="blue-grey-lighten-4" block @click="clearSelected">
-        Clear Selected
-      </v-btn>
+    <v-col>
+      <h5 class="text-h5">Datasets</h5>
     </v-col>
 
     <v-col cols="12" sm="auto">
@@ -70,6 +46,12 @@
 
     <v-spacer />
 
+    <v-btn @click="clearSelected"> Clear Selected </v-btn>
+
+    <v-btn variant="outlined" @click="showOnlySelected = !showOnlySelected">
+      Showing: {{ showOnlySelected ? 'Selected' : 'All' }}
+    </v-btn>
+
     <v-btn
       prepend-icon="mdi-download"
       @click="downloadSelectedDatastreamsCSVs(selectedDatastreams)"
@@ -109,11 +91,10 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
-import { Datastream, ProcessingLevel } from '@/types'
+import { Datastream } from '@/types'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { downloadSelectedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
 
