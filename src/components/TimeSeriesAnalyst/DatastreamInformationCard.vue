@@ -118,9 +118,9 @@ const addToPlot = (datastream: Datastream) => {
 }
 
 const clearAndPlot = (datastream: Datastream) => {
+  emit('close')
   selectedDatastreams.value = []
   selectedDatastreams.value.push(datastream)
-  emit('close')
 }
 
 const unit = ref<Unit | null>(null)
