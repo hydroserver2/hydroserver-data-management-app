@@ -75,12 +75,17 @@ const generateStateUrl = () => {
     queryParams.append('beginDate', beginDate.value.toISOString())
     queryParams.append('endDate', endDate.value.toISOString())
   } else {
-    queryParams.append('selectedDateBtnId', selectedDateBtnId.value.toString())
+    // 2 is the default so no need to put it in the URL
+    if (selectedDateBtnId.value !== 2)
+      queryParams.append(
+        'selectedDateBtnId',
+        selectedDateBtnId.value.toString()
+      )
   }
 
   if (dataZoomStart.value !== 0)
     queryParams.append('dataZoomStart', dataZoomStart.value.toString())
-  if (dataZoomEnd.value !== 0)
+  if (dataZoomEnd.value !== 0 && dataZoomEnd.value !== 100)
     queryParams.append('dataZoomEnd', dataZoomEnd.value.toString())
 
   return `${BASE_URL}?${queryParams.toString()}`
