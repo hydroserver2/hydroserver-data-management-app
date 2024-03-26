@@ -24,6 +24,20 @@ export const useTSAStore = defineStore('TSAStore', () => {
   const dataZoomStart = ref(0)
   const dataZoomEnd = ref(100)
 
+  function resetTSAState() {
+    selectedThings.value = []
+    selectedDatastreams.value = []
+    selectedObservedPropertyNames.value = []
+    selectedProcessingLevelNames.value = []
+    showSummaryStatistics.value = false
+    summaryStatisticsArray.value = []
+    endDate.value = new Date()
+    beginDate.value = new Date(new Date().getTime() - oneWeek)
+    selectedDateBtnId.value = 2
+    dataZoomStart.value = 0
+    dataZoomEnd.value = 100
+  }
+
   function matchesSelectedObservedProperty(datastream: Datastream) {
     if (selectedObservedPropertyNames.value.length === 0) return true
 
@@ -134,5 +148,6 @@ export const useTSAStore = defineStore('TSAStore', () => {
     matchesSelectedProcessingLevel,
     matchesSelectedThing,
     setDateRange,
+    resetTSAState,
   }
 })

@@ -22,7 +22,7 @@ import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vu
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import TSAVisualizationCard from '@/components/TimeSeriesAnalyst/TSAVisualizationCard.vue'
 import TSATimeFilters from '@/components/TimeSeriesAnalyst/TSATimeFilters.vue'
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
@@ -31,7 +31,7 @@ import { Snackbar } from '@/utils/notifications'
 
 const route = useRoute()
 
-const { setDateRange } = useTSAStore()
+const { setDateRange, resetTSAState } = useTSAStore()
 const {
   things,
   selectedThings,
@@ -163,5 +163,9 @@ onMounted(async () => {
   observedProperties.value = observedPropertiesResponse
 
   parseUrlAndSetState()
+})
+
+onUnmounted(() => {
+  resetTSAState()
 })
 </script>
