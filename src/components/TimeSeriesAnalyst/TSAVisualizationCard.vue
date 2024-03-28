@@ -252,9 +252,7 @@ watch(
   async ([newDatastreams, newBeginDate, newEndDate]) => {
     if (!newBeginDate || !newEndDate || !newDatastreams.length) {
       clearState()
-      return
-    }
-    if (!updating.value) {
+    } else if (!updating.value) {
       await updateState(newDatastreams, newBeginDate, newEndDate)
       renderPlot()
     }
