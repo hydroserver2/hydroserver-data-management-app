@@ -5,16 +5,27 @@
     readonly
     @click="showDatePicker = true"
     append-inner-icon="mdi-calendar"
-    class="mb-2"
     hide-details
     density="compact"
   />
 
-  <v-date-picker
-    v-if="showDatePicker"
-    v-model="localDate"
-    @update:modelValue="dateSelected"
-  />
+  <v-dialog v-model="showDatePicker" max-width="22rem">
+    <v-card>
+      <v-card-title class="d-flex pt-4">
+        Select {{ placeholder }}
+        <v-spacer />
+        <v-icon color="grey-darken-1" @click="showDatePicker = false"
+          >mdi-close</v-icon
+        >
+      </v-card-title>
+      <v-divider />
+      <v-date-picker
+        hide-header
+        v-model="localDate"
+        @update:modelValue="dateSelected"
+      />
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">

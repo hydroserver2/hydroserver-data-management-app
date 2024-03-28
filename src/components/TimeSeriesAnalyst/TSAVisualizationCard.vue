@@ -168,6 +168,7 @@ const fetchGraphSeries = async (
 const prevDatastreamIds = ref<string[]>([])
 const prevBeginDate = ref<string>('')
 const prevEndDate = ref<string>('')
+const isStateChanged = ref(true)
 
 const updateState = async (
   datastreams: Datastream[],
@@ -190,6 +191,9 @@ const updateState = async (
   const removedIds = prevDatastreamIds.value.filter(
     (id) => !currentIds.includes(id)
   )
+
+  isStateChanged.value =
+    !!newIds.length || !!removedIds.length || isDateRangeChanged
 
   // Directly remove graph series for datastreams that have been removed
   if (removedIds.length > 0) {
@@ -240,6 +244,7 @@ const updateState = async (
 
 const clearState = () => {
   graphSeriesArray.value = []
+  prevDatastreamIds.value = []
   showSummaryStatistics.value = false
   option.value = undefined
 }
@@ -251,11 +256,9 @@ watch(
   async ([newDatastreams, newBeginDate, newEndDate]) => {
     if (!newBeginDate || !newEndDate || !newDatastreams.length) {
       clearState()
-      return
-    }
-    if (!updating.value) {
+    } else if (!updating.value) {
       await updateState(newDatastreams, newBeginDate, newEndDate)
-      renderPlot()
+      if (isStateChanged.value) renderPlot()
     }
   },
   { deep: true, immediate: true }

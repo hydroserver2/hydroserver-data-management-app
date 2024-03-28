@@ -86,7 +86,7 @@
     <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
 
     <v-row class="pb-4" v-if="isOwner">
-      <v-col>
+      <v-col cols="auto">
         <v-btn-secondary
           prependIcon="mdi-plus"
           variant="elevated"

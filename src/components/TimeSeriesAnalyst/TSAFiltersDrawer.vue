@@ -16,6 +16,14 @@
     <v-expansion-panels multiple v-model="panels">
       <v-expansion-panel title="Sites">
         <v-expansion-panel-text>
+          <v-text-field
+            v-model="searchThing"
+            prepend-inner-icon="mdi-magnify"
+            label="Search"
+            dense
+            hide-details
+          />
+
           <v-virtual-scroll
             :items="sortedThings"
             :height="sortedThings.length < 6 ? sortedThings.length * 40 : 250"
@@ -34,36 +42,16 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
 
-      <v-expansion-panel title="Time">
-        <v-expansion-panel-text>
-          <div class="d-flex justify-center mb-3">
-            <v-btn
-              v-for="option in dateOptions"
-              :key="option.id"
-              :color="
-                selectedDateBtnId === option.id ? 'blue' : 'blue-grey-lighten-4'
-              "
-              @click="setDateRange(option.id)"
-            >
-              {{ option.label }}
-            </v-btn>
-          </div>
-
-          <DatePickerField
-            :model-value="beginDate"
-            placeholder="Begin Date"
-            @update:model-value="handleCustomDateSelection('begin', $event)"
-          />
-          <DatePickerField
-            :model-value="endDate"
-            placeholder="End Date"
-            @update:model-value="handleCustomDateSelection('end', $event)"
-          />
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
+          <v-text-field
+            v-model="searchObservedProperty"
+            prepend-inner-icon="mdi-magnify"
+            label="Search"
+            dense
+            hide-details
+          />
+
           <v-virtual-scroll
             :items="sortedObservedPropertyNames"
             :height="
@@ -87,6 +75,14 @@
 
       <v-expansion-panel title="Processing Levels">
         <v-expansion-panel-text>
+          <v-text-field
+            v-model="searchProcessingLevel"
+            prepend-inner-icon="mdi-magnify"
+            label="Search"
+            dense
+            hide-details
+          />
+
           <v-virtual-scroll
             :items="sortedProcessingLevelNames"
             :height="
@@ -118,47 +114,91 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
 
-const { clearFilters, setDateRange } = useTSAStore()
+const {
+  matchesSelectedObservedProperty,
+  matchesSelectedProcessingLevel,
+  matchesSelectedThing,
+} = useTSAStore()
 const {
   things,
+  datastreams,
   processingLevels,
   observedProperties,
   selectedThings,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
-  beginDate,
-  endDate,
-  dateOptions,
-  selectedDateBtnId,
 } = storeToRefs(useTSAStore())
 
+const searchThing = ref('')
+const searchObservedProperty = ref('')
+const searchProcessingLevel = ref('')
+
+// Only show list items that are referenced by at least one datastream
+// Then mutually filter the lists by selected filters.
 const sortedProcessingLevelNames = computed(() => {
-  const names = processingLevels.value.map((pl) => pl.definition)
+  const filteredPLs = processingLevels.value.filter(
+    (pl) =>
+      pl.definition
+        .toLowerCase()
+        .includes(searchProcessingLevel.value.toLowerCase()) &&
+      datastreams.value.some(
+        (ds) =>
+          ds.processingLevelId === pl.id &&
+          matchesSelectedThing(ds) &&
+          matchesSelectedObservedProperty(ds)
+      )
+  )
+  const names = filteredPLs.map((pl) => pl.definition)
   return [...new Set(names)].sort()
 })
 
 const sortedThings = computed(() => {
-  return things.value.slice().sort((a, b) => {
-    return a.name.localeCompare(b.name)
-  })
+  return things.value
+    .filter(
+      (thing) =>
+        thing.name.toLowerCase().includes(searchThing.value.toLowerCase()) &&
+        datastreams.value.some(
+          (ds) =>
+            ds.thingId === thing.id &&
+            matchesSelectedObservedProperty(ds) &&
+            matchesSelectedProcessingLevel(ds)
+        )
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
 })
 
 const sortedObservedPropertyNames = computed(() => {
-  const names = observedProperties.value.map((pl) => pl.name)
+  const filteredProperties = observedProperties.value.filter(
+    (op) =>
+      op.name
+        .toLowerCase()
+        .includes(searchObservedProperty.value.toLowerCase()) &&
+      datastreams.value.some(
+        (ds) =>
+          ds.observedPropertyId === op.id &&
+          matchesSelectedThing(ds) &&
+          matchesSelectedProcessingLevel(ds)
+      )
+  )
+
+  const names = filteredProperties.map((pl) => pl.name)
   return [...new Set(names)].sort()
 })
+
+const clearFilters = () => {
+  selectedThings.value = []
+  selectedObservedPropertyNames.value = []
+  selectedProcessingLevelNames.value = []
+
+  searchThing.value = ''
+  searchObservedProperty.value = ''
+  searchProcessingLevel.value = ''
+}
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2, 3])
 const drawer = ref(!!smAndDown)
-
-const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
-  if (type === 'begin') beginDate.value = date
-  else endDate.value = date
-  selectedDateBtnId.value = -1
-}
 </script>
