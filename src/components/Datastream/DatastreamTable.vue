@@ -1,6 +1,32 @@
 <template>
+  <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
+
+  <v-row class="pb-4">
+    <v-col cols="auto" v-if="thing?.ownsThing">
+      <v-btn-secondary
+        prependIcon="mdi-plus"
+        variant="elevated"
+        :to="{ name: 'DatastreamForm', params: { id: thingId } }"
+        >Add New Datastream</v-btn-secondary
+      >
+    </v-col>
+    <v-col v-if="datastreams.length">
+      <v-btn
+        color="blue-grey-lighten-2"
+        prependIcon="mdi-chart-line"
+        variant="elevated"
+        :to="{ name: 'TimeSeriesAnalyst', query: { sites: thingId } }"
+        >View on Time Series Analyst</v-btn
+      >
+    </v-col>
+  </v-row>
+
+  <h6 class="text-h6" style="color: #b71c1c">
+    {{ thing?.dataDisclaimer }}
+  </h6>
+
   <v-data-table
-    class="elevation-3"
+    class="elevation-3 my-4"
     :headers="headers"
     :items="visibleDatastreams"
     v-model:sort-by="sortBy"
