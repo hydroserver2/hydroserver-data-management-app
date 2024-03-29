@@ -17,6 +17,8 @@
       <v-expansion-panel title="Sites">
         <v-expansion-panel-text>
           <v-text-field
+            clearable
+            @click:clear="searchThing = ''"
             v-model="searchThing"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -45,6 +47,8 @@
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-text-field
+            clearable
+            @click:clear="searchObservedProperty = ''"
             v-model="searchObservedProperty"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -76,6 +80,8 @@
       <v-expansion-panel title="Processing Levels">
         <v-expansion-panel-text>
           <v-text-field
+            clearable
+            @click:clear="searchProcessingLevel = ''"
             v-model="searchProcessingLevel"
             prepend-inner-icon="mdi-magnify"
             label="Search"

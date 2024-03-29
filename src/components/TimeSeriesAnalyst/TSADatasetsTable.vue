@@ -37,6 +37,7 @@
   <v-toolbar flat color="secondary">
     <v-text-field
       class="mx-2"
+      clearable
       v-model="search"
       prepend-inner-icon="mdi-magnify"
       label="Search"
