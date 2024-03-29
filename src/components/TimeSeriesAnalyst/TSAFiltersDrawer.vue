@@ -28,7 +28,7 @@
 
           <v-virtual-scroll
             :items="sortedThings"
-            :height="sortedThings.length < 6 ? sortedThings.length * 50 : 250"
+            :height="sortedThings.length < 6 ? 'auto' : 250"
           >
             <template #default="{ item, index }">
               <v-checkbox
@@ -58,11 +58,7 @@
 
           <v-virtual-scroll
             :items="sortedObservedPropertyNames"
-            :height="
-              sortedObservedPropertyNames.length < 6
-                ? sortedObservedPropertyNames.length * 40
-                : 250
-            "
+            :height="sortedObservedPropertyNames.length < 6 ? 'auto' : 250"
           >
             <template #default="{ item }">
               <v-checkbox
@@ -91,11 +87,7 @@
 
           <v-virtual-scroll
             :items="sortedProcessingLevelNames"
-            :height="
-              sortedProcessingLevelNames.length < 6
-                ? sortedProcessingLevelNames.length * 40
-                : 250
-            "
+            :height="sortedProcessingLevelNames.length < 6 ? 'auto' : 250"
           >
             <template #default="{ item }">
               <v-checkbox
