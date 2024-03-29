@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
@@ -184,6 +184,31 @@ const sortedObservedPropertyNames = computed(() => {
 
   const names = filteredProperties.map((pl) => pl.name)
   return [...new Set(names)].sort()
+})
+
+// Watchers to handle deselection of hidden items
+watch(sortedThings, (newVal, oldVal) => {
+  if (newVal.length < oldVal.length) {
+    selectedThings.value = selectedThings.value.filter((selectedThing) =>
+      newVal.some((thing) => thing.id === selectedThing.id)
+    )
+  }
+})
+
+watch(sortedObservedPropertyNames, (newVal, oldVal) => {
+  if (newVal.length < oldVal.length) {
+    selectedObservedPropertyNames.value =
+      selectedObservedPropertyNames.value.filter((name) =>
+        newVal.includes(name)
+      )
+  }
+})
+
+watch(sortedProcessingLevelNames, (newVal, oldVal) => {
+  if (newVal.length < oldVal.length) {
+    selectedProcessingLevelNames.value =
+      selectedProcessingLevelNames.value.filter((name) => newVal.includes(name))
+  }
 })
 
 const clearFilters = () => {
