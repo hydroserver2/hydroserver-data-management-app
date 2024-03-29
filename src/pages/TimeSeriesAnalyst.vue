@@ -1,18 +1,21 @@
 <template>
-  <TSAFiltersDrawer />
+  <FullScreenLoader v-if="loading" />
+  <div v-else>
+    <TSAFiltersDrawer />
 
-  <div class="my-4 mx-4">
-    <TSAVisualizationCard
-      :datastreams="selectedDatastreams"
-      :begin-date="beginDate"
-      :end-date="endDate"
-    />
+    <div class="my-4 mx-4">
+      <TSAVisualizationCard
+        :datastreams="selectedDatastreams"
+        :begin-date="beginDate"
+        :end-date="endDate"
+      />
 
-    <TSATimeFilters />
-    <v-divider />
+      <TSATimeFilters />
+      <v-divider />
 
-    <div class="mt-1">
-      <TSADatasetsTable @copy-state="copyStateToClipboard" />
+      <div class="mt-1">
+        <TSADatasetsTable @copy-state="copyStateToClipboard" />
+      </div>
     </div>
   </div>
 </template>
@@ -22,13 +25,13 @@ import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vu
 import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
 import TSAVisualizationCard from '@/components/TimeSeriesAnalyst/TSAVisualizationCard.vue'
 import TSATimeFilters from '@/components/TimeSeriesAnalyst/TSATimeFilters.vue'
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { api } from '@/services/api'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { Snackbar } from '@/utils/notifications'
-
+import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 const route = useRoute()
 
 const { setDateRange, resetTSAState } = useTSAStore()
@@ -144,6 +147,8 @@ const parseUrlAndSetState = () => {
   if (end) dataZoomEnd.value = +end
 }
 
+const loading = ref(true)
+
 onMounted(async () => {
   const [
     thingsResponse,
@@ -163,6 +168,7 @@ onMounted(async () => {
   observedProperties.value = observedPropertiesResponse
 
   parseUrlAndSetState()
+  loading.value = false
 })
 
 onUnmounted(() => {
