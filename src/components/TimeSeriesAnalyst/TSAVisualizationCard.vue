@@ -74,6 +74,7 @@ import { storeToRefs } from 'pinia'
 import { useTSAStore } from '@/store/timeSeriesAnalyst'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
 import { useObservationStore } from '@/store/observations'
+import { Snackbar } from '@/utils/notifications'
 
 const { fetchObservationsInRange } = useObservationStore()
 const {
@@ -125,7 +126,16 @@ const fetchGraphSeries = async (
 ) => {
   const updatedGraphSeries: GraphSeries[] = await Promise.all(
     datastreams.map(async (ds, index) => {
-      const observationsPromise = fetchObservationsInRange(ds, start, end)
+      const observationsPromise = fetchObservationsInRange(
+        ds,
+        start,
+        end
+      ).catch((error) => {
+        Snackbar.error('Failed to fetch observations')
+        console.error('Failed to fetch observations:', error)
+        updating.value = false
+        return null
+      })
       const fetchUnitPromise = api.getUnit(ds.unitId).catch((error) => {
         console.error('Failed to fetch Unit:', error)
         return null
