@@ -112,14 +112,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 
 const {
   matchesSelectedObservedProperty,
   matchesSelectedProcessingLevel,
   matchesSelectedThing,
-} = useTSAStore()
+} = useDataVisStore()
 const {
   things,
   datastreams,
@@ -128,7 +128,7 @@ const {
   selectedThings,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
-} = storeToRefs(useTSAStore())
+} = storeToRefs(useDataVisStore())
 
 const searchThing = ref('')
 const searchObservedProperty = ref('')

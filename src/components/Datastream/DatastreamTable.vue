@@ -15,8 +15,8 @@
         color="blue-grey-lighten-2"
         prependIcon="mdi-chart-line"
         variant="elevated"
-        :to="{ name: 'TimeSeriesAnalyst', query: { sites: thingId } }"
-        >View on Time Series Analyst</v-btn
+        :to="{ name: 'VisualizeData', query: { sites: thingId } }"
+        >View on Data Visualization Page</v-btn
       >
     </v-col>
   </v-row>

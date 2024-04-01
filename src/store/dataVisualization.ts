@@ -3,7 +3,7 @@ import { SummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
-export const useTSAStore = defineStore('TSAStore', () => {
+export const useDataVisStore = defineStore('dataVisualization', () => {
   const things = ref<Thing[]>([])
   const datastreams = ref<Datastream[]>([])
   const observedProperties = ref<ObservedProperty[]>([])
@@ -24,7 +24,7 @@ export const useTSAStore = defineStore('TSAStore', () => {
   const dataZoomStart = ref(0)
   const dataZoomEnd = ref(100)
 
-  function resetTSAState() {
+  function resetState() {
     selectedThings.value = []
     selectedDatastreams.value = []
     selectedObservedPropertyNames.value = []
@@ -151,6 +151,6 @@ export const useTSAStore = defineStore('TSAStore', () => {
     matchesSelectedProcessingLevel,
     matchesSelectedThing,
     setDateRange,
-    resetTSAState,
+    resetState,
   }
 })

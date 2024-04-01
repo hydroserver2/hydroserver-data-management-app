@@ -31,14 +31,14 @@
 </template>
 
 <script setup lang="ts">
-import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import DatePickerField from '@/components/VisualizeData/DatePickerField.vue'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 
-const { setDateRange } = useTSAStore()
+const { setDateRange } = useDataVisStore()
 
 const { dateOptions, beginDate, endDate, selectedDateBtnId } = storeToRefs(
-  useTSAStore()
+  useDataVisStore()
 )
 
 const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {

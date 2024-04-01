@@ -148,7 +148,10 @@
 
       <template v-else>
         <v-list-item prepend-icon="mdi-login" to="/Login">Login</v-list-item>
-        <v-list-item prepend-icon="mdi-account-plus-outline" to="/sign-up" v-if="disableAccountCreation !== 'true'"
+        <v-list-item
+          prepend-icon="mdi-account-plus-outline"
+          to="/sign-up"
+          v-if="disableAccountCreation !== 'true'"
           >Sign Up</v-list-item
         >
       </template>
@@ -168,7 +171,8 @@ const { logout } = useAuthStore()
 const { isLoggedIn } = storeToRefs(useAuthStore())
 const { mdAndDown } = useDisplay()
 const drawer = ref(false)
-const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
+const disableAccountCreation =
+  import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 const paths: {
   name: string
@@ -199,7 +203,7 @@ const paths: {
   },
   {
     name: 'visualizeData',
-    attrs: { to: '/time-series-analyst' },
+    attrs: { to: '/visualize-data' },
     label: 'Visualize Data',
     icon: 'mdi-chart-line',
   },

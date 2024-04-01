@@ -20,7 +20,7 @@
     </keep-alive>
 
     <div v-if="!option && !showSummaryStatistics" style="min-height: 632px">
-      <v-card-title> Time Series Analyst </v-card-title>
+      <v-card-title> Data Visualization </v-card-title>
       <v-card-text>
         <v-timeline align="start" density="compact">
           <v-timeline-item size="x-small" dot-color="primary">
@@ -71,7 +71,7 @@ import { EChartsColors } from '@/utils/materialColors'
 import { createEChartsOption } from '@/utils/plotting/echarts'
 import { calculateSummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { storeToRefs } from 'pinia'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
 import { useObservationStore } from '@/store/observations'
 import { Snackbar } from '@/utils/notifications'
@@ -82,7 +82,7 @@ const {
   summaryStatisticsArray,
   dataZoomStart,
   dataZoomEnd,
-} = storeToRefs(useTSAStore())
+} = storeToRefs(useDataVisStore())
 
 const graphSeriesArray = ref<GraphSeries[]>([])
 const option = ref<EChartsOption | undefined>()

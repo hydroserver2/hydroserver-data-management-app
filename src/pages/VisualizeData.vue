@@ -1,40 +1,40 @@
 <template>
   <FullScreenLoader v-if="loading" />
   <div v-else>
-    <TSAFiltersDrawer />
+    <DataVisFiltersDrawer />
 
     <div class="my-4 mx-4">
-      <TSAVisualizationCard
+      <DataVisualizationCard
         :datastreams="selectedDatastreams"
         :begin-date="beginDate"
         :end-date="endDate"
       />
 
-      <TSATimeFilters />
+      <DataVisTimeFilters />
       <v-divider />
 
       <div class="mt-1">
-        <TSADatasetsTable @copy-state="copyStateToClipboard" />
+        <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import TSAFiltersDrawer from '@/components/TimeSeriesAnalyst/TSAFiltersDrawer.vue'
-import TSADatasetsTable from '@/components/TimeSeriesAnalyst/TSADatasetsTable.vue'
-import TSAVisualizationCard from '@/components/TimeSeriesAnalyst/TSAVisualizationCard.vue'
-import TSATimeFilters from '@/components/TimeSeriesAnalyst/TSATimeFilters.vue'
+import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawer.vue'
+import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
+import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
+import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { api } from '@/services/api'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { Snackbar } from '@/utils/notifications'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 const route = useRoute()
 
-const { setDateRange, resetTSAState } = useTSAStore()
+const { setDateRange, resetState } = useDataVisStore()
 const {
   things,
   selectedThings,
@@ -49,14 +49,14 @@ const {
   dataZoomStart,
   dataZoomEnd,
   selectedDateBtnId,
-} = storeToRefs(useTSAStore())
+} = storeToRefs(useDataVisStore())
 
 const generateStateUrl = () => {
   const BASE_URL = `${
     import.meta.env.MODE === 'development'
       ? 'http://127.0.0.1:5173'
       : import.meta.env.VITE_APP_PROXY_BASE_URL
-  }/time-series-analyst/`
+  }/visualize-data/`
 
   const queryParams = new URLSearchParams()
 
@@ -172,6 +172,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  resetTSAState()
+  resetState()
 })
 </script>

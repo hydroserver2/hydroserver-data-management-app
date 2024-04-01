@@ -1,7 +1,7 @@
 import { EChartsOption, YAXisComponentOption, SeriesOption } from 'echarts'
 import { GraphSeries } from '@/types'
 import { storeToRefs } from 'pinia'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 
 type yAxisConfigurationMap = Map<
   string,
@@ -71,7 +71,7 @@ export function generateSeriesOptions(
 }
 
 export function generateToolboxOptions() {
-  const { showSummaryStatistics } = storeToRefs(useTSAStore())
+  const { showSummaryStatistics } = storeToRefs(useDataVisStore())
   return {
     feature: {
       mySummaryStatistics: {
@@ -92,7 +92,7 @@ export function generateToolboxOptions() {
 }
 
 export function generateDataZoomOptions() {
-  const { dataZoomStart, dataZoomEnd } = storeToRefs(useTSAStore())
+  const { dataZoomStart, dataZoomEnd } = storeToRefs(useDataVisStore())
   return [
     {
       type: 'slider', // Creates a 'brush/context' zoom window

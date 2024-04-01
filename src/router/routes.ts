@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router'
 
-
-const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
+const disableAccountCreation =
+  import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -96,9 +96,9 @@ export const routes: RouteRecordRaw[] = [
     name: 'SignUp',
     component: () => {
       if (disableAccountCreation === 'true') {
-        return import('@/pages/PageNotFound.vue');
+        return import('@/pages/PageNotFound.vue')
       } else {
-        return import('@/pages/account/Signup.vue');
+        return import('@/pages/account/Signup.vue')
       }
     },
     meta: {
@@ -170,17 +170,17 @@ export const routes: RouteRecordRaw[] = [
     meta: { hasAuthGuard: true },
   },
   {
-    path: '/time-series-analyst/:thingId?',
-    name: 'TimeSeriesAnalyst',
-    component: () => import('@/pages/TimeSeriesAnalyst.vue'),
+    path: '/visualize-data/:thingId?',
+    name: 'VisualizeData',
+    component: () => import('@/pages/VisualizeData.vue'),
     meta: {
-      title: 'TSA',
+      title: 'VisualizeData',
       hideFooter: true,
       isFullScreen: true,
       metaTags: [
         {
           name: 'keywords',
-          content: 'HydroServer, Time Series Analyst',
+          content: 'HydroServer, Data Visualization',
         },
       ],
     },
