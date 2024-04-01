@@ -65,6 +65,8 @@ export function generateSeriesOptions(
     itemStyle: {
       color: series.lineColor,
     },
+    sampling: 'lttb',
+    showSymbol: false,
   }))
 }
 
