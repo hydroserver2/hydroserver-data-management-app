@@ -59,7 +59,7 @@
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row class="mb-6">
       <v-col cols="12" md="8">
         <SiteDetailsTable :thing-id="thingId" />
       </v-col>
@@ -85,7 +85,6 @@
 
     <DatastreamTable
       v-if="thing"
-      class="my-6"
       :is-owner="thing.ownsThing"
       :thing-id="thingId"
     />

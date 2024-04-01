@@ -56,11 +56,16 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="loaded[item.id]">
+      <v-progress-linear
+        v-if="observations[item.id]?.loading"
+        color="secondary"
+        indeterminate
+      />
+      <div v-else>
         <div v-if="!isOwner && !item.isDataVisible">
           Data is private for this datastream
         </div>
-        <div v-else-if="observations[item.id]">
+        <div v-else-if="observations[item.id]?.dataArray?.length">
           <v-dialog v-model="item.chartOpen" width="80rem">
             <FocusContextPlot
               :thing-name="thing?.name || 'Site'"
@@ -70,22 +75,26 @@
           </v-dialog>
           <Sparkline
             @click="item.chartOpen = true"
-            :observations="observations[item.id]"
+            :observations="observations[item.id]?.dataArray"
             :datastream="item"
           />
         </div>
         <div v-else>No data for this datastream</div>
       </div>
-      <v-progress-linear v-else color="secondary" indeterminate />
     </template>
 
     <template v-slot:item.last_observation="{ item }">
-      <div v-if="mostRecentObs[item.id] && (isOwner || item.isDataVisible)">
+      <div
+        v-if="
+          observations[item.id]?.dataArray?.length &&
+          (isOwner || item.isDataVisible)
+        "
+      >
         <v-row>
-          {{ formatDate(mostRecentObs[item.id][0]) }}
+          {{ getMostRecentObsTime(observations[item.id].dataArray) }}
         </v-row>
         <v-row>
-          {{ mostRecentObs[item.id][1] }}&nbsp;
+          {{ getMostRecentObsVal(observations[item.id].dataArray) }}&nbsp;
           {{ units.find((u) => u.id === item.unitId)?.name }}
         </v-row>
       </div>
@@ -108,16 +117,16 @@
 
 <script setup lang="ts">
 import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
-
+import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
-import { useObservationsLast72Hours } from '@/store/observations72Hours'
+import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
-import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 import { api } from '@/services/api'
-import { Datastream } from '@/types'
+import { DataArray, Datastream } from '@/types'
+import { subtractHours } from '@/utils/observationsUtils'
 
 const props = defineProps({
   thingId: {
@@ -130,10 +139,9 @@ const props = defineProps({
   },
 })
 
-const { fetchObservationsBulk } = useObservationsLast72Hours()
-const { loaded, observations, mostRecentObs } = storeToRefs(
-  useObservationsLast72Hours()
-)
+const { fetchObservationsInRange } = useObservationStore()
+const { observations } = storeToRefs(useObservationStore())
+
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
 const actionKey = ref(1)
@@ -141,6 +149,34 @@ const actionKey = ref(1)
 const { sensors, units, observedProperties, processingLevels } = useMetadata(
   props.thingId
 )
+
+const getMostRecentObsTime = (dataArray: DataArray) => {
+  if (!dataArray.length) return undefined
+  return formatDate(dataArray[dataArray.length - 1][0])
+}
+
+const getMostRecentObsVal = (dataArray: DataArray) => {
+  if (!dataArray.length) return undefined
+  return formatNumber(dataArray[dataArray.length - 1][1])
+}
+
+function formatDate(dateString: string) {
+  return (
+    new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
+  )
+}
+
+const formatNumber = (value: string | number): string => {
+  if (typeof value === 'number') {
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+    return formatter.format(value)
+  }
+
+  return value?.toString()
+}
 
 const visibleDatastreams = computed(() => {
   return datastreams.value
@@ -171,12 +207,6 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-function formatDate(dateString: string) {
-  return (
-    new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
-  )
-}
-
 function onDeleteDatastream(id: string) {
   datastreams.value = datastreams.value.filter((ds) => ds.id !== id)
 }
@@ -190,8 +220,25 @@ const loadDatastreams = async () => {
   }
 }
 
+const fetchObsLast72Hours = async (datastreams: Datastream[]) => {
+  await Promise.all(
+    datastreams.map(async (ds) => {
+      const { phenomenonEndTime: endTime } = ds
+      if (endTime) {
+        const beginTime = subtractHours(endTime, 72)
+        await fetchObservationsInRange(ds, beginTime, endTime).catch(
+          (error) => {
+            console.error('Failed to fetch observations:', error)
+            return null
+          }
+        )
+      }
+    })
+  )
+}
+
 onMounted(async () => {
   await loadDatastreams()
-  await fetchObservationsBulk(visibleDatastreams.value)
+  await fetchObsLast72Hours(visibleDatastreams.value)
 })
 </script>
