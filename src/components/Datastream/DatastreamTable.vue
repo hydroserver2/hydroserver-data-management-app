@@ -56,30 +56,18 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <v-progress-linear
-        v-if="observations[item.id]?.loading"
-        color="secondary"
-        indeterminate
-      />
+      <div v-if="!isOwner && !item.isDataVisible">
+        Data is private for this datastream
+      </div>
       <div v-else>
-        <div v-if="!isOwner && !item.isDataVisible">
-          Data is private for this datastream
-        </div>
-        <div v-else-if="observations[item.id]?.dataArray?.length">
-          <v-dialog v-model="item.chartOpen" width="80rem">
-            <FocusContextPlot
-              :thing-name="thing?.name || 'Site'"
-              :datastream="item"
-              @close="item.chartOpen = false"
-            />
-          </v-dialog>
-          <Sparkline
-            @click="item.chartOpen = true"
-            :observations="observations[item.id]?.dataArray"
+        <v-dialog v-model="item.chartOpen" width="80rem">
+          <FocusContextPlot
+            :thing-name="thing?.name || 'Site'"
             :datastream="item"
+            @close="item.chartOpen = false"
           />
-        </div>
-        <div v-else>No data for this datastream</div>
+        </v-dialog>
+        <Sparkline :datastream="item" @open-chart="item.chartOpen = true" />
       </div>
     </template>
 
@@ -126,7 +114,6 @@ import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
 import { DataArray, Datastream } from '@/types'
-import { subtractHours } from '@/utils/observationsUtils'
 
 const props = defineProps({
   thingId: {
@@ -139,7 +126,6 @@ const props = defineProps({
   },
 })
 
-const { fetchObservationsInRange } = useObservationStore()
 const { observations } = storeToRefs(useObservationStore())
 
 const { thing } = storeToRefs(useThingStore())
@@ -220,25 +206,7 @@ const loadDatastreams = async () => {
   }
 }
 
-const fetchObsLast72Hours = async (datastreams: Datastream[]) => {
-  await Promise.all(
-    datastreams.map(async (ds) => {
-      const { phenomenonEndTime: endTime } = ds
-      if (endTime) {
-        const beginTime = subtractHours(endTime, 72)
-        await fetchObservationsInRange(ds, beginTime, endTime).catch(
-          (error) => {
-            console.error('Failed to fetch observations:', error)
-            return null
-          }
-        )
-      }
-    })
-  )
-}
-
 onMounted(async () => {
   await loadDatastreams()
-  await fetchObsLast72Hours(visibleDatastreams.value)
 })
 </script>
