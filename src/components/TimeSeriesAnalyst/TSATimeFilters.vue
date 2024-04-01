@@ -13,14 +13,14 @@
       </v-btn>
     </v-col>
 
-    <v-col>
+    <v-col cols="6" sm="3">
       <DatePickerField
         :model-value="beginDate"
         placeholder="Begin Date"
         @update:model-value="handleCustomDateSelection('begin', $event)"
       />
     </v-col>
-    <v-col>
+    <v-col cols="6" sm="3">
       <DatePickerField
         :model-value="endDate"
         placeholder="End Date"

@@ -83,8 +83,11 @@ export const useTSAStore = defineStore('TSAStore', () => {
   const dateOptions = ref([
     {
       id: 0,
-      label: 'All',
-      calculateBeginDate: () => new Date('1850-01-01'),
+      label: 'Last Year',
+      calculateBeginDate: () => {
+        const now = new Date()
+        return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+      },
     },
     {
       id: 1,
