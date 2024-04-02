@@ -78,7 +78,10 @@
           v-if="datastream.isDataVisible"
           prepend-icon="mdi-chart-line"
           title="View Time Series Plot"
-          @click="emit('openPlot')"
+          :to="{
+            name: 'VisualizeData',
+            query: { sites: thingId, datastreams: datastream.id },
+          }"
         />
         <v-list-item
           v-if="datastream.isDataVisible"
@@ -149,7 +152,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['openPlot', 'deleted', 'linkUpdated'])
+const emit = defineEmits(['deleted', 'linkUpdated'])
 const handleLinkUpdated = (patchBody: {}) => emit('linkUpdated', patchBody)
 
 const openDelete = ref(false)

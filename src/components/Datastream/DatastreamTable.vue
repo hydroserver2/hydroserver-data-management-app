@@ -94,7 +94,6 @@
         :datastream="item"
         :is-owner="isOwner"
         :thing-id="thingId"
-        @openPlot="item.chartOpen = true"
         @deleted="onDeleteDatastream(item.id)"
         @linkUpdated="loadDatastreams"
       />

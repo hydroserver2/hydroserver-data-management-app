@@ -21,6 +21,20 @@
         @click="updateState(selection.value)"
         >{{ selection.label }}</v-btn
       >
+      <v-btn
+        color="grey"
+        :to="{
+          name: 'VisualizeData',
+          query: {
+            sites: datastream.thingId,
+            datastreams: datastream.id,
+            beginDate: beginTime,
+            endDate: endTime,
+          },
+        }"
+      >
+        Visualization Page
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -46,8 +60,9 @@ const emit = defineEmits(['close'])
 const option = ref<EChartsOption | undefined>()
 const graphSeriesArray = ref<GraphSeries[]>([])
 const updating = ref(false)
-const endTime = props.datastream.phenomenonEndTime!
 const selectedTime = ref(72)
+const endTime = ref(props.datastream.phenomenonEndTime!)
+let beginTime = ref(subtractHours(endTime.value, selectedTime.value))
 
 const timeSelections = [
   { label: 'Last 72 Hours', value: 72 },
@@ -59,12 +74,12 @@ const timeSelections = [
 const updateState = async (hours?: number) => {
   updating.value = true
   selectedTime.value = hours || 72
-  let beginTime = subtractHours(endTime, selectedTime.value)
+  beginTime.value = subtractHours(endTime.value, selectedTime.value)
 
   graphSeriesArray.value = await fetchGraphSeries(
     [props.datastream],
-    beginTime,
-    endTime
+    beginTime.value,
+    endTime.value
   )
 
   option.value = createEChartsOption(graphSeriesArray.value, {
