@@ -17,6 +17,8 @@
       <v-expansion-panel title="Sites">
         <v-expansion-panel-text>
           <v-text-field
+            clearable
+            @click:clear="searchThing = ''"
             v-model="searchThing"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -26,7 +28,7 @@
 
           <v-virtual-scroll
             :items="sortedThings"
-            :height="sortedThings.length < 6 ? sortedThings.length * 40 : 250"
+            :height="sortedThings.length < 6 ? 'auto' : 250"
           >
             <template #default="{ item, index }">
               <v-checkbox
@@ -45,6 +47,8 @@
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-text-field
+            clearable
+            @click:clear="searchObservedProperty = ''"
             v-model="searchObservedProperty"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -54,11 +58,7 @@
 
           <v-virtual-scroll
             :items="sortedObservedPropertyNames"
-            :height="
-              sortedObservedPropertyNames.length < 6
-                ? sortedObservedPropertyNames.length * 40
-                : 250
-            "
+            :height="sortedObservedPropertyNames.length < 6 ? 'auto' : 250"
           >
             <template #default="{ item }">
               <v-checkbox
@@ -76,6 +76,8 @@
       <v-expansion-panel title="Processing Levels">
         <v-expansion-panel-text>
           <v-text-field
+            clearable
+            @click:clear="searchProcessingLevel = ''"
             v-model="searchProcessingLevel"
             prepend-inner-icon="mdi-magnify"
             label="Search"
@@ -85,11 +87,7 @@
 
           <v-virtual-scroll
             :items="sortedProcessingLevelNames"
-            :height="
-              sortedProcessingLevelNames.length < 6
-                ? sortedProcessingLevelNames.length * 40
-                : 250
-            "
+            :height="sortedProcessingLevelNames.length < 6 ? 'auto' : 250"
           >
             <template #default="{ item }">
               <v-checkbox
@@ -112,16 +110,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 
 const {
   matchesSelectedObservedProperty,
   matchesSelectedProcessingLevel,
   matchesSelectedThing,
-} = useTSAStore()
+} = useDataVisStore()
 const {
   things,
   datastreams,
@@ -130,7 +128,7 @@ const {
   selectedThings,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
-} = storeToRefs(useTSAStore())
+} = storeToRefs(useDataVisStore())
 
 const searchThing = ref('')
 const searchObservedProperty = ref('')
@@ -186,6 +184,31 @@ const sortedObservedPropertyNames = computed(() => {
 
   const names = filteredProperties.map((pl) => pl.name)
   return [...new Set(names)].sort()
+})
+
+// Watchers to handle deselection of hidden items
+watch(sortedThings, (newVal, oldVal) => {
+  if (newVal.length < oldVal.length) {
+    selectedThings.value = selectedThings.value.filter((selectedThing) =>
+      newVal.some((thing) => thing.id === selectedThing.id)
+    )
+  }
+})
+
+watch(sortedObservedPropertyNames, (newVal, oldVal) => {
+  if (newVal.length < oldVal.length) {
+    selectedObservedPropertyNames.value =
+      selectedObservedPropertyNames.value.filter((name) =>
+        newVal.includes(name)
+      )
+  }
+})
+
+watch(sortedProcessingLevelNames, (newVal, oldVal) => {
+  if (newVal.length < oldVal.length) {
+    selectedProcessingLevelNames.value =
+      selectedProcessingLevelNames.value.filter((name) => newVal.includes(name))
+  }
 })
 
 const clearFilters = () => {

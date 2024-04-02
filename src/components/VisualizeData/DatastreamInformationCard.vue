@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { Datastream, Owner, Unit } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
@@ -107,7 +107,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const { processingLevels, observedProperties, things, selectedDatastreams } =
-  storeToRefs(useTSAStore())
+  storeToRefs(useDataVisStore())
 
 const addToPlot = (datastream: Datastream) => {
   const index = selectedDatastreams.value.findIndex(

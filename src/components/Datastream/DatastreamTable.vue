@@ -1,6 +1,32 @@
 <template>
+  <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
+
+  <v-row class="pb-4">
+    <v-col cols="auto" v-if="thing?.ownsThing">
+      <v-btn-secondary
+        prependIcon="mdi-plus"
+        variant="elevated"
+        :to="{ name: 'DatastreamForm', params: { id: thingId } }"
+        >Add New Datastream</v-btn-secondary
+      >
+    </v-col>
+    <v-col v-if="datastreams.length">
+      <v-btn
+        color="blue-grey-lighten-2"
+        prependIcon="mdi-chart-line"
+        variant="elevated"
+        :to="{ name: 'VisualizeData', query: { sites: thingId } }"
+        >View on Data Visualization Page</v-btn
+      >
+    </v-col>
+  </v-row>
+
+  <h6 class="text-h6" style="color: #b71c1c">
+    {{ thing?.dataDisclaimer }}
+  </h6>
+
   <v-data-table
-    class="elevation-3"
+    class="elevation-3 my-4"
     :headers="headers"
     :items="visibleDatastreams"
     v-model:sort-by="sortBy"
@@ -30,36 +56,32 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="loaded[item.id]">
-        <div v-if="!isOwner && !item.isDataVisible">
-          Data is private for this datastream
-        </div>
-        <div v-else-if="observations[item.id]">
-          <v-dialog v-model="item.chartOpen" width="80rem">
-            <FocusContextPlot
-              :thing-name="thing?.name || 'Site'"
-              :datastream="item"
-              @close="item.chartOpen = false"
-            />
-          </v-dialog>
-          <Sparkline
-            @click="item.chartOpen = true"
-            :observations="observations[item.id]"
-            :datastream="item"
-          />
-        </div>
-        <div v-else>No data for this datastream</div>
+      <div v-if="!isOwner && !item.isDataVisible">
+        Data is private for this datastream
       </div>
-      <v-progress-linear v-else color="secondary" indeterminate />
+      <div v-else>
+        <v-dialog v-model="item.chartOpen" width="80rem">
+          <DataVisPopupPlot
+            :datastream="item"
+            @close="item.chartOpen = false"
+          />
+        </v-dialog>
+        <Sparkline :datastream="item" @open-chart="item.chartOpen = true" />
+      </div>
     </template>
 
     <template v-slot:item.last_observation="{ item }">
-      <div v-if="mostRecentObs[item.id] && (isOwner || item.isDataVisible)">
+      <div
+        v-if="
+          observations[item.id]?.dataArray?.length &&
+          (isOwner || item.isDataVisible)
+        "
+      >
         <v-row>
-          {{ formatDate(mostRecentObs[item.id][0]) }}
+          {{ getMostRecentObsTime(observations[item.id].dataArray) }}
         </v-row>
         <v-row>
-          {{ mostRecentObs[item.id][1] }}&nbsp;
+          {{ getMostRecentObsVal(observations[item.id].dataArray) }}&nbsp;
           {{ units.find((u) => u.id === item.unitId)?.name }}
         </v-row>
       </div>
@@ -72,7 +94,6 @@
         :datastream="item"
         :is-owner="isOwner"
         :thing-id="thingId"
-        @openPlot="item.chartOpen = true"
         @deleted="onDeleteDatastream(item.id)"
         @linkUpdated="loadDatastreams"
       />
@@ -81,17 +102,16 @@
 </template>
 
 <script setup lang="ts">
-import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
-
+import DataVisPopupPlot from '@/components/VisualizeData/DataVisPopupPlot.vue'
+import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
-import { useObservationsLast72Hours } from '@/store/observations72Hours'
+import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
-import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 import { api } from '@/services/api'
-import { Datastream } from '@/types'
+import { DataArray, Datastream } from '@/types'
 
 const props = defineProps({
   thingId: {
@@ -104,10 +124,8 @@ const props = defineProps({
   },
 })
 
-const { fetchObservationsBulk } = useObservationsLast72Hours()
-const { loaded, observations, mostRecentObs } = storeToRefs(
-  useObservationsLast72Hours()
-)
+const { observations } = storeToRefs(useObservationStore())
+
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
 const actionKey = ref(1)
@@ -115,6 +133,34 @@ const actionKey = ref(1)
 const { sensors, units, observedProperties, processingLevels } = useMetadata(
   props.thingId
 )
+
+const getMostRecentObsTime = (dataArray: DataArray) => {
+  if (!dataArray.length) return undefined
+  return formatDate(dataArray[dataArray.length - 1][0])
+}
+
+const getMostRecentObsVal = (dataArray: DataArray) => {
+  if (!dataArray.length) return undefined
+  return formatNumber(dataArray[dataArray.length - 1][1])
+}
+
+function formatDate(dateString: string) {
+  return (
+    new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
+  )
+}
+
+const formatNumber = (value: string | number): string => {
+  if (typeof value === 'number') {
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+    return formatter.format(value)
+  }
+
+  return value?.toString()
+}
 
 const visibleDatastreams = computed(() => {
   return datastreams.value
@@ -145,12 +191,6 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-function formatDate(dateString: string) {
-  return (
-    new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
-  )
-}
-
 function onDeleteDatastream(id: string) {
   datastreams.value = datastreams.value.filter((ds) => ds.id !== id)
 }
@@ -166,6 +206,5 @@ const loadDatastreams = async () => {
 
 onMounted(async () => {
   await loadDatastreams()
-  await fetchObservationsBulk(visibleDatastreams.value)
 })
 </script>

@@ -37,6 +37,7 @@
   <v-toolbar flat color="secondary">
     <v-text-field
       class="mx-2"
+      clearable
       v-model="search"
       prepend-inner-icon="mdi-magnify"
       label="Search"
@@ -91,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { Datastream } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
@@ -104,7 +105,7 @@ const {
   selectedDatastreams,
   observedProperties,
   processingLevels,
-} = storeToRefs(useTSAStore())
+} = storeToRefs(useDataVisStore())
 
 const emit = defineEmits(['copyState'])
 

@@ -28,10 +28,10 @@
 <script setup lang="ts">
 import { SummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { storeToRefs } from 'pinia'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import { useDataVisStore } from '@/store/dataVisualization'
 
 const { showSummaryStatistics, summaryStatisticsArray } = storeToRefs(
-  useTSAStore()
+  useDataVisStore()
 )
 
 const formatNumber = (value: string | number): string => {

@@ -59,7 +59,7 @@
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row class="mb-6">
       <v-col cols="12" md="8">
         <SiteDetailsTable :thing-id="thingId" />
       </v-col>
@@ -83,35 +83,8 @@
       </v-col>
     </v-row>
 
-    <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
-
-    <v-row class="pb-4" v-if="isOwner">
-      <v-col cols="auto">
-        <v-btn-secondary
-          prependIcon="mdi-plus"
-          variant="elevated"
-          :to="{ name: 'DatastreamForm', params: { id: thingId } }"
-          >Add New Datastream</v-btn-secondary
-        >
-      </v-col>
-      <v-col>
-        <v-btn
-          color="blue-grey-lighten-2"
-          prependIcon="mdi-chart-line"
-          variant="elevated"
-          :to="{ name: 'TimeSeriesAnalyst', query: { sites: thingId } }"
-          >View on Time Series Analyst</v-btn
-        >
-      </v-col>
-    </v-row>
-
-    <h6 class="text-h6" style="color: #b71c1c">
-      {{ thing?.dataDisclaimer }}
-    </h6>
-
     <DatastreamTable
       v-if="thing"
-      class="my-4"
       :is-owner="thing.ownsThing"
       :thing-id="thingId"
     />

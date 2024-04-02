@@ -13,14 +13,14 @@
       </v-btn>
     </v-col>
 
-    <v-col>
+    <v-col cols="6" sm="3">
       <DatePickerField
         :model-value="beginDate"
         placeholder="Begin Date"
         @update:model-value="handleCustomDateSelection('begin', $event)"
       />
     </v-col>
-    <v-col>
+    <v-col cols="6" sm="3">
       <DatePickerField
         :model-value="endDate"
         placeholder="End Date"
@@ -31,14 +31,14 @@
 </template>
 
 <script setup lang="ts">
-import DatePickerField from '@/components/TimeSeriesAnalyst/DatePickerField.vue'
-import { useTSAStore } from '@/store/timeSeriesAnalyst'
+import DatePickerField from '@/components/VisualizeData/DatePickerField.vue'
+import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 
-const { setDateRange } = useTSAStore()
+const { setDateRange } = useDataVisStore()
 
 const { dateOptions, beginDate, endDate, selectedDateBtnId } = storeToRefs(
-  useTSAStore()
+  useDataVisStore()
 )
 
 const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
