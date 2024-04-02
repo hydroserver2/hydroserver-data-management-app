@@ -105,32 +105,33 @@ export function generateDataZoomOptions() {
   ]
 }
 
+interface CustomOptions {
+  addToolbox: boolean
+  initializeZoomed: boolean
+  addLegend: boolean
+}
+
 export const createEChartsOption = (
   seriesArray: GraphSeries[],
-  addToolbox: boolean = true,
-  initializeZoomed: boolean = true
+  opts: Partial<CustomOptions> = {}
 ): EChartsOption => {
+  const { addToolbox = true, initializeZoomed = true, addLegend = true } = opts
+
   const yAxisConfigurations = createYAxisConfigurations(seriesArray)
   const yAxisOptions = generateYAxisOptions(yAxisConfigurations)
   const seriesOptions = generateSeriesOptions(seriesArray, yAxisConfigurations)
-  const toolboxOptions = addToolbox ? generateToolboxOptions() : {}
 
   let gridRightPadding = 20
   if (yAxisConfigurations.size > 1)
     gridRightPadding += (yAxisConfigurations.size - 1) * 85
 
-  return {
-    legend: {
-      orient: 'vertical',
-      left: 'auto',
-    },
+  let echartsOption: EChartsOption = {
     grid: {
       bottom: 80,
       right: gridRightPadding,
       top: 50 + 15 * seriesArray.length,
       left: 80,
     },
-    toolbox: toolboxOptions,
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -157,4 +158,17 @@ export const createEChartsOption = (
           },
         ],
   }
+
+  if (addToolbox) {
+    echartsOption.toolbox = generateToolboxOptions() as {}
+  }
+
+  if (addLegend) {
+    echartsOption.legend = {
+      orient: 'vertical',
+      left: 'auto',
+    }
+  }
+
+  return echartsOption
 }

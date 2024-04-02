@@ -60,10 +60,7 @@
 
 <script setup lang="ts">
 import { ref, PropType, watch } from 'vue'
-import { Datastream } from '@/types'
-import { preProcessData } from '@/utils/observationsUtils'
-import { api } from '@/services/api'
-import { GraphSeries } from '@/types'
+import { Datastream, GraphSeries } from '@/types'
 import { EChartsOption } from 'echarts'
 import 'echarts'
 import VChart from 'vue-echarts'
@@ -73,10 +70,8 @@ import { calculateSummaryStatistics } from '@/utils/plotting/summaryStatisticUti
 import { storeToRefs } from 'pinia'
 import { useDataVisStore } from '@/store/dataVisualization'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
-import { useObservationStore } from '@/store/observations'
-import { Snackbar } from '@/utils/notifications'
+import { fetchGraphSeries } from '@/utils/plotting/graphSeriesUtils'
 
-const { fetchObservationsInRange } = useObservationStore()
 const {
   showSummaryStatistics,
   summaryStatisticsArray,
@@ -117,62 +112,6 @@ function handleDataZoom(event: any) {
   }
   dataZoomStart.value = start
   dataZoomEnd.value = end
-}
-
-const fetchGraphSeries = async (
-  datastreams: Datastream[],
-  start: string,
-  end: string
-) => {
-  const updatedGraphSeries: GraphSeries[] = await Promise.all(
-    datastreams.map(async (ds, index) => {
-      const observationsPromise = fetchObservationsInRange(
-        ds,
-        start,
-        end
-      ).catch((error) => {
-        Snackbar.error('Failed to fetch observations')
-        console.error('Failed to fetch observations:', error)
-        updating.value = false
-        return null
-      })
-      const fetchUnitPromise = api.getUnit(ds.unitId).catch((error) => {
-        console.error('Failed to fetch Unit:', error)
-        return null
-      })
-      const fetchObservedPropertyPromise = api
-        .fetchObservedProperty(ds.observedPropertyId)
-        .catch((error) => {
-          console.error('Failed to fetch ObservedProperty:', error)
-          return null
-        })
-
-      const [observations, unit, observedProperty] = await Promise.all([
-        observationsPromise,
-        fetchUnitPromise,
-        fetchObservedPropertyPromise,
-      ])
-
-      const processedData = preProcessData(observations, ds)
-
-      const yAxisLabel =
-        observedProperty && unit
-          ? `${observedProperty.name} (${unit.symbol})`
-          : 'Unknown'
-
-      const lineColor = EChartsColors[index % EChartsColors.length]
-
-      return {
-        id: ds.id,
-        name: ds.name,
-        data: processedData,
-        yAxisLabel,
-        lineColor,
-      }
-    })
-  )
-
-  return updatedGraphSeries
 }
 
 const prevDatastreamIds = ref<string[]>([])

@@ -45,7 +45,6 @@ const props = defineProps({
 
 const emit = defineEmits(['openChart'])
 const handleEmit = () => {
-  console.log('handling emit')
   emit('openChart')
 }
 

@@ -61,8 +61,7 @@
       </div>
       <div v-else>
         <v-dialog v-model="item.chartOpen" width="80rem">
-          <FocusContextPlot
-            :thing-name="thing?.name || 'Site'"
+          <DataVisPopupPlot
             :datastream="item"
             @close="item.chartOpen = false"
           />
@@ -104,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import FocusContextPlot from '@/components/Datastream/FocusContextPlot.vue'
+import DataVisPopupPlot from '@/components/VisualizeData/DataVisPopupPlot.vue'
 import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, onMounted, ref } from 'vue'
