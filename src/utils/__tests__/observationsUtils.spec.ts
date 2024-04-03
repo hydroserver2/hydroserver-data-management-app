@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  subtractHours,
-  calculateEffectiveStartTime,
-  preProcessData,
-} from '@/utils/observationsUtils'
+import { subtractHours, preProcessData } from '@/utils/observationsUtils'
 import { DataArray, Datastream } from '@/types'
 
 describe('subtractHours', () => {
@@ -12,18 +8,6 @@ describe('subtractHours', () => {
     const hours = 5
     const expected = '2022-01-01T05:00:00.000Z'
     expect(subtractHours(timestamp, hours)).toBe(expected)
-  })
-})
-
-describe('calculateEffectiveStartTime', () => {
-  it('returns the effective start time based on datastream begin time and hours before', () => {
-    const datastreamBeginTime = '2022-01-01T00:00:00Z'
-    const endTime = '2022-01-02T00:00:00Z'
-    const hoursBefore = 12
-    const expected = '2022-01-01T12:00:00.000Z'
-    expect(
-      calculateEffectiveStartTime(datastreamBeginTime, endTime, hoursBefore)
-    ).toBe(expected)
   })
 })
 
