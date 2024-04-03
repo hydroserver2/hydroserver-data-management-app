@@ -58,7 +58,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const option = ref<EChartsOption | undefined>()
-const graphSeriesArray = ref<GraphSeries[]>([])
+const graphSeries = ref<GraphSeries | undefined>()
 const updating = ref(false)
 const selectedTime = ref(72)
 const endTime = ref(props.datastream.phenomenonEndTime!)
@@ -76,13 +76,13 @@ const updateState = async (hours?: number) => {
   selectedTime.value = hours || 72
   beginTime.value = subtractHours(endTime.value, selectedTime.value)
 
-  graphSeriesArray.value = await fetchGraphSeries(
-    [props.datastream],
+  graphSeries.value = await fetchGraphSeries(
+    props.datastream,
     beginTime.value,
     endTime.value
   )
 
-  option.value = createEChartsOption(graphSeriesArray.value, {
+  option.value = createEChartsOption([graphSeries.value], {
     addLegend: false,
     addToolbox: false,
     initializeZoomed: false,

@@ -7,26 +7,6 @@ export function subtractHours(timestamp: string, hours: number): string {
   return date.toISOString()
 }
 
-export async function fetchObservations(
-  id: string,
-  startTime: string,
-  endTime?: string
-) {
-  let allData: DataArray = []
-  const pageSize = 100_000
-  let nextLink = getObservationsEndpoint(id, pageSize, startTime, endTime)
-
-  while (nextLink) {
-    const data = await api.fetchObservations(nextLink)
-    if (data.value && data.value[0] && data.value[0].dataArray) {
-      allData = allData.concat(data.value[0].dataArray)
-    }
-    nextLink = data['@iot.nextLink'] || null
-  }
-
-  return allData
-}
-
 export const fetchObservationsParallel = async (
   datastream: Datastream,
   startTime: string | null = null,

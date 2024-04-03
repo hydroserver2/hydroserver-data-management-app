@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, watch } from 'vue'
+import { ref, PropType, watch, computed } from 'vue'
 import { Datastream, GraphSeries } from '@/types'
 import { EChartsOption } from 'echarts'
 import 'echarts'
@@ -81,18 +81,33 @@ const {
 
 const graphSeriesArray = ref<GraphSeries[]>([])
 const option = ref<EChartsOption | undefined>()
+// State to track loading status of individual datasets
+const loadingStates = ref(new Map<string, boolean>())
+// the overall updating state based on individual loading states
+const updating = computed(() => {
+  return Array.from(loadingStates.value.values()).some((isLoading) => isLoading)
+})
 
 const props = defineProps({
   datastreams: {
     type: Array as PropType<Datastream[]>,
     required: true,
   },
-  beginDate: Date,
-  endDate: Date,
+  beginDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
 })
 
-function renderPlot() {
+function updateVisualization() {
+  graphSeriesArray.value.forEach((series, index) => {
+    series.lineColor = EChartsColors[index % EChartsColors.length]
+  })
+
+  summaryStatisticsArray.value = calculateSummaryStatistics(
+    graphSeriesArray.value
+  )
+
   option.value = createEChartsOption(graphSeriesArray.value)
+  prevIds.value = graphSeriesArray.value.map((series) => series.id)
 }
 
 function handleDataZoom(event: any) {
@@ -114,102 +129,92 @@ function handleDataZoom(event: any) {
   dataZoomEnd.value = end
 }
 
-const prevDatastreamIds = ref<string[]>([])
-const prevBeginDate = ref<string>('')
-const prevEndDate = ref<string>('')
-const isStateChanged = ref(true)
+const prevIds = ref<string[]>([])
 
-const updateState = async (
-  datastreams: Datastream[],
-  beginDate: Date,
-  endDate: Date
-) => {
-  updating.value = true
-  const start = beginDate.toISOString()
-  const end = endDate.toISOString()
-
-  const isDateRangeChanged =
-    prevBeginDate.value !== start || prevEndDate.value !== end
-
-  // Identify new and removed datastreams
+const updateDatasets = async (datastreams: Datastream[]) => {
   const currentIds = datastreams.map((ds) => ds.id)
+  const newIds = currentIds.filter((id) => !prevIds.value.includes(id))
+  const removedIds = prevIds.value.filter((id) => !currentIds.includes(id))
 
-  const newIds = currentIds.filter(
-    (id) => !prevDatastreamIds.value.includes(id)
-  )
-  const removedIds = prevDatastreamIds.value.filter(
-    (id) => !currentIds.includes(id)
-  )
-
-  isStateChanged.value =
-    !!newIds.length || !!removedIds.length || isDateRangeChanged
-
-  // Directly remove graph series for datastreams that have been removed
+  // Remove old datasets & abort unresolved requests
   if (removedIds.length > 0) {
     graphSeriesArray.value = graphSeriesArray.value.filter(
       (series) => !removedIds.includes(series.id)
     )
+    // TODO: Abort requests that haven't come back yet
+    updateVisualization()
   }
 
-  // Determine if there are any new datastreams or if the date range has changed, requiring data fetching
-  if (newIds.length > 0 || isDateRangeChanged) {
-    const datastreamsToFetch = isDateRangeChanged
-      ? datastreams
-      : datastreams.filter((ds) => newIds.includes(ds.id))
+  // fetch new datasets
+  if (newIds.length > 0) {
+    fetchDatasets(datastreams.filter((ds) => newIds.includes(ds.id)))
+  }
+}
 
-    const newSeriesArray = await fetchGraphSeries(
-      datastreamsToFetch,
-      start,
-      end
+const fetchDatasets = (datastreams: Datastream[]) => {
+  datastreams.forEach((ds) => {
+    loadingStates.value.set(ds.id, true)
+    fetchGraphSeries(
+      ds,
+      props.beginDate.toISOString(),
+      props.endDate.toISOString()
     )
+      .then((newSeries) => {
+        if (!props.datastreams.some((selectedDs) => selectedDs.id === ds.id)) {
+          return
+        }
 
-    // If the date range has changed, replace all series. Otherwise, append new series.
-    if (isDateRangeChanged) {
-      graphSeriesArray.value = newSeriesArray
-    } else {
-      // Remove any existing series that match the new ones to avoid duplicates
-      graphSeriesArray.value = graphSeriesArray.value.filter(
-        (series) => !newIds.includes(series.id)
-      )
-      graphSeriesArray.value.push(...newSeriesArray)
-    }
-  }
+        graphSeriesArray.value = graphSeriesArray.value.filter(
+          (series) => series.id !== ds.id
+        )
 
-  // update colors
-  graphSeriesArray.value.forEach((series, index) => {
-    series.lineColor = EChartsColors[index % EChartsColors.length]
+        graphSeriesArray.value.push(newSeries)
+        updateVisualization()
+      })
+      .catch((error) => {
+        console.error(`Failed to fetch dataset ${ds.id}:`, error)
+      })
+      .finally(() => {
+        loadingStates.value.set(ds.id, false)
+      })
   })
-
-  console.log('graphSeriesArray', graphSeriesArray.value)
-  summaryStatisticsArray.value = calculateSummaryStatistics(
-    graphSeriesArray.value
-  )
-
-  prevBeginDate.value = start
-  prevEndDate.value = end
-  prevDatastreamIds.value = currentIds
-  updating.value = false
 }
 
 const clearState = () => {
   graphSeriesArray.value = []
-  prevDatastreamIds.value = []
+  prevIds.value = []
   showSummaryStatistics.value = false
   option.value = undefined
 }
 
-const updating = ref(false)
-
+let prevDatastreamIds = ''
 watch(
-  [() => props.datastreams, () => props.beginDate, () => props.endDate],
-  async ([newDatastreams, newBeginDate, newEndDate]) => {
-    if (!newBeginDate || !newEndDate || !newDatastreams.length) {
+  [() => props.datastreams],
+  ([newDs]) => {
+    const newDatastreamIds = JSON.stringify(newDs.map((ds) => ds.id).sort())
+
+    if (!newDs.length || !props.beginDate || !props.endDate) {
       clearState()
-    } else if (!updating.value) {
-      await updateState(newDatastreams, newBeginDate, newEndDate)
-      if (isStateChanged.value) renderPlot()
+    } else if (newDatastreamIds !== prevDatastreamIds) {
+      updateDatasets(newDs)
     }
+    prevDatastreamIds = newDatastreamIds
   },
   { deep: true, immediate: true }
+)
+
+watch(
+  [() => props.beginDate, () => props.endDate],
+  async ([newBeginDate, newEndDate], [oldBeginDate, oldEndDate]) => {
+    if (
+      newBeginDate.getTime() === oldBeginDate?.getTime() ||
+      newEndDate.getTime() === oldEndDate?.getTime()
+    )
+      return
+    clearState()
+    if (!newBeginDate || !newEndDate || !props.datastreams.length) return
+    updateDatasets(props.datastreams)
+  },
+  { deep: true }
 )
 </script>
