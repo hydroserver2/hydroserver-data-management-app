@@ -98,9 +98,7 @@
       You are not authorized to view this private site.
     </h5>
   </v-container>
-  <v-container v-else>
-    <h5 class="text-h5 my-4">Loading Site Details...</h5>
-  </v-container>
+  <FullScreenLoader v-else />
 </template>
 
 <script setup lang="ts">
@@ -119,6 +117,7 @@ import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import SiteHydroShareArchivalModal from '@/components/Site/SiteHydroShareArchivalModal.vue'
+import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
