@@ -1,14 +1,22 @@
 <template>
-  <v-btn-secondary
+  <v-btn
     v-if="!hydroShareConnected"
-    class="mr-6"
+    color="deep-orange-lighten-1"
+    prepend-icon="mdi-link"
     @click="OAuthLogin(OAuthProvider.hydroshare)"
   >
     Connect to HydroShare
-  </v-btn-secondary>
-  <v-btn-delete v-else class="mr-6" @click="disconnectFromHydroShare">
+  </v-btn>
+
+  <v-btn
+    v-else
+    color="deep-orange"
+    variant="outlined"
+    prepend-icon="mdi-close"
+    @click="disconnectFromHydroShare"
+  >
     Disconnect from HydroShare
-  </v-btn-delete>
+  </v-btn>
 </template>
 
 <script setup lang="ts">

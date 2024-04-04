@@ -23,18 +23,6 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="isOwner && hydroShareConnected">
-        <v-btn @click="isHydroShareArchiveModalOpen = true"
-          >Archive to HydroShare</v-btn
-        >
-        <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
-          <SiteHydroShareArchivalModal
-            @close="isHydroShareArchiveModalOpen = false"
-            :thing-id="thingId"
-          />
-        </v-dialog>
-      </v-col>
-
       <v-col cols="auto" v-if="isOwner">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit Site Information</v-btn
@@ -54,6 +42,22 @@
             @switch-to-access-control="switchToAccessControlModal"
             @close="isDeleteModalOpen = false"
             @delete="onDeleteThing"
+          />
+        </v-dialog>
+      </v-col>
+
+      <v-spacer />
+
+      <v-col cols="auto" v-if="isOwner && hydroShareConnected">
+        <v-btn
+          color="deep-orange-lighten-1"
+          @click="isHydroShareArchiveModalOpen = true"
+          >Configure HydroShare Archival</v-btn
+        >
+        <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
+          <SiteHydroShareArchivalModal
+            @close="isHydroShareArchiveModalOpen = false"
+            :thing-id="thingId"
           />
         </v-dialog>
       </v-col>
