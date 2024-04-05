@@ -55,7 +55,7 @@
           >Configure HydroShare Archival</v-btn
         >
         <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
-          <SiteHydroShareArchivalModal
+          <HydroShareFormCard
             @close="isHydroShareArchiveModalOpen = false"
             :thing-id="thingId"
           />
@@ -116,7 +116,7 @@ import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
-import SiteHydroShareArchivalModal from '@/components/Site/SiteHydroShareArchivalModal.vue'
+import HydroShareFormCard from '@/components/Site/HydroShareFormCard.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 
 const thingId = useRoute().params.id.toString()
