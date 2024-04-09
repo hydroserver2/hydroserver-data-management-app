@@ -174,6 +174,7 @@ import { hydroShareUrl, rules } from '@/utils/rules'
 import { useFormLogic } from '@/composables/useFormLogic'
 import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.vue'
 import { useHydroShareStore } from '@/store/hydroShare'
+import { Snackbar } from '@/utils/notifications'
 
 const emit = defineEmits(['close'])
 const { hydroShareArchive: archive, loading } = storeToRefs(
@@ -238,18 +239,30 @@ async function onSubmit() {
   try {
     loading.value = true
     emit('close')
+    Snackbar.info('Uploading site data to HydroShare. This may take a minute.')
     const newItem = await uploadItem()
     if (!newItem) return
     archive.value = newItem
   } catch (error) {
-    console.error('Error uploading unit', error)
+    Snackbar.error('Failed to upload site data to HydroShare')
+    console.error('Error archiving to HydroShare', error)
   } finally {
     loading.value = false
   }
 }
 
 const archiveThing = async () => {
-  await api.archiveToHydroShare(thing.value!.id)
+  try {
+    loading.value = true
+    emit('close')
+    Snackbar.info('Uploading site data to HydroShare. This may take a minute.')
+    await api.archiveToHydroShare(thing.value!.id)
+  } catch (error) {
+    Snackbar.error('Failed to upload site data to HydroShare')
+    console.error('Error archiving to HydroShare', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {
