@@ -38,7 +38,7 @@ import AccountForm from '@/components/account/AccountForm.vue'
 import UserInfoTable from '@/components/account/UserInfoTable.vue'
 import OrganizationTable from '@/components/account/OrganizationTable.vue'
 import DeleteAccountCard from '@/components/account/DeleteAccountCard.vue'
-import HydroShareConnectionButton from '@/components/account/HydroShareConnectionButton.vue'
+import HydroShareConnectionButton from '@/components/HydroShare/HydroShareConnectionButton.vue'
 
 const openDelete = ref(false)
 const openForm = ref(false)

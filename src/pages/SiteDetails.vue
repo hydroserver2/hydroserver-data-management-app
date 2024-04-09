@@ -113,7 +113,7 @@ import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
-import HydroShareFormCard from '@/components/Site/HydroShareFormCard.vue'
+import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { HydroShareArchive } from '@/types'
 
