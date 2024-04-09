@@ -51,14 +51,11 @@
       <v-col cols="auto" v-if="isOwner && hydroShareConnected">
         <v-btn
           color="deep-orange-lighten-1"
-          @click="isHydroShareArchiveModalOpen = true"
+          @click="isHydroShareModalOpen = true"
           >Configure HydroShare Archival</v-btn
         >
-        <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
-          <HydroShareFormCard
-            @close="isHydroShareArchiveModalOpen = false"
-            :thing-id="thingId"
-          />
+        <v-dialog v-model="isHydroShareModalOpen" width="60rem">
+          <HydroShareFormCard @close="isHydroShareModalOpen = false" />
         </v-dialog>
       </v-col>
     </v-row>
@@ -118,6 +115,7 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import HydroShareFormCard from '@/components/Site/HydroShareFormCard.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
+import { HydroShareArchive } from '@/types'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
@@ -126,6 +124,8 @@ const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
+const hydroShareArchive = ref<HydroShareArchive | null>(null)
+
 const isOwner = computed(() => thing.value?.ownsThing)
 const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
@@ -133,7 +133,7 @@ const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-const isHydroShareArchiveModalOpen = ref(false)
+const isHydroShareModalOpen = ref(false)
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
@@ -166,7 +166,9 @@ onMounted(async () => {
     .then((data) => (photos.value = data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
+    // TODO: fetch at the same time
     thing.value = await api.fetchThing(thingId)
+    hydroShareArchive.value = await api.fetchHydroShareArchive(thingId)
   } catch (error) {
     if (error instanceof Error && parseInt(error.message) === 403) {
       authorized.value = false
