@@ -78,17 +78,17 @@
 
           <div v-if="!linkToExistingAccount">
             <v-text-field
-              label="Resource Title"
+              label="Resource Title *"
               v-model="item.resourceTitle"
               :rules="rules.required"
             />
             <v-textarea
-              label="Resource Abstract"
+              label="Resource Abstract *"
               v-model="item.resourceAbstract"
               :rules="rules.required"
             />
             <v-combobox
-              label="Resource Keywords"
+              label="Resource Keywords *"
               v-model="item.resourceKeywords"
               multiple
               :rules="rules.minLength(1)"
@@ -112,14 +112,14 @@
         />
 
         <v-text-field
-          label="Resource Folder Name"
+          label="Resource Folder Name *"
           v-model="item.folderName"
           :rules="rules.required"
           class="mb-4"
         />
 
         <v-autocomplete
-          label="Included Datastreams"
+          label="Included Datastreams *"
           v-model="item.datastreamIds"
           :items="datastreams"
           :item-title="datastreamTitle"
