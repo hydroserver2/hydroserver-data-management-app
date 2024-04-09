@@ -52,8 +52,10 @@
         <v-btn
           color="deep-orange-lighten-1"
           @click="isHydroShareModalOpen = true"
-          >Configure HydroShare Archival</v-btn
+          :loading="hydroShareLoading"
         >
+          {{ archivalBtnName }}
+        </v-btn>
         <v-dialog v-model="isHydroShareModalOpen" width="60rem">
           <HydroShareFormCard
             :archive="hydroShareArchive || undefined"
@@ -118,20 +120,31 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
-import { PostHydroShareArchive } from '@/types'
+import { useHydroShareStore } from '@/store/hydroShare'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
+const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
+  useHydroShareStore()
+)
 
 const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
-const hydroShareArchive = ref<PostHydroShareArchive | null>(null)
 
 const isOwner = computed(() => thing.value?.ownsThing)
 const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
+
+const archivalBtnName = computed(() => {
+  const BASE_NAME = 'HydroShare Archival'
+  if (hydroShareArchive.value) {
+    if (hydroShareArchive.value.frequency)
+      return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
+    else return `${BASE_NAME} (manual)`
+  } else return `Configure ${BASE_NAME}`
+})
 
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)

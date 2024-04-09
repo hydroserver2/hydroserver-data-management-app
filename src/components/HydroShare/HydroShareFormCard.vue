@@ -15,7 +15,7 @@
         </v-col>
         <v-spacer />
         <v-col cols="auto" v-if="isEdit">
-          <v-btn :loading="loading" @click="archiveThing">
+          <v-btn @click="archiveThing">
             <v-icon left> mdi-upload </v-icon>
             Archive Now
           </v-btn>
@@ -155,7 +155,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn-cancel @click="emit('close')">Close</v-btn-cancel>
-        <v-btn-primary @click="onSubmit" :loading="loading">{{
+        <v-btn-primary @click="onSubmit">{{
           isEdit ? 'Update' : 'Create'
         }}</v-btn-primary>
       </v-card-actions>
@@ -173,22 +173,24 @@ import { VForm } from 'vuetify/components'
 import { hydroShareUrl, rules } from '@/utils/rules'
 import { useFormLogic } from '@/composables/useFormLogic'
 import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.vue'
+import { useHydroShareStore } from '@/store/hydroShare'
 
-const props = defineProps({ archive: Object as () => PostHydroShareArchive })
 const emit = defineEmits(['close'])
+const { hydroShareArchive: archive, loading } = storeToRefs(
+  useHydroShareStore()
+)
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   () => Promise.resolve([]),
   api.createHydroShareArchive,
   api.updateHydroShareArchive,
   PostHydroShareArchive,
-  props.archive || undefined,
+  archive.value || undefined,
   false
 )
 
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
-const loading = ref(false)
 const linkToExistingAccount = ref(false)
 const openDelete = ref(false)
 
@@ -234,14 +236,16 @@ function generateDefaultFormData() {
 
 async function onSubmit() {
   try {
+    loading.value = true
+    emit('close')
     const newItem = await uploadItem()
     if (!newItem) return
-    // if (isEdit.value) emit('updated', newItem)
-    // else emit('created', newItem.id)
+    archive.value = newItem
   } catch (error) {
     console.error('Error uploading unit', error)
+  } finally {
+    loading.value = false
   }
-  emit('close')
 }
 
 const archiveThing = async () => {
