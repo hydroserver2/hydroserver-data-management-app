@@ -66,15 +66,15 @@ export class HydroShareArchive {
 }
 
 export class PostHydroShareArchive extends HydroShareArchive {
-  resourceTitle: string
-  resourceAbstract: string
-  resourceKeywords: string[]
+  resourceTitle?: string
+  resourceAbstract?: string
+  resourceKeywords?: string[]
 
   constructor() {
     super()
-    this.resourceTitle = ''
-    this.resourceAbstract = ''
-    this.resourceKeywords = []
+    this.resourceTitle = undefined
+    this.resourceAbstract = undefined
+    this.resourceKeywords = undefined
   }
 }
 
