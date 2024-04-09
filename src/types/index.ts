@@ -52,6 +52,7 @@ export class HydroShareArchive {
   frequency: Frequency
   folderName: string
   datastreamIds: string[]
+  publicResource: boolean
 
   constructor() {
     this.id = ''
@@ -60,6 +61,7 @@ export class HydroShareArchive {
     this.frequency = null
     this.folderName = 'HydroShare'
     this.datastreamIds = []
+    this.publicResource = false
   }
 }
 
@@ -67,14 +69,12 @@ export class PostHydroShareArchive extends HydroShareArchive {
   resourceTitle: string
   resourceAbstract: string
   resourceKeywords: string[]
-  publicResource: boolean
 
   constructor() {
     super()
     this.resourceTitle = ''
     this.resourceAbstract = ''
     this.resourceKeywords = []
-    this.publicResource = false
   }
 }
 

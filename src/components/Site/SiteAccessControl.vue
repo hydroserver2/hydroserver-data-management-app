@@ -1,5 +1,11 @@
 <template>
-  <v-card>
+  <HydroSharePrivacyCard
+    v-if="openHydroSharePrivacy && thing"
+    @no="toggleSitePrivacy"
+    @yes="toggleSitePrivacy(true)"
+    @close="cancelFromHydroShare"
+  />
+  <v-card v-else>
     <v-card-title class="text-h5">Access Control</v-card-title>
     <v-divider />
 
@@ -159,8 +165,8 @@
             :label="thing.isPrivate ? 'Site is private' : 'Site is public'"
             color="primary"
             hide-details
-            @change="toggleSitePrivacy"
-          ></v-switch>
+            @change="checkHydroShareArchival"
+          />
         </v-col>
       </v-row>
     </v-card-text>
@@ -181,7 +187,11 @@ import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
+import { useHydroShareStore } from '@/store/hydroShare'
+import HydroSharePrivacyCard from '@/components/HydroShare/HydroSharePrivacyCard.vue'
+import { PostHydroShareArchive } from '@/types'
 
+const { hydroShareArchive } = storeToRefs(useHydroShareStore())
 const { user } = storeToRefs(useUserStore())
 const emits = defineEmits(['close'])
 const props = defineProps<{
@@ -194,6 +204,7 @@ const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 const newPrimaryOwnerEmail = ref('')
 const showPrimaryOwnerConfirmation = ref(false)
 const newOwnerEmail = ref('')
+const openHydroSharePrivacy = ref(false)
 
 async function onTransferPrimaryOwnership() {
   if (!newPrimaryOwnerEmail.value) return
@@ -239,8 +250,15 @@ async function onRemoveOwner(email: string) {
   }
 }
 
-async function toggleSitePrivacy() {
+async function toggleSitePrivacy(updateHydroShare?: boolean) {
   try {
+    if (updateHydroShare) {
+      hydroShareArchive.value = await api.updateHydroShareArchive({
+        thingId: thing.value?.id,
+        publicResource: !thing.value?.isPrivate,
+      } as PostHydroShareArchive)
+    }
+
     thing.value = await api.updateThingPrivacy(
       props.thingId,
       thing.value!.isPrivate
@@ -248,6 +266,17 @@ async function toggleSitePrivacy() {
   } catch (error) {
     console.error('Error updating thing privacy', error)
   }
+  openHydroSharePrivacy.value = false
+}
+
+function checkHydroShareArchival() {
+  if (hydroShareArchive.value) openHydroSharePrivacy.value = true
+  else toggleSitePrivacy()
+}
+
+function cancelFromHydroShare() {
+  thing.value!.isPrivate = !thing.value!.isPrivate
+  openHydroSharePrivacy.value = false
 }
 
 const emitClose = () => emits('close')
