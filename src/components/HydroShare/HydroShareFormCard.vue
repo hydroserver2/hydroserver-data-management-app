@@ -15,8 +15,9 @@
         </v-col>
         <v-spacer />
         <v-col cols="auto" v-if="isEdit">
-          <v-btn :loading="loading">
-            <v-icon left>mdi-upload</v-icon>Archive Now
+          <v-btn :loading="loading" @click="archiveThing">
+            <v-icon left> mdi-upload </v-icon>
+            Archive Now
           </v-btn>
         </v-col>
       </v-row>
@@ -25,7 +26,7 @@
     <v-divider />
 
     <v-form
-      @submit.prevent="archiveThing"
+      @submit.prevent="onSubmit"
       ref="myForm"
       v-model="valid"
       validate-on="blur"
@@ -69,12 +70,6 @@
           </v-row>
         </div>
 
-        <v-text-field
-          v-if="linkToExistingAccount || isEdit"
-          v-model="item.resourceId"
-          label="HydroShare Resource ID"
-        />
-
         <div v-if="!isEdit">
           <v-radio-group v-model="linkToExistingAccount" inline>
             <v-radio label="Create New Resource" :value="false" />
@@ -108,9 +103,19 @@
         </div>
 
         <v-text-field
+          v-if="linkToExistingAccount || isEdit"
+          v-model="item.resourceLink"
+          label="HydroShare Resource Link (URL) *"
+          placeholder="https://www.hydroshare.org/resource/9429f876dc71958d93f22909f2cb12f3/"
+          :rules="hydroShareUrl"
+          class="mb-4"
+        />
+
+        <v-text-field
           label="Resource Folder Name"
           v-model="item.folderName"
           :rules="rules.required"
+          class="mb-4"
         />
 
         <v-autocomplete
@@ -122,8 +127,13 @@
           multiple
           :rules="rules.minLength(1)"
         >
-          <template v-slot:selection="{ item }">
-            <v-chip color="blue-grey" rounded closable>
+          <template v-slot:selection="{ item, index }">
+            <v-chip
+              color="blue-grey"
+              rounded
+              closable
+              @click:close="removeDatastream(index)"
+            >
               <span>{{ item.title }}</span>
             </v-chip>
           </template>
@@ -144,8 +154,8 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn-cancel @click="emitClose">Close</v-btn-cancel>
-        <v-btn-primary @click="archiveThing" :loading="loading">{{
+        <v-btn-cancel @click="emit('close')">Close</v-btn-cancel>
+        <v-btn-primary @click="onSubmit" :loading="loading">{{
           isEdit ? 'Update' : 'Create'
         }}</v-btn-primary>
       </v-card-actions>
@@ -160,15 +170,14 @@ import { onMounted, ref } from 'vue'
 import { Datastream, PostHydroShareArchive, Frequency } from '@/types'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
-import { rules } from '@/utils/rules'
-import { Snackbar } from '@/utils/notifications'
+import { hydroShareUrl, rules } from '@/utils/rules'
 import { useFormLogic } from '@/composables/useFormLogic'
 import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.vue'
 
 const props = defineProps({ archive: Object as () => PostHydroShareArchive })
-const emits = defineEmits(['close'])
+const emit = defineEmits(['close'])
 
-const { item, valid, myForm, uploadItem } = useFormLogic(
+const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   () => Promise.resolve([]),
   api.createHydroShareArchive,
   api.updateHydroShareArchive,
@@ -183,9 +192,6 @@ const loading = ref(false)
 const linkToExistingAccount = ref(false)
 const openDelete = ref(false)
 
-// TODO: USE the actual isEdit!
-const isEdit = ref(true)
-
 type ScheduleSelection = {
   value: Frequency
   text: string
@@ -199,6 +205,10 @@ const scheduleSelections: ScheduleSelection[] = [
 ]
 
 const datastreamTitle = (item: Datastream) => `${item.description} - ${item.id}`
+
+function removeDatastream(index: number) {
+  item.value.datastreamIds.splice(index, 1)
+}
 
 const generateKeywords = () => {
   const mediumsSet = new Set(datastreams.value.map((ds) => ds.sampledMedium))
@@ -222,33 +232,24 @@ function generateDefaultFormData() {
     `researchers and stakeholders.`
 }
 
-async function archiveThing() {
-  await myForm.value?.validate()
-  if (!valid.value) return
-
-  if (item.value && thing.value !== undefined) {
-    try {
-      loading.value = true
-      item.value.thingId = thing.value.id
-      thing.value.hydroShareArchive = await api.createHydroShareArchive(
-        item.value
-      )
-      loading.value = false
-      Snackbar.success('Uploaded site data to HydroShare.')
-
-      emitClose()
-    } catch (error) {
-      console.error('Error creating HydroShare archive.', error)
-      Snackbar.error('Failed to upload site data to HydroShare.')
-      loading.value = false
-    }
+async function onSubmit() {
+  try {
+    const newItem = await uploadItem()
+    if (!newItem) return
+    // if (isEdit.value) emit('updated', newItem)
+    // else emit('created', newItem.id)
+  } catch (error) {
+    console.error('Error uploading unit', error)
   }
+  emit('close')
+}
+
+const archiveThing = async () => {
+  await api.archiveToHydroShare(thing.value!.id)
 }
 
 onMounted(async () => {
   datastreams.value = await api.fetchDatastreamsForThing(thing.value!.id)
   if (!isEdit.value) generateDefaultFormData()
 })
-
-const emitClose = () => emits('close')
 </script>

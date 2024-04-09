@@ -55,7 +55,10 @@
           >Configure HydroShare Archival</v-btn
         >
         <v-dialog v-model="isHydroShareModalOpen" width="60rem">
-          <HydroShareFormCard @close="isHydroShareModalOpen = false" />
+          <HydroShareFormCard
+            :archive="hydroShareArchive || undefined"
+            @close="isHydroShareModalOpen = false"
+          />
         </v-dialog>
       </v-col>
     </v-row>
@@ -115,7 +118,7 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
-import { HydroShareArchive } from '@/types'
+import { PostHydroShareArchive } from '@/types'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
@@ -124,7 +127,7 @@ const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
-const hydroShareArchive = ref<HydroShareArchive | null>(null)
+const hydroShareArchive = ref<PostHydroShareArchive | null>(null)
 
 const isOwner = computed(() => thing.value?.ownsThing)
 const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
@@ -166,15 +169,22 @@ onMounted(async () => {
     .then((data) => (photos.value = data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
-    // TODO: fetch at the same time
-    thing.value = await api.fetchThing(thingId)
-    hydroShareArchive.value = await api.fetchHydroShareArchive(thingId)
-  } catch (error) {
-    if (error instanceof Error && parseInt(error.message) === 403) {
-      authorized.value = false
-    } else {
-      console.error('Error fetching thing', error)
-    }
+    const [thingResponse, hydroShareArchiveResponse] = await Promise.all([
+      api.fetchThing(thingId).catch((error) => {
+        if (error instanceof Error && parseInt(error.message) === 403)
+          authorized.value = false
+        else console.error('Error fetching thing', error)
+
+        return null
+      }),
+      api.fetchHydroShareArchive(thingId).catch((error) => {
+        console.error('Error fetching hydroShareArchive', error)
+        return null
+      }),
+    ])
+
+    thing.value = thingResponse
+    hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
     loaded.value = true
   }

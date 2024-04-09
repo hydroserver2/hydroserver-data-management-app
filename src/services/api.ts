@@ -176,6 +176,8 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/archive`),
   deleteHydroShareArchive: async (thingId: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/archive`),
+  archiveToHydroShare: async (thingId: string) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/archive/trigger`),
 
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
