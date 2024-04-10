@@ -1,7 +1,7 @@
 <template>
   <v-row class="my-2" align="center">
     <v-col>
-      <h5 class="text-h5">Datasets</h5>
+      <h5 class="text-h5">Datastreams</h5>
     </v-col>
 
     <v-col cols="12" sm="auto">

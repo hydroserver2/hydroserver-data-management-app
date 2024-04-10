@@ -28,8 +28,8 @@
               <strong> Filter: </strong>
             </div>
             <div>
-              Filter the dataset table items with the filter drawer on the left
-              and the search bar on the top of the datasets table.
+              Filter the datastream table items with the filter drawer on the
+              left and the search bar on the top of the datastreams table.
             </div>
           </v-timeline-item>
           <v-timeline-item size="x-small" dot-color="secondary">
@@ -44,12 +44,12 @@
           </v-timeline-item>
           <v-timeline-item size="x-small" dot-color="blue-grey">
             <div>
-              <strong> Select up to 5 datasets: </strong>
+              <strong> Select up to 5 datastreams: </strong>
             </div>
             <div>
-              The plot allows up to 5 datasets to be shown at once. If two
-              datasets share the same observed property and unit, they'll share
-              a y-axis.
+              The plot allows up to 5 datastreams to be shown at once. If two
+              datastreams share the same observed property and unit, they'll
+              share a y-axis.
             </div>
           </v-timeline-item>
         </v-timeline>
