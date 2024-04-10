@@ -18,7 +18,7 @@
       <v-select
         label="Show/Hide Columns"
         v-model="selectedHeaders"
-        :items="headers"
+        :items="selectableHeaders"
         item-text="title"
         item-value="key"
         multiple
@@ -201,6 +201,10 @@ const headers = reactive([
     visible: true,
   },
 ])
+
+const selectableHeaders = computed(() => {
+  return headers.filter((header) => header.key !== 'plot')
+})
 
 const sortBy = [
   { key: 'siteCodeName' },
