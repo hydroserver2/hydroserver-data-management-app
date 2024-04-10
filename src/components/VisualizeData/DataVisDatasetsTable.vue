@@ -63,6 +63,7 @@
     :headers="headers.filter((header) => header.visible)"
     :items="tableItems"
     :sort-by="sortBy"
+    multi-sort
     :search="search"
     height="400"
     fixed-header
@@ -201,7 +202,11 @@ const headers = reactive([
   },
 ])
 
-const sortBy = [{ key: 'siteCodeName' }]
+const sortBy = [
+  { key: 'siteCodeName' },
+  { key: 'observedPropertyName' },
+  { key: 'qualityControlLevelDefinition' },
+]
 const selectedHeaders = computed({
   get: () =>
     headers.filter((header) => header.visible).map((header) => header.key),
