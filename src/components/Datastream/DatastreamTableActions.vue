@@ -77,7 +77,7 @@
         <v-list-item
           v-if="datastream.isDataVisible"
           prepend-icon="mdi-chart-line"
-          title="View Time Series Plot"
+          title="Visualize Data"
           :to="{
             name: 'VisualizeData',
             query: { sites: thingId, datastreams: datastream.id },
