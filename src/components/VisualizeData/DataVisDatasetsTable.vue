@@ -50,7 +50,7 @@
     <v-btn @click="clearSelected"> Clear Selected </v-btn>
 
     <v-btn variant="outlined" @click="showOnlySelected = !showOnlySelected">
-      Showing: {{ showOnlySelected ? 'Selected' : 'All' }}
+      {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
     </v-btn>
 
     <v-btn
