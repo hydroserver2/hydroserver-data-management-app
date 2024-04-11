@@ -46,7 +46,7 @@ export const EChartsColors = [
   '#5571c7', // blue
   '#91cc75', // green
   '#ee6464', // red
-  '#fac857', // yellow
+  '#795548', // brown
   '#80d4f4', // light blue
 ]
 
