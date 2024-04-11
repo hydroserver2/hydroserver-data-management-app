@@ -115,6 +115,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       beginDate.value = selectedOption.calculateBeginDate()
       endDate.value = new Date()
       selectedDateBtnId.value = selectedId
+      dataZoomStart.value = 0
+      dataZoomEnd.value = 100
     }
   }
 

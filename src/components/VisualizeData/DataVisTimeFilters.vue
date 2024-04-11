@@ -37,13 +37,20 @@ import { storeToRefs } from 'pinia'
 
 const { setDateRange } = useDataVisStore()
 
-const { dateOptions, beginDate, endDate, selectedDateBtnId } = storeToRefs(
-  useDataVisStore()
-)
+const {
+  dateOptions,
+  beginDate,
+  endDate,
+  selectedDateBtnId,
+  dataZoomStart,
+  dataZoomEnd,
+} = storeToRefs(useDataVisStore())
 
 const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
   if (type === 'begin') beginDate.value = date
   else endDate.value = date
   selectedDateBtnId.value = -1
+  dataZoomStart.value = 0
+  dataZoomEnd.value = 100
 }
 </script>
