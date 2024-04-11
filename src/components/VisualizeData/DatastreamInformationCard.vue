@@ -4,9 +4,10 @@
       <div class="d-flex justify-space-between w-100">
         Datastream Information
         <v-btn
+          :loading="downloading"
           prepend-icon="mdi-download"
           color="blue-lighten-3"
-          @click="downloadDatastreamCSV(datastream.id)"
+          @click="downloadDatastream(datastream.id)"
           >Download</v-btn
         >
       </div>
@@ -108,6 +109,17 @@ const emit = defineEmits(['close'])
 
 const { processingLevels, observedProperties, things, selectedDatastreams } =
   storeToRefs(useDataVisStore())
+const downloading = ref(false)
+
+const downloadDatastream = async (id: string) => {
+  downloading.value = true
+  try {
+    await downloadDatastreamCSV(id)
+  } catch (error) {
+    console.error('Error downloading datastream', error)
+  }
+  downloading.value = false
+}
 
 const addToPlot = (datastream: Datastream) => {
   const index = selectedDatastreams.value.findIndex(

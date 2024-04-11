@@ -54,8 +54,9 @@
     </v-btn>
 
     <v-btn
+      :loading="downloading"
       prepend-icon="mdi-download"
-      @click="downloadSelectedDatastreamsCSVs(selectedDatastreams)"
+      @click="downloadSelected(selectedDatastreams)"
       >Download Selected</v-btn
     >
   </v-toolbar>
@@ -112,10 +113,21 @@ const emit = defineEmits(['copyState'])
 
 const showOnlySelected = ref(false)
 const openInfoCard = ref(false)
+const downloading = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
 
 const copyStateToClipboard = async () => {
   emit('copyState')
+}
+
+const downloadSelected = async (selectedDatastreams: Datastream[]) => {
+  downloading.value = true
+  try {
+    await downloadSelectedDatastreamsCSVs(selectedDatastreams)
+  } catch (error) {
+    console.error('Error downloading selected datastreams', error)
+  }
+  downloading.value = false
 }
 
 const onRowClick = (event: Event, item: any) => {
