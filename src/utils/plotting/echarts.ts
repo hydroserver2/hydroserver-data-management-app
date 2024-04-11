@@ -65,6 +65,9 @@ export function generateSeriesOptions(
     itemStyle: {
       color: series.lineColor,
     },
+    lineStyle: {
+      width: 1,
+    },
     sampling: 'lttb',
     showSymbol: false,
   }))
@@ -86,7 +89,7 @@ export function generateToolboxOptions() {
         yAxisIndex: 'none',
       },
       restore: {},
-      saveAsImage: {},
+      saveAsImage: { name: 'plot_export' },
     },
   }
 }
