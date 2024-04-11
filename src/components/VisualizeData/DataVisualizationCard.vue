@@ -207,7 +207,7 @@ watch(
   [() => props.beginDate, () => props.endDate],
   async ([newBeginDate, newEndDate], [oldBeginDate, oldEndDate]) => {
     if (
-      newBeginDate.getTime() === oldBeginDate?.getTime() ||
+      newBeginDate.getTime() === oldBeginDate?.getTime() &&
       newEndDate.getTime() === oldEndDate?.getTime()
     )
       return
