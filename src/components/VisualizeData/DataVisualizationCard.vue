@@ -9,7 +9,7 @@
     </div>
 
     <keep-alive>
-      <v-card-text v-if="option && !showSummaryStatistics">
+      <v-card-text v-if="option && !showSummaryStatistics && isDataAvailable">
         <v-chart
           :option="option"
           @datazoom="handleDataZoom"
@@ -19,7 +19,10 @@
       </v-card-text>
     </keep-alive>
 
-    <div v-if="!option && !showSummaryStatistics" style="min-height: 632px">
+    <div
+      v-if="!isDataAvailable && !showSummaryStatistics"
+      style="min-height: 632px"
+    >
       <v-card-title> Data Visualization </v-card-title>
       <v-card-text>
         <v-timeline align="start" density="compact">
@@ -38,8 +41,7 @@
             </div>
             <div>
               Adjust the time range to cover the desired period you wish to
-              observe. (Note: if a dataset has no data within the time range,
-              the legend and axes will display but no data will be shown)
+              observe.
             </div>
           </v-timeline-item>
           <v-timeline-item size="x-small" dot-color="blue-grey">
@@ -53,6 +55,13 @@
             </div>
           </v-timeline-item>
         </v-timeline>
+      </v-card-text>
+
+      <v-card-text v-if="datastreams.length && !updating" class="text-center">
+        <v-alert type="warning" dense>
+          No data available for the selected date range. Please select a
+          different date range to re-plot.
+        </v-alert>
       </v-card-text>
     </div>
   </v-card>
@@ -81,11 +90,15 @@ const {
 
 const graphSeriesArray = ref<GraphSeries[]>([])
 const option = ref<EChartsOption | undefined>()
-// State to track loading status of individual datasets
-const loadingStates = ref(new Map<string, boolean>())
-// the overall updating state based on individual loading states
+const loadingStates = ref(new Map<string, boolean>()) // State to track loading status of individual datasets
 const updating = computed(() => {
   return Array.from(loadingStates.value.values()).some((isLoading) => isLoading)
+}) // the overall updating state based on individual loading states
+
+const isDataAvailable = computed(() => {
+  return graphSeriesArray.value.some(
+    (series) => series.data && series.data.length > 0
+  )
 })
 
 const props = defineProps({
