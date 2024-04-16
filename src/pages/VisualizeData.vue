@@ -4,11 +4,24 @@
     <DataVisFiltersDrawer />
 
     <div class="my-4 mx-4">
-      <DataVisualizationCard
-        :datastreams="selectedDatastreams"
-        :begin-date="beginDate"
-        :end-date="endDate"
-      />
+      <v-expansion-panels v-model="panels">
+        <v-expansion-panel title="Data Visualization">
+          <v-expansion-panel-text>
+            <DataVisualizationCard
+              v-if="cardHeight"
+              :datastreams="selectedDatastreams"
+              :begin-date="beginDate"
+              :end-date="endDate"
+              :cardHeight="cardHeight"
+            />
+          </v-expansion-panel-text>
+          <div
+            v-if="panels === 0"
+            class="resize-handle"
+            @mousedown="handleMouseDown"
+          />
+        </v-expansion-panel>
+      </v-expansion-panels>
 
       <DataVisTimeFilters />
       <v-divider />
@@ -50,6 +63,30 @@ const {
   dataZoomEnd,
   selectedDateBtnId,
 } = storeToRefs(useDataVisStore())
+
+const panels = ref(0)
+const cardHeight = ref(40)
+
+let startY = 0
+let startHeight = 0
+
+function handleMouseDown(e: MouseEvent) {
+  startY = e.clientY
+  startHeight = cardHeight.value
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
+}
+
+function handleMouseMove(e: MouseEvent) {
+  const diffY = e.clientY - startY
+  const diffVh = diffY * (100 / window.innerHeight)
+  cardHeight.value = Math.max(startHeight + diffVh, 16) // Minimum height of 16vh
+}
+
+function handleMouseUp() {
+  document.removeEventListener('mousemove', handleMouseMove)
+  document.removeEventListener('mouseup', handleMouseUp)
+}
 
 const generateStateUrl = () => {
   const BASE_URL = `${
@@ -175,3 +212,11 @@ onUnmounted(() => {
   resetState()
 })
 </script>
+
+<style scoped>
+.resize-handle {
+  cursor: ns-resize;
+  height: 5px;
+  background-color: #ccc;
+}
+</style>

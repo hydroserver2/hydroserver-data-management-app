@@ -1,5 +1,5 @@
 <template>
-  <v-card class="elevation-1" :loading="updating">
+  <v-card class="elevation-0" :loading="updating">
     <template v-slot:loader="{ isActive }">
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
@@ -11,19 +11,19 @@
     <keep-alive>
       <v-card-text v-if="option && !showSummaryStatistics && isDataAvailable">
         <v-chart
+          ref="echartsRef"
           :option="option"
           @datazoom="handleDataZoom"
           autoresize
-          style="height: 600px"
+          :style="{ height: `${cardHeight}vh` }"
         />
       </v-card-text>
     </keep-alive>
 
     <div
       v-if="!isDataAvailable && !showSummaryStatistics"
-      style="min-height: 632px"
+      :style="{ 'min-height': `${cardHeight}vh` }"
     >
-      <v-card-title> Data Visualization </v-card-title>
       <v-card-text>
         <v-timeline align="start" density="compact">
           <v-timeline-item size="x-small" dot-color="primary">
@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, watch, computed } from 'vue'
+import { ref, PropType, watch, computed, nextTick } from 'vue'
 import { Datastream, GraphSeries } from '@/types'
 import { EChartsOption } from 'echarts'
 import 'echarts'
@@ -88,6 +88,7 @@ const {
   dataZoomEnd,
 } = storeToRefs(useDataVisStore())
 
+const echartsRef = ref<typeof VChart | null>(null)
 const graphSeriesArray = ref<GraphSeries[]>([])
 const option = ref<EChartsOption | undefined>()
 const loadingStates = ref(new Map<string, boolean>()) // State to track loading status of individual datasets
@@ -108,6 +109,7 @@ const props = defineProps({
   },
   beginDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
+  cardHeight: { type: Number, required: true },
 })
 
 function updateVisualization() {
@@ -230,4 +232,17 @@ watch(
   },
   { deep: true }
 )
+
+watch([() => props.cardHeight], ([newHeight], [oldHeight]) => {
+  if (Math.abs(newHeight - oldHeight) < 0.2) return
+  nextTick(() => {
+    if (echartsRef.value) echartsRef.value.resize()
+  })
+})
 </script>
+
+<style scoped>
+.v-card-text {
+  padding: 0;
+}
+</style>

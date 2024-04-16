@@ -222,6 +222,6 @@ const clearFilters = () => {
 }
 
 const { smAndDown } = useDisplay()
-const panels = ref([0, 1, 2, 3])
+const panels = ref([0, 1, 2])
 const drawer = ref(!!smAndDown)
 </script>
