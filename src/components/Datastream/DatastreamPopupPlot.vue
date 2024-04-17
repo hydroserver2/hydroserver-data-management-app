@@ -38,11 +38,13 @@
 import { Datastream, GraphSeries } from '@/types'
 import { subtractHours } from '@/utils/observationsUtils'
 import { createEChartsOption } from '@/utils/plotting/echarts'
-import { fetchGraphSeries } from '@/utils/plotting/graphSeriesUtils'
 import { EChartsOption } from 'echarts'
 import { onMounted, ref } from 'vue'
 import VChart from 'vue-echarts'
 import 'echarts'
+import { useObservationStore } from '@/store/observations'
+
+const { fetchGraphSeries } = useObservationStore()
 
 const props = defineProps({
   datastream: {

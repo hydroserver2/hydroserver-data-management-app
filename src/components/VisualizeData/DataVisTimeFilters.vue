@@ -7,7 +7,7 @@
         :color="
           selectedDateBtnId === option.id ? 'blue' : 'blue-grey-lighten-4'
         "
-        @click="setDateRange(option.id)"
+        @click="onDateBtnClick(option.id)"
       >
         {{ option.label }}
       </v-btn>
@@ -17,14 +17,14 @@
       <DatePickerField
         :model-value="beginDate"
         placeholder="Begin Date"
-        @update:model-value="handleCustomDateSelection('begin', $event)"
+        @update:model-value="setDateRange({ begin: $event })"
       />
     </v-col>
     <v-col cols="6" sm="3">
       <DatePickerField
         :model-value="endDate"
         placeholder="End Date"
-        @update:model-value="handleCustomDateSelection('end', $event)"
+        @update:model-value="setDateRange({ end: $event })"
       />
     </v-col>
   </v-row>
@@ -35,22 +35,9 @@ import DatePickerField from '@/components/VisualizeData/DatePickerField.vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 
-const { setDateRange } = useDataVisStore()
+const { setDateRange, onDateBtnClick } = useDataVisStore()
 
-const {
-  dateOptions,
-  beginDate,
-  endDate,
-  selectedDateBtnId,
-  dataZoomStart,
-  dataZoomEnd,
-} = storeToRefs(useDataVisStore())
-
-const handleCustomDateSelection = (type: 'begin' | 'end', date: Date) => {
-  if (type === 'begin') beginDate.value = date
-  else endDate.value = date
-  selectedDateBtnId.value = -1
-  dataZoomStart.value = 0
-  dataZoomEnd.value = 100
-}
+const { dateOptions, beginDate, endDate, selectedDateBtnId } = storeToRefs(
+  useDataVisStore()
+)
 </script>

@@ -7,13 +7,7 @@
       <v-expansion-panels v-model="panels">
         <v-expansion-panel title="Data Visualization">
           <v-expansion-panel-text>
-            <DataVisualizationCard
-              v-if="cardHeight"
-              :datastreams="selectedDatastreams"
-              :begin-date="beginDate"
-              :end-date="endDate"
-              :cardHeight="cardHeight"
-            />
+            <DataVisualizationCard v-if="cardHeight" :cardHeight="cardHeight" />
           </v-expansion-panel-text>
           <div
             v-if="panels === 0"
@@ -47,7 +41,7 @@ import { Snackbar } from '@/utils/notifications'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 const route = useRoute()
 
-const { setDateRange, resetState } = useDataVisStore()
+const { onDateBtnClick, resetState } = useDataVisStore()
 const {
   things,
   selectedThings,
@@ -146,7 +140,7 @@ const parseUrlAndSetState = () => {
   if (selectedDateBtnIdParam !== '') {
     // Convert the string to a number using the unary plus operator
     const btnId = +selectedDateBtnIdParam
-    setDateRange(btnId)
+    onDateBtnClick(btnId)
   } else {
     const beginDateParam = (route.query.beginDate as string) || ''
     const endDateParam = (route.query.endDate as string) || ''

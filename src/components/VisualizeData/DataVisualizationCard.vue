@@ -57,7 +57,10 @@
         </v-timeline>
       </v-card-text>
 
-      <v-card-text v-if="datastreams.length && !updating" class="text-center">
+      <v-card-text
+        v-if="selectedDatastreams.length && !updating"
+        class="text-center"
+      >
         <v-alert type="warning" dense>
           No data available for the selected date range. Please select a
           different date range to re-plot.
@@ -68,62 +71,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, watch, computed, nextTick } from 'vue'
-import { Datastream, GraphSeries } from '@/types'
-import { EChartsOption } from 'echarts'
-import 'echarts'
-import VChart from 'vue-echarts'
-import { EChartsColors } from '@/utils/materialColors'
-import { createEChartsOption } from '@/utils/plotting/echarts'
-import { calculateSummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
-import { storeToRefs } from 'pinia'
-import { useDataVisStore } from '@/store/dataVisualization'
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
-import { fetchGraphSeries } from '@/utils/plotting/graphSeriesUtils'
-
-const {
-  showSummaryStatistics,
-  summaryStatisticsArray,
-  dataZoomStart,
-  dataZoomEnd,
-} = storeToRefs(useDataVisStore())
-
-const echartsRef = ref<typeof VChart | null>(null)
-const graphSeriesArray = ref<GraphSeries[]>([])
-const option = ref<EChartsOption | undefined>()
-const loadingStates = ref(new Map<string, boolean>()) // State to track loading status of individual datasets
-const updating = computed(() => {
-  return Array.from(loadingStates.value.values()).some((isLoading) => isLoading)
-}) // the overall updating state based on individual loading states
-
-const isDataAvailable = computed(() => {
-  return graphSeriesArray.value.some(
-    (series) => series.data && series.data.length > 0
-  )
-})
+import { useDataVisStore } from '@/store/dataVisualization'
+import { ref, watch, computed, nextTick } from 'vue'
+import { storeToRefs } from 'pinia'
+import VChart from 'vue-echarts'
+import 'echarts'
 
 const props = defineProps({
-  datastreams: {
-    type: Array as PropType<Datastream[]>,
-    required: true,
-  },
-  beginDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
   cardHeight: { type: Number, required: true },
 })
 
-function updateVisualization() {
-  graphSeriesArray.value.forEach((series, index) => {
-    series.lineColor = EChartsColors[index % EChartsColors.length]
-  })
+const {
+  showSummaryStatistics,
+  dataZoomStart,
+  dataZoomEnd,
+  graphSeriesArray,
+  echartsOption: option,
+  loadingStates,
+  selectedDatastreams,
+} = storeToRefs(useDataVisStore())
 
-  summaryStatisticsArray.value = calculateSummaryStatistics(
-    graphSeriesArray.value
-  )
+const echartsRef = ref<typeof VChart | null>(null)
 
-  option.value = createEChartsOption(graphSeriesArray.value)
-  prevIds.value = graphSeriesArray.value.map((series) => series.id)
-}
+const updating = computed(() =>
+  Array.from(loadingStates.value.values()).some((isLoading) => isLoading)
+)
+
+const isDataAvailable = computed(() =>
+  graphSeriesArray.value.some((series) => series.data && series.data.length > 0)
+)
 
 function handleDataZoom(event: any) {
   let start, end
@@ -143,95 +120,6 @@ function handleDataZoom(event: any) {
   dataZoomStart.value = start
   dataZoomEnd.value = end
 }
-
-const prevIds = ref<string[]>([])
-
-const updateDatasets = async (datastreams: Datastream[]) => {
-  const currentIds = datastreams.map((ds) => ds.id)
-  const newIds = currentIds.filter((id) => !prevIds.value.includes(id))
-  const removedIds = prevIds.value.filter((id) => !currentIds.includes(id))
-
-  // Remove old datasets & abort unresolved requests
-  if (removedIds.length > 0) {
-    graphSeriesArray.value = graphSeriesArray.value.filter(
-      (series) => !removedIds.includes(series.id)
-    )
-    // TODO: Abort requests that haven't come back yet
-    updateVisualization()
-  }
-
-  // fetch new datasets
-  if (newIds.length > 0) {
-    fetchDatasets(datastreams.filter((ds) => newIds.includes(ds.id)))
-  }
-}
-
-const fetchDatasets = (datastreams: Datastream[]) => {
-  datastreams.forEach((ds) => {
-    loadingStates.value.set(ds.id, true)
-    fetchGraphSeries(
-      ds,
-      props.beginDate.toISOString(),
-      props.endDate.toISOString()
-    )
-      .then((newSeries) => {
-        if (!props.datastreams.some((selectedDs) => selectedDs.id === ds.id)) {
-          return
-        }
-
-        graphSeriesArray.value = graphSeriesArray.value.filter(
-          (series) => series.id !== ds.id
-        )
-
-        graphSeriesArray.value.push(newSeries)
-        updateVisualization()
-      })
-      .catch((error) => {
-        console.error(`Failed to fetch dataset ${ds.id}:`, error)
-      })
-      .finally(() => {
-        loadingStates.value.set(ds.id, false)
-      })
-  })
-}
-
-const clearState = () => {
-  graphSeriesArray.value = []
-  prevIds.value = []
-  showSummaryStatistics.value = false
-  option.value = undefined
-}
-
-let prevDatastreamIds = ''
-watch(
-  [() => props.datastreams],
-  ([newDs]) => {
-    const newDatastreamIds = JSON.stringify(newDs.map((ds) => ds.id).sort())
-
-    if (!newDs.length || !props.beginDate || !props.endDate) {
-      clearState()
-    } else if (newDatastreamIds !== prevDatastreamIds) {
-      updateDatasets(newDs)
-    }
-    prevDatastreamIds = newDatastreamIds
-  },
-  { deep: true, immediate: true }
-)
-
-watch(
-  [() => props.beginDate, () => props.endDate],
-  async ([newBeginDate, newEndDate], [oldBeginDate, oldEndDate]) => {
-    if (
-      newBeginDate.getTime() === oldBeginDate?.getTime() &&
-      newEndDate.getTime() === oldEndDate?.getTime()
-    )
-      return
-    clearState()
-    if (!newBeginDate || !newEndDate || !props.datastreams.length) return
-    updateDatasets(props.datastreams)
-  },
-  { deep: true }
-)
 
 watch([() => props.cardHeight], ([newHeight], [oldHeight]) => {
   if (Math.abs(newHeight - oldHeight) < 0.2) return
