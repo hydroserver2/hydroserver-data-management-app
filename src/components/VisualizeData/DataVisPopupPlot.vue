@@ -25,12 +25,7 @@
         color="grey"
         :to="{
           name: 'VisualizeData',
-          query: {
-            sites: datastream.thingId,
-            datastreams: datastream.id,
-            beginDate: beginTime,
-            endDate: endTime,
-          },
+          query: getDatastreamQueryParams(datastream),
         }"
       >
         Visualization Page
@@ -70,6 +65,31 @@ const timeSelections = [
   { label: 'Last Month', value: 720 },
   { label: 'Last Year', value: 8760 },
 ]
+
+type Query = {
+  sites: string
+  datastreams: string
+  selectedDateBtnId?: number
+  beginDate?: string
+  endDate?: string
+}
+
+const getDatastreamQueryParams = (datastream: Datastream) => {
+  let query: Query = {
+    sites: datastream.thingId,
+    datastreams: datastream.id,
+  }
+
+  if (selectedTime.value === 8760) query.selectedDateBtnId = 0
+  else if (selectedTime.value === 720) query.selectedDateBtnId = 1
+  else if (selectedTime.value === 168) query.selectedDateBtnId = 2
+  else {
+    query.beginDate = beginTime.value
+    query.endDate = endTime.value
+  }
+
+  return query
+}
 
 const updateState = async (hours?: number) => {
   updating.value = true

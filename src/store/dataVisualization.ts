@@ -85,7 +85,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       id: 0,
       label: 'Last Year',
       calculateBeginDate: () => {
-        const now = new Date()
+        const now = endDate.value
         return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
       },
     },
@@ -93,7 +93,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       id: 1,
       label: 'Last Month',
       calculateBeginDate: () => {
-        const now = new Date()
+        const now = endDate.value
         return new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
       },
     },
@@ -101,24 +101,47 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       id: 2,
       label: 'Last Week',
       calculateBeginDate: () => {
-        const now = new Date()
+        const now = endDate.value
         return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
       },
     },
   ])
+
+  const getMostRecentEndTime = () =>
+    selectedDatastreams.value.reduce((latest, ds) => {
+      const dsEndDate = new Date(ds.phenomenonEndTime!)
+      return dsEndDate > latest ? dsEndDate : latest
+    }, new Date(0))
 
   const setDateRange = (selectedId: number) => {
     const selectedOption = dateOptions.value.find(
       (option) => option.id === selectedId
     )
     if (selectedOption && selectedId !== selectedDateBtnId.value) {
+      endDate.value = getMostRecentEndTime()
       beginDate.value = selectedOption.calculateBeginDate()
-      endDate.value = new Date()
       selectedDateBtnId.value = selectedId
       dataZoomStart.value = 0
       dataZoomEnd.value = 100
     }
   }
+
+  // Update the time range to the most recent phenomenon end time
+  watch(
+    () => selectedDatastreams.value,
+    (newDatastreams) => {
+      if (newDatastreams.length) {
+        const selectedOption = dateOptions.value.find(
+          (option) => option.id === selectedDateBtnId.value
+        )
+        if (selectedOption) {
+          endDate.value = getMostRecentEndTime()
+          beginDate.value = selectedOption.calculateBeginDate()
+        }
+      }
+    },
+    { deep: true }
+  )
 
   // If currently selected datastreams are no longer in filteredDatastreams, deselect them
   watch(
