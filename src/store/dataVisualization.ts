@@ -259,13 +259,20 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       if (!newDs.length || !beginDate.value || !endDate.value) {
         clearState()
       } else if (newDatastreamIds !== prevDatastreamIds) {
+        const oldEnd = endDate.value
+        const oldBegin = beginDate.value
+        endDate.value = getMostRecentEndTime()
         const selectedOption = dateOptions.value.find(
           (option) => option.id === selectedDateBtnId.value
         )
         if (selectedOption) {
-          endDate.value = getMostRecentEndTime()
           beginDate.value = selectedOption.calculateBeginDate()
         }
+        if (
+          oldEnd.getTime() !== endDate.value.getTime() ||
+          oldBegin.getTime() !== beginDate.value.getTime()
+        )
+          clearState()
         updateDatasets(newDs)
       }
       prevDatastreamIds = newDatastreamIds
