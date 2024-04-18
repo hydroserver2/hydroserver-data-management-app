@@ -156,6 +156,18 @@ export const createEChartsOption = (
     },
     xAxis: {
       type: 'time',
+      axisLabel: {
+        hideOverlap: true,
+        formatter: {
+          year: '{yyyy}',
+          month: '{MMM} {yyyy}',
+          day: '{MMM} {d}, {yy}',
+          hour: '{HH}:{mm}\n{MMM} {d}, {yy}',
+          minute: '{HH}:{mm}\n{MMM} {d}, {yy}',
+          second: '{H}:{mm}:{s}\n{MMM} {d}, {yy}',
+          millisecond: '{HH}:{mm}:{s}:{S}\n{MMM} {d}, {yy}',
+        },
+      },
     },
     yAxis: yAxisOptions,
     series: seriesOptions,
