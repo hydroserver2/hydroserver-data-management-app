@@ -145,6 +145,7 @@ export const createEChartsOption = (
       left: gridLeftPadding,
     },
     tooltip: {
+      confine: true,
       trigger: 'axis',
       axisPointer: {
         type: 'cross',
