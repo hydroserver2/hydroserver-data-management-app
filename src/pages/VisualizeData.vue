@@ -5,20 +5,21 @@
 
     <div class="my-4 mx-4">
       <v-expansion-panels v-model="panels">
-        <v-expansion-panel title="Data Visualization">
+        <v-expansion-panel title="Data Visualization" v-if="cardHeight">
           <v-expansion-panel-text>
-            <DataVisualizationCard v-if="cardHeight" :cardHeight="cardHeight" />
+            <DataVisualizationCard :cardHeight="cardHeight" />
           </v-expansion-panel-text>
-          <div
-            v-if="panels === 0"
-            class="resize-handle"
-            @mousedown="handleMouseDown"
-          />
         </v-expansion-panel>
       </v-expansion-panels>
 
       <DataVisTimeFilters />
-      <v-divider />
+
+      <div
+        :class="{ 'resize-handle': panels === 0 }"
+        @mousedown="handleMouseDown"
+      >
+        <v-divider />
+      </div>
 
       <div class="mt-1">
         <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
@@ -32,7 +33,7 @@ import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawe
 import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
 import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
@@ -56,10 +57,17 @@ const {
   dataZoomStart,
   dataZoomEnd,
   selectedDateBtnId,
+  cardHeight,
+  tableHeight,
 } = storeToRefs(useDataVisStore())
 
 const panels = ref(0)
-const cardHeight = ref(40)
+
+watch(panels, () => {
+  if (panels.value === 0)
+    tableHeight.value = Math.max(70 - cardHeight.value, 16)
+  else if (panels.value === undefined) tableHeight.value = Math.max(70, 16)
+})
 
 let startY = 0
 let startHeight = 0
@@ -75,6 +83,7 @@ function handleMouseMove(e: MouseEvent) {
   const diffY = e.clientY - startY
   const diffVh = diffY * (100 / window.innerHeight)
   cardHeight.value = Math.max(startHeight + diffVh, 16) // Minimum height of 16vh
+  tableHeight.value = Math.max(70 - cardHeight.value, 16)
 }
 
 function handleMouseUp() {
@@ -210,7 +219,6 @@ onUnmounted(() => {
 <style scoped>
 .resize-handle {
   cursor: ns-resize;
-  height: 5px;
-  background-color: #ccc;
+  height: 3px;
 }
 </style>

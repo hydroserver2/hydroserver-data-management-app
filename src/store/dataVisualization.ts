@@ -37,6 +37,9 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   const loadingStates = ref(new Map<string, boolean>()) // State to track loading status of individual datasets
   const prevIds = ref<string[]>([])
 
+  const cardHeight = ref(40)
+  const tableHeight = ref(30)
+
   const endDate = ref<Date>(new Date())
   const oneWeek = 7 * 24 * 60 * 60 * 1000
   const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneWeek))
@@ -302,6 +305,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     selectedDateBtnId,
     showSummaryStatistics,
     summaryStatisticsArray,
+    cardHeight,
+    tableHeight,
     matchesSelectedObservedProperty,
     matchesSelectedProcessingLevel,
     matchesSelectedThing,

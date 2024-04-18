@@ -66,7 +66,7 @@
     :sort-by="sortBy"
     multi-sort
     :search="search"
-    height="400"
+    :style="{ 'max-height': `${tableHeight}vh` }"
     fixed-header
     class="elevation-2"
     color="green"
@@ -107,6 +107,7 @@ const {
   selectedDatastreams,
   observedProperties,
   processingLevels,
+  tableHeight,
 } = storeToRefs(useDataVisStore())
 
 const emit = defineEmits(['copyState'])
