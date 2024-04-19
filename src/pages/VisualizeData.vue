@@ -14,12 +14,17 @@
 
       <DataVisTimeFilters />
 
-      <div
-        :class="{ 'resize-handle': panels === 0 }"
+      <v-sheet
+        v-if="panels === 0"
+        class="resize-handle"
         @mousedown="handleMouseDown"
-      >
-        <v-divider />
-      </div>
+        color="blue-grey-lighten-2"
+        :height="4"
+        :elevation="2"
+        rounded="xl"
+        outlined
+      />
+      <v-divider v-else />
 
       <div class="mt-1">
         <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
@@ -219,6 +224,5 @@ onUnmounted(() => {
 <style scoped>
 .resize-handle {
   cursor: ns-resize;
-  height: 3px;
 }
 </style>
