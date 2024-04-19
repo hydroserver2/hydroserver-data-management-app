@@ -17,6 +17,7 @@
       <v-expansion-panel title="Sites">
         <v-expansion-panel-text>
           <v-text-field
+            class="pb-1"
             clearable
             @click:clear="searchThing = ''"
             v-model="searchThing"
@@ -47,6 +48,7 @@
       <v-expansion-panel title="Observed Properties">
         <v-expansion-panel-text>
           <v-text-field
+            class="pb-1"
             clearable
             @click:clear="searchObservedProperty = ''"
             v-model="searchObservedProperty"
@@ -76,6 +78,7 @@
       <v-expansion-panel title="Processing Levels">
         <v-expansion-panel-text>
           <v-text-field
+            class="pb-1"
             clearable
             @click:clear="searchProcessingLevel = ''"
             v-model="searchProcessingLevel"
@@ -225,3 +228,10 @@ const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2])
 const drawer = ref(!!smAndDown)
 </script>
+
+<style scoped>
+::v-deep .v-selection-control,
+::v-deep .v-label {
+  align-items: start;
+}
+</style>
