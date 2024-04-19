@@ -56,7 +56,20 @@ export function generateYAxisOptions(
       type: 'value',
       position,
       offset,
-      axisLine: { lineStyle: { color: yAxisConfig.color } },
+      min: 'dataMin',
+      max: 'dataMax',
+      axisLabel: {
+        showMaxLabel: false,
+        showMinLabel: false,
+      },
+      axisTick: {
+        show: true,
+        length: 5,
+      },
+      splitLine: {
+        show: false,
+      },
+      axisLine: { show: true, lineStyle: { color: yAxisConfig.color } },
     }
   })
 }
