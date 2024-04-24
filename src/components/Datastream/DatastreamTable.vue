@@ -61,7 +61,7 @@
       </div>
       <div v-else>
         <v-dialog v-model="item.chartOpen" width="80rem">
-          <DataVisPopupPlot
+          <DatastreamPopupPlot
             :datastream="item"
             @close="item.chartOpen = false"
           />
@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import DataVisPopupPlot from '@/components/VisualizeData/DataVisPopupPlot.vue'
+import DatastreamPopupPlot from '@/components/Datastream/DatastreamPopupPlot.vue'
 import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, onMounted, ref } from 'vue'

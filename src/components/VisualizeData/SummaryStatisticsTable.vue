@@ -51,7 +51,6 @@ const summaryStatsHeaders = [
   { title: 'Maximum', key: 'maximum' },
   { title: 'Minimum', key: 'minimum' },
   { title: 'Arithmetic Mean', key: 'arithmeticMean' },
-  { title: 'Geometric Mean', key: 'geometricMean' },
   { title: 'Standard Deviation', key: 'standardDeviation' },
   { title: 'Observations', key: 'observations' },
   { title: 'Coefficient of Variation', key: 'coefficientOfVariation' },

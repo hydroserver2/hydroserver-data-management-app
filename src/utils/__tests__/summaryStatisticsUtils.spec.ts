@@ -41,13 +41,6 @@ describe('SummaryStatistics', () => {
     expect(summary3.arithmeticMean).toBeCloseTo(4.5)
   })
 
-  it('calculates geometric mean correctly', () => {
-    expect(summary1.geometricMean).toBeCloseTo(26.05171)
-    expect(summary2.geometricMean).toBeCloseTo(16.41276)
-    expect(summary3.geometricMean).toBeCloseTo(3.764351)
-    expect(summary4.geometricMean).toBeCloseTo(7.394495)
-  })
-
   it('calculates standard deviation correctly', () => {
     expect(summary1.standardDeviation).toBeCloseTo(14.1421)
     expect(summary2.standardDeviation).toBeCloseTo(12.2989)

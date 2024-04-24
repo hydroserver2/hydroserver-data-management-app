@@ -4,14 +4,27 @@
     <DataVisFiltersDrawer />
 
     <div class="my-4 mx-4">
-      <DataVisualizationCard
-        :datastreams="selectedDatastreams"
-        :begin-date="beginDate"
-        :end-date="endDate"
-      />
+      <v-expansion-panels v-model="panels">
+        <v-expansion-panel title="Data Visualization" v-if="cardHeight">
+          <v-expansion-panel-text>
+            <DataVisualizationCard :cardHeight="cardHeight" />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
       <DataVisTimeFilters />
-      <v-divider />
+
+      <v-sheet
+        v-if="panels === 0"
+        class="resize-handle"
+        @mousedown="handleMouseDown"
+        color="blue-grey-lighten-2"
+        :height="4"
+        :elevation="2"
+        rounded="xl"
+        outlined
+      />
+      <v-divider v-else />
 
       <div class="mt-1">
         <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
@@ -25,7 +38,7 @@ import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawe
 import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
 import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
@@ -34,7 +47,7 @@ import { Snackbar } from '@/utils/notifications'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 const route = useRoute()
 
-const { setDateRange, resetState } = useDataVisStore()
+const { onDateBtnClick, resetState } = useDataVisStore()
 const {
   things,
   selectedThings,
@@ -49,7 +62,39 @@ const {
   dataZoomStart,
   dataZoomEnd,
   selectedDateBtnId,
+  cardHeight,
+  tableHeight,
 } = storeToRefs(useDataVisStore())
+
+const panels = ref(0)
+
+watch(panels, () => {
+  if (panels.value === 0)
+    tableHeight.value = Math.max(70 - cardHeight.value, 16)
+  else if (panels.value === undefined) tableHeight.value = Math.max(70, 16)
+})
+
+let startY = 0
+let startHeight = 0
+
+function handleMouseDown(e: MouseEvent) {
+  startY = e.clientY
+  startHeight = cardHeight.value
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
+}
+
+function handleMouseMove(e: MouseEvent) {
+  const diffY = e.clientY - startY
+  const diffVh = diffY * (100 / window.innerHeight)
+  cardHeight.value = Math.max(startHeight + diffVh, 16) // Minimum height of 16vh
+  tableHeight.value = Math.max(70 - cardHeight.value, 16)
+}
+
+function handleMouseUp() {
+  document.removeEventListener('mousemove', handleMouseMove)
+  document.removeEventListener('mouseup', handleMouseUp)
+}
 
 const generateStateUrl = () => {
   const BASE_URL = `${
@@ -109,7 +154,7 @@ const parseUrlAndSetState = () => {
   if (selectedDateBtnIdParam !== '') {
     // Convert the string to a number using the unary plus operator
     const btnId = +selectedDateBtnIdParam
-    setDateRange(btnId)
+    onDateBtnClick(btnId)
   } else {
     const beginDateParam = (route.query.beginDate as string) || ''
     const endDateParam = (route.query.endDate as string) || ''
@@ -175,3 +220,9 @@ onUnmounted(() => {
   resetState()
 })
 </script>
+
+<style scoped>
+.resize-handle {
+  cursor: ns-resize;
+}
+</style>
