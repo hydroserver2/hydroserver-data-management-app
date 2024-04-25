@@ -115,8 +115,13 @@
               multiple
               :rules="rules.minLength(1)"
             >
-              <template v-slot:selection="{ item }">
-                <v-chip color="blue-grey" rounded closable>
+              <template v-slot:selection="{ item, index }">
+                <v-chip
+                  color="blue-grey"
+                  rounded
+                  closable
+                  @click:close="removeKeyword(index)"
+                >
                   <span>{{ item.title }}</span>
                 </v-chip>
               </template>
@@ -229,6 +234,10 @@ const scheduleSelections: ScheduleSelection[] = [
   { value: null, text: "Don't schedule" },
 ]
 
+function removeKeyword(index: number) {
+  if (item.value.resourceKeywords) item.value.resourceKeywords.splice(index, 1)
+}
+
 const datastreamTitle = (item: Datastream) => `${item.description} - ${item.id}`
 
 function removeDatastream(index: number) {
@@ -244,6 +253,7 @@ const generateKeywords = () => {
 }
 
 function generateDefaultFormData() {
+  item.value.thingId = thing.value!.id
   item.value.folderName = 'HydroServer'
   item.value.resourceKeywords = generateKeywords()
   item.value.resourceTitle = `HydroServer Archive: ${thing.value?.name}`

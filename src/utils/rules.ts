@@ -15,8 +15,8 @@ export const requiredNumber = [
 ]
 
 export const minLength = (length: number) => [
-  (value: string) =>
-    value.length >= length ||
+  (value: string | number) =>
+    (value && `${value}`.length >= length) ||
     `This field must be at least ${length} characters long.`,
 ]
 
