@@ -72,7 +72,7 @@
               <v-btn
                 class="px-0"
                 variant="text"
-                :href="item.resourceLink"
+                :href="item.link"
                 target="_blank"
               >
                 Edit this resource in HydroShare
@@ -131,7 +131,7 @@
 
         <v-text-field
           v-if="linkToExistingAccount || isEdit"
-          v-model="item.resourceLink"
+          v-model="item.link"
           label="HydroShare Resource Link (URL) *"
           placeholder="https://www.hydroshare.org/resource/9429f876dc71958d93f22909f2cb12f3/"
           :rules="hydroShareUrl"
@@ -140,7 +140,7 @@
 
         <v-text-field
           label="Resource Folder Name *"
-          v-model="item.folderName"
+          v-model="item.path"
           :rules="rules.required"
           class="mb-4"
         />
@@ -254,7 +254,7 @@ const generateKeywords = () => {
 
 function generateDefaultFormData() {
   item.value.thingId = thing.value!.id
-  item.value.folderName = 'HydroServer'
+  item.value.path = 'HydroServer'
   item.value.resourceKeywords = generateKeywords()
   item.value.resourceTitle = `HydroServer Archive: ${thing.value?.name}`
   item.value.publicResource = !thing.value?.isPrivate

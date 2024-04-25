@@ -48,18 +48,18 @@ export type Frequency = 'daily' | 'weekly' | 'monthly' | null
 export class HydroShareArchive {
   id: string
   thingId: string
-  resourceLink: string
+  link: string
   frequency: Frequency
-  folderName: string
+  path: string
   datastreamIds: string[]
   publicResource: boolean
 
   constructor() {
     this.id = ''
     this.thingId = ''
-    this.resourceLink = ''
+    this.link = ''
     this.frequency = null
-    this.folderName = 'HydroShare'
+    this.path = 'HydroShare'
     this.datastreamIds = []
     this.publicResource = false
   }
