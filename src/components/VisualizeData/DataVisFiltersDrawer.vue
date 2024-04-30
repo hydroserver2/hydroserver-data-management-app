@@ -230,8 +230,8 @@ const drawer = ref(!!smAndDown)
 </script>
 
 <style scoped>
-::v-deep .v-selection-control,
-::v-deep .v-label {
+:deep(.v-selection-control),
+:deep(.v-label) {
   align-items: start;
 }
 </style>
