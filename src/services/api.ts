@@ -11,6 +11,7 @@ import {
   DataSource,
   ThingArchive,
   Tag,
+  User,
 } from '@/types'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`

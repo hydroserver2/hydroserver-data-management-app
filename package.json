@@ -9,8 +9,6 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test-e2e": "cypress open",
-    "test-e2e:run": "cypress run",
     "coverage": "vitest run --coverage --environment jsdom"
   },
   "dependencies": {
@@ -47,7 +45,6 @@
     "@vue/compiler-sfc": "^3.2.47",
     "@vue/test-utils": "^2.4.3",
     "autoprefixer": "^10.4.14",
-    "cypress": "^12.17.2",
     "postcss": "^8.4.23",
     "prettier": "^2.8.8",
     "resize-observer-polyfill": "^1.5.1",
