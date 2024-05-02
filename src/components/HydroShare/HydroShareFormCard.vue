@@ -32,7 +32,7 @@
       validate-on="blur"
       :disabled="loading"
     >
-      <h6 class="text-h6 my-4 d-flex justify-center align-center">
+      <h6 v-if="false" class="text-h6 my-4 d-flex justify-center align-center">
         Archival Scheduling
 
         <v-tooltip open-delay="500">
@@ -55,7 +55,7 @@
         </v-tooltip>
       </h6>
 
-      <v-card-text class="my-3 d-flex justify-center">
+      <v-card-text v-if="false" class="my-3 d-flex justify-center">
         <v-btn
           v-for="selection in scheduleSelections"
           rounded
