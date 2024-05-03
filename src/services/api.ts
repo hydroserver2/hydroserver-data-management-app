@@ -12,13 +12,10 @@ import {
   Tag,
   PostHydroShareArchive,
   HydroShareArchive,
+  User,
 } from '@/types'
 
-export const BASE_URL = `${
-  import.meta.env.MODE === 'development'
-    ? 'http://127.0.0.1:3030'
-    : import.meta.env.VITE_APP_PROXY_BASE_URL
-}/api`
+export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 
 export const ACCOUNT_BASE = `${BASE_URL}/account`
 export const TAG_BASE = `${BASE_URL}/data/tags`

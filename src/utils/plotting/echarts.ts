@@ -42,15 +42,36 @@ export function createYAxisConfigurations(
 export function generateYAxisOptions(
   yAxisConfigurations: yAxisConfigurationMap
 ): YAXisComponentOption[] {
-  return Array.from(yAxisConfigurations.values()).map((yAxisConfig, index) => ({
-    name: yAxisConfig.yAxisLabel,
-    nameLocation: 'middle',
-    nameGap: 60,
-    type: 'value',
-    position: yAxisConfig.index === 0 ? 'left' : 'right',
-    offset: yAxisConfig.index > 0 ? (yAxisConfig.index - 1) * 85 : 0,
-    axisLine: { lineStyle: { color: yAxisConfig.color } },
-  }))
+  const leftYAxesCount = Math.ceil(yAxisConfigurations.size / 2)
+
+  return Array.from(yAxisConfigurations.values()).map((yAxisConfig, index) => {
+    const position = index < leftYAxesCount ? 'left' : 'right'
+    let offset = index === 0 ? 0 : (index - leftYAxesCount) * 85
+    if (position === 'left') offset = -offset
+
+    return {
+      name: yAxisConfig.yAxisLabel,
+      nameLocation: 'middle',
+      nameGap: 60,
+      type: 'value',
+      position,
+      offset,
+      min: 'dataMin',
+      max: 'dataMax',
+      axisLabel: {
+        showMaxLabel: false,
+        showMinLabel: false,
+      },
+      axisTick: {
+        show: true,
+        length: 5,
+      },
+      splitLine: {
+        show: false,
+      },
+      axisLine: { show: true, lineStyle: { color: yAxisConfig.color } },
+    }
+  })
 }
 
 export function generateSeriesOptions(
@@ -64,6 +85,9 @@ export function generateSeriesOptions(
     yAxisIndex: yAxisConfigurations.get(series.yAxisLabel)?.index,
     itemStyle: {
       color: series.lineColor,
+    },
+    lineStyle: {
+      width: 1,
     },
     sampling: 'lttb',
     showSymbol: false,
@@ -86,7 +110,7 @@ export function generateToolboxOptions() {
         yAxisIndex: 'none',
       },
       restore: {},
-      saveAsImage: {},
+      saveAsImage: { name: 'plot_export' },
     },
   }
 }
@@ -121,18 +145,20 @@ export const createEChartsOption = (
   const yAxisOptions = generateYAxisOptions(yAxisConfigurations)
   const seriesOptions = generateSeriesOptions(seriesArray, yAxisConfigurations)
 
-  let gridRightPadding = 20
-  if (yAxisConfigurations.size > 1)
-    gridRightPadding += (yAxisConfigurations.size - 1) * 85
+  const leftYAxesCount = Math.ceil(yAxisConfigurations.size / 2)
+  const rightYAxesCount = yAxisConfigurations.size - leftYAxesCount
+  let gridRightPadding = 20 + rightYAxesCount * 85
+  let gridLeftPadding = leftYAxesCount * 85
 
   let echartsOption: EChartsOption = {
     grid: {
       bottom: 80,
       right: gridRightPadding,
       top: 50 + 15 * seriesArray.length,
-      left: 80,
+      left: gridLeftPadding,
     },
     tooltip: {
+      confine: true,
       trigger: 'axis',
       axisPointer: {
         type: 'cross',
@@ -144,6 +170,18 @@ export const createEChartsOption = (
     },
     xAxis: {
       type: 'time',
+      axisLabel: {
+        hideOverlap: true,
+        formatter: {
+          year: '{yyyy}',
+          month: '{MMM} {yyyy}',
+          day: '{MMM} {d}, {yy}',
+          hour: '{HH}:{mm}\n{MMM} {d}, {yy}',
+          minute: '{HH}:{mm}\n{MMM} {d}, {yy}',
+          second: '{H}:{mm}:{s}\n{MMM} {d}, {yy}',
+          millisecond: '{HH}:{mm}:{s}:{S}\n{MMM} {d}, {yy}',
+        },
+      },
     },
     yAxis: yAxisOptions,
     series: seriesOptions,

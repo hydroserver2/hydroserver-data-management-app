@@ -1,7 +1,7 @@
 <template>
   <v-row class="my-2" align="center">
     <v-col>
-      <h5 class="text-h5">Datasets</h5>
+      <h5 class="text-h5">Datastreams</h5>
     </v-col>
 
     <v-col cols="12" sm="auto">
@@ -18,7 +18,7 @@
       <v-select
         label="Show/Hide Columns"
         v-model="selectedHeaders"
-        :items="headers"
+        :items="selectableHeaders"
         item-text="title"
         item-value="key"
         multiple
@@ -50,12 +50,13 @@
     <v-btn @click="clearSelected"> Clear Selected </v-btn>
 
     <v-btn variant="outlined" @click="showOnlySelected = !showOnlySelected">
-      Showing: {{ showOnlySelected ? 'Selected' : 'All' }}
+      {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
     </v-btn>
 
     <v-btn
+      :loading="downloading"
       prepend-icon="mdi-download"
-      @click="downloadSelectedDatastreamsCSVs(selectedDatastreams)"
+      @click="downloadSelected(selectedDatastreams)"
       >Download Selected</v-btn
     >
   </v-toolbar>
@@ -63,8 +64,9 @@
     :headers="headers.filter((header) => header.visible)"
     :items="tableItems"
     :sort-by="sortBy"
+    multi-sort
     :search="search"
-    height="400"
+    :style="{ 'max-height': `${tableHeight}vh` }"
     fixed-header
     class="elevation-2"
     color="green"
@@ -105,16 +107,28 @@ const {
   selectedDatastreams,
   observedProperties,
   processingLevels,
+  tableHeight,
 } = storeToRefs(useDataVisStore())
 
 const emit = defineEmits(['copyState'])
 
 const showOnlySelected = ref(false)
 const openInfoCard = ref(false)
+const downloading = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
 
 const copyStateToClipboard = async () => {
   emit('copyState')
+}
+
+const downloadSelected = async (selectedDatastreams: Datastream[]) => {
+  downloading.value = true
+  try {
+    await downloadSelectedDatastreamsCSVs(selectedDatastreams)
+  } catch (error) {
+    console.error('Error downloading selected datastreams', error)
+  }
+  downloading.value = false
 }
 
 const onRowClick = (event: Event, item: any) => {
@@ -201,7 +215,15 @@ const headers = reactive([
   },
 ])
 
-const sortBy = [{ key: 'siteCodeName' }]
+const selectableHeaders = computed(() => {
+  return headers.filter((header) => header.key !== 'plot')
+})
+
+const sortBy = [
+  { key: 'siteCodeName' },
+  { key: 'observedPropertyName' },
+  { key: 'qualityControlLevelDefinition' },
+]
 const selectedHeaders = computed({
   get: () =>
     headers.filter((header) => header.visible).map((header) => header.key),

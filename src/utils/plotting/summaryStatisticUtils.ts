@@ -1,7 +1,6 @@
 import { GraphSeries } from '@/types'
 
 // Math References:
-//      ArithmeticMean - https://www.geeksforgeeks.org/geometric-mean-two-methods/
 //      Standard Deviation - https://stackoverflow.com/questions/7343890/standard-deviation-javascript
 //      Quantile - https://www.geeksforgeeks.org/d3-js-d3-quantile-function/
 
@@ -10,7 +9,6 @@ export class SummaryStatistics {
   maximum: number
   minimum: number
   arithmeticMean: number
-  geometricMean: number
   standardDeviation: number
   observations: number
   coefficientOfVariation: number
@@ -30,7 +28,6 @@ export class SummaryStatistics {
     this.maximum = this.sortedData[this.observations - 1]
     this.minimum = this.sortedData[0]
     this.arithmeticMean = this.computeArithmeticMean()
-    this.geometricMean = this.computeGeometricMean()
     this.standardDeviation = this.computeStandardDeviation()
     this.coefficientOfVariation = this.standardDeviation / this.arithmeticMean
     this.quantile10 = this.computeQuantile(0.1)
@@ -43,11 +40,6 @@ export class SummaryStatistics {
   private computeArithmeticMean(): number {
     const sum = this.sortedData.reduce((a, b) => a + b, 0)
     return sum / this.observations
-  }
-
-  private computeGeometricMean(): number {
-    const product = this.sortedData.reduce((a, b) => a * b, 1)
-    return Math.pow(product, 1 / this.observations)
   }
 
   private computeStandardDeviation(): number {
