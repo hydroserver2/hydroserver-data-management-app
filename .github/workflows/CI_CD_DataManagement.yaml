@@ -1,7 +1,13 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline - DataManagement App
 run-name: Running CI/CD Pipeline
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'DataManagement/**'
+  pull_request:
+    paths:
+      - 'DataManagement/**'
 
 permissions:
   id-token: write
@@ -19,14 +25,16 @@ jobs:
         with:
           node-version: 18.x
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: DataManagement/package-lock.json
       - name: Install dependencies
-        run: npm ci
+        run: |
+         cd DataManagement
+         npm ci
 
       - name: Add Environment Variables
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          cat << EOF > .env
+          cat << EOF > DataManagement/.env
           VITE_APP_VERSION=${{ secrets.VITE_APP_VERSION }}
           VITE_APP_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_APP_GOOGLE_MAPS_API_KEY }}
           VITE_APP_GOOGLE_MAPS_API_ID=${{ secrets.VITE_APP_GOOGLE_MAPS_API_ID }}
@@ -34,13 +42,15 @@ jobs:
           EOF
 
       - name: Build
-        run: npm run build
+        run: |
+        cd DataManagement
+        npm run build
 
       - name: Cache Build Artifacts
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/cache@v2
         with:
-          path: dist
+          path: DataManagement/dist
           key: build-${{ github.run_id }}
           restore-keys: |
             build-
@@ -56,13 +66,19 @@ jobs:
         with:
           node-version: 18.x
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: DataManagement/package-lock.json
       - name: Install dependencies
-        run: npm ci
+        run: |
+        cd DataManagement
+        npm ci
       - name: Run tests
-        run: npm run test
+        run: |
+        cd DataManagement
+        npm run test
       - name: Check coverage
-        run: npm run coverage
+        run: |
+        cd DataManagement
+        npm run coverage
 
   Deploy-Dev:
     name: Deploy to AWS S3 Dev
@@ -90,7 +106,7 @@ jobs:
       - name: Deploy to S3
         run: |
           echo ${{ vars.AWS_WEB_DEV_BUCKET }}
-          aws s3 sync ./dist s3://${{ vars.AWS_WEB_DEV_BUCKET }}/ --delete
+          aws s3 sync ./DataManagement/dist s3://${{ vars.AWS_WEB_DEV_BUCKET }}/ --delete
 
       - name: Invalidate CloudFront distribution cache
         run: |
