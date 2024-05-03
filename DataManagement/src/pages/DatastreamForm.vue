@@ -321,9 +321,9 @@ import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCa
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { useMetadata } from '@/composables/useMetadata'
-import { Thing, Unit } from '@/types'
+import { Thing, Unit } from '@shared/types'
 import { api } from '@/services/api'
-import { Datastream } from '@/types'
+import { Datastream } from '@shared/types'
 import { VForm } from 'vuetify/components'
 import router from '@/router/router'
 

@@ -164,7 +164,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import GoogleMap from '../GoogleMap.vue'
 import { useThingStore } from '@/store/thing'
-import { Thing } from '@/types'
+import { Thing } from '@shared/types'
 import { siteTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'

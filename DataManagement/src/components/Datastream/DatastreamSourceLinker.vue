@@ -52,7 +52,7 @@
 import { onMounted, ref } from 'vue'
 import { api } from '@/services/api'
 import { rules } from '@/utils/rules'
-import { DataSource, Datastream } from '@/types'
+import { DataSource, Datastream } from '@shared/types'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Snackbar } from '@/utils/notifications'
 

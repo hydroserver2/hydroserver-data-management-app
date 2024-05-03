@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream, Thing } from '@/types'
+import { Datastream, Thing } from '@shared/types'
 import { computed, onMounted, ref } from 'vue'
 import { api } from '@/services/api'
 

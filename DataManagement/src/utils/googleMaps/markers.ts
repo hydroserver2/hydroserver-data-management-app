@@ -1,6 +1,6 @@
-import { Thing } from '@/types'
+import { Thing } from '@shared/types'
 import { googlePinColors } from '@/utils/materialColors'
-import { ThingWithColor } from '@/types'
+import { ThingWithColor } from '@shared/types'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 
 let infoWindow: google.maps.InfoWindow | null = null

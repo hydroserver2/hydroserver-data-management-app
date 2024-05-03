@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream, GraphSeries } from '@/types'
+import { Datastream, GraphSeries } from '@shared/types'
 import { subtractHours } from '@/utils/observationsUtils'
 import { createEChartsOption } from '@/utils/plotting/echarts'
 import { EChartsOption } from 'echarts'

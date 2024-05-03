@@ -252,7 +252,7 @@ v-col
 import { onMounted, ref } from 'vue'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
-import { DataLoader, DataSource } from '@/types'
+import { DataLoader, DataSource } from '@shared/types'
 import { rules } from '@/utils/rules'
 
 const props = defineProps(['dataSource'])

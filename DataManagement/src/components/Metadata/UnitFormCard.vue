@@ -60,7 +60,7 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 
-import { Unit } from '@/types'
+import { Unit } from '@shared/types'
 import { computed } from 'vue'
 
 const props = defineProps({ unit: Object as () => Unit })

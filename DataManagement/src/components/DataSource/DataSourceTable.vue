@@ -65,7 +65,7 @@
 import { onMounted, ref } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
-import { DataLoader, DataSource } from '@/types'
+import { DataLoader, DataSource } from '@shared/types'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'

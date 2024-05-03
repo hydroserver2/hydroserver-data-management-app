@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { watch, onMounted, ref, computed } from 'vue'
-import { Datastream, Thing } from '@/types'
+import { Datastream, Thing } from '@shared/types'
 import { useMetadata } from '@/composables/useMetadata'
 
 const { sensors, observedProperties, processingLevels, fetchMetadata } =

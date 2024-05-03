@@ -1,5 +1,5 @@
 import { api } from '@/services/api'
-import { Datastream } from '@/types'
+import { Datastream } from '@shared/types'
 import JSZip from 'jszip'
 
 export const downloadDatastreamCSV = async (id: string) => {

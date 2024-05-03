@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Thing } from '@/types'
+import { Thing } from '@shared/types'
 import { api } from '@/services/api'
 import GoogleMap from '@/components/GoogleMap.vue'
 import BrowseFilterTool from '@/components/Browse/BrowseFilterTool.vue'

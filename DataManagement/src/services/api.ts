@@ -13,7 +13,7 @@ import {
   PostHydroShareArchive,
   HydroShareArchive,
   User,
-} from '@/types'
+} from '@shared/types'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 

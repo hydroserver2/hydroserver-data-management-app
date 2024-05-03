@@ -29,7 +29,7 @@
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
-import { Sensor } from '@/types'
+import { Sensor } from '@shared/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 

@@ -1,4 +1,4 @@
-import { GraphSeries } from '@/types'
+import { GraphSeries } from '@shared/types'
 
 // Math References:
 //      Standard Deviation - https://stackoverflow.com/questions/7343890/standard-deviation-javascript

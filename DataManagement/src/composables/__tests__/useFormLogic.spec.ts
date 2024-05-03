@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { Unit } from '@/types'
+import { Unit } from '@shared/types'
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, nextTick } from 'vue'
 import unitFixtures from '@/utils/test/fixtures/unitFixtures'

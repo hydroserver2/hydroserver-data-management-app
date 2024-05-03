@@ -88,7 +88,7 @@ import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { computed } from 'vue'
 import { methodTypes } from '@/vocabularies'
-import { Sensor } from '@/types'
+import { Sensor } from '@shared/types'
 
 const props = defineProps({ sensor: Object as () => Sensor })
 const emit = defineEmits(['created', 'updated', 'close'])

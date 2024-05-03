@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
-import { OAuthProvider } from '@/types'
+import { OAuthProvider } from '@shared/types'
 import { OAUTH_ENDPOINT } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'

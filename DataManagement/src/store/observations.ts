@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { Datastream, ObservationRecord, GraphSeries } from '@/types'
+import { Datastream, ObservationRecord, GraphSeries } from '@shared/types'
 import {
   fetchObservationsParallel,
   preProcessData,

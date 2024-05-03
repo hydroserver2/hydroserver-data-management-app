@@ -1,5 +1,5 @@
 import { onMounted, computed, ref, ComputedRef } from 'vue'
-import { ProcessingLevel, DatastreamMetadata } from '@/types'
+import { ProcessingLevel, DatastreamMetadata } from '@shared/types'
 import { api as defaultApi } from '@/services/api'
 
 interface Api {

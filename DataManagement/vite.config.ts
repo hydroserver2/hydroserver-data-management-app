@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
+import path from 'path'
 
 export default defineConfig({
   plugins: [
@@ -24,6 +25,7 @@ export default defineConfig({
     extensions: ['.js', '.json', '.vue', '.less', '.scss', '.ts'],
     alias: {
       '@': resolve(__dirname, 'src'),
+      '@shared': path.resolve(__dirname, '../shared'),
     },
   },
   build: {
@@ -45,7 +47,6 @@ export default defineConfig({
         '**/src/plugins/**',
         '**/src/router/**',
         '**/src/store/**',
-        '**/src/types/**',
         '**/src/config/**',
         '**/src/services/api.ts',
         '**/src/services/apiMethods.ts',

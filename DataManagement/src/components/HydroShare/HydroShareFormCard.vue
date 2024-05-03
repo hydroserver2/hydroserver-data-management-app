@@ -194,7 +194,7 @@
 import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
-import { Datastream, PostHydroShareArchive, Frequency } from '@/types'
+import { Datastream, PostHydroShareArchive, Frequency } from '@shared/types'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { hydroShareUrl, rules } from '@/utils/rules'

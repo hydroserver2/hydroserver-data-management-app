@@ -1,4 +1,9 @@
-import { DataArray, DataPoint, Datastream, TimeSpacingUnit } from '@/types'
+import {
+  DataArray,
+  DataPoint,
+  Datastream,
+  TimeSpacingUnit,
+} from '@shared/types'
 import { api, getObservationsEndpoint } from '@/services/api'
 
 export function subtractHours(timestamp: string, hours: number): string {

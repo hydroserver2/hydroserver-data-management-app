@@ -67,7 +67,7 @@ import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { OPVariableTypes, OPNameTypes } from '@/vocabularies'
-import { ObservedProperty } from '@/types'
+import { ObservedProperty } from '@shared/types'
 
 const OPNames = Object.keys(OPNameTypes)
 

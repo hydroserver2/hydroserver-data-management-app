@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 import { useTableLogic } from '../useTableLogic'
-import { Unit } from '@/types'
+import { Unit } from '@shared/types'
 import unitFixtures from '@/utils/test/fixtures/unitFixtures'
 
 const defaultFetchFunction: () => Promise<Unit[]> = () => {

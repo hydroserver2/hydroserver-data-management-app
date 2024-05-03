@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
-import { ResultQualifier } from '@/types'
+import { ResultQualifier } from '@shared/types'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
 

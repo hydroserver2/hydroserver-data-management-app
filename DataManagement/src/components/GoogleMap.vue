@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { Thing } from '@/types'
+import { Thing } from '@shared/types'
 import {
   loadMap,
   getBoundedMapOptions,
@@ -25,7 +25,7 @@ import {
 } from '@/utils/googleMaps/loadMap'
 import { loadMarkers, addColorToMarkers } from '@/utils/googleMaps/markers'
 import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
-import { ThingWithColor } from '@/types'
+import { ThingWithColor } from '@shared/types'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { defaultMapOptions } from '@/config/googleMapsConfig'
 

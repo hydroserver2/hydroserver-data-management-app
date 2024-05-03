@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream } from '@/types'
+import { Datastream } from '@shared/types'
 import { ref } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'

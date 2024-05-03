@@ -1,5 +1,5 @@
 import { api } from '@/services/api'
-import { Tag } from '@/types'
+import { Tag } from '@shared/types'
 import { ref, computed, onMounted } from 'vue'
 
 export function useUserTags() {

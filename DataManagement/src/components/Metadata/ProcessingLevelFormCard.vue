@@ -56,7 +56,7 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 
-import { ProcessingLevel } from '@/types'
+import { ProcessingLevel } from '@shared/types'
 import { computed } from 'vue'
 
 const props = defineProps({ processingLevel: Object as () => ProcessingLevel })

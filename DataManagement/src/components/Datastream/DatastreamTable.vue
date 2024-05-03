@@ -111,7 +111,7 @@ import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
-import { DataArray, Datastream } from '@/types'
+import { DataArray, Datastream } from '@shared/types'
 
 const props = defineProps({
   thingId: {

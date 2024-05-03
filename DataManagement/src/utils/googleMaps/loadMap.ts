@@ -1,4 +1,4 @@
-import { Thing } from '@/types'
+import { Thing } from '@shared/types'
 import { Loader } from '@googlemaps/js-api-loader'
 
 type Map = google.maps.Map

@@ -1,4 +1,4 @@
-import { DataSource } from '@/types'
+import { DataSource } from '@shared/types'
 
 export function getStatus(ds: DataSource) {
   if (!ds.lastSynced) return 'pending'

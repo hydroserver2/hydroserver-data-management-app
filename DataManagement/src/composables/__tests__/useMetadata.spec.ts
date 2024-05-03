@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useMetadata } from '@/composables/useMetadata'
-import { DatastreamMetadata } from '@/types'
+import { DatastreamMetadata } from '@shared/types'
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 import unitFixtures from '@/utils/test/fixtures/unitFixtures'

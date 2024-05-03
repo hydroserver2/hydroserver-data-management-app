@@ -29,7 +29,7 @@
 import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
-import { ObservedProperty } from '@/types'
+import { ObservedProperty } from '@shared/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'
 

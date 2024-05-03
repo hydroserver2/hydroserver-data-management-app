@@ -77,9 +77,9 @@ import SiteFilterTool from '@/components/Site/SiteFilterTool.vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
 import { api } from '@/services/api'
-import { Thing } from '@/types'
+import { Thing } from '@shared/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
-import { ThingWithColor } from '@/types'
+import { ThingWithColor } from '@shared/types'
 
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)

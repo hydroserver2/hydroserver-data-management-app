@@ -189,7 +189,7 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { useHydroShareStore } from '@/store/hydroShare'
 import HydroSharePrivacyCard from '@/components/HydroShare/HydroSharePrivacyCard.vue'
-import { PostHydroShareArchive } from '@/types'
+import { PostHydroShareArchive } from '@shared/types'
 
 const { hydroShareArchive } = storeToRefs(useHydroShareStore())
 const { user } = storeToRefs(useUserStore())
