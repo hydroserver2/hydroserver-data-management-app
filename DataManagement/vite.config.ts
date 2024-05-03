@@ -25,7 +25,7 @@ export default defineConfig({
     extensions: ['.js', '.json', '.vue', '.less', '.scss', '.ts'],
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@shared': path.resolve(__dirname, '../shared'),
+      '@shared': path.resolve(__dirname, '../shared/src'),
     },
   },
   build: {
