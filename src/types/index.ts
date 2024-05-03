@@ -43,11 +43,47 @@ export interface Tag {
   value: string
 }
 
+export type Frequency = 'daily' | 'weekly' | 'monthly' | null
+
+export class HydroShareArchive {
+  id: string
+  thingId: string
+  link: string
+  frequency: Frequency
+  path: string
+  datastreamIds: string[]
+  publicResource: boolean
+
+  constructor() {
+    this.id = ''
+    this.thingId = ''
+    this.link = ''
+    this.frequency = null
+    this.path = 'HydroShare'
+    this.datastreamIds = []
+    this.publicResource = false
+  }
+}
+
+export class PostHydroShareArchive extends HydroShareArchive {
+  resourceTitle?: string
+  resourceAbstract?: string
+  resourceKeywords?: string[]
+
+  constructor() {
+    super()
+    this.resourceTitle = undefined
+    this.resourceAbstract = undefined
+    this.resourceKeywords = undefined
+  }
+}
+
 export class Thing {
   id: string
   name: string
   owners: Owner[]
   tags: Tag[]
+  hydroShareArchive?: HydroShareArchive | null
   siteType: string
   samplingFeatureCode: string
   isPrivate: boolean
@@ -64,7 +100,6 @@ export class Thing {
   country: string
   isPrimaryOwner: boolean
   dataDisclaimer: string
-  hydroShareArchiveResourceId: string
 
   constructor() {
     this.id = ''
@@ -84,7 +119,6 @@ export class Thing {
     this.country = ''
     this.isPrimaryOwner = false
     this.dataDisclaimer = ''
-    this.hydroShareArchiveResourceId = ''
   }
 }
 
@@ -360,20 +394,4 @@ export enum OAuthProvider {
   google = 'google',
   orcid = 'orcid',
   hydroshare = 'hydroshare',
-}
-
-export class ThingArchive {
-  resourceTitle: string
-  resourceAbstract: string
-  resourceKeywords: string[]
-  publicResource: boolean
-  datastreams: Datastream[]
-
-  constructor() {
-    this.resourceTitle = ''
-    this.resourceAbstract = ''
-    this.resourceKeywords = []
-    this.publicResource = false
-    this.datastreams = []
-  }
 }

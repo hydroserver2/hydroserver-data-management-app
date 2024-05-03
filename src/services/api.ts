@@ -9,8 +9,9 @@ import {
   ObservedProperty,
   Datastream,
   DataSource,
-  ThingArchive,
   Tag,
+  PostHydroShareArchive,
+  HydroShareArchive,
   User,
 } from '@/types'
 
@@ -89,11 +90,6 @@ export const api = {
   sendVerificationEmail: async () =>
     apiMethods.post(`${ACCOUNT_BASE}/send-verification-email`),
 
-  connectToHydroShare: async () =>
-    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/connect`),
-  disconnectFromHydroShare: async () =>
-    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/disconnect`),
-
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
   fetchUnownedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=noUser`),
@@ -157,14 +153,29 @@ export const api = {
 
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
-  postHydroShareArchive: async (thingId: string, thingArchive: ThingArchive) =>
-    apiMethods.post(`${THINGS_BASE}/${thingId}/archive`, {
-      resourceTitle: thingArchive.resourceTitle,
-      resourceAbstract: thingArchive.resourceAbstract,
-      resourceKeywords: thingArchive.resourceKeywords,
-      publicResource: thingArchive.publicResource,
-      datastreams: thingArchive.datastreams.map((datastream) => datastream.id),
-    }),
+
+  connectToHydroShare: async () =>
+    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/connect`),
+  disconnectFromHydroShare: async () =>
+    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/disconnect`),
+  createHydroShareArchive: async (archive: PostHydroShareArchive) =>
+    apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
+  updateHydroShareArchive: async (
+    newArchive: HydroShareArchive,
+    oldArchive?: HydroShareArchive
+  ) =>
+    apiMethods.patch(
+      `${THINGS_BASE}/${newArchive.thingId}/archive`,
+      newArchive,
+      oldArchive
+    ),
+  fetchHydroShareArchive: async (thingId: string) =>
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/archive`),
+  deleteHydroShareArchive: async (thingId: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/archive`),
+  archiveToHydroShare: async (thingId: string) =>
+    apiMethods.post(`${THINGS_BASE}/${thingId}/archive/trigger`),
+
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
   fetchDatastreams: async () => apiMethods.fetch(DS_BASE),

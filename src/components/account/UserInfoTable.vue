@@ -1,5 +1,5 @@
 <template>
-  <v-data-table class="elevation-3 my-6 rounded-lg">
+  <v-data-table density="compact" class="elevation-3 my-6 rounded-lg">
     <template v-slot:top>
       <v-toolbar color="secondary">
         <h5 class="text-h5 ml-4">User Information</h5>
@@ -29,8 +29,8 @@ const { user } = storeToRefs(useUserStore())
 const { setUser } = useUserStore()
 const loaded = ref(false)
 const route = useRoute()
-const hydroShareOauthEnabled = import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
-
+const hydroShareOauthEnabled =
+  import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
 
 const tryUserRefresh = async () => {
   const refresh = (route.query.refresh as LocationQueryValue) || false
@@ -68,48 +68,16 @@ const userInformation = computed(() => {
     { icon: 'fas fa-phone', label: 'Phone', value: user.value.phone },
     { icon: 'fas fa-id-badge', label: 'Type', value: user.value.type },
     { icon: 'fas fa-link', label: 'Link', value: user.value.link },
-    user.value.organization
-      ? {
-          icon: 'fas fa-building',
-          label: 'Organization Name',
-          value: user.value.organization.name,
-        }
-      : null,
-    user.value.organization
-      ? {
-          icon: 'fas fa-code',
-          label: 'Organization Code',
-          value: user.value.organization.code,
-        }
-      : null,
-    user.value.organization
-      ? {
-          icon: 'fas fa-external-link-alt',
-          label: 'Organization Link',
-          value: user.value.organization.link,
-        }
-      : null,
-    user.value.organization
-      ? {
-          icon: 'fas fa-industry',
-          label: 'Organization Type',
-          value: user.value.organization.type,
-        }
-      : null,
-    user.value.organization
-      ? {
-          icon: 'fas fa-file-alt',
-          label: 'Organization Description',
-          value: user.value.organization.description,
-        }
-      : null,
     hydroShareOauthEnabled === 'true'
       ? {
           icon: 'fas fa-database',
           label: 'HydroShare Account',
-          value: user.value.hydroShareConnected === true ? 'Connected' : 'Not Connected'
+          value:
+            user.value.hydroShareConnected === true
+              ? 'Connected'
+              : 'Not Connected',
         }
-      : null
+      : null,
   ].filter(Boolean)
 })
 </script>

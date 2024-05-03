@@ -23,18 +23,6 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="isOwner && hydroShareConnected">
-        <v-btn @click="isHydroShareArchiveModalOpen = true"
-          >Archive to HydroShare</v-btn
-        >
-        <v-dialog v-model="isHydroShareArchiveModalOpen" width="60rem">
-          <SiteHydroShareArchivalModal
-            @close="isHydroShareArchiveModalOpen = false"
-            :thing-id="thingId"
-          />
-        </v-dialog>
-      </v-col>
-
       <v-col cols="auto" v-if="isOwner">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit Site Information</v-btn
@@ -54,6 +42,24 @@
             @switch-to-access-control="switchToAccessControlModal"
             @close="isDeleteModalOpen = false"
             @delete="onDeleteThing"
+          />
+        </v-dialog>
+      </v-col>
+
+      <v-spacer />
+
+      <v-col cols="auto" v-if="isOwner && hydroShareConnected">
+        <v-btn
+          color="deep-orange-lighten-1"
+          @click="isHydroShareModalOpen = true"
+          :loading="hydroShareLoading"
+        >
+          {{ archivalBtnName }}
+        </v-btn>
+        <v-dialog v-model="isHydroShareModalOpen" width="60rem">
+          <HydroShareFormCard
+            :archive="hydroShareArchive || undefined"
+            @close="isHydroShareModalOpen = false"
           />
         </v-dialog>
       </v-col>
@@ -94,9 +100,7 @@
       You are not authorized to view this private site.
     </h5>
   </v-container>
-  <v-container v-else>
-    <h5 class="text-h5 my-4">Loading Site Details...</h5>
-  </v-container>
+  <FullScreenLoader v-else />
 </template>
 
 <script setup lang="ts">
@@ -114,23 +118,38 @@ import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
-import SiteHydroShareArchivalModal from '@/components/Site/SiteHydroShareArchivalModal.vue'
+import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
+import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
+import { useHydroShareStore } from '@/store/hydroShare'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
+const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
+  useHydroShareStore()
+)
 
 const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
+
 const isOwner = computed(() => thing.value?.ownsThing)
 const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
+const archivalBtnName = computed(() => {
+  const BASE_NAME = 'HydroShare Archival'
+  if (hydroShareArchive.value) {
+    if (hydroShareArchive.value.frequency)
+      return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
+    else return `${BASE_NAME} (manual)`
+  } else return `Configure ${BASE_NAME}`
+})
+
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-const isHydroShareArchiveModalOpen = ref(false)
+const isHydroShareModalOpen = ref(false)
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
@@ -163,13 +182,22 @@ onMounted(async () => {
     .then((data) => (photos.value = data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
-    thing.value = await api.fetchThing(thingId)
-  } catch (error) {
-    if (error instanceof Error && parseInt(error.message) === 403) {
-      authorized.value = false
-    } else {
-      console.error('Error fetching thing', error)
-    }
+    const [thingResponse, hydroShareArchiveResponse] = await Promise.all([
+      api.fetchThing(thingId).catch((error) => {
+        if (error instanceof Error && parseInt(error.message) === 403)
+          authorized.value = false
+        else console.error('Error fetching thing', error)
+
+        return null
+      }),
+      api.fetchHydroShareArchive(thingId).catch((error) => {
+        console.error('Error fetching hydroShareArchive', error)
+        return null
+      }),
+    ])
+
+    thing.value = thingResponse
+    hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
     loaded.value = true
   }

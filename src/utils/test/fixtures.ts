@@ -6,7 +6,6 @@ export const thing = {
   samplingFeatureCode: 'MIA1',
   siteType: 'House',
   dataDisclaimer: null,
-  hydroShareArchiveResourceId: null,
   latitude: 25.779063,
   longitude: -80.162356,
   elevation_m: 1,

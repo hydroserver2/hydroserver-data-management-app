@@ -15,8 +15,8 @@ export const requiredNumber = [
 ]
 
 export const minLength = (length: number) => [
-  (value: string) =>
-    value.length >= length ||
+  (value: string | number) =>
+    (value && `${value}`.length >= length) ||
     `This field must be at least ${length} characters long.`,
 ]
 
@@ -99,6 +99,15 @@ export const urlFormat = [
   },
 ]
 
+export const hydroShareUrl = [
+  (value: string) => {
+    const urlPattern =
+      /^(https?:\/\/(www\.)?hydroshare\.org\/resource\/[a-z0-9]+\/?)$/i
+
+    return urlPattern.test(value) || 'Must be a valid HydroShare resource URL.'
+  },
+]
+
 export const rules = {
   minLength,
   maxLength,
@@ -113,6 +122,7 @@ export const rules = {
   urlFormat,
   phoneNumber,
   nonNumericCharacter,
+  hydroShareUrl,
 
   email: [...required, ...emailFormat],
   password: [...required, ...minLength(8), ...nonNumericCharacter],
