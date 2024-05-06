@@ -5,9 +5,13 @@ on:
   push:
     paths:
       - 'DataManagement/**'
+      - '.github/workflows/**'
+      - 'shared/**'
   pull_request:
     paths:
       - 'DataManagement/**'
+      - '.github/workflows/**'
+      - 'shared/**'
 
 permissions:
   id-token: write
