@@ -31,7 +31,6 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install dependencies
-        working-directory: DataManagement
         run: npm ci
 
       - name: Add Environment Variables
@@ -45,8 +44,9 @@ jobs:
           EOF
 
       - name: Build
-        working-directory: DataManagement
-        run: npm run build
+        run: |
+          cd DataManagement
+          npm run build
 
       - name: Cache Build Artifacts
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
