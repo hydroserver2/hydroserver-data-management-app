@@ -70,14 +70,15 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install dependencies
-        working-directory: DataManagement
         run: npm ci
       - name: Run tests
-        working-directory: DataManagement
-        run: npm run test
+        run: |
+          cd DataManagement
+          npm run test
       - name: Check coverage
-        working-directory: DataManagement
-        run: npm run coverage
+        run: |
+          cd DataManagement
+          npm run coverage
 
   Deploy-Dev:
     name: Deploy to AWS S3 Dev
