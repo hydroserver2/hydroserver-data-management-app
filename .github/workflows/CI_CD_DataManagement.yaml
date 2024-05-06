@@ -27,9 +27,8 @@ jobs:
           cache: npm
           cache-dependency-path: DataManagement/package-lock.json
       - name: Install dependencies
-        run: |
-          cd DataManagement
-          npm ci
+        working-directory: DataManagement
+        run: npm ci
 
       - name: Add Environment Variables
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -42,16 +41,15 @@ jobs:
           EOF
 
       - name: Build
-        run: |
-          cd DataManagement
-          npm run build
+        working-directory: DataManagement
+        run: npm run build
 
       - name: Cache Build Artifacts
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/cache@v2
         with:
           path: DataManagement/dist
-          key: build-${{ github.run_id }}
+          key: build-DM-${{ github.run_id }}
           restore-keys: |
             build-
 
@@ -68,17 +66,14 @@ jobs:
           cache: npm
           cache-dependency-path: DataManagement/package-lock.json
       - name: Install dependencies
-        run: |
-          cd DataManagement
-          npm ci
+        working-directory: DataManagement
+        run: npm ci
       - name: Run tests
-        run: |
-          cd DataManagement
-          npm run test
+        working-directory: DataManagement
+        run: npm run test
       - name: Check coverage
-        run: |
-          cd DataManagement
-          npm run coverage
+        working-directory: DataManagement
+        run: npm run coverage
 
   Deploy-Dev:
     name: Deploy to AWS S3 Dev
