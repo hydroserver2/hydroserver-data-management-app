@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import { OAuthProvider } from '@shared/types'
-import googleImg from '@/assets/google.png'
+import googleImg from '@shared/assets/google.png'
 import { OAUTH_ENDPOINT } from '@shared/services/api'
 
 const OAuthLogin = async (provider: OAuthProvider) => {
