@@ -1,4 +1,4 @@
-import { handle401 } from '@/services/handle401'
+import { handle401 } from './handle401'
 
 export async function parseResponseBody(response: Response) {
   try {

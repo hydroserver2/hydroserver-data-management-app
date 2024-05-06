@@ -34,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
-import { Snackbar } from '@/utils/notifications'
+import { api } from '@shared/services/api'
+import { Snackbar } from '@shared/utils/notifications'
 import { ref } from 'vue'
 
 const emit = defineEmits(['delete', 'close'])

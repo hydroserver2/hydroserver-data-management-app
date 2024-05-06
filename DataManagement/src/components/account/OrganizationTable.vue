@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@shared/store/user'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 

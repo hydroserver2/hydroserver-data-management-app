@@ -1,7 +1,7 @@
 import '@/styles/global.scss'
 
 import { createApp } from 'vue'
-import store from './store'
+import store from '@shared/store'
 import App from './App.vue'
 import router from './router/router'
 import vuetify from '@/plugins/vuetify'

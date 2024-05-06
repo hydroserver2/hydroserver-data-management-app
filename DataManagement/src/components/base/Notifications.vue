@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { onBeforeUnmount, ref } from 'vue'
-import { Snackbar, Snack } from '@/utils/notifications'
+import { Snackbar, Snack } from '@shared/utils/notifications'
 
 const snack = ref<Snack>(new Snack())
 

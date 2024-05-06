@@ -40,7 +40,7 @@ import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { ResultQualifier } from '@shared/types'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 
 const props = defineProps({ resultQualifier: Object as () => ResultQualifier })
 const emit = defineEmits(['updated', 'created', 'close'])

@@ -35,7 +35,9 @@ const api: Api = {
 let defaultThingId: string | null = 'thing1'
 // onMounted won't work outside of the context of script setup, therefore
 // wrap composable with dummy component
-const createDummyComponent = ({ thingId = defaultThingId } = {}) =>
+const createDummyComponent = ({
+  thingId = defaultThingId as string | null,
+} = {}) =>
   defineComponent({
     setup() {
       return useMetadata(thingId, api)

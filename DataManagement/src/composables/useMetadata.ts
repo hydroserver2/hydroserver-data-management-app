@@ -1,6 +1,6 @@
 import { onMounted, computed, ref, ComputedRef } from 'vue'
 import { ProcessingLevel, DatastreamMetadata } from '@shared/types'
-import { api as defaultApi } from '@/services/api'
+import { api as defaultApi } from '@shared/services/api'
 
 interface Api {
   fetchMetadataForThing: (id: string) => Promise<DatastreamMetadata>

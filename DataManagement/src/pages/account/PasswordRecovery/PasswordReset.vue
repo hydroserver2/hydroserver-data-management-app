@@ -40,9 +40,9 @@
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import { useRoute } from 'vue-router'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import router from '@/router/router'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const valid = ref(false)
 const myForm = ref(null)

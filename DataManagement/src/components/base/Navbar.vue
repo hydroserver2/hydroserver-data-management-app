@@ -127,8 +127,8 @@
 <script setup lang="ts">
 import appLogo from '@/assets/hydroserver-icon-min.png'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { useAuthStore } from '@/store/authentication'
-import { Snackbar } from '@/utils/notifications'
+import { useAuthStore } from '@shared/store/authentication'
+import { Snackbar } from '@shared/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'

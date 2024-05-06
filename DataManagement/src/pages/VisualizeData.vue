@@ -39,11 +39,11 @@ import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTabl
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
 import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 const route = useRoute()
 

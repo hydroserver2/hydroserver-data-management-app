@@ -1,4 +1,4 @@
-import { apiMethods } from '@/services/apiMethods'
+import { apiMethods } from './apiMethods'
 import {
   Unit,
   Thing,
@@ -13,7 +13,7 @@ import {
   PostHydroShareArchive,
   HydroShareArchive,
   User,
-} from '@shared/types'
+} from '../types'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 

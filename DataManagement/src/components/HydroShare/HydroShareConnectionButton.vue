@@ -20,13 +20,13 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '@/store/user'
-import { api } from '@/services/api'
+import { useUserStore } from '@shared/store/user'
+import { api } from '@shared/services/api'
 import { OAuthProvider } from '@shared/types'
-import { OAUTH_ENDPOINT } from '@/services/api'
+import { OAUTH_ENDPOINT } from '@shared/services/api'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 

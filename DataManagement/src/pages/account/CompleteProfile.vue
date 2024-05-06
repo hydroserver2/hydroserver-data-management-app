@@ -20,9 +20,9 @@
 
 <script setup lang="ts">
 import AccountForm from '@/components/account/AccountForm.vue'
-import { api } from '@/services/api'
-import { useAuthStore } from '@/store/authentication'
-import { useUserStore } from '@/store/user'
+import { api } from '@shared/services/api'
+import { useAuthStore } from '@shared/store/authentication'
+import { useUserStore } from '@shared/store/user'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'

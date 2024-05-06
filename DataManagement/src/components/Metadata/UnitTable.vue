@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { Unit } from '@shared/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed } from 'vue'

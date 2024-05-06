@@ -38,10 +38,10 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '@/store/user'
-import { api } from '@/services/api'
+import { useUserStore } from '@shared/store/user'
+import { api } from '@shared/services/api'
 import { storeToRefs } from 'pinia'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 let sendingVerificationEmail = false

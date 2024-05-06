@@ -1,4 +1,4 @@
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { Tag } from '@shared/types'
 import { ref, computed, onMounted } from 'vue'
 

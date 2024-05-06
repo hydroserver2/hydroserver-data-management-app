@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { DataLoader } from '@shared/types'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataLoaderCard from '@/components/DataLoader/DeleteDataLoaderCard.vue'
 

@@ -132,8 +132,8 @@
 <script setup lang="ts">
 import { Datastream } from '@shared/types'
 import { ref } from 'vue'
-import { api } from '@/services/api'
-import { Snackbar } from '@/utils/notifications'
+import { api } from '@shared/services/api'
+import { Snackbar } from '@shared/utils/notifications'
 import DatastreamSourceLinker from './DatastreamSourceLinker.vue'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 

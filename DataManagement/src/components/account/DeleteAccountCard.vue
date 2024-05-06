@@ -46,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
-import { Snackbar } from '@/utils/notifications'
-import { useAuthStore } from '@/store/authentication'
+import { api } from '@shared/services/api'
+import { Snackbar } from '@shared/utils/notifications'
+import { useAuthStore } from '@shared/store/authentication'
 import { computed, onMounted, ref } from 'vue'
 import { Thing } from '@shared/types'
 

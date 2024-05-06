@@ -173,12 +173,12 @@ import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
 import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@shared/types'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@shared/store/user'
 import router from '@/router/router'
-import { Snackbar } from '@/utils/notifications'
-import { api } from '@/services/api'
+import { Snackbar } from '@shared/utils/notifications'
+import { api } from '@shared/services/api'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/store/authentication'
+import { useAuthStore } from '@shared/store/authentication'
 
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },

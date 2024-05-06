@@ -39,7 +39,7 @@ import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { materialColors } from '@/utils/materialColors'
 import { useTagStore } from '@/store/tags'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())

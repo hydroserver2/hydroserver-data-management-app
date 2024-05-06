@@ -4,7 +4,7 @@ import {
   Datastream,
   TimeSpacingUnit,
 } from '@shared/types'
-import { api, getObservationsEndpoint } from '@/services/api'
+import { api, getObservationsEndpoint } from '@shared/services/api'
 
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)

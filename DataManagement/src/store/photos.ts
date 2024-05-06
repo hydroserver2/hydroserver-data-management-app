@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Photo } from '@shared/types'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 
 export const usePhotosStore = defineStore('photos', () => {
   const photos = ref<Photo[]>([])

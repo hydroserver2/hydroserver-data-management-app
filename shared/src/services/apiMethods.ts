@@ -1,8 +1,8 @@
-import { requestInterceptor } from '@/services/requestInterceptor'
-import { responseInterceptor } from '@/services/responseInterceptor'
-import { Snackbar } from '@/utils/notifications'
-import { createPatchObject } from '@/services/createPatchObject'
-import { useAuthStore } from '@/store/authentication'
+import { requestInterceptor } from './requestInterceptor'
+import { responseInterceptor } from './responseInterceptor'
+import { Snackbar } from '../utils/notifications'
+import { createPatchObject } from './createPatchObject'
+import { useAuthStore } from '../store/authentication'
 
 async function interceptedFetch(endpoint: string, options: any) {
   const authStore = useAuthStore()

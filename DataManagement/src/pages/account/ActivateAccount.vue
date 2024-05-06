@@ -8,15 +8,15 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
+import { useAuthStore } from '@shared/store/authentication'
 import { onMounted } from 'vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 
 import router from '@/router/router'
-import { useUserStore } from '@/store/user'
-import { Snackbar } from '@/utils/notifications'
+import { useUserStore } from '@shared/store/user'
+import { Snackbar } from '@shared/utils/notifications'
 
 const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()

@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { Datastream, Thing } from '@shared/types'
 import { computed, onMounted, ref } from 'vue'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 
 const things = ref<Thing[]>([])
 const datastreams = ref<Datastream[]>([])

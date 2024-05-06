@@ -31,8 +31,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { api } from '@/services/api'
-import { Snackbar } from '@/utils/notifications'
+import { api } from '@shared/services/api'
+import { Snackbar } from '@shared/utils/notifications'
 
 const email = ref('')
 const resetEmailSent = ref(false)

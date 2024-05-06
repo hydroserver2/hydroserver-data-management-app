@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 

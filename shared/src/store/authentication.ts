@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import router from '@/router/router'
+import { getOrCreateRouter } from '../router'
 import jwtDecode from 'jwt-decode'
 
 interface JWTPayload {
@@ -23,7 +23,8 @@ export const useAuthStore = defineStore(
       try {
         setTokens('', '')
         localStorage.clear()
-        router.push({ name: 'Login' })
+        const r = getOrCreateRouter()
+        r.push({ name: 'Login' })
       } catch (error) {
         console.error('Error logging out.', error)
       }

@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'

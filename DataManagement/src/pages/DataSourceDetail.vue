@@ -134,7 +134,7 @@ import { DataLoader, DataSource, Datastream } from '@shared/types'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
 

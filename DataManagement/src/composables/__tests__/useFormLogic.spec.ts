@@ -22,7 +22,7 @@ describe('useFormLogic', () => {
     mockFetchItems = defaultMockFetchItems,
     createItem = defaultCreateItem,
     updateItem = defaultUpdateItem,
-    initialUnit = defaultInitialUnit,
+    initialUnit = defaultInitialUnit as Unit | undefined,
   } = {}) =>
     defineComponent({
       setup() {
@@ -47,7 +47,7 @@ describe('useFormLogic', () => {
   })
 
   it('initializes correctly with initialItem', async () => {
-    let initialUnit = new Unit()
+    let initialUnit: Unit = new Unit()
     Object.assign(initialUnit, unit1)
 
     const wrapper = mount(

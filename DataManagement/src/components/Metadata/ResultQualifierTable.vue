@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { ResultQualifier } from '@shared/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'

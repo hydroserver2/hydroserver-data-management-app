@@ -7,6 +7,9 @@ import vuetify from 'vite-plugin-vuetify'
 import path from 'path'
 
 export default defineConfig({
+  define: {
+    __BASE_URL__: JSON.stringify(process.env.VITE_APP_PROXY_BASE_URL),
+  },
   plugins: [
     vue(),
     vuetify({

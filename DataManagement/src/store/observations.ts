@@ -5,8 +5,8 @@ import {
   fetchObservationsParallel,
   preProcessData,
 } from '@/utils/observationsUtils'
-import { Snackbar } from '@/utils/notifications'
-import { api } from '@/services/api'
+import { Snackbar } from '@shared/utils/notifications'
+import { api } from '@shared/services/api'
 
 export const useObservationStore = defineStore('observations', () => {
   const observations = ref<Record<string, ObservationRecord>>({})

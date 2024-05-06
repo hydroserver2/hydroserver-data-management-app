@@ -110,7 +110,7 @@ import { useMetadata } from '@/composables/useMetadata'
 import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { DataArray, Datastream } from '@shared/types'
 
 const props = defineProps({

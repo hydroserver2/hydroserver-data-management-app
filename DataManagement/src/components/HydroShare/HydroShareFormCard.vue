@@ -195,13 +195,13 @@ import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 import { Datastream, PostHydroShareArchive, Frequency } from '@shared/types'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { VForm } from 'vuetify/components'
 import { hydroShareUrl, rules } from '@/utils/rules'
 import { useFormLogic } from '@/composables/useFormLogic'
 import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.vue'
 import { useHydroShareStore } from '@/store/hydroShare'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const emit = defineEmits(['close'])
 const { hydroShareArchive: archive, loading } = storeToRefs(

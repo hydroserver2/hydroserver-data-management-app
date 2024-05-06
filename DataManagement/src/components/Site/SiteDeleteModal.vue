@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Thing } from '@shared/types'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const emit = defineEmits(['switchToAccessControl', 'delete', 'close'])
 const props = defineProps({

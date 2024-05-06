@@ -46,7 +46,11 @@
       </v-col>
     </v-row>
 
-    <v-row justify="center" class="mt-6" v-if="disableAccountCreation !== 'true'">
+    <v-row
+      justify="center"
+      class="mt-6"
+      v-if="disableAccountCreation !== 'true'"
+    >
       <span class="mr-2">Don't have an account?</span>
       <router-link to="/sign-up" class="light-text signup-link"
         >Sign Up</router-link
@@ -64,15 +68,15 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
+import { useAuthStore } from '@shared/store/authentication'
 import { onMounted, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import router from '@/router/router'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@shared/store/user'
 import { useRoute } from 'vue-router'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const email = ref('')
 const password = ref('')
@@ -80,7 +84,8 @@ const form = ref(null)
 const valid = ref(false)
 const loaded = ref(false)
 const route = useRoute()
-const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
+const disableAccountCreation =
+  import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()

@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import { api } from '@shared/services/api'
 import { watch, onMounted, ref, computed } from 'vue'
 import { Datastream, Thing } from '@shared/types'
 import { useMetadata } from '@/composables/useMetadata'

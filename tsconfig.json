@@ -15,5 +15,6 @@
     "noEmit": true,
     "baseUrl": "."
   },
-  "include": ["src/**/*"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.vue", "types/**/*.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }

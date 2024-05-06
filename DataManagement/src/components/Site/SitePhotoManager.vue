@@ -62,7 +62,7 @@
 import { usePhotosStore } from '@/store/photos'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import { Snackbar } from '@/utils/notifications'
+import { Snackbar } from '@shared/utils/notifications'
 
 const { photos, newPhotos, photosToDelete } = storeToRefs(usePhotosStore())
 

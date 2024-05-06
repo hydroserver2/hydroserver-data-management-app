@@ -7,7 +7,7 @@ import {
   SnackTitle,
   Position,
   DEFAULT_SNACK_DURATION,
-} from '@/utils/notifications'
+} from '@shared/utils/notifications'
 import { Subscription } from 'rxjs'
 
 describe('Snackbar', () => {

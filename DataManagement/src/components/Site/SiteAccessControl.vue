@@ -182,11 +182,11 @@
 
 <script setup lang="ts">
 import { useThingStore } from '@/store/thing'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@shared/store/user'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
-import { api } from '@/services/api'
-import { Snackbar } from '@/utils/notifications'
+import { api } from '@shared/services/api'
+import { Snackbar } from '@shared/utils/notifications'
 import { useHydroShareStore } from '@/store/hydroShare'
 import HydroSharePrivacyCard from '@/components/HydroShare/HydroSharePrivacyCard.vue'
 import { PostHydroShareArchive } from '@shared/types'

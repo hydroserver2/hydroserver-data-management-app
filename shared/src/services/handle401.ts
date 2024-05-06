@@ -1,5 +1,5 @@
-import { useAuthStore } from '@/store/authentication'
-import { JWT_REFRESH } from '@/services/api'
+import { useAuthStore } from '../store/authentication'
+import { JWT_REFRESH } from './api'
 
 let isRefreshing = false
 let failedQueue: any[] = []
