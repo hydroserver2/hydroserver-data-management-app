@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { subtractHours, preProcessData } from '@/utils/observationsUtils'
+import { subtractHours, preProcessData } from '@shared/utils/observationsUtils'
 import { DataArray, Datastream } from '@shared/types'
 
 describe('subtractHours', () => {

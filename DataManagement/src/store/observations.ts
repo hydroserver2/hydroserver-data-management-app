@@ -4,7 +4,7 @@ import { Datastream, ObservationRecord, GraphSeries } from '@shared/types'
 import {
   fetchObservationsParallel,
   preProcessData,
-} from '@/utils/observationsUtils'
+} from '@shared/utils/observationsUtils'
 import { Snackbar } from '@shared/utils/notifications'
 import { api } from '@shared/services/api'
 
