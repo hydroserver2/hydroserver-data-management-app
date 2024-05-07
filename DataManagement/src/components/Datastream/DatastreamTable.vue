@@ -29,7 +29,7 @@
     class="elevation-3 my-4"
     :headers="headers"
     :items="visibleDatastreams"
-    v-model:sort-by="sortBy"
+    :sort-by="sortBy"
   >
     <template v-slot:item.info="{ item }">
       <v-col>
