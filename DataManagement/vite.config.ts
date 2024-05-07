@@ -5,6 +5,7 @@ import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
 import path from 'path'
+import { fileURLToPath, URL } from 'url'
 
 export default defineConfig({
   define: {
@@ -35,8 +36,13 @@ export default defineConfig({
     manifest: true,
   },
   test: {
+    root: fileURLToPath(new URL('../', import.meta.url)),
+    include: [
+      'DataManagement/src/**/*.spec.{js,ts}',
+      'shared/src/**/*.spec.{js,ts}',
+    ],
     globals: true,
-    environmentMatchGlobs: [['src/components/**', 'jsdom']],
+    environmentMatchGlobs: [['DataManagement/src/components/**', 'jsdom']],
     server: {
       deps: {
         inline: ['vuetify'],
@@ -44,29 +50,31 @@ export default defineConfig({
     },
     environment: 'jsdom',
     coverage: {
+      include: ['DataManagement/src/**/*.{js,ts}', 'shared/src/**/*.{js,ts}'],
       exclude: [
-        '**/src/**/*.vue',
-        '**/src/composables/useUserTags.ts',
-        '**/src/plugins/**',
-        '**/src/router/**',
-        '**/src/store/**',
-        '**/src/config/**',
-        '**/src/services/api.ts',
-        '**/src/services/apiMethods.ts',
-        '**/src/services/handle401.ts',
-        '**/src/utils/mdi-icons.ts',
-        '**/src/utils/materialColors.ts',
-        '**/src/utils/CSVDownloadUtils.ts',
-        '**/src/utils/plotting/echarts.ts',
-        '**/src/utils/plotting/graphSeriesUtils.ts',
-        '**/src/utils/test/**',
-        '**/src/utils/googleMaps/**',
-        '**/src/utils/rules.ts',
-        '**/src/App.vue',
-        '**/src/main.ts',
-        '**/src/vocabularies.ts',
         '**/*.d.ts',
-        '**/postcss.config.js',
+        '**/src/store/**',
+        'DataManagement/src/composables/useUserTags.ts',
+        'DataManagement/src/plugins/**',
+        'DataManagement/src/router/**',
+        'DataManagement/src/config/**',
+        'DataManagement/src/utils/mdi-icons.ts',
+        'DataManagement/src/utils/materialColors.ts',
+        'DataManagement/src/utils/CSVDownloadUtils.ts',
+        'DataManagement/src/utils/plotting/echarts.ts',
+        'DataManagement/src/utils/plotting/graphSeriesUtils.ts',
+        'DataManagement/src/utils/test/**',
+        'DataManagement/src/utils/googleMaps/**',
+        'DataManagement/src/App.vue',
+        'DataManagement/src/main.ts',
+        'DataManagement/src/vocabularies.ts',
+        'DataManagement/postcss.config.js',
+        'shared/src/services/api.ts',
+        'shared/src/services/apiMethods.ts',
+        'shared/src/services/handle401.ts',
+        'shared/src/utils/rules.ts',
+        'shared/src/router/*',
+        'shared/src/types/*',
       ],
       thresholds: {
         lines: 80,

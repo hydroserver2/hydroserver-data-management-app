@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { subtractHours, preProcessData } from '@shared/utils/observationsUtils'
-import { DataArray, Datastream } from '@shared/types'
+import { subtractHours, preProcessData } from '../observationsUtils'
+import { DataArray, Datastream } from '../../types'
 
 describe('subtractHours', () => {
   it('correctly subtracts hours from a timestamp', () => {
