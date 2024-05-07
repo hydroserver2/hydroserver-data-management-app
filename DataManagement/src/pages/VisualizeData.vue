@@ -38,13 +38,13 @@ import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawe
 import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
 import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import FullScreenLoader from '@shared/components/base/FullScreenLoader.vue'
+import { Snackbar } from '@shared/utils/notifications'
 import { api } from '@shared/services/api'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { Snackbar } from '@shared/utils/notifications'
-import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 const route = useRoute()
 
 const { onDateBtnClick, resetState } = useDataVisStore()

@@ -119,7 +119,7 @@ import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
-import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
+import FullScreenLoader from '@shared/components/base/FullScreenLoader.vue'
 import { useHydroShareStore } from '@/store/hydroShare'
 
 const thingId = useRoute().params.id.toString()
