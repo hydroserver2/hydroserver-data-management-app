@@ -113,15 +113,6 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/pages/account/Login.vue'),
-    meta: {
-      title: 'Login',
-      hasLoggedOutGuard: true,
-    },
-  },
-  {
     path: '/password_reset',
     name: 'PasswordResetRequest',
     component: () =>

@@ -30,5 +30,5 @@
 
 <script setup lang="ts">
 import AccountForm from '@/components/account/AccountForm.vue'
-import OAuth from '@/components/account/OAuth.vue'
+import OAuth from '@shared/components/account/OAuth.vue'
 </script>

@@ -65,7 +65,7 @@
 import { api } from '@shared/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { rules } from '@/utils/rules'
+import { rules } from '@shared/utils/rules'
 import { OPVariableTypes, OPNameTypes } from '@/vocabularies'
 import { ObservedProperty } from '@shared/types'
 

@@ -70,10 +70,10 @@
 <script setup lang="ts">
 import { useAuthStore } from '@shared/store/authentication'
 import { onMounted, ref } from 'vue'
-import { rules } from '@/utils/rules'
-import OAuth from '@/components/account/OAuth.vue'
+import { rules } from '@shared/utils/rules'
+import OAuth from '@shared/components/account/OAuth.vue'
 import { api } from '@shared/services/api'
-import router from '@/router/router'
+import { getOrCreateRouter } from '@shared/router'
 import { useUserStore } from '@shared/store/user'
 import { useRoute } from 'vue-router'
 import { Snackbar } from '@shared/utils/notifications'
@@ -89,6 +89,7 @@ const disableAccountCreation =
 
 const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
+const router = getOrCreateRouter()
 
 const login = async (accessToken: string, refreshToken: string) => {
   try {

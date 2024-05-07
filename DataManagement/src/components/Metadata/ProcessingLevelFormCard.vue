@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { rules } from '@/utils/rules'
+import { rules } from '@shared/utils/rules'
 import { api } from '@shared/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'

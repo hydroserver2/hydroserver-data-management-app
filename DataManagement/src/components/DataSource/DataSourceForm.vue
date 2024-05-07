@@ -253,7 +253,7 @@ import { onMounted, ref } from 'vue'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@shared/services/api'
 import { DataLoader, DataSource } from '@shared/types'
-import { rules } from '@/utils/rules'
+import { rules } from '@shared/utils/rules'
 
 const props = defineProps(['dataSource'])
 const emit = defineEmits(['created', 'updated', 'close'])

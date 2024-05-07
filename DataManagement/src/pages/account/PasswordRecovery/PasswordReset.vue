@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { rules } from '@/utils/rules'
+import { rules } from '@shared/utils/rules'
 import { useRoute } from 'vue-router'
 import { api } from '@shared/services/api'
 import router from '@/router/router'

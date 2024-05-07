@@ -166,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { rules } from '@/utils/rules'
+import { rules } from '@shared/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
 import { userTypes } from '@/vocabularies'
 import { VForm } from 'vuetify/components'

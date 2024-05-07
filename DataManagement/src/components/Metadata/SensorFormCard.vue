@@ -85,7 +85,7 @@
 import { api } from '@shared/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { rules } from '@/utils/rules'
+import { rules } from '@shared/utils/rules'
 import { computed } from 'vue'
 import { methodTypes } from '@/vocabularies'
 import { Sensor } from '@shared/types'
