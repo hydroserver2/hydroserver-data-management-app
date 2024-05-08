@@ -92,6 +92,17 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/HydroLoaderDownload.vue'),
   },
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@shared/pages/account/Login.vue'),
+    meta: {
+      title: 'Login',
+      hasLoggedOutGuard: true,
+      redirectAfterLogin: 'Sites',
+      disablePasswordReset: false,
+    },
+  },
+  {
     path: '/sign-up',
     name: 'SignUp',
     component: () => {
