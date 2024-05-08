@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import Navbar from '@/components/base/Navbar.vue'
 import Footer from '@/components/base/Footer.vue'
-import Notifications from '@/components/base/Notifications.vue'
+import Notifications from '@shared/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()

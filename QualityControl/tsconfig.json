@@ -8,5 +8,5 @@
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }],
-  "exclude": ["node_modules", "../QualityControl/**/*"]
+  "exclude": ["node_modules", "../DataManagement/**/*"]
 }

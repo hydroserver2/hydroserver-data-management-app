@@ -35,11 +35,11 @@ export default defineConfig({
   test: {
     root: fileURLToPath(new URL('../', import.meta.url)),
     include: [
-      'DataManagement/src/**/*.spec.{js,ts}',
+      'QualityControl/src/**/*.spec.{js,ts}',
       'shared/src/**/*.spec.{js,ts}',
     ],
     globals: true,
-    environmentMatchGlobs: [['DataManagement/src/components/**', 'jsdom']],
+    environmentMatchGlobs: [['QualityControl/src/components/**', 'jsdom']],
     server: {
       deps: {
         inline: ['vuetify'],
@@ -47,25 +47,10 @@ export default defineConfig({
     },
     environment: 'jsdom',
     coverage: {
-      include: ['DataManagement/src/**/*.{js,ts}', 'shared/src/**/*.{js,ts}'],
+      include: ['QualityControl/src/**/*.{js,ts}', 'shared/src/**/*.{js,ts}'],
       exclude: [
         '**/*.d.ts',
         'src/store/**',
-        'DataManagement/src/composables/useUserTags.ts',
-        'DataManagement/src/plugins/**',
-        'DataManagement/src/router/**',
-        'DataManagement/src/config/**',
-        'DataManagement/src/utils/mdi-icons.ts',
-        'DataManagement/src/utils/materialColors.ts',
-        'DataManagement/src/utils/CSVDownloadUtils.ts',
-        'DataManagement/src/utils/plotting/echarts.ts',
-        'DataManagement/src/utils/plotting/graphSeriesUtils.ts',
-        'DataManagement/src/utils/test/**',
-        'DataManagement/src/utils/googleMaps/**',
-        'DataManagement/src/App.vue',
-        'DataManagement/src/main.ts',
-        'DataManagement/src/vocabularies.ts',
-        'DataManagement/postcss.config.js',
         'shared/src/services/api.ts',
         'shared/src/services/apiMethods.ts',
         'shared/src/services/handle401.ts',

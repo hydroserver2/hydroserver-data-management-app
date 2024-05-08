@@ -4,9 +4,8 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "shared",
-    "DataManagement",
-    "QualityControl"
+    "QualityControl",
+    "DataManagement"
   ],
   "dependencies": {
     "jwt-decode": "^3.1.2",

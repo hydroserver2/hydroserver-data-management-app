@@ -96,7 +96,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'SignUp',
     component: () => {
       if (disableAccountCreation === 'true') {
-        return import('@/pages/PageNotFound.vue')
+        return import('@shared/pages/PageNotFound.vue')
       } else {
         return import('@/pages/account/Signup.vue')
       }
@@ -181,11 +181,5 @@ export const routes: RouteRecordRaw[] = [
     name: 'Home',
     component: () => import('@/pages/Home.vue'),
     meta: { title: 'Home' },
-  },
-  {
-    path: '/:catchAll(.*)*',
-    name: 'PageNotFound',
-    component: () => import('@/pages/PageNotFound.vue'),
-    meta: { title: 'Page Not Found' },
   },
 ]
