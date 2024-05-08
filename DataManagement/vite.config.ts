@@ -55,6 +55,7 @@ export default defineConfig({
         'DataManagement/src/plugins/**',
         'DataManagement/src/router/**',
         'DataManagement/src/config/**',
+        'DataManagement/src/store/**',
         'DataManagement/src/utils/mdi-icons.ts',
         'DataManagement/src/utils/materialColors.ts',
         'DataManagement/src/utils/CSVDownloadUtils.ts',
@@ -72,6 +73,7 @@ export default defineConfig({
         'shared/src/utils/rules.ts',
         'shared/src/router/*',
         'shared/src/types/*',
+        'shared/src/store/*',
       ],
       thresholds: {
         lines: 80,
