@@ -1,10 +1,30 @@
 <template>
-  <HydroSharePrivacyCard
-    v-if="openHydroSharePrivacy && thing"
-    @no="toggleSitePrivacy"
-    @yes="toggleSitePrivacy(true)"
-    @close="cancelFromHydroShare"
-  />
+  <v-card v-if="openHydroSharePrivacy && thing" :loading="isUpdating">
+    <v-card-title class="text-h5">Update HydroShare Privacy</v-card-title>
+
+    <v-divider />
+
+    <v-card-text>
+      This site is linked to a HydroShare resource. Do you also want to update
+      the privacy of the HydroServer resource?
+    </v-card-text>
+
+    <v-divider />
+
+    <v-card-actions>
+      <v-spacer />
+      <v-btn-cancel :disabled="isUpdating" @click="cancelFromHydroShare">
+        Cancel
+      </v-btn-cancel>
+      <v-btn-delete :disabled="isUpdating" @click="toggleSitePrivacy">
+        No
+      </v-btn-delete>
+      <v-btn-primary :disabled="isUpdating" @click="toggleSitePrivacy(true)">
+        Yes
+      </v-btn-primary>
+    </v-card-actions>
+  </v-card>
+
   <v-card v-else>
     <v-card-title class="text-h5">Access Control</v-card-title>
     <v-divider />
@@ -188,7 +208,6 @@ import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { useHydroShareStore } from '@/store/hydroShare'
-import HydroSharePrivacyCard from '@/components/HydroShare/HydroSharePrivacyCard.vue'
 import { PostHydroShareArchive } from '@/types'
 
 const { hydroShareArchive } = storeToRefs(useHydroShareStore())
@@ -205,6 +224,7 @@ const newPrimaryOwnerEmail = ref('')
 const showPrimaryOwnerConfirmation = ref(false)
 const newOwnerEmail = ref('')
 const openHydroSharePrivacy = ref(false)
+const isUpdating = ref(false)
 
 async function onTransferPrimaryOwnership() {
   if (!newPrimaryOwnerEmail.value) return
@@ -252,6 +272,7 @@ async function onRemoveOwner(email: string) {
 
 async function toggleSitePrivacy(updateHydroShare?: boolean) {
   try {
+    isUpdating.value = true
     if (updateHydroShare) {
       hydroShareArchive.value = await api.updateHydroShareArchive({
         thingId: thing.value?.id,
@@ -265,6 +286,8 @@ async function toggleSitePrivacy(updateHydroShare?: boolean) {
     )
   } catch (error) {
     console.error('Error updating thing privacy', error)
+  } finally {
+    isUpdating.value = false
   }
   openHydroSharePrivacy.value = false
 }
