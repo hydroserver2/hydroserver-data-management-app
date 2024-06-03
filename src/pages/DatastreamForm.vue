@@ -355,7 +355,7 @@ const {
   processingLevels,
   formattedProcessingLevels,
   fetchMetadata,
-} = useMetadata(thingId)
+} = useMetadata(thingId, true)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
   await fetchMetadata(thingId)
