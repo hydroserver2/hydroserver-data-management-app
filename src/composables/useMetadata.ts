@@ -35,7 +35,7 @@ export function useMetadata(thingId?: string | null, api: Api = defaultApi) {
 
   const fetchMetadata = async (id: string) => {
     try {
-      metadata.value = await api.fetchMetadataForThing(id)
+      metadata.value = await api.fetchMetadataForThingOwner(id)
     } catch (error) {
       console.error('Error fetching metadata', error)
     }
