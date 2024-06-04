@@ -185,61 +185,67 @@
 
       <v-card class="outlined-container mb-10">
         <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          Add time aggregation interval and intended time spacing. Note: in
-          order to create a new unit which appears in the dropdowns below, the
-          unit type must be 'Time'.
+          Add time aggregation interval and intended time spacing.
         </v-card-text>
         <v-card-text>
           <v-row>
-            <v-col md="6" cols="12">
+            <v-col
+              cols="12"
+              md="6"
+              align="center"
+              justify="center"
+              class="no-wrap"
+            >
               <v-text-field
                 v-model="datastream.timeAggregationInterval"
                 label="Time Aggregation Interval *"
                 :rules="rules.requiredNumber"
                 type="number"
-                class="mb-4"
               />
 
-              <v-autocomplete
-                v-model="datastream.timeAggregationIntervalUnitsId"
+              <v-btn-toggle
+                v-model="datastream.timeAggregationIntervalUnits"
                 label="Time aggregation unit *"
                 :items="timeUnits"
-                item-title="name"
-                item-value="id"
-                :rules="rules.required"
-                no-data-text="No available units"
-                class="pb-1"
-              />
-              <div v-if="isPrimaryOwner">
-                <v-btn-add @click="openAggUnitForm = true">Add New</v-btn-add>
-                <v-dialog v-model="openAggUnitForm" width="60rem">
-                  <UnitFormCard
-                    @created="
-                      datastream.timeAggregationIntervalUnitsId = $event
-                    "
-                    @close="openAggUnitForm = false"
-                    >Add New</UnitFormCard
-                  >
-                </v-dialog>
-              </div>
+                variant="outlined"
+                color="secondary"
+                density="compact"
+                rounded="xl"
+                divided
+              >
+                <v-btn v-for="unit in timeUnits" :value="unit">{{
+                  unit
+                }}</v-btn>
+              </v-btn-toggle>
             </v-col>
 
-            <v-col md="6" cols="12">
+            <v-col
+              cols="12"
+              md="6"
+              align="center"
+              justify="center"
+              class="no-wrap"
+            >
               <v-text-field
                 v-model="datastream.intendedTimeSpacing"
                 label="Intended Time Spacing"
                 type="number"
-                class="mb-4"
-              ></v-text-field>
+              />
 
-              <v-autocomplete
+              <v-btn-toggle
                 v-model="datastream.intendedTimeSpacingUnits"
                 label="Intended time spacing unit"
-                :items="intendedTimeUnits"
-                no-data-text="No available units"
-                class="pb-1"
-                clearable
-              />
+                :items="timeUnits"
+                variant="outlined"
+                color="secondary"
+                density="compact"
+                rounded="xl"
+                divided
+              >
+                <v-btn v-for="unit in timeUnits" :value="unit">{{
+                  unit
+                }}</v-btn>
+              </v-btn-toggle>
             </v-col>
           </v-row>
         </v-card-text>
@@ -311,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, watchEffect } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
@@ -332,10 +338,8 @@ const thingId = route.params.id.toString()
 const thing = ref<Thing>()
 const datastreamId = route.params.datastreamId?.toString() || ''
 
-const timeUnits = ref<Unit[]>([])
-const intendedTimeUnits = ['seconds', 'minutes', 'hours', 'days']
+const timeUnits = ['seconds', 'minutes', 'hours', 'days']
 const openUnitForm = ref(false)
-const openAggUnitForm = ref(false)
 
 const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 const showTemplateModal = ref(false)
@@ -402,7 +406,7 @@ watch(selectedDatastreamID, async () => {
       observedPropertyId: fetchedDS.observedPropertyId,
       processingLevelId: fetchedDS.processingLevelId,
       unitId: fetchedDS.unitId,
-      timeAggregationIntervalUnitsId: fetchedDS.timeAggregationIntervalUnitsId,
+      timeAggregationIntervalUnits: fetchedDS.timeAggregationIntervalUnits,
       intendedTimeSpacingUnits: fetchedDS.intendedTimeSpacingUnits,
       name: fetchedDS.name,
       description: fetchedDS.description,
@@ -442,15 +446,15 @@ async function uploadDatastream() {
 onMounted(async () => {
   window.scrollTo(0, 0)
 
-  let promises = [api.fetchThing(thingId), api.fetchUnits()]
+  let promises = [api.fetchThing(thingId)]
   if (datastreamId) promises.push(api.fetchDatastream(datastreamId))
 
   try {
     const results = await Promise.all(promises)
 
-    let fetchedDatastream, fetchedThing, fetchedUnits
-    if (datastreamId) [fetchedThing, fetchedUnits, fetchedDatastream] = results
-    else [fetchedThing, fetchedUnits] = results
+    let fetchedDatastream, fetchedThing
+    if (datastreamId) [fetchedThing, fetchedDatastream] = results
+    else [fetchedThing] = results
 
     if (fetchedDatastream) {
       datastream.value = fetchedDatastream
@@ -458,7 +462,6 @@ onMounted(async () => {
       originalDescription.value = datastream.value.description
     }
     thing.value = fetchedThing
-    timeUnits.value = fetchedUnits.filter((u: Unit) => u.type === 'Time')
   } catch (error) {
     console.error('Error fetching datastream data from DB.', error)
   }
