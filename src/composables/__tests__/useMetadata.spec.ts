@@ -38,7 +38,7 @@ let defaultThingId: string | null = 'thing1'
 const createDummyComponent = ({ thingId = defaultThingId } = {}) =>
   defineComponent({
     setup() {
-      return useMetadata(thingId, api)
+      return useMetadata(thingId, false, api)
     },
     template: '<div>{{sensors}}</div>',
   })

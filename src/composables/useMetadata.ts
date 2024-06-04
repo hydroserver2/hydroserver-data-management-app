@@ -7,8 +7,19 @@ interface Api {
   fetchMetadataForThingOwner: (id: string) => Promise<DatastreamMetadata>
 }
 
-export function useMetadata(thingId?: string | null, api: Api = defaultApi) {
-  const metadata = ref<DatastreamMetadata | null>()
+/**
+ * Fetch metadata for a specific thing or its owner.
+ *
+ * @param {string | null} [thingId=null] - ID of the thing to fetch metadata for.
+ * @param {boolean} [forOwner=false] - Fetch metadata for the primary owner of this thing if true.
+ * @param {Api} [api=defaultApi] - API service for fetching metadata.
+ */
+export function useMetadata(
+  thingId?: string | null,
+  forOwner: boolean = false,
+  api: Api = defaultApi
+) {
+  const metadata = ref<DatastreamMetadata | null>(null)
 
   const sensors = computed(() => metadata.value?.sensors || [])
 
@@ -35,7 +46,9 @@ export function useMetadata(thingId?: string | null, api: Api = defaultApi) {
 
   const fetchMetadata = async (id: string) => {
     try {
-      metadata.value = await api.fetchMetadataForThing(id)
+      metadata.value = forOwner
+        ? await api.fetchMetadataForThingOwner(id)
+        : await api.fetchMetadataForThing(id)
     } catch (error) {
       console.error('Error fetching metadata', error)
     }
