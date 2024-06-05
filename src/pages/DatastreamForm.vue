@@ -187,7 +187,12 @@
               <v-text-field
                 v-model="datastream.timeAggregationInterval"
                 label="Time aggregation interval *"
-                :rules="rules.requiredNumber"
+                :rules="[
+                  ...rules.requiredNumber,
+                  () =>
+                    datastream.timeAggregationIntervalUnits != null ||
+                    'An interval must be selected.',
+                ]"
                 type="number"
                 density="compact"
                 rounded="lg"
@@ -209,6 +214,7 @@
                   density="compact"
                   rounded="xl"
                   divided
+                  mandatory
                 >
                   <v-btn v-for="unit in timeUnits" :value="unit">{{
                     unit
@@ -219,6 +225,12 @@
               <v-text-field
                 v-model="datastream.intendedTimeSpacing"
                 label="Intended time spacing"
+                :rules="[
+                  () =>
+                    !datastream.intendedTimeSpacing ||
+                    datastream.intendedTimeSpacingUnits != null ||
+                    'Unit is required when a time spacing value is provided.',
+                ]"
                 type="number"
                 density="compact"
                 rounded="lg"
