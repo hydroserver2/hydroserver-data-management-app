@@ -153,7 +153,7 @@ export class Datastream {
   intendedTimeSpacing?: number
   intendedTimeSpacingUnits?: string | null
   timeAggregationInterval: number | null
-  timeAggregationIntervalUnitsId: string
+  timeAggregationIntervalUnits: string
   dataSourceId?: string | null
   dataSourceColumn?: string | number | null
   valueCount: number
@@ -173,7 +173,7 @@ export class Datastream {
     this.sensorId = ''
     this.processingLevelId = ''
     this.timeAggregationInterval = null
-    this.timeAggregationIntervalUnitsId = ''
+    this.timeAggregationIntervalUnits = 'seconds'
     this.isVisible = true
     this.valueCount = 0
     this.isDataVisible = true
