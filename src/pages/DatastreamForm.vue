@@ -1,318 +1,397 @@
 <template>
-  <v-container class="mb-16">
-    <h5 class="text-h5 py-5">
-      {{ datastreamId ? 'Edit' : 'Create' }} Datastream
-    </h5>
-
-    <v-card
-      class="outlined-container mb-10"
-      v-if="!datastreamId && isPrimaryOwner"
-    >
-      <v-card-actions class="text-subtitle-2 text-medium-emphasis">
-        Use an existing datastream as a template
-        <v-spacer />
-        <v-btn-primary @click="showTemplateModal = true"
-          >Load template</v-btn-primary
-        >
-      </v-card-actions>
-    </v-card>
-
-    <v-dialog v-model="showTemplateModal" width="60rem">
-      <DatastreamTemplateModal
-        @selected-datastream-id="selectedDatastreamID = $event"
-        @close="showTemplateModal = false"
-      />
-    </v-dialog>
-
-    <v-form
-      v-if="datastream"
-      @submit.prevent="uploadDatastream"
-      ref="myForm"
-      v-model="valid"
-      validate-on="blur"
-    >
-      <v-card class="outlined-container mb-10">
-        <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          Select the appropriate metadata to describe the the datastream you are
-          adding to the monitoring site. If you want to modify the values
-          available in the drop down menus below, click the “Add New” button or
-          visit the
-          <router-link to="/Metadata"> Manage Metadata page. </router-link>
-        </v-card-text>
-
-        <v-card-text>
-          <v-autocomplete
-            :key="datastream.sensorId"
-            v-model="datastream.sensorId"
-            label="Select sensor *"
-            :items="sensors"
-            item-title="name"
-            item-value="id"
-            :rules="rules.required"
-            no-data-text="No available sensors"
+  <v-container>
+    <v-card elevation="3">
+      <v-card-title class="my-2">
+        <v-row align="center">
+          <v-btn
+            icon="mdi-arrow-left"
+            size="large"
+            color="black"
+            variant="text"
+            @click="$router.go(-1)"
           >
-            <template v-slot:append v-if="isPrimaryOwner">
-              <v-btn-add @click="showSensorModal = true">Add New</v-btn-add>
-              <v-dialog v-model="showSensorModal" width="60rem">
-                <SensorFormCard
-                  @created="handleMetadataUploaded('sensorId', $event)"
-                  @close="showSensorModal = false"
-                />
-              </v-dialog>
-            </template>
-          </v-autocomplete>
-        </v-card-text>
+          </v-btn>
 
-        <v-card-text>
-          <v-autocomplete
-            v-model="datastream.observedPropertyId"
-            label="Select observed property *"
-            :items="observedProperties"
-            item-title="name"
-            item-value="id"
-            :rules="rules.required"
-            no-data-text="No available properties"
-          >
-            <template v-slot:append v-if="isPrimaryOwner">
-              <v-btn-add @click="showOPModal = true">Add New</v-btn-add>
-              <v-dialog v-model="showOPModal" width="60rem">
-                <ObservedPropertyFormCard
-                  @created="
-                    handleMetadataUploaded('observedPropertyId', $event)
-                  "
-                  @close="showOPModal = false"
-                />
-              </v-dialog>
-            </template>
-          </v-autocomplete>
-        </v-card-text>
+          <v-spacer />
+          {{ datastreamId ? 'Edit' : 'Create' }} datastream
+          <v-spacer />
 
-        <v-card-text>
-          <v-autocomplete
-            v-model="datastream.unitId"
-            label="Select unit *"
-            :items="units"
-            item-title="name"
-            item-value="id"
-            :rules="rules.required"
-            no-data-text="No available units"
+          <v-btn
+            v-if="!datastreamId && isPrimaryOwner"
+            color="primary-darken-2"
+            variant="outlined"
+            rounded="lg"
+            @click="showTemplateModal = true"
+            prepend-icon="mdi-import"
+            >Load template</v-btn
           >
-            <template v-slot:append v-if="isPrimaryOwner">
-              <v-btn-add @click="openUnitForm = true">Add New</v-btn-add>
-              <v-dialog v-model="openUnitForm" width="60rem">
-                <UnitFormCard
-                  @created="handleMetadataUploaded('unitId', $event)"
-                  @close="openUnitForm = false"
-                  >Add New</UnitFormCard
+        </v-row>
+      </v-card-title>
+
+      <v-dialog v-model="showTemplateModal" width="60rem">
+        <DatastreamTemplateModal
+          @selected-datastream-id="selectedDatastreamID = $event"
+          @close="showTemplateModal = false"
+        />
+      </v-dialog>
+
+      <v-divider />
+
+      <v-form
+        v-if="datastream"
+        @submit.prevent="uploadDatastream"
+        ref="myForm"
+        v-model="valid"
+        validate-on="blur"
+      >
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-card-title
+              >Linked metadata
+              <v-icon
+                size="x-small"
+                class="ml-2"
+                @click="showLinkedMetadataHelp = !showLinkedMetadataHelp"
+              >
+                mdi-help-circle-outline
+              </v-icon>
+            </v-card-title>
+            <v-card-text
+              v-if="showLinkedMetadataHelp"
+              class="text-subtitle-2 text-medium-emphasis"
+            >
+              Select the appropriate metadata to describe the the datastream you
+              are adding to the monitoring site. If you want to modify the
+              values available in the drop down menus below, click the "+"
+              button or visit the
+              <router-link to="/Metadata"> Manage metadata page. </router-link>
+            </v-card-text>
+
+            <v-card-text>
+              <v-autocomplete
+                :key="datastream.sensorId"
+                v-model="datastream.sensorId"
+                label="Select sensor *"
+                :items="sensors"
+                item-title="name"
+                item-value="id"
+                :rules="rules.required"
+                no-data-text="No available sensors"
+                prepend-inner-icon="mdi-signal-variant"
+                density="compact"
+                rounded="lg"
+              >
+                <template v-slot:append v-if="isPrimaryOwner">
+                  <v-icon
+                    color="secondary-darken-2"
+                    @click="showSensorModal = true"
+                    >mdi-plus</v-icon
+                  >
+                  <v-dialog v-model="showSensorModal" width="60rem">
+                    <SensorFormCard
+                      @created="handleMetadataUploaded('sensorId', $event)"
+                      @close="showSensorModal = false"
+                    />
+                  </v-dialog>
+                </template>
+              </v-autocomplete>
+
+              <v-autocomplete
+                v-model="datastream.observedPropertyId"
+                label="Select observed property *"
+                :items="observedProperties"
+                item-title="name"
+                item-value="id"
+                :rules="rules.required"
+                no-data-text="No available properties"
+                prepend-inner-icon="mdi-water-thermometer"
+                density="compact"
+                rounded="lg"
+              >
+                <template v-slot:append v-if="isPrimaryOwner">
+                  <v-icon color="secondary-darken-2" @click="showOPModal = true"
+                    >mdi-plus</v-icon
+                  >
+                  <v-dialog v-model="showOPModal" width="60rem">
+                    <ObservedPropertyFormCard
+                      @created="
+                        handleMetadataUploaded('observedPropertyId', $event)
+                      "
+                      @close="showOPModal = false"
+                    />
+                  </v-dialog>
+                </template>
+              </v-autocomplete>
+
+              <v-autocomplete
+                v-model="datastream.unitId"
+                label="Select unit *"
+                :items="units"
+                item-title="name"
+                item-value="id"
+                :rules="rules.required"
+                no-data-text="No available units"
+                prepend-inner-icon="mdi-tape-measure"
+                density="compact"
+                rounded="lg"
+              >
+                <template v-slot:append v-if="isPrimaryOwner">
+                  <v-icon
+                    color="secondary-darken-2"
+                    @click="openUnitForm = true"
+                    >mdi-plus</v-icon
+                  >
+                  <v-dialog v-model="openUnitForm" width="60rem">
+                    <UnitFormCard
+                      @created="handleMetadataUploaded('unitId', $event)"
+                      @close="openUnitForm = false"
+                      >Add New</UnitFormCard
+                    >
+                  </v-dialog>
+                </template>
+              </v-autocomplete>
+
+              <v-autocomplete
+                v-model="datastream.processingLevelId"
+                label="Select processing level *"
+                :items="formattedProcessingLevels"
+                item-title="title"
+                item-value="id"
+                :rules="rules.required"
+                no-data-text="No available processing level"
+                prepend-inner-icon="mdi-check-circle"
+                density="compact"
+                rounded="lg"
+              >
+                <template v-slot:append v-if="isPrimaryOwner">
+                  <v-icon color="secondary-darken-2" @click="showPLModal = true"
+                    >mdi-plus</v-icon
+                  >
+                  <v-dialog v-model="showPLModal" width="60rem">
+                    <ProcessingLevelFormCard
+                      @created="
+                        handleMetadataUploaded('processingLevelId', $event)
+                      "
+                      @close="showPLModal = false"
+                      >Add New</ProcessingLevelFormCard
+                    >
+                  </v-dialog>
+                </template>
+              </v-autocomplete>
+            </v-card-text>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-card-title>Time spacing</v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="datastream.timeAggregationInterval"
+                label="Time aggregation interval *"
+                :rules="rules.requiredNumber"
+                type="number"
+                density="compact"
+                rounded="lg"
+                prepend-inner-icon="mdi-clock-time-three"
+              />
+
+              <v-col
+                cols="12"
+                align="center"
+                justify="center"
+                class="no-wrap pt-0 mb-4"
+              >
+                <v-btn-toggle
+                  v-model="datastream.timeAggregationIntervalUnits"
+                  label="Time aggregation unit *"
+                  :items="timeUnits"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  rounded="xl"
+                  divided
                 >
-              </v-dialog>
-            </template>
-          </v-autocomplete>
-        </v-card-text>
+                  <v-btn v-for="unit in timeUnits" :value="unit">{{
+                    unit
+                  }}</v-btn>
+                </v-btn-toggle>
+              </v-col>
 
-        <v-card-text>
-          <v-autocomplete
-            v-model="datastream.processingLevelId"
-            label="Select processing level *"
-            :items="formattedProcessingLevels"
-            item-title="title"
-            item-value="id"
-            :rules="rules.required"
-            no-data-text="No available processing level"
-          >
-            <template v-slot:append v-if="isPrimaryOwner">
-              <v-btn-add @click="showPLModal = true">Add New</v-btn-add>
-              <v-dialog v-model="showPLModal" width="60rem">
-                <ProcessingLevelFormCard
-                  @created="handleMetadataUploaded('processingLevelId', $event)"
-                  @close="showPLModal = false"
-                  >Add New</ProcessingLevelFormCard
+              <v-text-field
+                v-model="datastream.intendedTimeSpacing"
+                label="Intended time spacing"
+                type="number"
+                density="compact"
+                rounded="lg"
+                prepend-inner-icon="mdi-timer"
+              />
+
+              <v-col
+                cols="12"
+                align="center"
+                justify="center"
+                class="no-wrap pt-0"
+              >
+                <v-btn-toggle
+                  v-model="datastream.intendedTimeSpacingUnits"
+                  label="Intended time spacing unit"
+                  :items="timeUnits"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  rounded="xl"
+                  divided
                 >
-              </v-dialog>
-            </template>
-          </v-autocomplete>
-        </v-card-text>
-      </v-card>
+                  <v-btn v-for="unit in timeUnits" :value="unit">{{
+                    unit
+                  }}</v-btn>
+                </v-btn-toggle>
+              </v-col>
+            </v-card-text>
+          </v-col>
+        </v-row>
 
-      <v-card class="outlined-container mb-10">
-        <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          For the following items, select an option or type your own. Note: the
-          default selections won't be available if there is custom text in the
-          field.
-        </v-card-text>
-        <v-card-text class="d-flex">
-          <v-row>
-            <v-col md="4" cols="12">
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-card-title>Datastream attributes</v-card-title>
+            <v-card-text class="text-subtitle-2 text-medium-emphasis">
+              For the following items, select an option or type your own. Note:
+              the default selections won't be available if there is custom text
+              in the field.
+            </v-card-text>
+            <v-card-text class="pb-0">
               <v-combobox
                 :items="mediumTypes"
                 v-model="datastream.sampledMedium"
                 label="Medium *"
                 :rules="rules.required"
+                density="compact"
+                rounded="xl"
+                prepend-inner-icon="mdi-air-filter"
               />
-            </v-col>
-            <v-col md="4" cols="12">
+
               <v-combobox
                 :items="statusTypes"
                 v-model="datastream.status"
                 label="Status"
+                density="compact"
+                rounded="xl"
+                prepend-inner-icon="mdi-list-status"
               />
-            </v-col>
-            <v-col md="4" cols="12">
+
               <v-combobox
                 :items="aggregationTypes"
                 v-model="datastream.aggregationStatistic"
-                label="Aggregation Statistic *"
+                label="Aggregation statistic *"
                 :rules="rules.required"
-              />
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-
-      <v-card class="outlined-container mb-10">
-        <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          When observation data is missing a value, what should the default be?
-        </v-card-text>
-        <v-card-text>
-          <v-text-field
-            v-model="datastream.noDataValue"
-            label="No data value *"
-            :rules="rules.required"
-            type="number"
-          />
-        </v-card-text>
-      </v-card>
-
-      <v-card class="outlined-container mb-10">
-        <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          Add time aggregation interval and intended time spacing.
-        </v-card-text>
-        <v-card-text>
-          <v-row>
-            <v-col
-              cols="12"
-              md="6"
-              align="center"
-              justify="center"
-              class="no-wrap"
-            >
-              <v-text-field
-                v-model="datastream.timeAggregationInterval"
-                label="Time Aggregation Interval *"
-                :rules="rules.requiredNumber"
-                type="number"
-              />
-
-              <v-btn-toggle
-                v-model="datastream.timeAggregationIntervalUnits"
-                label="Time aggregation unit *"
-                :items="timeUnits"
-                variant="outlined"
-                color="secondary"
                 density="compact"
                 rounded="xl"
-                divided
-              >
-                <v-btn v-for="unit in timeUnits" :value="unit">{{
-                  unit
-                }}</v-btn>
-              </v-btn-toggle>
-            </v-col>
+                prepend-inner-icon="mdi-table-column"
+              />
+            </v-card-text>
 
-            <v-col
-              cols="12"
-              md="6"
-              align="center"
-              justify="center"
-              class="no-wrap"
-            >
+            <v-card-text class="text-subtitle-2 text-medium-emphasis pt-2">
+              When observation data is missing a value, what should the default
+              be?
+            </v-card-text>
+            <v-card-text>
               <v-text-field
-                v-model="datastream.intendedTimeSpacing"
-                label="Intended Time Spacing"
+                v-model="datastream.noDataValue"
+                label="No data value *"
+                :rules="rules.required"
                 type="number"
+                density="compact"
+                rounded="lg"
+                prepend-inner-icon="mdi-circle-off-outline"
+              />
+            </v-card-text>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-card-title>Name and description</v-card-title>
+            <v-card-text class="text-subtitle-2 text-medium-emphasis">
+              Enter a name and description for this datastream, or opt to
+              auto-fill with default text. If you choose the defaults, make sure
+              you've first filled out the rest of the form correctly as the
+              website will generate text based on the current form fields.
+            </v-card-text>
+
+            <v-card-text>
+              <v-text-field
+                v-model="datastream.name"
+                label="Datastream name *"
+                :rules="rules.required"
+                density="compact"
+                rounded="lg"
               />
 
-              <v-btn-toggle
-                v-model="datastream.intendedTimeSpacingUnits"
-                label="Intended time spacing unit"
-                :items="timeUnits"
-                variant="outlined"
-                color="secondary"
-                density="compact"
-                rounded="xl"
-                divided
-              >
-                <v-btn v-for="unit in timeUnits" :value="unit">{{
-                  unit
-                }}</v-btn>
-              </v-btn-toggle>
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
+              <v-row justify="end">
+                <v-col cols="auto">
+                  <v-spacer />
+                  <v-btn
+                    variant="text"
+                    color="grey-darken-4"
+                    :disabled="datastream.name === originalName"
+                    @click="datastream.name = originalName"
+                  >
+                    Revert
+                  </v-btn>
+                  <v-btn
+                    color="primary-darken-2"
+                    variant="outlined"
+                    rounded="xl"
+                    class="ml-2"
+                    @click="datastream.name = generateDefaultName()"
+                    >Auto-Fill from Form</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-card-text>
 
-      <v-card class="outlined-container mb-10">
-        <v-card-text class="text-subtitle-2 text-medium-emphasis">
-          Enter a name and description for this datastream, or opt to auto-fill
-          with default text. If you choose the defaults, make sure you've first
-          filled out the rest of the form correctly as the website will generate
-          text based on the current form fields.
-        </v-card-text>
+            <v-card-text>
+              <v-textarea
+                v-model="datastream.description"
+                label="Datastream description *"
+                :rules="rules.required"
+                rounded="lg"
+              />
 
-        <v-card-text>
-          <v-text-field
-            v-model="datastream.name"
-            label="Datastream name *"
-            :rules="rules.required"
-          />
+              <v-row justify="end">
+                <v-col cols="auto">
+                  <v-spacer />
+                  <v-btn
+                    variant="text"
+                    color="grey-darken-4"
+                    :disabled="datastream.description === originalDescription"
+                    @click="datastream.description = originalDescription"
+                  >
+                    Revert
+                  </v-btn>
+                  <v-btn
+                    color="primary-darken-2"
+                    variant="outlined"
+                    rounded="xl"
+                    class="ml-2"
+                    @click="
+                      datastream.description = generateDefaultDescription()
+                    "
+                    >Auto-Fill from Form</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-col>
+        </v-row>
 
-          <v-btn-cancel
-            :disabled="datastream.name === originalName"
-            @click="datastream.name = originalName"
+        <v-divider />
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn-primary type="submit" class="my-4"
+            >{{ datastreamId ? 'Update' : 'Create' }} datastream</v-btn-primary
           >
-            Revert
-          </v-btn-cancel>
-          <v-btn class="ml-2" @click="datastream.name = generateDefaultName()"
-            >Auto-Fill from Form</v-btn
-          >
-        </v-card-text>
-
-        <v-card-text>
-          <v-textarea
-            v-model="datastream.description"
-            label="Datastream description *"
-            :rules="rules.required"
-          />
-
-          <v-btn-cancel
-            :disabled="datastream.description === originalDescription"
-            @click="datastream.description = originalDescription"
-          >
-            Revert
-          </v-btn-cancel>
-          <v-btn
-            class="ml-2"
-            @click="datastream.description = generateDefaultDescription()"
-            >Auto-Fill from Form</v-btn
-          >
-        </v-card-text>
-      </v-card>
-
-      <v-row>
-        <v-col cols="auto">
-          <v-btn-cancel @click="$router.go(-1)">
-            <v-icon>mdi-arrow-left</v-icon>
-            Return to previous page
-          </v-btn-cancel>
-        </v-col>
-        <v-spacer />
-        <v-col cols="auto">
-          <v-btn-primary type="submit">{{
-            datastreamId ? 'Update' : 'Save'
-          }}</v-btn-primary>
-        </v-col>
-      </v-row>
-    </v-form>
+        </v-card-actions>
+      </v-form>
+    </v-card>
   </v-container>
 </template>
 
@@ -327,7 +406,7 @@ import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCa
 import { rules } from '@/utils/rules'
 import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
 import { useMetadata } from '@/composables/useMetadata'
-import { Thing, Unit } from '@/types'
+import { Thing } from '@/types'
 import { api } from '@/services/api'
 import { Datastream } from '@/types'
 import { VForm } from 'vuetify/components'
@@ -346,6 +425,7 @@ const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
 const showPLModal = ref(false)
 const showOPModal = ref(false)
+const showLinkedMetadataHelp = ref(false)
 
 const valid = ref(false)
 const myForm = ref<VForm>()
@@ -467,10 +547,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped>
-.outlined-container {
-  border: 1px solid rgba(33, 150, 243, 0.3);
-  padding: 16px;
-}
-</style>
