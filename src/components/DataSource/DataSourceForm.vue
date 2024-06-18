@@ -369,7 +369,6 @@ const initializeForm = () => {
 }
 
 onMounted(async () => {
-  console.log('datasource', props.dataSource)
   dataLoaders.value = await api.fetchDataLoaders()
   if (isEdit.value) initializeForm()
   loaded.value = true
