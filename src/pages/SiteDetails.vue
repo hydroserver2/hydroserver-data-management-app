@@ -32,7 +32,7 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="isOwner">
+      <v-col cols="auto" v-if="isPrimaryOwner">
         <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete Site</v-btn
         >
@@ -134,6 +134,7 @@ const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
 
 const isOwner = computed(() => thing.value?.ownsThing)
+const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
