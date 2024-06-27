@@ -163,14 +163,13 @@
               <template v-slot:default>
                 <p v-if="thing.isPrivate" style="max-width: 25rem">
                   Setting your site to public will make it visible to all users
-                  and guests of the system. They will be able to follow your
-                  site and download its data
+                  and guests of the system. By default, all related datastreams
+                  will also be public, but can be made private from the
+                  datastreams table on the Site Details page.
                 </p>
                 <p v-else style="max-width: 25rem">
-                  setting your site to private will make it visible to only you
-                  and other owners of your site. Anyone who is currently
-                  following your site who is not an owner will be removed as a
-                  follower
+                  Setting your site to private will make it and all related
+                  datastreams visible to only you and other owners of your site.
                 </p>
               </template>
             </v-tooltip>

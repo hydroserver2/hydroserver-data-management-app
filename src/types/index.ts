@@ -280,7 +280,7 @@ export class DataSource {
   id: string
   name: string
   path: string
-  url: string | null
+  link: string | null
   headerRow?: number
   dataStartRow: number
   delimiter: string
@@ -304,7 +304,7 @@ export class DataSource {
     this.id = ''
     this.name = ''
     this.path = ''
-    this.url = null
+    this.link = null
     this.dataStartRow = 1
     this.delimiter = ','
     this.interval = null
