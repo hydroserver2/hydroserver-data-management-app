@@ -34,9 +34,9 @@
 
 <script setup lang="ts">
 
-let version = 'v1.0.2' // TODO: Add this as an environment variable
-let macosLink = `https://beta.hydroserver2.org/data-loader/${version}/macos/Streaming+Data+Loader.dmg`
-let windowsLink = `https://beta.hydroserver2.org/data-loader/${version}/windows/Streaming+Data+Loader.zip`
+let version = 'v1.0.5' // TODO: Add this as an environment variable
+let macosLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.MacOS.dmg`
+let windowsLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.Windows.zip`
 
 </script>
 
