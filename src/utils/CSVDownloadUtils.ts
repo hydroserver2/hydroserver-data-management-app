@@ -17,13 +17,13 @@ export const downloadDatastreamCSV = async (id: string) => {
   }
 }
 
-export const downloadSelectedDatastreamsCSVs = async (
-  selectedDatastreams: Datastream[]
+export const downloadPlottedDatastreamsCSVs = async (
+  plottedDatastreams: Datastream[]
 ) => {
   const zip = new JSZip()
 
   try {
-    const csvPromises = selectedDatastreams.map(async (d) => {
+    const csvPromises = plottedDatastreams.map(async (d) => {
       const data = await api.downloadDatastreamCSV(d.id)
       const blob = new Blob([data], { type: 'text/csv' })
       zip.file(`datastream_${d.id}.csv`, blob)
