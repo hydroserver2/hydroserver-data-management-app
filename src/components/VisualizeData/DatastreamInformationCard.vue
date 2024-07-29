@@ -107,7 +107,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 
-const { processingLevels, observedProperties, things, selectedDatastreams } =
+const { processingLevels, observedProperties, things, plottedDatastreams } =
   storeToRefs(useDataVisStore())
 const downloading = ref(false)
 
@@ -122,17 +122,17 @@ const downloadDatastream = async (id: string) => {
 }
 
 const addToPlot = (datastream: Datastream) => {
-  const index = selectedDatastreams.value.findIndex(
+  const index = plottedDatastreams.value.findIndex(
     (ds) => ds.id === datastream.id
   )
-  if (index === -1) selectedDatastreams.value.push(datastream)
+  if (index === -1) plottedDatastreams.value.push(datastream)
   emit('close')
 }
 
 const clearAndPlot = (datastream: Datastream) => {
   emit('close')
-  selectedDatastreams.value = []
-  selectedDatastreams.value.push(datastream)
+  plottedDatastreams.value = []
+  plottedDatastreams.value.push(datastream)
 }
 
 const unit = ref<Unit | null>(null)

@@ -56,7 +56,7 @@
     <v-btn
       :loading="downloading"
       prepend-icon="mdi-download"
-      @click="downloadSelected(selectedDatastreams)"
+      @click="downloadSelected(plottedDatastreams)"
       >Download Selected</v-btn
     >
   </v-toolbar>
@@ -77,10 +77,10 @@
     <template v-slot:item.plot="{ item }">
       <v-checkbox
         :model-value="isChecked(item)"
-        :disabled="selectedDatastreams.length >= 5 && !isChecked(item)"
+        :disabled="plottedDatastreams.length >= 5 && !isChecked(item)"
         class="d-flex align-self-center"
         density="compact"
-        @change="() => updateSelectedDatastreams(item)"
+        @change="() => updatePlottedDatastreams(item)"
       />
     </template>
   </v-data-table-virtual>
@@ -99,12 +99,12 @@ import { Datastream } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
-import { downloadSelectedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
+import { downloadPlottedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
 
 const {
   things,
   filteredDatastreams,
-  selectedDatastreams,
+  plottedDatastreams,
   observedProperties,
   processingLevels,
   tableHeight,
@@ -121,10 +121,10 @@ const copyStateToClipboard = async () => {
   emit('copyState')
 }
 
-const downloadSelected = async (selectedDatastreams: Datastream[]) => {
+const downloadSelected = async (plottedDatastreams: Datastream[]) => {
   downloading.value = true
   try {
-    await downloadSelectedDatastreamsCSVs(selectedDatastreams)
+    await downloadPlottedDatastreamsCSVs(plottedDatastreams)
   } catch (error) {
     console.error('Error downloading selected datastreams', error)
   }
@@ -149,7 +149,7 @@ const onRowClick = (event: Event, item: any) => {
 const displayDatastreams = computed(() => {
   if (showOnlySelected.value) {
     return filteredDatastreams.value.filter((ds) =>
-      selectedDatastreams.value.some((sds) => sds.id === ds.id)
+      plottedDatastreams.value.some((sds) => sds.id === ds.id)
     )
   } else {
     return filteredDatastreams.value
@@ -176,12 +176,12 @@ const tableItems = computed(() => {
 
 function clearSelected() {
   showOnlySelected.value = false
-  selectedDatastreams.value = []
+  plottedDatastreams.value = []
 }
 
 const isChecked = (item: Datastream) => {
   return computed(() =>
-    selectedDatastreams.value.some((sds) => sds.id === item.id)
+    plottedDatastreams.value.some((sds) => sds.id === item.id)
   ).value
 }
 
@@ -234,11 +234,11 @@ const selectedHeaders = computed({
   },
 })
 
-function updateSelectedDatastreams(datastream: Datastream) {
-  const index = selectedDatastreams.value.findIndex(
+function updatePlottedDatastreams(datastream: Datastream) {
+  const index = plottedDatastreams.value.findIndex(
     (ds) => ds.id === datastream.id
   )
-  if (index === -1) selectedDatastreams.value.push(datastream)
-  else selectedDatastreams.value.splice(index, 1)
+  if (index === -1) plottedDatastreams.value.push(datastream)
+  else plottedDatastreams.value.splice(index, 1)
 }
 </script>

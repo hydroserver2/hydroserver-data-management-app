@@ -58,7 +58,7 @@
       </v-card-text>
 
       <v-card-text
-        v-if="selectedDatastreams.length && !updating"
+        v-if="plottedDatastreams.length && !updating"
         class="text-center"
       >
         <v-alert type="warning" dense>
@@ -89,7 +89,7 @@ const {
   graphSeriesArray,
   echartsOption: option,
   loadingStates,
-  selectedDatastreams,
+  plottedDatastreams,
 } = storeToRefs(useDataVisStore())
 
 const echartsRef = ref<typeof VChart | null>(null)

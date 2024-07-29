@@ -96,6 +96,24 @@ export const useObservationStore = defineStore('observations', () => {
     }
   }
 
+  const fetchGraphSeriesData = async (
+    datastream: Datastream,
+    start: string,
+    end: string
+  ) => {
+    const observations = await fetchObservationsInRange(
+      datastream,
+      start,
+      end
+    ).catch((error) => {
+      Snackbar.error('Failed to fetch observations')
+      console.error('Failed to fetch observations:', error)
+      return []
+    })
+
+    return preProcessData(observations, datastream)
+  }
+
   const fetchGraphSeries = async (
     datastream: Datastream,
     start: string,
@@ -146,6 +164,7 @@ export const useObservationStore = defineStore('observations', () => {
   return {
     observations,
     fetchObservationsInRange,
+    fetchGraphSeriesData,
     fetchGraphSeries,
   }
 })

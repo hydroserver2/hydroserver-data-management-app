@@ -51,7 +51,7 @@ const { onDateBtnClick, resetState } = useDataVisStore()
 const {
   things,
   selectedThings,
-  selectedDatastreams,
+  plottedDatastreams,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
   processingLevels,
@@ -108,7 +108,7 @@ const generateStateUrl = () => {
   const siteIds = selectedThings.value.map((t) => t.id).join(',')
   if (siteIds) queryParams.append('sites', siteIds)
 
-  const datastreamIds = selectedDatastreams.value
+  const datastreamIds = plottedDatastreams.value
     .map((ds) => encodeURIComponent(ds.id))
     .join(',')
   if (datastreamIds) queryParams.append('datastreams', datastreamIds)
@@ -168,7 +168,7 @@ const parseUrlAndSetState = () => {
   const datastreamIdString = (route.query.datastreams as string) || ''
   const datastreamIds = datastreamIdString.split(',')
   if (datastreamIds)
-    selectedDatastreams.value = datastreams.value.filter((ds) =>
+    plottedDatastreams.value = datastreams.value.filter((ds) =>
       datastreamIds.includes(ds.id)
     )
 
