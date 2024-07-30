@@ -68,6 +68,8 @@
               params: { id: thingId, datastreamId: datastream.id },
             }"
           />
+        </div>
+        <div v-if="thing?.isPrimaryOwner">
           <v-list-item
             prepend-icon="mdi-delete"
             title="Delete Datastream"
@@ -136,6 +138,8 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import DatastreamSourceLinker from './DatastreamSourceLinker.vue'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
+import { useThingStore } from '@/store/thing'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps({
   datastream: {
@@ -151,6 +155,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const { thing } = storeToRefs(useThingStore())
 
 const emit = defineEmits(['deleted', 'linkUpdated'])
 const handleLinkUpdated = (patchBody: {}) => emit('linkUpdated', patchBody)
