@@ -52,7 +52,7 @@ const props = defineProps({
 const deleteInput = ref('')
 
 const onDeleteThing = () => {
-  if (deleteInput.value !== props.thing.name) {
+  if (deleteInput.value.toLowerCase() !== props.thing.name.toLowerCase()) {
     Snackbar.warn('Site name does not match.')
     return
   }

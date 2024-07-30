@@ -25,7 +25,7 @@
 
     <v-card-text>
       Please type the following text to confirm deletion:
-      <strong> Delete my account and data </strong>
+      <strong> delete my account and data </strong>
       <v-form>
         <v-text-field
           v-model="deleteInput"
