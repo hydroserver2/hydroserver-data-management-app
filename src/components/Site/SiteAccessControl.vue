@@ -208,6 +208,7 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { useHydroShareStore } from '@/store/hydroShare'
 import { PostHydroShareArchive } from '@/types'
+import router from '@/router/router'
 
 const { hydroShareArchive } = storeToRefs(useHydroShareStore())
 const { user } = storeToRefs(useUserStore())
@@ -264,6 +265,8 @@ async function onAddSecondaryOwner() {
 async function onRemoveOwner(email: string) {
   try {
     thing.value = await api.removeThingOwner(props.thingId, email)
+    Snackbar.success('Owner removed for site.')
+    if (email === user.value.email) await router.push({ name: 'Sites' })
   } catch (error) {
     console.error('Error removing owner from thing', error)
   }
