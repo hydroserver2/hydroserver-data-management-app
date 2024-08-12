@@ -1,10 +1,10 @@
 <template>
   <v-text-field
     :placeholder="placeholder"
-    :value="formattedDate"
-    readonly
-    @click="showDatePicker = true"
-    append-inner-icon="mdi-calendar"
+    v-model="inputDate"
+    @blur="handleBlur"
+    append-inner-icon="mdi-calendar-blank"
+    @click:append-inner="toggleDatePicker"
     hide-details
     density="compact"
   />
@@ -14,9 +14,9 @@
       <v-card-title class="d-flex pt-4">
         Select {{ placeholder }}
         <v-spacer />
-        <v-icon color="grey-darken-1" @click="showDatePicker = false"
-          >mdi-close</v-icon
-        >
+        <v-icon color="grey-darken-1" @click="showDatePicker = false">
+          mdi-close
+        </v-icon>
       </v-card-title>
       <v-divider />
       <v-date-picker
@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Date, required: true },
@@ -39,28 +39,42 @@ const emit = defineEmits(['update:modelValue'])
 
 const showDatePicker = ref(false)
 const localDate = ref<Date>(props.modelValue)
+const inputDate = ref(localDate.value.toLocaleDateString('en-US'))
 
 watch(
   () => props.modelValue,
   (newValue) => {
     if (newValue !== localDate.value) {
       localDate.value = newValue
+      inputDate.value = newValue.toLocaleDateString('en-US')
     }
   }
 )
 
 const dateSelected = (newDate: Date) => {
   localDate.value = newDate
+  inputDate.value = newDate.toLocaleDateString('en-US')
   emit('update:modelValue', newDate)
   showDatePicker.value = false
 }
 
-const formattedDate = computed(() => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+const handleBlur = () => {
+  if (inputDate.value === props.modelValue.toLocaleDateString('en-US')) return
+  const parts = inputDate.value.split('/')
+  try {
+    const newDate = new Date(+parts[2], +parts[0] - 1, +parts[1])
+    if (!isNaN(newDate.getTime())) {
+      localDate.value = newDate
+      emit('update:modelValue', newDate)
+    } else {
+      inputDate.value = localDate.value.toLocaleDateString('en-US')
+    }
+  } catch (e) {
+    inputDate.value = localDate.value.toLocaleDateString('en-US')
   }
-  return new Date(localDate.value).toLocaleDateString(undefined, options)
-})
+}
+
+const toggleDatePicker = () => {
+  showDatePicker.value = !showDatePicker.value
+}
 </script>

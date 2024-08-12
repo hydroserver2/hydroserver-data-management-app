@@ -17,7 +17,7 @@ import { createEChartsOption } from '@/utils/plotting/echarts'
 import { useObservationStore } from '@/store/observations'
 
 export const useDataVisStore = defineStore('dataVisualization', () => {
-  const { fetchGraphSeries } = useObservationStore()
+  const { fetchGraphSeries, fetchGraphSeriesData } = useObservationStore()
 
   const things = ref<Thing[]>([])
   const datastreams = ref<Datastream[]>([])
@@ -25,7 +25,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   const processingLevels = ref<ProcessingLevel[]>([])
 
   const selectedThings = ref<Thing[]>([])
-  const selectedDatastreams = ref<Datastream[]>([])
+  const plottedDatastreams = ref<Datastream[]>([])
   const selectedObservedPropertyNames = ref<string[]>([])
   const selectedProcessingLevelNames = ref<string[]>([])
 
@@ -49,7 +49,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
 
   function resetState() {
     selectedThings.value = []
-    selectedDatastreams.value = []
+    plottedDatastreams.value = []
     selectedObservedPropertyNames.value = []
     selectedProcessingLevelNames.value = []
     showSummaryStatistics.value = false
@@ -131,7 +131,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   ])
 
   const getMostRecentEndTime = () =>
-    selectedDatastreams.value.reduce((latest, ds) => {
+    plottedDatastreams.value.reduce((latest, ds) => {
       const dsEndDate = new Date(ds.phenomenonEndTime!)
       return dsEndDate > latest ? dsEndDate : latest
     }, new Date(0))
@@ -153,13 +153,15 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     dataZoomEnd.value = 100
     if (begin) beginDate.value = begin
     if (end) endDate.value = end
-
     if (custom) selectedDateBtnId.value = -1
 
-    if (update) {
-      clearState()
-      if (!beginDate || !endDate || !selectedDatastreams.value.length) return
-      updateDatasets(selectedDatastreams.value)
+    if (
+      update &&
+      beginDate.value &&
+      endDate.value &&
+      plottedDatastreams.value.length
+    ) {
+      refreshGraphSeriesArray(plottedDatastreams.value)
     }
   }
 
@@ -191,54 +193,58 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     prevIds.value = graphSeriesArray.value.map((series) => series.id)
   }
 
-  const fetchDatasets = (datastreams: Datastream[]) => {
-    datastreams.forEach((ds) => {
-      loadingStates.value.set(ds.id, true)
-      const begin = beginDate.value.toISOString()
-      const end = endDate.value.toISOString()
-      fetchGraphSeries(ds, begin, end)
-        .then((newSeries) => {
-          if (!selectedDatastreams.value.some((sd) => sd.id === ds.id)) return
+  const updateOrFetchGraphSeries = async (
+    datastream: Datastream,
+    start: string,
+    end: string
+  ) => {
+    try {
+      const seriesIndex = graphSeriesArray.value.findIndex(
+        (series) => series.id === datastream.id
+      )
 
-          graphSeriesArray.value = graphSeriesArray.value.filter(
-            (series) => series.id !== ds.id
-          )
+      if (seriesIndex >= 0) {
+        // Update the existing graph series with new data
+        const data = await fetchGraphSeriesData(datastream, start, end)
+        graphSeriesArray.value[seriesIndex].data = data
+      } else {
+        // Add new graph series
+        const newSeries = await fetchGraphSeries(datastream, start, end)
+        graphSeriesArray.value.push(newSeries)
+      }
 
-          graphSeriesArray.value.push(newSeries)
-          updateVisualization()
-        })
-        .catch((error) => {
-          console.error(`Failed to fetch dataset ${ds.id}:`, error)
-        })
-        .finally(() => {
-          loadingStates.value.set(ds.id, false)
-        })
-    })
+      updateVisualization()
+    } catch (error) {
+      console.error(
+        `Failed to fetch or update dataset for ${datastream.id}:`,
+        error
+      )
+    } finally {
+      loadingStates.value.set(datastream.id, false)
+    }
   }
 
-  const updateDatasets = async (datastreams: Datastream[]) => {
-    const currentIds = datastreams.map((ds) => ds.id)
-    const newIds = currentIds.filter((id) => !prevIds.value.includes(id))
-    const removedIds = prevIds.value.filter((id) => !currentIds.includes(id))
+  /** Refreshes the graphSeriesArray based on the current selection of datastreams */
+  const refreshGraphSeriesArray = async (datastreams: Datastream[]) => {
+    // Remove graphSeries that are no longer selected
+    const currentIds = new Set(datastreams.map((ds) => ds.id))
+    graphSeriesArray.value = graphSeriesArray.value.filter((s) =>
+      currentIds.has(s.id)
+    )
 
-    // Remove old
-    if (removedIds.length) {
-      graphSeriesArray.value = graphSeriesArray.value.filter(
-        (series) => !removedIds.includes(series.id)
-      )
-      updateVisualization()
-    }
-
-    // fetch new
-    if (newIds.length)
-      fetchDatasets(datastreams.filter((d) => newIds.includes(d.id)))
+    const begin = beginDate.value.toISOString()
+    const end = endDate.value.toISOString()
+    datastreams.forEach((ds) => {
+      loadingStates.value.set(ds.id, true)
+      updateOrFetchGraphSeries(ds, begin, end)
+    })
   }
 
   // If currently selected datastreams are no longer in filteredDatastreams, deselect them
   watch(
     () => filteredDatastreams.value,
     (newDatastreams) => {
-      selectedDatastreams.value = selectedDatastreams.value.filter((ds) =>
+      plottedDatastreams.value = plottedDatastreams.value.filter((ds) =>
         newDatastreams.some((datastream) => datastream.id === ds.id)
       )
     },
@@ -255,7 +261,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   // Update the time range to the most recent phenomenon end time
   let prevDatastreamIds = ''
   watch(
-    () => selectedDatastreams.value,
+    () => plottedDatastreams.value,
     (newDs) => {
       const newDatastreamIds = JSON.stringify(newDs.map((ds) => ds.id).sort())
 
@@ -264,19 +270,21 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       } else if (newDatastreamIds !== prevDatastreamIds) {
         const oldEnd = endDate.value
         const oldBegin = beginDate.value
+
         endDate.value = getMostRecentEndTime()
+
         const selectedOption = dateOptions.value.find(
           (option) => option.id === selectedDateBtnId.value
         )
+
         if (selectedOption) {
           beginDate.value = selectedOption.calculateBeginDate()
+        } else {
+          const timeDifference = oldEnd.getTime() - oldBegin.getTime()
+          beginDate.value = new Date(endDate.value.getTime() - timeDifference)
         }
-        if (
-          oldEnd.getTime() !== endDate.value.getTime() ||
-          oldBegin.getTime() !== beginDate.value.getTime()
-        )
-          clearState()
-        updateDatasets(newDs)
+
+        refreshGraphSeriesArray(newDs)
       }
       prevDatastreamIds = newDatastreamIds
     },
@@ -292,7 +300,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     selectedObservedPropertyNames,
     selectedProcessingLevelNames,
     filteredDatastreams,
-    selectedDatastreams,
+    plottedDatastreams,
     beginDate,
     endDate,
     dataZoomStart,
