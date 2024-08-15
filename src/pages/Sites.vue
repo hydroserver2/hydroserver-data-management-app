@@ -8,20 +8,22 @@
     />
   </div>
 
-  <v-container>
+  <div class="my-4 mx-6">
     <v-row class="my-2">
       <v-col cols="auto">
-        <h5 class="text-h5">My Registered Sites</h5>
+        <h5 class="text-h5">My registered sites</h5>
       </v-col>
 
       <v-spacer />
 
       <v-col cols="auto">
-        <v-btn-primary
+        <v-btn
           class="mr-2"
           @click="showFilter = !showFilter"
           prependIcon="mdi-filter"
-          >Filter Sites</v-btn-primary
+          variant="outlined"
+          rounded="xl"
+          >Filter Sites</v-btn
         >
         <v-btn-secondary @click="showSiteForm = true" prependIcon="mdi-plus"
           >Register a new site</v-btn-secondary
@@ -42,10 +44,13 @@
       v-if="ownedThings?.length"
       :headers="headers"
       :items="coloredThings"
-      hover
+      :sort-by="[{ key: 'samplingFeatureCode' }]"
+      multi-sort
       item-value="id"
       class="elevation-3 owned-sites-table"
       @click:row="onRowClick"
+      color="secondary"
+      hover
     >
       <template v-slot:item.tagValue="{ item }">
         <template v-for="(tag, index) in item.tags">
@@ -63,7 +68,7 @@
     <h5 v-else-if="!ownedThings.length" class="text-h5">
       You have not registered any sites.
     </h5>
-  </v-container>
+  </div>
 
   <v-dialog v-model="showSiteForm" width="60rem">
     <SiteForm @close="showSiteForm = false" @created="loadThings" />
@@ -71,11 +76,11 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterTool from '@/components/Site/SiteFilterTool.vue'
-import { useRouter } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
 import { api } from '@/services/api'
 import { Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
@@ -121,9 +126,9 @@ const router = useRouter()
 
 const headers = computed(() => {
   const baseHeaders = [
-    { title: 'Site Code', key: 'samplingFeatureCode' },
-    { title: 'Site Name', key: 'name' },
-    { title: 'Site Type', key: 'siteType' },
+    { title: 'Site code', key: 'samplingFeatureCode' },
+    { title: 'Site name', key: 'name' },
+    { title: 'Site type', key: 'siteType' },
   ]
 
   if (isFiltered.value && useColors.value) {
