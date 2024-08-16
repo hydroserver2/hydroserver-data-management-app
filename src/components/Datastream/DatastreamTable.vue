@@ -1,5 +1,5 @@
 <template>
-  <h5 class="text-h5 my-6">Datastreams Available at this Site</h5>
+  <h5 class="text-h5 my-6">Datastreams available at this site</h5>
 
   <v-row class="pb-4">
     <v-col cols="auto" v-if="thing?.ownsThing">
