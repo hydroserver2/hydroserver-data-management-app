@@ -25,11 +25,13 @@
     {{ thing?.dataDisclaimer }}
   </h6>
 
-  <v-data-table
+  <v-data-table-virtual
     class="elevation-3 my-4"
     :headers="headers"
     :items="visibleDatastreams"
     v-model:sort-by="sortBy"
+    :style="{ 'max-height': `100vh` }"
+    fixed-header
   >
     <template v-slot:item.info="{ item }">
       <v-col>
@@ -98,7 +100,7 @@
         @linkUpdated="loadDatastreams"
       />
     </template>
-  </v-data-table>
+  </v-data-table-virtual>
 </template>
 
 <script setup lang="ts">
