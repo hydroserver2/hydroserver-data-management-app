@@ -1,10 +1,15 @@
 <template>
-  <v-data-table :headers="UnitHeaders" :items="sortedItems">
+  <v-data-table-virtual
+    :headers="UnitHeaders"
+    :items="sortedItems"
+    :style="{ 'max-height': `200vh` }"
+    fixed-header
+  >
     <template v-slot:item.actions="{ item }">
       <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
-  </v-data-table>
+  </v-data-table-virtual>
 
   <v-dialog v-model="openEdit" width="60rem">
     <UnitFormCard :unit="item" @close="openEdit = false" @updated="onUpdate" />
