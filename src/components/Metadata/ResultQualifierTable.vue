@@ -1,9 +1,14 @@
 <template>
-  <v-data-table :headers="headers" :items="items">
+  <v-data-table-virtual
+    :headers="headers"
+    :items="items"
+    :style="{ 'max-height': `200vh` }"
+    fixed-header
+  >
     <template v-slot:item.actions="{ item }">
       <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
-    </template></v-data-table
+    </template></v-data-table-virtual
   >
 
   <v-dialog v-model="openEdit" width="60rem">
