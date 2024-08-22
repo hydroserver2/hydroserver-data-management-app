@@ -13,7 +13,7 @@ const defaultMockFetchItems: () => Promise<Unit[]> = vi.fn(() =>
 )
 const defaultCreateItem = vi.fn()
 const defaultUpdateItem = vi.fn()
-let defaultInitialUnit: Unit | undefined = undefined
+let defaultInitialUnit: Unit
 
 describe('useFormLogic', () => {
   // onMounted won't work outside of the context of script setup, therefore

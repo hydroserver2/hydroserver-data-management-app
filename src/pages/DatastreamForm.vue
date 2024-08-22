@@ -8,7 +8,7 @@
             size="large"
             color="black"
             variant="text"
-            @click="$router.go(-1)"
+            @click="router.go(-1)"
           >
           </v-btn>
 

@@ -1,3 +1,5 @@
+import { Unit } from '@/types'
+
 export default [
   {
     id: 'unit1',
@@ -16,4 +18,4 @@ export default [
     type: 'TestType',
     owner: 'Owner2',
   },
-]
+] as Unit[]
