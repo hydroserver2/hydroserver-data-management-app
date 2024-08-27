@@ -17,7 +17,7 @@
           :items="OPNames"
           hide-details
           label="Name *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength255"
           @update:modelValue="handleNameUpdated"
           class="pb-4"
         />
@@ -38,13 +38,13 @@
           :items="OPVariableTypes"
           v-model="item.type"
           label="Variable Type *"
-          :rules="rules.required"
+          :rules="rules.requiredAndMaxLength500"
         />
 
         <v-text-field
           v-model="item.code"
           label="Variable Code *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength500"
         />
       </v-card-text>
 

@@ -43,21 +43,21 @@
           v-if="!isInstrument"
           v-model="item.name"
           label="Name *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength255"
         />
 
         <v-text-field
           v-if="isInstrument"
           v-model="item.manufacturer"
           label="Manufacturer *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength255"
         />
 
         <v-text-field
           v-if="isInstrument"
           v-model="item.model"
           label="Model *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength255"
         />
 
         <v-text-field

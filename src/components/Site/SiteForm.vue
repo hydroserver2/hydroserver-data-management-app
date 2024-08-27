@@ -44,7 +44,7 @@
                 ><v-text-field
                   label="Site Name *"
                   v-model="thing.name"
-                  :rules="rules.requiredName"
+                  :rules="rules.requiredAndMaxLength200"
               /></v-col>
               <v-col cols="12"
                 ><v-textarea
@@ -88,7 +88,7 @@
                   label="Latitude *"
                   v-model="thing.latitude"
                   type="number"
-                  :rules="rules.requiredNumber"
+                  :rules="[...rules.requiredNumber, ...rules.maxLength(22)]"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6"
@@ -96,7 +96,7 @@
                   label="Longitude *"
                   v-model="thing.longitude"
                   type="number"
-                  :rules="rules.requiredNumber"
+                  :rules="[...rules.requiredNumber, ...rules.maxLength(22)]"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6"
@@ -104,7 +104,7 @@
                   label="Elevation (m) *"
                   v-model="thing.elevation_m"
                   type="number"
-                  :rules="rules.requiredNumber"
+                  :rules="[...rules.requiredNumber, ...rules.maxLength(22)]"
                   validate-on="input"
               /></v-col>
               <v-col cols="12" sm="6">

@@ -294,7 +294,7 @@
                 :items="aggregationTypes"
                 v-model="datastream.aggregationStatistic"
                 label="Aggregation statistic *"
-                :rules="rules.required"
+                :rules="rules.requiredAndMaxLength255"
                 density="compact"
                 rounded="xl"
                 prepend-inner-icon="mdi-table-column"
@@ -331,7 +331,7 @@
               <v-text-field
                 v-model="datastream.name"
                 label="Datastream name *"
-                :rules="rules.required"
+                :rules="rules.requiredAndMaxLength255"
                 density="compact"
                 rounded="lg"
               />
@@ -363,7 +363,7 @@
               <v-textarea
                 v-model="datastream.description"
                 label="Datastream description *"
-                :rules="rules.required"
+                :rules="rules.requiredDescription"
                 rounded="lg"
               />
 
