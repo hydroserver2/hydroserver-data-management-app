@@ -50,7 +50,7 @@
           >Filter Sites</v-btn
         >
 
-        <v-btn-add @click="showSiteForm = true" color="white">
+        <v-btn-add class="mr-2" @click="showSiteForm = true" color="white">
           Register a new site
         </v-btn-add>
       </v-toolbar>
