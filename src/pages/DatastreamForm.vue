@@ -455,7 +455,7 @@ const {
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
   await fetchMetadata(thingId)
-  ;(datastream as any)[dsKey] = newId
+  ;(datastream.value as any)[dsKey] = newId
 }
 
 const originalName = ref('')
