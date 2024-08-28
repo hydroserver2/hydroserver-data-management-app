@@ -10,7 +10,7 @@
 
     <v-row class="justify-start" align="center">
       <v-col cols="auto">
-        <h5 class="text-h5">Site Information</h5>
+        <h5 class="text-h5">Site information</h5>
       </v-col>
 
       <v-col cols="auto" v-if="isOwner">
@@ -25,7 +25,7 @@
 
       <v-col cols="auto" v-if="isOwner">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
-          >Edit Site Information</v-btn
+          >Edit site information</v-btn
         >
         <v-dialog v-model="isRegisterModalOpen" width="80rem">
           <SiteForm @close="isRegisterModalOpen = false" :thing-id="thingId" />

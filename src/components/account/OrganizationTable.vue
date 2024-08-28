@@ -1,24 +1,24 @@
 <template>
   <v-data-table
     v-if="user.organization"
+    :items="organizationInfo"
+    :items-per-page="-1"
+    hide-default-header
+    hide-default-footer
     density="compact"
     class="elevation-3 my-6 rounded-lg"
   >
     <template v-slot:top>
-      <v-toolbar color="blue-grey">
-        <h5 class="text-h5 ml-4">Organization Information</h5>
+      <v-toolbar color="blue-grey" rounded="t-lg">
+        <h5 class="text-h5 ml-4">Organization information</h5>
       </v-toolbar>
     </template>
-    <tbody>
-      <tr v-for="property in organizationInfo" :key="property?.label">
-        <td><i :class="property?.icon"></i></td>
-        <td>
-          <strong>{{ property?.label }}</strong>
-        </td>
-        <td>{{ property?.value }}</td>
-      </tr>
-    </tbody>
-    <template v-slot:bottom></template>
+    <template v-slot:item.icon="{ item }">
+      <v-icon :icon="item.icon"></v-icon>
+    </template>
+    <template v-slot:item.label="{ item }">
+      <strong>{{ item.label }}</strong>
+    </template>
   </v-data-table>
 </template>
 
@@ -34,27 +34,27 @@ const organizationInfo = computed(() => {
 
   return [
     {
-      icon: 'fas fa-building',
+      icon: 'mdi-office-building',
       label: 'Name',
       value: user.value.organization.name,
     },
     {
-      icon: 'fas fa-code',
+      icon: 'mdi-code-tags',
       label: 'Code',
       value: user.value.organization.code,
     },
     {
-      icon: 'fas fa-external-link-alt',
+      icon: 'mdi-open-in-new',
       label: 'Link',
       value: user.value.organization.link,
     },
     {
-      icon: 'fas fa-industry',
+      icon: 'mdi-factory',
       label: 'Type',
       value: user.value.organization.type,
     },
     {
-      icon: 'fas fa-file-alt',
+      icon: 'mdi-file-document-outline',
       label: 'Description',
       value: user.value.organization.description,
     },

@@ -1,20 +1,23 @@
 <template>
-  <v-data-table density="compact" class="elevation-3 my-6 rounded-lg">
+  <v-data-table
+    :items="userInformation"
+    :items-per-page="-1"
+    hide-default-header
+    hide-default-footer
+    density="compact"
+    class="elevation-3 my-6 rounded-lg"
+  >
     <template v-slot:top>
-      <v-toolbar color="secondary">
-        <h5 class="text-h5 ml-4">User Information</h5>
+      <v-toolbar color="secondary" rounded="t-lg">
+        <h5 class="text-h5 ml-4">User information</h5>
       </v-toolbar>
     </template>
-    <tbody>
-      <tr v-for="property in userInformation" :key="property?.label">
-        <td><i :class="property?.icon"></i></td>
-        <td>
-          <strong>{{ property?.label }}</strong>
-        </td>
-        <td>{{ property?.value }}</td>
-      </tr>
-    </tbody>
-    <template v-slot:bottom></template>
+    <template v-slot:item.icon="{ item }">
+      <v-icon :icon="item?.icon"></v-icon>
+    </template>
+    <template v-slot:item.label="{ item }">
+      <strong>{{ item?.label }}</strong>
+    </template>
   </v-data-table>
 </template>
 
@@ -52,26 +55,25 @@ const userInformation = computed(() => {
 
   return [
     {
-      icon: 'fas fa-user',
+      icon: 'mdi-account',
       label: 'Name',
       value: `${user.value.firstName} ${user.value.middleName || ''} ${
         user.value.lastName
       }`,
     },
-
-    { icon: 'fas fa-envelope', label: 'Email', value: user.value.email },
+    { icon: 'mdi-email', label: 'Email', value: user.value.email },
     {
-      icon: 'fas fa-map-marker-alt',
+      icon: 'mdi-map-marker',
       label: 'Address',
       value: user.value.address,
     },
-    { icon: 'fas fa-phone', label: 'Phone', value: user.value.phone },
-    { icon: 'fas fa-id-badge', label: 'Type', value: user.value.type },
-    { icon: 'fas fa-link', label: 'Link', value: user.value.link },
+    { icon: 'mdi-phone', label: 'Phone', value: user.value.phone },
+    { icon: 'mdi-card-account-details', label: 'Type', value: user.value.type },
+    { icon: 'mdi-link', label: 'Link', value: user.value.link },
     hydroShareOauthEnabled === 'true'
       ? {
-          icon: 'fas fa-database',
-          label: 'HydroShare Account',
+          icon: 'mdi-database',
+          label: 'HydroShare account',
           value:
             user.value.hydroShareConnected === true
               ? 'Connected'
