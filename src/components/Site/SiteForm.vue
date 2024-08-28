@@ -194,6 +194,7 @@ const myForm = ref<VForm>()
 const mapOptions = ref<any>(undefined)
 const thing = reactive<Thing>(new Thing())
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
+const { tags } = storeToRefs(useTagStore())
 
 watch(
   () => includeDataDisclaimer.value,
@@ -233,6 +234,10 @@ async function uploadThing() {
       : await api.createThing(thing)
 
     if (!props.thingId) emit('created')
+
+    // Set the tag context to the current site so updateTags can compare
+    // against what we already have if anything.
+    tags.value = await api.fetchSiteTags(storedThing.value!.id)
     await updateTags(storedThing.value!.id)
     await updatePhotos(storedThing.value!.id)
   } catch (error) {

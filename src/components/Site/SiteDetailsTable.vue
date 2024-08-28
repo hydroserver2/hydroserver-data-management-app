@@ -34,21 +34,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { materialColors } from '@/utils/materialColors'
 import { useTagStore } from '@/store/tags'
-import { api } from '@/services/api'
 
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
-const props = defineProps({
-  thingId: {
-    type: String,
-    required: true,
-  },
-})
 
 const isUrl = (value: string): boolean => {
   try {
@@ -130,14 +123,6 @@ const tagProperty = computed(() => {
     icon: 'fas fa-tags',
     label: 'Additional Metadata',
     value: tags.value || [],
-  }
-})
-
-onMounted(async () => {
-  try {
-    tags.value = await api.fetchSiteTags(props.thingId)
-  } catch (error) {
-    console.error('Error fetching thing', error)
   }
 })
 </script>

@@ -67,7 +67,7 @@
 
     <v-row class="mb-6">
       <v-col cols="12" md="8">
-        <SiteDetailsTable :thing-id="thingId" />
+        <SiteDetailsTable />
       </v-col>
 
       <v-col cols="12" md="4">
@@ -109,6 +109,7 @@ import { useRoute } from 'vue-router'
 import { usePhotosStore } from '@/store/photos'
 import { useThingStore } from '@/store/thing'
 import { useUserStore } from '@/store/user'
+import { useTagStore } from '@/store/tags'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 import router from '@/router/router'
@@ -132,6 +133,7 @@ const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { user } = storeToRefs(useUserStore())
+const { tags } = storeToRefs(useTagStore())
 
 const isOwner = computed(() => thing.value?.ownsThing)
 const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
@@ -183,20 +185,26 @@ onMounted(async () => {
     .then((data) => (photos.value = data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
-    const [thingResponse, hydroShareArchiveResponse] = await Promise.all([
-      api.fetchThing(thingId).catch((error) => {
-        if (error instanceof Error && parseInt(error.message) === 403)
-          authorized.value = false
-        else console.error('Error fetching thing', error)
+    const [thingResponse, hydroShareArchiveResponse, tagResponse] =
+      await Promise.all([
+        api.fetchThing(thingId).catch((error) => {
+          if (error instanceof Error && parseInt(error.message) === 403)
+            authorized.value = false
+          else console.error('Error fetching thing', error)
 
-        return null
-      }),
-      api.fetchHydroShareArchive(thingId).catch((error) => {
-        console.error('Error fetching hydroShareArchive', error)
-        return null
-      }),
-    ])
+          return null
+        }),
+        api.fetchHydroShareArchive(thingId).catch((error) => {
+          console.error('Error fetching hydroShareArchive', error)
+          return null
+        }),
+        api.fetchSiteTags(thingId).catch((error) => {
+          console.error('Error fetching additional metadata tags', error)
+          return null
+        }),
+      ])
 
+    tags.value = tagResponse
     thing.value = thingResponse
     hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
