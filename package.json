@@ -26,7 +26,6 @@
     "maska": "^2.1.10",
     "npm": "^10.8.3",
     "pinia": "^2.1.6",
-    "pinia-plugin-persistedstate": "^3.2.2",
     "tslib": "^2.5.0",
     "vue": "^3.4.38",
     "vue-echarts": "^6.6.9",
