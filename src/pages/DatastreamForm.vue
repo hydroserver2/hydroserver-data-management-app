@@ -99,8 +99,8 @@
               <v-autocomplete
                 v-model="datastream.observedPropertyId"
                 label="Select observed property *"
-                :items="observedProperties"
-                item-title="name"
+                :items="formattedObservedProperties"
+                item-title="title"
                 item-value="id"
                 :rules="rules.required"
                 no-data-text="No available properties"
@@ -108,6 +108,15 @@
                 density="compact"
                 rounded="lg"
               >
+                <template v-slot:item="{ props, item }">
+                  <v-tooltip bottom :openDelay="1500">
+                    <template v-slot:activator="{ props: tooltipProps }">
+                      <v-list-item v-bind="{ ...props, ...tooltipProps }">
+                      </v-list-item>
+                    </template>
+                    <span>{{ item.title }}</span>
+                  </v-tooltip>
+                </template>
                 <template v-slot:append v-if="isPrimaryOwner">
                   <v-icon color="secondary-darken-2" @click="showOPModal = true"
                     >mdi-plus</v-icon
@@ -449,6 +458,7 @@ const {
   units,
   observedProperties,
   processingLevels,
+  formattedObservedProperties,
   formattedProcessingLevels,
   fetchMetadata,
 } = useMetadata(thingId, true)

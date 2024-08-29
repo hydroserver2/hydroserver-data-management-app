@@ -40,6 +40,17 @@ export function useMetadata(
       ) || []
   )
 
+  const formattedObservedProperties = computed(() => {
+    return (
+      observedProperties.value
+        ?.map((pl) => ({
+          id: pl.id,
+          title: `${pl.code}: ${pl.name}, ${pl.type}`,
+        }))
+        .sort((a, b) => a.title.localeCompare(b.title)) || []
+    )
+  })
+
   const processingLevels: ComputedRef<ProcessingLevel[]> = computed(
     () =>
       metadata.value?.processingLevels.sort((a, b) =>
@@ -51,7 +62,7 @@ export function useMetadata(
     () =>
       processingLevels.value?.map((pl) => ({
         id: pl.id,
-        title: `${pl.code} : ${pl.definition}`,
+        title: `${pl.code}: ${pl.definition}`,
       })) || []
   )
 
@@ -74,6 +85,7 @@ export function useMetadata(
     units,
     observedProperties,
     processingLevels,
+    formattedObservedProperties,
     formattedProcessingLevels,
     fetchMetadata,
   }
