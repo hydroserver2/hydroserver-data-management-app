@@ -32,11 +32,25 @@ export const lessThan = (max: number, name?: string) => [
     `Value must be less than ${name ? name : max}`,
 ]
 
+export const lessThanOrEqualTo = (max: number, name?: string) => [
+  (value: number) =>
+    value == null ||
+    value <= max ||
+    `Value must be less than or equal to ${name ? name : max}`,
+]
+
 export const greaterThan = (min: number, name?: string) => [
   (value: number) =>
     value == null ||
     value > min ||
     `Value must be greater than ${name ? name : min}`,
+]
+
+export const greaterThanOrEqualTo = (min: number, name?: string) => [
+  (value: number) =>
+    value == null ||
+    value >= min ||
+    `Value must be greater than or equal to ${name ? name : min}`,
 ]
 
 export const emailFormat = [
@@ -112,7 +126,9 @@ export const rules = {
   minLength,
   maxLength,
   lessThan,
+  lessThanOrEqualTo,
   greaterThan,
+  greaterThanOrEqualTo,
   alphanumeric,
   nameRules,
   passwordMatch,
