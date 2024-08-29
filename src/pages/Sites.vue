@@ -179,6 +179,7 @@ const onRowClick = (event: Event, item: any) => {
 
 const loadThings = async () => {
   ownedThings.value = await api.fetchOwnedThings()
+  console.log('ownedThings', ownedThings.value)
   sitesLoaded.value = true
 }
 

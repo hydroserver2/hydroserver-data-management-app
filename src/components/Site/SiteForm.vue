@@ -235,6 +235,7 @@ async function uploadThing() {
 
     if (!props.thingId) emit('created')
 
+    console.log('Site upload response', storedThing.value)
     // Set the tag context to the current site so updateTags can compare
     // against what we already have if anything.
     tags.value = await api.fetchSiteTags(storedThing.value!.id)
