@@ -22,12 +22,12 @@
         <v-text-field
           v-model="item.name"
           label="Name *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength255"
         />
         <v-text-field
           v-model="item.symbol"
           label="Symbol *"
-          :rules="rules.required"
+          :rules="rules.requiredAndMaxLength255"
         />
         <v-text-field
           v-model="item.definition"
@@ -37,7 +37,7 @@
         <v-text-field
           v-model="item.type"
           label="Unit Type *"
-          :rules="rules.requiredName"
+          :rules="rules.requiredAndMaxLength255"
         />
       </v-card-text>
 

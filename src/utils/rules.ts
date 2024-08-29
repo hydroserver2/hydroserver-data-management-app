@@ -32,11 +32,25 @@ export const lessThan = (max: number, name?: string) => [
     `Value must be less than ${name ? name : max}`,
 ]
 
+export const lessThanOrEqualTo = (max: number, name?: string) => [
+  (value: number) =>
+    value == null ||
+    value <= max ||
+    `Value must be less than or equal to ${name ? name : max}`,
+]
+
 export const greaterThan = (min: number, name?: string) => [
   (value: number) =>
     value == null ||
     value > min ||
     `Value must be greater than ${name ? name : min}`,
+]
+
+export const greaterThanOrEqualTo = (min: number, name?: string) => [
+  (value: number) =>
+    value == null ||
+    value >= min ||
+    `Value must be greater than or equal to ${name ? name : min}`,
 ]
 
 export const emailFormat = [
@@ -112,7 +126,9 @@ export const rules = {
   minLength,
   maxLength,
   lessThan,
+  lessThanOrEqualTo,
   greaterThan,
+  greaterThanOrEqualTo,
   alphanumeric,
   nameRules,
   passwordMatch,
@@ -124,40 +140,15 @@ export const rules = {
   nonNumericCharacter,
   hydroShareUrl,
 
-  email: [...required, ...emailFormat],
+  email: [...required, ...emailFormat, ...maxLength(150)],
   password: [...required, ...minLength(8), ...nonNumericCharacter],
   name: [...maxLength(200)],
-  requiredName: [...required, ...maxLength(200)],
+  requiredAndMaxLength50: [...required, ...maxLength(50)],
+  requiredAndMaxLength150: [...required, ...maxLength(150)],
+  requiredAndMaxLength200: [...required, ...maxLength(200)],
+  requiredAndMaxLength255: [...required, ...maxLength(255)],
+  requiredAndMaxLength500: [...required, ...maxLength(500)],
   description: [...maxLength(3000)],
   requiredDescription: [...maxLength(3000), ...required],
   requiredCode: [...maxLength(200), ...required],
 }
-
-// Starter code for Vuelidate if we ever decide to use it
-// import { Validation, useVuelidate } from '@vuelidate/core'
-// import { Ref } from 'vue'
-// export class HsFormValidator {
-//   instance: Ref<Validation>
-//   constructor(rules: any, state: any) {
-//     this.instance = useVuelidate(rules, state)
-//   }
-//   get validate() {
-//     return this.instance.value.$validate
-//   }
-//   /** Returns event handlers for a field */
-//   handlers(field: Validation) {
-//     // const field = this.instance.value[name]
-//     return {
-//       input: field.$touch,
-//       blur: field.$touch,
-//     }
-//   }
-//   /** Returns attributes for a field */
-//   attrs(field: Validation) {
-//     return {
-//       'error-messages': field.$errors.map((e: any) => e.$message),
-//       counter: field.maxLength?.$params.max || undefined,
-//       class: { 'is-required': field.value?.hasOwnProperty('required') },
-//     }
-//   }
-// }

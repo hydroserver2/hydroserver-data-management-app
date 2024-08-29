@@ -18,21 +18,21 @@
             <v-text-field
               v-model="userForm.firstName"
               label="First Name *"
-              :rules="rules.requiredName"
+              :rules="rules.requiredAndMaxLength150"
             />
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="userForm.middleName"
               label="Middle Name"
-              :rules="rules.name"
+              :rules="rules.maxLength(50)"
             />
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="userForm.lastName"
               label="Last Name *"
-              :rules="rules.requiredName"
+              :rules="rules.requiredAndMaxLength150"
             />
           </v-col>
 
@@ -80,7 +80,11 @@
           </v-col>
 
           <v-col cols="12">
-            <v-text-field v-model="userForm.address" label="Address" />
+            <v-text-field
+              v-model="userForm.address"
+              label="Address"
+              :rules="rules.maxLength(255)"
+            />
           </v-col>
 
           <v-col>
@@ -104,14 +108,14 @@
             <v-text-field
               v-model="userForm.organization.name"
               label="Organization Name *"
-              :rules="rules.requiredName"
+              :rules="rules.requiredAndMaxLength500"
             />
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="userForm.organization.code"
               label="Organization Code *"
-              :rules="rules.requiredName"
+              :rules="rules.requiredAndMaxLength200"
             />
           </v-col>
           <v-col cols="12" sm="6">
@@ -119,7 +123,7 @@
               :items="organizationTypes"
               v-model="userForm.organization.type"
               label="Organization Type *"
-              :rules="rules.requiredName"
+              :rules="rules.requiredAndMaxLength255"
             />
           </v-col>
           <v-col cols="12" sm="6">

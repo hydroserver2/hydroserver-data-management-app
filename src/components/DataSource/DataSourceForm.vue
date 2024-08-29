@@ -19,7 +19,7 @@ v-col
             <v-text-field
               v-model="item.name"
               label="Data Source Name *"
-              :rules="rules.requiredName"
+              :rules="rules.requiredAndMaxLength255"
             />
           </v-col>
           <v-col>
@@ -40,7 +40,7 @@ v-col
               v-model="item.path"
               label="Local File Path *"
               hint="Enter the absolute path to the data source file."
-              :rules="rules.required"
+              :rules="rules.requiredAndMaxLength255"
             />
           </v-col>
           <v-col>
