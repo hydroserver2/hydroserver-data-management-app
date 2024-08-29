@@ -117,8 +117,8 @@
                   :rules="[
                     ...rules.requiredNumber,
                     ...rules.maxLength(22),
-                    rules.lessThan(1000000),
-                    rules.greaterThan(-1000000),
+                    ...rules.lessThan(1000000),
+                    ...rules.greaterThan(-1000000),
                   ]"
                   validate-on="input"
               /></v-col>
