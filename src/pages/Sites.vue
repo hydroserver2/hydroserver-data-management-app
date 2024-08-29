@@ -50,7 +50,7 @@
           >Filter Sites</v-btn
         >
 
-        <v-btn-add @click="showSiteForm = true" color="white">
+        <v-btn-add class="mr-2" @click="showSiteForm = true" color="white">
           Register a new site
         </v-btn-add>
       </v-toolbar>
@@ -179,6 +179,7 @@ const onRowClick = (event: Event, item: any) => {
 
 const loadThings = async () => {
   ownedThings.value = await api.fetchOwnedThings()
+  console.log('ownedThings', ownedThings.value)
   sitesLoaded.value = true
 }
 

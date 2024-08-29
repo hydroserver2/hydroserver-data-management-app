@@ -1,15 +1,20 @@
 <template>
   <v-navigation-drawer v-model="drawer" width="400">
     <v-card-title class="d-flex justify-space-between align-start">
-      Browse Data Collection Sites
+      Browse data collection sites
       <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
     </v-card-title>
 
     <v-divider />
 
     <div class="d-flex justify-end my-4 mx-2">
-      <v-btn-cancel elevation="3" @click="onClearFilters"
-        >Clear Filters</v-btn-cancel
+      <v-btn
+        color="primary-darken-2"
+        variant="outlined"
+        rounded="xl"
+        @click="onClearFilters"
+        append-icon="mdi-close"
+        >Clear Filters</v-btn
       >
     </div>
 
@@ -17,6 +22,8 @@
       <v-autocomplete
         v-model="selectedOrganizations"
         :items="organizations"
+        clearable
+        prepend-inner-icon="mdi-domain"
         label="Organizations"
         multiple
         hide-details
@@ -36,8 +43,8 @@
       </v-autocomplete>
     </v-col>
 
-    <v-expansion-panels class="pa-4">
-      <v-expansion-panel title="Site Types" color="green">
+    <v-expansion-panels class="pa-4" v-model="panelOpen">
+      <v-expansion-panel title="Site types" color="green">
         <v-expansion-panel-text>
           <v-checkbox
             v-for="type in siteTypes"
@@ -68,6 +75,7 @@ const { smAndDown } = useDisplay()
 const selectedSiteTypes: Ref<string[]> = ref([])
 const selectedOrganizations: Ref<string[]> = ref([])
 const drawer = ref(!!smAndDown)
+const panelOpen = ref([0])
 
 const emit = defineEmits(['filter'])
 const props = defineProps({

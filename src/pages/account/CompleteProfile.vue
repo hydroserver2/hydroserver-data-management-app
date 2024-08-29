@@ -23,13 +23,12 @@ import AccountForm from '@/components/account/AccountForm.vue'
 import { api } from '@/services/api'
 import { useAuthStore } from '@/store/authentication'
 import { useUserStore } from '@/store/user'
-import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router/router'
 
 const route = useRoute()
-const { user } = storeToRefs(useUserStore())
+const { setUser } = useUserStore()
 const { setTokens } = useAuthStore()
 const loaded = ref(false)
 
@@ -43,7 +42,8 @@ onMounted(async () => {
   if (accessToken && refreshToken) setTokens(accessToken, refreshToken)
 
   try {
-    user.value = await api.fetchUser()
+    const user = await api.fetchUser()
+    setUser(user)
   } catch (e) {
     console.error('Error fetching user', e)
   }

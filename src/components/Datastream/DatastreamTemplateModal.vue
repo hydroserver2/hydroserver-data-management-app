@@ -66,7 +66,11 @@ const { sensors, observedProperties, processingLevels, fetchMetadata } =
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
 const selectedThingId = ref('')
-const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))
+const usersThings = computed(() => {
+  return things.value
+    .filter((t) => t.isPrimaryOwner)
+    .sort((a, b) => a.name.localeCompare(b.name))
+})
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 

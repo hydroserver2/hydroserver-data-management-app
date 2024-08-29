@@ -21,19 +21,30 @@ export function useMetadata(
 ) {
   const metadata = ref<DatastreamMetadata | null>(null)
 
-  const sensors = computed(() => metadata.value?.sensors || [])
+  const sensors = computed(
+    () =>
+      metadata.value?.sensors.sort((a, b) => a.name.localeCompare(b.name)) || []
+  )
 
   const units = computed(() => {
     const allUnits = metadata.value?.units || []
-    return allUnits.filter((u) => u.type !== 'Time' && u.owner !== null)
+    return allUnits
+      .filter((u) => u.type !== 'Time' && u.owner !== null)
+      .sort((a, b) => a.name.localeCompare(b.name))
   })
 
   const observedProperties = computed(
-    () => metadata.value?.observedProperties || []
+    () =>
+      metadata.value?.observedProperties.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ) || []
   )
 
   const processingLevels: ComputedRef<ProcessingLevel[]> = computed(
-    () => metadata.value?.processingLevels || []
+    () =>
+      metadata.value?.processingLevels.sort((a, b) =>
+        a.code.localeCompare(b.code)
+      ) || []
   )
 
   const formattedProcessingLevels = computed(

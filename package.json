@@ -12,7 +12,6 @@
     "coverage": "vitest run --coverage --environment jsdom"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.4.0",
     "@googlemaps/js-api-loader": "^1.16.6",
     "@googlemaps/markerclusterer": "^2.5.3",
     "@mdi/js": "^7.2.96",
@@ -25,9 +24,8 @@
     "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",
     "maska": "^2.1.10",
-    "npm": "^10.2.5",
+    "npm": "^10.8.3",
     "pinia": "^2.1.6",
-    "pinia-plugin-persistedstate": "^3.1.0",
     "tslib": "^2.5.0",
     "vue": "^3.4.38",
     "vue-echarts": "^6.6.9",

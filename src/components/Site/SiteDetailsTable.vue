@@ -1,54 +1,45 @@
 <template>
-  <v-data-table class="elevation-2">
-    <tbody>
-      <tr v-for="property in thingProperties" :key="property.label">
-        <td><i :class="property.icon"></i></td>
-        <td>{{ property.label }}</td>
-        <td>
-          {{ property.value }}
-        </td>
-      </tr>
+  <v-data-table
+    :items="thingProperties"
+    :items-per-page="-1"
+    hide-default-header
+    hide-default-footer
+    class="elevation-2"
+  >
+    <template v-slot:item.icon="{ item }">
+      <v-icon :icon="item.icon"></v-icon>
+    </template>
 
-      <tr>
-        <td><i :class="tagProperty.icon"></i></td>
-        <td>{{ tagProperty.label }}</td>
-        <td>
-          <v-chip
-            v-for="(tag, index) in tagProperty.value"
-            rounded="true"
-            :color="materialColors[index % materialColors.length]"
-            :key="tag.id"
-            class="ma-1"
-          >
-            {{ tag.key }}:
-            <span v-if="isUrl(tag.value)">
-              <a :href="tag.value" target="_blank">{{ tag.value }}</a>
-            </span>
-            <span v-else>{{ tag.value }}</span>
-          </v-chip>
-        </td>
-      </tr>
-    </tbody>
-    <template v-slot:bottom></template>
+    <template v-slot:item.value="{ item }">
+      <div v-if="item.label === 'Additional metadata'">
+        <v-chip
+          v-for="(tag, index) in tagProperty.value"
+          rounded="true"
+          :color="materialColors[index % materialColors.length]"
+          :key="tag.id"
+          class="mr-2 my-1"
+        >
+          {{ tag.key }}:
+          <span v-if="isUrl(tag.value)">
+            <a :href="tag.value" target="_blank">{{ tag.value }}</a>
+          </span>
+          <span v-else>{{ tag.value }}</span>
+        </v-chip>
+      </div>
+      <p v-else>{{ item.value }}</p>
+    </template>
   </v-data-table>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { materialColors } from '@/utils/materialColors'
 import { useTagStore } from '@/store/tags'
-import { api } from '@/services/api'
 
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
-const props = defineProps({
-  thingId: {
-    type: String,
-    required: true,
-  },
-})
 
 const isUrl = (value: string): boolean => {
   try {
@@ -62,56 +53,64 @@ const isUrl = (value: string): boolean => {
 const thingProperties = computed(() => {
   return thing.value
     ? [
-        { icon: 'fas fa-id-badge', label: 'ID', value: thing.value.id },
         {
-          icon: 'fas fa-barcode',
-          label: 'Site Code',
+          icon: 'mdi-card-account-details',
+          label: 'ID',
+          value: thing.value.id,
+        },
+        {
+          icon: 'mdi-barcode',
+          label: 'Site code',
           value: thing.value.samplingFeatureCode,
         },
-        { icon: 'fas fa-map', label: 'Latitude', value: thing.value.latitude },
         {
-          icon: 'fas fa-map',
+          icon: 'mdi-map',
+          label: 'Latitude',
+          value: thing.value.latitude,
+        },
+        {
+          icon: 'mdi-map',
           label: 'Longitude',
           value: thing.value.longitude,
         },
         {
-          icon: 'fas fa-mountain',
+          icon: 'mdi-image-filter-hdr',
           label: 'Elevation',
           value: thing.value.elevation_m,
         },
         {
-          icon: 'fas fa-file-alt',
+          icon: 'mdi-file-document-outline',
           label: 'Description',
           value: thing.value.description,
         },
         {
-          icon: 'fas fa-map-pin',
-          label: 'Site Type',
+          icon: 'mdi-pine-tree',
+          label: 'Site type',
           value: thing.value.siteType,
         },
         {
-          icon: 'fas fa-flag-usa',
-          label: 'State/Province/Region',
-          value: thing.value.state,
-        },
-        {
-          icon: 'fas fa-flag-usa',
+          icon: 'mdi-car-back',
           label: 'County/District',
           value: thing.value.county,
         },
         {
-          icon: 'fas fa-flag-usa',
+          icon: 'mdi-plane-train',
+          label: 'State/Province/Region',
+          value: thing.value.state,
+        },
+        {
+          icon: 'mdi-earth',
           label: 'Country',
           value: thing.value.country,
         },
         {
-          icon: thing.value.isPrivate ? 'fas fa-lock' : 'fas fa-globe',
+          icon: thing.value.isPrivate ? 'mdi-lock' : 'mdi-lock-open-variant',
           label: 'Privacy',
-          value: thing.value.isPrivate ? 'Private' : 'Public',
+          value: 'Public',
         },
         {
-          icon: 'fas fa-user',
-          label: 'Site Owners',
+          icon: 'mdi-account-multiple',
+          label: 'Site owners',
           value: thing.value.owners
             .map(
               (o) =>
@@ -121,23 +120,20 @@ const thingProperties = computed(() => {
             )
             .join(', '),
         },
+        {
+          icon: 'mdi-tag-multiple-outline',
+          label: 'Additional metadata',
+          value: tags.value || [],
+        },
       ]
     : []
 })
 
 const tagProperty = computed(() => {
   return {
-    icon: 'fas fa-tags',
-    label: 'Additional Metadata',
+    icon: 'mdi-tag-multiple-outline',
+    label: 'Additional metadata',
     value: tags.value || [],
-  }
-})
-
-onMounted(async () => {
-  try {
-    tags.value = await api.fetchSiteTags(props.thingId)
-  } catch (error) {
-    console.error('Error fetching thing', error)
   }
 })
 </script>
