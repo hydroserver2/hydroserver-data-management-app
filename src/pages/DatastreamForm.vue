@@ -108,6 +108,15 @@
                 density="compact"
                 rounded="lg"
               >
+                <template v-slot:item="{ props, item }">
+                  <v-tooltip bottom :openDelay="1500">
+                    <template v-slot:activator="{ props: tooltipProps }">
+                      <v-list-item v-bind="{ ...props, ...tooltipProps }">
+                      </v-list-item>
+                    </template>
+                    <span>{{ item.title }}</span>
+                  </v-tooltip>
+                </template>
                 <template v-slot:append v-if="isPrimaryOwner">
                   <v-icon color="secondary-darken-2" @click="showOPModal = true"
                     >mdi-plus</v-icon
