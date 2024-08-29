@@ -99,8 +99,8 @@
               <v-autocomplete
                 v-model="datastream.observedPropertyId"
                 label="Select observed property *"
-                :items="observedProperties"
-                item-title="name"
+                :items="formattedObservedProperties"
+                item-title="title"
                 item-value="id"
                 :rules="rules.required"
                 no-data-text="No available properties"
@@ -449,6 +449,7 @@ const {
   units,
   observedProperties,
   processingLevels,
+  formattedObservedProperties,
   formattedProcessingLevels,
   fetchMetadata,
 } = useMetadata(thingId, true)

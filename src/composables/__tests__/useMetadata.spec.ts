@@ -73,7 +73,7 @@ describe('useMetadata', () => {
     await flushPromises()
     const expected = processingLevelFixtures.map((pl) => ({
       id: pl.id,
-      title: `${pl.code} : ${pl.definition}`,
+      title: `${pl.code}: ${pl.definition}`,
     }))
     expect(wrapper.vm.formattedProcessingLevels).toEqual(expected)
   })
