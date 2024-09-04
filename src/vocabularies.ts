@@ -1,9 +1,12 @@
 export const siteTypes = [
   'Atmosphere',
   'Borehole',
+  'Calculated',
   'Ditch',
   'Estuary',
+  'Groundwater Well',
   'House',
+  'Irrigation Pivot',
   'Lake, Reservoir, Impoundment',
   'Land',
   'Laboratory or sample-preparation area',
