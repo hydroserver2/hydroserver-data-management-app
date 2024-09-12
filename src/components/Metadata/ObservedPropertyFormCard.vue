@@ -66,7 +66,7 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
-import { OPVariableTypes, OPNameTypes } from '@/vocabularies'
+import { OPVariableTypes, OPNameTypes } from '@/config/vocabularies'
 import { ObservedProperty } from '@/types'
 
 const OPNames = Object.keys(OPNameTypes)

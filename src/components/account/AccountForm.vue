@@ -172,10 +172,9 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
-import { userTypes } from '@/vocabularies'
+import { userTypes, organizationTypes } from '@/config/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
-import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import router from '@/router/router'
