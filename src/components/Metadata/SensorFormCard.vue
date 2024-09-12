@@ -10,7 +10,7 @@
       validate-on="blur"
     >
       <v-card-text>
-        <v-select
+        <v-combobox
           v-model="item.methodType"
           :items="methodTypes"
           label="Method Type *"
