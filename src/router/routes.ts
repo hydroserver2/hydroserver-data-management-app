@@ -26,11 +26,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/Sites.vue'),
     meta: {
       hasAuthGuard: true,
-      title: 'My Sites',
+      title: 'Your Sites',
       metaTags: [
         {
           name: 'keywords',
-          content: 'HydroServer, My Sites',
+          content: 'HydroServer, Your Sites',
         },
       ],
     },

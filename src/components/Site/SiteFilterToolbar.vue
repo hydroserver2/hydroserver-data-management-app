@@ -35,6 +35,7 @@
     />
 
     <v-btn
+      class="mx-2"
       color="white-darken-2"
       @click="clear"
       rounded="xl"

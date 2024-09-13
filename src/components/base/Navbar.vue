@@ -156,7 +156,7 @@ const paths: {
   },
   {
     attrs: { to: '/sites' },
-    label: 'My Sites',
+    label: 'Your Sites',
     icon: 'mdi-map-marker-multiple',
   },
   {
