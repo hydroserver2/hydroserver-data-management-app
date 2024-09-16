@@ -425,7 +425,11 @@ import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyForm
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'
-import { mediumTypes, aggregationTypes, statusTypes } from '@/vocabularies'
+import {
+  mediumTypes,
+  aggregationTypes,
+  statusTypes,
+} from '@/config/vocabularies'
 import { useMetadata } from '@/composables/useMetadata'
 import { Thing } from '@/types'
 import { api } from '@/services/api'

@@ -60,7 +60,6 @@ export default defineConfig({
         '**/src/utils/rules.ts',
         '**/src/App.vue',
         '**/src/main.ts',
-        '**/src/vocabularies.ts',
         '**/*.d.ts',
         '**/postcss.config.js',
       ],

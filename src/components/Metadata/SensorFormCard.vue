@@ -10,7 +10,7 @@
       validate-on="blur"
     >
       <v-card-text>
-        <v-select
+        <v-combobox
           v-model="item.methodType"
           :items="methodTypes"
           label="Method Type *"
@@ -87,7 +87,7 @@ import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { computed } from 'vue'
-import { methodTypes } from '@/vocabularies'
+import { methodTypes } from '@/config/vocabularies'
 import { Sensor } from '@/types'
 
 const props = defineProps({ sensor: Object as () => Sensor })

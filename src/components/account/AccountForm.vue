@@ -71,7 +71,7 @@
           </v-col>
 
           <v-col cols="12" sm="6">
-            <v-autocomplete
+            <v-combobox
               v-model="userForm.type"
               label="User Type *"
               :items="userTypes"
@@ -119,7 +119,7 @@
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-autocomplete
+            <v-combobox
               :items="organizationTypes"
               v-model="userForm.organization.type"
               label="Organization Type *"
@@ -172,10 +172,9 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
-import { userTypes } from '@/vocabularies'
+import { userTypes, organizationTypes } from '@/config/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
-import { organizationTypes } from '@/vocabularies'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import router from '@/router/router'

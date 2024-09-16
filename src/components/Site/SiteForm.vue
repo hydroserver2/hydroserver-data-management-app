@@ -52,14 +52,14 @@
                   v-model="thing.description"
                   :rules="rules.requiredDescription"
               /></v-col>
-              <v-col cols="12"
-                ><v-autocomplete
+              <v-col cols="12">
+                <v-combobox
                   label="Select Site Type *"
                   :items="siteTypes"
                   v-model="thing.siteType"
                   :rules="rules.required"
-                ></v-autocomplete
-              ></v-col>
+                />
+              </v-col>
             </v-row>
             <v-row no-gutters class="pt-2">
               <v-col>
@@ -180,7 +180,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import GoogleMap from '../GoogleMap.vue'
 import { useThingStore } from '@/store/thing'
 import { Thing } from '@/types'
-import { siteTypes } from '@/vocabularies'
+import { siteTypes } from '@/config/vocabularies'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
