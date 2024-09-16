@@ -11,7 +11,7 @@
   <div class="my-4 mx-6">
     <v-row class="my-2">
       <v-col cols="auto">
-        <h5 class="text-h5">My registered sites</h5>
+        <h5 class="text-h5">Your registered sites</h5>
       </v-col>
     </v-row>
 
@@ -26,9 +26,10 @@
       </KeepAlive>
     </v-card>
 
-    <v-card v-if="ownedThings?.length">
+    <v-card>
       <v-toolbar flat color="blue-darken-2">
         <v-text-field
+          :disabled="!ownedThings?.length"
           class="mx-2"
           clearable
           v-model="search"
@@ -42,6 +43,7 @@
         <v-spacer />
 
         <v-btn
+          :disabled="!ownedThings?.length"
           class="mr-2"
           @click="showFilter = !showFilter"
           prependIcon="mdi-filter"
@@ -64,10 +66,37 @@
         class="elevation-3 owned-sites-table"
         @click:row="onRowClick"
         color="primary"
-        hover
+        :hover="coloredThings?.length > 0 && sitesLoaded"
         :style="{ 'max-height': `200vh` }"
         fixed-header
+        :loading="!sitesLoaded"
+        loading-text="Loading sites..."
       >
+        <template v-slot:no-data>
+          <div class="text-center pa-4" v-if="ownedThings.length === 0">
+            <v-icon size="48" color="grey lighten-1">mdi-radio-tower</v-icon>
+            <h4 class="mt-2">You have not registered any sites</h4>
+            <p class="mb-4">
+              Click the "Register a new site" button to start managing your
+              data.
+            </p>
+          </div>
+
+          <!-- Check if filters result in no matching sites -->
+          <div
+            class="text-center pa-4"
+            v-else-if="ownedThings.length > 0 && coloredThings.length === 0"
+          >
+            <v-icon size="48" color="grey lighten-1"
+              >mdi-filter-remove-outline</v-icon
+            >
+            <h4 class="mt-2">No sites match your filters</h4>
+            <p class="mb-4">
+              Try adjusting your search keywords or filter criteria to find
+              sites.
+            </p>
+          </div>
+        </template>
         <template v-slot:item.tagValue="{ item }">
           <template v-for="(tag, index) in item.tags">
             <v-chip
@@ -80,11 +109,6 @@
         </template>
       </v-data-table-virtual>
     </v-card>
-
-    <h5 v-if="!sitesLoaded" class="text-h5">Loading sites...</h5>
-    <h5 v-else-if="!ownedThings.length" class="text-h5">
-      You have not registered any sites.
-    </h5>
   </div>
 
   <v-dialog v-model="showSiteForm" width="60rem">
