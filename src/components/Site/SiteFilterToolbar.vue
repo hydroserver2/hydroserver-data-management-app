@@ -73,5 +73,12 @@ const clear = () => {
   selectedTagValues.value = []
 }
 
-watch([formKey, selectedTagValues], emitFilteredTags)
+watch(formKey, () => {
+  selectedTagValues.value = []
+  emitFilteredTags()
+})
+
+watch(selectedTagValues, () => {
+  emitFilteredTags()
+})
 </script>
