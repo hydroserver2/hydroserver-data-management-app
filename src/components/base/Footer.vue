@@ -3,12 +3,8 @@
     <v-container fluid class="py-8 text-body-2">
       <v-row class="justify-space-around">
         <v-col cols="12" md="auto" class="mb-4 block-children">
-          <h5 class="text-h5 mb-4">Contact Us</h5>
-          <router-link to="/contact">Contact</router-link>
-          <div>
-            Learn more about
-            <a href="https://ciroh.ua.edu/" target="_blank">CIROH</a>
-          </div>
+          <h5 class="text-h5 mb-4">About</h5>
+          <router-link to="/about">About</router-link>
         </v-col>
 
         <v-col cols="12" md="auto" class="mb-4 block-children">
@@ -18,37 +14,27 @@
         </v-col>
 
         <v-col cols="12" md="auto" class="text-md-center mb-4">
-          <h5 class="text-h5 mb-4">Developed By</h5>
-          <v-img
-            :src="uwrlLogo"
-            alt="UWRL Logo"
-            max-width="25rem"
-            min-width="20rem"
-          />
+          <h5 class="text-h5 mb-4">Developed by</h5>
+          <a href="https://uwrl.usu.edu/" target="_blank">
+            <v-img
+              :src="uwrlLogo"
+              alt="UWRL Logo"
+              max-width="25rem"
+              min-width="20rem"
+            />
+          </a>
         </v-col>
 
-        <v-col cols="12" md="auto" class="mb-4">
-          <h5 class="text-h5 mb-4">Open Source</h5>
-          <p class="mb-3">
-            HydroServer is open Source. Find us on
-            <a
-              href="https://github.com/hydroserver2/hydroserver"
-              target="_blank"
-            >
-              GitHub.
-            </a>
-          </p>
-          <p class="mb-3">
-            Report a bug
-            <a
-              href="https://github.com/hydroserver2/hydroserver/issues"
-              target="_blank"
-              >here.</a
-            >
-          </p>
-          <p>
-            This is Version {{ version }} of the Hydroserver web application.
-          </p>
+        <v-col cols="12" md="auto" class="text-md-center mb-4">
+          <h5 class="text-h5 mb-4">Powered by</h5>
+          <a href="https://hydroserver.org" target="_blank">
+            <v-img
+              :src="HydroServerLogo"
+              alt="UWRL Logo"
+              max-width="25rem"
+              min-width="10rem"
+            />
+          </a>
         </v-col>
       </v-row>
 
@@ -69,6 +55,7 @@
 
 <script setup lang="ts">
 import uwrlLogo from '@/assets/UWRL-min.png'
+import HydroServerLogo from '@/assets/hydroserver-icon-min.png'
 import policyConfig from '@/config/policyConfig'
 
 const version = import.meta.env.VITE_APP_VERSION || '0.0.1'
