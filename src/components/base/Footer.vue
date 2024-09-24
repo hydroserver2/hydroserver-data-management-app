@@ -44,7 +44,7 @@
       </v-row>
 
       <v-row v-if="!!copyright">
-        <v-col>
+        <v-col cols="12" class="text-center">
           <p class="d-inline-block text-body-2">{{ copyright }}</p>
         </v-col>
       </v-row>
