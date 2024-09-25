@@ -39,6 +39,12 @@ export function createYAxisConfigurations(
   return yAxisConfigurations
 }
 
+export function yAxisFormatter(value: number) {
+  return Math.abs(value) >= 1e6
+    ? value.toExponential(1)
+    : value.toLocaleString()
+}
+
 export function generateYAxisOptions(
   yAxisConfigurations: yAxisConfigurationMap
 ): YAXisComponentOption[] {
@@ -61,6 +67,7 @@ export function generateYAxisOptions(
       axisLabel: {
         showMaxLabel: false,
         showMinLabel: false,
+        formatter: yAxisFormatter,
       },
       axisTick: {
         show: true,
