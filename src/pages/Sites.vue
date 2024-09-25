@@ -126,6 +126,7 @@ import { api } from '@/services/api'
 import { Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
 import { ThingWithColor } from '@/types'
+import { Snackbar } from '@/utils/notifications'
 
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)
@@ -202,9 +203,14 @@ const onRowClick = (event: Event, item: any) => {
 }
 
 const loadThings = async () => {
-  ownedThings.value = await api.fetchOwnedThings()
-  console.log('ownedThings', ownedThings.value)
-  sitesLoaded.value = true
+  try {
+    ownedThings.value = await api.fetchOwnedThings()
+    console.log('ownedThings', ownedThings.value)
+  } catch (error) {
+    Snackbar.error('Unable to fetch site data from the API.')
+  } finally {
+    sitesLoaded.value = true
+  }
 }
 
 onMounted(async () => loadThings())
