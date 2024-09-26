@@ -5,10 +5,10 @@
     <h3>Legend</h3>
     <ul>
       <li v-for="thing in uniqueColoredThings" :key="thing.tagValue">
-        <i
-          class="fa fa-map-marker"
+        <v-icon
+          icon="mdi-map-marker"
           :style="{ color: thing.color?.background }"
-        ></i>
+        ></v-icon>
         {{ thing?.tagValue }}
       </li>
     </ul>
@@ -82,7 +82,9 @@ const uniqueColoredThings = computed(() => {
     }
   })
 
-  return Array.from(firstOccurrenceMap.values())
+  return Array.from(firstOccurrenceMap.values()).sort((a, b) => {
+    return a.tagValue.localeCompare(b.tagValue)
+  })
 })
 
 onMounted(async () => {
