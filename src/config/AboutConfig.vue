@@ -50,16 +50,14 @@
 </template>
 
 <script setup lang="ts">
+import AboutCards from '@/components/About/AboutCards.vue'
+import AboutHydroServer from '@/components/About/AboutHydroServer.vue'
 /**
- * This configuration component is meant to be edited by the deployment admin
+ * This configurable component is meant to be edited by the deployment admin
  * running a specific instance of Hydroserver. This frontend web app uses Vuetify 3 and Vue 3
  * so any of their components can be imported and used here or you can just use the default
  * layout and replace the lorem ipsum text with your own.
  */
-import { aboutUs } from '@/config/aboutConfig.ts'
-import { defineComponent } from 'vue'
-import AboutCards from '@/components/About/AboutCards.vue'
-import AboutHydroServer from '@/components/About/AboutHydroServer.vue'
 
 const cards = [
   {

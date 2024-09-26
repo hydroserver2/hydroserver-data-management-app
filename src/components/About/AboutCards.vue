@@ -44,7 +44,7 @@
 <script setup lang="ts">
 interface Card {
   title: string
-  titleIcon: string
+  titleIcon?: string
   text: string
   btnText: string
   btnColor: string
