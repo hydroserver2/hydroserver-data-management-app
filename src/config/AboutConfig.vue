@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <h4 class="text-h4 my-6">About us</h4>
-    <h5 class="text-h5 my-6">Lorem ipsum</h5>
+    <!-- <h5 class="text-h5 my-6">Lorem ipsum</h5>
     <p class="mb-4">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
@@ -43,7 +43,7 @@
       velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
       cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
       est laborum.
-    </p>
+    </p> -->
   </v-container>
 
   <AboutHydroServer />
