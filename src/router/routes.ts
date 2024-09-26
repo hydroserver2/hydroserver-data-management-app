@@ -56,15 +56,15 @@ export const routes: RouteRecordRaw[] = [
     meta: { hasThingOwnershipGuard: true },
   },
   {
-    path: '/contact',
+    path: '/about',
     name: 'Contact',
-    component: () => import('@/pages/Contact.vue'),
+    component: () => import('@/pages/About.vue'),
     meta: {
-      title: 'Contact Us',
+      title: 'About',
       metaTags: [
         {
           name: 'keywords',
-          content: 'HydroServer, Contact Us, GitHub, Email',
+          content: 'HydroServer, About, GitHub, Email',
         },
       ],
     },

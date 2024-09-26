@@ -186,9 +186,9 @@ const paths: {
     ],
   },
   {
-    attrs: { to: '/contact' },
-    label: 'Contact Us',
-    icon: 'mdi-email',
+    attrs: { to: '/about' },
+    label: 'About',
+    icon: 'mdi-information',
   },
 ]
 
