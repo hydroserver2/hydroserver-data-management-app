@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h5 class="text-h5 mb-4">Manage Metadata</h5>
+    <h5 class="text-h5 mb-4">Manage metadata</h5>
     <v-card>
       <v-toolbar color="brown">
         <v-text-field

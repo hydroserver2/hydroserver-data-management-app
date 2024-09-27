@@ -1,5 +1,5 @@
 <template>
-  <v-data-table
+  <v-data-table-virtual
     :headers="headers"
     :items="tableData"
     :search="search"
@@ -42,7 +42,7 @@
         </v-list>
       </v-menu>
     </template>
-  </v-data-table>
+  </v-data-table-virtual>
 
   <v-dialog v-model="openEdit">
     <DataSourceForm
