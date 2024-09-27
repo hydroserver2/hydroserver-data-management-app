@@ -2,6 +2,7 @@
   <v-data-table-virtual
     :headers="headers"
     :items="sortedItems"
+    :search="search"
     :style="{ 'max-height': `200vh` }"
     fixed-header
   >
@@ -40,6 +41,8 @@ import { computed } from 'vue'
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(api.fetchCurrentUserSensors, api.deleteSensor, Sensor)
+
+const props = defineProps<{ search: string }>()
 
 const headers = [
   { title: 'Name', key: 'name' },

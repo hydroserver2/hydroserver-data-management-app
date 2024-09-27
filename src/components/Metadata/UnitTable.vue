@@ -2,6 +2,7 @@
   <v-data-table-virtual
     :headers="UnitHeaders"
     :items="sortedItems"
+    :search="search"
     :style="{ 'max-height': `200vh` }"
     fixed-header
   >
@@ -43,6 +44,8 @@ const UnitHeaders = [
   { title: 'Symbol', key: 'symbol' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
+
+const props = defineProps<{ search: string }>()
 
 const sortedItems = computed(() =>
   items.value.sort((a, b) => a.name.localeCompare(b.name))

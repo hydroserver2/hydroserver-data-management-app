@@ -2,6 +2,7 @@
   <v-data-table-virtual
     :headers="ProcLevelHeaders"
     :items="sortedItems"
+    :search="search"
     :style="{ 'max-height': `200vh` }"
     fixed-header
   >
@@ -44,6 +45,8 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
     api.deleteProcessingLevel,
     ProcessingLevel
   )
+
+const props = defineProps<{ search: string }>()
 
 const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },

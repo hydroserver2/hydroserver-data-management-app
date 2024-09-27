@@ -1,75 +1,102 @@
 <template>
   <v-container>
     <h5 class="text-h5 mb-4">Manage Metadata</h5>
+    <v-card>
+      <v-toolbar color="brown">
+        <v-text-field
+          class="mx-4"
+          clearable
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          hide-details
+          density="compact"
+          rounded="xl"
+          maxWidth="300"
+        />
 
-    <v-toolbar color="brown">
-      <v-tabs v-model="tab" color="white" scrollable>
-        <v-tab v-for="item in metaMap">{{ item.name }}</v-tab>
-      </v-tabs>
-      <v-spacer />
+        <template v-slot:extension>
+          <v-tabs
+            v-model="tab"
+            color="secondary-lighten-5"
+            scrollable
+            class="my-2"
+          >
+            <v-tab v-for="item in metaMap">{{ item.name }}</v-tab>
+          </v-tabs>
+        </template>
 
-      <v-btn-add
-        prependIcon="mdi-plus"
-        color="white"
-        @click="metaMap[tab]?.openDialog()"
-        >Add New {{ metaMap[tab]?.singularName }}</v-btn-add
-      >
-    </v-toolbar>
+        <v-spacer />
 
-    <v-window v-model="tab" class="elevation-3">
-      <v-window-item value="0">
-        <SensorTable :key="sensorKey" />
-      </v-window-item>
+        <v-btn-add
+          prependIcon="mdi-plus"
+          color="white"
+          class="mr-2"
+          @click="metaMap[tab]?.openDialog()"
+          >Add New {{ metaMap[tab]?.singularName }}</v-btn-add
+        >
+      </v-toolbar>
 
-      <v-window-item value="1">
-        <ObservedPropertyTable :key="OPKey" />
-      </v-window-item>
+      <v-toolbar color="brown" height="5"></v-toolbar>
 
-      <v-window-item value="2">
-        <ProcessingLevelTable :key="PLKey" />
-      </v-window-item>
+      <v-window v-model="tab" class="elevation-3">
+        <v-window-item value="0">
+          <SensorTable :key="sensorKey" :search="search" />
+        </v-window-item>
 
-      <v-window-item value="3">
-        <UnitTable :key="unitKey" />
-      </v-window-item>
+        <v-window-item value="1">
+          <ObservedPropertyTable :key="OPKey" :search="search" />
+        </v-window-item>
 
-      <v-window-item value="4">
-        <ResultQualifierTable :key="qualifierKey" />
-      </v-window-item>
-    </v-window>
+        <v-window-item value="2">
+          <ProcessingLevelTable :key="PLKey" :search="search" />
+        </v-window-item>
+
+        <v-window-item value="3">
+          <UnitTable :key="unitKey" :search="search" />
+        </v-window-item>
+
+        <v-window-item value="4">
+          <ResultQualifierTable :key="qualifierKey" :search="search" />
+        </v-window-item>
+      </v-window>
+
+      <v-dialog v-model="openUnitCreate" width="60rem">
+        <UnitFormCard
+          @close="openUnitCreate = false"
+          @created="refreshUnitTable"
+        />
+      </v-dialog>
+
+      <v-dialog v-model="openSensorCreate" width="60rem">
+        <SensorFormCard
+          @close="openSensorCreate = false"
+          @created="refreshSensorTable"
+        />
+      </v-dialog>
+
+      <v-dialog v-model="openRQCreate" width="60rem">
+        <ResultQualifierFormCard
+          @close="openRQCreate = false"
+          @created="refreshRQTable"
+        />
+      </v-dialog>
+
+      <v-dialog v-model="openOPCreate" width="60rem">
+        <ObservedPropertyFormCard
+          @close="openOPCreate = false"
+          @created="refreshOPTable"
+        />
+      </v-dialog>
+
+      <v-dialog v-model="openPLCreate" width="60rem">
+        <ProcessingLevelFormCard
+          @close="openPLCreate = false"
+          @created="refreshPLTable"
+        />
+      </v-dialog>
+    </v-card>
   </v-container>
-
-  <v-dialog v-model="openUnitCreate" width="60rem">
-    <UnitFormCard @close="openUnitCreate = false" @created="refreshUnitTable" />
-  </v-dialog>
-
-  <v-dialog v-model="openSensorCreate" width="60rem">
-    <SensorFormCard
-      @close="openSensorCreate = false"
-      @created="refreshSensorTable"
-    />
-  </v-dialog>
-
-  <v-dialog v-model="openRQCreate" width="60rem">
-    <ResultQualifierFormCard
-      @close="openRQCreate = false"
-      @created="refreshRQTable"
-    />
-  </v-dialog>
-
-  <v-dialog v-model="openOPCreate" width="60rem">
-    <ObservedPropertyFormCard
-      @close="openOPCreate = false"
-      @created="refreshOPTable"
-    />
-  </v-dialog>
-
-  <v-dialog v-model="openPLCreate" width="60rem">
-    <ProcessingLevelFormCard
-      @close="openPLCreate = false"
-      @created="refreshPLTable"
-    />
-  </v-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -107,6 +134,8 @@ const refreshOPTable = () => (OPKey.value += 1)
 const openSensorCreate = ref(false)
 const sensorKey = ref(0)
 const refreshSensorTable = () => (sensorKey.value += 1)
+
+const search = ref()
 
 const metaMap: Record<string, any> = {
   0: {

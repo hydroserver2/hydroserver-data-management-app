@@ -2,6 +2,7 @@
   <v-data-table-virtual
     :headers="headers"
     :items="items"
+    :search="search"
     :style="{ 'max-height': `200vh` }"
     fixed-header
   >
@@ -43,6 +44,8 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
     api.deleteResultQualifier,
     ResultQualifier
   )
+
+const props = defineProps<{ search: string }>()
 
 const headers = [
   { title: 'Code', key: 'code' },
