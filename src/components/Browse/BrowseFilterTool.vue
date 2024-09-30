@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-2" v-if="!drawer">
+  <div class="pa-4" v-if="!drawer">
     <v-icon size="large" @click="drawer = !drawer">mdi-menu</v-icon>
   </div>
 
