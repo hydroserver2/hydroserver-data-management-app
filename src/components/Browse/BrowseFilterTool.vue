@@ -1,9 +1,15 @@
 <template>
+  <div class="pa-2" v-if="!drawer">
+    <v-icon size="large" @click="drawer = !drawer">mdi-menu</v-icon>
+  </div>
+
   <v-navigation-drawer v-model="drawer" width="400">
-    <v-card-title class="d-flex justify-space-between align-start">
-      Browse data collection sites
-      <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
-    </v-card-title>
+    <div class="d-flex align-center justify-space-between pa-4">
+      <h5 class="text-h5">Browse data collection sites</h5>
+      <v-icon size="large" v-if="drawer" @click="drawer = !drawer"
+        >mdi-menu-open</v-icon
+      >
+    </div>
 
     <v-divider />
 
@@ -58,10 +64,6 @@
       </v-expansion-panel>
     </v-expansion-panels>
   </v-navigation-drawer>
-
-  <div class="pa-2" v-if="!drawer">
-    <v-icon @click="drawer = !drawer">mdi-menu</v-icon>
-  </div>
 </template>
 
 <script setup lang="ts">
