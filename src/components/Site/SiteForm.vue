@@ -202,7 +202,7 @@ const { updatePhotos } = usePhotosStore()
 const { updateTags } = useTagStore()
 
 const props = defineProps({ thingId: String })
-const emit = defineEmits(['close', 'created'])
+const emit = defineEmits(['close', 'site-created'])
 let loaded = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
@@ -239,8 +239,6 @@ function closeDialog() {
 async function uploadThing() {
   await myForm.value?.validate()
   if (!valid.value) return
-  emit('close')
-  if (!thing) return
   if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
 
   try {
@@ -248,7 +246,10 @@ async function uploadThing() {
       ? await api.updateThing(thing)
       : await api.createThing(thing)
 
-    if (!props.thingId) emit('created')
+    if (!props.thingId) {
+      console.log('emitting site-created from SiteForm.vue')
+      emit('site-created')
+    }
 
     console.log('Site upload response', storedThing.value)
     // Set the tag context to the current site so updateTags can compare
@@ -258,6 +259,8 @@ async function uploadThing() {
     await updatePhotos(storedThing.value!.id)
   } catch (error) {
     console.error('Error updating thing', error)
+  } finally {
+    emit('close')
   }
 }
 

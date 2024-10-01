@@ -112,7 +112,7 @@
   </div>
 
   <v-dialog v-model="showSiteForm" width="60rem">
-    <SiteForm @close="showSiteForm = false" @created="loadThings" />
+    <SiteForm @close="showSiteForm = false" @site-created="loadThings" />
   </v-dialog>
 </template>
 
