@@ -246,6 +246,8 @@ async function uploadThing() {
       ? await api.updateThing(thing)
       : await api.createThing(thing)
 
+    console.log('props.thingId', props.thingId)
+
     if (!props.thingId) {
       console.log('emitting site-created from SiteForm.vue')
       emit('site-created')
