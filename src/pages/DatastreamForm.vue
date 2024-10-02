@@ -425,6 +425,7 @@ import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyForm
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'
+import { Snackbar } from '@/utils/notifications'
 import {
   mediumTypes,
   aggregationTypes,
@@ -569,6 +570,7 @@ onMounted(async () => {
     }
     thing.value = fetchedThing
   } catch (error) {
+    Snackbar.error('Unable to fetch data from the API.')
     console.error('Error fetching datastream data from DB.', error)
   }
 })

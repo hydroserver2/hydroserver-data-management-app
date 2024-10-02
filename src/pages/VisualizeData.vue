@@ -195,22 +195,27 @@ const parseUrlAndSetState = () => {
 const loading = ref(true)
 
 onMounted(async () => {
-  const [
-    thingsResponse,
-    datastreamsResponse,
-    processingLevelsResponse,
-    observedPropertiesResponse,
-  ] = await Promise.all([
-    api.fetchThings(),
-    api.fetchDatastreams(),
-    api.fetchProcessingLevels(),
-    api.fetchObservedProperties(),
-  ])
+  try {
+    const [
+      thingsResponse,
+      datastreamsResponse,
+      processingLevelsResponse,
+      observedPropertiesResponse,
+    ] = await Promise.all([
+      api.fetchThings(),
+      api.fetchDatastreams(),
+      api.fetchProcessingLevels(),
+      api.fetchObservedProperties(),
+    ])
 
-  things.value = thingsResponse
-  datastreams.value = datastreamsResponse
-  processingLevels.value = processingLevelsResponse
-  observedProperties.value = observedPropertiesResponse
+    things.value = thingsResponse
+    datastreams.value = datastreamsResponse
+    processingLevels.value = processingLevelsResponse
+    observedProperties.value = observedPropertiesResponse
+  } catch (error) {
+    Snackbar.error('Unable to fetch data from the API.')
+    console.error('Unable to fetch data from the API:', error)
+  }
 
   parseUrlAndSetState()
   loading.value = false

@@ -11,6 +11,7 @@ import { Thing } from '@/types'
 import { api } from '@/services/api'
 import GoogleMap from '@/components/GoogleMap.vue'
 import BrowseFilterTool from '@/components/Browse/BrowseFilterTool.vue'
+import { Snackbar } from '@/utils/notifications'
 
 const things = ref<Thing[]>([])
 const filteredThings = ref<Thing[]>([])
@@ -20,7 +21,12 @@ const updateFilteredThings = (updatedThings: Thing[]) => {
 }
 
 onMounted(async () => {
-  things.value = await api.fetchThings()
-  filteredThings.value = things.value
+  try {
+    things.value = await api.fetchThings()
+    filteredThings.value = things.value
+  } catch (error) {
+    Snackbar.error('Unable to fetch data from the API.')
+    console.error('Unable to fetch data from the API:', error)
+  }
 })
 </script>

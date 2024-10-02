@@ -137,6 +137,7 @@ import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.v
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
+import { Snackbar } from '@/utils/notifications'
 
 const route = useRoute()
 const openEdit = ref(false)
@@ -201,6 +202,7 @@ const fetchData = async () => {
       (d) => d.dataSourceId === dataSource.value.id
     )
   } catch (e) {
+    Snackbar.error('Unable to fetch dataSources from the API.')
     console.log('error fetching dataSource', e)
   }
 }
