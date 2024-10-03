@@ -1,8 +1,15 @@
 <template>
   <v-app-bar app elevation="2">
-    <router-link :to="{ path: `/` }">
-      <v-img class="mx-4" :src="appLogo" alt="HydroServer home" width="10rem" />
+    <router-link v-if="navbarLogo.route" :to="navbarLogo.route">
+      <v-img :src="navbarLogo.src" alt="Logo" :width="navbarLogo.width" />
     </router-link>
+    <a
+      v-else-if="navbarLogo.link"
+      :href="navbarLogo.link"
+      :target="navbarLogo.target || '_self'"
+    >
+      <v-img :src="navbarLogo.src" alt="Logo" :width="navbarLogo.width" />
+    </a>
 
     <template v-if="mdAndDown" v-slot:append>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
@@ -132,6 +139,7 @@ import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
+import { navbarLogo } from '@/config/navbarConfig'
 
 const { resetState } = useDataVisStore()
 const { logout } = useAuthStore()

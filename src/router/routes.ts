@@ -1,9 +1,21 @@
 import { RouteRecordRaw } from 'vue-router'
+import { enableHomePage } from '@/config/homeConfig'
 
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 export const routes: RouteRecordRaw[] = [
+  enableHomePage
+    ? {
+        path: '/',
+        name: 'Home',
+        component: () => import('@/config/Home.vue'),
+        meta: { title: 'Home' },
+      }
+    : {
+        path: '/',
+        redirect: '/browse',
+      },
   {
     path: '/browse',
     name: 'Browse',
@@ -184,12 +196,6 @@ export const routes: RouteRecordRaw[] = [
         },
       ],
     },
-  },
-  {
-    path: '/',
-    name: 'Home',
-    component: () => import('@/pages/Home.vue'),
-    meta: { title: 'Home' },
   },
   {
     path: '/:catchAll(.*)*',
