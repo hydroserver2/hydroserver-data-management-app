@@ -1,5 +1,5 @@
 <template>
-  <v-data-table
+  <v-data-table-virtual
     :headers="headers"
     :items="items"
     :search="search"
@@ -9,7 +9,7 @@
     <template v-slot:item.actions="{ item }">
       <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
-  </v-data-table>
+  </v-data-table-virtual>
 
   <v-dialog v-model="openDelete" max-width="500">
     <DeleteDataLoaderCard

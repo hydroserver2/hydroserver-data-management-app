@@ -1,23 +1,29 @@
 <template>
   <v-container>
-    <h5 class="text-h5 mb-4">Manage Data Sources</h5>
+    <h5 class="text-h5 mb-4">Manage data sources</h5>
 
-    <v-toolbar :flat="true" color="blue-grey" class="elevation-1">
-      <v-text-field
-        class="mx-2"
-        v-model="search"
-        prepend-inner-icon="mdi-magnify"
-        label="Search"
-        hide-details
-      />
-      <v-spacer />
+    <v-card>
+      <v-toolbar :flat="true" color="blue-grey" class="elevation-1">
+        <v-text-field
+          class="mx-4"
+          clearable
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          hide-details
+          density="compact"
+          rounded="xl"
+          maxWidth="300"
+        />
+        <v-spacer />
 
-      <v-btn-add color="white" @click="openCreate = true">
-        Add Data Source
-      </v-btn-add>
-    </v-toolbar>
+        <v-btn-add color="white" @click="openCreate = true">
+          Add Data Source
+        </v-btn-add>
+      </v-toolbar>
 
-    <DataSourceTable :search="search" :key="key" />
+      <DataSourceTable :search="search" :key="key" />
+    </v-card>
   </v-container>
 
   <v-dialog v-model="openCreate">
