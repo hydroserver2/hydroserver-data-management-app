@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
+import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
 import DataSourceTable from '@/components/DataSource/DataSourceTable.vue'
 
 const search = ref()

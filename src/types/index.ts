@@ -277,6 +277,10 @@ export class ResultQualifier {
 }
 
 export class DataSource {
+  // new variables
+  type: string
+  etlSystemId: string
+  // old variables
   id: string
   name: string
   path: string
@@ -301,6 +305,8 @@ export class DataSource {
   nextSync: string | null
 
   constructor() {
+    this.type = 'ETL'
+    this.etlSystemId = ''
     this.id = ''
     this.name = ''
     this.path = ''
