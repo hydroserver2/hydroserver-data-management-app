@@ -1,21 +1,97 @@
 <template>
   <v-container v-if="dataSource">
-    <v-row class="mb-2">
+    <v-row class="my-4">
       <v-col cols="auto">
         <h5 class="text-h5">{{ dataSource.name }}</h5>
       </v-col>
 
-      <v-spacer />
-
       <v-col cols="auto">
-        <v-btn-primary class="mr-2" @click="openEdit = true">
-          Edit
-        </v-btn-primary>
-        <v-btn-delete @click="openDelete = true">Delete</v-btn-delete>
+        <v-btn color="secondary" class="mr-2" @click="openEdit = true">
+          Edit data source
+        </v-btn>
+        <v-btn-delete color="red-darken-3" @click="openDelete = true">
+          Delete data source
+        </v-btn-delete>
       </v-col>
     </v-row>
 
-    <h6 class="text-h6 my-4">Data Source Configuration</h6>
+    <v-data-table
+      :items="dataSourceInformation"
+      :items-per-page="-1"
+      hide-default-header
+      hide-default-footer
+      density="compact"
+      class="elevation-3 my-6 rounded-lg"
+    >
+      <template v-slot:top>
+        <v-toolbar color="blue-grey" rounded="t-lg">
+          <h5 class="text-h5 ml-4">Data source information</h5>
+        </v-toolbar>
+      </template>
+      <template v-slot:item.icon="{ item }">
+        <v-icon :icon="item?.icon"></v-icon>
+      </template>
+      <template v-slot:item.label="{ item }">
+        <strong>{{ item?.label }}</strong>
+      </template>
+    </v-data-table>
+
+    <v-data-table
+      :items="etlSystemInformation"
+      :items-per-page="-1"
+      hide-default-header
+      hide-default-footer
+      density="compact"
+      class="elevation-3 my-6 rounded-lg"
+    >
+      <template v-slot:top>
+        <v-toolbar color="indigo" rounded="t-lg">
+          <h5 class="text-h5 ml-4">Linked ETL system information</h5>
+        </v-toolbar>
+      </template>
+      <template v-slot:item.icon="{ item }">
+        <v-icon :icon="item?.icon"></v-icon>
+      </template>
+      <template v-slot:item.label="{ item }">
+        <strong>{{ item?.label }}</strong>
+      </template>
+    </v-data-table>
+
+    <h5 class="text-h5 mt-8 mb-6">Payloads for this data source</h5>
+
+    <v-row class="pb-4">
+      <v-col cols="auto">
+        <v-btn-secondary prependIcon="mdi-plus" variant="elevated"
+          >Add new payload</v-btn-secondary
+        >
+      </v-col>
+    </v-row>
+
+    <v-data-table-virtual
+      class="elevation-3 my-4"
+      :headers="payloadHeaders"
+      :items="payloads"
+      :sort-by="sortBy"
+      :style="{ 'max-height': `100vh` }"
+      fixed-header
+    >
+      <template v-slot:item.info="{ item }">
+        <v-col>
+          <v-row
+            v-for="[source, target] in Object.entries(item.sourceToTargetMap)"
+            style="font-size: 1.2em"
+          >
+            <p>
+              <strong>{{ source }}: </strong> {{ target }}
+            </p>
+          </v-row>
+        </v-col>
+      </template>
+
+      <template v-slot:item.actions="{ item }"> </template>
+    </v-data-table-virtual>
+
+    <!-- <h6 class="text-h6 my-4">Data Source Configuration</h6>
 
     <v-table class="elevation-2">
       <tbody>
@@ -28,7 +104,7 @@
           <td>{{ dataSource.name }}</td>
         </tr>
         <tr>
-          <td style="width: 220px">Data Loader</td>
+          <td style="width: 220px">Linked ETL System</td>
           <td>{{ dataLoader?.name }}</td>
         </tr>
         <tr>
@@ -91,9 +167,9 @@
           <td>{{ dataSource.nextSync }}</td>
         </tr>
       </tbody>
-    </v-table>
+    </v-table> -->
 
-    <h6 class="text-h6 my-4">Linked Datastreams</h6>
+    <!-- <h6 class="text-h6 my-4">Linked Datastreams</h6>
 
     <v-data-table
       class="elevation-2"
@@ -107,7 +183,7 @@
       :to="{ name: 'DataSources' }"
     >
       Back
-    </v-btn-cancel>
+    </v-btn-cancel> -->
   </v-container>
   <v-container v-else>Loading...</v-container>
 
@@ -146,6 +222,33 @@ const datastreams = ref<Datastream[]>([])
 const dataLoader = ref<DataLoader>(new DataLoader())
 const dataSource = ref<DataSource>(new DataSource())
 
+const sortBy = [{ key: 'name' }]
+const payloadHeaders = [
+  { title: 'Name', key: 'name' },
+  {
+    title: 'Source to target mapping',
+    key: 'info',
+    sortable: false,
+  },
+  { title: 'Actions', key: 'actions', sortable: false },
+]
+const payloads = [
+  {
+    name: 'Example payload 1',
+    sourceToTargetMap: {
+      water_level_ft: '1928-125-3484-8348',
+      temperature_f: '0985-157-3486-3257',
+    },
+  },
+  {
+    name: 'Example payload 2',
+    sourceToTargetMap: {
+      water_level_ft: '1928-125-3484-8348',
+      temperature_f: '0985-157-3486-3257',
+    },
+  },
+]
+
 const status = computed(() =>
   dataSource.value ? getStatus(dataSource.value) : 'pending'
 )
@@ -164,6 +267,59 @@ const scheduleString = computed(() => {
   else if (ds.endTime) string += ` until ${ds.endTime}`
 
   return string
+})
+
+const dataSourceInformation = computed(() => {
+  if (!dataSource.value) return []
+
+  return [
+    {
+      icon: 'mdi-account',
+      label: 'Name',
+      value: dataSource.value.name,
+    },
+    {
+      icon: 'mdi-account',
+      label: 'Schedule',
+      value: scheduleString,
+    },
+    {
+      icon: 'mdi-account',
+      label: 'Timestamp column',
+      value: dataSource.value.timestampColumn,
+    },
+    {
+      icon: 'mdi-account',
+      label: 'Last Synced',
+      value: dataSource.value.lastSynced,
+    },
+    {
+      icon: 'mdi-account',
+      label: 'Next sync',
+      value: dataSource.value.nextSync,
+    },
+    {
+      icon: 'mdi-account',
+      label: 'ID',
+      value: dataSource.value.id,
+    },
+    {
+      icon: 'mdi-account',
+      label: 'Status',
+    },
+  ].filter(Boolean)
+})
+
+const etlSystemInformation = computed(() => {
+  if (!dataSource.value || !dataLoader.value) return []
+
+  return [
+    {
+      icon: 'mdi-account',
+      label: 'Name',
+      value: dataLoader.value.name,
+    },
+  ].filter(Boolean)
 })
 
 const linkedDatastreamColumns = [
