@@ -181,14 +181,12 @@ import router from '@/router/router'
 import { Snackbar } from '@/utils/notifications'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/store/authentication'
 
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
   isEdit: Boolean,
 })
 
-const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 const { user } = storeToRefs(useUserStore())
 
@@ -226,7 +224,6 @@ async function createUser() {
   try {
     const data = await api.createUser(userForm)
     setUser(data.user)
-    setTokens(data.access, data.refresh)
     Snackbar.success('Account created.')
     await router.push({ name: 'VerifyEmail' })
   } catch (error) {

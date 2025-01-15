@@ -11,11 +11,10 @@ import ogcLogo from '@/assets/ogc-min.png'
 import cirohLogo from '@/assets/CIROH_logo_transparent-min.png'
 import sensorThingsLogo from '@/assets/sensorThings-min.png'
 import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
-import { useAuthStore } from '@/store/authentication'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
 
-const { isLoggedIn } = storeToRefs(useAuthStore())
+const { isLoggedIn } = storeToRefs(useUserStore())
 const { user } = storeToRefs(useUserStore())
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'

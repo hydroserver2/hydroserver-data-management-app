@@ -46,7 +46,11 @@
       </v-col>
     </v-row>
 
-    <v-row justify="center" class="mt-6" v-if="disableAccountCreation !== 'true'">
+    <v-row
+      justify="center"
+      class="mt-6"
+      v-if="disableAccountCreation !== 'true'"
+    >
       <span class="mr-2">Don't have an account?</span>
       <router-link to="/sign-up" class="light-text signup-link"
         >Sign Up</router-link
@@ -64,7 +68,6 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
 import { onMounted, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
@@ -80,14 +83,13 @@ const form = ref(null)
 const valid = ref(false)
 const loaded = ref(false)
 const route = useRoute()
-const disableAccountCreation = import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
+const disableAccountCreation =
+  import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
-const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 
 const login = async (accessToken: string, refreshToken: string) => {
   try {
-    setTokens(accessToken, refreshToken)
     const user = await api.fetchUser()
     setUser(user)
     Snackbar.success('You have logged in!')
@@ -101,9 +103,6 @@ const formLogin = async () => {
   if (!valid) return
 
   try {
-    // This needs to be run at some point before making any POST requests to the API.
-    await api.fetchCsrfToken()
-
     const tokens = await api.login(email.value, password.value)
     login(tokens.access, tokens.refresh)
   } catch (error) {
@@ -114,14 +113,14 @@ const formLogin = async () => {
   }
 }
 
-const tryOAuthLogin = async () => {
-  const accessToken = (route.query.t as string) || ''
-  const refreshToken = (route.query.rt as string) || ''
-  if (accessToken && refreshToken) await login(accessToken, refreshToken)
-}
+// const tryOAuthLogin = async () => {
+//   const accessToken = (route.query.t as string) || ''
+//   const refreshToken = (route.query.rt as string) || ''
+//   if (accessToken && refreshToken) await login(accessToken, refreshToken)
+// }
 
 onMounted(async () => {
-  await tryOAuthLogin()
+  // await tryOAuthLogin()
   loaded.value = true
 })
 </script>

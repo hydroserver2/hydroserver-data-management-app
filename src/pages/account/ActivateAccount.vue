@@ -8,7 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/store/authentication'
 import { onMounted } from 'vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
@@ -18,7 +17,6 @@ import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 
-const { setTokens } = useAuthStore()
 const { setUser } = useUserStore()
 const route = useRoute()
 const isActivating = ref(true)
@@ -32,7 +30,6 @@ onMounted(async () => {
 
     if (!data.user.isVerified) return false
     setUser(data.user)
-    setTokens(data.access, data.refresh)
     wasActivated.value = true
     Snackbar.success('Your HydroServer account has been activated.')
     await router.push({ name: 'Sites' })

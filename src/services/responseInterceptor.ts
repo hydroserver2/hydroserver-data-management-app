@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/store/authentication'
+import { useUserStore } from '@/store/user'
 
 export async function parseResponseBody(response: Response) {
   try {
@@ -26,8 +26,8 @@ export async function responseInterceptor(
   options: any
 ): Promise<any> {
   if (response.status === 401 && !options._retry) {
-    const authStore = useAuthStore()
-    authStore.logout()
+    const { logout } = useUserStore()
+    logout()
   }
   return parseResponseBody(response)
 }

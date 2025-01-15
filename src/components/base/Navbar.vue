@@ -132,18 +132,17 @@
 </template>
 
 <script setup lang="ts">
-import appLogo from '@/assets/hydroserver-icon-min.png'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { useAuthStore } from '@/store/authentication'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { navbarLogo } from '@/config/navbarConfig'
+import { useUserStore } from '@/store/user'
 
 const { resetState } = useDataVisStore()
-const { logout } = useAuthStore()
-const { isLoggedIn } = storeToRefs(useAuthStore())
+const { logout } = useUserStore()
+const { isLoggedIn } = storeToRefs(useUserStore())
 const { mdAndDown } = useDisplay()
 
 const drawer = ref(false)

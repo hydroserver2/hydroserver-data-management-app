@@ -21,9 +21,16 @@ import Footer from '@/components/base/Footer.vue'
 import Notifications from '@/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
 import { setupRouteGuards } from './router/router'
+import { onMounted } from 'vue'
+import { api } from './services/api'
 
 const route = useRoute()
 setupRouteGuards()
+
+onMounted(async () => {
+  // TODO: Can this be done automatically with cookies?
+  await api.fetchCsrfToken()
+})
 </script>
 
 <style scoped lang="scss">

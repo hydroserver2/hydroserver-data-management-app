@@ -21,15 +21,11 @@
 <script setup lang="ts">
 import AccountForm from '@/components/account/AccountForm.vue'
 import { api } from '@/services/api'
-import { useAuthStore } from '@/store/authentication'
 import { useUserStore } from '@/store/user'
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import router from '@/router/router'
 
-const route = useRoute()
 const { setUser } = useUserStore()
-const { setTokens } = useAuthStore()
 const loaded = ref(false)
 
 const navigateToSites = async () => {
@@ -37,10 +33,6 @@ const navigateToSites = async () => {
 }
 
 onMounted(async () => {
-  const accessToken = (route.query.t as string) || ''
-  const refreshToken = (route.query.rt as string) || ''
-  if (accessToken && refreshToken) setTokens(accessToken, refreshToken)
-
   try {
     const user = await api.fetchUser()
     setUser(user)

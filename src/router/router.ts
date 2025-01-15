@@ -4,7 +4,6 @@ import {
   createWebHistory,
 } from 'vue-router'
 import { routes } from '@/router/routes'
-import { useAuthStore } from '@/store/authentication'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
@@ -23,8 +22,7 @@ const guards: ((
   // hasAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasAuthGuard) {
-      const { isLoggedIn } = storeToRefs(useAuthStore())
-      const { user } = storeToRefs(useUserStore())
+      const { user, isLoggedIn } = storeToRefs(useUserStore())
 
       if (!isLoggedIn.value) return { name: 'Login', query: { next: to.name } }
       if (user.value?.isVerified) return null
@@ -37,7 +35,7 @@ const guards: ((
   // hasLoggedOutGuard
   (to, _from, _next) => {
     if (to.meta?.hasLoggedOutGuard) {
-      const { isLoggedIn } = useAuthStore()
+      const { isLoggedIn } = useUserStore()
       if (isLoggedIn) return { name: 'PageNotFound' }
     }
     return null
@@ -46,7 +44,7 @@ const guards: ((
   // hasUnverifiedAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasUnverifiedAuthGuard) {
-      const { isLoggedIn } = useAuthStore()
+      const { isLoggedIn } = useUserStore()
       const { user } = storeToRefs(useUserStore())
       if (isLoggedIn && user.value?.isVerified) return { name: 'PageNotFound' }
     }
