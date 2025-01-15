@@ -1,4 +1,4 @@
-import { handle401 } from '@/services/handle401'
+import { useAuthStore } from '@/store/authentication'
 
 export async function parseResponseBody(response: Response) {
   try {
@@ -23,14 +23,11 @@ export async function parseResponseBody(response: Response) {
 
 export async function responseInterceptor(
   response: Response,
-  method: Function,
-  endpoint: string,
   options: any
 ): Promise<any> {
   if (response.status === 401 && !options._retry) {
-    if (endpoint.includes('jwt/pair')) return parseResponseBody(response)
-    return await handle401(method, endpoint, options)
-  } else {
-    return parseResponseBody(response)
+    const authStore = useAuthStore()
+    authStore.logout()
   }
+  return parseResponseBody(response)
 }

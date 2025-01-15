@@ -65,41 +65,48 @@ export const OAUTH_ENDPOINT = (
 export const api = {
   fetchCsrfToken: async () => apiMethods.fetch(`${BASE_URL}/csrf/`),
 
-  fetchAuthenticationStatus: async () => apiMethods.fetch(`${AUTH_BASE}/session`),
+  fetchAuthenticationStatus: async () =>
+    apiMethods.fetch(`${AUTH_BASE}/session`),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/get
 
   logout: async () => apiMethods.delete(`${AUTH_BASE}/session`),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/delete
 
-  login: async (email: string, password: string) => apiMethods.post(`${AUTH_BASE}/login`, {
-    email: email,
-    password: password
-  }),
+  login: async (email: string, password: string) =>
+    apiMethods.post(`${AUTH_BASE}/login`, {
+      email: email,
+      password: password,
+    }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1login/post
 
   signup: async (user: User) => apiMethods.post(`${AUTH_BASE}/signup`, user),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1signup/post
 
-  fetchEmailVerificationStatus: async () => apiMethods.fetch(`${AUTH_BASE}/email/verify`),
+  fetchEmailVerificationStatus: async () =>
+    apiMethods.fetch(`${AUTH_BASE}/email/verify`),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/get
 
-  verifyEmail: async (key: string) => apiMethods.post(`${AUTH_BASE}/email/`, {
-    key: key
-  }),
+  verifyEmail: async (key: string) =>
+    apiMethods.post(`${AUTH_BASE}/email/`, {
+      key: key,
+    }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/post
 
-  requestPasswordReset: async (email: string) => apiMethods.post(`${AUTH_BASE}/password/request`, {
-    email: email
-  }),
+  requestPasswordReset: async (email: string) =>
+    apiMethods.post(`${AUTH_BASE}/password/request`, {
+      email: email,
+    }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1request/post
 
-  fetchPasswordResetStatus: async () => apiMethods.fetch(`${AUTH_BASE}/password/reset`),
+  fetchPasswordResetStatus: async () =>
+    apiMethods.fetch(`${AUTH_BASE}/password/reset`),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/get
 
-  resetPassword: async (key: string, password: string) => apiMethods.post(`${AUTH_BASE}/password/reset`, {
-    key: key,
-    password: password
-  }),
+  resetPassword: async (key: string, password: string) =>
+    apiMethods.post(`${AUTH_BASE}/password/reset`, {
+      key: key,
+      password: password,
+    }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
 
   createUser: async (user: User) => apiMethods.post(USER_BASE, user),

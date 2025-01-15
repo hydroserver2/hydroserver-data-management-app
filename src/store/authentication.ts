@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import router from '@/router/router'
-import jwtDecode from 'jwt-decode'
 import Storage from '@/utils/storage'
 
 interface JWTPayload {
@@ -34,24 +33,11 @@ export const useAuthStore = defineStore('authentication', () => {
     }
   }
 
-  function isRefreshTokenExpired() {
-    if (!isLoggedIn.value || !refreshToken.value) return false
-    try {
-      const decodedToken = jwtDecode(refreshToken.value) as JWTPayload
-      const currentTime = Date.now() / 1000
-      return decodedToken.exp < currentTime
-    } catch (e) {
-      console.error('Invalid refresh token:', e)
-      return true
-    }
-  }
-
   return {
     accessToken,
     refreshToken,
     isLoggedIn,
     setTokens,
     logout,
-    isRefreshTokenExpired,
   }
 })

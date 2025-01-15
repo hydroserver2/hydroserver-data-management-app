@@ -5,7 +5,6 @@ import {
 } from 'vue-router'
 import { routes } from '@/router/routes'
 import { useAuthStore } from '@/store/authentication'
-import { Snackbar } from '@/utils/notifications'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
@@ -21,17 +20,6 @@ const guards: ((
   from?: RouteLocationNormalized,
   next?: (to?: string | object) => void
 ) => any | null)[] = [
-  // Check if the refresh token is expired each page change
-  (_to, _from, _next) => {
-    const { isRefreshTokenExpired, logout } = useAuthStore()
-
-    if (isRefreshTokenExpired()) {
-      Snackbar.info('Session expired. Please login')
-      logout()
-    }
-    return null
-  },
-
   // hasAuthGuard
   (to, _from, _next) => {
     if (to.meta?.hasAuthGuard) {

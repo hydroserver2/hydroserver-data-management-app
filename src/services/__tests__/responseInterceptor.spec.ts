@@ -75,16 +75,9 @@ describe('parseResponseBody', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const method = () => {}
-      const endpoint = 'test/endpoint'
       const options = {}
 
-      const result = await responseInterceptor(
-        mockResponse,
-        method,
-        endpoint,
-        options
-      )
+      const result = await responseInterceptor(mockResponse, options)
 
       expect(result).toEqual(mockJsonResponse)
     })
