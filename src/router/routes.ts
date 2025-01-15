@@ -103,7 +103,8 @@ export const routes: RouteRecordRaw[] = [
     name: 'HydroLoader',
     component: () => import('@/pages/HydroLoaderDownload.vue'),
   },
-  {
+  { // AllAuth emails will link users to this page if a password reset was requested but the email provided does not
+    // have an account associated with it yet.
     path: '/sign-up',
     name: 'SignUp',
     component: () => {
@@ -133,7 +134,10 @@ export const routes: RouteRecordRaw[] = [
       hasLoggedOutGuard: true,
     },
   },
-  {
+  { // AllAuth password reset emails will link users to this page. This page will need to request the user for a new
+    // password and then POST the password and reset key to the resetPassword endpoint complete the password reset
+    // process. Full docs here:
+    // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
     path: '/password_reset',
     name: 'PasswordResetRequest',
     component: () =>
@@ -163,7 +167,9 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/account/CompleteProfile.vue'),
     meta: { hasUnverifiedAuthGuard: true, title: 'Complete Profile' },
   },
-  {
+  { // AllAuth verification emails will link users to this page. This page will need to POST a key to the verifyEmail
+    // endpoint to complete the verification process. Full docs here:
+    // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/post
     path: '/verify-email',
     name: 'VerifyEmail',
     component: () => import('@/pages/account/VerifyEmail.vue'),

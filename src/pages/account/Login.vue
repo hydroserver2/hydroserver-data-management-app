@@ -101,6 +101,9 @@ const formLogin = async () => {
   if (!valid) return
 
   try {
+    // This needs to be run at some point before making any POST requests to the API.
+    await api.fetchCsrfToken()
+
     const tokens = await api.login(email.value, password.value)
     login(tokens.access, tokens.refresh)
   } catch (error) {

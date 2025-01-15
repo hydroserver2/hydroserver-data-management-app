@@ -17,7 +17,9 @@ import {
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 
-export const ACCOUNT_BASE = `${BASE_URL}/account`
+export const AUTH_BASE = `${BASE_URL}/auth/browser/v1/auth`
+export const ACCOUNT_BASE = `${BASE_URL}/auth/browser/v1/account`
+export const PROFILE_BASE = `${BASE_URL}/account`
 export const TAG_BASE = `${BASE_URL}/data/tags`
 export const USER_BASE = `${BASE_URL}/account/user`
 const DS_BASE = `${BASE_URL}/data/datastreams`
@@ -31,7 +33,7 @@ const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
 export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
-export const JWT_REFRESH = `${ACCOUNT_BASE}/jwt/refresh`
+export const JWT_REFRESH = `${PROFILE_BASE}/jwt/refresh`
 
 export const getObservationsEndpoint = (
   id: string,
@@ -53,7 +55,7 @@ export const OAUTH_ENDPOINT = (
   uid?: string,
   token?: string
 ) => {
-  let url = `${ACCOUNT_BASE}/${provider}/login`
+  let url = `${PROFILE_BASE}/${provider}/login`
   if (uid && token) {
     url += `?uid=${uid}&token=${token}`
   }
@@ -61,34 +63,72 @@ export const OAUTH_ENDPOINT = (
 }
 
 export const api = {
+  fetchCsrfToken: async () => apiMethods.fetch(`${BASE_URL}/csrf/`),
+
+  fetchAuthenticationStatus: async () => apiMethods.fetch(`${AUTH_BASE}/session`),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/get
+
+  logout: async () => apiMethods.delete(`${AUTH_BASE}/session`),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/delete
+
+  login: async (email: string, password: string) => apiMethods.post(`${AUTH_BASE}/login`, {
+    email: email,
+    password: password
+  }),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1login/post
+
+  signup: async (user: User) => apiMethods.post(`${AUTH_BASE}/signup`, user),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1signup/post
+
+  fetchEmailVerificationStatus: async () => apiMethods.fetch(`${AUTH_BASE}/email/verify`),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/get
+
+  verifyEmail: async (key: string) => apiMethods.post(`${AUTH_BASE}/email/`, {
+    key: key
+  }),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/post
+
+  requestPasswordReset: async (email: string) => apiMethods.post(`${AUTH_BASE}/password/request`, {
+    email: email
+  }),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1request/post
+
+  fetchPasswordResetStatus: async () => apiMethods.fetch(`${AUTH_BASE}/password/reset`),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/get
+
+  resetPassword: async (key: string, password: string) => apiMethods.post(`${AUTH_BASE}/password/reset`, {
+    key: key,
+    password: password
+  }),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
+
   createUser: async (user: User) => apiMethods.post(USER_BASE, user),
   fetchUser: async () => apiMethods.fetch(USER_BASE),
   updateUser: async (user: User, oldUser: User) =>
     apiMethods.patch(USER_BASE, user, oldUser),
   deleteUser: async () => apiMethods.delete(USER_BASE),
-
-  resetPassword: async (uid: string, token: string, password: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/reset-password`, {
-      uid: uid,
-      token: token,
-      password: password,
-    }),
+  // resetPassword: async (uid: string, token: string, password: string) =>
+  //   apiMethods.post(`${PROFILE_BASE}/reset-password`, {
+  //     uid: uid,
+  //     token: token,
+  //     password: password,
+  //   }),
   sendPasswordRestEmail: async (email: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/send-password-reset-email`, {
+    apiMethods.post(`${PROFILE_BASE}/send-password-reset-email`, {
       email: email,
     }),
-  login: async (email: string, password: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/jwt/pair`, {
-      email: email,
-      password: password,
-    }),
+  // login: async (email: string, password: string) =>
+  //   apiMethods.post(`${PROFILE_BASE}/jwt/pair`, {
+  //     email: email,
+  //     password: password,
+  //   }),
   activateAccount: async (uid: string, token: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/activate`, {
+    apiMethods.post(`${PROFILE_BASE}/activate`, {
       uid: uid,
       token: token,
     }),
   sendVerificationEmail: async () =>
-    apiMethods.post(`${ACCOUNT_BASE}/send-verification-email`),
+    apiMethods.post(`${PROFILE_BASE}/send-verification-email`),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
@@ -155,9 +195,9 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
 
   connectToHydroShare: async () =>
-    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/connect`),
+    apiMethods.fetch(`${PROFILE_BASE}/hydroshare/connect`),
   disconnectFromHydroShare: async () =>
-    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/disconnect`),
+    apiMethods.fetch(`${PROFILE_BASE}/hydroshare/disconnect`),
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
   updateHydroShareArchive: async (

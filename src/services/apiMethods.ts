@@ -20,6 +20,7 @@ async function interceptedFetch(endpoint: string, options: any) {
 export const apiMethods = {
   async fetch(endpoint: string, options: any = {}): Promise<any> {
     options.method = 'GET'
+    options.credentials = 'include'
     return await interceptedFetch(endpoint, options)
   },
   async patch(
@@ -29,6 +30,7 @@ export const apiMethods = {
     options: any = {}
   ): Promise<any> {
     options.method = 'PATCH'
+    options.credentials = 'include'
     options.body = originalBody ? createPatchObject(originalBody, body) : body
     if (Object.keys(options.body).length === 0) return
     return await interceptedFetch(endpoint, options)
@@ -39,11 +41,13 @@ export const apiMethods = {
     options: any = {}
   ): Promise<any> {
     options.method = 'POST'
+    options.credentials = 'include'
     options.body = body
     return await interceptedFetch(endpoint, options)
   },
   async delete(endpoint: string, options: any = {}): Promise<any> {
     options.method = 'DELETE'
+    options.credentials = 'include'
     return await interceptedFetch(endpoint, options)
   },
 }
