@@ -19,9 +19,8 @@ export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 
 export const AUTH_BASE = `${BASE_URL}/auth/browser/v1/auth`
 export const ACCOUNT_BASE = `${BASE_URL}/auth/browser/v1/account`
-export const PROFILE_BASE = `${BASE_URL}/account`
+export const IAM_BASE = `${BASE_URL}/account`
 export const TAG_BASE = `${BASE_URL}/data/tags`
-export const USER_BASE = `${BASE_URL}/account/user`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
 export const THINGS_BASE = `${BASE_URL}/data/things`
@@ -32,8 +31,6 @@ const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
 export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
-
-export const JWT_REFRESH = `${PROFILE_BASE}/jwt/refresh`
 
 export const getObservationsEndpoint = (
   id: string,
@@ -55,7 +52,7 @@ export const OAUTH_ENDPOINT = (
   uid?: string,
   token?: string
 ) => {
-  let url = `${PROFILE_BASE}/${provider}/login`
+  let url = `${AUTH_BASE}/${provider}/login`
   if (uid && token) {
     url += `?uid=${uid}&token=${token}`
   }
@@ -109,11 +106,10 @@ export const api = {
     }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
 
-  createUser: async (user: User) => apiMethods.post(USER_BASE, user),
-  fetchUser: async () => apiMethods.fetch(USER_BASE),
+  fetchUser: async () => apiMethods.fetch(`${IAM_BASE}/profile`),
   updateUser: async (user: User, oldUser: User) =>
-    apiMethods.patch(USER_BASE, user, oldUser),
-  deleteUser: async () => apiMethods.delete(USER_BASE),
+    apiMethods.patch(`${IAM_BASE}/profile`, user, oldUser),
+  deleteUser: async () => apiMethods.delete(`${IAM_BASE}/profile`),
   // resetPassword: async (uid: string, token: string, password: string) =>
   //   apiMethods.post(`${PROFILE_BASE}/reset-password`, {
   //     uid: uid,
@@ -121,7 +117,7 @@ export const api = {
   //     password: password,
   //   }),
   sendPasswordRestEmail: async (email: string) =>
-    apiMethods.post(`${PROFILE_BASE}/send-password-reset-email`, {
+    apiMethods.post(`${IAM_BASE}/send-password-reset-email`, {
       email: email,
     }),
   // login: async (email: string, password: string) =>
@@ -130,12 +126,12 @@ export const api = {
   //     password: password,
   //   }),
   activateAccount: async (uid: string, token: string) =>
-    apiMethods.post(`${PROFILE_BASE}/activate`, {
+    apiMethods.post(`${IAM_BASE}/activate`, {
       uid: uid,
       token: token,
     }),
   sendVerificationEmail: async () =>
-    apiMethods.post(`${PROFILE_BASE}/send-verification-email`),
+    apiMethods.post(`${IAM_BASE}/send-verification-email`),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
@@ -202,9 +198,9 @@ export const api = {
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
 
   connectToHydroShare: async () =>
-    apiMethods.fetch(`${PROFILE_BASE}/hydroshare/connect`),
+    apiMethods.fetch(`${IAM_BASE}/hydroshare/connect`),
   disconnectFromHydroShare: async () =>
-    apiMethods.fetch(`${PROFILE_BASE}/hydroshare/disconnect`),
+    apiMethods.fetch(`${IAM_BASE}/hydroshare/disconnect`),
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
   updateHydroShareArchive: async (

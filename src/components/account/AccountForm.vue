@@ -222,7 +222,7 @@ const emit = defineEmits(['close'])
 
 async function createUser() {
   try {
-    const data = await api.createUser(userForm)
+    const data = await api.signup(userForm)
     setUser(data.user)
     Snackbar.success('Account created.')
     await router.push({ name: 'VerifyEmail' })
