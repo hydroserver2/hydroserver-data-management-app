@@ -356,7 +356,9 @@ export class User {
   address: string
   organization?: Organization | null
   type: string
-  isVerified: boolean
+  isActive: boolean
+  isOwnershipAllowed: boolean
+  isProfileComplete: boolean
   link: string
   hydroShareConnected: boolean
 
@@ -370,7 +372,9 @@ export class User {
     this.phone = ''
     this.address = ''
     this.type = ''
-    this.isVerified = false
+    this.isActive = true
+    this.isOwnershipAllowed = true
+    this.isProfileComplete = true
     this.link = ''
     this.hydroShareConnected = false
   }

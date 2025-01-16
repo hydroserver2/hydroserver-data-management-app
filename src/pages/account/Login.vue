@@ -88,7 +88,7 @@ const disableAccountCreation =
 
 const { setUser } = useUserStore()
 
-const login = async (accessToken: string, refreshToken: string) => {
+const login = async () => {
   try {
     const user = await api.fetchUser()
     setUser(user)
@@ -104,7 +104,7 @@ const formLogin = async () => {
 
   try {
     const tokens = await api.login(email.value, password.value)
-    login(tokens.access, tokens.refresh)
+    login()
   } catch (error) {
     console.error('Error logging in.', error)
     if ((error as Error).message === '401') {
