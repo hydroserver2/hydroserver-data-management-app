@@ -106,6 +106,14 @@ export const api = {
     }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
 
+  providerRedirect: async (provider: string, callbackUrl: string, process: string) =>
+    apiMethods.post(`${AUTH_BASE}/provider/redirect`, {
+      provider: provider,
+      callback_url: callbackUrl,
+      process: process
+    }),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Providers/paths/~1_allauth~1browser~1v1~1auth~1provider~1redirect/post
+
   fetchUser: async () => apiMethods.fetch(`${IAM_BASE}/profile`),
   updateUser: async (user: User, oldUser: User) =>
     apiMethods.patch(`${IAM_BASE}/profile`, user, oldUser),
@@ -192,10 +200,6 @@ export const api = {
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
 
-  connectToHydroShare: async () =>
-    apiMethods.fetch(`${IAM_BASE}/hydroshare/connect`),
-  disconnectFromHydroShare: async () =>
-    apiMethods.fetch(`${IAM_BASE}/hydroshare/disconnect`),
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
   updateHydroShareArchive: async (
