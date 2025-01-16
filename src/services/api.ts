@@ -120,11 +120,6 @@ export const api = {
     apiMethods.post(`${IAM_BASE}/send-password-reset-email`, {
       email: email,
     }),
-  // login: async (email: string, password: string) =>
-  //   apiMethods.post(`${PROFILE_BASE}/jwt/pair`, {
-  //     email: email,
-  //     password: password,
-  //   }),
   activateAccount: async (uid: string, token: string) =>
     apiMethods.post(`${IAM_BASE}/activate`, {
       uid: uid,
