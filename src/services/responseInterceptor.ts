@@ -25,9 +25,13 @@ export async function responseInterceptor(
   response: Response,
   options: any
 ): Promise<any> {
-  if (response.status === 401 && !options._retry) {
-    const { logout } = useUserStore()
-    logout()
+  if (
+    response.status === 401 &&
+    !options._retry &&
+    !(response.url?.endsWith("session")) && options.method === "DELETE"
+  ) {
+    const { logout } = useUserStore();
+    logout();
   }
   return parseResponseBody(response)
 }
