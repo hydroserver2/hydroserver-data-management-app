@@ -114,21 +114,10 @@ export const api = {
   updateUser: async (user: User, oldUser: User) =>
     apiMethods.patch(USER_BASE, user, oldUser),
   deleteUser: async () => apiMethods.delete(USER_BASE),
-  // resetPassword: async (uid: string, token: string, password: string) =>
-  //   apiMethods.post(`${PROFILE_BASE}/reset-password`, {
-  //     uid: uid,
-  //     token: token,
-  //     password: password,
-  //   }),
   sendPasswordRestEmail: async (email: string) =>
     apiMethods.post(`${PROFILE_BASE}/send-password-reset-email`, {
       email: email,
     }),
-  // login: async (email: string, password: string) =>
-  //   apiMethods.post(`${PROFILE_BASE}/jwt/pair`, {
-  //     email: email,
-  //     password: password,
-  //   }),
   activateAccount: async (uid: string, token: string) =>
     apiMethods.post(`${PROFILE_BASE}/activate`, {
       uid: uid,
