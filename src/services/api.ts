@@ -70,10 +70,7 @@ export const api = {
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/delete
 
   login: async (email: string, password: string) =>
-    apiMethods.post(`${AUTH_BASE}/login`, {
-      email: email,
-      password: password,
-    }),
+    apiMethods.post(`${AUTH_BASE}/login`, { email, password }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1login/post
 
   signup: async (user: User) => apiMethods.post(`${AUTH_BASE}/signup`, user),
@@ -84,7 +81,7 @@ export const api = {
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/get
 
   verifyEmail: async (key: string) =>
-    apiMethods.post(`${AUTH_BASE}/email/`, {
+    apiMethods.post(`${AUTH_BASE}/email/verify`, {
       key: key,
     }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/post

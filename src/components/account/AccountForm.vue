@@ -36,7 +36,7 @@
             />
           </v-col>
 
-          <v-col cols="12" v-if="!userForm.isVerified">
+          <v-col cols="12" v-if="!userForm.isProfileComplete">
             <v-text-field
               v-model="userForm.email"
               label="Email *"
@@ -222,15 +222,14 @@ const emit = defineEmits(['close'])
 
 async function createUser() {
   try {
+    // TODO: Email verification form requires a user.value.email. Set the store or alter that page
     const data = await api.signup(userForm)
-    setUser(data.user)
     Snackbar.success('Account created.')
-    await router.push({ name: 'VerifyEmail' })
   } catch (error) {
     console.error('Error creating user', error)
-    if ((error as Error).message === '409') {
-      Snackbar.warn('A user with this email already exists.')
-    }
+    // if ((error as Error).message === '409') {
+    //   Snackbar.warn('A user with this email already exists.')
+    // }
   }
 }
 
@@ -241,8 +240,7 @@ const updateUser = async () => {
   } catch (error) {
     console.error('Error updating user', error)
   }
-  if (!user.value?.isVerified) await router.push({ name: 'VerifyEmail' })
-  else Snackbar.success('Your changes have been saved.')
+  Snackbar.success('Your changes have been saved.')
   emit('close')
 }
 

@@ -25,9 +25,7 @@ const guards: ((
       const { user, isLoggedIn } = storeToRefs(useUserStore())
 
       if (!isLoggedIn.value) return { name: 'Login', query: { next: to.name } }
-      if (user.value?.isVerified) return null
-      if (user.value?.email) return { name: 'VerifyEmail' }
-      return { name: 'CompleteProfile' }
+      if (!user.value?.isProfileComplete) return { name: 'CompleteProfile' }
     }
     return null
   },
@@ -41,12 +39,13 @@ const guards: ((
     return null
   },
 
-  // hasUnverifiedAuthGuard
+  // hasIncompleteProfileAuthGuard
   (to, _from, _next) => {
-    if (to.meta?.hasUnverifiedAuthGuard) {
+    if (to.meta?.hasIncompleteProfileAuthGuard) {
       const { isLoggedIn } = useUserStore()
       const { user } = storeToRefs(useUserStore())
-      if (isLoggedIn && user.value?.isVerified) return { name: 'PageNotFound' }
+      if (isLoggedIn && user.value?.isProfileComplete)
+        return { name: 'PageNotFound' }
     }
     return null
   },
