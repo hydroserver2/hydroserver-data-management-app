@@ -23,12 +23,8 @@ export async function responseInterceptor(
   }
 
   if (response.status === 401) {
-    if (options.method === 'DELETE' && response.url?.endsWith('session')) {
-      // Ignore the case where an already logged out user tries to logout.
-      // This prevents an infinite logout/401 response loop.
-      console.error('User tried to logout when they were already logged out.')
-      return
-    }
+    // return if the user deletes the session so we don't logout multiple times.
+    if (options.method === 'DELETE' && response.url?.endsWith('session')) return
 
     const flows = errorBody?.data.flows || []
     console.log('errorBody', errorBody)
@@ -44,6 +40,7 @@ export async function responseInterceptor(
     }
 
     // Session expired
+    console.log('Session expired')
     const { logout } = useUserStore()
     logout()
   }

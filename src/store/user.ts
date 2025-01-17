@@ -21,7 +21,8 @@ export const useUserStore = defineStore('user', () => {
       await api.logout()
       localStorage.clear()
       sessionStorage.clear()
-      router.push({ name: 'Login' })
+      user.value = new User()
+      await router.push({ name: 'Login' })
     } catch (error) {
       console.error('Error logging out.', error)
     }
