@@ -35,6 +35,7 @@
             <v-card-actions class="text-body-1 signup-link-section">
               <v-spacer></v-spacer>
               <v-btn-primary
+                :loading="loading"
                 class="login-button mr-4"
                 :disabled="!valid"
                 type="submit"
@@ -83,7 +84,7 @@ const password = ref('')
 const form = ref(null)
 const valid = ref(false)
 const loaded = ref(false)
-const route = useRoute()
+const loading = ref(false)
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
@@ -101,15 +102,17 @@ const login = async (user: User) => {
 
 const formLogin = async () => {
   if (!valid) return
-
   try {
+    loading.value = true
     const session = await api.login(email.value, password.value)
     await login(session.data.user.profile)
   } catch (error) {
     console.error('Error logging in.', error)
-    if ((error as Error).message === '401') {
+    if ((error as Error).message === '400') {
       Snackbar.warn('No active account found with the given credentials.')
     }
+  } finally {
+    loading.value = false
   }
 }
 
