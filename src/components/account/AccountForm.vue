@@ -222,7 +222,6 @@ const emit = defineEmits(['close'])
 
 async function createUser() {
   try {
-    // TODO: Email verification form requires a user.value.email. Set the store or alter that page
     const data = await api.signup(userForm)
     Snackbar.success('Account created.')
   } catch (error) {

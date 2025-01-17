@@ -374,7 +374,7 @@ export class User {
     this.type = ''
     this.isActive = true
     this.isOwnershipAllowed = true
-    this.isProfileComplete = true
+    this.isProfileComplete = false // The profile won't be complete on the signup page
     this.link = ''
     this.hydroShareConnected = false
   }
