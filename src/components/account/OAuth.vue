@@ -36,8 +36,8 @@
 import { OAuthProvider } from '@/types'
 import googleImg from '@/assets/google.png'
 import ORCIDImg from '@/assets/orcid.png'
-import { OAUTH_ENDPOINT } from '@/services/api'
 import { computed } from 'vue'
+import { api } from '@/services/api'
 
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
@@ -63,7 +63,11 @@ const showOAuthOptions = computed(
     disableAccountCreation !== 'true'
 )
 
-const OAuthLogin = async (provider: OAuthProvider) => {
-  window.location.href = OAUTH_ENDPOINT(provider)
+const OAuthLogin = (provider: OAuthProvider) => {
+  api.providerRedirect(
+    provider,
+    `${import.meta.env.VITE_APP_PROXY_BASE_URL}/Sites`,
+    'login'
+  )
 }
 </script>

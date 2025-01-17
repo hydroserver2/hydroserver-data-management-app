@@ -14,6 +14,7 @@ import {
   HydroShareArchive,
   User,
 } from '@/types'
+import { getCSRFToken } from './getCSRFToken'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 
@@ -103,12 +104,33 @@ export const api = {
     }),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
 
-  providerRedirect: async (provider: string, callbackUrl: string, process: string) =>
-    apiMethods.post(`${AUTH_BASE}/provider/redirect`, {
+  providerRedirect: (provider: string, callbackUrl: string, process: string) => {
+    const data: Record<string, string> = {
       provider: provider,
       callback_url: callbackUrl,
       process: process
-    }),
+    };
+    const csrfToken = getCSRFToken()
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `${AUTH_BASE}/provider/redirect`;
+    if (csrfToken) {
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'csrfmiddlewaretoken';
+      csrfInput.value = csrfToken;
+      form.appendChild(csrfInput);
+    }
+    for (const key in data) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = data[key];
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+  },
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Providers/paths/~1_allauth~1browser~1v1~1auth~1provider~1redirect/post
 
   fetchUser: async () => apiMethods.fetch(`${IAM_BASE}/profile`),
