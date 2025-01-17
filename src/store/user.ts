@@ -9,7 +9,7 @@ export const userStorage = new Storage<User>('user')
 
 export const useUserStore = defineStore('user', () => {
   const user = ref(userStorage.get() || new User())
-  const isLoggedIn = computed(() => !!user.value.id)
+  const isLoggedIn = computed(() => !!user.value.email)
 
   const setUser = (userData: User) => {
     user.value = userData

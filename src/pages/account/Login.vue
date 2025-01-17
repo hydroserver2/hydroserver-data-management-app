@@ -72,6 +72,7 @@ import { onMounted, ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
 import { api } from '@/services/api'
+import { User } from '@/types'
 import router from '@/router/router'
 import { useUserStore } from '@/store/user'
 import { useRoute } from 'vue-router'
@@ -88,9 +89,8 @@ const disableAccountCreation =
 
 const { setUser } = useUserStore()
 
-const login = async () => {
+const login = async (user: User) => {
   try {
-    const user = await api.fetchUser()
     setUser(user)
     Snackbar.success('You have logged in!')
     await router.push({ name: 'Sites' })
@@ -103,8 +103,8 @@ const formLogin = async () => {
   if (!valid) return
 
   try {
-    const tokens = await api.login(email.value, password.value)
-    login()
+    const session = await api.login(email.value, password.value)
+    await login(session.data.user.profile)
   } catch (error) {
     console.error('Error logging in.', error)
     if ((error as Error).message === '401') {
