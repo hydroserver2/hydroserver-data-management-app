@@ -30,9 +30,6 @@ setupRouteGuards()
 onMounted(async () => {
   // TODO: Can this be done automatically with cookies?
   await api.fetchCsrfToken()
-
-  // TODO: fetch fetchAuthenticationStatus on site load and set user to authenticated
-  // if there's an active session.
 })
 </script>
 
