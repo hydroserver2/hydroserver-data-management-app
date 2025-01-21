@@ -49,7 +49,7 @@
           prependIcon="mdi-filter"
           variant="outlined"
           rounded="xl"
-          >Filter Sites</v-btn
+          >Filter sites</v-btn
         >
 
         <v-btn-add class="mr-2" @click="showSiteForm = true" color="white">

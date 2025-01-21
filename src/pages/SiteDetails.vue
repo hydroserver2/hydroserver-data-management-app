@@ -14,7 +14,7 @@
       </v-col>
 
       <v-col cols="auto" v-if="isOwner">
-        <v-btn @click="isAccessControlModalOpen = true">Access Control</v-btn>
+        <v-btn @click="isAccessControlModalOpen = true">Access control</v-btn>
         <v-dialog v-model="isAccessControlModalOpen" width="60rem">
           <SiteAccessControl
             @close="isAccessControlModalOpen = false"
@@ -34,7 +34,7 @@
 
       <v-col cols="auto" v-if="isPrimaryOwner">
         <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
-          >Delete Site</v-btn
+          >Delete site</v-btn
         >
         <v-dialog v-model="isDeleteModalOpen" v-if="thing" width="40rem">
           <SiteDeleteModal

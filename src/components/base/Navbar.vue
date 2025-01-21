@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app elevation="2">
+  <v-app-bar app elevation="2" density="default">
     <router-link v-if="navbarLogo.route" :to="navbarLogo.route">
       <v-img :src="navbarLogo.src" alt="Logo" :width="navbarLogo.width" />
     </router-link>
@@ -59,7 +59,7 @@
               <v-list-item
                 prepend-icon="mdi-logout"
                 @click="onLogout"
-                title="Log Out"
+                title="Log out"
               />
             </v-list>
           </v-menu>
@@ -67,12 +67,12 @@
       </template>
 
       <template v-else>
-        <v-btn prepend-icon="mdi-login" to="/Login">Log In</v-btn>
+        <v-btn prepend-icon="mdi-login" to="/Login">Log in</v-btn>
         <v-btn
           v-if="disableAccountCreation !== 'true'"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
-          >Sign Up</v-btn
+          >Sign up</v-btn
         >
       </template>
     </template>
@@ -124,7 +124,7 @@
           v-if="disableAccountCreation !== 'true'"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
-          >Sign Up</v-list-item
+          >Sign up</v-list-item
         >
       </template>
     </v-list>
@@ -158,36 +158,36 @@ const paths: {
 }[] = [
   {
     attrs: { to: '/browse' },
-    label: 'Browse Monitoring Sites',
+    label: 'Browse monitoring sites',
     icon: 'mdi-layers-search',
   },
   {
     attrs: { to: '/sites' },
-    label: 'Your Sites',
+    label: 'Your sites',
     icon: 'mdi-map-marker-multiple',
   },
   {
     attrs: { to: '/visualize-data' },
-    label: 'Visualize Data',
+    label: 'Visualize data',
     icon: 'mdi-chart-line',
     onClick: () => resetState(),
   },
   {
-    label: 'Data Management',
+    label: 'Data management',
     menu: [
       {
         attrs: { to: '/Metadata' },
-        label: 'Manage Metadata',
+        label: 'Manage metadata',
         icon: 'mdi-database-cog',
       },
       {
         attrs: { to: '/data-sources' },
-        label: 'Manage Data Sources',
+        label: 'Manage data sources',
         icon: 'mdi-file-chart',
       },
       {
         attrs: { to: '/data-loaders' },
-        label: 'Manage Data Loaders',
+        label: 'Manage data loaders',
         icon: 'mdi-file-upload',
       },
     ],
