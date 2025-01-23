@@ -215,6 +215,8 @@ export const api = {
   createProcessingLevel: async (pl: ProcessingLevel) =>
     apiMethods.post(PL_BASE, pl),
   fetchProcessingLevels: async () => apiMethods.fetch(PL_BASE),
+  fetchProcessingLevel: async (id: string) =>
+    apiMethods.fetch(`${PL_BASE}/${id}`),
   fetchUnownedProcessingLevels: async () =>
     apiMethods.fetch(`${PL_BASE}?owner=noUser`),
   fetchOwnedProcessingLevels: async () =>
@@ -232,6 +234,7 @@ export const api = {
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
   fetchSensors: async () => apiMethods.fetch(SENSOR_BASE),
+  fetchSensor: async (id: string) => apiMethods.fetch(`${SENSOR_BASE}/${id}`),
   fetchOwnedSensors: async () =>
     apiMethods.fetch(`${SENSOR_BASE}?owner=anyUser`),
   fetchCurrentUserSensors: async () =>
