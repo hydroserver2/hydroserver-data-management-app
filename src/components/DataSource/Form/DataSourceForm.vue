@@ -76,28 +76,45 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col class="v-col-xs-6 v-col-sm-3">
-            <v-text-field
-              v-model="item.interval"
-              label="Interval *"
-              hint="Enter the interval data should be loaded on."
-              type="number"
-              :rules="[
+          <v-col class="v-col-xs-12 v-col-sm-6">
+            <v-radio-group v-model="scheduleType" inline>
+              <v-radio label="Interval" value="interval" />
+              <v-radio label="Crontab" value="crontab" />
+            </v-radio-group>
+          </v-col>
+          <template v-if="scheduleType === 'interval'">
+            <v-col class="v-col-xs-6 v-col-sm-3">
+              <v-text-field
+                v-model="item.interval"
+                label="Interval *"
+                hint="Enter the interval data should be loaded on."
+                type="number"
+                :rules="[
               (val: string) => val != null && val !== '' || 'Interval value is required.',
               (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
               (val: string) => +val > 0 || 'Interval must be greater than zero.'
             ]"
-            />
-          </v-col>
-          <v-col class="v-col-xs-6 v-col-sm-3">
-            <v-select
-              v-model="item.intervalUnits"
-              label="Interval Units"
-              :items="intervalUnitValues"
-              variant="outlined"
-              density="comfortable"
-            />
-          </v-col>
+              />
+            </v-col>
+            <v-col class="v-col-xs-6 v-col-sm-3">
+              <v-select
+                v-model="item.intervalUnits"
+                label="Interval Units"
+                :items="intervalUnitValues"
+                variant="outlined"
+                density="comfortable"
+              />
+            </v-col>
+          </template>
+          <template v-if="scheduleType === 'crontab'">
+            <v-col class="v-col-xs-12 v-col-sm-6">
+              <v-text-field
+                v-model="item.crontab"
+                label="Crontab"
+                hint="Enter a crontab schedule for the data to be loaded on."
+              />
+            </v-col>
+          </template>
         </v-row>
       </v-card-item>
 
@@ -159,6 +176,7 @@ const workflowTypes = [
 
 // const dataLoaders = ref<DataLoader[]>([])
 const loaded = ref(false)
+const scheduleType = ref('interval')
 
 const intervalUnitValues = [
   { value: 'minutes', title: 'Minutes' },

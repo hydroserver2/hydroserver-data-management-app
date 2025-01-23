@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-4">
+  <div class="mx-4 mb-4">
     <ETLTimeline />
     <ExtractorForm v-if="selectedETLStep === 'extractor'" />
     <TransformerForm v-else-if="selectedETLStep === 'transformer'" />
