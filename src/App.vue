@@ -23,13 +23,21 @@ import { useRoute } from 'vue-router'
 import { setupRouteGuards } from './router/router'
 import { onMounted } from 'vue'
 import { api } from './services/api'
+import { useAuthStore } from '@/store/auth'
+import { useUserStore } from '@/store/user'
 
 const route = useRoute()
 setupRouteGuards()
 
 onMounted(async () => {
   // TODO: Can this be done automatically with cookies?
-  await api.fetchCsrfToken()
+  const { setAuth } = useAuthStore()
+  const authMethods = await api.fetchAuthMethods()
+  setAuth(authMethods)
+
+  const { setUser } = useUserStore()
+  const user = await api.fetchUser()
+  setUser(user)
 })
 </script>
 

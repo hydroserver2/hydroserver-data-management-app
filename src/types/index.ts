@@ -345,6 +345,32 @@ export class Organization {
   constructor() {}
 }
 
+export class Provider {
+  id: string
+  name: string
+  iconLink: string
+  signupEnabled: boolean
+  connectEnabled: boolean
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.iconLink = ''
+    this.signupEnabled = true
+    this.connectEnabled = true
+  }
+}
+
+export class Auth {
+  hydroserverSignupEnabled: boolean
+  providers: Provider[]
+
+  constructor() {
+    this.hydroserverSignupEnabled = true
+    this.providers = []
+  }
+}
+
 export class User {
   id: string
   email: string
@@ -356,10 +382,9 @@ export class User {
   address: string
   organization?: Organization | null
   type: string
-  isActive: boolean
-  isOwnershipAllowed: boolean
-  isProfileComplete: boolean
   link: string
+  accountType: 'admin' | 'standard' | 'limited'
+  accountStatus: 'active' | 'disabled' | 'unverified' | 'incomplete'
   hydroShareConnected: boolean
 
   constructor() {
@@ -372,10 +397,9 @@ export class User {
     this.phone = ''
     this.address = ''
     this.type = ''
-    this.isActive = true
-    this.isOwnershipAllowed = true
-    this.isProfileComplete = false // The profile won't be complete on the signup page
     this.link = ''
+    this.accountType = 'standard'
+    this.accountStatus = 'active'
     this.hydroShareConnected = false
   }
 }

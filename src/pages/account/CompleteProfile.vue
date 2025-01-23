@@ -4,6 +4,7 @@
       v-if="loaded"
       :has-cancel-button="false"
       :is-edit="true"
+      :is-complete-signup="true"
       @close="navigateToSites()"
     >
       <template v-slot:header>

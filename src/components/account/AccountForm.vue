@@ -185,6 +185,7 @@ import { storeToRefs } from 'pinia'
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
   isEdit: Boolean,
+  isCompleteSignup: { type: Boolean, required: false, default: false },
 })
 
 const { setUser } = useUserStore()
@@ -232,6 +233,15 @@ async function createUser() {
   }
 }
 
+async function completeSignup() {
+  try {
+    const data = api.providerSignup(userForm)
+    Snackbar.success('Account created.')
+  } catch (error) {
+    console.error('Error creating user', error)
+  }
+}
+
 const updateUser = async () => {
   try {
     userForm = await api.updateUser(userForm, user.value)
@@ -246,7 +256,8 @@ const updateUser = async () => {
 const onSubmit = async () => {
   await myForm.value?.validate()
   if (!valid.value) return
-  if (props.isEdit) updateUser()
+  if (props.isCompleteSignup) completeSignup()
+  else if (props.isEdit) updateUser()
   else createUser()
 }
 

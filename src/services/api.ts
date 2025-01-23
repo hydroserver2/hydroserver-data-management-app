@@ -61,12 +61,7 @@ export const OAUTH_ENDPOINT = (
 }
 
 export const api = {
-  fetchCsrfToken: async () => apiMethods.fetch(`${BASE_URL}/csrf/`),
-
-  fetchAuthenticationStatus: async () =>
-    apiMethods.fetch(`${AUTH_BASE}/session`),
-  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/get
-
+  fetchAuthMethods: async () => apiMethods.fetch(`${IAM_BASE}/authentication/methods`),
   logout: async () => apiMethods.delete(`${AUTH_BASE}/session`),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Current-Session/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1session/delete
 
@@ -76,6 +71,9 @@ export const api = {
 
   signup: async (user: User) => apiMethods.post(`${AUTH_BASE}/signup`, user),
   // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1signup/post
+
+  providerSignup: async (user: User) => apiMethods.post(`${AUTH_BASE}/provider/signup`, user),
+  // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Providers/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1provider~1signup/post
 
   fetchEmailVerificationStatus: async () =>
     apiMethods.fetch(`${AUTH_BASE}/email/verify`),
