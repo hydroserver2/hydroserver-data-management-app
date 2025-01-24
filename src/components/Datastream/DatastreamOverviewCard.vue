@@ -18,6 +18,15 @@
       <strong class="mr-2">Sensor:</strong>
       {{ sensor?.name }}
     </v-card-text>
+    <v-card-text class="py-1">
+      <strong class="mr-2">Aggregation statistic:</strong>
+      {{ datastream?.aggregationStatistic }}
+    </v-card-text>
+    <v-card-text class="py-1">
+      <strong class="mr-2">Aggregation statistic interval:</strong>
+      {{ datastream?.timeAggregationInterval }}
+      {{ datastream?.timeAggregationIntervalUnits }}
+    </v-card-text>
   </v-card>
 </template>
 
