@@ -36,8 +36,8 @@ onMounted(async () => {
   setAuth(authMethods)
 
   const { setUser } = useUserStore()
-  const user = await api.fetchUser()
-  setUser(user)
+  const session = await api.fetchSession()
+  setUser(session.data.account)
 })
 </script>
 

@@ -39,7 +39,7 @@ const resetEmailSent = ref(false)
 
 const submitForm = async () => {
   try {
-    resetEmailSent.value = await api.sendPasswordRestEmail(email.value)
+    resetEmailSent.value = await api.requestPasswordReset(email.value)
   } catch (error) {
     console.error('Error requesting password reset', error)
     if ((error as Error).message === '404') {

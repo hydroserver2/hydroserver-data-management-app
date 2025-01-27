@@ -40,6 +40,15 @@ export const apiMethods = {
     options.body = body
     return await interceptedFetch(endpoint, options)
   },
+  async put(
+    endpoint: string,
+    body: any = undefined,
+    options: any = {}
+  ): Promise<any> {
+    options.method = 'PUT'
+    options.body = body
+    return await interceptedFetch(endpoint, options)
+  },
   async delete(endpoint: string, options: any = {}): Promise<any> {
     options.method = 'DELETE'
     return await interceptedFetch(endpoint, options)

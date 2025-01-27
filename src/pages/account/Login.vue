@@ -105,7 +105,7 @@ const formLogin = async () => {
   try {
     loading.value = true
     const session = await api.login(email.value, password.value)
-    await login(session.data.user.profile)
+    await login(session.data.account)
   } catch (error) {
     console.error('Error logging in.', error)
     if ((error as Error).message === '400') {
