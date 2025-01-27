@@ -384,7 +384,6 @@ export class User {
   type: string
   link: string
   accountType: 'admin' | 'standard' | 'limited'
-  accountStatus: 'active' | 'disabled' | 'unverified' | 'incomplete'
   hydroShareConnected: boolean
 
   constructor() {
@@ -399,7 +398,6 @@ export class User {
     this.type = ''
     this.link = ''
     this.accountType = 'standard'
-    this.accountStatus = 'active'
     this.hydroShareConnected = false
   }
 }
