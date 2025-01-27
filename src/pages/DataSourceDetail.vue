@@ -5,11 +5,24 @@
         <h5 class="text-h5">{{ dataSource.name }}</h5>
       </v-col>
 
-      <v-col cols="auto">
-        <v-btn color="secondary" class="mr-2" @click="openEdit = true">
+      <v-col cols="auto" align-self="center">
+        <v-btn
+          variant="outlined"
+          prepend-icon="mdi-pencil"
+          rounded="xl"
+          color="secondary"
+          class="mr-2"
+          @click="openEdit = true"
+        >
           Edit data source
         </v-btn>
-        <v-btn-delete color="red-darken-3" @click="openDelete = true">
+        <v-btn-delete
+          variant="outlined"
+          rounded="xl"
+          prepend-icon="mdi-trash-can-outline"
+          color="red-darken-3"
+          @click="openDelete = true"
+        >
           Delete data source
         </v-btn-delete>
       </v-col>
@@ -24,8 +37,8 @@
       class="elevation-3 my-6 rounded-lg"
     >
       <template v-slot:top>
-        <v-toolbar color="blue-grey" rounded="t-lg">
-          <h5 class="text-h5 ml-4">Data source information</h5>
+        <v-toolbar color="blue-grey-lighten-4" rounded="t-lg" density="compact">
+          <h6 class="text-h6 ml-4">Data source information</h6>
         </v-toolbar>
       </template>
       <template v-slot:item.icon="{ item }">
@@ -33,6 +46,14 @@
       </template>
       <template v-slot:item.label="{ item }">
         <strong>{{ item?.label }}</strong>
+      </template>
+      <template #item.value="{ item }">
+        <template v-if="item.label === 'Status'">
+          <DataSourceStatus :status="status" :paused="!!item.paused" />
+        </template>
+        <template v-else>
+          {{ item.value }}
+        </template>
       </template>
     </v-data-table>
 
@@ -45,8 +66,8 @@
       class="elevation-3 my-6 rounded-lg"
     >
       <template v-slot:top>
-        <v-toolbar color="indigo" rounded="t-lg">
-          <h5 class="text-h5 ml-4">Linked ETL system information</h5>
+        <v-toolbar color="indigo-lighten-4" rounded="t-lg" density="compact">
+          <h6 class="text-h6 ml-4">Linked ETL system information</h6>
         </v-toolbar>
       </template>
       <template v-slot:item.icon="{ item }">
@@ -61,7 +82,10 @@
 
     <v-row class="pb-4">
       <v-col cols="auto">
-        <v-btn-secondary prependIcon="mdi-plus" variant="elevated"
+        <v-btn-secondary
+          @click="openPayloadForm = true"
+          prependIcon="mdi-plus"
+          variant="elevated"
           >Add new payload</v-btn-secondary
         >
       </v-col>
@@ -93,20 +117,6 @@
 
     <!-- <h6 class="text-h6 my-4">Data Source Configuration</h6>
 
-    <v-table class="elevation-2">
-      <tbody>
-        <tr>
-          <td style="width: 220px">ID</td>
-          <td>{{ dataSource.id }}</td>
-        </tr>
-        <tr>
-          <td style="width: 220px">Name</td>
-          <td>{{ dataSource.name }}</td>
-        </tr>
-        <tr>
-          <td style="width: 220px">Linked ETL System</td>
-          <td>{{ dataLoader?.name }}</td>
-        </tr>
         <tr>
           <td style="width: 220px">Local File Path</td>
           <td>{{ dataSource.path }}</td>
@@ -123,67 +133,16 @@
           <td style="width: 220px">Timestamp Column</td>
           <td>{{ dataSource.timestampColumn }}</td>
         </tr>
-        <tr>
-          <td style="width: 220px">Timestamp Format</td>
-          <td>
-            {{ dataSource.timestampFormat }}
-          </td>
-        </tr>
-        <tr>
-          <td style="width: 220px">Timezone Offset</td>
-          <td>
-            {{
-              dataSource.timestampOffset ? dataSource.timestampOffset : 'UTC'
-            }}
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
-
-    <h6 class="text-h6 my-4">Data Source Status</h6>
-
-    <v-table class="elevation-2">
-      <tbody>
+   
         <tr>
           <td style="width: 220px">Status</td>
           <td>
             <DataSourceStatus :status="status" :paused="dataSource.paused" />
           </td>
         </tr>
-        <tr>
-          <td style="width: 220px">Schedule</td>
-          <td>{{ scheduleString }}</td>
-        </tr>
-        <tr>
-          <td style="width: 220px">Last Synced</td>
-          <td>{{ dataSource.lastSynced }}</td>
-        </tr>
-        <tr>
-          <td style="width: 220px">Last Sync Message</td>
-          <td>{{ dataSource.lastSyncMessage }}</td>
-        </tr>
-        <tr>
-          <td style="width: 220px">Next Sync</td>
-          <td>{{ dataSource.nextSync }}</td>
-        </tr>
-      </tbody>
+   
+  
     </v-table> -->
-
-    <!-- <h6 class="text-h6 my-4">Linked Datastreams</h6>
-
-    <v-data-table
-      class="elevation-2"
-      :headers="linkedDatastreamColumns"
-      :items="datastreams"
-    />
-
-    <v-btn-cancel
-      class="mt-4"
-      prependIcon="mdi-arrow-left"
-      :to="{ name: 'DataSources' }"
-    >
-      Back
-    </v-btn-cancel> -->
   </v-container>
   <v-container v-else>Loading...</v-container>
 
@@ -201,6 +160,10 @@
       :itemName="dataSource.name"
     />
   </v-dialog>
+
+  <v-dialog v-model="openPayloadForm" width="40rem">
+    <PayloadForm />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -210,6 +173,7 @@ import { DataLoader, DataSource, Datastream } from '@/types'
 import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
+import PayloadForm from '@/components/DataSource/PayloadForm.vue'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
@@ -218,6 +182,7 @@ import { Snackbar } from '@/utils/notifications'
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
+const openPayloadForm = ref(false)
 const datastreams = ref<Datastream[]>([])
 const dataLoader = ref<DataLoader>(new DataLoader())
 const dataSource = ref<DataSource>(new DataSource())
@@ -274,38 +239,40 @@ const dataSourceInformation = computed(() => {
 
   return [
     {
-      icon: 'mdi-account',
-      label: 'Name',
-      value: dataSource.value.name,
-    },
-    {
-      icon: 'mdi-account',
-      label: 'Schedule',
-      value: scheduleString,
-    },
-    {
-      icon: 'mdi-account',
-      label: 'Timestamp column',
-      value: dataSource.value.timestampColumn,
-    },
-    {
-      icon: 'mdi-account',
-      label: 'Last Synced',
-      value: dataSource.value.lastSynced,
-    },
-    {
-      icon: 'mdi-account',
-      label: 'Next sync',
-      value: dataSource.value.nextSync,
-    },
-    {
-      icon: 'mdi-account',
+      icon: 'mdi-card-account-details',
       label: 'ID',
       value: dataSource.value.id,
     },
     {
-      icon: 'mdi-account',
+      icon: 'mdi-calendar-clock',
+      label: 'Schedule',
+      value: scheduleString,
+    },
+    {
+      icon: 'mdi-clock-outline',
+      label: 'Timestamp column',
+      value: dataSource.value.timestampColumn,
+    },
+    {
+      icon: 'mdi-history',
+      label: 'Last synced',
+      value: dataSource.value.lastSynced,
+    },
+    {
+      icon: 'mdi-message-text-outline',
+      label: 'Last sync message',
+      value: dataSource.value.lastSyncMessage,
+    },
+    {
+      icon: 'mdi-calendar-sync',
+      label: 'Next sync',
+      value: dataSource.value.nextSync,
+    },
+    {
+      icon: 'mdi-information-outline',
       label: 'Status',
+      status: status,
+      paused: dataSource.value.paused,
     },
   ].filter(Boolean)
 })
@@ -315,35 +282,40 @@ const etlSystemInformation = computed(() => {
 
   return [
     {
-      icon: 'mdi-account',
+      icon: 'mdi-rename-box-outline',
       label: 'Name',
       value: dataLoader.value.name,
+    },
+    {
+      icon: 'mdi-broadcast',
+      label: 'Type',
+      value: dataLoader.value.type,
     },
   ].filter(Boolean)
 })
 
-const linkedDatastreamColumns = [
-  {
-    title: 'ID',
-    key: 'name',
-  },
-  {
-    title: 'Name',
-    key: 'description',
-  },
-  {
-    title: 'Status',
-    key: 'status',
-  },
-  {
-    title: 'Last Loaded Timestamp',
-    key: 'phenomenonEndTime',
-  },
-  {
-    title: 'Data Source Column',
-    key: 'dataSourceColumn',
-  },
-] as const
+// const linkedDatastreamColumns = [
+//   {
+//     title: 'ID',
+//     key: 'name',
+//   },
+//   {
+//     title: 'Name',
+//     key: 'description',
+//   },
+//   {
+//     title: 'Status',
+//     key: 'status',
+//   },
+//   {
+//     title: 'Last Loaded Timestamp',
+//     key: 'phenomenonEndTime',
+//   },
+//   {
+//     title: 'Data Source Column',
+//     key: 'dataSourceColumn',
+//   },
+// ] as const
 
 const fetchData = async () => {
   try {

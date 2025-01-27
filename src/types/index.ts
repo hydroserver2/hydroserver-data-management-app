@@ -401,3 +401,22 @@ export enum OAuthProvider {
   orcid = 'orcid',
   hydroshare = 'hydroshare',
 }
+
+export interface SourceTargetPair {
+  source_identifier: string | number
+  target_identifier: string | number
+}
+
+export class Payload {
+  id: string
+  dataSourceId: string
+  name: string
+  sourceTargetMap: SourceTargetPair[]
+
+  constructor(dataSourceId?: string) {
+    this.id = ''
+    this.dataSourceId = dataSourceId || ''
+    this.name = ''
+    this.sourceTargetMap = []
+  }
+}

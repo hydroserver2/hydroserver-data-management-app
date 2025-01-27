@@ -13,6 +13,7 @@ import {
   PostHydroShareArchive,
   HydroShareArchive,
   User,
+  Payload,
 } from '@/types'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
@@ -281,4 +282,16 @@ export const api = {
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
+
+  createDataSourcePayload: async (payload: Payload) =>
+    apiMethods.post(
+      `${DATA_SOURCES_BASE}/${payload.dataSourceId}/payload`,
+      payload
+    ),
+  updateDataSourcePayload: async (newPayload: Payload, oldPayload?: Payload) =>
+    apiMethods.patch(
+      `${DATA_SOURCES_BASE}/${newPayload.dataSourceId}/${newPayload.id}`,
+      newPayload,
+      oldPayload
+    ),
 }
