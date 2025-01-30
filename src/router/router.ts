@@ -5,7 +5,6 @@ import {
   createWebHistory,
 } from 'vue-router'
 import { routes } from '@/router/routes'
-import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 import { useAuthStore } from '@/store/authentication'
