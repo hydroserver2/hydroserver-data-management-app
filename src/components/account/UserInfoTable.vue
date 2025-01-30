@@ -26,21 +26,16 @@ import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 import { api } from '@/services/api'
-import { useRoute, LocationQueryValue } from 'vue-router'
 
 const { user } = storeToRefs(useUserStore())
 const loaded = ref(false)
-const route = useRoute()
 const hydroShareOauthEnabled =
   import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
 
 const tryUserRefresh = async () => {
-  const refresh = (route.query.refresh as LocationQueryValue) || false
-  if (refresh) {
-    let userResponse = await api.fetchUser()
-    if (userResponse !== undefined) {
-      user.value = userResponse
-    }
+  let userResponse = await api.fetchUser()
+  if (userResponse !== undefined) {
+    user.value = userResponse
   }
 }
 
