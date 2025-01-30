@@ -49,6 +49,35 @@ export const useAuthStore = defineStore('authentication', () => {
     }
   }
 
+  /**
+   * Fetches the session variables if there are any and any allowed OAuth methods
+   * for this instance of HydroServer.
+   */
+  async function initializeSession() {
+    const [authMethodsResponse, sessionResponse] = await Promise.all([
+      api.fetchAuthMethods(),
+      api.fetchSession(),
+    ])
+
+    // Process OAuth methods
+    oAuthProviders.value = authMethodsResponse.providers
+    signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
+
+    // Process session
+    isAuthenticated.value = sessionResponse?.meta?.is_authenticated
+
+    const flows = sessionResponse?.data?.flows || []
+    if (flows.length <= 0) return
+    const needsProfileCompletion = flows.some(
+      (f: any) => f.id === 'provider_signup'
+    )
+
+    if (sessionResponse?.status === 401 && needsProfileCompletion) {
+      isAccountPending.value = true
+      await router.push({ name: 'CompleteProfile' })
+    }
+  }
+
   return {
     oAuthProviders,
     signupEnabled,
@@ -56,5 +85,6 @@ export const useAuthStore = defineStore('authentication', () => {
     isAccountPending,
     login,
     logout,
+    initializeSession,
   }
 })
