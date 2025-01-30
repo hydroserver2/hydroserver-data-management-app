@@ -20,25 +20,8 @@ import Navbar from '@/components/base/Navbar.vue'
 import Footer from '@/components/base/Footer.vue'
 import Notifications from '@/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
-import { setupRouteGuards } from './router/router'
-import { onMounted } from 'vue'
-import { api } from './services/api'
-import { useAuthStore } from '@/store/auth'
-import { useUserStore } from '@/store/user'
 
 const route = useRoute()
-setupRouteGuards()
-
-onMounted(async () => {
-  // TODO: Can this be done automatically with cookies?
-  const { setAuth } = useAuthStore()
-  const authMethods = await api.fetchAuthMethods()
-  setAuth(authMethods)
-
-  const { setUser } = useUserStore()
-  const session = await api.fetchSession()
-  setUser(session.data.account)
-})
 </script>
 
 <style scoped lang="scss">

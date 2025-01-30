@@ -29,7 +29,6 @@ import { api } from '@/services/api'
 import { useRoute, LocationQueryValue } from 'vue-router'
 
 const { user } = storeToRefs(useUserStore())
-const { setUser } = useUserStore()
 const loaded = ref(false)
 const route = useRoute()
 const hydroShareOauthEnabled =
@@ -38,9 +37,9 @@ const hydroShareOauthEnabled =
 const tryUserRefresh = async () => {
   const refresh = (route.query.refresh as LocationQueryValue) || false
   if (refresh) {
-    let user = await api.fetchUser()
-    if (user !== undefined) {
-      setUser(user)
+    let userResponse = await api.fetchUser()
+    if (userResponse !== undefined) {
+      user.value = userResponse
     }
   }
 }

@@ -1,6 +1,3 @@
-import { useUserStore } from '@/store/user'
-import router from '@/router/router'
-
 export async function responseInterceptor(
   response: Response,
   options: any
@@ -22,28 +19,9 @@ export async function responseInterceptor(
     }
   }
 
-  if (response.status === 401) {
-    // return if the user deletes the session so we don't logout multiple times.
-    if (options.method === 'DELETE' && response.url?.endsWith('session')) return
-
-    const flows = errorBody?.data.flows || []
-    console.log('errorBody', errorBody)
-    console.log('flows', flows)
-
-    const hasVerifyEmail = flows.some((f: any) => f?.id === 'verify_email')
-
-    if (hasVerifyEmail) {
-      // User must confirm email
-      console.info('User created. Redirecting to verify email page...')
-      await router.push({ name: 'VerifyEmail' })
-      return errorBody
-    }
-
-    // Session expired
-    console.log('Session expired')
-    const { logout } = useUserStore()
-    logout()
-  }
+  // Django AllAuth doesn't consider 401 responses errors.
+  // Pass the response to the calling component to handle the AllAuth 'flows'.
+  if (response.status === 401) return errorBody
 
   console.error('API Response Not OK:', errorBody)
   throw new Error(`${response.status}`)

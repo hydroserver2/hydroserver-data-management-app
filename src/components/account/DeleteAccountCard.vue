@@ -50,9 +50,9 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { computed, onMounted, ref } from 'vue'
 import { Thing } from '@/types'
-import { useUserStore } from '@/store/user'
+import { useAuthStore } from '@/store/authentication'
 
-const { logout } = useUserStore()
+const { logout } = useAuthStore()
 
 const things = ref<Thing[]>([])
 const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))

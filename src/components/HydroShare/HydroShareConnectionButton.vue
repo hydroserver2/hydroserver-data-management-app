@@ -1,9 +1,9 @@
 <template>
   <v-btn
-    v-if="!hydroShareConnected"
+    v-if="!isConnected"
     color="deep-orange-lighten-1"
     prepend-icon="mdi-link"
-    @click="OAuthLogin(OAuthProvider.hydroshare)"
+    @click="connectHydroShare"
   >
     Connect to HydroShare
   </v-btn>
@@ -13,7 +13,7 @@
     color="deep-orange"
     variant="outlined"
     prepend-icon="mdi-close"
-    @click="disconnectFromHydroShare"
+    @click="disconnectHydroShare"
   >
     Disconnect from HydroShare
   </v-btn>
@@ -22,29 +22,30 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
-import { OAuthProvider } from '@/types'
-import { OAUTH_ENDPOINT } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
-import { Snackbar } from '@/utils/notifications'
 
 const { user } = storeToRefs(useUserStore())
 
-const OAuthLogin = async (provider: OAuthProvider) => {
-  let token = await api.connectToHydroShare()
-  window.location.href = OAUTH_ENDPOINT(provider, token.uid, token.token)
-}
-
-async function disconnectFromHydroShare() {
-  let response = await api.disconnectFromHydroShare()
-  if (response === null) {
-    user.value.hydroShareConnected = false
-    Snackbar.info('Your HydroShare account has been disconnected.')
-  }
-}
-
-const hydroShareConnected = computed(() => {
+const isConnected = computed(() => {
   if (!user.value) return false
   return user.value.hydroShareConnected
 })
+
+const connectHydroShare = async () => {
+  // TODO: Verify this works with AllAuth flow
+  api.providerRedirect(
+    'hydroshare',
+    `${import.meta.env.VITE_APP_PROXY_BASE_URL}/Sites`,
+    'connect'
+  )
+}
+
+async function disconnectHydroShare() {
+  // TODO: Add disconnect functionality
+  // let response = await api.disconnectFromHydroShare()
+  // if (response === null) {
+  // Snackbar.info('Your HydroShare account has been disconnected.')
+  // }
+}
 </script>

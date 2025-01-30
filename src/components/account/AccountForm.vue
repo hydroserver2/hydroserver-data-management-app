@@ -36,7 +36,7 @@
             />
           </v-col>
 
-          <v-col cols="12" v-if="!userForm.isProfileComplete">
+          <v-col cols="12" v-if="(isAccountPending && isEdit) || !isEdit">
             <v-text-field
               v-model="userForm.email"
               label="Email *"
@@ -177,10 +177,11 @@ import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
-import router from '@/router/router'
 import { Snackbar } from '@/utils/notifications'
 import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
+import router from '@/router/router'
+import { useAuthStore } from '@/store/authentication'
 
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
@@ -188,7 +189,8 @@ const props = defineProps({
   isCompleteSignup: { type: Boolean, required: false, default: false },
 })
 
-const { setUser } = useUserStore()
+const { login } = useAuthStore()
+const { isAccountPending } = storeToRefs(useAuthStore())
 const { user } = storeToRefs(useUserStore())
 
 let userForm = reactive<User>(
@@ -224,19 +226,29 @@ const emit = defineEmits(['close'])
 async function createUser() {
   try {
     const data = await api.signup(userForm)
-    Snackbar.success('Account created.')
+    const flows = data?.data?.flows || []
+    const hasVerifyEmail = flows.some((f: any) => f?.id === 'verify_email')
+
+    if (hasVerifyEmail) {
+      user.value = userForm
+      await router.push({ name: 'VerifyEmail' })
+    } else {
+      Snackbar.success('Account created.')
+    }
   } catch (error) {
     console.error('Error creating user', error)
-    // if ((error as Error).message === '409') {
-    //   Snackbar.warn('A user with this email already exists.')
-    // }
+    if ((error as Error).message === '409') {
+      Snackbar.warn('A user with this email already exists.')
+    }
   }
 }
 
 async function completeSignup() {
   try {
-    const data = api.providerSignup(userForm)
-    Snackbar.success('Account created.')
+    await api.providerSignup(userForm)
+    const response = await api.fetchUser()
+    isAccountPending.value = false
+    await login()
   } catch (error) {
     console.error('Error creating user', error)
   }
@@ -244,8 +256,8 @@ async function completeSignup() {
 
 const updateUser = async () => {
   try {
-    userForm = await api.updateUser(userForm, user.value)
-    if (userForm !== undefined) setUser(userForm)
+    userForm = await api.updateUser(userForm, user.value!)
+    if (userForm !== undefined) user.value = userForm
   } catch (error) {
     console.error('Error updating user', error)
   }

@@ -345,32 +345,6 @@ export class Organization {
   constructor() {}
 }
 
-export class Provider {
-  id: string
-  name: string
-  iconLink: string
-  signupEnabled: boolean
-  connectEnabled: boolean
-
-  constructor() {
-    this.id = ''
-    this.name = ''
-    this.iconLink = ''
-    this.signupEnabled = true
-    this.connectEnabled = true
-  }
-}
-
-export class Auth {
-  hydroserverSignupEnabled: boolean
-  providers: Provider[]
-
-  constructor() {
-    this.hydroserverSignupEnabled = true
-    this.providers = []
-  }
-}
-
 export class User {
   id: string
   email: string
@@ -416,8 +390,24 @@ export interface Photo {
   link: string
 }
 
-export enum OAuthProvider {
-  google = 'google',
-  orcid = 'orcid',
-  hydroshare = 'hydroshare',
+export class OAuthProvider {
+  id: string
+  name: string
+  iconLink: string
+  signupEnabled: boolean
+  connectEnabled: boolean
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.iconLink = ''
+    this.signupEnabled = true
+    this.connectEnabled = true
+  }
 }
+
+// export enum OAuthProvider {
+//   google = 'google',
+//   orcid = 'orcid',
+//   hydroshare = 'hydroshare',
+// }

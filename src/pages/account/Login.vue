@@ -1,5 +1,5 @@
 <template>
-  <v-container class="mt-10" v-if="loaded">
+  <v-container class="mt-10">
     <v-row justify="center" align="center" class="mt-10">
       <v-col cols="12" sm="8" md="6">
         <v-card class="login-card">
@@ -69,43 +69,45 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
 import { api } from '@/services/api'
-import { User } from '@/types'
-import router from '@/router/router'
-import { useUserStore } from '@/store/user'
-import { useRoute } from 'vue-router'
 import { Snackbar } from '@/utils/notifications'
+import { useAuthStore } from '@/store/authentication'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/store/user'
+import router from '@/router/router'
 
 const email = ref('')
 const password = ref('')
 const form = ref(null)
 const valid = ref(false)
-const loaded = ref(false)
 const loading = ref(false)
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
-const { setUser } = useUserStore()
-
-const login = async (user: User) => {
-  try {
-    setUser(user)
-    Snackbar.success('You have logged in!')
-    await router.push({ name: 'Sites' })
-  } catch (e) {
-    console.log('Failed to fetch user info')
-  }
-}
+const { login } = useAuthStore()
+const { isAuthenticated } = storeToRefs(useAuthStore())
+const { user } = storeToRefs(useUserStore())
 
 const formLogin = async () => {
   if (!valid) return
   try {
     loading.value = true
-    const session = await api.login(email.value, password.value)
-    await login(session.data.account)
+    const response = await api.login(email.value, password.value)
+    const flows = response?.data?.flows || []
+    const hasVerifyEmail = flows.some((f: any) => f?.id === 'verify_email')
+    if (hasVerifyEmail) {
+      console.info('Email not verified. Redirecting to verify email page.')
+      Snackbar.info('Email not verified. Redirecting to verify email page.')
+      user.value.email = email.value
+      await router.push({ name: 'VerifyEmail' })
+      return
+    }
+
+    isAuthenticated.value = response.meta.is_authenticated
+    await login()
   } catch (error) {
     console.error('Error logging in.', error)
     if ((error as Error).message === '400') {
@@ -115,15 +117,4 @@ const formLogin = async () => {
     loading.value = false
   }
 }
-
-// const tryOAuthLogin = async () => {
-//   const accessToken = (route.query.t as string) || ''
-//   const refreshToken = (route.query.rt as string) || ''
-//   if (accessToken && refreshToken) await login(accessToken, refreshToken)
-// }
-
-onMounted(async () => {
-  // await tryOAuthLogin()
-  loaded.value = true
-})
 </script>

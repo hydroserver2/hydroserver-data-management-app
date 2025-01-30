@@ -4,7 +4,6 @@
       <v-toolbar flat color="secondary">
         <v-card-title color="secondary"> Verify Your Email </v-card-title>
       </v-toolbar>
-      <v-divider />
 
       <v-card-text v-if="verifying">
         Verifying your email address...
@@ -18,10 +17,18 @@
       </v-card-text>
       <v-card-text v-else>
         Before you continue, we need to verify the email address you provided
-        for your account. We've sent an email to {{ user.email }}. Click on the
-        link in that message to verify your email address.
-        <p>NOTE: The verification email may take several minutes to arrive.</p>
-
+        for your account. We've sent an email with a verification code to
+        {{ user.email }}. Please enter the code below.
+        <v-text-field
+          v-model="verificationCode"
+          label="Verification Code"
+          type="text"
+          :rules="rules.required"
+          class="mt-4"
+        />
+        <v-btn :disabled="verifying || resending" @click="verifyCode">
+          Verify Code
+        </v-btn>
         <v-divider class="my-4" />
 
         <span class="mr-2">Didn't receive a verification email?</span>
@@ -39,32 +46,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
+import { rules } from '@/utils/rules'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/store/authentication'
 
-const route = useRoute()
 const router = useRouter()
 
-const { user, setUser } = useUserStore()
+const { user } = storeToRefs(useUserStore())
+const { isAuthenticated } = storeToRefs(useAuthStore())
 
 const verifying = ref(false)
 const verified = ref(false)
 const verificationError = ref(false)
-
-// Resend email status
+const verificationCode = ref('')
 const resending = ref(false)
 
-onMounted(async () => {
-  const key = route.params.key as string | undefined
-  if (!key) return
+const verifyCode = async () => {
+  if (!verificationCode.value) {
+    Snackbar.error('Please enter the verification code.')
+    return
+  }
 
-  verifying.value = true
   try {
-    const response = await api.verifyEmail(key)
-    setUser(response.data.user.profile)
+    verifying.value = true
+    const response = await api.verifyEmailWithCode(verificationCode.value)
+    console.log('verify email response', response)
+    user.value = response.data.user.account
+    isAuthenticated.value = response.meta.is_authenticated
     verified.value = true
     Snackbar.success('Your email has been verified.')
     router.push({ name: 'Sites' })
@@ -74,13 +87,13 @@ onMounted(async () => {
   } finally {
     verifying.value = false
   }
-})
+}
 
 async function resend() {
   try {
     resending.value = true
-    await api.sendVerificationEmail()
-    Snackbar.success('Verification email sent successfully.')
+    const response = await api.sendVerificationEmail(user.value.email)
+    Snackbar.success('Verification email resent.')
   } catch (err) {
     console.error('Error sending verification email:', err)
     Snackbar.error('Failed to resend verification email.')

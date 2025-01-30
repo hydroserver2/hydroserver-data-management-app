@@ -41,7 +41,7 @@
 
       <v-spacer />
 
-      <template v-if="isLoggedIn">
+      <template v-if="isAuthenticated">
         <v-btn elevation="2" rounded>
           <v-icon>mdi-account-circle</v-icon>
           <v-icon>mdi-menu-down</v-icon>
@@ -69,7 +69,7 @@
       <template v-else>
         <v-btn prepend-icon="mdi-login" to="/Login">Log in</v-btn>
         <v-btn
-          v-if="disableAccountCreation !== 'true'"
+          v-if="signupEnabled"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
           >Sign up</v-btn
@@ -109,7 +109,7 @@
     <v-divider />
 
     <v-list density="compact" nav>
-      <template v-if="isLoggedIn">
+      <template v-if="isAuthenticated">
         <v-list-item to="/profile" prepend-icon="mdi-account-circle"
           >Account</v-list-item
         >
@@ -121,7 +121,7 @@
       <template v-else>
         <v-list-item prepend-icon="mdi-login" to="/Login">Login</v-list-item>
         <v-list-item
-          v-if="disableAccountCreation !== 'true'"
+          v-if="signupEnabled"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
           >Sign up</v-list-item
@@ -138,16 +138,14 @@ import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { navbarLogo } from '@/config/navbarConfig'
-import { useUserStore } from '@/store/user'
+import { useAuthStore } from '@/store/authentication'
 
+const { logout } = useAuthStore()
+const { signupEnabled, isAuthenticated } = storeToRefs(useAuthStore())
 const { resetState } = useDataVisStore()
-const { logout } = useUserStore()
-const { isLoggedIn } = storeToRefs(useUserStore())
 const { mdAndDown } = useDisplay()
 
 const drawer = ref(false)
-const disableAccountCreation =
-  import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 const paths: {
   attrs?: { to?: string; href?: string }

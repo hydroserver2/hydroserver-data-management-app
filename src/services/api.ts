@@ -49,16 +49,48 @@ export const getObservationsEndpoint = (
   return url
 }
 
-export const OAUTH_ENDPOINT = (
+/**
+ * Initiates a synchronous form submission to redirect the user for OAuth login in a Django AllAuth
+ * environment. This allows the server to return a 302 redirect that the browser will follow,
+ * preserving session cookies and enabling AllAuth to handle the full OAuth handshake.
+ *
+ * @param {string} provider - The ID of the OAuth provider (e.g. "google", "hydroshare").
+ * @param {string} callbackUrl - The URL to which the user is redirected after the OAuth flow completes.
+ * @param {string} process - Enum: "login" or "connect" The process to be executed when the user successfully authenticates.
+ *                           When set to login, the user will be logged into the account to which the provider account is connected,
+ *                           or if no such account exists, a signup will occur. If set to connect, the provider account will
+ *                           be connected to the list of provider accounts for the currently authenticated user.
+ */
+const providerRedirect = (
   provider: string,
-  uid?: string,
-  token?: string
+  callbackUrl: string,
+  process: string
 ) => {
-  let url = `${AUTH_BASE}/${provider}/login`
-  if (uid && token) {
-    url += `?uid=${uid}&token=${token}`
+  const data: Record<string, string> = {
+    provider: provider,
+    callback_url: callbackUrl,
+    process: process,
   }
-  return url
+  const csrfToken = getCSRFToken()
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = `${PROVIDER_BASE}/redirect`
+  if (csrfToken) {
+    const csrfInput = document.createElement('input')
+    csrfInput.type = 'hidden'
+    csrfInput.name = 'csrfmiddlewaretoken'
+    csrfInput.value = csrfToken
+    form.appendChild(csrfInput)
+  }
+  for (const key in data) {
+    const input = document.createElement('input')
+    input.type = 'hidden'
+    input.name = key
+    input.value = data[key]
+    form.appendChild(input)
+  }
+  document.body.appendChild(form)
+  form.submit()
 }
 
 export const api = {
@@ -69,16 +101,16 @@ export const api = {
   logout: async () => apiMethods.delete(`${SESSION_BASE}`),
   fetchUser: async () => apiMethods.fetch(`${ACCOUNT_BASE}`),
   signup: async (user: User) => apiMethods.post(`${ACCOUNT_BASE}`, user),
-  updateUser: async (user: User, oldUser: User) => apiMethods.patch(`${ACCOUNT_BASE}`, user, oldUser),
+  updateUser: async (user: User, oldUser: User) =>
+    apiMethods.patch(`${ACCOUNT_BASE}`, user, oldUser),
   deleteUser: async () => apiMethods.delete(`${ACCOUNT_BASE}`),
   sendVerificationEmail: async (email: string) =>
     apiMethods.put(`${ACCOUNT_BASE}/email/verify`, {
-      email: email
+      email: email,
     }),
-  verifyEmail: async (key: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/email/verify`, {
-      key: key,
-    }),
+  verifyEmailWithCode: async (key: string) =>
+    apiMethods.post(`${ACCOUNT_BASE}/email/verify`, { key }),
+
   requestPasswordReset: async (email: string) =>
     apiMethods.post(`${ACCOUNT_BASE}/password/request`, {
       email: email,
@@ -88,34 +120,10 @@ export const api = {
       key: key,
       password: password,
     }),
-  providerRedirect: (provider: string, callbackUrl: string, process: string) => {
-    const data: Record<string, string> = {
-      provider: provider,
-      callback_url: callbackUrl,
-      process: process
-    };
-    const csrfToken = getCSRFToken()
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `${PROVIDER_BASE}/redirect`;
-    if (csrfToken) {
-      const csrfInput = document.createElement('input');
-      csrfInput.type = 'hidden';
-      csrfInput.name = 'csrfmiddlewaretoken';
-      csrfInput.value = csrfToken;
-      form.appendChild(csrfInput);
-    }
-    for (const key in data) {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = data[key];
-      form.appendChild(input);
-    }
-    document.body.appendChild(form);
-    form.submit();
-  },
-  providerSignup: async (user: User) => apiMethods.post(`${PROVIDER_BASE}/signup`, user),
+
+  providerRedirect,
+  providerSignup: async (user: User) =>
+    apiMethods.post(`${PROVIDER_BASE}/signup`, user),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),

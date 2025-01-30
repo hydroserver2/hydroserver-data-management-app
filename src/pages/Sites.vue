@@ -205,7 +205,6 @@ const onRowClick = (event: Event, item: any) => {
 const loadThings = async () => {
   try {
     ownedThings.value = await api.fetchOwnedThings()
-    console.log('ownedThings', ownedThings.value)
   } catch (error) {
     Snackbar.error('Unable to fetch site data from the API.')
   } finally {

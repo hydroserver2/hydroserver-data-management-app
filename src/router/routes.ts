@@ -37,7 +37,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'Sites',
     component: () => import('@/pages/Sites.vue'),
     meta: {
-      hasAuthGuard: true,
+      requiresAuth: true,
       title: 'Your Sites',
       metaTags: [
         {
@@ -65,7 +65,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/sites/:id/datastreams/form/:datastreamId?',
     name: 'DatastreamForm',
     component: () => import('@/pages/DatastreamForm.vue'),
-    meta: { hasThingOwnershipGuard: true },
+    meta: { requiresThingOwnership: true },
   },
   {
     path: '/about',
@@ -85,7 +85,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/data-sources',
     name: 'DataSources',
     component: () => import('@/pages/DataSourceDashboard.vue'),
-    meta: { hasAuthGuard: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/data-sources/:id',
@@ -96,7 +96,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/data-loaders',
     name: 'DataLoaders',
     component: () => import('@/pages/DataLoaderDashboard.vue'),
-    meta: { hasAuthGuard: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/hydroloader/download',
@@ -116,7 +116,7 @@ export const routes: RouteRecordRaw[] = [
       }
     },
     meta: {
-      hasLoggedOutGuard: true,
+      requiresLoggedOut: true,
       title: 'Sign Up',
       metaTags: [
         {
@@ -132,7 +132,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/account/Login.vue'),
     meta: {
       title: 'Login',
-      hasLoggedOutGuard: true,
+      requiresLoggedOut: true,
     },
   },
   {
@@ -149,7 +149,7 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/password_reset/:uid/:token',
+    path: '/reset-password/:passwordResetKey',
     name: 'PasswordReset',
     component: () =>
       import('@/pages/account/PasswordRecovery/PasswordReset.vue'),
@@ -161,28 +161,28 @@ export const routes: RouteRecordRaw[] = [
     path: '/profile',
     name: 'Profile',
     component: () => import('@/pages/account/Profile.vue'),
-    meta: { hasAuthGuard: true, title: 'Profile' },
+    meta: { requiresAuth: true, title: 'Profile' },
   },
   {
     path: '/complete-profile',
     name: 'CompleteProfile',
     component: () => import('@/pages/account/CompleteProfile.vue'),
-    meta: { hasIncompleteProfileAuthGuard: true, title: 'Complete Profile' },
+    meta: { title: 'Complete Profile' },
   },
   {
     // AllAuth verification emails will link users to this page. This page will need to POST a key to the verifyEmail
     // endpoint to complete the verification process. Full docs here:
     // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/post
-    path: '/verify-email/:key?',
+    path: '/verify-email',
     name: 'VerifyEmail',
     component: () => import('@/pages/account/VerifyEmail.vue'),
-    meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
+    meta: { title: 'Verify Email' },
   },
   {
     path: '/metadata',
     name: 'Metadata',
     component: () => import('@/pages/Metadata.vue'),
-    meta: { hasAuthGuard: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/visualize-data/:thingId?',
