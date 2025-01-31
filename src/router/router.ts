@@ -32,23 +32,23 @@ function updateDocumentTitle(matched: RouteRecordNormalized[]): void {
 
 router.beforeEach(
   async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    const { isAuthenticated, isAccountPending } = storeToRefs(useAuthStore())
+    const { isAuthenticated, inProviderSignupFlow, inEmailVerificationFlow } =
+      storeToRefs(useAuthStore())
 
-    if (isAuthenticated.value) {
-      if (isAccountPending.value && to.name !== 'CompleteProfile') {
-        return { name: 'CompleteProfile' }
-      } else if (!isAccountPending.value && to.name === 'CompleteProfile') {
-        console.log('redirecting to sites')
-        return { name: 'Sites' }
-      }
+    if (inEmailVerificationFlow.value && to.name !== 'VerifyEmail')
+      return { name: 'VerifyEmail' }
+    if (!inEmailVerificationFlow.value && to.name === 'VerifyEmail')
+      return { name: 'Sites' }
 
-      // Prevent navigation to login and signup page if we're already logged in
-      if (to.meta.requiresLoggedOut) return { name: 'PageNotFound' }
-    } else {
-      if (to.meta.requiresAuth) {
-        return { name: 'Login', query: { next: to.fullPath } }
-      }
-    }
+    if (inProviderSignupFlow.value && to.name !== 'CompleteProfile')
+      return { name: 'CompleteProfile' }
+    if (!inProviderSignupFlow.value && to.name === 'CompleteProfile')
+      return { name: 'Sites' }
+
+    if (isAuthenticated.value && to.meta.requiresLoggedOut)
+      return { name: 'Sites' }
+    if (!isAuthenticated.value && to.meta.requiresAuth)
+      return { name: 'Login', query: { next: to.fullPath } }
 
     if (to.meta.requiresThingOwnership) {
       const thing = await api.fetchThing(to.params.id as string)

@@ -1,13 +1,44 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { OAuthProvider } from '@/types'
+import { defineStore, storeToRefs } from 'pinia'
+import { computed, ref, watch } from 'vue'
+import { OAuthProvider, User } from '@/types'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import router from '@/router/router'
+import Storage from '@/utils/storage'
+import { useUserStore } from './user'
+
+export interface AllAuthFlowItem {
+  id: string
+  providers?: string[]
+}
+
+export const emailStorage = new Storage<string>('unverifiedEmail')
 
 export const useAuthStore = defineStore('authentication', () => {
+  /**
+   * Persist the state of unverified email since it won't be saved in the db
+   * during the verify_email flow. Used on the VerifyEmail.vue page for
+   * re-emailing the verification code to the user upon request.
+   */
+  const unverifiedEmail = ref(emailStorage.get() || '')
+  watch(unverifiedEmail, (newEmail) => {
+    emailStorage.set(newEmail)
+  })
+
   const isAuthenticated = ref(false)
-  const isAccountPending = ref(false)
+
+  const flows = ref<AllAuthFlowItem[]>([])
+  const flowIds = computed(() => flows.value.map((flow) => flow.id))
+
+  const inEmailVerificationFlow = computed(() =>
+    flowIds.value.includes('verify_email')
+  )
+  const inPasswordResetFlow = computed(() =>
+    flowIds.value.includes('password_reset')
+  )
+  const inProviderSignupFlow = computed(() =>
+    flowIds.value.includes('provider_signup')
+  )
 
   /**
    * Determines if signing up on the website is available at all.
@@ -21,10 +52,10 @@ export const useAuthStore = defineStore('authentication', () => {
 
   /**
    * An array of OAuth providers that the user can use to authenticate.
-   * In some cases, such as HydroShare, this allows connecting to the provider
+   * In some cases, such as with HydroShare, this allows connecting to the provider
    * for data archival instead of direct authentication.
    *
-   * This array determines which buttons are available on the login and signup pages.
+   * This array determines which login with OAuth buttons are available on the login and signup pages.
    */
   const oAuthProviders = ref<OAuthProvider[]>([])
 
@@ -39,10 +70,8 @@ export const useAuthStore = defineStore('authentication', () => {
 
   async function logout() {
     try {
-      await api.logout()
-      isAuthenticated.value = false
-      localStorage.clear()
-      sessionStorage.clear()
+      const response = await api.logout()
+      setSession(response)
       await router.push({ name: 'Login' })
     } catch (error) {
       console.error('Error logging out.', error)
@@ -58,33 +87,30 @@ export const useAuthStore = defineStore('authentication', () => {
       api.fetchAuthMethods(),
       api.fetchSession(),
     ])
-
-    // Process OAuth methods
     oAuthProviders.value = authMethodsResponse.providers
     signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
+    setSession(sessionResponse)
+  }
 
-    // Process session
-    isAuthenticated.value = sessionResponse?.meta?.is_authenticated
+  function setSession(apiResponse: any) {
+    const { user } = storeToRefs(useUserStore())
 
-    const flows = sessionResponse?.data?.flows || []
-    if (flows.length <= 0) return
-    const needsProfileCompletion = flows.some(
-      (f: any) => f.id === 'provider_signup'
-    )
-
-    if (sessionResponse?.status === 401 && needsProfileCompletion) {
-      isAccountPending.value = true
-      await router.push({ name: 'CompleteProfile' })
-    }
+    isAuthenticated.value = apiResponse?.meta?.is_authenticated
+    flows.value = apiResponse?.data?.flows || []
+    user.value = apiResponse?.data?.account || new User()
   }
 
   return {
     oAuthProviders,
     signupEnabled,
     isAuthenticated,
-    isAccountPending,
+    inProviderSignupFlow,
+    inEmailVerificationFlow,
+    flows,
+    unverifiedEmail,
     login,
     logout,
     initializeSession,
+    setSession,
   }
 })

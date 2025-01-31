@@ -24,24 +24,20 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { api } from '@/services/api'
 
 const { user } = storeToRefs(useUserStore())
-const loaded = ref(false)
 const hydroShareOauthEnabled =
   import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
 
-const tryUserRefresh = async () => {
-  let userResponse = await api.fetchUser()
-  if (userResponse !== undefined) {
-    user.value = userResponse
-  }
-}
-
 onMounted(async () => {
-  await tryUserRefresh()
-  loaded.value = true
+  try {
+    user.value = await api.fetchUser()
+    console.log('user.value', user.value)
+  } catch (error) {
+    console.error('Error fetching user', error)
+  }
 })
 
 const userInformation = computed(() => {

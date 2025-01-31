@@ -36,7 +36,7 @@
             />
           </v-col>
 
-          <v-col cols="12" v-if="(isAccountPending && isEdit) || !isEdit">
+          <v-col cols="12" v-if="(inProviderSignupFlow && isEdit) || !isEdit">
             <v-text-field
               v-model="userForm.email"
               label="Email *"
@@ -189,8 +189,9 @@ const props = defineProps({
   isCompleteSignup: { type: Boolean, required: false, default: false },
 })
 
-const { login } = useAuthStore()
-const { isAccountPending } = storeToRefs(useAuthStore())
+const { login, setSession } = useAuthStore()
+const { inProviderSignupFlow, inEmailVerificationFlow, unverifiedEmail } =
+  storeToRefs(useAuthStore())
 const { user } = storeToRefs(useUserStore())
 
 let userForm = reactive<User>(
@@ -225,15 +226,15 @@ const emit = defineEmits(['close'])
 
 async function createUser() {
   try {
-    const data = await api.signup(userForm)
-    const flows = data?.data?.flows || []
-    const hasVerifyEmail = flows.some((f: any) => f?.id === 'verify_email')
+    const sessionResponse = await api.signup(userForm)
+    setSession(sessionResponse)
 
-    if (hasVerifyEmail) {
-      user.value = userForm
+    if (inEmailVerificationFlow.value) {
+      unverifiedEmail.value = userForm.email
       await router.push({ name: 'VerifyEmail' })
     } else {
       Snackbar.success('Account created.')
+      await router.push({ name: 'Sites' })
     }
   } catch (error) {
     console.error('Error creating user', error)
@@ -245,9 +246,8 @@ async function createUser() {
 
 async function completeSignup() {
   try {
-    await api.providerSignup(userForm)
-    const response = await api.fetchUser()
-    isAccountPending.value = false
+    const providerResponse = await api.providerSignup(userForm)
+    setSession(providerResponse)
     await login()
   } catch (error) {
     console.error('Error creating user', error)

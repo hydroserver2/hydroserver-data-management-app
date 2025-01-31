@@ -215,18 +215,11 @@ import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
 import { useAuthStore } from '@/store/authentication'
-import { api } from '@/services/api'
-import { onMounted } from 'vue'
 
 const { isAuthenticated } = storeToRefs(useAuthStore())
 const { user } = storeToRefs(useUserStore())
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
-
-onMounted(async () => {
-  const user = api.fetchUser()
-  console.log('user')
-})
 </script>
 
 <style scoped lang="scss">

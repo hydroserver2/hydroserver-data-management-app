@@ -137,6 +137,7 @@ const { tags } = storeToRefs(useTagStore())
 
 const isOwner = computed(() => thing.value?.ownsThing)
 const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
+// TODO: Get this from flows instead
 const hydroShareConnected = computed(() => user.value?.hydroShareConnected)
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 

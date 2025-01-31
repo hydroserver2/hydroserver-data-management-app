@@ -1,36 +1,61 @@
 <template>
-  <v-container class="d-flex align-center justify-center my-8">
-    <v-card width="50rem">
-      <v-toolbar flat color="secondary">
-        <v-card-title color="secondary"> Verify Your Email </v-card-title>
-      </v-toolbar>
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <v-card>
+          <v-toolbar flat color="secondary">
+            <v-card-title color="secondary"> Verify Your Email </v-card-title>
+          </v-toolbar>
 
-      <v-card-text v-if="verifying">
-        Verifying your email address...
-      </v-card-text>
-      <v-card-text v-else-if="verified">
-        Your email has been verified! You can now continue using HydroServer.
-      </v-card-text>
-      <v-card-text v-else-if="verificationError">
-        <p class="text-error">Your email could not be verified.</p>
-        <p>Please try resending or contact support.</p>
-      </v-card-text>
-      <v-card-text v-else>
-        Before you continue, we need to verify the email address you provided
-        for your account. We've sent an email with a verification code to
-        {{ user.email }}. Please enter the code below.
-        <v-text-field
-          v-model="verificationCode"
-          label="Verification Code"
-          type="text"
-          :rules="rules.required"
-          class="mt-4"
-        />
-        <v-btn :disabled="verifying || resending" @click="verifyCode">
-          Verify Code
-        </v-btn>
-        <v-divider class="my-4" />
+          <v-card-text v-if="verifying">
+            Verifying your email address...
+          </v-card-text>
+          <v-card-text v-else-if="verified">
+            Your email has been verified! You can now continue using
+            HydroServer.
+          </v-card-text>
+          <v-card-text v-else-if="verificationError">
+            <p class="text-error">Your email could not be verified.</p>
+            <p>Please try resending or contact support.</p>
+          </v-card-text>
+          <v-card-text v-else>
+            Before you continue, we need to verify the email address you
+            provided for your account. We've sent an email with a verification
+            code to
+            {{ unverifiedEmail }}. Please enter the code below.
+            <v-text-field
+              v-model="verificationCode"
+              label="Verification Code"
+              type="text"
+              :rules="rules.required"
+              class="mt-4"
+            />
 
+            <v-row class="mt-2">
+              <v-spacer />
+              <v-col cols="auto">
+                <v-btn
+                  variant="outlined"
+                  color="default"
+                  :disabled="verifying || resending"
+                  @click="logout"
+                >
+                  Cancel account creation
+                </v-btn>
+              </v-col>
+              <v-col cols="auto">
+                <v-btn :disabled="verifying || resending" @click="verifyCode">
+                  Verify Code
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row justify="center">
+      <v-col cols="12" md="8">
         <span class="mr-2">Didn't receive a verification email?</span>
         <v-btn
           :disabled="resending"
@@ -40,15 +65,14 @@
         >
           Resend Email
         </v-btn>
-      </v-card-text>
-    </v-card>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { rules } from '@/utils/rules'
@@ -57,8 +81,8 @@ import { useAuthStore } from '@/store/authentication'
 
 const router = useRouter()
 
-const { user } = storeToRefs(useUserStore())
-const { isAuthenticated } = storeToRefs(useAuthStore())
+const { unverifiedEmail } = storeToRefs(useAuthStore())
+const { setSession, logout } = useAuthStore()
 
 const verifying = ref(false)
 const verified = ref(false)
@@ -76,8 +100,7 @@ const verifyCode = async () => {
     verifying.value = true
     const response = await api.verifyEmailWithCode(verificationCode.value)
     console.log('verify email response', response)
-    user.value = response.data.user.account
-    isAuthenticated.value = response.meta.is_authenticated
+    setSession(response)
     verified.value = true
     Snackbar.success('Your email has been verified.')
     router.push({ name: 'Sites' })
@@ -92,7 +115,8 @@ const verifyCode = async () => {
 async function resend() {
   try {
     resending.value = true
-    const response = await api.sendVerificationEmail(user.value.email)
+    // TODO: Get this working
+    const response = await api.sendVerificationEmail(unverifiedEmail.value)
     Snackbar.success('Verification email resent.')
   } catch (err) {
     console.error('Error sending verification email:', err)

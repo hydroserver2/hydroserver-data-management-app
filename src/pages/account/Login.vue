@@ -76,7 +76,6 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { useAuthStore } from '@/store/authentication'
 import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
 import router from '@/router/router'
 
 const email = ref('')
@@ -87,27 +86,24 @@ const loading = ref(false)
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
-const { login } = useAuthStore()
-const { isAuthenticated } = storeToRefs(useAuthStore())
-const { user } = storeToRefs(useUserStore())
+const { login, setSession } = useAuthStore()
+const { unverifiedEmail, inEmailVerificationFlow } = storeToRefs(useAuthStore())
 
 const formLogin = async () => {
   if (!valid) return
   try {
     loading.value = true
     const response = await api.login(email.value, password.value)
-    const flows = response?.data?.flows || []
-    const hasVerifyEmail = flows.some((f: any) => f?.id === 'verify_email')
-    if (hasVerifyEmail) {
+    setSession(response)
+
+    if (inEmailVerificationFlow.value) {
       console.info('Email not verified. Redirecting to verify email page.')
       Snackbar.info('Email not verified. Redirecting to verify email page.')
-      user.value.email = email.value
+      unverifiedEmail.value = email.value
       await router.push({ name: 'VerifyEmail' })
-      return
+    } else {
+      await login()
     }
-
-    isAuthenticated.value = response.meta.is_authenticated
-    await login()
   } catch (error) {
     console.error('Error logging in.', error)
     if ((error as Error).message === '400') {
