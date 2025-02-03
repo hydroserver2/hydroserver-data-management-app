@@ -4,7 +4,7 @@
     <OrganizationTable />
 
     <v-row class="mb-8">
-      <v-col v-if="isHydroShareAvailable">
+      <v-col v-if="isHydroShareConnectionEnabled">
         <HydroShareConnectionButton />
       </v-col>
 
@@ -39,10 +39,9 @@ import UserInfoTable from '@/components/account/UserInfoTable.vue'
 import OrganizationTable from '@/components/account/OrganizationTable.vue'
 import DeleteAccountCard from '@/components/account/DeleteAccountCard.vue'
 import HydroShareConnectionButton from '@/components/HydroShare/HydroShareConnectionButton.vue'
-import { useAuthStore } from '@/store/authentication'
-import { storeToRefs } from 'pinia'
+import { useHydroShare } from '@/composables/useHydroShare'
 
-const { isHydroShareAvailable } = storeToRefs(useAuthStore())
+const { isHydroShareConnectionEnabled } = useHydroShare()
 const openDelete = ref(false)
 const openForm = ref(false)
 </script>

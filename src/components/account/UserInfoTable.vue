@@ -26,10 +26,11 @@ import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted } from 'vue'
 import { api } from '@/services/api'
+import { useHydroShare } from '@/composables/useHydroShare'
 
 const { user } = storeToRefs(useUserStore())
-const hydroShareOauthEnabled =
-  import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
+const { isConnected: isHydroShareConnected, isHydroShareConnectionEnabled } =
+  useHydroShare()
 
 onMounted(async () => {
   try {
@@ -59,12 +60,12 @@ const userInformation = computed(() => {
     { icon: 'mdi-phone', label: 'Phone', value: user.value.phone },
     { icon: 'mdi-card-account-details', label: 'Type', value: user.value.type },
     { icon: 'mdi-link', label: 'Link', value: user.value.link },
-    hydroShareOauthEnabled === 'true'
+    isHydroShareConnectionEnabled.value
       ? {
           icon: 'mdi-database',
           label: 'HydroShare account',
           value:
-            user.value.hydroShareConnected === true
+            isHydroShareConnected.value === true
               ? 'Connected'
               : 'Not Connected',
         }

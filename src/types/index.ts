@@ -405,9 +405,3 @@ export class OAuthProvider {
     this.connectEnabled = true
   }
 }
-
-// export enum OAuthProvider {
-//   google = 'google',
-//   orcid = 'orcid',
-//   hydroshare = 'hydroshare',
-// }

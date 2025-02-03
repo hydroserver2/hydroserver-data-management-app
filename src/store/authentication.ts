@@ -59,10 +59,6 @@ export const useAuthStore = defineStore('authentication', () => {
    */
   const oAuthProviders = ref<OAuthProvider[]>([])
 
-  const isHydroShareAvailable = computed(() =>
-    oAuthProviders.value.some((provider) => provider.id === 'hydroshare')
-  )
-
   const login = async () => {
     try {
       Snackbar.success('You have logged in!')
@@ -92,6 +88,7 @@ export const useAuthStore = defineStore('authentication', () => {
       api.fetchSession(),
     ])
     oAuthProviders.value = authMethodsResponse.providers
+    console.log('oauthProviders', oAuthProviders.value)
     signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
     setSession(sessionResponse)
   }
@@ -111,7 +108,6 @@ export const useAuthStore = defineStore('authentication', () => {
     inProviderSignupFlow,
     inEmailVerificationFlow,
     flows,
-    isHydroShareAvailable,
     unverifiedEmail,
     login,
     logout,
