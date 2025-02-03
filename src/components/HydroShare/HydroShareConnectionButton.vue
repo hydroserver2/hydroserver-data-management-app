@@ -1,6 +1,6 @@
 <template>
   <v-btn
-    v-if="!isConnected"
+    v-if="!isConnected && loaded"
     color="deep-orange-lighten-1"
     prepend-icon="mdi-link"
     @click="connectHydroShare"
@@ -9,7 +9,7 @@
   </v-btn>
 
   <v-btn
-    v-else
+    v-else-if="loaded"
     color="deep-orange"
     variant="outlined"
     prepend-icon="mdi-close"
@@ -25,6 +25,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 
 const connectedProviders = ref()
+const loaded = ref(false)
 
 const hydroShareProvider = computed(() => {
   if (!connectedProviders.value?.data) return false
@@ -44,15 +45,17 @@ async function disconnectHydroShare() {
   try {
     let providerResponse = await api.deleteProvider(
       'hydroshare',
-      hydroShareProvider.value?.uid
+      hydroShareProvider.value.uid
     )
     Snackbar.info('Your HydroShare account has been disconnected.')
   } catch (error) {
     console.error('Error disconnecting HydroShare account', error)
+    Snackbar.error('Error disconnecting HydroShare account')
   }
 }
 
 onMounted(async () => {
   connectedProviders.value = await api.fetchConnectedProviders()
+  loaded.value = true
 })
 </script>

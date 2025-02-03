@@ -127,7 +127,10 @@ export const api = {
   providerSignup: async (user: User) =>
     apiMethods.post(`${PROVIDER_BASE}/signup`, user),
   deleteProvider: async (provider: string, account: string) =>
-    apiMethods.post(PROVIDER_BASE, { provider, account }),
+    apiMethods.delete(`${PROVIDER_BASE}/connections`, {
+      provider: provider,
+      account: account,
+    }),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
