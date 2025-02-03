@@ -121,9 +121,13 @@ export const api = {
       password: password,
     }),
 
+  fetchConnectedProviders: async () =>
+    apiMethods.fetch(`${PROVIDER_BASE}/connections`),
   providerRedirect,
   providerSignup: async (user: User) =>
     apiMethods.post(`${PROVIDER_BASE}/signup`, user),
+  deleteProvider: async (provider: string, account: string) =>
+    apiMethods.post(PROVIDER_BASE, { provider, account }),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),

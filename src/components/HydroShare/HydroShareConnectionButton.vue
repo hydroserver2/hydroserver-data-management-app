@@ -20,32 +20,39 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
-import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { Snackbar } from '@/utils/notifications'
 
-const { user } = storeToRefs(useUserStore())
+const connectedProviders = ref()
 
-const isConnected = computed(() => {
-  if (!user.value) return false
-  return user.value.hydroShareConnected
+const hydroShareProvider = computed(() => {
+  if (!connectedProviders.value?.data) return false
+  return connectedProviders.value.data.find(
+    (item: any) => item.provider.id === 'hydroshare'
+  )
 })
 
+const isConnected = computed(() => !!hydroShareProvider.value)
+
 const connectHydroShare = async () => {
-  // TODO: Verify this works with AllAuth flow
-  api.providerRedirect(
-    'hydroshare',
-    `${import.meta.env.VITE_APP_PROXY_BASE_URL}/Sites`,
-    'connect'
-  )
+  const callbackUrl = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/profile`
+  api.providerRedirect('hydroshare', callbackUrl, 'connect')
 }
 
 async function disconnectHydroShare() {
-  // TODO: Add disconnect functionality
-  // let response = await api.disconnectFromHydroShare()
-  // if (response === null) {
-  // Snackbar.info('Your HydroShare account has been disconnected.')
-  // }
+  try {
+    let providerResponse = await api.deleteProvider(
+      'hydroshare',
+      hydroShareProvider.value?.uid
+    )
+    Snackbar.info('Your HydroShare account has been disconnected.')
+  } catch (error) {
+    console.error('Error disconnecting HydroShare account', error)
+  }
 }
+
+onMounted(async () => {
+  connectedProviders.value = await api.fetchConnectedProviders()
+})
 </script>

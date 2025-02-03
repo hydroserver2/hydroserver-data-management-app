@@ -34,7 +34,6 @@ const hydroShareOauthEnabled =
 onMounted(async () => {
   try {
     user.value = await api.fetchUser()
-    console.log('user.value', user.value)
   } catch (error) {
     console.error('Error fetching user', error)
   }
