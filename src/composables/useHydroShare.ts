@@ -62,11 +62,10 @@ export function useHydroShare() {
   onMounted(async () => {
     try {
       const connectedProvidersResponse = await api.fetchConnectedProviders()
-      console.log('connectedProviders', connectedProvidersResponse.data)
       connectedProviders.value = connectedProvidersResponse.data
       isLoaded.value = true
     } catch (error) {
-      console.log('error fetching 3rd party providers', error)
+      console.error('Error fetching 3rd party providers', error)
     }
   })
 
