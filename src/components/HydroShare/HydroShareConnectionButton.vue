@@ -28,8 +28,8 @@ const connectedProviders = ref()
 const loaded = ref(false)
 
 const hydroShareProvider = computed(() => {
-  if (!connectedProviders.value?.data) return false
-  return connectedProviders.value.data.find(
+  if (!connectedProviders.value) return false
+  return connectedProviders.value.find(
     (item: any) => item.provider.id === 'hydroshare'
   )
 })
@@ -43,10 +43,12 @@ const connectHydroShare = async () => {
 
 async function disconnectHydroShare() {
   try {
-    let providerResponse = await api.deleteProvider(
+    const providerResponse = await api.deleteProvider(
       'hydroshare',
       hydroShareProvider.value.uid
     )
+
+    connectedProviders.value = providerResponse.data
     Snackbar.info('Your HydroShare account has been disconnected.')
   } catch (error) {
     console.error('Error disconnecting HydroShare account', error)
@@ -55,7 +57,12 @@ async function disconnectHydroShare() {
 }
 
 onMounted(async () => {
-  connectedProviders.value = await api.fetchConnectedProviders()
-  loaded.value = true
+  try {
+    const connectedProvidersResponse = await api.fetchConnectedProviders()
+    connectedProviders.value = connectedProvidersResponse.data
+    loaded.value = true
+  } catch (error) {
+    console.log('error fetching 3rd party providers', error)
+  }
 })
 </script>
