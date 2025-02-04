@@ -7,7 +7,7 @@ async function interceptedFetch(endpoint: string, options: any) {
   const opts = requestInterceptor(options)
   try {
     const response = await fetch(endpoint, opts)
-    return await responseInterceptor(response, opts)
+    return await responseInterceptor(response)
   } catch (error: any) {
     if (error instanceof TypeError)
       Snackbar.error('Network error. Please check your connection.')

@@ -1,7 +1,4 @@
-export async function responseInterceptor(
-  response: Response,
-  options: any
-): Promise<any> {
+export async function responseInterceptor(response: Response): Promise<any> {
   if (response.headers.get('Content-Length') === '0') return null
   const contentType = response.headers.get('content-type') || ''
 
