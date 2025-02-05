@@ -26,6 +26,7 @@ export const useAuthStore = defineStore('authentication', () => {
   })
 
   const isAuthenticated = ref(false)
+  const sessionExpiresAt = ref<number | null>(null)
 
   const flows = ref<AllAuthFlowItem[]>([])
   const flowIds = computed(() => flows.value.map((flow) => flow.id))
@@ -68,13 +69,18 @@ export const useAuthStore = defineStore('authentication', () => {
     }
   }
 
+  let loggingOut = false
   async function logout() {
+    if (loggingOut) return
     try {
+      loggingOut = true
       const response = await api.logout()
       setSession(response)
       await router.push({ name: 'Login' })
     } catch (error) {
       console.error('Error logging out.', error)
+    } finally {
+      loggingOut = false
     }
   }
 
@@ -88,7 +94,6 @@ export const useAuthStore = defineStore('authentication', () => {
       api.fetchSession(),
     ])
     oAuthProviders.value = authMethodsResponse.providers
-    console.log('oauthProviders', oAuthProviders.value)
     signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
     setSession(sessionResponse)
   }
@@ -97,9 +102,34 @@ export const useAuthStore = defineStore('authentication', () => {
     const { user } = storeToRefs(useUserStore())
 
     isAuthenticated.value = apiResponse?.meta?.is_authenticated
+    sessionExpiresAt.value = apiResponse?.meta?.session_expires_at
     flows.value = apiResponse?.data?.flows || []
     user.value = apiResponse?.data?.account || new User()
   }
+
+  function checkSessionExpiration() {
+    if (
+      isAuthenticated.value &&
+      sessionExpiresAt.value &&
+      Date.now() >= sessionExpiresAt.value
+    ) {
+      Snackbar.info('Session expired. Please log in again.')
+      logout()
+    }
+  }
+
+  // Check if the session has expired when the user switches to this tab
+  // and/or when the browser comes into focus
+  window.addEventListener('focus', () => {
+    console.log('handleFocus')
+    checkSessionExpiration()
+  })
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      console.log('handleVisibilityChange')
+      checkSessionExpiration()
+    }
+  })
 
   return {
     oAuthProviders,
@@ -109,6 +139,7 @@ export const useAuthStore = defineStore('authentication', () => {
     inEmailVerificationFlow,
     flows,
     unverifiedEmail,
+    checkSessionExpiration,
     login,
     logout,
     initializeSession,
