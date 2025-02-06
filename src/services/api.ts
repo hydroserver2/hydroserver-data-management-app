@@ -13,6 +13,7 @@ import {
   PostHydroShareArchive,
   HydroShareArchive,
   User,
+  Workspace,
 } from '@/types'
 import { getCSRFToken } from './getCSRFToken'
 
@@ -32,6 +33,7 @@ const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
+const WORKSPACES_BASE = `${BASE_URL}/data/workspaces`
 export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
 export const getObservationsEndpoint = (
@@ -99,11 +101,13 @@ export const api = {
   login: async (email: string, password: string) =>
     apiMethods.post(`${SESSION_BASE}`, { email, password }),
   logout: async () => apiMethods.delete(`${SESSION_BASE}`),
+
   fetchUser: async () => apiMethods.fetch(`${ACCOUNT_BASE}`),
   signup: async (user: User) => apiMethods.post(`${ACCOUNT_BASE}`, user),
   updateUser: async (user: User, oldUser: User) =>
     apiMethods.patch(`${ACCOUNT_BASE}`, user, oldUser),
   deleteUser: async () => apiMethods.delete(`${ACCOUNT_BASE}`),
+
   sendVerificationEmail: async (email: string) =>
     apiMethods.put(`${ACCOUNT_BASE}/email/verify`, {
       email: email,
@@ -120,6 +124,48 @@ export const api = {
       key: key,
       password: password,
     }),
+
+  fetchWorkspaces: async () => apiMethods.fetch(WORKSPACES_BASE),
+  fetchWorkspace: async (id: string) =>
+    apiMethods.post(`${WORKSPACES_BASE}/${id}`),
+  createWorkspace: async () => apiMethods.post(WORKSPACES_BASE),
+  updateWorkspace: async (
+    newWorkspace: Workspace,
+    oldWorkspace: Workspace | null = null
+  ) =>
+    apiMethods.patch(
+      `${WORKSPACES_BASE}/${newWorkspace.id}`,
+      newWorkspace,
+      oldWorkspace
+    ),
+  deleteWorkspace: async (id: string) =>
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}`),
+  transferWorkspace: async (id: string) =>
+    apiMethods.post(`${WORKSPACES_BASE}/${id}/transfer`),
+  acceptWorkspaceTransfer: async (id: string) =>
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/transfer`),
+  rejectWorkspaceTransfer: async (id: string) =>
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}/transfer`),
+
+  getCollaboratorRoles: async (id: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${id}/roles`),
+  getCollaboratorRole: async (workspaceId: string, roleId: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/roles/${roleId}`),
+
+  getCollaborators: async (id: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${id}/collaborators`),
+  createCollaborator: async (id: string, email: string, roleId: string) =>
+    apiMethods.post(`${WORKSPACES_BASE}/${id}/collaborators`, {
+      email,
+      roleId,
+    }),
+  updateCollaboratorRole: async (id: string, email: string, roleId: string) =>
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/collaborators`, {
+      email,
+      roleId,
+    }),
+  deleteCollaborator: async (id: string, email: string) =>
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
 
   fetchConnectedProviders: async () =>
     apiMethods.fetch(`${PROVIDER_BASE}/connections`),

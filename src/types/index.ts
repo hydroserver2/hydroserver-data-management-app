@@ -405,3 +405,50 @@ export class OAuthProvider {
     this.connectEnabled = true
   }
 }
+
+export interface Permission {
+  resource_type: string
+  permission_type: string
+}
+
+export interface CollaboratorRole {
+  name: string
+  description: string
+  id: string
+  workspaceId: string
+  permissions: Permission[]
+}
+
+export interface WorkspaceData {
+  id: string
+  name: string
+  private: boolean
+  owner: User
+  collaboratorRole: CollaboratorRole
+  pendingTransferTo?: User | null
+}
+
+export class Workspace {
+  id: string
+  name: string;
+  ['private']: boolean
+  owner: User
+  collaboratorRole: CollaboratorRole
+  pendingTransferTo?: User | null
+
+  constructor({
+    id,
+    name,
+    private: isPrivate,
+    owner,
+    collaboratorRole,
+    pendingTransferTo = null,
+  }: WorkspaceData) {
+    this.id = id
+    this.name = name
+    this['private'] = isPrivate
+    this.owner = owner
+    this.collaboratorRole = collaboratorRole
+    this.pendingTransferTo = pendingTransferTo
+  }
+}
