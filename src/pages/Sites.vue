@@ -1,7 +1,7 @@
 <template>
   <div class="map-container flex-shrink-0">
     <GoogleMap
-      v-if="ownedThings"
+      v-if="workspaceThings"
       :colorKey="useColors ? filterCriteria.key : ''"
       :things="filteredThings"
       useBounds
@@ -11,7 +11,7 @@
   <div class="my-4 mx-6">
     <WorkspaceToolbar />
 
-    <v-row class="my-2">
+    <v-row class="my-2" v-if="hasWorkspaces && selectedWorkspace !== null">
       <v-col cols="auto">
         <h5 class="text-h5">Your registered sites</h5>
       </v-col>
@@ -31,7 +31,7 @@
     <v-card v-if="hasWorkspaces && selectedWorkspace !== null">
       <v-toolbar flat color="blue-darken-2">
         <v-text-field
-          :disabled="!ownedThings?.length"
+          :disabled="!workspaceThings?.length"
           class="mx-2"
           clearable
           v-model="search"
@@ -45,7 +45,7 @@
         <v-spacer />
 
         <v-btn
-          :disabled="!ownedThings?.length"
+          :disabled="!workspaceThings?.length"
           class="mr-2"
           @click="showFilter = !showFilter"
           prependIcon="mdi-filter"
@@ -75,7 +75,7 @@
         loading-text="Loading sites..."
       >
         <template v-slot:no-data>
-          <div class="text-center pa-4" v-if="ownedThings.length === 0">
+          <div class="text-center pa-4" v-if="workspaceThings.length === 0">
             <v-icon size="48" color="grey lighten-1">mdi-radio-tower</v-icon>
             <h4 class="mt-2">You have not registered any sites</h4>
             <p class="mb-4">
@@ -87,7 +87,7 @@
           <!-- Check if filters result in no matching sites -->
           <div
             class="text-center pa-4"
-            v-else-if="ownedThings.length > 0 && coloredThings.length === 0"
+            v-else-if="workspaceThings.length > 0 && coloredThings.length === 0"
           >
             <v-icon size="48" color="grey lighten-1"
               >mdi-filter-remove-outline</v-icon
@@ -166,9 +166,9 @@ const matchesSearchCriteria = (thing: Thing) => {
 // TODO: Use workspace things in filteredThings and wherever ownedThings are used
 const workspaceThings = computed(
   () => {
-    console.log('computing workspaceThings', selectedWorkspace.value?.id)
-    return selectedWorkspace.value
+    return ownedThings.value
   }
+  // TODO: uncomment once backend provides workspaceIds to things
   // ownedThings.value.filter(
   //   (thing) => thing.workspaceId === selectedWorkspace.value?.id
   // )
@@ -180,7 +180,7 @@ const filteredThings = computed(() => {
 
   isFiltered.value = hasKey
 
-  return ownedThings.value.filter((thing) => {
+  return workspaceThings.value.filter((thing) => {
     return (
       matchesSearchCriteria(thing) &&
       (!hasKey || matchesFilterCriteria(thing, key, values))

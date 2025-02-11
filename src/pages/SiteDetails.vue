@@ -187,9 +187,8 @@ onMounted(async () => {
   try {
     const [thingResponse, hydroShareArchiveResponse, tagResponse] =
       await Promise.all([
-        api.fetchThing(thingId).catch((error) => {
-          if (error instanceof Error && parseInt(error.message) === 403)
-            authorized.value = false
+        api.fetchThing(thingId).catch((error: any) => {
+          if (parseInt(error.status) === 403) authorized.value = false
           else console.error('Error fetching thing', error)
 
           return null

@@ -236,11 +236,8 @@ async function createUser() {
       Snackbar.success('Account created.')
       await router.push({ name: 'Sites' })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating user', error)
-    if ((error as Error).message === '409') {
-      Snackbar.warn('A user with this email already exists.')
-    }
   }
 }
 

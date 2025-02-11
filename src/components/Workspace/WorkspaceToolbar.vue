@@ -62,7 +62,7 @@
           <v-icon size="48" color="grey lighten-1"
             >mdi-briefcase-outline</v-icon
           >
-          <h4 class="mt-2">You have not registered any workspaces</h4>
+          <h4 class="mt-2">You have not created any workspaces</h4>
           <p class="mb-4">Click the "Add workspace" button to create one.</p>
         </div>
       </template>
@@ -139,7 +139,6 @@ import { useTableLogic } from '@/composables/useTableLogic'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
-console.log('workspaces', workspaces.value)
 
 const openCreate = ref(false)
 const openWorkspaceTable = ref(false)
@@ -164,11 +163,9 @@ const sortedWorkspaces = computed(() =>
 watch(
   selectedWorkspaceId,
   (newId) => {
-    console.log('selected workspace changed', newId)
     if (!newId || newId === selectedWorkspace.value?.id) return
     const newWorkspace = workspaces.value.find((ws) => ws.id === newId)
     if (!!newWorkspace) selectedWorkspace.value = newWorkspace
-    console.log('new selected workspace', selectedWorkspace.value)
   },
   { immediate: true }
 )
@@ -181,7 +178,11 @@ const refreshWorkspaces = async (workspace?: Workspace) => {
   try {
     items.value = await api.fetchWorkspaces()
     setWorkspaces(items.value)
-    if (workspace) selectedWorkspace.value = workspace
+    if (
+      workspace &&
+      (!selectedWorkspace.value || selectedWorkspace.value.id === workspace.id)
+    )
+      selectedWorkspace.value = workspace
     workspaceKey.value += 1
   } catch (error) {
     console.error('Error refreshing workspaces', error)
