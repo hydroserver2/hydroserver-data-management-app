@@ -2,21 +2,16 @@
   <v-row class="my-4" align="center">
     <v-col cols="12" sm="3">
       <v-select
-        v-model="selectedWorkspaceId"
+        v-model="selectedWorkspace"
         label="Selected Workspace"
         :items="sortedWorkspaces"
         :key="workspaceKey"
         item-title="name"
-        item-value="id"
+        :return-object="true"
         variant="outlined"
         hide-details
       ></v-select>
     </v-col>
-    <!-- <v-col cols="12" sm="auto">
-      <v-btn @click="openEdit = true" rounded="xl" color="primary-darken-2"
-        >Workspace access control</v-btn
-      >
-    </v-col> -->
     <v-col cols="12" sm="auto">
       <v-btn
         @click="openWorkspaceTable = !openWorkspaceTable"
@@ -132,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import WorkspaceFormCard from '@/components/Workspace/WorkspaceFormCard.vue'
 import DeleteWorkspaceCard from './DeleteWorkspaceCard.vue'
 import WorkspaceAccessControl from './WorkspaceAccessControl.vue'
@@ -142,13 +137,15 @@ import { Workspace } from '@/types'
 import { api } from '@/services/api'
 import { useTableLogic } from '@/composables/useTableLogic'
 
-const { selectedWorkspaceId, workspaces } = storeToRefs(useWorkspaceStore())
+const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
+const { setWorkspaces } = useWorkspaceStore()
 console.log('workspaces', workspaces.value)
 
 const openCreate = ref(false)
 const openWorkspaceTable = ref(false)
 const workspaceKey = ref(0)
 const search = ref()
+const selectedWorkspaceId = ref('')
 
 const {
   item,
@@ -157,7 +154,6 @@ const {
   openDelete,
   openAccessControl,
   openDialog,
-  onUpdate,
   onDelete,
 } = useTableLogic(api.fetchWorkspaces, api.deleteWorkspace, Workspace)
 
@@ -165,19 +161,34 @@ const sortedWorkspaces = computed(() =>
   workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
 )
 
-const refreshWorkspaces = async (workspaceId?: string) => {
+watch(
+  selectedWorkspaceId,
+  (newId) => {
+    console.log('selected workspace changed', newId)
+    if (!newId || newId === selectedWorkspace.value?.id) return
+    const newWorkspace = workspaces.value.find((ws) => ws.id === newId)
+    if (!!newWorkspace) selectedWorkspace.value = newWorkspace
+    console.log('new selected workspace', selectedWorkspace.value)
+  },
+  { immediate: true }
+)
+
+/** We need refreshWorkspaces because we're saving a global workspaces array that should
+ * always be the source of truth. This function syncs the table items with the db and global workspaces.
+ */
+const refreshWorkspaces = async (workspace?: Workspace) => {
+  console.log('refreshing workspace')
   try {
-    items.value = workspaces.value = await api.fetchWorkspaces()
-    if (workspaceId) selectedWorkspaceId.value = workspaceId
+    items.value = await api.fetchWorkspaces()
+    setWorkspaces(items.value)
+    if (workspace) selectedWorkspace.value = workspace
     workspaceKey.value += 1
   } catch (error) {
     console.error('Error refreshing workspaces', error)
   }
 }
 
-const onDeleteWorkspace = async (workspace: Workspace) => {
-  item.value = workspace
-  if (workspace.id === selectedWorkspaceId.value) selectedWorkspaceId.value = ''
+const onDeleteWorkspace = async () => {
   await onDelete()
   refreshWorkspaces()
 }

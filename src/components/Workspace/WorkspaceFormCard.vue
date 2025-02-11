@@ -57,8 +57,8 @@ async function onSubmit() {
   try {
     const newItem = await uploadItem()
     if (!newItem) return
-    if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem.id)
+    if (isEdit.value) emit('updated')
+    else emit('created', newItem)
   } catch (error) {
     console.error('Error uploading unit', error)
   }

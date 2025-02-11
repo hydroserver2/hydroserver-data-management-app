@@ -59,6 +59,6 @@ const onDelete = () => {
     Snackbar.warn('Workspace name does not match.')
     return
   }
-  emit('delete', props.workspace)
+  emit('delete')
 }
 </script>

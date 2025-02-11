@@ -26,7 +26,6 @@ export function useTableLogic<T extends WithId>(
   const onUpdate = (updatedItem: T) => {
     const index = items.value.findIndex((u: any) => u.id === updatedItem.id)
     if (index !== -1) items.value[index] = updatedItem
-    console.log('updated item', updatedItem)
   }
 
   const onDelete = async () => {

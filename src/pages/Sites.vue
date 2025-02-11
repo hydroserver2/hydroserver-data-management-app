@@ -28,7 +28,7 @@
       </KeepAlive>
     </v-card>
 
-    <v-card>
+    <v-card v-if="hasWorkspaces && selectedWorkspace !== null">
       <v-toolbar flat color="blue-darken-2">
         <v-text-field
           :disabled="!ownedThings?.length"
@@ -133,13 +133,14 @@ import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 
-// TODO: Load sites table based on selectedWorkspace
-// const { selectedWorkspaceId, workspaces } = storeToRefs(useWorkspaceStore())
+const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())
+const { setWorkspaces } = useWorkspaceStore()
 
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)
 const isFiltered = ref(false)
 const sitesLoaded = ref(false)
+const showSitesTable = ref(false)
 const filterCriteria = ref({ key: '', values: [] as string[] })
 const search = ref()
 
@@ -161,6 +162,17 @@ const matchesSearchCriteria = (thing: Thing) => {
     thing.siteType?.toLowerCase().includes(searchLower)
   )
 }
+
+// TODO: Use workspace things in filteredThings and wherever ownedThings are used
+const workspaceThings = computed(
+  () => {
+    console.log('computing workspaceThings', selectedWorkspace.value?.id)
+    return selectedWorkspace.value
+  }
+  // ownedThings.value.filter(
+  //   (thing) => thing.workspaceId === selectedWorkspace.value?.id
+  // )
+)
 
 const filteredThings = computed(() => {
   const { key, values } = filterCriteria.value
@@ -220,7 +232,21 @@ const loadThings = async () => {
   }
 }
 
-onMounted(async () => loadThings())
+onMounted(async () => {
+  try {
+    const [thingsResponse, workspacesResponse] = await Promise.all([
+      api.fetchOwnedThings(),
+      api.fetchWorkspaces(),
+    ])
+
+    setWorkspaces(workspacesResponse)
+    ownedThings.value = thingsResponse
+  } catch (error) {
+    console.error('Error fetching site data', error)
+  } finally {
+    sitesLoaded.value = true
+  }
+})
 </script>
 
 <style scoped>
