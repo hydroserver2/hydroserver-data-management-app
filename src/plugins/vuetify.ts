@@ -30,7 +30,7 @@ const textFieldAttrs = {
 const btnAttrs = {
   color: 'primary',
   style: 'text-transform: none;', // Remove uppercase text
-  rounded: false,
+  rounded: 'xl',
 }
 
 export default createVuetify({
@@ -72,6 +72,7 @@ export default createVuetify({
     VBtnCancel: {
       ...btnAttrs,
       color: 'grey',
+      variant: 'outlined',
     },
     VBtnAdd: {
       ...btnAttrs,
