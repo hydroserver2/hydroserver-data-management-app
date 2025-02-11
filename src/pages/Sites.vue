@@ -9,6 +9,8 @@
   </div>
 
   <div class="my-4 mx-6">
+    <WorkspaceToolbar />
+
     <v-row class="my-2">
       <v-col cols="auto">
         <h5 class="text-h5">Your registered sites</h5>
@@ -122,11 +124,17 @@ import { ref, onMounted, computed } from 'vue'
 import GoogleMap from '@/components/GoogleMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
+import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import { api } from '@/services/api'
 import { Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
 import { ThingWithColor } from '@/types'
 import { Snackbar } from '@/utils/notifications'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
+
+// TODO: Load sites table based on selectedWorkspace
+// const { selectedWorkspaceId, workspaces } = storeToRefs(useWorkspaceStore())
 
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)

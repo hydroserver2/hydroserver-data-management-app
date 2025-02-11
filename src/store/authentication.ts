@@ -6,6 +6,7 @@ import { Snackbar } from '@/utils/notifications'
 import router from '@/router/router'
 import Storage from '@/utils/storage'
 import { useUserStore } from './user'
+import { useWorkspaceStore } from './workspaces'
 
 export interface AllAuthFlowItem {
   id: string
@@ -74,6 +75,8 @@ export const useAuthStore = defineStore('authentication', () => {
     if (loggingOut) return
     try {
       loggingOut = true
+      localStorage.clear()
+      sessionStorage.clear()
       const response = await api.logout()
       setSession(response)
       await router.push({ name: 'Login' })
@@ -89,13 +92,20 @@ export const useAuthStore = defineStore('authentication', () => {
    * for this instance of HydroServer.
    */
   async function initializeSession() {
-    const [authMethodsResponse, sessionResponse] = await Promise.all([
-      api.fetchAuthMethods(),
-      api.fetchSession(),
-    ])
+    const [authMethodsResponse, sessionResponse, workspacesResponse] =
+      await Promise.all([
+        api.fetchAuthMethods(),
+        api.fetchSession(),
+        api.fetchWorkspaces(),
+      ])
     oAuthProviders.value = authMethodsResponse.providers
     signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
     setSession(sessionResponse)
+
+    const { workspaces } = storeToRefs(useWorkspaceStore())
+    // TODO: set selectedWorkspace from sessionResponse.account.defaultWorkspace
+    // TODO: is workspaceOwnershipAllowed
+    workspaces.value = workspacesResponse
   }
 
   function setSession(apiResponse: any) {
@@ -121,12 +131,10 @@ export const useAuthStore = defineStore('authentication', () => {
   // Check if the session has expired when the user switches to this tab
   // and/or when the browser comes into focus
   window.addEventListener('focus', () => {
-    console.log('handleFocus')
     checkSessionExpiration()
   })
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      console.log('handleVisibilityChange')
       checkSessionExpiration()
     }
   })

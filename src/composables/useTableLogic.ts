@@ -11,6 +11,7 @@ export function useTableLogic<T extends WithId>(
 ) {
   const openEdit = ref(false)
   const openDelete = ref(false)
+  const openAccessControl = ref(false)
   const item = ref(new ItemClass()) as Ref<T>
   const items: Ref<T[]> = ref([])
 
@@ -18,12 +19,14 @@ export function useTableLogic<T extends WithId>(
     item.value = selectedItem
     if (dialog === 'edit') openEdit.value = true
     else if (dialog === 'delete') openDelete.value = true
+    else if (dialog === 'accessControl') openAccessControl.value = true
   }
 
   // For emitting the updated item to parent. Assume child calls api update.
   const onUpdate = (updatedItem: T) => {
     const index = items.value.findIndex((u: any) => u.id === updatedItem.id)
     if (index !== -1) items.value[index] = updatedItem
+    console.log('updated item', updatedItem)
   }
 
   const onDelete = async () => {
@@ -48,6 +51,7 @@ export function useTableLogic<T extends WithId>(
   return {
     openEdit,
     openDelete,
+    openAccessControl,
     item,
     items,
     openDialog,

@@ -432,23 +432,62 @@ export class Workspace {
   id: string
   name: string;
   ['private']: boolean
-  owner: User
-  collaboratorRole: CollaboratorRole
+  owner: User | null
+  collaboratorRole: CollaboratorRole | null
   pendingTransferTo?: User | null
 
-  constructor({
-    id,
-    name,
-    private: isPrivate,
-    owner,
-    collaboratorRole,
-    pendingTransferTo = null,
-  }: WorkspaceData) {
-    this.id = id
-    this.name = name
-    this['private'] = isPrivate
-    this.owner = owner
-    this.collaboratorRole = collaboratorRole
-    this.pendingTransferTo = pendingTransferTo
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this['private'] = false
+    this.owner = null
+    this.collaboratorRole = null
+    this.pendingTransferTo = null
+  }
+}
+
+export class PostWorkspace {
+  id: string
+  name: string
+  private: boolean
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.private = false
+  }
+}
+
+export interface UserInfo {
+  name: string
+  email: string
+  phone: string
+  address: string
+  link: string
+  type: string
+  organizationName: string
+}
+
+export class Collaborator {
+  user: UserInfo
+  role: CollaboratorRole
+
+  constructor() {
+    this.user = {
+      phone: '',
+      address: '',
+      link: '',
+      type: '',
+      name: '',
+      email: '',
+      organizationName: '',
+    }
+    this.role = {
+      name: '',
+      description: '',
+      id: '',
+      workspaceId: '',
+      permissions: [],
+    }
   }
 }
