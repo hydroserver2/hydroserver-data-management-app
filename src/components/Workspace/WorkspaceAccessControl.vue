@@ -38,11 +38,16 @@
           <v-text-field
             v-model="newCollaboratorEmail"
             label="New collaborator's email"
-            required
           />
-          <v-btn-primary @click="onAddCollaborator(role.id)"
-            >Submit</v-btn-primary
-          >
+          <v-select
+            v-model="selectedRole"
+            :items="roles"
+            label="New collaborator's role"
+            item-title="name"
+            :return-object="true"
+            variant="outlined"
+          />
+          <v-btn-primary @click="onAddCollaborator">Submit</v-btn-primary>
         </v-card-text>
 
         <v-row class="mt-6">
@@ -154,6 +159,7 @@
           <v-checkbox
             v-model="workspace.private"
             label="Make this workspace private"
+            @click="togglePrivacy"
             hide-details
           />
         </v-card-text>
@@ -195,6 +201,7 @@ const openHydroSharePrivacy = ref(false)
 const isUpdating = ref(false)
 const collaborators = ref<Collaborator[]>([])
 const roles = ref([])
+const selectedRole = ref()
 
 const showPrivacyHelp = ref(false)
 const showAddCollaboratorHelp = ref(false)
@@ -213,25 +220,26 @@ async function onTransferOwnership() {
   showTransferConfirmation.value = false
 }
 
-async function onAddCollaborator(roleId: string) {
-  if (!newCollaboratorEmail.value) return
+async function onAddCollaborator() {
+  if (!newCollaboratorEmail.value || !selectedRole.value) {
+    Snackbar.warn('Please fill out collaborator email and role.')
+    return
+  }
   try {
-    await api.addCollaborator(
+    console.log('selectedRole', selectedRole.value)
+    const collaboratorResponse = await api.addCollaborator(
       props.workspace!.id,
       newCollaboratorEmail.value,
-      roleId
+      selectedRole.value.id
     )
+    console.log('collaboratorResponse', collaboratorResponse)
+    collaborators.value = collaboratorResponse
     // TODO: update workspace collaborators
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding secondary owner', error)
-    if ((error as Error).message === '404') {
-      Snackbar.warn(
-        'Email address does not have a valid user account.' +
-          ' Please input the email for a valid user.'
-      )
-    } else if ((error as Error).message === '422') {
-      Snackbar.error('Specified user is already an owner of this site')
-    }
+    console.log(error)
+    Snackbar.error(error.message)
+    return
   }
   newCollaboratorEmail.value = ''
 }
@@ -250,6 +258,7 @@ async function onRemoveOwner(email: string) {
 async function togglePrivacy(updateHydroShare?: boolean) {
   try {
     isUpdating.value = true
+    await api.updateWorkspace(props.workspace)
   } catch (error) {
     console.error('Error updating thing privacy', error)
   } finally {
@@ -262,8 +271,13 @@ const emitClose = () => emits('close')
 
 onMounted(async () => {
   try {
-    collaborators.value = await api.getCollaborators(props.workspace.id)
-    console.log('collaborators', collaborators.value)
+    const [collaboratorsResponse, rolesResponse] = await Promise.all([
+      api.getCollaborators(props.workspace.id),
+      api.getCollaboratorRoles(props.workspace.id),
+    ])
+
+    collaborators.value = collaboratorsResponse
+    roles.value = rolesResponse
   } catch (error) {
     console.error('Error fetching collaborators for workspace', error)
   }
