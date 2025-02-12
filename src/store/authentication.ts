@@ -92,20 +92,27 @@ export const useAuthStore = defineStore('authentication', () => {
    * for this instance of HydroServer.
    */
   async function initializeSession() {
-    const [authMethodsResponse, sessionResponse, workspacesResponse] =
-      await Promise.all([
-        api.fetchAuthMethods(),
-        api.fetchSession(),
-        api.fetchWorkspaces(),
-      ])
+    // TODO: Revert this so we're fetching in parallel
+    // const [authMethodsResponse, sessionResponse] = await Promise.all([
+    //   api.fetchAuthMethods(),
+    //   api.fetchSession(),
+    // ])
+    const authMethodsResponse = await api.fetchAuthMethods()
+    const sessionResponse = await api.fetchSession()
+
     oAuthProviders.value = authMethodsResponse.providers
     signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
     setSession(sessionResponse)
 
-    const { workspaces } = storeToRefs(useWorkspaceStore())
-    // TODO: set selectedWorkspace from sessionResponse.account.defaultWorkspace
-    // TODO: is workspaceOwnershipAllowed
-    workspaces.value = workspacesResponse
+    if (isAuthenticated.value) {
+      try {
+        const workspacesResponse = await api.fetchWorkspaces()
+        const { setWorkspaces } = useWorkspaceStore()
+        setWorkspaces(workspacesResponse)
+      } catch (error) {
+        console.error('Error fetching workspaces', error)
+      }
+    }
   }
 
   function setSession(apiResponse: any) {

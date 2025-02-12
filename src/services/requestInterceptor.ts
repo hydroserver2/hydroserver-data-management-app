@@ -22,11 +22,7 @@ export function requestInterceptor(options: any) {
         : JSON.stringify(options.body)
   }
 
-  // If non-GET, add CSRF token and JSON headers (unless body is FormData, etc.)
-  const method = (options.method || 'GET').toUpperCase()
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    headers['X-CSRFToken'] = getCSRFToken() || ''
-  }
+  headers['X-CSRFToken'] = getCSRFToken() || ''
 
   return {
     ...options,
