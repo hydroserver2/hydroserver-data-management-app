@@ -259,12 +259,10 @@ const props = defineProps(['dataSource'])
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchDataSources,
   api.createDataSource,
   api.updateDataSource,
   DataSource,
-  props.dataSource || undefined,
-  false
+  props.dataSource || undefined
 )
 
 const dataLoaders = ref<DataLoader[]>([])

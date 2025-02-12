@@ -9,7 +9,7 @@
         Filter datastreams by site
         <v-select
           v-model="selectedThingId"
-          :items="usersThings"
+          :items="things"
           item-title="name"
           item-value="id"
         >
@@ -57,20 +57,21 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import { watch, onMounted, ref, computed } from 'vue'
+import { watch, onMounted, ref } from 'vue'
 import { Datastream, Thing } from '@/types'
 import { useMetadata } from '@/composables/useMetadata'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
 
-const { sensors, observedProperties, processingLevels, fetchMetadata } =
-  useMetadata()
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+
+const { sensors, observedProperties, processingLevels } = useMetadata(
+  selectedWorkspace.value!.id
+)
+
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
 const selectedThingId = ref('')
-const usersThings = computed(() => {
-  return things.value
-    .filter((t) => t.isPrimaryOwner)
-    .sort((a, b) => a.name.localeCompare(b.name))
-})
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 
@@ -81,11 +82,7 @@ watch(
       datastreamsForThing.value = []
       return
     }
-    const [datastreams] = await Promise.all([
-      api.fetchDatastreamsForThing(newId),
-      fetchMetadata(newId),
-    ])
-    datastreamsForThing.value = datastreams
+    datastreamsForThing.value = await api.fetchDatastreamsForThing(newId)
   },
   { immediate: true }
 )
@@ -96,7 +93,11 @@ function datastreamSelected(id: string) {
 }
 
 onMounted(async () => {
-  const [fetchedThings] = await Promise.all([api.fetchThings()])
-  things.value = fetchedThings
+  const [fetchedThings] = await Promise.all([
+    api.fetchThingsForWorkspace(selectedWorkspace.value!.id),
+  ])
+  things.value = (fetchedThings as Thing[]).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  )
 })
 </script>

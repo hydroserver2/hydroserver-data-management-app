@@ -7,10 +7,6 @@ import unitFixtures from '@/utils/test/fixtures/unitFixtures'
 
 const [unit1, unit2] = unitFixtures
 
-// Default mock functions that can be overridden
-const defaultMockFetchItems: () => Promise<Unit[]> = vi.fn(() =>
-  Promise.resolve([])
-)
 const defaultCreateItem = vi.fn()
 const defaultUpdateItem = vi.fn()
 let defaultInitialUnit: Unit
@@ -19,20 +15,13 @@ describe('useFormLogic', () => {
   // onMounted won't work outside of the context of script setup, therefore
   // wrap composable with dummy component
   const createDummyComponent = ({
-    mockFetchItems = defaultMockFetchItems,
     createItem = defaultCreateItem,
     updateItem = defaultUpdateItem,
     initialUnit = defaultInitialUnit,
   } = {}) =>
     defineComponent({
       setup() {
-        return useFormLogic(
-          mockFetchItems,
-          createItem,
-          updateItem,
-          Unit,
-          initialUnit
-        )
+        return useFormLogic(createItem, updateItem, Unit, initialUnit)
       },
       template: '<div>{{item}}</div>',
     })
@@ -40,10 +29,8 @@ describe('useFormLogic', () => {
   it('initializes correctly without initialItem', async () => {
     const wrapper = mount(createDummyComponent())
     expect(wrapper.vm.item).toBeInstanceOf(Unit)
-    expect(wrapper.vm.items).toEqual([])
     expect(wrapper.vm.isEdit).toBe(false)
     expect(wrapper.vm.valid).toBe(false)
-    expect(wrapper.vm.selectedId).toBeUndefined()
   })
 
   it('initializes correctly with initialItem', async () => {
@@ -52,36 +39,18 @@ describe('useFormLogic', () => {
 
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
         initialUnit: initialUnit,
       })
     )
 
     await flushPromises()
-    expect(wrapper.vm.selectedId).toEqual(initialUnit.id)
-    expect(wrapper.vm.items).toEqual(unitFixtures)
     expect(wrapper.vm.item).toEqual(initialUnit)
     expect(wrapper.vm.isEdit).toBe(true)
-  })
-
-  it('updates item when selectedId changes', async () => {
-    const wrapper = mount(
-      createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
-      })
-    )
-
-    await flushPromises()
-    wrapper.vm.selectedId = 'unit2'
-    await nextTick()
-
-    expect(wrapper.vm.item).toEqual(unit2)
   })
 
   it('Calls update() when in edit mode', async () => {
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
         updateItem: vi.fn(() => Promise.resolve(unit2)),
         initialUnit: unit2,
       })
@@ -97,7 +66,6 @@ describe('useFormLogic', () => {
   it('Calls create() when in create mode', async () => {
     const wrapper = mount(
       createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.resolve(unitFixtures)),
         createItem: vi.fn(() => Promise.resolve(unit1)),
       })
     )
@@ -111,11 +79,7 @@ describe('useFormLogic', () => {
 
   it('Handles errors properly', async () => {
     const mockError = new Error('Failed to fetch items')
-    const wrapper = mount(
-      createDummyComponent({
-        mockFetchItems: vi.fn(() => Promise.reject(mockError)),
-      })
-    )
+    const wrapper = mount(createDummyComponent({}))
 
     const consoleErrorSpy = vi
       .spyOn(console, 'error')

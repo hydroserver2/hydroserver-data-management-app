@@ -5,7 +5,6 @@
         v-model="selectedWorkspace"
         label="Selected Workspace"
         :items="sortedWorkspaces"
-        :key="workspaceKey"
         item-title="name"
         :return-object="true"
         variant="outlined"
@@ -142,7 +141,6 @@ const { setWorkspaces } = useWorkspaceStore()
 
 const openCreate = ref(false)
 const openWorkspaceTable = ref(false)
-const workspaceKey = ref(0)
 const search = ref()
 const selectedWorkspaceId = ref('')
 
@@ -183,7 +181,6 @@ const refreshWorkspaces = async (workspace?: Workspace) => {
       (!selectedWorkspace.value || selectedWorkspace.value.id === workspace.id)
     )
       selectedWorkspace.value = workspace
-    workspaceKey.value += 1
   } catch (error) {
     console.error('Error refreshing workspaces', error)
   }
@@ -201,7 +198,7 @@ function switchToAccessControlModal() {
 
 const headers = [
   { title: 'Name', key: 'name' },
-  { title: 'Is private', key: 'private' },
+  { title: 'Is private', key: 'isPrivate' },
   { title: 'Actions', key: 'actions', align: 'end' },
 ] as const
 </script>

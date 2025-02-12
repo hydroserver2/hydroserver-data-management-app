@@ -1,92 +1,86 @@
-import { onMounted, computed, ref, ComputedRef } from 'vue'
-import { ProcessingLevel, DatastreamMetadata } from '@/types'
-import { api as defaultApi } from '@/services/api'
+import { computed, onMounted, ref } from 'vue'
+import {
+  ProcessingLevel,
+  Unit,
+  ObservedProperty,
+  Sensor,
+  ResultQualifier,
+} from '@/types'
+import { api } from '@/services/api'
 
-interface Api {
-  fetchMetadataForThing: (id: string) => Promise<DatastreamMetadata>
-  fetchMetadataForThingOwner: (id: string) => Promise<DatastreamMetadata>
-}
+export function useMetadata(workspaceId: string) {
+  const sensors = ref<Sensor[]>([])
+  const units = ref<Unit[]>([])
+  const resultQualifiers = ref<ResultQualifier[]>([])
 
-/**
- * Fetch metadata for a specific thing or its owner.
- *
- * @param {string | null} [thingId=null] - ID of the thing to fetch metadata for.
- * @param {boolean} [forOwner=false] - Fetch metadata for the primary owner of this thing if true.
- * @param {Api} [api=defaultApi] - API service for fetching metadata.
- */
-export function useMetadata(
-  thingId?: string | null,
-  forOwner: boolean = false,
-  api: Api = defaultApi
-) {
-  const metadata = ref<DatastreamMetadata | null>(null)
-
-  const sensors = computed(
-    () =>
-      metadata.value?.sensors.sort((a, b) => a.name.localeCompare(b.name)) || []
+  const processingLevels = ref<ProcessingLevel[]>([])
+  const formattedObservedProperties = computed(() =>
+    observedProperties.value
+      .map((op) => ({
+        id: op.id,
+        title: `${op.code}: ${op.name}, ${op.type}`,
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title))
   )
 
-  const units = computed(() => {
-    const allUnits = metadata.value?.units || []
-    return allUnits
-      .filter((u) => u.type !== 'Time' && u.owner !== null)
-      .sort((a, b) => a.name.localeCompare(b.name))
-  })
-
-  const observedProperties = computed(
-    () =>
-      metadata.value?.observedProperties.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      ) || []
-  )
-
-  const formattedObservedProperties = computed(() => {
-    return (
-      observedProperties.value
-        ?.map((pl) => ({
-          id: pl.id,
-          title: `${pl.code}: ${pl.name}, ${pl.type}`,
-        }))
-        .sort((a, b) => a.title.localeCompare(b.title)) || []
-    )
-  })
-
-  const processingLevels: ComputedRef<ProcessingLevel[]> = computed(
-    () =>
-      metadata.value?.processingLevels.sort((a, b) =>
-        a.code.localeCompare(b.code)
-      ) || []
-  )
-
-  const formattedProcessingLevels = computed(
-    () =>
-      processingLevels.value?.map((pl) => ({
-        id: pl.id,
-        title: `${pl.code}: ${pl.definition}`,
-      })) || []
+  const observedProperties = ref<ObservedProperty[]>([])
+  const formattedProcessingLevels = computed(() =>
+    processingLevels.value.map((pl) => ({
+      id: pl.id,
+      title: `${pl.code}: ${pl.definition}`,
+    }))
   )
 
   const fetchMetadata = async (id: string) => {
     try {
-      metadata.value = forOwner
-        ? await api.fetchMetadataForThingOwner(id)
-        : await api.fetchMetadataForThing(id)
+      const [
+        unitsResponse,
+        observedPropertiesResponse,
+        processingLevelsResponse,
+        sensorsResponse,
+        resultQualifiersResponse,
+      ] = await Promise.all([
+        api.fetchUnits(),
+        api.fetchObservedProperties(),
+        api.fetchProcessingLevels(),
+        api.fetchSensors(),
+        api.fetchResultQualifiers(),
+      ])
+
+      units.value = (unitsResponse as Unit[])
+        .filter((u) => u.type !== 'Time' && u.workspaceId !== null)
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      sensors.value = (sensorsResponse as Sensor[]).sort(
+        (a: Sensor, b: Sensor) => a.name.localeCompare(b.name)
+      )
+
+      observedProperties.value = (
+        observedPropertiesResponse as ObservedProperty[]
+      ).sort((a, b) => a.name.localeCompare(b.name))
+
+      processingLevels.value = (
+        processingLevelsResponse as ProcessingLevel[]
+      ).sort((a, b) => a.code.localeCompare(b.code))
+
+      resultQualifiers.value = resultQualifiersResponse as ResultQualifier[]
     } catch (error) {
       console.error('Error fetching metadata', error)
     }
   }
 
   onMounted(async () => {
-    if (thingId) await fetchMetadata(thingId)
+    await fetchMetadata(workspaceId)
   })
 
   return {
     sensors,
     units,
     observedProperties,
-    processingLevels,
     formattedObservedProperties,
+    processingLevels,
     formattedProcessingLevels,
+    resultQualifiers,
     fetchMetadata,
   }
 }

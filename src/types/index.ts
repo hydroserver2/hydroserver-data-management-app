@@ -80,6 +80,7 @@ export class PostHydroShareArchive extends HydroShareArchive {
 
 export class Thing {
   id: string
+  workspaceId: string
   name: string
   owners: Owner[]
   tags: Tag[]
@@ -103,6 +104,7 @@ export class Thing {
 
   constructor() {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
     this.owners = []
     this.tags = []
@@ -182,7 +184,7 @@ export class Datastream {
 
 export class Unit {
   id: string
-  owner: string | null
+  workspaceId: string
   name: string
   symbol: string
   definition: string
@@ -190,7 +192,7 @@ export class Unit {
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.name = ''
     this.symbol = ''
     this.definition = ''
@@ -200,7 +202,7 @@ export class Unit {
 
 export class Sensor {
   id: string
-  owner: string | null
+  workspaceId: string
   name: string
   description: string
   manufacturer: string
@@ -213,7 +215,7 @@ export class Sensor {
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.name = ''
     this.description = ''
     this.manufacturer = ''
@@ -228,8 +230,8 @@ export class Sensor {
 
 export class ObservedProperty {
   id: string
+  workspaceId: string
   name: string
-  owner: string | null
   definition: string
   description: string
   type: string
@@ -237,8 +239,8 @@ export class ObservedProperty {
 
   constructor() {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
-    this.owner = null
     this.definition = ''
     this.description = ''
     this.type = 'Hydrology'
@@ -248,14 +250,14 @@ export class ObservedProperty {
 
 export class ProcessingLevel {
   id: string
-  owner: string | null
+  workspaceId: string
   code: string
   definition: string
   explanation: string
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.code = ''
     this.definition = ''
     this.explanation = ''
@@ -264,13 +266,13 @@ export class ProcessingLevel {
 
 export class ResultQualifier {
   id: string
-  owner: string | null
+  workspaceId: string
   code: string
   description: string
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.code = ''
     this.description = ''
   }
@@ -376,13 +378,6 @@ export class User {
   }
 }
 
-export interface DatastreamMetadata {
-  units: Unit[]
-  sensors: Sensor[]
-  processingLevels: ProcessingLevel[]
-  observedProperties: ObservedProperty[]
-}
-
 export interface Photo {
   id: string
   thingId: string
@@ -422,7 +417,7 @@ export interface CollaboratorRole {
 export interface WorkspaceData {
   id: string
   name: string
-  private: boolean
+  isPrivate: boolean
   owner: User
   collaboratorRole: CollaboratorRole
   pendingTransferTo?: User | null
@@ -430,8 +425,8 @@ export interface WorkspaceData {
 
 export class Workspace {
   id: string
-  name: string;
-  ['private']: boolean
+  name: string
+  isPrivate: boolean
   owner: User | null
   collaboratorRole: CollaboratorRole | null
   pendingTransferTo?: User | null
@@ -439,7 +434,7 @@ export class Workspace {
   constructor() {
     this.id = ''
     this.name = ''
-    this['private'] = false
+    this.isPrivate = false
     this.owner = null
     this.collaboratorRole = null
     this.pendingTransferTo = null
@@ -449,12 +444,12 @@ export class Workspace {
 export class PostWorkspace {
   id: string
   name: string
-  private: boolean
+  isPrivate: boolean
 
   constructor() {
     this.id = ''
     this.name = ''
-    this.private = false
+    this.isPrivate = false
   }
 }
 

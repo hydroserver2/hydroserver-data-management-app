@@ -215,6 +215,8 @@ export const api = {
     }),
   createThing: async (thing: Thing) => apiMethods.post(THINGS_BASE, thing),
   fetchThings: async () => apiMethods.fetch(THINGS_BASE),
+  fetchThingsForWorkspace: async (id: string) =>
+    apiMethods.fetch(`${THINGS_BASE}?workspace_id=${id}`),
   fetchPrimaryOwnedThings: async () =>
     apiMethods.fetch(`${THINGS_BASE}?primary_owned_only=true`),
   fetchOwnedThings: async () =>

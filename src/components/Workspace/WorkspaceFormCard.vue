@@ -16,7 +16,7 @@
           :rules="rules.requiredAndMaxLength255"
         />
         <v-checkbox
-          v-model="item.private"
+          v-model="item.isPrivate"
           label="Make this workspace private"
         />
       </v-card-text>
@@ -45,12 +45,10 @@ const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  () => Promise.resolve([]),
   api.createWorkspace,
   api.updateWorkspace,
   PostWorkspace,
-  props.workspace || undefined,
-  false
+  props.workspace || undefined
 )
 
 async function onSubmit() {

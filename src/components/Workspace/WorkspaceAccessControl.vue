@@ -157,7 +157,7 @@
 
         <v-card-text>
           <v-checkbox
-            v-model="workspace.private"
+            v-model="workspace.isPrivate"
             label="Make this workspace private"
             @click="togglePrivacy"
             hide-details

@@ -113,6 +113,7 @@ import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
 import { DataArray, Datastream } from '@/types'
+import { useWorkspaceStore } from '@/store/workspaces'
 
 const props = defineProps({
   thingId: {
@@ -126,13 +127,14 @@ const props = defineProps({
 })
 
 const { observations } = storeToRefs(useObservationStore())
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
 const actionKey = ref(1)
 
 const { sensors, units, observedProperties, processingLevels } = useMetadata(
-  props.thingId
+  selectedWorkspace.value!.id
 )
 
 const getMostRecentObsTime = (dataArray: DataArray) => {

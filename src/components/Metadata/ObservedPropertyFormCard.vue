@@ -77,12 +77,10 @@ const props = defineProps({
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchUnownedObservedProperties,
   api.createObservedProperty,
   api.updateObservedProperty,
   ObservedProperty,
-  props.observedProperty || undefined,
-  false
+  props.observedProperty || undefined
 )
 
 const handleNameUpdated = () => {

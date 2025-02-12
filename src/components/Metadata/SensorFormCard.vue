@@ -94,12 +94,10 @@ const props = defineProps({ sensor: Object as () => Sensor })
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchSensors,
   api.createSensor,
   api.updateSensor,
   Sensor,
-  props.sensor || undefined,
-  false
+  props.sensor || undefined
 )
 
 const isInstrument = computed(

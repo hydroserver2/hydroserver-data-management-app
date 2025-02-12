@@ -437,6 +437,10 @@ import { api } from '@/services/api'
 import { Datastream } from '@/types'
 import { VForm } from 'vuetify/components'
 import router from '@/router/router'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
+
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 const route = useRoute()
 const thingId = route.params.id.toString()
@@ -466,7 +470,7 @@ const {
   formattedObservedProperties,
   formattedProcessingLevels,
   fetchMetadata,
-} = useMetadata(thingId, true)
+} = useMetadata(selectedWorkspace.value!.id)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
   await fetchMetadata(thingId)

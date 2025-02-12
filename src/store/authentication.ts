@@ -93,16 +93,20 @@ export const useAuthStore = defineStore('authentication', () => {
    */
   async function initializeSession() {
     // TODO: Revert this so we're fetching in parallel
-    // const [authMethodsResponse, sessionResponse] = await Promise.all([
-    //   api.fetchAuthMethods(),
-    //   api.fetchSession(),
-    // ])
-    const authMethodsResponse = await api.fetchAuthMethods()
-    const sessionResponse = await api.fetchSession()
+    try {
+      const [authMethodsResponse, sessionResponse] = await Promise.all([
+        api.fetchAuthMethods(),
+        api.fetchSession(),
+      ])
+      // const authMethodsResponse = await api.fetchAuthMethods()
+      // const sessionResponse = await api.fetchSession()
 
-    oAuthProviders.value = authMethodsResponse.providers
-    signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
-    setSession(sessionResponse)
+      oAuthProviders.value = authMethodsResponse.providers
+      signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
+      setSession(sessionResponse)
+    } catch (error) {
+      console.log('Error fetching initializing session', error)
+    }
 
     if (isAuthenticated.value) {
       try {
