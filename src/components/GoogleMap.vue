@@ -18,11 +18,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { Thing } from '@/types'
-import {
-  loadMap,
-  getBoundedMapOptions,
-  zoomAndCenterMap,
-} from '@/utils/googleMaps/loadMap'
+import { loadMap, zoomAndCenterMap } from '@/utils/googleMaps/loadMap'
 import { loadMarkers, addColorToMarkers } from '@/utils/googleMaps/markers'
 import { useSingleMarkerMode, clearMarkers } from '@/utils/googleMaps/mapUtils'
 import { ThingWithColor } from '@/types'
@@ -89,10 +85,12 @@ const uniqueColoredThings = computed(() => {
 
 onMounted(async () => {
   if (mapContainer && mapContainer.value) {
-    const initialMapOptions = props.useBounds
-      ? getBoundedMapOptions(mapContainer.value, props.things, props.mapOptions)
-      : props.mapOptions
-    map = await loadMap(mapContainer.value, initialMapOptions)
+    map = await loadMap(
+      mapContainer.value,
+      props.mapOptions,
+      props.useBounds,
+      props.things
+    )
     markers = loadMarkers(props.things, map, markerClusterer)
 
     if (props.singleMarkerMode && map) {
