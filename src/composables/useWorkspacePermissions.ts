@@ -30,8 +30,10 @@ export function useWorkspacePermissions() {
         p.permission_type === permissionType && p.resource_type === resourceType
     )
 
-  const hasGlobalPermissions = computed(() =>
-    checkSelectedPermissions(PermissionType.Global, ResourceType.Global)
+  const hasGlobalPermissions = computed(
+    () =>
+      isWorkspaceOwner.value ||
+      checkSelectedPermissions(PermissionType.Global, ResourceType.Global)
   )
 
   const canDeleteThings = computed(

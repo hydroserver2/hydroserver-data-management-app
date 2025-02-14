@@ -23,12 +23,16 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="canEditThings">
+      <v-col cols="auto" v-if="canEditThings && !!thing">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit site information</v-btn
         >
         <v-dialog v-model="isRegisterModalOpen" width="80rem">
-          <SiteForm @close="isRegisterModalOpen = false" :thing-id="thingId" />
+          <SiteForm
+            @close="isRegisterModalOpen = false"
+            :thing-id="thingId"
+            :workspace-id="thing.workspaceId"
+          />
         </v-dialog>
       </v-col>
 
@@ -116,6 +120,7 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import { useWorkspaceStore } from '@/store/workspaces'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
@@ -125,11 +130,11 @@ const { photos, loading } = storeToRefs(usePhotosStore())
 //   useHydroShareStore()
 // )
 const { canEditThings, canDeleteThings } = useWorkspacePermissions()
-
 const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
+const { setSelectedWorkspaceById } = useWorkspaceStore()
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
@@ -197,6 +202,7 @@ onMounted(async () => {
 
     tags.value = tagResponse
     thing.value = thingResponse
+    setSelectedWorkspaceById(thing.value!.workspaceId)
     // hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
     loaded.value = true

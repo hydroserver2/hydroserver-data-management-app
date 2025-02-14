@@ -1,7 +1,11 @@
 import { ApiError } from '@/types'
 
 export async function responseInterceptor(response: Response): Promise<any> {
-  if (response.headers.get('Content-Length') === '0') return null
+  if (
+    response.headers.get('Content-Length') === '0' ||
+    response.statusText === 'No Content'
+  )
+    return null
   const contentType = response.headers.get('content-type') || ''
 
   let parsedBody: any = null

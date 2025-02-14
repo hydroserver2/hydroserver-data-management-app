@@ -201,7 +201,10 @@ const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
 const { updateTags } = useTagStore()
 
-const props = defineProps({ thingId: String })
+const props = defineProps({
+  thingId: String,
+  workspaceId: { type: String, required: true },
+})
 const emit = defineEmits(['close', 'site-created'])
 let loaded = ref(false)
 const valid = ref(false)
@@ -242,6 +245,7 @@ async function uploadThing() {
   if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
 
   try {
+    thing.workspaceId = props.workspaceId
     storedThing.value = props.thingId
       ? await api.updateThing(thing)
       : await api.createThing(thing)

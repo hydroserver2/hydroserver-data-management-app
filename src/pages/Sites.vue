@@ -116,8 +116,12 @@
       </v-card>
     </div>
 
-    <v-dialog v-model="showSiteForm" width="60rem">
-      <SiteForm @close="showSiteForm = false" @site-created="loadThings" />
+    <v-dialog v-model="showSiteForm" width="60rem" v-if="selectedWorkspace">
+      <SiteForm
+        @close="showSiteForm = false"
+        :workspace-id="selectedWorkspace.id"
+        @site-created="loadThings"
+      />
     </v-dialog>
   </template>
   <FullScreenLoader v-else />

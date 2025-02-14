@@ -26,6 +26,13 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     )
   )
 
+  const setSelectedWorkspaceById = (workspaceId: string) => {
+    const selection = workspaces.value.find((ws) => ws.id === workspaceId)
+    if (selection) selectedWorkspace.value = selection
+    // We're fetching workspaces on app load so this should never console.error
+    else console.error('Selected workspace not in workspaces list')
+  }
+
   const setWorkspaces = (newWorkspaces: Workspace[]) => {
     workspaces.value = newWorkspaces
     if (!workspaces.value.length) {
@@ -55,5 +62,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     hasWorkspaces,
     ownedWorkspaces,
     setWorkspaces,
+    setSelectedWorkspaceById,
   }
 })
