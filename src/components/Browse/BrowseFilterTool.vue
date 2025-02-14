@@ -26,11 +26,13 @@
 
     <v-col cols="12" class="align-self-center">
       <v-autocomplete
-        v-model="selectedOrganizations"
-        :items="organizations"
+        v-model="selectedWorkspaces"
+        :items="workspaces"
+        item-title="name"
+        return-object
         clearable
         prepend-inner-icon="mdi-domain"
-        label="Organizations"
+        label="Workspaces"
         multiple
         hide-details
         color="primary"
@@ -41,7 +43,7 @@
             color="primary"
             rounded
             closable
-            @click:close="removeOrganization(item)"
+            @click:close="selectedWorkspaces.splice(index)"
           >
             <span>{{ item.title }}</span>
           </v-chip>
@@ -68,14 +70,15 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Ref } from 'vue'
-import { Thing } from '@/types'
+import { Thing, Workspace } from '@/types'
 import { siteTypes } from '@/config/vocabularies'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
 
 const { smAndDown } = useDisplay()
-const selectedSiteTypes: Ref<string[]> = ref([])
-const selectedOrganizations: Ref<string[]> = ref([])
+const selectedSiteTypes = ref<string[]>([])
+const selectedWorkspaces = ref<Workspace[]>([])
 const drawer = ref(!!smAndDown)
 const panelOpen = ref([0])
 
@@ -87,30 +90,11 @@ const props = defineProps({
   },
 })
 
-const organizations = computed(() =>
-  Array.from(
-    new Set(
-      props.things
-        .flatMap((t) => t.owners.map((owner) => owner.organizationName))
-        .filter((name): name is string => Boolean(name))
-    )
-  ).sort((a, b) => a.localeCompare(b))
-)
+const { workspaces } = storeToRefs(useWorkspaceStore())
 
-const removeOrganization = (item: any) => {
-  selectedOrganizations.value = selectedOrganizations.value.filter(
-    (o) => o !== item.title
-  )
-}
-
-const isOrgValid = (thing: Thing) =>
-  selectedOrganizations.value.length === 0 ||
-  thing.owners.some(
-    (o) =>
-      o.isPrimaryOwner &&
-      o.organizationName &&
-      selectedOrganizations.value.includes(o.organizationName)
-  )
+const inSelectedWorkspaces = (thing: Thing) =>
+  selectedWorkspaces.value.length === 0 ||
+  selectedWorkspaces.value.find((ws) => ws.id === thing.workspaceId)
 
 const isTypeValid = (thing: Thing) =>
   selectedSiteTypes.value.length === 0 ||
@@ -118,15 +102,15 @@ const isTypeValid = (thing: Thing) =>
 
 const emitFilteredThings = () => {
   const filteredThings = props.things.filter(
-    (thing) => isOrgValid(thing) && isTypeValid(thing)
+    (thing) => inSelectedWorkspaces(thing) && isTypeValid(thing)
   )
   emit('filter', filteredThings)
 }
 
 const onClearFilters = () => {
   selectedSiteTypes.value = []
-  selectedOrganizations.value = []
+  selectedWorkspaces.value = []
 }
 
-watch([selectedSiteTypes, selectedOrganizations], emitFilteredThings)
+watch([selectedSiteTypes, selectedWorkspaces], emitFilteredThings)
 </script>

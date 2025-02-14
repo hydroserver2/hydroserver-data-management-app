@@ -110,7 +110,7 @@ export const useAuthStore = defineStore('authentication', () => {
 
     if (isAuthenticated.value) {
       try {
-        const workspacesResponse = await api.fetchWorkspaces()
+        const workspacesResponse = await api.fetchAssociatedWorkspaces()
         const { setWorkspaces } = useWorkspaceStore()
         setWorkspaces(workspacesResponse)
       } catch (error) {

@@ -1,5 +1,15 @@
 <template>
-  <v-container>
+  <v-container v-if="!canCreateDatastreams">
+    <v-row justify="center" align="center">
+      <v-col class="text-center" cols="12">
+        <h5 class="text-h5">
+          You don't have the required permissions to add datastreams to this
+          site.
+        </h5>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container v-else>
     <v-card elevation="3">
       <v-card-title class="my-2">
         <v-row align="center">
@@ -17,7 +27,7 @@
           <v-spacer />
 
           <v-btn
-            v-if="!datastreamId && isPrimaryOwner"
+            v-if="!datastreamId"
             color="primary-darken-2"
             variant="outlined"
             rounded="lg"
@@ -81,7 +91,7 @@
                 density="compact"
                 rounded="lg"
               >
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateSensors">
                   <v-icon
                     color="secondary-darken-2"
                     @click="showSensorModal = true"
@@ -117,7 +127,7 @@
                     <span>{{ item.title }}</span>
                   </v-tooltip>
                 </template>
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateObservedProperties">
                   <v-icon color="secondary-darken-2" @click="showOPModal = true"
                     >mdi-plus</v-icon
                   >
@@ -144,7 +154,7 @@
                 density="compact"
                 rounded="lg"
               >
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateUnits">
                   <v-icon
                     color="secondary-darken-2"
                     @click="openUnitForm = true"
@@ -172,7 +182,7 @@
                 density="compact"
                 rounded="lg"
               >
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateProcessingLevels">
                   <v-icon color="secondary-darken-2" @click="showPLModal = true"
                     >mdi-plus</v-icon
                   >
@@ -439,8 +449,16 @@ import { VForm } from 'vuetify/components'
 import router from '@/router/router'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+const {
+  canCreateObservedProperties,
+  canCreateProcessingLevels,
+  canCreateSensors,
+  canCreateUnits,
+  canCreateDatastreams,
+} = useWorkspacePermissions()
 
 const route = useRoute()
 const thingId = route.params.id.toString()
@@ -450,7 +468,6 @@ const datastreamId = route.params.datastreamId?.toString() || ''
 const timeUnits = ['seconds', 'minutes', 'hours', 'days']
 const openUnitForm = ref(false)
 
-const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
 const showPLModal = ref(false)

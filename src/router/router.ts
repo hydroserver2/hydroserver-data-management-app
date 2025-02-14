@@ -6,7 +6,6 @@ import {
 } from 'vue-router'
 import { routes } from '@/router/routes'
 import { storeToRefs } from 'pinia'
-import { api } from '@/services/api'
 import { useAuthStore } from '@/store/authentication'
 
 const router = createRouter({
@@ -49,11 +48,6 @@ router.beforeEach(
       return { name: 'Sites' }
     if (!isAuthenticated.value && to.meta.requiresAuth)
       return { name: 'Login', query: { next: to.fullPath } }
-
-    if (to.meta.requiresThingOwnership) {
-      const thing = await api.fetchThing(to.params.id as string)
-      if (!thing?.ownsThing) return { name: 'PageNotFound' }
-    }
   }
 )
 

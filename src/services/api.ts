@@ -126,8 +126,7 @@ export const api = {
       password: password,
     }),
 
-  fetchWorkspaces: async () =>
-    apiMethods.fetch(`${WORKSPACES_BASE}?associated_only=true`),
+  fetchWorkspaces: async () => apiMethods.fetch(WORKSPACES_BASE),
   fetchAssociatedWorkspaces: async () =>
     apiMethods.fetch(`${WORKSPACES_BASE}?associated_only=true`),
   fetchWorkspace: async (id: string) =>

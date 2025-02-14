@@ -23,12 +23,12 @@ export const useTagStore = defineStore('tags', () => {
 
   const deleteSelectedTags = async (thingId: string) => {
     const deletedTags = tags.value.filter(
-      (storedTag) => !previewTags.value.some((t) => t.id === storedTag.id)
+      (storedTag) => !previewTags.value.some((t) => t.key === storedTag.key)
     )
     if (deletedTags.length <= 0) return
     try {
       const requests = deletedTags.map((tag) =>
-        api.deleteSiteTag(thingId, tag.id)
+        api.deleteSiteTag(thingId, tag.key)
       )
       await Promise.all(requests)
     } catch (error) {

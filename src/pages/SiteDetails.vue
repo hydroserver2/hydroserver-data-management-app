@@ -13,7 +13,7 @@
         <h5 class="text-h5">Site information</h5>
       </v-col>
 
-      <v-col cols="auto" v-if="isOwner">
+      <v-col cols="auto" v-if="canEditThings">
         <v-btn @click="isAccessControlModalOpen = true">Access control</v-btn>
         <v-dialog v-model="isAccessControlModalOpen" width="60rem">
           <SiteAccessControl
@@ -23,7 +23,7 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="isOwner">
+      <v-col cols="auto" v-if="canEditThings">
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit site information</v-btn
         >
@@ -32,7 +32,7 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="isPrimaryOwner">
+      <v-col cols="auto" v-if="canDeleteThings">
         <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete site</v-btn
         >
@@ -46,9 +46,9 @@
         </v-dialog>
       </v-col>
 
-      <v-spacer />
+      <!-- <v-spacer />
 
-      <v-col cols="auto" v-if="isOwner && hydroShareConnected">
+      <v-col cols="auto" v-if="canEditThings && hydroShareConnected">
         <v-btn
           color="deep-orange-lighten-1"
           @click="isHydroShareModalOpen = true"
@@ -62,7 +62,7 @@
             @close="isHydroShareModalOpen = false"
           />
         </v-dialog>
-      </v-col>
+      </v-col> -->
     </v-row>
 
     <v-row class="mb-6">
@@ -89,11 +89,7 @@
       </v-col>
     </v-row>
 
-    <DatastreamTable
-      v-if="thing"
-      :is-owner="thing.ownsThing"
-      :thing-id="thingId"
-    />
+    <DatastreamTable v-if="thing" :thing-id="thingId" />
   </v-container>
   <v-container v-else-if="loaded && !authorized">
     <h5 class="text-h5 my-4">
@@ -118,41 +114,38 @@ import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
-import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
-import { useHydroShareStore } from '@/store/hydroShare'
-import { useHydroShare } from '@/composables/useHydroShare'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
-const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
-  useHydroShareStore()
-)
+
+// const { isConnected: hydroShareConnected } = useHydroShare()
+// const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
+//   useHydroShareStore()
+// )
+const { canEditThings, canDeleteThings } = useWorkspacePermissions()
 
 const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
 
-const isOwner = computed(() => thing.value?.ownsThing)
-const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
-const { isConnected: hydroShareConnected } = useHydroShare()
-
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
-const archivalBtnName = computed(() => {
-  const BASE_NAME = 'HydroShare Archival'
-  if (hydroShareArchive.value) {
-    if (hydroShareArchive.value.frequency)
-      return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
-    else return `${BASE_NAME} (manual)`
-  } else return `Configure ${BASE_NAME}`
-})
+// const archivalBtnName = computed(() => {
+//   const BASE_NAME = 'HydroShare Archival'
+//   if (hydroShareArchive.value) {
+//     if (hydroShareArchive.value.frequency)
+//       return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
+//     else return `${BASE_NAME} (manual)`
+//   } else return `Configure ${BASE_NAME}`
+// })
 
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-const isHydroShareModalOpen = ref(false)
+// const isHydroShareModalOpen = ref(false)
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
@@ -185,27 +178,26 @@ onMounted(async () => {
     .then((data) => (photos.value = data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
-    const [thingResponse, hydroShareArchiveResponse, tagResponse] =
-      await Promise.all([
-        api.fetchThing(thingId).catch((error: any) => {
-          if (parseInt(error.status) === 403) authorized.value = false
-          else console.error('Error fetching thing', error)
+    const [thingResponse, tagResponse] = await Promise.all([
+      api.fetchThing(thingId).catch((error: any) => {
+        if (parseInt(error.status) === 403) authorized.value = false
+        else console.error('Error fetching thing', error)
 
-          return null
-        }),
-        api.fetchHydroShareArchive(thingId).catch((error) => {
-          console.error('Error fetching hydroShareArchive', error)
-          return null
-        }),
-        api.fetchSiteTags(thingId).catch((error) => {
-          console.error('Error fetching additional metadata tags', error)
-          return null
-        }),
-      ])
+        return null
+      }),
+      // api.fetchHydroShareArchive(thingId).catch((error) => {
+      //   console.error('Error fetching hydroShareArchive', error)
+      //   return null
+      // }),
+      api.fetchSiteTags(thingId).catch((error) => {
+        console.error('Error fetching additional metadata tags', error)
+        return null
+      }),
+    ])
 
     tags.value = tagResponse
     thing.value = thingResponse
-    hydroShareArchive.value = hydroShareArchiveResponse
+    // hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
     loaded.value = true
   }

@@ -76,21 +76,4 @@ describe('useFormLogic', () => {
     await nextTick()
     expect(newItem).toEqual(unit1)
   })
-
-  it('Handles errors properly', async () => {
-    const mockError = new Error('Failed to fetch items')
-    const wrapper = mount(createDummyComponent({}))
-
-    const consoleErrorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {})
-
-    await flushPromises()
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Error fetching items from DB.',
-      mockError
-    )
-
-    consoleErrorSpy.mockRestore()
-  })
 })

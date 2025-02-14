@@ -2,7 +2,7 @@
   <h5 class="text-h5 my-6">Datastreams available at this site</h5>
 
   <v-row class="pb-4">
-    <v-col cols="auto" v-if="thing?.ownsThing">
+    <v-col cols="auto" v-if="canCreateDatastreams">
       <v-btn-secondary
         prependIcon="mdi-plus"
         :to="{ name: 'DatastreamForm', params: { id: thingId } }"
@@ -57,7 +57,7 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="!isOwner && !item.isDataVisible">
+      <div v-if="!canViewDatastreams && !item.isDataVisible">
         Data is private for this datastream
       </div>
       <div v-else>
@@ -74,8 +74,8 @@
     <template v-slot:item.last_observation="{ item }">
       <div
         v-if="
-          observations[item.id]?.dataArray?.length &&
-          (isOwner || item.isDataVisible)
+          (canViewDatastreams || item.isDataVisible) &&
+          observations[item.id]?.dataArray?.length
         "
       >
         <v-row>
@@ -90,10 +90,9 @@
 
     <template v-slot:item.actions="{ item }">
       <DatastreamTableActions
+        v-if="canEditDatastreams"
         :key="actionKey"
-        v-if="isOwner !== undefined"
         :datastream="item"
-        :is-owner="isOwner"
         :thing-id="thingId"
         @deleted="onDeleteDatastream(item.id)"
         @linkUpdated="loadDatastreams"
@@ -114,17 +113,17 @@ import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
 import { DataArray, Datastream } from '@/types'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const props = defineProps({
   thingId: {
     type: String,
     required: true,
   },
-  isOwner: {
-    type: Boolean,
-    required: true,
-  },
 })
+
+const { canEditDatastreams, canViewDatastreams, canCreateDatastreams } =
+  useWorkspacePermissions()
 
 const { observations } = storeToRefs(useObservationStore())
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
@@ -167,7 +166,7 @@ const formatNumber = (value: string | number): string => {
 
 const visibleDatastreams = computed(() => {
   return datastreams.value
-    .filter((d) => d.isVisible || props.isOwner)
+    .filter((d) => d.isVisible || canViewDatastreams)
     .map((d) => ({
       ...d,
       chartOpen: false,

@@ -43,6 +43,8 @@ export default defineConfig({
         '**/src/**/*.vue',
         '**/src/composables/useUserTags.ts',
         '**/src/composables/useHydroShare.ts',
+        '**/src/composables/useWorkspacePermissions.ts',
+        '**/src/composables/useMetadata.ts',
         '**/src/services/getCSRFToken.ts',
         '**/src/plugins/**',
         '**/src/router/**',

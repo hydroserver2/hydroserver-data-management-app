@@ -62,13 +62,21 @@ describe('responseInterceptor', () => {
     expect(console.error).not.toHaveBeenCalled()
   })
 
-  it('throws an error for non-401 status codes, logs null if non-JSON', async () => {
-    const mockResponse = new Response('Error occurred', {
+  it('throws an ApiError for non-401 status codes', async () => {
+    const mockErrorBody = { detail: 'Bad response' }
+    const mockResponse = new Response(JSON.stringify(mockErrorBody), {
       status: 500,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'application/json' },
     })
 
-    await expect(responseInterceptor(mockResponse)).rejects.toThrow('500')
-    expect(console.error).toHaveBeenCalledWith('API Response Not OK:', null)
+    await expect(responseInterceptor(mockResponse)).rejects.toEqual({
+      status: 500,
+      message: 'Bad response',
+    })
+
+    expect(console.error).toHaveBeenCalledWith(
+      'API response not OK:',
+      'Bad response'
+    )
   })
 })

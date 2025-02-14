@@ -29,16 +29,7 @@ export interface GraphSeries {
 
 export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
 
-export interface Owner {
-  firstName: string
-  lastName: string
-  organizationName: string
-  isPrimaryOwner: boolean
-  email: string
-}
-
 export interface Tag {
-  id: string
   key: string
   value: string
 }
@@ -82,7 +73,6 @@ export class Thing {
   id: string
   workspaceId: string
   name: string
-  owners: Owner[]
   tags: Tag[]
   hydroShareArchive?: HydroShareArchive | null
   siteType: string
@@ -92,34 +82,27 @@ export class Thing {
   longitude?: number | ''
   elevation_m?: number | ''
   elevationDatum: string
-  ownsThing: boolean
-  followsThing: boolean
   description: string
   samplingFeatureType: string
   state: string
   county: string
   country: string
-  isPrimaryOwner: boolean
   dataDisclaimer: string
 
   constructor() {
     this.id = ''
     this.workspaceId = ''
     this.name = ''
-    this.owners = []
     this.tags = []
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
     this.elevationDatum = 'WGS84'
-    this.ownsThing = false
-    this.followsThing = false
     this.description = ''
     this.samplingFeatureType = 'Site'
     this.state = ''
     this.county = ''
     this.country = ''
-    this.isPrimaryOwner = false
     this.dataDisclaimer = ''
   }
 }
@@ -135,6 +118,7 @@ export interface ThingWithColor extends Thing {
 
 export class Datastream {
   id: string
+  workspaceId: string
   name: string
   description: string
   thingId: string
@@ -162,6 +146,7 @@ export class Datastream {
 
   constructor(thingId?: string) {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
     this.description = ''
     this.thingId = thingId || ''
@@ -401,9 +386,28 @@ export class OAuthProvider {
   }
 }
 
+export enum ResourceType {
+  Global = '*',
+  View = 'view',
+  Create = 'create',
+  Edit = 'edit',
+  Delete = 'delete',
+}
+
+export enum PermissionType {
+  Global = '*',
+  Thing = 'Thing',
+  Datastream = 'Datastream',
+  Sensor = 'Sensor',
+  Unit = 'Unit',
+  ObservedProperty = 'ObservedProperty',
+  ProcessingLevel = 'ProcessingLevel',
+  Observation = 'Observation',
+}
+
 export interface Permission {
-  resource_type: string
-  permission_type: string
+  resource_type: ResourceType
+  permission_type: PermissionType
 }
 
 export interface CollaboratorRole {

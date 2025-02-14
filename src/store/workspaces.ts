@@ -1,13 +1,16 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { Workspace } from '@/types'
 import { computed, ref, watch } from 'vue'
 import Storage from '@/utils/storage'
+import { useUserStore } from './user'
 
 export const selectedWorkspaceStorage = new Storage<Workspace | null>(
   'selectedWorkspace'
 )
 
 export const useWorkspaceStore = defineStore('workspace', () => {
+  const { user } = storeToRefs(useUserStore())
+
   const workspaces = ref<Workspace[]>([])
 
   const selectedWorkspace = ref(selectedWorkspaceStorage.get() || null)
@@ -16,6 +19,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   })
 
   const hasWorkspaces = computed(() => workspaces.value?.length)
+
+  const ownedWorkspaces = computed(() =>
+    workspaces.value.filter(
+      (ws) => !!ws.owner && ws.owner.email === user.value.email
+    )
+  )
 
   const setWorkspaces = (newWorkspaces: Workspace[]) => {
     workspaces.value = newWorkspaces
@@ -44,6 +53,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     workspaces,
     selectedWorkspace,
     hasWorkspaces,
+    ownedWorkspaces,
     setWorkspaces,
   }
 })

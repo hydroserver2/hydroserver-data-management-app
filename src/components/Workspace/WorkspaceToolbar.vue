@@ -152,7 +152,7 @@ const {
   openAccessControl,
   openDialog,
   onDelete,
-} = useTableLogic(api.fetchWorkspaces, api.deleteWorkspace, Workspace)
+} = useTableLogic(workspaces.value, api.deleteWorkspace, Workspace)
 
 const sortedWorkspaces = computed(() =>
   workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
@@ -174,7 +174,7 @@ watch(
 const refreshWorkspaces = async (workspace?: Workspace) => {
   console.log('refreshing workspace')
   try {
-    items.value = await api.fetchWorkspaces()
+    items.value = await api.fetchAssociatedWorkspaces()
     setWorkspaces(items.value)
     if (
       workspace &&

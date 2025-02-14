@@ -4,6 +4,8 @@ import {
   ProcessingLevel,
   Thing,
   GraphSeries,
+  PermissionType,
+  ResourceType,
 } from '@/types'
 import {
   SummaryStatistics,
@@ -15,6 +17,7 @@ import { EChartsOption } from 'echarts'
 import { EChartsColors } from '@/utils/materialColors'
 import { createEChartsOption } from '@/utils/plotting/echarts'
 import { useObservationStore } from '@/store/observations'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 export const useDataVisStore = defineStore('dataVisualization', () => {
   const { fetchGraphSeries, fetchGraphSeriesData } = useObservationStore()
@@ -100,8 +103,13 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   function hasObservationsReadPermission(datastream: Datastream) {
     if (datastream.isDataVisible) return true
 
-    const matchingThing = things.value.find((t) => t.id === datastream.thingId)
-    return matchingThing?.ownsThing
+    const { checkPermissionsByWorkspaceId } = useWorkspacePermissions()
+
+    return checkPermissionsByWorkspaceId(
+      datastream.workspaceId,
+      PermissionType.Observation,
+      ResourceType.View
+    )
   }
 
   const filteredDatastreams = computed(() => {

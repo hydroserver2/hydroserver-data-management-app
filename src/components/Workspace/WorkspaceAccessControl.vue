@@ -4,7 +4,7 @@
       <v-card-title>Workspace access control</v-card-title>
     </v-toolbar>
 
-    <v-row v-if="isOwner">
+    <v-row v-if="isWorkspaceOwner">
       <v-col cols="12" md="6">
         <v-row align="center" class="mt-6">
           <v-col cols="auto" class="pr-0">
@@ -67,10 +67,12 @@
           </v-col>
 
           <v-col class="py-0" cols="auto">
-            <strong v-if="isOwner">(Owner)</strong>
+            <strong v-if="isWorkspaceOwner">(Owner)</strong>
             <div v-else>
               <v-btn-delete
-                v-if="!isOwner && collaborator.user.email == user.email"
+                v-if="
+                  !isWorkspaceOwner && collaborator.user.email == user.email
+                "
                 @click="onRemoveOwner(collaborator.user.email)"
                 >Remove</v-btn-delete
               >
@@ -183,6 +185,7 @@ import { Collaborator, Workspace } from '@/types'
 import router from '@/router/router'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const emits = defineEmits(['close'])
 const props = defineProps({
@@ -191,9 +194,8 @@ const props = defineProps({
 console.log('workspace', props.workspace)
 const { user } = storeToRefs(useUserStore())
 
-const isOwner = computed(
-  () => props.workspace?.owner?.email == user.value.email
-)
+const { isWorkspaceOwner } = useWorkspacePermissions()
+
 const newOwnerEmail = ref('')
 const showTransferConfirmation = ref(false)
 const newCollaboratorEmail = ref('')

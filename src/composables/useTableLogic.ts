@@ -5,7 +5,7 @@ interface WithId {
 }
 
 export function useTableLogic<T extends WithId>(
-  apiFetchFunction: () => Promise<T[]>,
+  initialItems: T[] | (() => Promise<T[]>),
   apiDeleteFunction: (id: string) => Promise<any>,
   ItemClass: new () => T
 ) {
@@ -41,7 +41,8 @@ export function useTableLogic<T extends WithId>(
 
   onMounted(async () => {
     try {
-      items.value = await apiFetchFunction()
+      if (Array.isArray(initialItems)) items.value = initialItems
+      else items.value = await initialItems()
     } catch (error) {
       console.error(`Error fetching table items`, error)
     }
