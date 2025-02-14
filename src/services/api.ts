@@ -245,9 +245,6 @@ export const api = {
   deleteSiteTag: async (thingId: string, tagId: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/tags/${tagId}`),
 
-  fetchDatastreamsForThing: async (thingId: string) =>
-    apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
-
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
   updateHydroShareArchive: async (
@@ -269,6 +266,8 @@ export const api = {
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
   fetchDatastreams: async () => apiMethods.fetch(DS_BASE),
+  fetchDatastreamsForThing: async (thingId: string) =>
+    apiMethods.fetch(`${DS_BASE}?thing_id=${thingId}`),
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),
   fetchUsersDatastreams: async () =>
     apiMethods.fetch(`${DS_BASE}?exclude_unowned=true`),

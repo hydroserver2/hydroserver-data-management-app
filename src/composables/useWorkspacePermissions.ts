@@ -8,7 +8,7 @@ export function useWorkspacePermissions() {
   const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
   const { user } = storeToRefs(useUserStore())
 
-  const permissions = computed(
+  const selectedWorkspacePermissions = computed(
     () => selectedWorkspace.value?.collaboratorRole?.permissions ?? []
   )
 
@@ -21,62 +21,89 @@ export function useWorkspacePermissions() {
       : false
   )
 
-  const checkPermission = (
+  const checkSelectedPermissions = (
     permissionType: PermissionType,
     resourceType: ResourceType
   ): boolean =>
-    hasGlobalPermissions.value ||
-    permissions.value.some(
+    selectedWorkspacePermissions.value.some(
       (p) =>
         p.permission_type === permissionType && p.resource_type === resourceType
     )
 
   const hasGlobalPermissions = computed(() =>
-    checkPermission(PermissionType.Global, ResourceType.Global)
+    checkSelectedPermissions(PermissionType.Global, ResourceType.Global)
   )
 
-  const canDeleteThings = computed(() =>
-    checkPermission(PermissionType.Thing, ResourceType.Delete)
+  const canDeleteThings = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Thing, ResourceType.Delete)
   )
 
-  const canEditThings = computed(() =>
-    checkPermission(PermissionType.Thing, ResourceType.Edit)
+  const canEditThings = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Thing, ResourceType.Edit)
   )
 
-  const canCreateDatastreams = computed(() =>
-    checkPermission(PermissionType.Datastream, ResourceType.Create)
+  const canCreateDatastreams = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Datastream, ResourceType.Create)
   )
 
-  const canEditDatastreams = computed(() =>
-    checkPermission(PermissionType.Datastream, ResourceType.Edit)
+  const canEditDatastreams = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Datastream, ResourceType.Edit)
   )
 
-  const canDeleteDatastreams = computed(() =>
-    checkPermission(PermissionType.Datastream, ResourceType.Delete)
+  const canDeleteDatastreams = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Datastream, ResourceType.Delete)
   )
 
-  const canViewDatastreams = computed(() =>
-    checkPermission(PermissionType.Datastream, ResourceType.View)
+  const canViewDatastreams = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Datastream, ResourceType.View)
   )
 
-  const canCreateSensors = computed(() =>
-    checkPermission(PermissionType.Sensor, ResourceType.Create)
+  const canCreateSensors = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Sensor, ResourceType.Create)
   )
 
-  const canCreateUnits = computed(() =>
-    checkPermission(PermissionType.Unit, ResourceType.Create)
+  const canCreateUnits = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Unit, ResourceType.Create)
   )
 
-  const canCreateObservedProperties = computed(() =>
-    checkPermission(PermissionType.ObservedProperty, ResourceType.Create)
+  const canCreateObservedProperties = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(
+        PermissionType.ObservedProperty,
+        ResourceType.Create
+      )
   )
 
-  const canCreateProcessingLevels = computed(() =>
-    checkPermission(PermissionType.ProcessingLevel, ResourceType.Create)
+  const canCreateProcessingLevels = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(
+        PermissionType.ProcessingLevel,
+        ResourceType.Create
+      )
   )
 
-  const canViewObservations = computed(() =>
-    checkPermission(PermissionType.Observation, ResourceType.View)
+  const canViewObservations = computed(
+    () =>
+      hasGlobalPermissions.value ||
+      checkSelectedPermissions(PermissionType.Observation, ResourceType.View)
   )
 
   const checkPermissionsByWorkspaceId = (

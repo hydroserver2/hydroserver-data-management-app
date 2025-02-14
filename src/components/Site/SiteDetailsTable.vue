@@ -16,7 +16,7 @@
           v-for="(tag, index) in tagProperty.value"
           rounded="true"
           :color="materialColors[index % materialColors.length]"
-          :key="tag.id"
+          :key="tag.key"
           class="mr-2 my-1"
         >
           {{ tag.key }}:
@@ -107,18 +107,6 @@ const thingProperties = computed(() => {
           icon: thing.value.isPrivate ? 'mdi-lock' : 'mdi-lock-open-variant',
           label: 'Privacy',
           value: 'Public',
-        },
-        {
-          icon: 'mdi-account-multiple',
-          label: 'Site owners',
-          value: thing.value.owners
-            .map(
-              (o) =>
-                `${o.firstName} ${o.lastName} (${
-                  o.organizationName ? o.organizationName : 'No Organization'
-                })`
-            )
-            .join(', '),
         },
         {
           icon: 'mdi-tag-multiple-outline',
