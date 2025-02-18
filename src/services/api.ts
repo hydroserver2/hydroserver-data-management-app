@@ -130,7 +130,7 @@ export const api = {
   fetchAssociatedWorkspaces: async () =>
     apiMethods.fetch(`${WORKSPACES_BASE}?associated_only=true`),
   fetchWorkspace: async (id: string) =>
-    apiMethods.post(`${WORKSPACES_BASE}/${id}`),
+    apiMethods.fetch(`${WORKSPACES_BASE}/${id}`),
   createWorkspace: async (postWorkspace: PostWorkspace) =>
     apiMethods.post(WORKSPACES_BASE, postWorkspace),
   updateWorkspace: async (
@@ -242,8 +242,8 @@ export const api = {
   fetchSiteTags: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
   fetchUsersSiteTags: async () => apiMethods.fetch(`${TAG_BASE}`),
-  deleteSiteTag: async (thingId: string, tagId: string) =>
-    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags/${tagId}`),
+  deleteSiteTag: async (thingId: string, key: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags`, { key }),
 
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),

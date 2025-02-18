@@ -120,21 +120,22 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
-import { useWorkspaceStore } from '@/store/workspaces'
+import { Workspace } from '@/types'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
+const workspace = ref<Workspace>()
 
 // const { isConnected: hydroShareConnected } = useHydroShare()
 // const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
 //   useHydroShareStore()
 // )
-const { canEditThings, canDeleteThings } = useWorkspacePermissions()
+
+const { canEditThings, canDeleteThings } = useWorkspacePermissions(workspace)
 const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
-const { setSelectedWorkspaceById } = useWorkspaceStore()
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
@@ -202,7 +203,12 @@ onMounted(async () => {
 
     tags.value = tagResponse
     thing.value = thingResponse
-    setSelectedWorkspaceById(thing.value!.workspaceId)
+    try {
+      workspace.value = await api.fetchWorkspace(thing.value!.workspaceId)
+    } catch (error) {
+      console.error('Error fetching workspace', error)
+    }
+
     // hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
     loaded.value = true
