@@ -208,10 +208,6 @@ export const api = {
       email: email,
       transferPrimary: true,
     }),
-  updateThingPrivacy: async (id: string, thingPrivacy: boolean) =>
-    apiMethods.patch(`${THINGS_BASE}/${id}/privacy`, {
-      isPrivate: thingPrivacy,
-    }),
   createThing: async (thing: Thing) => apiMethods.post(THINGS_BASE, thing),
   fetchThings: async () => apiMethods.fetch(THINGS_BASE),
   fetchThingsForWorkspace: async (id: string) =>
@@ -223,6 +219,8 @@ export const api = {
   fetchThing: async (id: string) => apiMethods.fetch(`${THINGS_BASE}/${id}`),
   updateThing: async (thing: Thing) =>
     apiMethods.patch(`${THINGS_BASE}/${thing.id}`, thing),
+  updateThingPrivacy: async (id: string, isPrivate: boolean) =>
+    apiMethods.patch(`${THINGS_BASE}/${id}`, { isPrivate }),
   deleteThing: async (id: string) => apiMethods.delete(`${THINGS_BASE}/${id}`),
   fetchMetadataForThingOwner: async (thingId: string) =>
     apiMethods.fetch(

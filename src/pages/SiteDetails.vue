@@ -15,7 +15,7 @@
 
       <v-col cols="auto" v-if="canEditThings">
         <v-btn @click="isAccessControlModalOpen = true">Access control</v-btn>
-        <v-dialog v-model="isAccessControlModalOpen" width="60rem">
+        <v-dialog v-model="isAccessControlModalOpen" width="40rem">
           <SiteAccessControl
             @close="isAccessControlModalOpen = false"
             :thing-id="thingId"

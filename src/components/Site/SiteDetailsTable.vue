@@ -106,7 +106,7 @@ const thingProperties = computed(() => {
         {
           icon: thing.value.isPrivate ? 'mdi-lock' : 'mdi-lock-open-variant',
           label: 'Privacy',
-          value: 'Public',
+          value: thing.value.isPrivate ? 'Private' : 'Public',
         },
         {
           icon: 'mdi-tag-multiple-outline',
