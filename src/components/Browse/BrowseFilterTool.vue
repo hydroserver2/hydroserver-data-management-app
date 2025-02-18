@@ -65,18 +65,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { Thing, Workspace } from '@/types'
 import { siteTypes } from '@/config/vocabularies'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { storeToRefs } from 'pinia'
-import { useWorkspaceStore } from '@/store/workspaces'
 import { useSidebarStore } from '@/store/useSidebar'
+import { api } from '@/services/api'
 
 const { smAndDown } = useDisplay()
 const selectedSiteTypes = ref<string[]>([])
 const selectedWorkspaces = ref<Workspace[]>([])
 const panelOpen = ref([0])
+const workspaces = ref<Workspace[]>([])
 
 const emit = defineEmits(['filter'])
 const props = defineProps({
@@ -86,7 +86,6 @@ const props = defineProps({
   },
 })
 
-const { workspaces } = storeToRefs(useWorkspaceStore())
 const sidebar = useSidebarStore()
 sidebar.isOpen = !!smAndDown
 
@@ -109,6 +108,15 @@ const onClearFilters = () => {
   selectedSiteTypes.value = []
   selectedWorkspaces.value = []
 }
+
+onMounted(async () => {
+  try {
+    workspaces.value = await api.fetchWorkspaces()
+    workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
+  } catch (error) {
+    console.error('Error fetching workspaces')
+  }
+})
 
 watch([selectedSiteTypes, selectedWorkspaces], emitFilteredThings)
 </script>
