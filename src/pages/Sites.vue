@@ -173,15 +173,10 @@ const matchesSearchCriteria = (thing: Thing) => {
   )
 }
 
-// TODO: Use workspace things in filteredThings and wherever ownedThings are used
-const workspaceThings = computed(
-  () => {
-    return ownedThings.value
-  }
-  // TODO: uncomment once backend provides workspaceIds to things
-  // ownedThings.value.filter(
-  //   (thing) => thing.workspaceId === selectedWorkspace.value?.id
-  // )
+const workspaceThings = computed(() =>
+  ownedThings.value.filter(
+    (thing) => thing.workspaceId === selectedWorkspace.value?.id
+  )
 )
 
 const filteredThings = computed(() => {
