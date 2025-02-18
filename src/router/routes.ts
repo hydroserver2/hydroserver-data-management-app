@@ -23,6 +23,7 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       hideFooter: true,
       isFullScreen: true,
+      hasSidebar: true,
       title: 'Browse Monitoring Sites',
       metaTags: [
         {

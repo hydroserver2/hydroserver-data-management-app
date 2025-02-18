@@ -1,85 +1,81 @@
 <template>
-  <div class="pa-4" v-if="!drawer">
-    <v-icon size="large" @click="drawer = !drawer">mdi-menu</v-icon>
-  </div>
+  <v-navigation-drawer v-model="sidebar.isOpen" width="400">
+    <v-list>
+      <v-list-subheader class="text-h6 mb-2 mt-1">
+        Browse data collection sites
+      </v-list-subheader>
 
-  <v-navigation-drawer v-model="drawer" width="400">
-    <div class="d-flex align-center justify-space-between pa-4">
-      <h5 class="text-h5">Browse data collection sites</h5>
-      <v-icon size="large" v-if="drawer" @click="drawer = !drawer"
-        >mdi-menu-open</v-icon
-      >
-    </div>
+      <v-divider />
 
-    <v-divider />
+      <v-list-item class="d-flex justify-end mt-2">
+        <v-btn
+          color="primary-darken-2"
+          variant="outlined"
+          rounded="xl"
+          @click="onClearFilters"
+          append-icon="mdi-close"
+          >Clear filters</v-btn
+        >
+      </v-list-item>
 
-    <div class="d-flex justify-end my-4 mx-2">
-      <v-btn
-        color="primary-darken-2"
-        variant="outlined"
-        rounded="xl"
-        @click="onClearFilters"
-        append-icon="mdi-close"
-        >Clear filters</v-btn
-      >
-    </div>
+      <v-list-item>
+        <v-autocomplete
+          class="pt-2"
+          v-model="selectedWorkspaces"
+          :items="workspaces"
+          item-title="name"
+          return-object
+          clearable
+          prepend-inner-icon="mdi-domain"
+          label="Workspaces"
+          multiple
+          hide-details
+          color="primary"
+          density="compact"
+        >
+          <template v-slot:selection="{ item, index }">
+            <v-chip
+              color="primary"
+              rounded
+              closable
+              @click:close="selectedWorkspaces.splice(index)"
+            >
+              <span>{{ item.title }}</span>
+            </v-chip>
+          </template>
+        </v-autocomplete>
+      </v-list-item>
 
-    <v-col cols="12" class="align-self-center">
-      <v-autocomplete
-        v-model="selectedWorkspaces"
-        :items="workspaces"
-        item-title="name"
-        return-object
-        clearable
-        prepend-inner-icon="mdi-domain"
-        label="Workspaces"
-        multiple
-        hide-details
-        color="primary"
-        density="compact"
-      >
-        <template v-slot:selection="{ item, index }">
-          <v-chip
-            color="primary"
-            rounded
-            closable
-            @click:close="selectedWorkspaces.splice(index)"
-          >
-            <span>{{ item.title }}</span>
-          </v-chip>
-        </template>
-      </v-autocomplete>
-    </v-col>
-
-    <v-expansion-panels class="pa-4" v-model="panelOpen">
-      <v-expansion-panel title="Site types" color="green">
-        <v-expansion-panel-text>
-          <v-checkbox
-            v-for="type in siteTypes"
-            v-model="selectedSiteTypes"
-            :label="type"
-            :value="type"
-            hide-details
-            density="compact"
-          />
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+      <v-expansion-panels class="pa-4" v-model="panelOpen">
+        <v-expansion-panel title="Site types" color="secondary-darken-1">
+          <v-expansion-panel-text>
+            <v-checkbox
+              v-for="type in siteTypes"
+              v-model="selectedSiteTypes"
+              :label="type"
+              :value="type"
+              hide-details
+              density="compact"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-list>
   </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { Thing, Workspace } from '@/types'
 import { siteTypes } from '@/config/vocabularies'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useSidebarStore } from '@/store/useSidebar'
 
 const { smAndDown } = useDisplay()
 const selectedSiteTypes = ref<string[]>([])
 const selectedWorkspaces = ref<Workspace[]>([])
-const drawer = ref(!!smAndDown)
 const panelOpen = ref([0])
 
 const emit = defineEmits(['filter'])
@@ -91,6 +87,8 @@ const props = defineProps({
 })
 
 const { workspaces } = storeToRefs(useWorkspaceStore())
+const sidebar = useSidebarStore()
+sidebar.isOpen = !!smAndDown
 
 const inSelectedWorkspaces = (thing: Thing) =>
   selectedWorkspaces.value.length === 0 ||

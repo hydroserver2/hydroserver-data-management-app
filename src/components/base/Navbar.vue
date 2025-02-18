@@ -1,5 +1,25 @@
 <template>
   <v-app-bar app elevation="2" density="default">
+    <template v-slot:prepend v-if="route.meta.hasSidebar">
+      <v-app-bar-nav-icon
+        v-if="sidebar.isOpen"
+        icon="mdi-menu-open"
+        @click="sidebar.toggle"
+        class="mx-3"
+        variant="tonal"
+        rounded="lg"
+        size="large"
+      />
+      <v-app-bar-nav-icon
+        v-else
+        icon="mdi-menu-close"
+        @click="sidebar.toggle"
+        class="mx-3"
+        variant="tonal"
+        rounded="lg"
+        size="large"
+      />
+    </template>
     <router-link v-if="navbarLogo.route" :to="navbarLogo.route">
       <v-img :src="navbarLogo.src" alt="Logo" :width="navbarLogo.width" />
     </router-link>
@@ -16,8 +36,14 @@
     </template>
 
     <template v-if="!mdAndDown">
+      <div class="mr-3"></div>
       <div v-for="path of paths" :key="path.label">
-        <v-btn v-if="!path.menu" v-bind="path.attrs" @click="path.onClick">
+        <v-btn
+          v-if="!path.menu"
+          v-bind="path.attrs"
+          @click="path.onClick"
+          density="comfortable"
+        >
           {{ path.label }}
         </v-btn>
 
@@ -139,12 +165,16 @@ import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { navbarLogo } from '@/config/navbarConfig'
 import { useAuthStore } from '@/store/authentication'
+import { useRoute } from 'vue-router'
+import { useSidebarStore } from '@/store/useSidebar'
 
+const route = useRoute()
 const { logout } = useAuthStore()
 const { signupEnabled, isAuthenticated } = storeToRefs(useAuthStore())
 const { resetState } = useDataVisStore()
 const { mdAndDown } = useDisplay()
 
+const sidebar = useSidebarStore()
 const drawer = ref(false)
 
 const paths: {
