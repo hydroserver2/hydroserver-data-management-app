@@ -65,9 +65,7 @@ import { useWorkspaceStore } from '@/store/workspaces'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
-const { sensors, observedProperties, processingLevels } = useMetadata(
-  selectedWorkspace.value!.id
-)
+const { sensors, observedProperties, processingLevels } = useMetadata()
 
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])

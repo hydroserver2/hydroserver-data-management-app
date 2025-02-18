@@ -1,19 +1,31 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, Ref, ref, watch } from 'vue'
 import {
   ProcessingLevel,
   Unit,
   ObservedProperty,
   Sensor,
   ResultQualifier,
+  Workspace,
 } from '@/types'
 import { api } from '@/services/api'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
 
-export function useMetadata(workspaceId: string) {
+export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
+  const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+
+  const effectiveWorkspace = computed(
+    () => localWorkspace?.value ?? selectedWorkspace.value
+  )
+
+  const workspaceId = computed(() => effectiveWorkspace.value?.id ?? null)
+
   const sensors = ref<Sensor[]>([])
   const units = ref<Unit[]>([])
   const resultQualifiers = ref<ResultQualifier[]>([])
-
   const processingLevels = ref<ProcessingLevel[]>([])
+  const observedProperties = ref<ObservedProperty[]>([])
+
   const formattedObservedProperties = computed(() =>
     observedProperties.value
       .map((op) => ({
@@ -23,7 +35,6 @@ export function useMetadata(workspaceId: string) {
       .sort((a, b) => a.title.localeCompare(b.title))
   )
 
-  const observedProperties = ref<ObservedProperty[]>([])
   const formattedProcessingLevels = computed(() =>
     processingLevels.value.map((pl) => ({
       id: pl.id,
@@ -48,30 +59,54 @@ export function useMetadata(workspaceId: string) {
       ])
 
       units.value = (unitsResponse as Unit[])
-        .filter((u) => u.type !== 'Time' && u.workspaceId !== null)
+        .filter(
+          (u) =>
+            (u.type !== 'Time' && u.workspaceId === null) ||
+            u.workspaceId === id
+        )
         .sort((a, b) => a.name.localeCompare(b.name))
 
-      sensors.value = (sensorsResponse as Sensor[]).sort(
-        (a: Sensor, b: Sensor) => a.name.localeCompare(b.name)
-      )
+      sensors.value = (sensorsResponse as Sensor[])
+        .filter((s) => s.workspaceId === null || s.workspaceId === id)
+        .sort((a: Sensor, b: Sensor) => a.name.localeCompare(b.name))
 
       observedProperties.value = (
         observedPropertiesResponse as ObservedProperty[]
-      ).sort((a, b) => a.name.localeCompare(b.name))
+      )
+        .filter((op) => op.workspaceId === null || op.workspaceId === id)
+        .sort((a, b) => a.name.localeCompare(b.name))
 
-      processingLevels.value = (
-        processingLevelsResponse as ProcessingLevel[]
-      ).sort((a, b) => a.code.localeCompare(b.code))
+      processingLevels.value = (processingLevelsResponse as ProcessingLevel[])
+        .filter((p) => p.workspaceId === null || p.workspaceId === id)
+        .sort((a, b) => a.code.localeCompare(b.code))
 
-      resultQualifiers.value = resultQualifiersResponse as ResultQualifier[]
+      resultQualifiers.value = (
+        resultQualifiersResponse as ResultQualifier[]
+      ).filter((r) => r.workspaceId === null || r.workspaceId === id)
     } catch (error) {
       console.error('Error fetching metadata', error)
     }
   }
 
-  onMounted(async () => {
-    await fetchMetadata(workspaceId)
-  })
+  /**
+   * Watch the effective workspace ID. When it changes (including on first mount),
+   *    immediately fetch metadata if a valid workspace ID is available.
+   */
+  watch(
+    workspaceId,
+    async (id) => {
+      if (id) {
+        await fetchMetadata(id)
+      } else {
+        sensors.value = []
+        units.value = []
+        observedProperties.value = []
+        processingLevels.value = []
+        resultQualifiers.value = []
+      }
+    },
+    { immediate: true }
+  )
 
   return {
     sensors,

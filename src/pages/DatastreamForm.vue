@@ -209,7 +209,7 @@
                 :rules="[
                   ...rules.requiredNumber,
                   () =>
-                    datastream.timeAggregationIntervalUnits != null ||
+                    datastream.timeAggregationIntervalUnit != null ||
                     'An interval must be selected.',
                 ]"
                 type="number"
@@ -225,7 +225,7 @@
                 class="no-wrap pt-0 mb-4"
               >
                 <v-btn-toggle
-                  v-model="datastream.timeAggregationIntervalUnits"
+                  v-model="datastream.timeAggregationIntervalUnit"
                   label="Time aggregation unit *"
                   :items="timeUnits"
                   variant="outlined"
@@ -247,7 +247,7 @@
                 :rules="[
                   () =>
                     !datastream.intendedTimeSpacing ||
-                    datastream.intendedTimeSpacingUnits != null ||
+                    datastream.intendedTimeSpacingUnit != null ||
                     'Unit is required when a time spacing value is provided.',
                 ]"
                 type="number"
@@ -263,7 +263,7 @@
                 class="no-wrap pt-0"
               >
                 <v-btn-toggle
-                  v-model="datastream.intendedTimeSpacingUnits"
+                  v-model="datastream.intendedTimeSpacingUnit"
                   label="Intended time spacing unit"
                   :items="timeUnits"
                   variant="outlined"
@@ -427,7 +427,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
@@ -444,21 +444,19 @@ import {
 import { useMetadata } from '@/composables/useMetadata'
 import { Thing } from '@/types'
 import { api } from '@/services/api'
-import { Datastream } from '@/types'
+import { Datastream, Workspace } from '@/types'
 import { VForm } from 'vuetify/components'
 import router from '@/router/router'
-import { storeToRefs } from 'pinia'
-import { useWorkspaceStore } from '@/store/workspaces'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+const workspace = ref<Workspace>()
 const {
   canCreateObservedProperties,
   canCreateProcessingLevels,
   canCreateSensors,
   canCreateUnits,
   canCreateDatastreams,
-} = useWorkspacePermissions()
+} = useWorkspacePermissions(workspace)
 
 const route = useRoute()
 const thingId = route.params.id.toString()
@@ -487,7 +485,7 @@ const {
   formattedObservedProperties,
   formattedProcessingLevels,
   fetchMetadata,
-} = useMetadata(selectedWorkspace.value!.id)
+} = useMetadata(workspace)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
   await fetchMetadata(thingId)
@@ -511,7 +509,6 @@ const generateDefaultDescription = () => {
   const OP = observedProperties.value.find(
     (pl) => pl.id === datastream.value.observedPropertyId
   )?.name
-  console.log('computing description', OP)
   const PL = processingLevels.value.find(
     (pl) => pl.id === datastream.value.processingLevelId
   )?.code
@@ -534,8 +531,8 @@ watch(selectedDatastreamID, async () => {
       observedPropertyId: fetchedDS.observedPropertyId,
       processingLevelId: fetchedDS.processingLevelId,
       unitId: fetchedDS.unitId,
-      timeAggregationIntervalUnits: fetchedDS.timeAggregationIntervalUnits,
-      intendedTimeSpacingUnits: fetchedDS.intendedTimeSpacingUnits,
+      timeAggregationIntervalUnit: fetchedDS.timeAggregationIntervalUnit,
+      intendedTimeSpacingUnit: fetchedDS.intendedTimeSpacingUnit,
       name: fetchedDS.name,
       description: fetchedDS.description,
       sampledMedium: fetchedDS.sampledMedium,
@@ -590,6 +587,12 @@ onMounted(async () => {
       originalDescription.value = datastream.value.description
     }
     thing.value = fetchedThing
+
+    try {
+      workspace.value = await api.fetchWorkspace(thing.value!.workspaceId)
+    } catch (error) {
+      console.error('Error fetching workspace', error)
+    }
   } catch (error) {
     Snackbar.error('Unable to fetch data from the API.')
     console.error('Error fetching datastream data from DB.', error)

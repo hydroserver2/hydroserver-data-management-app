@@ -112,7 +112,6 @@ import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
 import { DataArray, Datastream } from '@/types'
-import { useWorkspaceStore } from '@/store/workspaces'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const props = defineProps({
@@ -126,15 +125,12 @@ const { canEditDatastreams, canViewDatastreams, canCreateDatastreams } =
   useWorkspacePermissions()
 
 const { observations } = storeToRefs(useObservationStore())
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 const { thing } = storeToRefs(useThingStore())
 const datastreams = ref<Datastream[]>([])
 const actionKey = ref(1)
 
-const { sensors, units, observedProperties, processingLevels } = useMetadata(
-  selectedWorkspace.value!.id
-)
+const { sensors, units, observedProperties, processingLevels } = useMetadata()
 
 const getMostRecentObsTime = (dataArray: DataArray) => {
   if (!dataArray.length) return undefined
