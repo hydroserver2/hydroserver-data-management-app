@@ -63,10 +63,10 @@
         v-for="(tag, index) in previewTags"
         rounded="true"
         :color="materialColors[index % materialColors.length]"
-        :key="tag.id"
+        :key="tag.key"
         closable
         class="mr-1 mb-1"
-        @click:close="removeTag(index)"
+        @click:close="previewTags.splice(index, 1)"
       >
         {{ tag.key }}: {{ tag.value }}
       </v-chip>
@@ -93,12 +93,10 @@ const addTag = () => {
   if (formKey.value === '' || formValue.value === '') {
     return
   }
-  previewTags.value.push({ key: formKey.value, value: formValue.value, id: '' })
+  previewTags.value.push({ key: formKey.value, value: formValue.value })
   formKey.value = ''
   formValue.value = ''
 }
-
-const removeTag = (index: number) => previewTags.value.splice(index, 1)
 
 onMounted(async () => {
   previewTags.value = props.thingId ? [...tags.value] : []
