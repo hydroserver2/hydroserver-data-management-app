@@ -45,7 +45,7 @@
     </v-toolbar>
     <v-data-table-virtual
       :headers="headers"
-      :items="items"
+      :items="workspaces"
       :sort-by="[{ key: 'name' }]"
       :search="search"
       multi-sort
@@ -103,14 +103,14 @@
   <v-dialog v-model="openAccessControl" width="60rem">
     <WorkspaceAccessControl
       @close="openAccessControl = false"
-      :workspace="item"
+      :workspace="activeItem"
     />
   </v-dialog>
 
   <v-dialog v-model="openEdit" width="30rem">
     <WorkspaceFormCard
       @close="openEdit = false"
-      :workspace="item"
+      :workspace="activeItem"
       @updated="refreshWorkspaces"
     />
   </v-dialog>
@@ -118,9 +118,9 @@
   <v-dialog v-model="openDelete" width="30rem">
     <DeleteWorkspaceCard
       @close="openDelete = false"
-      @delete="onDeleteWorkspace"
+      @delete="onDelete"
       @switch-to-access-control="switchToAccessControlModal"
-      :workspace="item"
+      :workspace="activeItem"
     />
   </v-dialog>
 </template>
@@ -134,30 +134,23 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { Workspace } from '@/types'
 import { api } from '@/services/api'
-import { useTableLogic } from '@/composables/useTableLogic'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 
-const openCreate = ref(false)
 const openWorkspaceTable = ref(false)
-const search = ref()
-const selectedWorkspaceId = ref('')
-
-const {
-  item,
-  items,
-  openEdit,
-  openDelete,
-  openAccessControl,
-  openDialog,
-  onDelete,
-} = useTableLogic(workspaces.value, api.deleteWorkspace, Workspace)
+const openCreate = ref(false)
+const openEdit = ref(false)
+const openDelete = ref(false)
+const openAccessControl = ref(false)
+const search = ref<string>('')
+const activeItem = ref<Workspace>(new Workspace())
 
 const sortedWorkspaces = computed(() =>
   workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
 )
 
+const selectedWorkspaceId = ref('')
 watch(
   selectedWorkspaceId,
   (newId) => {
@@ -168,14 +161,23 @@ watch(
   { immediate: true }
 )
 
+function openDialog(
+  item: Workspace,
+  dialog: 'edit' | 'delete' | 'accessControl'
+) {
+  activeItem.value = item
+  if (dialog === 'edit') openEdit.value = true
+  if (dialog === 'delete') openDelete.value = true
+  if (dialog === 'accessControl') openAccessControl.value = true
+}
+
 /** We need refreshWorkspaces because we're saving a global workspaces array that should
  * always be the source of truth. This function syncs the table items with the db and global workspaces.
  */
 const refreshWorkspaces = async (workspace?: Workspace) => {
-  console.log('refreshing workspace')
   try {
-    items.value = await api.fetchAssociatedWorkspaces()
-    setWorkspaces(items.value)
+    const workspacesResponse = await api.fetchAssociatedWorkspaces()
+    setWorkspaces(workspacesResponse)
     if (
       workspace &&
       (!selectedWorkspace.value || selectedWorkspace.value.id === workspace.id)
@@ -186,9 +188,14 @@ const refreshWorkspaces = async (workspace?: Workspace) => {
   }
 }
 
-const onDeleteWorkspace = async () => {
-  await onDelete()
-  refreshWorkspaces()
+async function onDelete() {
+  if (!activeItem.value) return
+  try {
+    await api.deleteWorkspace(activeItem.value.id)
+    refreshWorkspaces()
+  } catch (error) {
+    console.error('Error deleting workspace', error)
+  }
 }
 
 function switchToAccessControlModal() {
