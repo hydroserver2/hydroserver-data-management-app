@@ -99,6 +99,8 @@
                   >
                   <v-dialog v-model="showSensorModal" width="60rem">
                     <SensorFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="handleMetadataUploaded('sensorId', $event)"
                       @close="showSensorModal = false"
                     />
@@ -133,6 +135,8 @@
                   >
                   <v-dialog v-model="showOPModal" width="60rem">
                     <ObservedPropertyFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="
                         handleMetadataUploaded('observedPropertyId', $event)
                       "
@@ -162,6 +166,8 @@
                   >
                   <v-dialog v-model="openUnitForm" width="60rem">
                     <UnitFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="handleMetadataUploaded('unitId', $event)"
                       @close="openUnitForm = false"
                       >Add New</UnitFormCard
@@ -188,6 +194,8 @@
                   >
                   <v-dialog v-model="showPLModal" width="60rem">
                     <ProcessingLevelFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="
                         handleMetadataUploaded('processingLevelId', $event)
                       "
@@ -488,7 +496,7 @@ const {
 } = useMetadata(workspace)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
-  await fetchMetadata(thingId)
+  await fetchMetadata(workspace.value!.id)
   ;(datastream.value as any)[dsKey] = newId
 }
 

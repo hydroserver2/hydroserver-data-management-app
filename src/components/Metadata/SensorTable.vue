@@ -17,6 +17,7 @@
       :sensor="item"
       @close="openEdit = false"
       @updated="onUpdate"
+      :workspace-id="workspaceId"
     />
   </v-dialog>
 
@@ -37,12 +38,20 @@ import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
 import { Sensor } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
-import { computed } from 'vue'
+import { computed, toRef } from 'vue'
+
+const props = defineProps<{
+  search: string | undefined
+  workspaceId: string
+}>()
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
-  useTableLogic(api.fetchCurrentUserSensors, api.deleteSensor, Sensor)
-
-const props = defineProps<{ search: string | undefined }>()
+  useTableLogic(
+    async (wsId: string) => await api.fetchWorkspaceSensors(wsId),
+    api.deleteSensor,
+    Sensor,
+    toRef(props, 'workspaceId')
+  )
 
 const headers = [
   { title: 'Name', key: 'name' },

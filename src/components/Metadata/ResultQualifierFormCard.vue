@@ -42,7 +42,11 @@ import { ResultQualifier } from '@/types'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
 
-const props = defineProps({ resultQualifier: Object as () => ResultQualifier })
+const props = defineProps<{
+  resultQualifier?: ResultQualifier
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['updated', 'created', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
@@ -54,6 +58,7 @@ const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
 
 async function onSubmit() {
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)

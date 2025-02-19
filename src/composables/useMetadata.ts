@@ -1,4 +1,4 @@
-import { computed, onMounted, Ref, ref, watch } from 'vue'
+import { computed, Ref, ref, watch } from 'vue'
 import {
   ProcessingLevel,
   Unit,
@@ -95,15 +95,7 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
   watch(
     workspaceId,
     async (id) => {
-      if (id) {
-        await fetchMetadata(id)
-      } else {
-        sensors.value = []
-        units.value = []
-        observedProperties.value = []
-        processingLevels.value = []
-        resultQualifiers.value = []
-      }
+      if (id) await fetchMetadata(id)
     },
     { immediate: true }
   )

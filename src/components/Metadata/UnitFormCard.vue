@@ -52,7 +52,11 @@ import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Unit } from '@/types'
 
-const props = defineProps({ unit: Object as () => Unit })
+const props = defineProps<{
+  unit?: Unit
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
@@ -63,6 +67,7 @@ const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
 
 async function onSubmit() {
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)

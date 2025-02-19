@@ -1,13 +1,14 @@
-import { Ref, onMounted, ref } from 'vue'
+import { Ref, ref, watch } from 'vue'
 
 interface WithId {
   id: string
 }
 
 export function useTableLogic<T extends WithId>(
-  initialItems: T[] | (() => Promise<T[]>),
+  fetchFn: (wsId: string) => Promise<T[]>,
   apiDeleteFunction: (id: string) => Promise<any>,
-  ItemClass: new () => T
+  ItemClass: new () => T,
+  workspaceId: Ref<string>
 ) {
   const openEdit = ref(false)
   const openDelete = ref(false)
@@ -39,14 +40,25 @@ export function useTableLogic<T extends WithId>(
     }
   }
 
-  onMounted(async () => {
+  async function loadData() {
     try {
-      if (Array.isArray(initialItems)) items.value = initialItems
-      else items.value = await initialItems()
+      if (!workspaceId.value) {
+        items.value = []
+        return
+      }
+      items.value = await fetchFn(workspaceId.value)
     } catch (error) {
       console.error(`Error fetching table items`, error)
     }
-  })
+  }
+
+  watch(
+    workspaceId,
+    async (newVal, oldVal) => {
+      if (newVal !== oldVal) await loadData()
+    },
+    { immediate: true }
+  )
 
   return {
     openEdit,

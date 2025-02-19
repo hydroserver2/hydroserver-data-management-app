@@ -12,9 +12,8 @@
       validate-on="blur"
     >
       <v-card-text>
-        <v-combobox
+        <v-text-field
           v-model="item.name"
-          :items="OPNames"
           hide-details
           label="Name *"
           :rules="rules.requiredAndMaxLength255"
@@ -71,9 +70,11 @@ import { ObservedProperty } from '@/types'
 
 const OPNames = Object.keys(OPNameTypes)
 
-const props = defineProps({
-  observedProperty: Object as () => ObservedProperty,
-})
+const props = defineProps<{
+  observedProperty?: ObservedProperty
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
@@ -93,6 +94,7 @@ const handleNameUpdated = () => {
 
 async function onSubmit() {
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)
