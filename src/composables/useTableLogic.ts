@@ -6,7 +6,7 @@ interface WithId {
 
 export function useTableLogic<T extends WithId>(
   fetchFn: (wsId: string) => Promise<T[]>,
-  apiDeleteFunction: (id: string) => Promise<any>,
+  deleteFn: (id: string) => Promise<any>,
   ItemClass: new () => T,
   workspaceId: Ref<string>
 ) {
@@ -32,7 +32,7 @@ export function useTableLogic<T extends WithId>(
   const onDelete = async () => {
     if (!item.value) return
     try {
-      await apiDeleteFunction(item.value.id)
+      await deleteFn(item.value.id)
       items.value = items.value.filter((u: any) => u.id !== item.value.id)
       openDelete.value = false
     } catch (error) {
