@@ -364,9 +364,7 @@ const collaboratorToFormData = (c: Collaborator) => ({
 })
 
 const setCollaboratorList = (collaborators: Collaborator[]) => {
-  collaboratorList.value = collaborators
-    .map((c) => collaboratorToFormData(c))
-    .sort((a, b) => a.name.localeCompare(b.name))
+  collaboratorList.value = collaborators.map((c) => collaboratorToFormData(c))
 
   if (props.workspace?.owner) {
     collaboratorList.value.unshift({
@@ -379,6 +377,7 @@ const setCollaboratorList = (collaborators: Collaborator[]) => {
       isBeingEdited: false,
     })
   }
+  collaboratorList.value.sort((a, b) => a.name.localeCompare(b.name))
 }
 
 onMounted(async () => {
