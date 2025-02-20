@@ -1,7 +1,10 @@
 <template>
   <v-card>
     <v-toolbar color="primary-darken-5">
-      <v-card-title>Workspace access control</v-card-title>
+      <v-card-title
+        >Workspace access control
+        <span class="opacity-80">- {{ workspace.name }}</span>
+      </v-card-title>
     </v-toolbar>
 
     <v-row v-if="isWorkspaceOwner">
@@ -52,33 +55,82 @@
 
         <v-row class="mt-6">
           <v-col>
-            <v-card-title class="text-h6"> Collaborators </v-card-title>
+            <v-card-title class="text-h6 pb-0"> Collaborators </v-card-title>
           </v-col>
         </v-row>
 
-        <v-row v-for="collaborator in collaborators" class="my-1">
-          <v-col cols="auto" class="py-0">
-            {{ collaborator.user.name }} -
-            {{
-              collaborator.user.organizationName
-                ? collaborator.user.organizationName
-                : 'No Organization'
-            }}
-          </v-col>
+        <v-card-text>
+          <div class="collaborator-list-container">
+            <v-list
+              lines="three"
+              v-model:selected="selection"
+              select-strategy="leaf"
+            >
+              <v-list-group v-for="item in collaboratorList" :key="item.value">
+                <template v-slot:activator="{ props }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.name"
+                    :value="item.value"
+                    active-class="text-red"
+                  >
+                    <v-list-item-subtitle
+                      v-if="item.isBeingEdited"
+                      class="mb-1 text-high-emphasis opacity-100"
+                    >
+                      <v-select
+                        v-model="item.pendingRole"
+                        :items="roles"
+                        item-title="name"
+                        @click.stop
+                        @mousedown.stop
+                        :return-object="true"
+                        variant="outlined"
+                        hide-details
+                      />
+                      <div class="d-flex my-2">
+                        <v-btn-cancel class="mr-2" @click="onCancelEdit(item)"
+                          >Cancel</v-btn-cancel
+                        >
+                        <v-btn @click="onSaveRole(item)">Save</v-btn>
+                      </div>
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-else
+                      class="mb-1 text-high-emphasis opacity-100"
+                    >
+                      {{ item.role.name }}
+                    </v-list-item-subtitle>
 
-          <v-col class="py-0" cols="auto">
-            <strong v-if="isWorkspaceOwner">(Owner)</strong>
-            <div v-else>
-              <v-btn-delete
-                v-if="
-                  !isWorkspaceOwner && collaborator.user.email == user.email
-                "
-                @click="onRemoveOwner(collaborator.user.email)"
-                >Remove</v-btn-delete
-              >
-            </div>
-          </v-col>
-        </v-row>
+                    <v-list-item-subtitle
+                      class="mb-2 text-high-emphasis opacity-60"
+                    >
+                      {{ item.organization }}
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </template>
+
+                <v-list-item>
+                  <template v-slot:append>
+                    <v-btn
+                      variant="outlined"
+                      class="mr-2"
+                      :disabled="item.isOwner || item.isBeingEdited"
+                      @click="item.isBeingEdited = true"
+                      >Edit roll</v-btn
+                    >
+                    <v-btn-delete
+                      variant="outlined"
+                      :disabled="item.isOwner || item.isBeingEdited"
+                      @click="onRemoveCollaborator(item.email)"
+                      >Remove collaborator</v-btn-delete
+                    >
+                  </template>
+                </v-list-item>
+              </v-list-group>
+            </v-list>
+          </div>
+        </v-card-text>
       </v-col>
 
       <v-col cols="12" md="6">
@@ -159,9 +211,9 @@
 
         <v-card-text>
           <v-checkbox
-            v-model="workspace.isPrivate"
+            v-model="isPrivate"
             label="Make this workspace private"
-            @click="togglePrivacy"
+            @change="togglePrivacy"
             hide-details
           />
         </v-card-text>
@@ -178,7 +230,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { Collaborator, Workspace } from '@/types'
@@ -187,27 +239,53 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
-const emits = defineEmits(['close'])
+const emits = defineEmits(['close', 'privacy-updated'])
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
 })
-console.log('workspace', props.workspace)
+const isPrivate = ref(props.workspace.isPrivate)
 const { user } = storeToRefs(useUserStore())
 
 const { isWorkspaceOwner } = useWorkspacePermissions()
 
+const selection = ref([])
 const newOwnerEmail = ref('')
 const showTransferConfirmation = ref(false)
 const newCollaboratorEmail = ref('')
 const openHydroSharePrivacy = ref(false)
 const isUpdating = ref(false)
-const collaborators = ref<Collaborator[]>([])
 const roles = ref([])
 const selectedRole = ref()
 
 const showPrivacyHelp = ref(false)
 const showAddCollaboratorHelp = ref(false)
 const showTransferHelp = ref(false)
+
+const collaboratorList = ref<any[]>([])
+
+async function onCancelEdit(item: any) {
+  item.pendingRole = item.role
+  item.isBeingEdited = false
+}
+
+/**
+ * Save the new role, then reset editing state
+ */
+async function onSaveRole(item: any) {
+  try {
+    const roleResponse = await api.updateCollaboratorRole(
+      props.workspace.id,
+      item.email,
+      item.pendingRole.id
+    )
+    item.role = roleResponse.role
+    item.isBeingEdited = false
+    Snackbar.success('Collaborator role updated.')
+  } catch (error) {
+    console.error('Error updating collaborator role:', error)
+    Snackbar.error('Failed to update collaborator role.')
+  }
+}
 
 async function onTransferOwnership() {
   if (!newOwnerEmail.value) return
@@ -228,28 +306,28 @@ async function onAddCollaborator() {
     return
   }
   try {
-    console.log('selectedRole', selectedRole.value)
     const collaboratorResponse = await api.addCollaborator(
       props.workspace!.id,
       newCollaboratorEmail.value,
       selectedRole.value.id
     )
-    console.log('collaboratorResponse', collaboratorResponse)
-    collaborators.value = collaboratorResponse
-    // TODO: update workspace collaborators
+    collaboratorList.value.push(collaboratorToFormData(collaboratorResponse))
+    collaboratorList.value.sort((a, b) => a.name.localeCompare(b.name))
+    Snackbar.success('Collaborator added to workspace.')
   } catch (error: any) {
     console.error('Error adding secondary owner', error)
-    console.log(error)
     Snackbar.error(error.message)
     return
   }
   newCollaboratorEmail.value = ''
+  selectedRole.value = ''
 }
 
-async function onRemoveOwner(email: string) {
+async function onRemoveCollaborator(email: string) {
   try {
     await api.removeCollaborator(props.workspace!.id, email)
-    // TODO: update workspace
+    const index = collaboratorList.value.findIndex((c) => c.email === email)
+    if (index !== -1) collaboratorList.value.splice(index, 1)
     Snackbar.success('Owner removed for site.')
     if (email === user.value.email) await router.push({ name: 'Sites' })
   } catch (error) {
@@ -257,10 +335,14 @@ async function onRemoveOwner(email: string) {
   }
 }
 
-async function togglePrivacy(updateHydroShare?: boolean) {
+async function togglePrivacy() {
   try {
     isUpdating.value = true
-    await api.updateWorkspace(props.workspace)
+    await api.updateWorkspace({
+      id: props.workspace.id,
+      isPrivate: isPrivate.value,
+    } as Workspace)
+    emits('privacy-updated', isPrivate.value)
   } catch (error) {
     console.error('Error updating thing privacy', error)
   } finally {
@@ -270,6 +352,34 @@ async function togglePrivacy(updateHydroShare?: boolean) {
 }
 
 const emitClose = () => emits('close')
+const collaboratorToFormData = (c: Collaborator) => ({
+  email: c.user.email,
+  value: c.user.email,
+  name: c.user.name,
+  role: c.role,
+  pendingRole: c.role,
+  organization: c.user.organizationName || 'No Organization',
+  isOwner: false,
+  isBeingEdited: false,
+})
+
+const setCollaboratorList = (collaborators: Collaborator[]) => {
+  collaboratorList.value = collaborators
+    .map((c) => collaboratorToFormData(c))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  if (props.workspace?.owner) {
+    collaboratorList.value.unshift({
+      email: props.workspace.owner.email,
+      value: props.workspace.owner.email,
+      name: props.workspace.owner.name,
+      role: { name: 'Owner' },
+      organization: props.workspace.owner.organizationName || 'No Organization',
+      isOwner: true,
+      isBeingEdited: false,
+    })
+  }
+}
 
 onMounted(async () => {
   try {
@@ -278,10 +388,17 @@ onMounted(async () => {
       api.getCollaboratorRoles(props.workspace.id),
     ])
 
-    collaborators.value = collaboratorsResponse
     roles.value = rolesResponse
+    setCollaboratorList(collaboratorsResponse)
   } catch (error) {
     console.error('Error fetching collaborators for workspace', error)
   }
 })
 </script>
+
+<style scoped>
+.collaborator-list-container {
+  max-height: 360px; /* max-height to about 4 collaborator items */
+  overflow-y: auto;
+}
+</style>

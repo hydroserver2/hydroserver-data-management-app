@@ -13,7 +13,7 @@ import {
   PostHydroShareArchive,
   HydroShareArchive,
   User,
-  PostWorkspace,
+  Workspace,
 } from '@/types'
 import { getCSRFToken } from './getCSRFToken'
 
@@ -131,11 +131,11 @@ export const api = {
     apiMethods.fetch(`${WORKSPACES_BASE}?associated_only=true`),
   fetchWorkspace: async (id: string) =>
     apiMethods.fetch(`${WORKSPACES_BASE}/${id}`),
-  createWorkspace: async (postWorkspace: PostWorkspace) =>
+  createWorkspace: async (postWorkspace: Workspace) =>
     apiMethods.post(WORKSPACES_BASE, postWorkspace),
   updateWorkspace: async (
-    newWorkspace: PostWorkspace,
-    oldWorkspace: PostWorkspace | null = null
+    newWorkspace: Workspace,
+    oldWorkspace: Workspace | null = null
   ) =>
     apiMethods.patch(
       `${WORKSPACES_BASE}/${newWorkspace.id}`,
@@ -169,7 +169,7 @@ export const api = {
       roleId,
     }),
   removeCollaborator: async (id: string, email: string) =>
-    apiMethods.put(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
 
   fetchConnectedProviders: async () =>
     apiMethods.fetch(`${PROVIDER_BASE}/connections`),

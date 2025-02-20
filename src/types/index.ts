@@ -431,7 +431,7 @@ export class Workspace {
   id: string
   name: string
   isPrivate: boolean
-  owner: User | null
+  owner: UserInfo | null
   collaboratorRole: CollaboratorRole | null
   pendingTransferTo?: User | null
 
@@ -442,18 +442,6 @@ export class Workspace {
     this.owner = null
     this.collaboratorRole = null
     this.pendingTransferTo = null
-  }
-}
-
-export class PostWorkspace {
-  id: string
-  name: string
-  isPrivate: boolean
-
-  constructor() {
-    this.id = ''
-    this.name = ''
-    this.isPrivate = false
   }
 }
 

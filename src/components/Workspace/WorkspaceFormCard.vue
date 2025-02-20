@@ -39,7 +39,7 @@ import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { Workspace, PostWorkspace } from '@/types'
+import { Workspace } from '@/types'
 
 const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
@@ -47,7 +47,7 @@ const emit = defineEmits(['created', 'updated', 'close'])
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   api.createWorkspace,
   api.updateWorkspace,
-  PostWorkspace,
+  Workspace,
   props.workspace || undefined
 )
 

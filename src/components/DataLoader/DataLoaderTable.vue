@@ -28,6 +28,7 @@ import DeleteDataLoaderCard from '@/components/DataLoader/DeleteDataLoaderCard.v
 
 defineProps({ search: String })
 
+// TODO: This needs a new endpoint
 const { item, items, openDelete, openDialog, onDelete } = useTableLogic(
   api.fetchDataLoaders,
   api.deleteDataLoader,

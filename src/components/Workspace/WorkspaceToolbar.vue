@@ -61,7 +61,7 @@
           <v-icon size="48" color="grey lighten-1"
             >mdi-briefcase-outline</v-icon
           >
-          <h4 class="mt-2">You have not created any workspaces</h4>
+          <h4 class="mt-2">No workspaces found</h4>
           <p class="mb-4">Click the "Add workspace" button to create one.</p>
         </div>
       </template>
@@ -104,6 +104,7 @@
     <WorkspaceAccessControl
       @close="openAccessControl = false"
       :workspace="activeItem"
+      @privacy-updated="activeItem.isPrivate = $event"
     />
   </v-dialog>
 
@@ -138,7 +139,7 @@ import { api } from '@/services/api'
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 
-const openWorkspaceTable = ref(false)
+const openWorkspaceTable = ref(!workspaces.value.length)
 const openCreate = ref(false)
 const openEdit = ref(false)
 const openDelete = ref(false)

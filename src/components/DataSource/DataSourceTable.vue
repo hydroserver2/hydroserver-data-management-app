@@ -75,6 +75,7 @@ import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.v
 defineProps({ search: String })
 const dataLoaders = ref<DataLoader[]>([])
 
+// TODO: This needs a new endpoint
 const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
   useTableLogic(api.fetchDataSources, api.deleteDataSource, DataSource)
 
