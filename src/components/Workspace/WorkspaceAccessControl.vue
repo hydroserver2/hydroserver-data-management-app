@@ -7,7 +7,7 @@
       </v-card-title>
     </v-toolbar>
 
-    <v-row v-if="isWorkspaceOwner">
+    <v-row>
       <v-col cols="12" md="6">
         <v-row align="center" class="mt-6">
           <v-col cols="auto" class="pr-0">
@@ -233,11 +233,10 @@
 import { ref, onMounted } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
-import { Collaborator, Workspace } from '@/types'
+import { Collaborator, CollaboratorRole, Workspace } from '@/types'
 import router from '@/router/router'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
-import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const emits = defineEmits(['close', 'privacy-updated'])
 const props = defineProps({
@@ -246,15 +245,13 @@ const props = defineProps({
 const isPrivate = ref(props.workspace.isPrivate)
 const { user } = storeToRefs(useUserStore())
 
-const { isWorkspaceOwner } = useWorkspacePermissions()
-
 const selection = ref([])
 const newOwnerEmail = ref('')
 const showTransferConfirmation = ref(false)
 const newCollaboratorEmail = ref('')
 const openHydroSharePrivacy = ref(false)
 const isUpdating = ref(false)
-const roles = ref([])
+const roles = ref<CollaboratorRole[]>([])
 const selectedRole = ref()
 
 const showPrivacyHelp = ref(false)
@@ -281,9 +278,9 @@ async function onSaveRole(item: any) {
     item.role = roleResponse.role
     item.isBeingEdited = false
     Snackbar.success('Collaborator role updated.')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating collaborator role:', error)
-    Snackbar.error('Failed to update collaborator role.')
+    Snackbar.error(error.message)
   }
 }
 
@@ -330,8 +327,9 @@ async function onRemoveCollaborator(email: string) {
     if (index !== -1) collaboratorList.value.splice(index, 1)
     Snackbar.success('Owner removed for site.')
     if (email === user.value.email) await router.push({ name: 'Sites' })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error removing owner from thing', error)
+    Snackbar.error(error.message)
   }
 }
 
@@ -343,7 +341,9 @@ async function togglePrivacy() {
       isPrivate: isPrivate.value,
     } as Workspace)
     emits('privacy-updated', isPrivate.value)
-  } catch (error) {
+  } catch (error: any) {
+    isPrivate.value = !isPrivate.value
+    Snackbar.error(error.message)
     console.error('Error updating thing privacy', error)
   } finally {
     isUpdating.value = false

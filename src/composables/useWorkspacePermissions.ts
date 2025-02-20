@@ -59,6 +59,10 @@ export function useWorkspacePermissions(
         p.resource_type === ResourceType.Global
     )
 
+  const canEditWorkspace = computed(() =>
+    hasPermission(PermissionType.Workspace, ResourceType.Edit)
+  )
+
   const canDeleteThings = computed(() =>
     hasPermission(PermissionType.Thing, ResourceType.Delete)
   )
@@ -118,6 +122,7 @@ export function useWorkspacePermissions(
 
   return {
     isWorkspaceOwner,
+    canEditWorkspace,
     canDeleteThings,
     canEditThings,
     canCreateDatastreams,
@@ -129,6 +134,8 @@ export function useWorkspacePermissions(
     canCreateProcessingLevels,
     canCreateObservedProperties,
     canViewObservations,
+    isOwner,
+    hasPermission,
     hasGlobalPermissions,
     checkPermissionsByWorkspaceId,
   }

@@ -1,7 +1,8 @@
 <template>
   <v-card>
-    <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} workspace </v-card-title>
-    <v-divider />
+    <v-toolbar color="secondary-darken-2">
+      <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} workspace </v-card-title>
+    </v-toolbar>
 
     <v-form
       @submit.prevent="onSubmit"
@@ -9,7 +10,7 @@
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-text v-if="item">
+      <v-card-text v-if="item" class="mt-4">
         <v-text-field
           v-model="item.name"
           label="Name *"

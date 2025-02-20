@@ -75,6 +75,9 @@
         />
 
         <v-btn
+          :disabled="
+            !hasPermission(PermissionType.Workspace, ResourceType.Edit, item)
+          "
           variant="text"
           color="grey-darken-2"
           @click="openDialog(item, 'edit')"
@@ -83,6 +86,9 @@
         />
 
         <v-btn
+          :disabled="
+            !hasPermission(PermissionType.Workspace, ResourceType.Delete, item)
+          "
           variant="text"
           color="red-darken-2"
           @click="openDialog(item, 'delete')"
@@ -133,11 +139,13 @@ import DeleteWorkspaceCard from './DeleteWorkspaceCard.vue'
 import WorkspaceAccessControl from './WorkspaceAccessControl.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { Workspace } from '@/types'
+import { PermissionType, ResourceType, Workspace } from '@/types'
 import { api } from '@/services/api'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
+const { hasPermission } = useWorkspacePermissions()
 
 const openWorkspaceTable = ref(!workspaces.value.length)
 const openCreate = ref(false)

@@ -396,6 +396,8 @@ export enum ResourceType {
 
 export enum PermissionType {
   Global = '*',
+  Workspace = 'Workspace',
+  Collaborator = 'Collaborator',
   Thing = 'Thing',
   Datastream = 'Datastream',
   Sensor = 'Sensor',
