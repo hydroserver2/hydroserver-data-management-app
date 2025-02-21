@@ -25,14 +25,19 @@ import { DataLoader } from '@/types'
 import { api } from '@/services/api'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataLoaderCard from '@/components/DataLoader/DeleteDataLoaderCard.vue'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
+import { toRef } from 'vue'
 
 defineProps({ search: String })
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 // TODO: This needs a new endpoint
 const { item, items, openDelete, openDialog, onDelete } = useTableLogic(
   api.fetchDataLoaders,
   api.deleteDataLoader,
-  DataLoader
+  DataLoader,
+  toRef(selectedWorkspace.value?.id || '')
 )
 
 const headers = [

@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, toRef } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { DataLoader, DataSource } from '@/types'
@@ -71,13 +71,22 @@ import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
+
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 defineProps({ search: String })
 const dataLoaders = ref<DataLoader[]>([])
 
 // TODO: This needs a new endpoint
 const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
-  useTableLogic(api.fetchDataSources, api.deleteDataSource, DataSource)
+  useTableLogic(
+    api.fetchDataSources,
+    api.deleteDataSource,
+    DataSource,
+    toRef(selectedWorkspace.value?.id || '')
+  )
 
 const tableData = computed(() =>
   items.value
