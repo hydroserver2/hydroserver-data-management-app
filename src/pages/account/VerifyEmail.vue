@@ -99,7 +99,6 @@ const verifyCode = async () => {
   try {
     verifying.value = true
     const response = await api.verifyEmailWithCode(verificationCode.value)
-    console.log('verify email response', response)
     setSession(response)
     verified.value = true
     Snackbar.success('Your email has been verified.')
@@ -115,8 +114,7 @@ const verifyCode = async () => {
 async function resend() {
   try {
     resending.value = true
-    // TODO: Get this working
-    const response = await api.sendVerificationEmail(unverifiedEmail.value)
+    await api.sendVerificationEmail(unverifiedEmail.value)
     Snackbar.success('Verification email resent.')
   } catch (err) {
     console.error('Error sending verification email:', err)
