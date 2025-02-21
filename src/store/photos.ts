@@ -10,19 +10,25 @@ export const usePhotosStore = defineStore('photos', () => {
   const loading = ref(false)
 
   const uploadNewPhotos = async (thingId: string) => {
-    if (newPhotos.value.length > 0) {
+    if (!newPhotos.value.length) return
+
+    const promises = newPhotos.value.map(async (file) => {
       const data = new FormData()
-      newPhotos.value.forEach((photo) => data.append('files', photo))
-      photos.value = await api.uploadSitePhotos(thingId, data)
-    }
+      data.append('file', file)
+      return await api.uploadSitePhotos(thingId, data)
+    })
+
+    const newPhotoResponses = await Promise.all(promises)
+    photos.value = [...photos.value, ...newPhotoResponses]
   }
 
   const deleteSelectedPhotos = async (thingId: string) => {
-    for (const photoId of photosToDelete.value) {
-      await api.deleteSitePhoto(thingId, photoId)
-    }
+    if (!photosToDelete.value.length) return
+    await Promise.all(
+      photosToDelete.value.map((p) => api.deleteSitePhoto(thingId, p))
+    )
     photos.value = photos.value.filter(
-      (p) => !photosToDelete.value.includes(p.id)
+      (p) => !photosToDelete.value.includes(p.name)
     )
   }
 

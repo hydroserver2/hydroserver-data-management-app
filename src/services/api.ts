@@ -232,8 +232,8 @@ export const api = {
     apiMethods.post(`${THINGS_BASE}/${thingId}/photos`, data),
   fetchSitePhotos: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
-  deleteSitePhoto: async (thingId: string, photoId: string) =>
-    apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
+  deleteSitePhoto: async (thingId: string, name: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/photos`, { name }),
 
   createSiteTag: async (thingId: string, tag: Tag) =>
     apiMethods.post(`${THINGS_BASE}/${thingId}/tags`, tag),

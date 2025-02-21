@@ -364,9 +364,7 @@ export class User {
 }
 
 export interface Photo {
-  id: string
-  thingId: string
-  filePath: string
+  name: string
   link: string
 }
 

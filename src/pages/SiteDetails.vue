@@ -78,7 +78,7 @@
         <v-carousel hide-delimiters v-if="hasPhotos">
           <v-carousel-item
             v-for="photo in photos"
-            :key="photo.id"
+            :key="photo.name"
             :src="photo.link"
             cover
           />
