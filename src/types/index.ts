@@ -433,7 +433,7 @@ export class Workspace {
   isPrivate: boolean
   owner: UserInfo | null
   collaboratorRole: CollaboratorRole | null
-  pendingTransferTo?: User | null
+  pendingTransferTo?: UserInfo | null
 
   constructor() {
     this.id = ''

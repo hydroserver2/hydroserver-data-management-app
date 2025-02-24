@@ -150,7 +150,6 @@
             </v-icon>
           </v-col>
         </v-row>
-
         <v-card-text v-if="showTransferHelp">
           This action will irreversibly de-elevate your permission level to
           collaborator and elevate the chosen user's permission level to owner
@@ -163,27 +162,39 @@
           </ul>
         </v-card-text>
 
-        <v-card-text>
-          <v-text-field
-            v-model="newOwnerEmail"
-            label="New owner's email"
-            required
-          />
-          <p v-if="showTransferConfirmation" style="color: red" class="pb-4">
-            WARNING: This action cannot be undone. Once you the transfer has
-            been completed by the chosen user, your permissions will be reduced
-            to those of a collaborator.
-          </p>
-          <v-btn-primary
-            v-if="showTransferConfirmation"
-            @click="onTransferOwnership"
-          >
-            Confirm
-          </v-btn-primary>
-          <v-btn-primary v-else @click="showTransferConfirmation = true"
-            >Submit</v-btn-primary
-          >
-        </v-card-text>
+        <template v-if="showPendingTransferText">
+          <v-card-text style="color: #2196f3">
+            <p>
+              An ownership transfer is pending to
+              {{ workspace.pendingTransferTo?.name }}
+            </p>
+            <v-btn-cancel class="mt-4" @click="onCancelTransfer">
+              Cancel transfer
+            </v-btn-cancel>
+          </v-card-text>
+        </template>
+        <template v-else>
+          <v-card-text>
+            <v-text-field
+              v-model="newOwnerEmail"
+              label="New owner's email"
+              required
+            />
+            <p v-if="showTransferConfirmation" style="color: red" class="pb-4">
+              WARNING: Once the transfer has been accepted by the chosen user,
+              your permissions will be reduced to those of a collaborator.
+            </p>
+            <v-btn-primary
+              v-if="showTransferConfirmation"
+              @click="onTransferOwnership"
+            >
+              Confirm
+            </v-btn-primary>
+            <v-btn-primary v-else @click="showTransferConfirmation = true"
+              >Submit</v-btn-primary
+            >
+          </v-card-text>
+        </template>
 
         <v-row align="center" class="mt-6">
           <v-col cols="auto" class="pr-0">
@@ -230,20 +241,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { Collaborator, CollaboratorRole, Workspace } from '@/types'
 import router from '@/router/router'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
-const emits = defineEmits(['close', 'privacy-updated'])
+const permissionsStore = useWorkspacePermissions()
+
+const emits = defineEmits(['close', 'privacy-updated', 'needs-refresh'])
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
 })
 const isPrivate = ref(props.workspace.isPrivate)
 const { user } = storeToRefs(useUserStore())
+
+const showPendingTransferText = computed(
+  () =>
+    props.workspace.pendingTransferTo?.email &&
+    permissionsStore.isOwner(props.workspace)
+)
 
 const selection = ref([])
 const newOwnerEmail = ref('')
@@ -288,13 +308,23 @@ async function onTransferOwnership() {
   if (!newOwnerEmail.value) return
   try {
     await api.transferWorkspace(props.workspace!.id, newOwnerEmail.value)
-    // TODO: This should only send a request for transfer to the new owner
-    Snackbar.success('Workspace transfer requested.')
+    emits('needs-refresh')
+    Snackbar.success('Workspace transfer initiated.')
   } catch (error) {
     console.error('Error transferring workspace.', error)
   }
   newOwnerEmail.value = ''
   showTransferConfirmation.value = false
+}
+
+async function onCancelTransfer() {
+  try {
+    await api.rejectWorkspaceTransfer(props.workspace!.id)
+    emits('needs-refresh')
+    Snackbar.success('Workspace transfer cancelled.')
+  } catch (error) {
+    console.error('Error cancelling workspace transfer.', error)
+  }
 }
 
 async function onAddCollaborator() {

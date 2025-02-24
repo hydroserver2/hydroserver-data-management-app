@@ -21,7 +21,64 @@
         Manage workspaces
       </v-btn>
     </v-col>
+    <v-col cols="12" sm="auto" v-if="pendingWorkspaces.length">
+      <v-btn
+        @click="openTransferTable = !openTransferTable"
+        rounded="xl"
+        color="blue-darken-4"
+      >
+        Pending workspace transfer
+      </v-btn>
+    </v-col>
   </v-row>
+
+  <v-card v-if="openTransferTable" class="mb-8">
+    <v-toolbar flat color="blue-darken-4">
+      <v-card-title>Pending transfers</v-card-title>
+    </v-toolbar>
+    <v-data-table-virtual
+      :headers="transferHeaders"
+      :items="pendingWorkspaces"
+      :sort-by="[{ key: 'name' }]"
+      item-value="id"
+      class="elevation-3 owned-sites-table"
+      color="secondary-darken-2"
+      :style="{ 'max-height': `200vh` }"
+      fixed-header
+      loading-text="Loading sites..."
+    >
+      <template v-slot:no-data>
+        <div class="text-center pa-4" v-if="workspaces.length === 0">
+          <v-icon size="48" color="grey lighten-1"
+            >mdi-briefcase-outline</v-icon
+          >
+          <h4 class="mt-2">No workspaces found</h4>
+          <p class="mb-4">Click the "Add workspace" button to create one.</p>
+        </div>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-btn
+          variant="outlined"
+          color="grey-darken-2"
+          @click="onCancelTransfer(item)"
+          prepend-icon="mdi-close"
+          rounded="xl"
+        >
+          Cancel transfer</v-btn
+        >
+
+        <v-btn
+          color="green-darken-2"
+          @click="onAcceptTransfer(item)"
+          prepend-icon="mdi-check"
+          rounded="xl"
+          class="ml-2"
+        >
+          Accept transfer</v-btn
+        >
+      </template>
+    </v-data-table-virtual>
+  </v-card>
 
   <v-card v-if="openWorkspaceTable" class="mb-8">
     <v-toolbar flat color="secondary-darken-2">
@@ -108,9 +165,10 @@
 
   <v-dialog v-model="openAccessControl" width="60rem">
     <WorkspaceAccessControl
-      @close="openAccessControl = false"
       :workspace="activeItem"
+      @close="openAccessControl = false"
       @privacy-updated="activeItem.isPrivate = $event"
+      @needs-refresh="refreshAccessControl(activeItem.id)"
     />
   </v-dialog>
 
@@ -142,12 +200,16 @@ import { useWorkspaceStore } from '@/store/workspaces'
 import { PermissionType, ResourceType, Workspace } from '@/types'
 import { api } from '@/services/api'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import { useUserStore } from '@/store/user'
+import { Snackbar } from '@/utils/notifications'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 const { hasPermission } = useWorkspacePermissions()
+const { user } = storeToRefs(useUserStore())
 
 const openWorkspaceTable = ref(!workspaces.value.length)
+const openTransferTable = ref(false)
 const openCreate = ref(false)
 const openEdit = ref(false)
 const openDelete = ref(false)
@@ -168,6 +230,13 @@ watch(
     if (!!newWorkspace) selectedWorkspace.value = newWorkspace
   },
   { immediate: true }
+)
+
+/** Workspaces that are pending a transfer to the current user */
+const pendingWorkspaces = computed(() =>
+  workspaces.value.filter(
+    (ws) => ws.pendingTransferTo?.email === user.value.email
+  )
 )
 
 function openDialog(
@@ -197,6 +266,36 @@ const refreshWorkspaces = async (workspace?: Workspace) => {
   }
 }
 
+const refreshAccessControl = async (workspaceId: string) => {
+  try {
+    activeItem.value = await api.fetchWorkspace(workspaceId)
+  } catch (error) {
+    console.error('Error refreshing workspaces', error)
+  }
+}
+
+async function onCancelTransfer(ws: Workspace) {
+  try {
+    await api.rejectWorkspaceTransfer(ws.id)
+    await refreshWorkspaces()
+    Snackbar.success('Workspace transfer cancelled.')
+    if (!pendingWorkspaces.value.length) openTransferTable.value = false
+  } catch (error) {
+    console.error('Error cancelling workspace transfer.', error)
+  }
+}
+
+async function onAcceptTransfer(ws: Workspace) {
+  try {
+    await api.acceptWorkspaceTransfer(ws.id)
+    await refreshWorkspaces()
+    Snackbar.success('Workspace transfer accepted.')
+    if (!pendingWorkspaces.value.length) openTransferTable.value = false
+  } catch (error) {
+    console.error('Error accepting workspace transfer.', error)
+  }
+}
+
 async function onDelete() {
   if (!activeItem.value) return
   try {
@@ -215,6 +314,11 @@ function switchToAccessControlModal() {
 const headers = [
   { title: 'Name', key: 'name' },
   { title: 'Is private', key: 'isPrivate' },
+  { title: 'Actions', key: 'actions', align: 'end' },
+] as const
+
+const transferHeaders = [
+  { title: 'Workspace name', key: 'name' },
   { title: 'Actions', key: 'actions', align: 'end' },
 ] as const
 </script>
