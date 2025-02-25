@@ -4,6 +4,11 @@ export function extractErrorMessage(body: any) {
   if (Array.isArray(body?.errors) && body.errors.length) {
     body = body.errors[0]
   }
+
+  if (typeof body !== 'object' || body === null) {
+    return 'An unknown error occurred.'
+  }
+
   const possibleKeys = ['message', 'detail', 'error']
   for (const key of possibleKeys) {
     if (body[key]) return body[key]

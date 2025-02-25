@@ -32,11 +32,10 @@
     </a>
 
     <template v-if="mdAndDown" v-slot:append>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-app-bar-nav-icon class="mx-2" @click.stop="drawer = !drawer" />
     </template>
 
     <template v-if="!mdAndDown">
-      <div class="mr-3"></div>
       <div v-for="path of paths" :key="path.label">
         <v-btn
           v-if="!path.menu"
