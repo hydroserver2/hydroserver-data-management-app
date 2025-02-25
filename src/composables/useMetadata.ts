@@ -31,6 +31,7 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
       .map((op) => ({
         id: op.id,
         title: `${op.code}: ${op.name}, ${op.type}`,
+        workspaceId: op.workspaceId,
       }))
       .sort((a, b) => a.title.localeCompare(b.title))
   )
@@ -39,6 +40,7 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
     processingLevels.value.map((pl) => ({
       id: pl.id,
       title: `${pl.code}: ${pl.definition}`,
+      workspaceId: pl.workspaceId,
     }))
   )
 

@@ -106,6 +106,21 @@
                     />
                   </v-dialog>
                 </template>
+
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.raw.name"
+                    :subtitle="
+                      item.raw.workspaceId === null
+                        ? 'System variable'
+                        : 'Workspace variable'
+                    "
+                    :class="
+                      item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                    "
+                  />
+                </template>
               </v-autocomplete>
 
               <v-autocomplete
@@ -121,9 +136,21 @@
                 rounded="lg"
               >
                 <template v-slot:item="{ props, item }">
-                  <v-tooltip bottom :openDelay="1500">
+                  <v-tooltip bottom :openDelay="500">
                     <template v-slot:activator="{ props: tooltipProps }">
-                      <v-list-item v-bind="{ ...props, ...tooltipProps }">
+                      <v-list-item
+                        :subtitle="
+                          item.raw.workspaceId === null
+                            ? 'System variable'
+                            : 'Workspace variable'
+                        "
+                        :class="
+                          item.raw.workspaceId === null
+                            ? 'bg-grey-lighten-5'
+                            : ''
+                        "
+                        v-bind="{ ...props, ...tooltipProps }"
+                      >
                       </v-list-item>
                     </template>
                     <span>{{ item.title }}</span>
@@ -174,6 +201,20 @@
                     >
                   </v-dialog>
                 </template>
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.raw.name"
+                    :subtitle="
+                      item.raw.workspaceId === null
+                        ? 'System variable'
+                        : 'Workspace variable'
+                    "
+                    :class="
+                      item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                    "
+                  />
+                </template>
               </v-autocomplete>
 
               <v-autocomplete
@@ -203,6 +244,20 @@
                       >Add New</ProcessingLevelFormCard
                     >
                   </v-dialog>
+                </template>
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.raw.title"
+                    :subtitle="
+                      item.raw.workspaceId
+                        ? 'Workspace variable'
+                        : 'System variable'
+                    "
+                    :class="
+                      item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                    "
+                  />
                 </template>
               </v-autocomplete>
             </v-card-text>
