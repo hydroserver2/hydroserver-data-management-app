@@ -61,7 +61,7 @@
     <OAuth />
 
     <v-row justify="center" class="my-10">
-      <router-link to="/password_reset" class="light-text forgot-password-link"
+      <router-link to="/reset-password" class="light-text forgot-password-link"
         >Forgot your password?</router-link
       >
     </v-row>

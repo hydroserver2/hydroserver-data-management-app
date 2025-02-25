@@ -140,19 +140,9 @@ export const routes: RouteRecordRaw[] = [
     // password and then POST the password and reset key to the resetPassword endpoint complete the password reset
     // process. Full docs here:
     // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
-    path: '/password_reset',
-    name: 'PasswordResetRequest',
-    component: () =>
-      import('@/pages/account/PasswordRecovery/PasswordResetRequest.vue'),
-    meta: {
-      title: 'Reset Password',
-    },
-  },
-  {
-    path: '/reset-password/:passwordResetKey',
-    name: 'PasswordReset',
-    component: () =>
-      import('@/pages/account/PasswordRecovery/PasswordReset.vue'),
+    path: '/reset-password/:passwordResetKey?',
+    name: 'ResetPassword',
+    component: () => import('@/pages/account/ResetPassword.vue'),
     meta: {
       title: 'Reset Password',
     },

@@ -35,9 +35,6 @@ export const useAuthStore = defineStore('authentication', () => {
   const inEmailVerificationFlow = computed(() =>
     flowIds.value.includes('verify_email')
   )
-  const inPasswordResetFlow = computed(() =>
-    flowIds.value.includes('password_reset')
-  )
   const inProviderSignupFlow = computed(() =>
     flowIds.value.includes('provider_signup')
   )

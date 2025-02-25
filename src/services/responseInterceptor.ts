@@ -1,5 +1,17 @@
 import { ApiError } from '@/types'
 
+export function extractErrorMessage(body: any) {
+  if (Array.isArray(body?.errors) && body.errors.length) {
+    body = body.errors[0]
+  }
+  const possibleKeys = ['message', 'detail', 'error']
+  for (const key of possibleKeys) {
+    if (body[key]) return body[key]
+  }
+
+  return 'An unknown error occurred.'
+}
+
 export async function responseInterceptor(response: Response): Promise<any> {
   if (
     response.headers.get('Content-Length') === '0' ||
@@ -30,11 +42,7 @@ export async function responseInterceptor(response: Response): Promise<any> {
 
   const apiError: ApiError = {
     status: response.status,
-    message:
-      parsedBody?.detail ||
-      parsedBody?.error ||
-      JSON.stringify(parsedBody) ||
-      'Unknown Error',
+    message: extractErrorMessage(parsedBody),
   }
 
   console.error('API response not OK:', apiError.message)

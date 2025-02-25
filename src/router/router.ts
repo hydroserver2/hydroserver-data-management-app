@@ -33,9 +33,10 @@ router.beforeEach(
   async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
     const { isAuthenticated, inProviderSignupFlow, inEmailVerificationFlow } =
       storeToRefs(useAuthStore())
-
-    if (inEmailVerificationFlow.value && to.name !== 'VerifyEmail')
+    if (inEmailVerificationFlow.value && to.name !== 'VerifyEmail') {
+      if (to.name === 'ResetPassword') return { name: 'ResetPassword' }
       return { name: 'VerifyEmail' }
+    }
     if (!inEmailVerificationFlow.value && to.name === 'VerifyEmail')
       return { name: 'Sites' }
 
