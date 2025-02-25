@@ -104,9 +104,9 @@ const formLogin = async () => {
     } else {
       await login()
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error logging in.', error)
-    if ((error as Error).message === '400') {
+    if (error.status === 400) {
       Snackbar.warn('No active account found with the given credentials.')
     }
   } finally {
