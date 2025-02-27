@@ -30,8 +30,8 @@
     <v-col cols="5">
       <v-combobox
         density="comfortable"
-        v-model="formKey"
-        :items="keyList"
+        v-model="selectedKey"
+        :items="Object.keys(workspaceTags)"
         label="Key"
         :hide-details="!isKeyUsed"
         :error-messages="
@@ -42,16 +42,18 @@
     <v-col cols="5">
       <v-combobox
         density="comfortable"
-        v-model="formValue"
-        :items="valueList"
-        :disabled="!formKey || isKeyUsed"
+        v-model="selectedValue"
+        :items="workspaceTags[selectedKey]"
+        :disabled="!selectedKey || isKeyUsed"
         label="Value"
         hide-details
       >
       </v-combobox>
     </v-col>
     <v-col>
-      <v-btn :disabled="!formKey || !formValue || isKeyUsed" @click="addTag"
+      <v-btn
+        :disabled="!selectedKey || !selectedValue || isKeyUsed"
+        @click="addTag"
         >Add</v-btn
       >
     </v-col>
@@ -75,27 +77,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { materialColors } from '@/utils/materialColors'
 import { storeToRefs } from 'pinia'
 import { useTagStore } from '@/store/tags'
-import { useUserTags } from '@/composables/useUserTags'
+import { useWorkspaceTags } from '@/composables/useWorkspaceTags'
 
 const props = defineProps({ thingId: String })
 const { tags, previewTags } = storeToRefs(useTagStore())
-const { formKey, formValue, keyList, valueList } = useUserTags()
+const { tags: workspaceTags } = useWorkspaceTags()
+
+const selectedKey = ref('')
+const selectedValue = ref('')
 
 const isKeyUsed = computed(() =>
-  previewTags.value.some((tag) => tag.key === formKey.value)
+  previewTags.value.some((tag) => tag.key === selectedKey.value)
 )
 
 const addTag = () => {
-  if (formKey.value === '' || formValue.value === '') {
+  if (selectedKey.value === '' || selectedValue.value === '') {
     return
   }
-  previewTags.value.push({ key: formKey.value, value: formValue.value })
-  formKey.value = ''
-  formValue.value = ''
+  previewTags.value.push({ key: selectedKey.value, value: selectedValue.value })
+  selectedKey.value = ''
+  selectedValue.value = ''
 }
 
 onMounted(async () => {

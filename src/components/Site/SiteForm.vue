@@ -199,6 +199,7 @@ const countryTitle = (item: { name: string; code: string } | undefined) => {
 
 const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
+const { tags } = storeToRefs(useTagStore())
 const { updateTags } = useTagStore()
 
 const props = defineProps({
@@ -212,7 +213,6 @@ const myForm = ref<VForm>()
 const mapOptions = ref<any>(undefined)
 const thing = reactive<Thing>(new Thing())
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
-const { tags } = storeToRefs(useTagStore())
 
 watch(
   () => includeDataDisclaimer.value,

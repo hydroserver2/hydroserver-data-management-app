@@ -3,8 +3,8 @@
     <v-autocomplete
       class="mx-2"
       density="compact"
-      v-model="formKey"
-      :items="keyList"
+      v-model="selectedKey"
+      :items="Object.keys(tags)"
       label="Key"
       clearable
       @click:clear="clear"
@@ -16,11 +16,11 @@
       class="mr-2"
       density="compact"
       v-model="selectedTagValues"
-      :items="valueList"
+      :items="tags[selectedKey]"
       label="Value"
       multiple
       clearable
-      :disabled="!formKey"
+      :disabled="!selectedKey"
       hide-details
       rounded="xl"
     />
@@ -30,7 +30,7 @@
       @change="updateColors"
       color="primary"
       label="Show legend"
-      :disabled="!formKey"
+      :disabled="!selectedKey"
       hide-details
     />
 
@@ -47,16 +47,18 @@
 </template>
 
 <script setup lang="ts">
-import { useUserTags } from '@/composables/useUserTags'
+import { useWorkspaceTags } from '@/composables/useWorkspaceTags'
 import { ref, watch } from 'vue'
 
-const { formKey, keyList, valueList } = useUserTags()
-const selectedTagValues = ref<string[]>([])
+const { tags } = useWorkspaceTags()
 
 const emit = defineEmits(['filter', 'update:useColors'])
 const props = defineProps({
   useColors: Boolean,
 })
+
+const selectedKey = ref('')
+const selectedTagValues = ref<string[]>([])
 const currentColor = ref(props.useColors)
 
 const updateColors = () => {
@@ -65,15 +67,15 @@ const updateColors = () => {
 }
 
 const emitFilteredTags = () => {
-  emit('filter', { key: formKey.value, values: selectedTagValues.value })
+  emit('filter', { key: selectedKey.value, values: selectedTagValues.value })
 }
 
 const clear = () => {
-  formKey.value = ''
+  selectedKey.value = ''
   selectedTagValues.value = []
 }
 
-watch(formKey, () => {
+watch(selectedKey, () => {
   selectedTagValues.value = []
   emitFilteredTags()
 })
