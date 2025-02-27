@@ -12,7 +12,7 @@
       />
       <v-app-bar-nav-icon
         v-else
-        icon="mdi-menu-close"
+        icon="mdi-menu"
         @click="sidebar.toggle"
         class="mx-3"
         variant="tonal"

@@ -20,12 +20,14 @@
 
       <v-card class="mb-1" elevation="2">
         <KeepAlive>
-          <SiteFilterToolbar
-            v-if="showFilter"
-            :useColors="useColors"
-            @update:useColors="updateColors"
-            @filter="handleFilter"
-          />
+          <v-expand-transition>
+            <SiteFilterToolbar
+              v-if="showFilter"
+              :useColors="useColors"
+              @update:useColors="updateColors"
+              @filter="handleFilter"
+            />
+          </v-expand-transition>
         </KeepAlive>
       </v-card>
 
@@ -49,7 +51,7 @@
             :disabled="!workspaceThings?.length"
             class="mr-2"
             @click="showFilter = !showFilter"
-            prependIcon="mdi-filter"
+            :append-icon="showFilter ? 'mdi-menu-up' : 'mdi-menu-down'"
             variant="outlined"
             rounded="xl"
             >Filter sites</v-btn

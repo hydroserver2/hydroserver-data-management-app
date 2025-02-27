@@ -15,8 +15,10 @@
       <v-btn
         @click="openWorkspaceTable = !openWorkspaceTable"
         rounded="xl"
-        color="secondary-darken-2"
+        color="secondary-darken-3"
         variant="outlined"
+        density="comfortable"
+        :append-icon="openWorkspaceTable ? 'mdi-menu-up' : 'mdi-menu-down'"
       >
         Manage workspaces
       </v-btn>
@@ -80,81 +82,87 @@
     </v-data-table-virtual>
   </v-card>
 
-  <v-card v-if="openWorkspaceTable" class="mb-8">
-    <v-toolbar flat color="secondary-darken-2">
-      <v-text-field
-        :disabled="!workspaces?.length"
-        class="mx-2"
-        clearable
-        v-model="search"
-        prepend-inner-icon="mdi-magnify"
-        label="Search"
-        hide-details
-        density="compact"
-        rounded="xl"
-      />
-
-      <v-spacer />
-
-      <v-btn-add class="mr-2" @click="openCreate = true" color="white">
-        Add workspace
-      </v-btn-add>
-    </v-toolbar>
-    <v-data-table-virtual
-      :headers="headers"
-      :items="workspaces"
-      :sort-by="[{ key: 'name' }]"
-      :search="search"
-      multi-sort
-      item-value="id"
-      class="elevation-3 owned-sites-table"
-      color="secondary-darken-2"
-      :style="{ 'max-height': `200vh` }"
-      fixed-header
-      loading-text="Loading sites..."
-    >
-      <template v-slot:no-data>
-        <div class="text-center pa-4" v-if="workspaces.length === 0">
-          <v-icon size="48" color="grey lighten-1"
-            >mdi-briefcase-outline</v-icon
-          >
-          <h4 class="mt-2">No workspaces found</h4>
-          <p class="mb-4">Click the "Add workspace" button to create one.</p>
-        </div>
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-btn
-          variant="text"
-          color="primary-darken-2"
-          @click="openDialog(item, 'accessControl')"
-          icon="mdi-lock-plus-outline"
+  <v-expand-transition>
+    <v-card v-if="openWorkspaceTable" class="mb-8">
+      <v-toolbar flat color="secondary-darken-2">
+        <v-text-field
+          :disabled="!workspaces?.length"
+          class="mx-2"
+          clearable
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          hide-details
+          density="compact"
           rounded="xl"
         />
 
-        <v-btn
-          :disabled="
-            !hasPermission(PermissionType.Workspace, ResourceType.Edit, item)
-          "
-          variant="text"
-          color="grey-darken-2"
-          @click="openDialog(item, 'edit')"
-          icon="mdi-pencil"
-          rounded="xl"
-        />
+        <v-spacer />
 
-        <v-btn
-          :disabled="
-            !hasPermission(PermissionType.Workspace, ResourceType.Delete, item)
-          "
-          variant="text"
-          color="red-darken-2"
-          @click="openDialog(item, 'delete')"
-          icon="mdi-delete"
-          rounded="xl"
-        />
-      </template>
-    </v-data-table-virtual>
-  </v-card>
+        <v-btn-add class="mr-2" @click="openCreate = true" color="white">
+          Add workspace
+        </v-btn-add>
+      </v-toolbar>
+      <v-data-table-virtual
+        :headers="headers"
+        :items="workspaces"
+        :sort-by="[{ key: 'name' }]"
+        :search="search"
+        multi-sort
+        item-value="id"
+        class="elevation-3 owned-sites-table"
+        color="secondary-darken-2"
+        :style="{ 'max-height': `200vh` }"
+        fixed-header
+        loading-text="Loading sites..."
+      >
+        <template v-slot:no-data>
+          <div class="text-center pa-4" v-if="workspaces.length === 0">
+            <v-icon size="48" color="grey lighten-1"
+              >mdi-briefcase-outline</v-icon
+            >
+            <h4 class="mt-2">No workspaces found</h4>
+            <p class="mb-4">Click the "Add workspace" button to create one.</p>
+          </div>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-btn
+            variant="text"
+            color="primary-darken-2"
+            @click="openDialog(item, 'accessControl')"
+            icon="mdi-lock-plus-outline"
+            rounded="xl"
+          />
+
+          <v-btn
+            :disabled="
+              !hasPermission(PermissionType.Workspace, ResourceType.Edit, item)
+            "
+            variant="text"
+            color="grey-darken-2"
+            @click="openDialog(item, 'edit')"
+            icon="mdi-pencil"
+            rounded="xl"
+          />
+
+          <v-btn
+            :disabled="
+              !hasPermission(
+                PermissionType.Workspace,
+                ResourceType.Delete,
+                item
+              )
+            "
+            variant="text"
+            color="red-darken-2"
+            @click="openDialog(item, 'delete')"
+            icon="mdi-delete"
+            rounded="xl"
+          />
+        </template>
+      </v-data-table-virtual>
+    </v-card>
+  </v-expand-transition>
 
   <v-dialog v-model="openCreate" width="30rem">
     <WorkspaceFormCard
