@@ -112,6 +112,12 @@ a {
 a:hover {
   color: #0d47a1;
 }
+
+.gm-style-iw-chr button[title='Close'] {
+  position: absolute !important;
+  top: 0rem !important;
+  right: 0rem !important;
+}
 </style>
 
 <style scoped>
