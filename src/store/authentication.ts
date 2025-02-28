@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('authentication', () => {
   })
 
   const isAuthenticated = ref(false)
-  const sessionExpiresAt = ref<number | null>(null)
+  const sessionExpiresAt = ref<string | null>(null)
 
   const flows = ref<AllAuthFlowItem[]>([])
   const flowIds = computed(() => flows.value.map((flow) => flow.id))
@@ -89,7 +89,6 @@ export const useAuthStore = defineStore('authentication', () => {
    * for this instance of HydroServer.
    */
   async function initializeSession() {
-    // TODO: Revert this so we're fetching in parallel
     try {
       const [authMethodsResponse, sessionResponse] = await Promise.all([
         api.fetchAuthMethods(),
@@ -118,9 +117,8 @@ export const useAuthStore = defineStore('authentication', () => {
 
   function setSession(apiResponse: any) {
     const { user } = storeToRefs(useUserStore())
-
     isAuthenticated.value = apiResponse?.meta?.is_authenticated
-    sessionExpiresAt.value = apiResponse?.meta?.session_expires_at
+    sessionExpiresAt.value = apiResponse?.meta?.expires
     flows.value = apiResponse?.data?.flows || []
     user.value = apiResponse?.data?.account || new User()
   }
@@ -129,7 +127,7 @@ export const useAuthStore = defineStore('authentication', () => {
     if (
       isAuthenticated.value &&
       sessionExpiresAt.value &&
-      Date.now() >= sessionExpiresAt.value
+      Date.now() >= new Date(sessionExpiresAt.value).getTime()
     ) {
       Snackbar.info('Session expired. Please log in again.')
       logout()
