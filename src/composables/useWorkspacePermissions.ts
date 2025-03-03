@@ -31,6 +31,10 @@ export function useWorkspacePermissions(
     return workspace.owner?.email === user.value.email
   }
 
+  function isAdmin() {
+    return user.value.accountType === 'admin'
+  }
+
   const hasPermission = (
     permissionType: PermissionType,
     resourceType: ResourceType,
@@ -39,7 +43,7 @@ export function useWorkspacePermissions(
     const w = workspace ?? selectedWorkspace.value
     if (!w) return false
 
-    if (isOwner(w)) return true
+    if (isOwner(w) || isAdmin()) return true
 
     const perms = w.collaboratorRole?.permissions ?? []
     return (
@@ -113,10 +117,13 @@ export function useWorkspacePermissions(
     resourceType: ResourceType
   ) => {
     const workspace = workspaces.value.find((ws) => ws.id === workspaceId)
-    const permissions = workspace?.collaboratorRole?.permissions ?? []
+    const permissions = isOwner(workspace || null) || isAdmin()
+      ? [{ resource_type: ResourceType.Global, permission_type: PermissionType.Global }]
+      : workspace?.collaboratorRole?.permissions ?? [];
     return permissions.some(
       (p) =>
-        p.permission_type === permissionType && p.resource_type === resourceType
+        (p.permission_type === permissionType || p.permission_type === PermissionType.Global) &&
+        (p.resource_type === resourceType || p.resource_type === ResourceType.Global)
     )
   }
 
