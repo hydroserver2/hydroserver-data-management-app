@@ -56,6 +56,17 @@ export function useWorkspacePermissions(
     )
   }
 
+  function checkPermissionsByWorkspaceId(
+    workspaceId: string,
+    permissionType: PermissionType,
+    resourceType: ResourceType
+  ) {
+    const workspace = workspaces.value.find((ws) => ws.id === workspaceId)
+    if (!workspace) return false
+
+    return hasPermission(permissionType, resourceType, workspace)
+  }
+
   const hasGlobalPermissions = (permissions: Permission[]) =>
     permissions.some(
       (p) =>
@@ -110,22 +121,6 @@ export function useWorkspacePermissions(
   const canViewObservations = computed(() =>
     hasPermission(PermissionType.Observation, ResourceType.View)
   )
-
-  const checkPermissionsByWorkspaceId = (
-    workspaceId: string,
-    permissionType: PermissionType,
-    resourceType: ResourceType
-  ) => {
-    const workspace = workspaces.value.find((ws) => ws.id === workspaceId)
-    const permissions = isOwner(workspace || null) || isAdmin()
-      ? [{ resource_type: ResourceType.Global, permission_type: PermissionType.Global }]
-      : workspace?.collaboratorRole?.permissions ?? [];
-    return permissions.some(
-      (p) =>
-        (p.permission_type === permissionType || p.permission_type === PermissionType.Global) &&
-        (p.resource_type === resourceType || p.resource_type === ResourceType.Global)
-    )
-  }
 
   return {
     isWorkspaceOwner,
