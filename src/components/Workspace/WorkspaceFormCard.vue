@@ -41,6 +41,7 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Workspace } from '@/types'
+import { Snackbar } from '@/utils/notifications'
 
 const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
@@ -58,8 +59,9 @@ async function onSubmit() {
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)
     else emit('created', newItem)
-  } catch (error) {
-    console.error('Error uploading unit', error)
+  } catch (error: any) {
+    console.error('Error uploading workspace', error)
+    Snackbar.error(error.message)
   }
   emit('close')
 }
