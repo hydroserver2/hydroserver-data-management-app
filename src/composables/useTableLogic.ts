@@ -1,16 +1,18 @@
-import { Ref, onMounted, ref } from 'vue'
+import { Ref, ref, watch } from 'vue'
 
 interface WithId {
   id: string
 }
 
 export function useTableLogic<T extends WithId>(
-  apiFetchFunction: () => Promise<T[]>,
-  apiDeleteFunction: (id: string) => Promise<any>,
-  ItemClass: new () => T
+  fetchFn: (wsId: string) => Promise<T[]>,
+  deleteFn: (id: string) => Promise<any>,
+  ItemClass: new () => T,
+  workspaceId: Ref<string>
 ) {
   const openEdit = ref(false)
   const openDelete = ref(false)
+  const openAccessControl = ref(false)
   const item = ref(new ItemClass()) as Ref<T>
   const items: Ref<T[]> = ref([])
 
@@ -18,6 +20,7 @@ export function useTableLogic<T extends WithId>(
     item.value = selectedItem
     if (dialog === 'edit') openEdit.value = true
     else if (dialog === 'delete') openDelete.value = true
+    else if (dialog === 'accessControl') openAccessControl.value = true
   }
 
   // For emitting the updated item to parent. Assume child calls api update.
@@ -29,7 +32,7 @@ export function useTableLogic<T extends WithId>(
   const onDelete = async () => {
     if (!item.value) return
     try {
-      await apiDeleteFunction(item.value.id)
+      await deleteFn(item.value.id)
       items.value = items.value.filter((u: any) => u.id !== item.value.id)
       openDelete.value = false
     } catch (error) {
@@ -37,17 +40,30 @@ export function useTableLogic<T extends WithId>(
     }
   }
 
-  onMounted(async () => {
+  async function loadData() {
     try {
-      items.value = await apiFetchFunction()
+      if (!workspaceId.value) {
+        items.value = []
+        return
+      }
+      items.value = await fetchFn(workspaceId.value)
     } catch (error) {
       console.error(`Error fetching table items`, error)
     }
-  })
+  }
+
+  watch(
+    workspaceId,
+    async (newVal, oldVal) => {
+      if (newVal !== oldVal) await loadData()
+    },
+    { immediate: true }
+  )
 
   return {
     openEdit,
     openDelete,
+    openAccessControl,
     item,
     items,
     openDialog,

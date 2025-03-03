@@ -17,6 +17,7 @@
       :processing-level="item"
       @close="openEdit = false"
       @updated="onUpdate"
+      :workspace-id="workspaceId"
     />
   </v-dialog>
 
@@ -37,16 +38,20 @@ import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import { api } from '@/services/api'
 import { ProcessingLevel } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
-import { computed } from 'vue'
+import { computed, toRef } from 'vue'
+
+const props = defineProps<{
+  search: string | undefined
+  workspaceId: string
+}>()
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
-    api.fetchCurrentUserProcessingLevels,
+    async (wsId: string) => await api.fetchWorkspaceProcessingLevels(wsId),
     api.deleteProcessingLevel,
-    ProcessingLevel
+    ProcessingLevel,
+    toRef(props, 'workspaceId')
   )
-
-const props = defineProps<{ search: string }>()
 
 const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },

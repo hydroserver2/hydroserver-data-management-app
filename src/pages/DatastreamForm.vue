@@ -1,5 +1,15 @@
 <template>
-  <v-container>
+  <v-container v-if="!canCreateDatastreams">
+    <v-row justify="center" align="center">
+      <v-col class="text-center" cols="12">
+        <h5 class="text-h5">
+          You don't have the required permissions to add datastreams to this
+          site.
+        </h5>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container v-else>
     <v-card elevation="3">
       <v-card-title class="my-2">
         <v-row align="center">
@@ -17,7 +27,7 @@
           <v-spacer />
 
           <v-btn
-            v-if="!datastreamId && isPrimaryOwner"
+            v-if="!datastreamId"
             color="primary-darken-2"
             variant="outlined"
             rounded="lg"
@@ -81,7 +91,7 @@
                 density="compact"
                 rounded="lg"
               >
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateSensors">
                   <v-icon
                     color="secondary-darken-2"
                     @click="showSensorModal = true"
@@ -89,10 +99,27 @@
                   >
                   <v-dialog v-model="showSensorModal" width="60rem">
                     <SensorFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="handleMetadataUploaded('sensorId', $event)"
                       @close="showSensorModal = false"
                     />
                   </v-dialog>
+                </template>
+
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.raw.name"
+                    :subtitle="
+                      item.raw.workspaceId === null
+                        ? 'System variable'
+                        : 'Workspace variable'
+                    "
+                    :class="
+                      item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                    "
+                  />
                 </template>
               </v-autocomplete>
 
@@ -109,20 +136,34 @@
                 rounded="lg"
               >
                 <template v-slot:item="{ props, item }">
-                  <v-tooltip bottom :openDelay="1500">
+                  <v-tooltip bottom :openDelay="500">
                     <template v-slot:activator="{ props: tooltipProps }">
-                      <v-list-item v-bind="{ ...props, ...tooltipProps }">
+                      <v-list-item
+                        :subtitle="
+                          item.raw.workspaceId === null
+                            ? 'System variable'
+                            : 'Workspace variable'
+                        "
+                        :class="
+                          item.raw.workspaceId === null
+                            ? 'bg-grey-lighten-5'
+                            : ''
+                        "
+                        v-bind="{ ...props, ...tooltipProps }"
+                      >
                       </v-list-item>
                     </template>
                     <span>{{ item.title }}</span>
                   </v-tooltip>
                 </template>
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateObservedProperties">
                   <v-icon color="secondary-darken-2" @click="showOPModal = true"
                     >mdi-plus</v-icon
                   >
                   <v-dialog v-model="showOPModal" width="60rem">
                     <ObservedPropertyFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="
                         handleMetadataUploaded('observedPropertyId', $event)
                       "
@@ -144,7 +185,7 @@
                 density="compact"
                 rounded="lg"
               >
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateUnits">
                   <v-icon
                     color="secondary-darken-2"
                     @click="openUnitForm = true"
@@ -152,11 +193,27 @@
                   >
                   <v-dialog v-model="openUnitForm" width="60rem">
                     <UnitFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="handleMetadataUploaded('unitId', $event)"
                       @close="openUnitForm = false"
                       >Add New</UnitFormCard
                     >
                   </v-dialog>
+                </template>
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.raw.name"
+                    :subtitle="
+                      item.raw.workspaceId === null
+                        ? 'System variable'
+                        : 'Workspace variable'
+                    "
+                    :class="
+                      item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                    "
+                  />
                 </template>
               </v-autocomplete>
 
@@ -172,12 +229,14 @@
                 density="compact"
                 rounded="lg"
               >
-                <template v-slot:append v-if="isPrimaryOwner">
+                <template v-slot:append v-if="canCreateProcessingLevels">
                   <v-icon color="secondary-darken-2" @click="showPLModal = true"
                     >mdi-plus</v-icon
                   >
                   <v-dialog v-model="showPLModal" width="60rem">
                     <ProcessingLevelFormCard
+                      v-if="workspace"
+                      :workspace-id="workspace.id"
                       @created="
                         handleMetadataUploaded('processingLevelId', $event)
                       "
@@ -185,6 +244,20 @@
                       >Add New</ProcessingLevelFormCard
                     >
                   </v-dialog>
+                </template>
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.raw.title"
+                    :subtitle="
+                      item.raw.workspaceId
+                        ? 'Workspace variable'
+                        : 'System variable'
+                    "
+                    :class="
+                      item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                    "
+                  />
                 </template>
               </v-autocomplete>
             </v-card-text>
@@ -199,7 +272,7 @@
                 :rules="[
                   ...rules.requiredNumber,
                   () =>
-                    datastream.timeAggregationIntervalUnits != null ||
+                    datastream.timeAggregationIntervalUnit != null ||
                     'An interval must be selected.',
                 ]"
                 type="number"
@@ -215,7 +288,7 @@
                 class="no-wrap pt-0 mb-4"
               >
                 <v-btn-toggle
-                  v-model="datastream.timeAggregationIntervalUnits"
+                  v-model="datastream.timeAggregationIntervalUnit"
                   label="Time aggregation unit *"
                   :items="timeUnits"
                   variant="outlined"
@@ -237,7 +310,7 @@
                 :rules="[
                   () =>
                     !datastream.intendedTimeSpacing ||
-                    datastream.intendedTimeSpacingUnits != null ||
+                    datastream.intendedTimeSpacingUnit != null ||
                     'Unit is required when a time spacing value is provided.',
                 ]"
                 type="number"
@@ -253,7 +326,7 @@
                 class="no-wrap pt-0"
               >
                 <v-btn-toggle
-                  v-model="datastream.intendedTimeSpacingUnits"
+                  v-model="datastream.intendedTimeSpacingUnit"
                   label="Intended time spacing unit"
                   :items="timeUnits"
                   variant="outlined"
@@ -417,7 +490,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
@@ -434,9 +507,19 @@ import {
 import { useMetadata } from '@/composables/useMetadata'
 import { Thing } from '@/types'
 import { api } from '@/services/api'
-import { Datastream } from '@/types'
+import { Datastream, Workspace } from '@/types'
 import { VForm } from 'vuetify/components'
 import router from '@/router/router'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+
+const workspace = ref<Workspace>()
+const {
+  canCreateObservedProperties,
+  canCreateProcessingLevels,
+  canCreateSensors,
+  canCreateUnits,
+  canCreateDatastreams,
+} = useWorkspacePermissions(workspace)
 
 const route = useRoute()
 const thingId = route.params.id.toString()
@@ -446,7 +529,6 @@ const datastreamId = route.params.datastreamId?.toString() || ''
 const timeUnits = ['seconds', 'minutes', 'hours', 'days']
 const openUnitForm = ref(false)
 
-const isPrimaryOwner = computed(() => thing.value?.isPrimaryOwner)
 const showTemplateModal = ref(false)
 const showSensorModal = ref(false)
 const showPLModal = ref(false)
@@ -466,10 +548,10 @@ const {
   formattedObservedProperties,
   formattedProcessingLevels,
   fetchMetadata,
-} = useMetadata(thingId, true)
+} = useMetadata(workspace)
 
 const handleMetadataUploaded = async (dsKey: string, newId: string) => {
-  await fetchMetadata(thingId)
+  await fetchMetadata(workspace.value!.id)
   ;(datastream.value as any)[dsKey] = newId
 }
 
@@ -490,7 +572,6 @@ const generateDefaultDescription = () => {
   const OP = observedProperties.value.find(
     (pl) => pl.id === datastream.value.observedPropertyId
   )?.name
-  console.log('computing description', OP)
   const PL = processingLevels.value.find(
     (pl) => pl.id === datastream.value.processingLevelId
   )?.code
@@ -513,8 +594,8 @@ watch(selectedDatastreamID, async () => {
       observedPropertyId: fetchedDS.observedPropertyId,
       processingLevelId: fetchedDS.processingLevelId,
       unitId: fetchedDS.unitId,
-      timeAggregationIntervalUnits: fetchedDS.timeAggregationIntervalUnits,
-      intendedTimeSpacingUnits: fetchedDS.intendedTimeSpacingUnits,
+      timeAggregationIntervalUnit: fetchedDS.timeAggregationIntervalUnit,
+      intendedTimeSpacingUnit: fetchedDS.intendedTimeSpacingUnit,
       name: fetchedDS.name,
       description: fetchedDS.description,
       sampledMedium: fetchedDS.sampledMedium,
@@ -569,6 +650,12 @@ onMounted(async () => {
       originalDescription.value = datastream.value.description
     }
     thing.value = fetchedThing
+
+    try {
+      workspace.value = await api.fetchWorkspace(thing.value!.workspaceId)
+    } catch (error) {
+      console.error('Error fetching workspace', error)
+    }
   } catch (error) {
     Snackbar.error('Unable to fetch data from the API.')
     console.error('Error fetching datastream data from DB.', error)

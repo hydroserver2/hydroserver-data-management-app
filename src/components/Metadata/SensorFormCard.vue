@@ -90,16 +90,18 @@ import { computed } from 'vue'
 import { methodTypes } from '@/config/vocabularies'
 import { Sensor } from '@/types'
 
-const props = defineProps({ sensor: Object as () => Sensor })
+const props = defineProps<{
+  sensor?: Sensor
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchSensors,
   api.createSensor,
   api.updateSensor,
   Sensor,
-  props.sensor || undefined,
-  false
+  props.sensor || undefined
 )
 
 const isInstrument = computed(
@@ -112,6 +114,7 @@ async function onSubmit() {
     item.value.name = `${manufacturer}: ${model}`
   }
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)

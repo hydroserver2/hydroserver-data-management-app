@@ -286,84 +286,139 @@ onMounted(async () => {
             ></v-autocomplete>
           </v-col>
         </v-row>
-      </v-card-item> -->
+      </v-card-item>
 
-<!-- // const intervalDelimiterValues = [
-//   { value: ',', title: 'Comma' },
-//   { value: '|', title: 'Pipe' },
-//   { value: '\\t', title: 'Tab' },
-//   { value: ';', title: 'Semicolon' },
-//   { value: ' ', title: 'Space' },
-// ] -->
+      <v-divider />
+      <v-card-actions>
+        <v-spacer />
+        <v-btn-cancel @click="emit('close')"> Cancel </v-btn-cancel>
+        <v-btn-primary type="submit"> Save </v-btn-primary>
+      </v-card-actions>
+    </v-form>
+  </v-card>
+</template>
 
-<!-- // const timezoneOffsets = ref([
-//   '-1200',
-//   '-1100',
-//   '-1000',
-//   '-0900',
-//   '-0800',
-//   '-0700',
-//   '-0600',
-//   '-0500',
-//   '-0430',
-//   '-0400',
-//   '-0330',
-//   '-0300',
-//   '-0200',
-//   '-0100',
-//   '+0000',
-//   '+0100',
-//   '+0200',
-//   '+0300',
-//   '+0330',
-//   '+0400',
-//   '+0430',
-//   '+0500',
-//   '+0530',
-//   '+0545',
-//   '+0600',
-//   '+0630',
-//   '+0700',
-//   '+0800',
-//   '+0845',
-//   '+0900',
-//   '+0930',
-//   '+1000',
-//   '+1030',
-//   '+1100',
-//   '+1130',
-//   '+1200',
-//   '+1245',
-//   '+1300',
-//   '+1400',
-// ]) -->
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useFormLogic } from '@/composables/useFormLogic'
+import { api } from '@/services/api'
+import { DataLoader, DataSource } from '@/types'
+import { rules } from '@/utils/rules'
 
-<!-- const openStrftimeHelp = () => window.open('https://devhints.io/strftime','_blank', 'noreferrer') -->
+const props = defineProps(['dataSource'])
+const emit = defineEmits(['created', 'updated', 'close'])
 
-<!-- <v-row>
-  <v-col>
-    <v-text-field
-      v-model.number="item.headerRow"
-      label="File Header Row"
-      hint="Enter the row that contains file headers, if any."
-      type="number"
-      clearable
-      :rules="[
-        ...rules.greaterThan(0),
-        ...rules.lessThan(item.dataStartRow, 'the data start row'),
-      ]"
-    />
-  </v-col>
-  <v-col>
-    <v-text-field
-      v-model.number="item.dataStartRow"
-      label="Data Start Row *"
-      hint="Enter the row that data starts on."
-      type="number"
-      :rules="[
-        ...rules.greaterThan(0),
-        ...rules.greaterThan(item.headerRow || 0, 'the file header row'),
-      ]"
-    />
-  </v-col>
-</v-row> -->
+const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
+  api.createDataSource,
+  api.updateDataSource,
+  DataSource,
+  props.dataSource || undefined
+)
+
+const dataLoaders = ref<DataLoader[]>([])
+const scheduleType = ref('interval')
+const timestampType = ref('index')
+const timestampFormatType = ref('iso')
+const useOffset = ref(false)
+const loaded = ref(false)
+
+const intervalDelimiterValues = [
+  { value: ',', title: 'Comma' },
+  { value: '|', title: 'Pipe' },
+  { value: '\\t', title: 'Tab' },
+  { value: ';', title: 'Semicolon' },
+  { value: ' ', title: 'Space' },
+]
+
+const intervalUnitValues = [
+  { value: 'minutes', title: 'Minutes' },
+  { value: 'hours', title: 'Hours' },
+  { value: 'days', title: 'Days' },
+]
+
+const timezoneOffsets = ref([
+  '-1200',
+  '-1100',
+  '-1000',
+  '-0900',
+  '-0800',
+  '-0700',
+  '-0600',
+  '-0500',
+  '-0430',
+  '-0400',
+  '-0330',
+  '-0300',
+  '-0200',
+  '-0100',
+  '+0000',
+  '+0100',
+  '+0200',
+  '+0300',
+  '+0330',
+  '+0400',
+  '+0430',
+  '+0500',
+  '+0530',
+  '+0545',
+  '+0600',
+  '+0630',
+  '+0700',
+  '+0800',
+  '+0845',
+  '+0900',
+  '+0930',
+  '+1000',
+  '+1030',
+  '+1100',
+  '+1130',
+  '+1200',
+  '+1245',
+  '+1300',
+  '+1400',
+])
+
+async function onSubmit() {
+  try {
+    const newItem = await uploadItem()
+    if (!newItem) return
+    if (isEdit.value) emit('updated', newItem)
+    else emit('created', newItem.id)
+  } catch (error) {
+    console.error('Error uploading DataSource', error)
+  }
+  emit('close')
+}
+
+const openStrftimeHelp = () =>
+  window.open('https://devhints.io/strftime', '_blank', 'noreferrer')
+
+const initializeForm = () => {
+  if (!item.value) return
+  let {
+    crontab,
+    timestampColumn,
+    timestampFormat,
+    timestampOffset,
+    startTime,
+    endTime,
+  } = item.value
+
+  if (crontab) scheduleType.value = 'crontab'
+  if (timestampOffset) useOffset.value = true
+
+  if (timestampColumn && typeof timestampColumn === 'string')
+    timestampType.value = 'name'
+  if (timestampFormat && timestampFormat !== 'iso')
+    timestampFormatType.value = 'custom'
+
+  if (startTime) item.value.startTime = startTime.replace('Z', '')
+  if (endTime) item.value.endTime = endTime.replace('Z', '')
+}
+
+onMounted(async () => {
+  dataLoaders.value = await api.fetchDataLoaders()
+  if (isEdit.value) initializeForm()
+  loaded.value = true
+})
+</script>

@@ -1,27 +1,52 @@
 import { Thing } from '@/types'
 import { Loader } from '@googlemaps/js-api-loader'
 
-type Map = google.maps.Map
+type GoogleMapsLibraries = {
+  Map: typeof google.maps.Map
+  AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement
+  google: typeof google
+}
+
+// Create a module‑scoped promise so the libraries load only once.
+let googleMapsPromise: Promise<GoogleMapsLibraries> | null = null
+function loadGoogleMaps(): Promise<GoogleMapsLibraries> {
+  if (!googleMapsPromise) {
+    const loader = new Loader({
+      apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
+      version: 'beta',
+      libraries: ['marker'],
+    })
+    googleMapsPromise = (async () => {
+      const { Map } = (await loader.importLibrary(
+        'maps'
+      )) as google.maps.MapsLibrary
+      const { AdvancedMarkerElement } = await loader.importLibrary('marker')
+      return { Map, AdvancedMarkerElement, google: window.google }
+    })()
+  }
+  return googleMapsPromise
+}
 
 export const loadMap = async (
   container: HTMLElement,
-  mapOptions: google.maps.MapOptions = {}
+  mapOptions: google.maps.MapOptions = {},
+  useBounds: boolean,
+  markers: Thing[]
 ) => {
-  const loader = new Loader({
-    apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
-    version: 'beta',
-    libraries: ['marker'],
-  })
-  const google = await loader.load()
+  const { Map } = await loadGoogleMaps()
 
-  return new google.maps.Map(container, {
-    ...mapOptions,
+  const initialMapOptions = useBounds
+    ? getBoundedMapOptions(container, markers, mapOptions)
+    : mapOptions
+
+  return new Map(container, {
+    ...initialMapOptions,
     mapId: import.meta.env.VITE_APP_GOOGLE_MAPS_MAP_ID,
   })
 }
 
 export const zoomAndCenterMap = (
-  map: Map | null,
+  map: google.maps.Map | null,
   mapContainer: HTMLElement,
   markers: Thing[],
   defaultMapOptions: {}
@@ -35,7 +60,7 @@ export const zoomAndCenterMap = (
   map?.setZoom(mapOptions.zoom)
 }
 
-export function getBoundedMapOptions(
+function getBoundedMapOptions(
   mapContainer: HTMLElement,
   markers: Thing[],
   defaultMapOptions: any

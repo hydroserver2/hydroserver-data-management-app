@@ -25,19 +25,19 @@
     <div
       v-if="thingId && photos"
       v-for="photo in photos"
-      :key="photo.id"
+      :key="photo.name"
       class="photo-wrapper"
     >
       <img
-        v-if="!photosToDelete.includes(photo.id)"
+        v-if="!photosToDelete.includes(photo.name)"
         :src="photo.link"
         class="photo"
       />
       <v-icon
-        v-if="!photosToDelete.includes(photo.id)"
+        v-if="!photosToDelete.includes(photo.name)"
         color="red-darken-1"
         class="delete-icon"
-        @click="photosToDelete.push(photo.id)"
+        @click="photosToDelete.push(photo.name)"
         >mdi-close-circle</v-icon
       >
     </div>

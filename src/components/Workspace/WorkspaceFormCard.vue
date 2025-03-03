@@ -1,7 +1,8 @@
 <template>
   <v-card>
-    <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Unit </v-card-title>
-    <v-divider />
+    <v-toolbar color="secondary-darken-2">
+      <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} workspace </v-card-title>
+    </v-toolbar>
 
     <v-form
       @submit.prevent="onSubmit"
@@ -9,26 +10,15 @@
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-text v-if="item">
+      <v-card-text v-if="item" class="mt-4">
         <v-text-field
           v-model="item.name"
           label="Name *"
           :rules="rules.requiredAndMaxLength255"
         />
-        <v-text-field
-          v-model="item.symbol"
-          label="Symbol *"
-          :rules="rules.requiredAndMaxLength255"
-        />
-        <v-text-field
-          v-model="item.definition"
-          label="Definition *"
-          :rules="rules.requiredDescription"
-        />
-        <v-text-field
-          v-model="item.type"
-          label="Unit Type *"
-          :rules="rules.requiredAndMaxLength255"
+        <v-checkbox
+          v-model="item.isPrivate"
+          label="Make this workspace private"
         />
       </v-card-text>
 
@@ -50,30 +40,28 @@ import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { Unit } from '@/types'
+import { Workspace } from '@/types'
+import { Snackbar } from '@/utils/notifications'
 
-const props = defineProps<{
-  unit?: Unit
-  workspaceId: string
-}>()
-
+const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createUnit,
-  api.updateUnit,
-  Unit
+  api.createWorkspace,
+  api.updateWorkspace,
+  Workspace,
+  props.workspace || undefined
 )
 
 async function onSubmit() {
   try {
-    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem.id)
-  } catch (error) {
-    console.error('Error uploading unit', error)
+    else emit('created', newItem)
+  } catch (error: any) {
+    console.error('Error uploading workspace', error)
+    Snackbar.error(error.message)
   }
   emit('close')
 }

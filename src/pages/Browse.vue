@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex fill-height">
     <BrowseFilterTool :things="things" @filter="updateFilteredThings" />
-    <GoogleMap :things="filteredThings" useMarkerClusterer />
+    <GoogleMap :things="filteredThings" useMarkerClusterer useBounds />
   </div>
 </template>
 

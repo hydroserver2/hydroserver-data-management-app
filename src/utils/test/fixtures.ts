@@ -13,31 +13,16 @@ export const thing = {
   state: 'FL',
   county: 'Miami-Dade County',
   isPrivate: false,
-  isPrimaryOwner: true,
-  ownsThing: true,
-  followsThing: false,
-  owners: [
-    {
-      firstName: 'Paul',
-      lastName: 'Paulson',
-      email: 'paul@example.com',
-      organizationName: 'University A',
-      isPrimaryOwner: true,
-    },
-  ],
   tags: [
     {
-      id: 'a138e997-1cd7-48c4-852d-df324768345f',
       key: 'Commissioner',
       value: 'Bub',
     },
     {
-      id: '54cea019-ddd4-484a-87f3-f2ad34676e78',
       key: 'Is fav',
       value: 'Definitely',
     },
     {
-      id: '514f5353-8ce8-4fba-a0ba-63b5863a3026',
       key: 'Land Use',
       value: 'Agricultural',
     },

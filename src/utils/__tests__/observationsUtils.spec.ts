@@ -30,7 +30,7 @@ describe('preProcessData', () => {
     newDatastream = {
       ...newDatastream,
       intendedTimeSpacing: 5,
-      intendedTimeSpacingUnits: 'minutes',
+      intendedTimeSpacingUnit: 'minutes',
     }
 
     const data = preProcessData(input as DataArray, newDatastream)

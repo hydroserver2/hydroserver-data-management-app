@@ -75,12 +75,10 @@ const hasLink =
     : false
 
 const { item, isEdit, valid, myForm } = useFormLogic(
-  api.fetchDatastreams,
   api.createDatastream,
   api.updateDatastream,
   Datastream,
-  hasLink ? props.datastream : undefined,
-  false
+  hasLink ? props.datastream : undefined
 )
 
 const dataSources = ref<DataSource[]>([])

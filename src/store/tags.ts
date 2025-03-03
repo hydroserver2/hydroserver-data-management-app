@@ -7,39 +7,37 @@ export const useTagStore = defineStore('tags', () => {
   const tags = ref<Tag[]>([])
   const previewTags = ref<Tag[]>([])
 
-  const uploadNewTags = async (thingId: string) => {
-    const newTags = previewTags.value.filter(
-      (pt) =>
-        !tags.value.some((st) => st.key === pt.key && st.value === pt.value)
+  function findTagChanges(oldTags: Tag[], newTags: Tag[]) {
+    const tagsToEdit = newTags.filter((nt) =>
+      oldTags.some((ot) => nt.key === ot.key && nt.value !== ot.value)
     )
-    if (newTags.length <= 0) return
-    try {
-      const requests = newTags.map((tag) => api.createSiteTag(thingId, tag))
-      await Promise.all(requests)
-    } catch (error) {
-      console.error('Failed to upload tags:', error)
-    }
-  }
 
-  const deleteSelectedTags = async (thingId: string) => {
-    const deletedTags = tags.value.filter(
-      (storedTag) => !previewTags.value.some((t) => t.id === storedTag.id)
+    const tagsToDelete = oldTags.filter(
+      (ot) => !newTags.some((nt) => nt.key === ot.key)
     )
-    if (deletedTags.length <= 0) return
-    try {
-      const requests = deletedTags.map((tag) =>
-        api.deleteSiteTag(thingId, tag.id)
-      )
-      await Promise.all(requests)
-    } catch (error) {
-      console.error('Failed to upload tags:', error)
-    }
+
+    const tagsToAdd = newTags.filter(
+      (nt) => !oldTags.some((ot) => ot.key === nt.key)
+    )
+
+    return [tagsToEdit, tagsToDelete, tagsToAdd]
   }
 
   const updateTags = async (thingId: string) => {
     try {
-      await uploadNewTags(thingId)
-      await deleteSelectedTags(thingId)
+      const [tagsToEdit, tagsToDelete, tagsToAdd] = findTagChanges(
+        tags.value,
+        previewTags.value
+      )
+
+      const requests = [
+        ...tagsToAdd.map((tag) => api.createSiteTag(thingId, tag)),
+        ...tagsToEdit.map((tag) => api.editSiteTag(thingId, tag)),
+        ...tagsToDelete.map((tag) => api.deleteSiteTag(thingId, tag.key)),
+      ]
+
+      await Promise.all(requests)
+
       tags.value = await api.fetchSiteTags(thingId)
       previewTags.value = []
     } catch (error) {

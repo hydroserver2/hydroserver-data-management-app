@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-tooltip bottom :openDelay="500" v-if="isOwner">
+    <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
       <template v-slot:activator="{ props }">
         <v-icon
           :icon="
@@ -21,7 +21,7 @@
       <span v-else>Make the data for this datastream publicly visible</span>
     </v-tooltip>
 
-    <v-tooltip bottom :openDelay="500" v-if="isOwner">
+    <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
       <template v-slot:activator="{ props }">
         <v-icon
           :icon="datastream.isVisible ? 'mdi-eye' : 'mdi-eye-off'"
@@ -39,7 +39,7 @@
     </v-tooltip>
 
     <v-tooltip
-      v-if="!isOwner && !datastream.isDataVisible"
+      v-if="!canViewDatastreams && !datastream.isDataVisible"
       bottom
       :openDelay="100"
     >
@@ -54,7 +54,7 @@
         <v-icon v-bind="props" icon="mdi-dots-vertical" />
       </template>
       <v-list>
-        <div v-if="isOwner">
+        <div v-if="canEditDatastreams">
           <v-list-item
             prepend-icon="mdi-link-variant"
             title="Link Data Source"
@@ -69,7 +69,7 @@
             }"
           />
         </div>
-        <div v-if="thing?.isPrimaryOwner">
+        <div v-if="canDeleteDatastreams">
           <v-list-item
             prepend-icon="mdi-delete"
             title="Delete Datastream"
@@ -138,8 +138,7 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import DatastreamSourceLinker from './DatastreamSourceLinker.vue'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
-import { useThingStore } from '@/store/thing'
-import { storeToRefs } from 'pinia'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const props = defineProps({
   datastream: {
@@ -150,13 +149,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  isOwner: {
-    type: Boolean,
-    required: true,
-  },
 })
 
-const { thing } = storeToRefs(useThingStore())
+const { canEditDatastreams, canDeleteDatastreams, canViewDatastreams } =
+  useWorkspacePermissions()
 
 const emit = defineEmits(['deleted', 'linkUpdated'])
 const handleLinkUpdated = (patchBody: {}) => emit('linkUpdated', patchBody)

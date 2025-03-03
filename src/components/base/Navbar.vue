@@ -1,5 +1,25 @@
 <template>
-  <v-app-bar app elevation="2">
+  <v-app-bar app elevation="2" density="default">
+    <template v-slot:prepend v-if="route.meta.hasSidebar">
+      <v-app-bar-nav-icon
+        v-if="sidebar.isOpen"
+        icon="mdi-menu-open"
+        @click="sidebar.toggle"
+        class="mx-3"
+        variant="tonal"
+        rounded="lg"
+        size="large"
+      />
+      <v-app-bar-nav-icon
+        v-else
+        icon="mdi-menu"
+        @click="sidebar.toggle"
+        class="mx-3"
+        variant="tonal"
+        rounded="lg"
+        size="large"
+      />
+    </template>
     <router-link v-if="navbarLogo.route" :to="navbarLogo.route">
       <v-img :src="navbarLogo.src" alt="Logo" :width="navbarLogo.width" />
     </router-link>
@@ -12,12 +32,17 @@
     </a>
 
     <template v-if="mdAndDown" v-slot:append>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-app-bar-nav-icon class="mx-2" @click.stop="drawer = !drawer" />
     </template>
 
     <template v-if="!mdAndDown">
       <div v-for="path of paths" :key="path.label">
-        <v-btn v-if="!path.menu" v-bind="path.attrs" @click="path.onClick">
+        <v-btn
+          v-if="!path.menu"
+          v-bind="path.attrs"
+          @click="path.onClick"
+          density="comfortable"
+        >
           {{ path.label }}
         </v-btn>
 
@@ -41,7 +66,7 @@
 
       <v-spacer />
 
-      <template v-if="isLoggedIn">
+      <template v-if="isAuthenticated">
         <v-btn elevation="2" rounded>
           <v-icon>mdi-account-circle</v-icon>
           <v-icon>mdi-menu-down</v-icon>
@@ -59,7 +84,7 @@
               <v-list-item
                 prepend-icon="mdi-logout"
                 @click="onLogout"
-                title="Log Out"
+                title="Log out"
               />
             </v-list>
           </v-menu>
@@ -67,12 +92,12 @@
       </template>
 
       <template v-else>
-        <v-btn prepend-icon="mdi-login" to="/Login">Log In</v-btn>
+        <v-btn prepend-icon="mdi-login" to="/Login">Log in</v-btn>
         <v-btn
-          v-if="disableAccountCreation !== 'true'"
+          v-if="signupEnabled"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
-          >Sign Up</v-btn
+          >Sign up</v-btn
         >
       </template>
     </template>
@@ -109,7 +134,7 @@
     <v-divider />
 
     <v-list density="compact" nav>
-      <template v-if="isLoggedIn">
+      <template v-if="isAuthenticated">
         <v-list-item to="/profile" prepend-icon="mdi-account-circle"
           >Account</v-list-item
         >
@@ -121,10 +146,10 @@
       <template v-else>
         <v-list-item prepend-icon="mdi-login" to="/Login">Login</v-list-item>
         <v-list-item
-          v-if="disableAccountCreation !== 'true'"
+          v-if="signupEnabled"
           prepend-icon="mdi-account-plus-outline"
           to="/sign-up"
-          >Sign Up</v-list-item
+          >Sign up</v-list-item
         >
       </template>
     </v-list>
@@ -132,23 +157,24 @@
 </template>
 
 <script setup lang="ts">
-import appLogo from '@/assets/hydroserver-icon-min.png'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
-import { useAuthStore } from '@/store/authentication'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { navbarLogo } from '@/config/navbarConfig'
+import { useAuthStore } from '@/store/authentication'
+import { useRoute } from 'vue-router'
+import { useSidebarStore } from '@/store/useSidebar'
 
-const { resetState } = useDataVisStore()
+const route = useRoute()
 const { logout } = useAuthStore()
-const { isLoggedIn } = storeToRefs(useAuthStore())
+const { signupEnabled, isAuthenticated } = storeToRefs(useAuthStore())
+const { resetState } = useDataVisStore()
 const { mdAndDown } = useDisplay()
 
+const sidebar = useSidebarStore()
 const drawer = ref(false)
-const disableAccountCreation =
-  import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
 const paths: {
   attrs?: { to?: string; href?: string }
@@ -159,36 +185,36 @@ const paths: {
 }[] = [
   {
     attrs: { to: '/browse' },
-    label: 'Browse Monitoring Sites',
+    label: 'Browse monitoring sites',
     icon: 'mdi-layers-search',
   },
   {
     attrs: { to: '/sites' },
-    label: 'Your Sites',
+    label: 'Your sites',
     icon: 'mdi-map-marker-multiple',
   },
   {
     attrs: { to: '/visualize-data' },
-    label: 'Visualize Data',
+    label: 'Visualize data',
     icon: 'mdi-chart-line',
     onClick: () => resetState(),
   },
   {
-    label: 'Data Management',
+    label: 'Data management',
     menu: [
       {
         attrs: { to: '/Metadata' },
-        label: 'Manage Metadata',
+        label: 'Manage metadata',
         icon: 'mdi-database-cog',
       },
       {
         attrs: { to: '/data-sources' },
-        label: 'Manage Data Sources',
+        label: 'Manage data sources',
         icon: 'mdi-file-chart',
       },
       {
         attrs: { to: '/data-loaders' },
-        label: 'Manage Data Loaders',
+        label: 'Manage data loaders',
         icon: 'mdi-file-upload',
       },
     ],

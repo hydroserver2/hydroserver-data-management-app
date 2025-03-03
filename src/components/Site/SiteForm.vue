@@ -199,9 +199,13 @@ const countryTitle = (item: { name: string; code: string } | undefined) => {
 
 const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
+const { tags } = storeToRefs(useTagStore())
 const { updateTags } = useTagStore()
 
-const props = defineProps({ thingId: String })
+const props = defineProps({
+  thingId: String,
+  workspaceId: { type: String, required: true },
+})
 const emit = defineEmits(['close', 'site-created'])
 let loaded = ref(false)
 const valid = ref(false)
@@ -209,7 +213,6 @@ const myForm = ref<VForm>()
 const mapOptions = ref<any>(undefined)
 const thing = reactive<Thing>(new Thing())
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
-const { tags } = storeToRefs(useTagStore())
 
 watch(
   () => includeDataDisclaimer.value,
@@ -242,18 +245,13 @@ async function uploadThing() {
   if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
 
   try {
+    thing.workspaceId = props.workspaceId
     storedThing.value = props.thingId
       ? await api.updateThing(thing)
       : await api.createThing(thing)
 
-    console.log('props.thingId', props.thingId)
+    if (!props.thingId) emit('site-created')
 
-    if (!props.thingId) {
-      console.log('emitting site-created from SiteForm.vue')
-      emit('site-created')
-    }
-
-    console.log('Site upload response', storedThing.value)
     // Set the tag context to the current site so updateTags can compare
     // against what we already have if anything.
     tags.value = await api.fetchSiteTags(storedThing.value!.id)

@@ -1,6 +1,22 @@
 <template>
-  <v-container>
-    <h5 class="text-h5 mb-4">Manage metadata</h5>
+  <v-container v-if="isPageLoaded">
+    <v-row class="mb-4 mt-2" align="center">
+      <v-col cols="auto">
+        <h5 class="text-h5">Manage metadata</h5>
+      </v-col>
+      <v-col cols="12" sm="3">
+        <v-select
+          v-model="selectedWorkspace"
+          label="Selected Workspace"
+          :items="sortedWorkspaces"
+          item-title="name"
+          :return-object="true"
+          variant="outlined"
+          hide-details
+        ></v-select>
+      </v-col>
+    </v-row>
+
     <v-card>
       <v-toolbar color="brown">
         <v-text-field
@@ -33,31 +49,51 @@
           color="white"
           class="mr-2"
           @click="metaMap[tab]?.openDialog()"
-          >Add New {{ metaMap[tab]?.singularName }}</v-btn-add
+          >Add new {{ metaMap[tab]?.singularName }}</v-btn-add
         >
       </v-toolbar>
 
       <v-toolbar color="brown" height="5"></v-toolbar>
 
-      <v-window v-model="tab" class="elevation-3">
+      <v-window v-model="tab" class="elevation-3" v-if="selectedWorkspace">
         <v-window-item value="0">
-          <SensorTable :key="sensorKey" :search="search" />
+          <SensorTable
+            :key="sensorKey"
+            :search="search"
+            :workspace-id="selectedWorkspace.id"
+          />
         </v-window-item>
 
         <v-window-item value="1">
-          <ObservedPropertyTable :key="OPKey" :search="search" />
+          <ObservedPropertyTable
+            :key="OPKey"
+            :search="search"
+            :workspace-id="selectedWorkspace.id"
+          />
         </v-window-item>
 
         <v-window-item value="2">
-          <ProcessingLevelTable :key="PLKey" :search="search" />
+          <ProcessingLevelTable
+            :key="PLKey"
+            :search="search"
+            :workspace-id="selectedWorkspace.id"
+          />
         </v-window-item>
 
         <v-window-item value="3">
-          <UnitTable :key="unitKey" :search="search" />
+          <UnitTable
+            :key="unitKey"
+            :search="search"
+            :workspace-id="selectedWorkspace.id"
+          />
         </v-window-item>
 
         <v-window-item value="4">
-          <ResultQualifierTable :key="qualifierKey" :search="search" />
+          <ResultQualifierTable
+            :key="qualifierKey"
+            :search="search"
+            :workspace-id="selectedWorkspace.id"
+          />
         </v-window-item>
       </v-window>
 
@@ -65,6 +101,7 @@
         <UnitFormCard
           @close="openUnitCreate = false"
           @created="refreshUnitTable"
+          :workspace-id="selectedWorkspace!.id"
         />
       </v-dialog>
 
@@ -72,6 +109,7 @@
         <SensorFormCard
           @close="openSensorCreate = false"
           @created="refreshSensorTable"
+          :workspace-id="selectedWorkspace!.id"
         />
       </v-dialog>
 
@@ -79,6 +117,7 @@
         <ResultQualifierFormCard
           @close="openRQCreate = false"
           @created="refreshRQTable"
+          :workspace-id="selectedWorkspace!.id"
         />
       </v-dialog>
 
@@ -86,6 +125,7 @@
         <ObservedPropertyFormCard
           @close="openOPCreate = false"
           @created="refreshOPTable"
+          :workspace-id="selectedWorkspace!.id"
         />
       </v-dialog>
 
@@ -93,14 +133,16 @@
         <ProcessingLevelFormCard
           @close="openPLCreate = false"
           @created="refreshPLTable"
+          :workspace-id="selectedWorkspace!.id"
         />
       </v-dialog>
     </v-card>
   </v-container>
+  <FullScreenLoader v-else />
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
 import SensorTable from '@/components/Metadata/SensorTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
@@ -112,6 +154,18 @@ import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
+import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
+import { api } from '@/services/api'
+
+const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
+const { setWorkspaces } = useWorkspaceStore()
+const isPageLoaded = ref(false)
+
+const sortedWorkspaces = computed(() =>
+  workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
+)
 
 const tab = ref(0)
 
@@ -144,12 +198,12 @@ const metaMap: Record<string, any> = {
     singularName: 'sensor',
   },
   1: {
-    name: 'Observed Properties',
+    name: 'Observed properties',
     openDialog: () => (openOPCreate.value = true),
     singularName: 'observed property',
   },
   2: {
-    name: 'Processing Levels',
+    name: 'Processing levels',
     openDialog: () => (openPLCreate.value = true),
     singularName: 'processing level',
   },
@@ -159,9 +213,20 @@ const metaMap: Record<string, any> = {
     singularName: 'unit',
   },
   4: {
-    name: 'Result Qualifiers',
+    name: 'Result qualifiers',
     openDialog: () => (openRQCreate.value = true),
     singularName: 'result qualifier',
   },
 }
+
+onMounted(async () => {
+  try {
+    const workspacesResponse = await api.fetchAssociatedWorkspaces()
+    setWorkspaces(workspacesResponse)
+  } catch (error) {
+    console.error('Error fetching workspaces', error)
+  } finally {
+    isPageLoaded.value = true
+  }
+})
 </script>

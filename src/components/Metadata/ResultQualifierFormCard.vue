@@ -42,20 +42,23 @@ import { ResultQualifier } from '@/types'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
 
-const props = defineProps({ resultQualifier: Object as () => ResultQualifier })
+const props = defineProps<{
+  resultQualifier?: ResultQualifier
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['updated', 'created', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  () => Promise.resolve([]), // No need to fetch RQs so do nothing
   api.createResultQualifier,
   api.updateResultQualifier,
   ResultQualifier,
-  props.resultQualifier || undefined,
-  false
+  props.resultQualifier || undefined
 )
 
 async function onSubmit() {
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)

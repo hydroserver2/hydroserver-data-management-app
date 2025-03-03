@@ -17,6 +17,7 @@
       :result-qualifier="item"
       @close="openEdit = false"
       @updated="onUpdate"
+      :workspace-id="workspaceId"
     />
   </v-dialog>
 
@@ -37,15 +38,20 @@ import { ResultQualifier } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
+import { toRef } from 'vue'
+
+const props = defineProps<{
+  search: string | undefined
+  workspaceId: string
+}>()
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
-    api.fetchCurrentUserResultQualifiers,
+    async (wsId: string) => await api.fetchWorkspaceResultQualifiers(wsId),
     api.deleteResultQualifier,
-    ResultQualifier
+    ResultQualifier,
+    toRef(props, 'workspaceId')
   )
-
-const props = defineProps<{ search: string }>()
 
 const headers = [
   { title: 'Code', key: 'code' },
