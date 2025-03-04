@@ -8,7 +8,7 @@
         <v-select
           v-model="selectedWorkspace"
           label="Selected Workspace"
-          :items="sortedWorkspaces"
+          :items="workspaces"
           item-title="name"
           :return-object="true"
           variant="outlined"
@@ -162,10 +162,6 @@ import { api } from '@/services/api'
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 const isPageLoaded = ref(false)
-
-const sortedWorkspaces = computed(() =>
-  workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
-)
 
 const tab = ref(0)
 

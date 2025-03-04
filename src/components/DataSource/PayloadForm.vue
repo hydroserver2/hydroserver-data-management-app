@@ -94,18 +94,15 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Payload } from '@/types'
-import { computed, ref } from 'vue'
 
 const props = defineProps({ payload: Object as () => Payload })
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  () => Promise.resolve([]),
   api.createDataSourcePayload,
   api.updateDataSourcePayload,
   Payload,
-  props.payload || undefined,
-  false
+  props.payload || undefined
 )
 
 async function onSubmit() {

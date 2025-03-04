@@ -1,6 +1,8 @@
 import { DataSource } from '@/types'
 
-export function getStatus(ds: DataSource) {
+export function getStatus(
+  ds: DataSource
+): 'ok' | 'pending' | 'bad' | 'stale' | 'unknown' {
   if (!ds.lastSynced) return 'pending'
 
   let now = new Date()

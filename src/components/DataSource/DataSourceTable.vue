@@ -4,7 +4,6 @@
     :items="tableData"
     :search="search"
     :hover="true"
-    @click:row="onRowClick"
     class="elevation-2"
   >
     <template v-slot:item.status="{ item }">
@@ -16,36 +15,76 @@
         :icon="item.paused ? 'mdi-play' : 'mdi-pause'"
         @click="togglePaused(item)"
       />
+
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-icon v-bind="props" icon="mdi-dots-vertical" />
+        </template>
+        <v-list>
+          <v-list-item
+            title="Data Source Details"
+            prepend-icon="mdi-information"
+            :to="{
+              name: 'DataSource',
+              params: { id: item.id },
+            }"
+          />
+          <v-list-item
+            title="Edit Data Source"
+            prepend-icon="mdi-pencil"
+            @click="openDialog(item, 'edit')"
+          />
+          <v-list-item
+            title="Delete Data Source"
+            prepend-icon="mdi-delete"
+            @click="openDialog(item, 'delete')"
+          />
+        </v-list>
+      </v-menu>
     </template>
   </v-data-table-virtual>
+
+  <v-dialog v-model="openEdit">
+    <DataSourceForm
+      :data-source="item"
+      @close="openEdit = false"
+      @updated="onUpdate"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="openDelete" max-width="500">
+    <DeleteDataSourceCard
+      :item-name="item.name"
+      @delete="onDelete"
+      @close="openDelete = false"
+    />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, toRef } from 'vue'
-import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
+import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { DataLoader, DataSource } from '@/types'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
 import { useTableLogic } from '@/composables/useTableLogic'
-import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
-import { storeToRefs } from 'pinia'
-import { useWorkspaceStore } from '@/store/workspaces'
+import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+const props = defineProps<{
+  search: string | undefined
+  workspaceId: string
+}>()
 
-defineProps({ search: String })
 const dataLoaders = ref<DataLoader[]>([])
-const router = useRouter()
 
-// TODO: This needs a new endpoint
 const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
   useTableLogic(
-    api.fetchDataSources,
+    async (wsId: string) => await api.fetchWorkspaceDataSources(wsId),
     api.deleteDataSource,
     DataSource,
-    toRef(selectedWorkspace.value?.id || '')
+    toRef(props, 'workspaceId')
   )
 
 const tableData = computed(() =>

@@ -302,6 +302,8 @@ export const api = {
   createProcessingLevel: async (pl: ProcessingLevel) =>
     apiMethods.post(PL_BASE, pl),
   fetchProcessingLevels: async () => apiMethods.fetch(PL_BASE),
+  fetchProcessingLevel: async (id: string) =>
+    apiMethods.fetch(`${PL_BASE}/${id}`),
   fetchWorkspaceProcessingLevels: async (id: string) =>
     apiMethods.fetch(`${PL_BASE}?workspace_id=${id}`),
   updateProcessingLevel: async (
@@ -313,6 +315,7 @@ export const api = {
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
   fetchSensors: async () => apiMethods.fetch(SENSOR_BASE),
+  fetchSensor: async (id: string) => apiMethods.fetch(`${SENSOR_BASE}/${id}`),
   fetchWorkspaceSensors: async (id: string) =>
     apiMethods.fetch(`${SENSOR_BASE}?workspace_id=${id}`),
   updateSensor: async (newSensor: Sensor, oldSensor: Sensor | null = null) =>
@@ -349,6 +352,8 @@ export const api = {
   createDataSource: async (dataSource: DataSource) =>
     apiMethods.post(DATA_SOURCES_BASE, dataSource),
   fetchDataSources: async () => apiMethods.fetch(DATA_SOURCES_BASE),
+  fetchWorkspaceDataSources: async (id: string) =>
+    apiMethods.fetch(`${DATA_SOURCES_BASE}?workspace_id=${id}`),
   fetchDataSource: async (id: string) =>
     apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}`),
   updateDataSource: async (newS: DataSource, oldS: DataSource | null = null) =>

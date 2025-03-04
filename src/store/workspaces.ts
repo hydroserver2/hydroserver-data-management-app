@@ -39,6 +39,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       selectedWorkspace.value = null
       return
     }
+    workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
 
     const currentWorkspace = workspaces.value.find(
       (ws) => selectedWorkspace.value?.id === ws.id
@@ -53,7 +54,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     // TODO: if there is a default workspace, select it
     else {
       // If no default, then select the first in the list
-      workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
       selectedWorkspace.value = workspaces.value[0]
     }
   }

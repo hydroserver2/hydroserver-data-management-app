@@ -25,7 +25,7 @@
     <v-card-text class="py-1">
       <strong class="mr-2">Aggregation statistic interval:</strong>
       {{ datastream?.timeAggregationInterval }}
-      {{ datastream?.timeAggregationIntervalUnits }}
+      {{ datastream?.timeAggregationIntervalUnit }}
     </v-card-text>
   </v-card>
 </template>

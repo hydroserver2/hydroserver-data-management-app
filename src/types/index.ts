@@ -321,10 +321,12 @@ export class DataSource {
 export class DataLoader {
   id: string
   name: string
+  type: string
 
   constructor() {
     this.id = ''
     this.name = ''
+    this.type = ''
   }
 }
 
