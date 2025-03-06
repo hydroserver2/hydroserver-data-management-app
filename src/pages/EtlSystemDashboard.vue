@@ -1,6 +1,21 @@
 <template>
   <v-container>
-    <h5 class="text-h5 mb-4">Manage ETL systems</h5>
+    <v-row class="mb-4 mt-2" align="center">
+      <v-col cols="auto">
+        <h5 class="text-h5">Manage ETL systems</h5>
+      </v-col>
+      <v-col cols="12" sm="3">
+        <v-select
+          v-model="selectedWorkspace"
+          label="Selected Workspace"
+          :items="workspaces"
+          item-title="name"
+          :return-object="true"
+          variant="outlined"
+          hide-details
+        ></v-select>
+      </v-col>
+    </v-row>
     <v-card>
       <v-toolbar flat color="indigo">
         <v-text-field
@@ -32,8 +47,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import EtlSystemTable from '@/components/EtlSystem/EtlSystemTable.vue'
+import { useWorkspaceStore } from '@/store/workspaces'
+import { storeToRefs } from 'pinia'
+import { api } from '@/services/api'
 
+const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
+const { setWorkspaces } = useWorkspaceStore()
 const search = ref()
+
+onMounted(async () => {
+  try {
+    const workspacesResponse = await api.fetchAssociatedWorkspaces()
+    setWorkspaces(workspacesResponse)
+  } catch (error) {
+    console.error('Error fetching workspaces', error)
+  }
+})
 </script>
