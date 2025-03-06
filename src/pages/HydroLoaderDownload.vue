@@ -2,7 +2,7 @@
   <v-container>
     <v-row class="mb-4">
       <v-col cols="auto">
-        <h5 class="text-h5">Download Streaming Data Loader</h5>
+        <h5 class="text-h5">Download Streaming ETL System</h5>
       </v-col>
     </v-row>
     <v-row>
@@ -33,13 +33,9 @@
 </template>
 
 <script setup lang="ts">
-
 let version = 'v1.0.5' // TODO: Add this as an environment variable
 let macosLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.MacOS.dmg`
 let windowsLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.Windows.zip`
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

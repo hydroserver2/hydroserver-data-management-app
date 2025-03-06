@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h5 class="text-h5 mb-4">Manage data loaders</h5>
+    <h5 class="text-h5 mb-4">Manage ETL systems</h5>
     <v-card>
       <v-toolbar flat color="indigo">
         <v-text-field
@@ -26,14 +26,14 @@
         </v-btn-add>
       </v-toolbar>
 
-      <DataLoaderTable :search="search" />
+      <EtlSystemTable :search="search" />
     </v-card>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import DataLoaderTable from '@/components/DataLoader/DataLoaderTable.vue'
+import EtlSystemTable from '@/components/EtlSystem/EtlSystemTable.vue'
 
 const search = ref()
 </script>

@@ -12,7 +12,7 @@
   </v-data-table-virtual>
 
   <v-dialog v-model="openDelete" max-width="500">
-    <DeleteDataLoaderCard
+    <DeleteEtlSystemCard
       :item-name="item.name"
       @delete="onDelete"
       @close="openDelete = false"
@@ -21,10 +21,10 @@
 </template>
 
 <script setup lang="ts">
-import { DataLoader } from '@/types'
+import { EtlSystem } from '@/types'
 import { api } from '@/services/api'
 import { useTableLogic } from '@/composables/useTableLogic'
-import DeleteDataLoaderCard from '@/components/DataLoader/DeleteDataLoaderCard.vue'
+import DeleteEtlSystemCard from '@/components/EtlSystem/DeleteEtlSystemCard.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { toRef } from 'vue'
@@ -34,9 +34,9 @@ const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 // TODO: This needs a new endpoint
 const { item, items, openDelete, openDialog, onDelete } = useTableLogic(
-  api.fetchDataLoaders,
-  api.deleteDataLoader,
-  DataLoader,
+  api.fetchEtlSystems,
+  api.deleteEtlSystem,
+  EtlSystem,
   toRef(selectedWorkspace.value?.id || '')
 )
 

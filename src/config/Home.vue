@@ -52,7 +52,7 @@
             </p>
             <p class="text-body-2 text-medium-emphasis mb-2">
               Stream sensor data directly from your Internet connected
-              datalogger or load data using our Streaming Data Loader software.
+              datalogger or load data using our Streaming ETL System software.
             </p>
           </div>
         </div>

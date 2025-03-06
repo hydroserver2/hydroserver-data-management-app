@@ -214,7 +214,7 @@ const paths: {
       },
       {
         attrs: { to: '/data-loaders' },
-        label: 'Manage data loaders',
+        label: 'Manage ETL systems',
         icon: 'mdi-file-upload',
       },
     ],

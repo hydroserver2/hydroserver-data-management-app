@@ -169,7 +169,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { DataLoader, DataSource, Datastream } from '@/types'
+import { EtlSystem, DataSource, Datastream } from '@/types'
 import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
@@ -184,7 +184,7 @@ const openEdit = ref(false)
 const openDelete = ref(false)
 const openPayloadForm = ref(false)
 const datastreams = ref<Datastream[]>([])
-const dataLoader = ref<DataLoader>(new DataLoader())
+const etlSystem = ref<EtlSystem>(new EtlSystem())
 const dataSource = ref<DataSource>(new DataSource())
 
 const sortBy = [{ key: 'name' }]
@@ -278,18 +278,18 @@ const dataSourceInformation = computed(() => {
 })
 
 const etlSystemInformation = computed(() => {
-  if (!dataSource.value || !dataLoader.value) return []
+  if (!dataSource.value || !etlSystem.value) return []
 
   return [
     {
       icon: 'mdi-rename-box-outline',
       label: 'Name',
-      value: dataLoader.value.name,
+      value: etlSystem.value.name,
     },
     {
       icon: 'mdi-broadcast',
       label: 'Type',
-      value: dataLoader.value.type,
+      value: etlSystem.value.type,
     },
   ].filter(Boolean)
 })
@@ -325,7 +325,7 @@ const fetchData = async () => {
     ])
 
     dataSource.value = source
-    dataLoader.value = await api.fetchDataLoader(dataSource.value.dataLoaderId)
+    etlSystem.value = await api.fetchEtlSystem(dataSource.value.etlSystemId)
     datastreams.value = (data as Datastream[]).filter(
       (d) => d.dataSourceId === dataSource.value.id
     )

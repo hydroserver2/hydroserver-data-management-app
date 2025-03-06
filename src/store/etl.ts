@@ -29,7 +29,7 @@ interface LoaderConfig {
 
 export const useETLStore = defineStore('etl', () => {
   const dataSourceForm = ref<boolean | object>(true)
-  const dataLoaders = ref<{ id: string; name: string }[]>([])
+  const etlSystems = ref<{ id: string; name: string }[]>([])
   const timeUnits = ref(['seconds', 'minutes', 'hours', 'days'] as string[])
   const selectedETLStep = ref('extractor')
 
@@ -55,7 +55,7 @@ export const useETLStore = defineStore('etl', () => {
 
   return {
     dataSourceForm,
-    dataLoaders,
+    etlSystems,
     timeUnits,
     extractorConfig,
     transformerConfig,

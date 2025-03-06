@@ -2,7 +2,7 @@ import { apiMethods } from '@/services/apiMethods'
 import {
   Unit,
   Thing,
-  DataLoader,
+  EtlSystem,
   Sensor,
   ResultQualifier,
   ProcessingLevel,
@@ -339,14 +339,14 @@ export const api = {
   deleteResultQualifier: async (id: string) =>
     apiMethods.delete(`${RQ_BASE}/${id}`),
 
-  createDataLoader: async (dataLoader: DataLoader) =>
-    apiMethods.post(DATA_LOADERS_BASE, dataLoader),
-  fetchDataLoaders: async () => apiMethods.fetch(DATA_LOADERS_BASE),
-  fetchDataLoader: async (id: string) =>
+  createEtlSystem: async (etlSystem: EtlSystem) =>
+    apiMethods.post(DATA_LOADERS_BASE, etlSystem),
+  fetchEtlSystems: async () => apiMethods.fetch(DATA_LOADERS_BASE),
+  fetchEtlSystem: async (id: string) =>
     apiMethods.fetch(`${DATA_LOADERS_BASE}/${id}`),
-  updateDataLoader: async (id: string, dataLoader: DataLoader) =>
-    apiMethods.patch(`${DATA_LOADERS_BASE}/${id}`, dataLoader),
-  deleteDataLoader: async (id: string) =>
+  updateEtlSystem: async (id: string, etlSystem: EtlSystem) =>
+    apiMethods.patch(`${DATA_LOADERS_BASE}/${id}`, etlSystem),
+  deleteEtlSystem: async (id: string) =>
     apiMethods.delete(`${DATA_LOADERS_BASE}/${id}`),
 
   createDataSource: async (dataSource: DataSource) =>

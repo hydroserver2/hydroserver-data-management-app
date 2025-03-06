@@ -267,29 +267,29 @@ export class DataSource {
   // new variables
   type: string
   etlSystemId: string
-  // old variables
   id: string
   name: string
+  lastSyncSuccessful: boolean
+  lastSyncMessage: string
+  lastSynced: string | null
+  nextSync: string | null
+  interval: number | null
+  intervalUnits: string | null
+  startTime: string | null
+  endTime: string | null
+  paused: boolean
+  jsonConfiguration: Object
+  // old variables
   path: string
   link: string | null
   headerRow?: number
   dataStartRow: number
   delimiter: string
-  interval: number | null
-  intervalUnits: string | null
   crontab: string
-  startTime: string | null
-  endTime: string | null
-  paused: boolean
   timestampColumn: string | number
   timestampFormat: string
   timestampOffset: string
-  dataLoaderId: string
   dataSourceThru: string | null
-  lastSyncSuccessful: boolean
-  lastSyncMessage: string
-  lastSynced: string | null
-  nextSync: string | null
 
   constructor() {
     this.type = 'ETL'
@@ -309,22 +309,25 @@ export class DataSource {
     this.timestampColumn = ''
     this.timestampFormat = ''
     this.timestampOffset = ''
-    this.dataLoaderId = ''
+    this.etlSystemId = ''
     this.dataSourceThru = null
     this.lastSyncSuccessful = false
     this.lastSyncMessage = ''
     this.lastSynced = null
     this.nextSync = null
+    this.jsonConfiguration = {}
   }
 }
 
-export class DataLoader {
+export class EtlSystem {
   id: string
+  workspaceId: string
   name: string
   type: string
 
   constructor() {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
     this.type = ''
   }

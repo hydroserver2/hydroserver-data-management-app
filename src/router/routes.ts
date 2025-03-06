@@ -94,8 +94,8 @@ export const routes: RouteRecordRaw[] = [
   },
   {
     path: '/data-loaders',
-    name: 'DataLoaders',
-    component: () => import('@/pages/DataLoaderDashboard.vue'),
+    name: 'EtlSystems',
+    component: () => import('@/pages/EtlSystemDashboard.vue'),
     meta: { requiresAuth: true },
   },
   {

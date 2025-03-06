@@ -129,7 +129,7 @@
       <template v-else-if="item.type === 'HydroServer virtual datastream'">
         <DataSourceVirtualFields />
       </template>
-      <template v-else-if="item.type === 'Streaming Data Loader'">
+      <template v-else-if="item.type === 'Streaming ETL System'">
         <DataSourceSDLFields />
       </template>
 
@@ -147,7 +147,7 @@
 import { onMounted, ref } from 'vue'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
-import { DataLoader, DataSource } from '@/types'
+import { EtlSystem, DataSource } from '@/types'
 import { rules } from '@/utils/rules'
 import DataSourceETLFields from './ETL/DataSourceETLFields.vue'
 import DataSourceAggregationFields from './DataSourceAggregationFields.vue'
@@ -169,10 +169,10 @@ const workflowTypes = [
   'ETL',
   'HydroServer aggregation',
   'HydroServer virtual datastream',
-  'Streaming Data Loader',
+  'Streaming ETL System',
 ]
 
-// const dataLoaders = ref<DataLoader[]>([])
+// const etlSystems = ref<EtlSystem[]>([])
 const loaded = ref(false)
 const scheduleType = ref('interval')
 
@@ -195,7 +195,7 @@ async function onSubmit() {
 }
 
 onMounted(async () => {
-  // dataLoaders.value = await api.fetchDataLoaders()
+  // etlSystems.value = await api.fetchEtlSystems()
   loaded.value = true
 })
 </script>

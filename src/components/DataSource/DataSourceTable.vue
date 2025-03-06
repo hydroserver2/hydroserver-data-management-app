@@ -65,7 +65,7 @@
 import { onMounted, ref, toRef } from 'vue'
 import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
-import { DataLoader, DataSource } from '@/types'
+import { EtlSystem, DataSource } from '@/types'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
@@ -77,7 +77,7 @@ const props = defineProps<{
   workspaceId: string
 }>()
 
-const dataLoaders = ref<DataLoader[]>([])
+const etlSystems = ref<EtlSystem[]>([])
 
 const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
   useTableLogic(
@@ -92,8 +92,8 @@ const tableData = computed(() =>
     .map((d) => ({
       ...d,
       status: getStatus(d),
-      dataLoaderName:
-        dataLoaders.value.find((dl) => dl.id === d.dataLoaderId)?.name || '',
+      etlSystemName:
+        etlSystems.value.find((dl) => dl.id === d.etlSystemId)?.name || '',
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 )
@@ -109,8 +109,8 @@ const headers = [
     key: 'name',
   },
   {
-    title: 'Data Loader',
-    key: 'dataLoaderName',
+    title: 'ETL System',
+    key: 'etlSystemName',
   },
   {
     title: 'Status',
@@ -131,6 +131,6 @@ const headers = [
 ] as const
 
 onMounted(async () => {
-  dataLoaders.value = await api.fetchDataLoaders()
+  etlSystems.value = await api.fetchEtlSystems()
 })
 </script>

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getStatus } from '@/utils/dataSourceUtils'
-import dataSourceFixtures from '../test/fixtures/dataSourceFixtures'
+import dataSourceFixtures from '@/utils/test/fixtures/dataSourceFixtures'
 
 describe('getStatus', () => {
   it('returns "pending" if lastSynced is not set', () => {

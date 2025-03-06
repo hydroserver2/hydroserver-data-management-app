@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title> Confirm Delete Data Loader </v-card-title>
+    <v-card-title> Confirm Delete ETL System </v-card-title>
 
     <v-divider class="my-4" />
 
@@ -8,9 +8,9 @@
       Are you sure you want to delete <strong> {{ itemName }} </strong>?
     </v-card-text>
     <v-card-text>
-      Note: You should uninstall this data loader instance before deleting it
-      here. Deleting this data loader instance will unlink it from all
-      associated data sources.
+      Note: You should uninstall this ETL system instance before deleting it
+      here. Deleting this ETL system instance will unlink it from all associated
+      data sources.
     </v-card-text>
 
     <v-divider class="my-4" />
