@@ -496,8 +496,8 @@ export interface ApiError {
 }
 
 export interface SourceTargetPair {
-  source_identifier: string | number
-  target_identifier: string | number
+  sourceIdentifier: string | number
+  targetIdentifier: string | number
 }
 
 export class Payload {

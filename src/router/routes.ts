@@ -82,20 +82,15 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/data-sources',
-    name: 'DataSources',
-    component: () => import('@/pages/DataSourceDashboard.vue'),
+    path: '/orchestration',
+    name: 'Orchestration',
+    component: () => import('@/pages/Orchestration.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/data-sources/:id',
     name: 'DataSource',
-    component: () => import('@/pages/DataSourceDetail.vue'),
-  },
-  {
-    path: '/data-loaders',
-    name: 'EtlSystems',
-    component: () => import('@/pages/EtlSystemDashboard.vue'),
+    component: () => import('@/pages/DataSourceDetails.vue'),
     meta: { requiresAuth: true },
   },
   {

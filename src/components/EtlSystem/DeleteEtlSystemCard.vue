@@ -1,24 +1,22 @@
 <template>
   <v-card>
-    <v-card-title> Confirm Delete ETL System </v-card-title>
-
-    <v-divider class="my-4" />
+    <v-toolbar flat color="red-darken-4">
+      <v-card-title class="text-h5">
+        <v-icon>mdi-alert</v-icon> Confirm deletion
+      </v-card-title>
+    </v-toolbar>
 
     <v-card-text>
-      Are you sure you want to delete <strong> {{ itemName }} </strong>?
-    </v-card-text>
-    <v-card-text>
-      Note: You should uninstall this ETL system instance before deleting it
-      here. Deleting this ETL system instance will unlink it from all associated
-      data sources.
+      Deleting <strong> {{ itemName }} </strong> will unlink it from all
+      associated data sources.
     </v-card-text>
 
-    <v-divider class="my-4" />
+    <v-divider />
 
     <v-card-actions>
       <v-spacer />
       <v-btn-cancel @click="emit('close')">Cancel</v-btn-cancel>
-      <v-btn-delete color="red" @click="onDelete"> Delete </v-btn-delete>
+      <v-btn-delete color="delete" @click="onDelete"> Delete </v-btn-delete>
     </v-card-actions>
   </v-card>
 </template>

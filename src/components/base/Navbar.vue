@@ -208,14 +208,9 @@ const paths: {
         icon: 'mdi-database-cog',
       },
       {
-        attrs: { to: '/data-sources' },
-        label: 'Manage data sources',
+        attrs: { to: '/orchestration' },
+        label: 'Job orchestration',
         icon: 'mdi-file-chart',
-      },
-      {
-        attrs: { to: '/data-loaders' },
-        label: 'Manage ETL systems',
-        icon: 'mdi-file-upload',
       },
     ],
   },
