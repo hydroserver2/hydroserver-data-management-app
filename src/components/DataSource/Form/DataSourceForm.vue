@@ -165,7 +165,6 @@ const workflowTypes = [
   'Streaming ETL System',
 ]
 
-// const etlSystems = ref<EtlSystem[]>([])
 const loaded = ref(false)
 const scheduleType = ref('interval')
 

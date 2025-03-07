@@ -1,8 +1,6 @@
 <template>
-  <v-card class="mt-4" variant="outlined" rounded="lg">
-    <v-card-title class="text-h6 bg-red-lighten-2 mb-4">
-      Extractor configurations
-    </v-card-title>
+  <v-card class="mt-4" color="brown-darken-4" variant="outlined" rounded="lg">
+    <v-toolbar title="Extractor configurations" color="brown" />
     <v-card-text>
       <v-row>
         <v-col cols="12" md="3">

@@ -1,8 +1,6 @@
 <template>
-  <v-card class="mt-4" variant="outlined" rounded="lg">
-    <v-card-title class="text-h6 bg-green-lighten-1 mb-4">
-      Transformer configurations
-    </v-card-title>
+  <v-card class="mt-4" color="green-darken-4" variant="outlined" rounded="lg">
+    <v-toolbar title="Transformer configurations" color="green"></v-toolbar>
     <v-card-text>
       <v-row>
         <v-col cols="12" md="3">

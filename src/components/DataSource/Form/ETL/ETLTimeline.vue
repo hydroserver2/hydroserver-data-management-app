@@ -3,14 +3,14 @@
     <v-timeline-item
       v-for="step in steps"
       :key="step.name"
-      :dot-color="selectedETLStep === step.name ? step.color : 'grey'"
+      :dot-color="step.color"
       :icon="step.icon"
       fill-dot
       style="cursor: pointer"
       @click="toggleETLProcess(step.name)"
     >
-      <v-card>
-        <v-card-title :class="['text-h6', `bg-${step.color}`]">
+      <v-card :variant="selectedETLStep === step.name ? 'elevated' : 'flat'">
+        <v-card-title :class="['text-header-6', `bg-${step.color}`]">
           {{ step.title }}
           <span>
             :
@@ -40,19 +40,19 @@ const { selectedETLStep, extractorConfig, transformerConfig, loaderConfig } =
 const steps = [
   {
     name: 'extractor',
-    color: 'red-lighten-2',
+    color: 'brown',
     icon: 'mdi-database-export',
     title: 'Extractor',
   },
   {
     name: 'transformer',
-    color: 'green-lighten-1',
+    color: 'green',
     icon: 'mdi-table-pivot',
     title: 'Transformer',
   },
   {
     name: 'loader',
-    color: 'indigo-lighten-2',
+    color: 'blue-grey-darken-2',
     icon: 'mdi-database-import',
     title: 'Loader',
   },

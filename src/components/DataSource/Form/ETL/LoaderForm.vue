@@ -1,6 +1,11 @@
 <template>
-  <v-card class="mt-4" variant="outlined" rounded="lg">
-    <v-card-title class="text-h6 bg-indigo-lighten-2 mb-4">
+  <v-card
+    color="blue-grey-darken-2"
+    class="mt-4"
+    variant="outlined"
+    rounded="lg"
+  >
+    <v-card-title class="text-h6 bg-blue-grey-darken-2 mb-4">
       Loader configurations
     </v-card-title>
     <v-card-text>
