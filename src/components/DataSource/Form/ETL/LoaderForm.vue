@@ -5,9 +5,7 @@
     variant="outlined"
     rounded="lg"
   >
-    <v-card-title class="text-h6 bg-blue-grey-darken-2 mb-4">
-      Loader configurations
-    </v-card-title>
+    <v-toolbar title="Loader configurations" color="blue-grey-darken-2" />
     <v-card-text>
       <v-row>
         <v-col cols="12" md="3">
