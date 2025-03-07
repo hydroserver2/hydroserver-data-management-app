@@ -1,8 +1,11 @@
 <template>
   <v-card v-if="loaded">
-    <v-card-title class="text-h5">
-      {{ isEdit ? 'Edit' : 'Add' }} data source
-    </v-card-title>
+    <v-toolbar
+      :title="`${isEdit ? 'Edit' : 'Add'} data source`"
+      flat
+      color="white"
+    />
+
     <v-divider />
 
     <v-form
@@ -11,26 +14,11 @@
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-item class="mt-4">
-        <h6 class="text-h6 mb-6">Workflow configurations</h6>
-        <v-row>
-          <v-col>
-            <v-card-text class="text-subtitle-2 text-medium-emphasis">
-              Which orchestration system would you like to run this data source
-              workflow on?
-            </v-card-text>
-            <v-select
-              v-model="item.etlSystemId"
-              label="ETL system *"
-              :items="etlSystems"
-              variant="outlined"
-              density="compact"
-            />
-          </v-col>
-          <v-col>
-            <v-card-text class="text-subtitle-2 text-medium-emphasis">
-              Select workflow type.
-            </v-card-text>
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-card-title>Workflow configurations</v-card-title>
+
+          <v-card-text>
             <v-select
               v-model="item.type"
               label="Workflow type *"
@@ -38,25 +26,38 @@
               variant="outlined"
               density="compact"
             />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col md="6">
             <v-text-field
+              class="mt-1"
               v-model="item.name"
               label="Data source name *"
               :rules="rules.requiredAndMaxLength255"
               density="compact"
             />
-          </v-col>
-        </v-row>
-      </v-card-item>
+          </v-card-text>
 
-      <v-card-item class="mt-4">
-        <h6 class="text-h6 mb-6">Schedule</h6>
+          <v-card-text class="text-subtitle-2 text-medium-emphasis">
+            Which system would you like to run this data source workflow on?
+          </v-card-text>
 
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
+          <v-card-text>
+            <v-select
+              v-model="item.etlSystemId"
+              label="ETL system *"
+              :items="etlSystems"
+              :item-title="
+                (etlSystem) =>
+                  etlSystem ? `${etlSystem.name} (${etlSystem.type})` : ''
+              "
+              :item-value="(etlSystem) => etlSystem?.id"
+              variant="outlined"
+              density="compact"
+            />
+          </v-card-text>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <v-card-title>Schedule</v-card-title>
+          <v-card-text>
             <v-text-field
               v-model="item.startTime"
               label="Start Time"
@@ -64,8 +65,6 @@
               type="datetime-local"
               density="compact"
             />
-          </v-col>
-          <v-col class="v-col-xs-12 v-col-sm-6">
             <v-text-field
               v-model="item.endTime"
               label="End Time"
@@ -73,30 +72,25 @@
               type="datetime-local"
               density="compact"
             />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
+          </v-card-text>
+
+          <v-card-text>
             <v-radio-group v-model="scheduleType" inline>
               <v-radio label="Interval" value="interval" />
               <v-radio label="Crontab" value="crontab" />
             </v-radio-group>
-          </v-col>
-          <template v-if="scheduleType === 'interval'">
-            <v-col class="v-col-xs-6 v-col-sm-3">
+            <template v-if="scheduleType === 'interval'">
               <v-text-field
                 v-model="item.interval"
                 label="Interval *"
                 hint="Enter the interval data should be loaded on."
                 type="number"
                 :rules="[
-              (val: string) => val != null && val !== '' || 'Interval value is required.',
-              (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
-              (val: string) => +val > 0 || 'Interval must be greater than zero.'
-            ]"
+                            (val: string) => val != null && val !== '' || 'Interval value is required.',
+                            (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
+                            (val: string) => +val > 0 || 'Interval must be greater than zero.'
+                          ]"
               />
-            </v-col>
-            <v-col class="v-col-xs-6 v-col-sm-3">
               <v-select
                 v-model="item.intervalUnits"
                 label="Interval Units"
@@ -104,19 +98,17 @@
                 variant="outlined"
                 density="comfortable"
               />
-            </v-col>
-          </template>
-          <template v-if="scheduleType === 'crontab'">
-            <v-col class="v-col-xs-12 v-col-sm-6">
+            </template>
+            <template v-if="scheduleType === 'crontab'">
               <v-text-field
                 v-model="item.crontab"
                 label="Crontab"
                 hint="Enter a crontab schedule for the data to be loaded on."
               />
-            </v-col>
-          </template>
-        </v-row>
-      </v-card-item>
+            </template>
+          </v-card-text>
+        </v-col>
+      </v-row>
 
       <div class="mb-4" />
 
@@ -153,6 +145,7 @@ import DataSourceETLFields from './ETL/DataSourceETLFields.vue'
 import DataSourceAggregationFields from './DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './DataSourceVirtualFields.vue'
 import DataSourceSDLFields from './DataSourceSDLFields.vue'
+import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
 
 const props = defineProps({ dataSource: Object as () => DataSource })
 const emit = defineEmits(['created', 'updated', 'close'])
@@ -164,7 +157,7 @@ const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   props.dataSource || undefined
 )
 
-const etlSystems = ["Daniel's PC", 'DWRi Airflow Orchestrator']
+const etlSystems = etlSystemFixtures as EtlSystem[]
 const workflowTypes = [
   'ETL',
   'HydroServer aggregation',

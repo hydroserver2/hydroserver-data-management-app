@@ -39,18 +39,6 @@
           :icon="item.paused ? 'mdi-play' : 'mdi-pause'"
           @click="togglePaused(item)"
         />
-        <!-- <v-btn
-          variant="text"
-          icon="mdi-pencil"
-          color="grey-darken-2"
-          @click="openDialog(item, 'edit')"
-        />
-        <v-btn
-          variant="text"
-          icon="mdi-delete"
-          color="red-darken-2"
-          @click="openDialog(item, 'delete')"
-        /> -->
       </template>
     </v-data-table-virtual>
 

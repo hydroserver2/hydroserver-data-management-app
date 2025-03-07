@@ -61,26 +61,13 @@ import { EtlSystem } from '@/types'
 import { api } from '@/services/api'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteEtlSystemCard from '../EtlSystem/DeleteEtlSystemCard.vue'
+import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const search = ref()
 
 const { item, items, openDelete, openDialog, onDelete } = useTableLogic(
-  async (wsId: string) =>
-    [
-      {
-        id: 'ETL 1',
-        workspaceId: 'Workspace 1',
-        name: "Daniel's Cloud Composer Instance",
-        type: 'Airflow',
-      },
-      {
-        id: 'ETL 2',
-        workspaceId: 'Workspace 1',
-        name: "Daniel's PC",
-        type: 'SDL',
-      },
-    ] as EtlSystem[],
+  async (wsId: string) => etlSystemFixtures as EtlSystem[],
   api.deleteEtlSystem,
   EtlSystem,
   toRef(selectedWorkspace.value?.id || '')
