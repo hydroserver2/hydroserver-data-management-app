@@ -1,4 +1,4 @@
-import { DataSource } from '@/types'
+import { DataSource } from '@/models'
 
 export function getStatus(
   ds: DataSource

@@ -8,14 +8,13 @@ import {
   ProcessingLevel,
   ObservedProperty,
   Datastream,
-  DataSource,
   Tag,
   PostHydroShareArchive,
   HydroShareArchive,
   User,
   Workspace,
-  Payload,
 } from '@/types'
+import { Payload, DataSource } from '@/models'
 import { getCSRFToken } from './getCSRFToken'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`

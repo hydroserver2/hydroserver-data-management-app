@@ -172,7 +172,7 @@
 import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
-import { Payload } from '@/models/Payload'
+import { Payload } from '@/models'
 import { computed, ref } from 'vue'
 
 const props = defineProps({ oldPayload: Object as () => Payload })

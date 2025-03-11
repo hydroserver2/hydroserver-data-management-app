@@ -5,15 +5,12 @@ export interface DataTransformation {
 }
 
 export class SourceTargetMapping {
-  sourceIdentifier: string | number
-  targetIdentifier: string | number
-  dataTransformation: DataTransformation | null
+  sourceIdentifier: string | number = ''
+  targetIdentifier: string | number = ''
+  dataTransformation: DataTransformation | null = null
 
   constructor(init?: Partial<SourceTargetMapping>) {
-    // Initialize fields with defaults
-    this.sourceIdentifier = init?.sourceIdentifier ?? ''
-    this.targetIdentifier = init?.targetIdentifier ?? ''
-    this.dataTransformation = init?.dataTransformation ?? null
+    Object.assign(this, init)
   }
 
   toggleDataTransformation(): void {
@@ -34,18 +31,16 @@ export class SourceTargetMapping {
 }
 
 export class Payload {
-  id: string
-  dataSourceId: string
-  name: string
-  mappings: SourceTargetMapping[]
+  id = ''
+  dataSourceId = ''
+  name = ''
+  mappings: SourceTargetMapping[] = []
 
   constructor(init?: Partial<Payload>) {
-    this.id = init?.id ?? ''
-    this.dataSourceId = init?.dataSourceId || ''
-    this.name = init?.name ?? ''
-
-    const incomingMap = init?.mappings ?? []
-    this.mappings = incomingMap.map((m) => new SourceTargetMapping(m))
+    Object.assign(this, {
+      ...init,
+      mappings: init?.mappings?.map((m) => new SourceTargetMapping(m)) ?? [],
+    })
   }
 
   addMapping(): void {

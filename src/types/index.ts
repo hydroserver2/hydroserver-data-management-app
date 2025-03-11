@@ -263,62 +263,6 @@ export class ResultQualifier {
   }
 }
 
-export class DataSource {
-  // new variables
-  type: string
-  etlSystemId: string
-  id: string
-  name: string
-  lastSyncSuccessful: boolean
-  lastSyncMessage: string
-  lastSynced: string | null
-  nextSync: string | null
-  interval: number | null
-  intervalUnits: string | null
-  startTime: string | null
-  endTime: string | null
-  paused: boolean
-  jsonConfiguration: Object
-  // old variables
-  path: string
-  link: string | null
-  headerRow?: number
-  dataStartRow: number
-  delimiter: string
-  crontab: string
-  timestampColumn: string | number
-  timestampFormat: string
-  timestampOffset: string
-  dataSourceThru: string | null
-
-  constructor() {
-    this.type = 'ETL'
-    this.etlSystemId = ''
-    this.id = ''
-    this.name = ''
-    this.path = ''
-    this.link = null
-    this.dataStartRow = 1
-    this.delimiter = ','
-    this.interval = null
-    this.intervalUnits = null
-    this.crontab = ''
-    this.startTime = null
-    this.endTime = null
-    this.paused = false
-    this.timestampColumn = ''
-    this.timestampFormat = ''
-    this.timestampOffset = ''
-    this.etlSystemId = ''
-    this.dataSourceThru = null
-    this.lastSyncSuccessful = false
-    this.lastSyncMessage = ''
-    this.lastSynced = null
-    this.nextSync = null
-    this.jsonConfiguration = {}
-  }
-}
-
 export class EtlSystem {
   id: string
   workspaceId: string

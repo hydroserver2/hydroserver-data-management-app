@@ -1,10 +1,11 @@
 <template>
   <v-card v-if="loaded">
-    <v-toolbar
-      :title="`${isEdit ? 'Edit' : 'Add'} data source`"
-      flat
-      color="white"
-    />
+    <v-toolbar flat color="white">
+      <v-card-title class="text-medium-emphasis">
+        {{ isEdit ? 'Edit' : 'Add' }} data source
+        <span v-if="isEdit" class="opacity-80">- {{ item?.name }}</span>
+      </v-card-title></v-toolbar
+    >
 
     <v-divider />
 
@@ -139,7 +140,8 @@
 import { onMounted, ref } from 'vue'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
-import { EtlSystem, DataSource } from '@/types'
+import { EtlSystem } from '@/types'
+import { DataSource } from '@/models'
 import { rules } from '@/utils/rules'
 import DataSourceETLFields from './ETL/DataSourceETLFields.vue'
 import DataSourceAggregationFields from './DataSourceAggregationFields.vue'

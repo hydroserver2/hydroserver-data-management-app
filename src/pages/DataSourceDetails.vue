@@ -98,7 +98,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { EtlSystem, DataSource, Datastream } from '@/types'
+import { EtlSystem, Datastream } from '@/types'
+import { DataSource } from '@/models'
 import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'

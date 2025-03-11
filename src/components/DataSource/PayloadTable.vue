@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import PayloadForm from '@/components/DataSource/PayloadForm.vue'
-import { Payload } from '@/models/Payload'
+import { Payload } from '@/models'
 import { ref } from 'vue'
 
 const selectedPayload = ref<Payload>()
