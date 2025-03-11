@@ -1,7 +1,7 @@
 <template>
   <v-card>
-    <v-toolbar color="secondary">
-      <v-card-title>
+    <v-toolbar color="secondary-lighten-1">
+      <v-card-title class="text-medium-emphasis">
         {{ isEdit ? 'Edit' : 'Add' }} payload
         <span v-if="isEdit" class="opacity-80">- {{ payload?.name }}</span>
       </v-card-title>
@@ -13,73 +13,148 @@
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-text v-if="item">
+      <v-card-text v-if="payload">
         <v-text-field
-          v-model="item.name"
+          v-model="payload.name"
           label="Payload name *"
           :rules="rules.requiredAndMaxLength255"
         />
 
-        <v-toolbar density="compact" flat color="secondary-lighten-5">
-          <v-card-title class="text-medium-emphasis"
-            >Source to target mapping</v-card-title
-          >
+        <v-row align="center">
+          <v-col cols="auto">
+            <v-card-title class="text-subtitle-1 text-medium-emphasis px-0 mb-1"
+              >Source to target mapping</v-card-title
+            >
+          </v-col>
+          <v-col class="pl-0">
+            <v-icon
+              @click="showDataTransformationHelp = !showDataTransformationHelp"
+              color="grey"
+              small
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </v-col>
 
           <v-spacer />
 
-          <v-btn-add
-            variant="text"
-            class="mr-2"
-            @click="addRow"
-            color="secondary-darken-2"
+          <v-col cols="auto">
+            <v-btn-add
+              variant="text"
+              class="mr-2"
+              @click="() => payload.addMapping()"
+              color="secondary-darken-1"
+            >
+              Add row
+            </v-btn-add>
+          </v-col>
+        </v-row>
+
+        <div v-if="showDataTransformationHelp" class="mb-4">
+          A source to target mapping allows you to map columns or keys in your
+          source payload to specific destinations. HydroServer uses the
+          datastream's ID as its identifier.
+        </div>
+        <div v-if="showDataTransformationHelp" class="mb-4">
+          Adding a data transformation will allow you to apply a unit conversion
+          or rating curve to each data point for a mapping. Optionally, you can
+          also save the raw data to a separate datastream. Configuration details
+          for this step will be available on the Payload Form after creating
+          this data source.
+        </div>
+
+        <v-expansion-panels variant="accordion" multiple elevation="1">
+          <v-expansion-panel
+            v-for="(row, index) in payload.mappings"
+            :key="index"
+            density="compact"
+            color="blue-grey-lighten-5"
+            class="no-expansion-padding"
+            :title="row.getTitle()"
           >
-            Add row
-          </v-btn-add>
-        </v-toolbar>
-        <v-data-table
-          :items="[]"
-          :headers="[]"
-          hide-default-footer
-          density="compact"
-          fixed-header
-          class="border"
-          :style="{ 'max-height': `40vh` }"
-        >
-          <template #body>
-            <tr v-for="(row, index) in item.sourceTargetMap" :key="index">
-              <td style="padding: 8px">
-                <v-text-field
-                  v-model="row.sourceIdentifier"
-                  placeholder="Source identifier"
-                  density="compact"
-                  class="ma-0 pa-0"
-                  variant="outlined"
-                  hide-details
-                />
-              </td>
-              <td style="padding: 8px">
-                <v-text-field
-                  v-model="row.targetIdentifier"
-                  placeholder="Target identifier"
-                  density="compact"
-                  class="ma-0 pa-0"
-                  variant="outlined"
-                  hide-details
-                />
-              </td>
-              <td style="padding: 8px; width: 50px">
-                <v-btn
-                  icon
-                  variant="text"
-                  color="error"
-                  @click="removeRow(index)"
-                >
-                  <v-icon>mdi-trash-can-outline</v-icon>
-                </v-btn>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+            <v-expansion-panel-text class="pa-0 pb-2">
+              <v-row class="mx-1 mt-1">
+                <v-col md="6" c>
+                  <v-text-field
+                    v-model="row.sourceIdentifier"
+                    placeholder="Source identifier"
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                  />
+                </v-col>
+                <v-col md="6">
+                  <v-text-field
+                    v-model="row.targetIdentifier"
+                    placeholder="Target identifier"
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                  />
+                </v-col>
+              </v-row>
+              <v-row align="center" class="mx-1 mt-0">
+                <v-col md="6">
+                  <v-checkbox
+                    :v-model="!!row.dataTransformation"
+                    @change="() => row.toggleDataTransformation()"
+                    label="Add a data transformation step"
+                    density="compact"
+                    rounded="lg"
+                    prepend-inner-icon="mdi-table-column-width"
+                    hide-details
+                  />
+                </v-col>
+              </v-row>
+              <v-row v-if="!!row.dataTransformation" class="mx-1 mt-0">
+                <v-spacer />
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="row.dataTransformation.operation"
+                    placeholder="Data transformation operation"
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                  />
+                </v-col>
+              </v-row>
+              <v-row v-if="!!row.dataTransformation" class="mx-1 mt-0 mb-1">
+                <v-col md="6">
+                  <v-checkbox
+                    v-model="row.dataTransformation.doSaveRawDataCopy"
+                    label="Save a copy of the raw data"
+                    density="compact"
+                    rounded="lg"
+                    prepend-inner-icon="mdi-table-column-width"
+                    hide-details
+                  />
+                </v-col>
+                <v-col md="6" v-if="row.dataTransformation.doSaveRawDataCopy">
+                  <v-text-field
+                    v-model="row.dataTransformation.rawTargetIdentifier"
+                    placeholder="Raw data target identifier"
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                  />
+                </v-col>
+              </v-row>
+              <v-row class="mx-1">
+                <v-spacer />
+                <v-col cols="auto">
+                  <v-btn
+                    icon
+                    variant="text"
+                    color="error"
+                    @click="() => payload.removeMapping(index)"
+                  >
+                    <v-icon>mdi-trash-can-outline</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-card-text>
 
       <v-divider />
@@ -97,18 +172,27 @@
 import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
-import { useFormLogic } from '@/composables/useFormLogic'
-import { Payload } from '@/types'
+import { Payload } from '@/models/Payload'
+import { computed, ref } from 'vue'
 
-const props = defineProps({ payload: Object as () => Payload })
+const props = defineProps({ oldPayload: Object as () => Payload })
 const emit = defineEmits(['created', 'updated', 'close'])
+const isEdit = computed(() => !!props.oldPayload || undefined)
+const valid = ref(false)
+const myForm = ref<VForm>()
 
-const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createDataSourcePayload,
-  api.updateDataSourcePayload,
-  Payload,
-  props.payload || undefined
-)
+const payload = ref<Payload>(new Payload())
+if (props.oldPayload) payload.value = new Payload(props.oldPayload!)
+
+const showDataTransformationHelp = ref(false)
+
+async function uploadItem() {
+  await myForm.value?.validate()
+  if (!valid.value) return
+  if (isEdit.value)
+    return await api.updateDataSourcePayload(payload.value, props.oldPayload!)
+  return await api.createDataSourcePayload(payload.value)
+}
 
 async function onSubmit() {
   try {
@@ -121,18 +205,10 @@ async function onSubmit() {
   }
   emit('close')
 }
-
-function addRow() {
-  if (!item.value) return
-  item.value.sourceTargetMap.push({
-    sourceIdentifier: '',
-    targetIdentifier: '',
-  })
-}
-
-// Remove row from sourceTargetMap
-function removeRow(index: number) {
-  if (!item.value) return
-  item.value.sourceTargetMap.splice(index, 1)
-}
 </script>
+
+<style scoped>
+::v-deep .v-expansion-panel-text__wrapper {
+  padding: 0px 0px 0px !important;
+}
+</style>

@@ -32,10 +32,7 @@
       <template v-slot:item.info="{ item }">
         <v-col>
           <v-row
-            v-for="{
-              sourceIdentifier,
-              targetIdentifier,
-            } in item.sourceTargetMap"
+            v-for="{ sourceIdentifier, targetIdentifier } in item.mappings"
             style="font-size: 1.2em"
           >
             <p>
@@ -57,13 +54,13 @@
   </v-dialog>
 
   <v-dialog v-model="openEdit" width="40rem">
-    <PayloadForm :payload="selectedPayload" @close="openEdit = false" />
+    <PayloadForm :oldPayload="selectedPayload" @close="openEdit = false" />
   </v-dialog>
 </template>
 
 <script setup lang="ts">
 import PayloadForm from '@/components/DataSource/PayloadForm.vue'
-import { Payload } from '@/types'
+import { Payload } from '@/models/Payload'
 import { ref } from 'vue'
 
 const selectedPayload = ref<Payload>()
@@ -86,35 +83,40 @@ const payloadHeaders = [
 
 const payloads = [
   {
-    name: 'Example payload 1',
-    sourceTargetMap: [
+    name: 'Example Payload 1',
+    mappings: [
       {
         sourceIdentifier: 'water_level_ft',
         targetIdentifier: '1928-125-3484-8348',
+        dataTransformation: null,
       },
       {
         sourceIdentifier: 'temperature_f',
         targetIdentifier: '0985-157-3486-3257',
+        dataTransformation: null,
       },
     ],
   },
   {
-    name: 'Example payload 2',
-    sourceTargetMap: [
+    name: 'Example Payload 2',
+    mappings: [
       {
         sourceIdentifier: 'water_level_ft',
         targetIdentifier: '1928-125-3484-8348',
+        dataTransformation: null,
       },
       {
         sourceIdentifier: 'temperature_f',
         targetIdentifier: '0985-157-3486-3257',
+        dataTransformation: null,
       },
     ],
   },
 ] as Payload[]
 
 function openDialog(selectedItem: Payload, dialog: string) {
-  selectedPayload.value = selectedItem
+  selectedPayload.value = new Payload(selectedItem)
+  console.log('selectedItem', selectedItem)
   if (dialog === 'edit') openEdit.value = true
   else if (dialog === 'delete') openDelete.value = true
 }

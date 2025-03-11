@@ -494,22 +494,3 @@ export interface ApiError {
   status: number
   message?: string
 }
-
-export interface SourceTargetPair {
-  sourceIdentifier: string | number
-  targetIdentifier: string | number
-}
-
-export class Payload {
-  id: string
-  dataSourceId: string
-  name: string
-  sourceTargetMap: SourceTargetPair[]
-
-  constructor(dataSourceId?: string) {
-    this.id = ''
-    this.dataSourceId = dataSourceId || ''
-    this.name = ''
-    this.sourceTargetMap = []
-  }
-}
