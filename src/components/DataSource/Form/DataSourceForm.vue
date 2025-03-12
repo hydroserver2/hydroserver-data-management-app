@@ -3,9 +3,9 @@
     <v-toolbar flat color="white">
       <v-card-title class="text-medium-emphasis">
         {{ isEdit ? 'Edit' : 'Add' }} data source
-        <span v-if="isEdit" class="opacity-80">- {{ item?.name }}</span>
-      </v-card-title></v-toolbar
-    >
+        <span v-if="isEdit" class="opacity-80">- {{ dataSource?.name }}</span>
+      </v-card-title>
+    </v-toolbar>
 
     <v-divider />
 
@@ -21,7 +21,7 @@
 
           <v-card-text>
             <v-select
-              v-model="item.type"
+              v-model="dataSource.type"
               label="Workflow type *"
               :items="workflowTypes"
               variant="outlined"
@@ -29,7 +29,7 @@
             />
             <v-text-field
               class="mt-1"
-              v-model="item.name"
+              v-model="dataSource.name"
               label="Data source name *"
               :rules="rules.requiredAndMaxLength255"
               density="compact"
@@ -42,7 +42,7 @@
 
           <v-card-text>
             <v-select
-              v-model="item.etlSystemId"
+              v-model="dataSource.etlSystemId"
               label="ETL system *"
               :items="etlSystems"
               :item-title="
@@ -60,14 +60,14 @@
           <v-card-title>Schedule</v-card-title>
           <v-card-text>
             <v-text-field
-              v-model="item.startTime"
+              v-model="dataSource.startTime"
               label="Start Time"
               hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
               type="datetime-local"
               density="compact"
             />
             <v-text-field
-              v-model="item.endTime"
+              v-model="dataSource.endTime"
               label="End Time"
               hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
               type="datetime-local"
@@ -82,7 +82,7 @@
             </v-radio-group>
             <template v-if="scheduleType === 'interval'">
               <v-text-field
-                v-model="item.interval"
+                v-model="dataSource.interval"
                 label="Interval *"
                 hint="Enter the interval data should be loaded on."
                 type="number"
@@ -93,7 +93,7 @@
                           ]"
               />
               <v-select
-                v-model="item.intervalUnits"
+                v-model="dataSource.intervalUnits"
                 label="Interval Units"
                 :items="intervalUnitValues"
                 variant="outlined"
@@ -102,7 +102,7 @@
             </template>
             <template v-if="scheduleType === 'crontab'">
               <v-text-field
-                v-model="item.crontab"
+                v-model="dataSource.crontab"
                 label="Crontab"
                 hint="Enter a crontab schedule for the data to be loaded on."
               />
@@ -113,16 +113,18 @@
 
       <div class="mb-4" />
 
-      <template v-if="item.type === 'ETL'">
+      <template v-if="dataSource.type === 'ETL'">
         <DataSourceETLFields />
       </template>
-      <template v-else-if="item.type === 'HydroServer aggregation'">
+      <template v-else-if="dataSource.type === 'HydroServer aggregation'">
         <DataSourceAggregationFields />
       </template>
-      <template v-else-if="item.type === 'HydroServer virtual datastream'">
+      <template
+        v-else-if="dataSource.type === 'HydroServer virtual datastream'"
+      >
         <DataSourceVirtualFields />
       </template>
-      <template v-else-if="item.type === 'Streaming ETL System'">
+      <template v-else-if="dataSource.type === 'Streaming ETL System'">
         <DataSourceSDLFields />
       </template>
 
@@ -137,8 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useFormLogic } from '@/composables/useFormLogic'
+import { computed, onMounted, ref } from 'vue'
 import { api } from '@/services/api'
 import { EtlSystem } from '@/types'
 import { DataSource } from '@/models'
@@ -148,16 +149,17 @@ import DataSourceAggregationFields from './DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './DataSourceVirtualFields.vue'
 import DataSourceSDLFields from './DataSourceSDLFields.vue'
 import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
+import { VForm } from 'vuetify/components'
 
-const props = defineProps({ dataSource: Object as () => DataSource })
+const props = defineProps({ oldDataSource: Object as () => DataSource })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createDataSource,
-  api.updateDataSource,
-  DataSource,
-  props.dataSource || undefined
-)
+const isEdit = computed(() => !!props.oldDataSource || undefined)
+const valid = ref(false)
+const myForm = ref<VForm>()
+
+const dataSource = ref<DataSource>(new DataSource())
+if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
 
 const etlSystems = etlSystemFixtures as EtlSystem[]
 const workflowTypes = [
@@ -167,6 +169,17 @@ const workflowTypes = [
   'Streaming ETL System',
 ]
 
+function toLocalDateString(iso: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
 const loaded = ref(false)
 const scheduleType = ref('interval')
 
@@ -175,6 +188,14 @@ const intervalUnitValues = [
   { value: 'hours', title: 'Hours' },
   { value: 'days', title: 'Days' },
 ]
+
+async function uploadItem() {
+  await myForm.value?.validate()
+  if (!valid.value) return
+  if (isEdit.value)
+    return await api.updateDataSource(dataSource.value, props.oldDataSource!)
+  return await api.createDataSource(dataSource.value)
+}
 
 async function onSubmit() {
   try {
@@ -189,6 +210,12 @@ async function onSubmit() {
 }
 
 onMounted(async () => {
+  if (dataSource.value.startTime) {
+    dataSource.value.startTime = toLocalDateString(dataSource.value.startTime)
+  }
+  if (dataSource.value.endTime) {
+    dataSource.value.endTime = toLocalDateString(dataSource.value.endTime)
+  }
   // etlSystems.value = await api.fetchEtlSystems()
   loaded.value = true
 })

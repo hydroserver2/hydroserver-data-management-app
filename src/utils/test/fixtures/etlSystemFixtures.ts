@@ -1,12 +1,12 @@
 export default [
   {
-    id: 'ETL 1',
+    id: 'orchestrator1',
     workspaceId: 'Workspace 1',
     name: "Daniel's Cloud Composer Instance",
     type: 'Airflow',
   },
   {
-    id: 'ETL 2',
+    id: 'orchestrator2',
     workspaceId: 'Workspace 1',
     name: "Daniel's PC",
     type: 'SDL',

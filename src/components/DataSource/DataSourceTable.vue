@@ -44,7 +44,7 @@
 
     <v-dialog v-model="openEdit">
       <DataSourceForm
-        :data-source="item"
+        :old-data-source="item"
         @close="openEdit = false"
         @updated="onUpdate"
       />

@@ -58,7 +58,7 @@
     </v-row>
 
     <v-toolbar color="blue-grey-darken-2" rounded="t-lg" density="compact">
-      <h6 class="text-h6 ml-4">Linked ETL system details</h6>
+      <h6 class="text-h6 ml-4">Linked ETL system</h6>
     </v-toolbar>
     <v-data-table
       :headers="etlSystemHeaders"
@@ -82,7 +82,7 @@
   <v-dialog v-model="openEdit" width="80rem">
     <DataSourceForm
       @close="openEdit = false"
-      :dataSource="dataSource"
+      :old-data-source="dataSource"
       @updated="fetchData"
     />
   </v-dialog>
@@ -121,20 +121,28 @@ const status = computed(() =>
   dataSource.value ? getStatus(dataSource.value) : 'pending'
 )
 
+const formatTime = (time: string) =>
+  new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(time)) + ' UTC'
+
 const scheduleString = computed(() => {
   if (!dataSource.value) return ''
-  const ds = dataSource.value
-  let string = ''
+  const { interval, intervalUnits, crontab, startTime, endTime } =
+    dataSource.value
 
-  if (ds.interval) string += `Every ${ds.interval} ${ds.intervalUnits}`
-  else string += `Crontab: ${ds.crontab}`
+  let schedule = interval
+    ? `Every ${interval} ${intervalUnits}`
+    : `Crontab: ${crontab}`
 
-  if (ds.startTime && ds.endTime)
-    string += ` from ${ds.startTime} to ${ds.endTime}`
-  else if (ds.startTime) string += ` beginning ${ds.startTime}`
-  else if (ds.endTime) string += ` until ${ds.endTime}`
+  if (startTime && endTime)
+    schedule += ` from ${formatTime(startTime)} to ${formatTime(endTime)}`
+  else if (startTime) schedule += ` beginning ${formatTime(startTime)}`
+  else if (endTime) schedule += ` until ${formatTime(endTime)}`
 
-  return string
+  return schedule
 })
 
 const dataSourceHeaders = [
@@ -157,29 +165,33 @@ const dataSourceInformation = computed(() => {
       value: dataSource.value.id,
     },
     {
-      icon: 'mdi-calendar-clock',
-      label: 'Schedule',
-      value: scheduleString,
-    },
-    {
       icon: 'mdi-clock-outline',
       label: 'Timestamp column',
       value: dataSource.value.timestampColumn,
     },
     {
+      icon: 'mdi-calendar-clock',
+      label: 'Schedule',
+      value: scheduleString,
+    },
+    {
       icon: 'mdi-history',
       label: 'Last synced',
-      value: dataSource.value.lastSynced,
+      value: dataSource.value.lastSynced
+        ? formatTime(dataSource.value.lastSynced)
+        : '',
+    },
+    {
+      icon: 'mdi-calendar-sync',
+      label: 'Next sync',
+      value: dataSource.value.nextSync
+        ? formatTime(dataSource.value.nextSync)
+        : '',
     },
     {
       icon: 'mdi-message-text-outline',
       label: 'Last sync message',
       value: dataSource.value.lastSyncMessage,
-    },
-    {
-      icon: 'mdi-calendar-sync',
-      label: 'Next sync',
-      value: dataSource.value.nextSync,
     },
     {
       icon: 'mdi-information-outline',
@@ -253,7 +265,7 @@ const fetchData = async () => {
     )
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')
-    console.log('error fetching dataSource', e)
+    console.error('error fetching dataSource', e)
   }
 }
 
