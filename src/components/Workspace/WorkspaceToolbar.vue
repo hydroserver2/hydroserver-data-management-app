@@ -4,7 +4,7 @@
       <v-select
         v-model="selectedWorkspace"
         label="Selected Workspace"
-        :items="sortedWorkspaces"
+        :items="workspaces"
         item-title="name"
         :return-object="true"
         variant="outlined"
