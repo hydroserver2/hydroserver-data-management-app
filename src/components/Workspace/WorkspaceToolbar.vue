@@ -225,10 +225,6 @@ const openAccessControl = ref(false)
 const search = ref<string>('')
 const activeItem = ref<Workspace>(new Workspace())
 
-const sortedWorkspaces = computed(() =>
-  workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
-)
-
 const selectedWorkspaceId = ref('')
 watch(
   selectedWorkspaceId,

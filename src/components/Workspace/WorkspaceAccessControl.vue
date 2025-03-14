@@ -114,7 +114,7 @@
                       class="mr-2"
                       :disabled="item.isOwner || item.isBeingEdited"
                       @click="item.isBeingEdited = true"
-                      >Edit roll</v-btn
+                      >Edit role</v-btn
                     >
                     <v-btn-delete
                       variant="outlined"
