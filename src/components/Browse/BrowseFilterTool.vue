@@ -31,14 +31,14 @@
           multiple
           hide-details
           color="primary"
-          density="compact"
         >
           <template v-slot:selection="{ item, index }">
             <v-chip
-              color="primary"
+              color="primary-darken-2"
               rounded
               closable
-              @click:close="selectedWorkspaces.splice(index)"
+              density="comfortable"
+              @click:close="selectedWorkspaces.splice(index, 1)"
             >
               <span>{{ item.title }}</span>
             </v-chip>
@@ -46,20 +46,31 @@
         </v-autocomplete>
       </v-list-item>
 
-      <v-expansion-panels class="pa-4" v-model="panelOpen">
-        <v-expansion-panel title="Site types" color="secondary-darken-1">
-          <v-expansion-panel-text>
-            <v-checkbox
-              v-for="type in siteTypes"
-              v-model="selectedSiteTypes"
-              :label="type"
-              :value="type"
-              hide-details
-              density="compact"
-            />
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+      <v-list-item>
+        <v-autocomplete
+          class="pt-2"
+          label="Site types"
+          v-model="selectedSiteTypes"
+          :items="siteTypes"
+          clearable
+          prepend-inner-icon="mdi-water-pump"
+          multiple
+          hide-details
+          color="primary"
+        >
+          <template v-slot:selection="{ item, index }">
+            <v-chip
+              color="primary-darken-2"
+              rounded
+              density="comfortable"
+              closable
+              @click:close="selectedSiteTypes.splice(index, 1)"
+            >
+              <span>{{ item.title }}</span>
+            </v-chip>
+          </template>
+        </v-autocomplete>
+      </v-list-item>
     </v-list>
   </v-navigation-drawer>
 </template>
