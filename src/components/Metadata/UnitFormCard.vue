@@ -62,7 +62,8 @@ const emit = defineEmits(['created', 'updated', 'close'])
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   api.createUnit,
   api.updateUnit,
-  Unit
+  Unit,
+  props.unit || undefined
 )
 
 async function onSubmit() {
