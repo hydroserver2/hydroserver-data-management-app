@@ -1,19 +1,9 @@
 <template>
   <v-container v-if="isPageLoaded">
-    <v-row class="mb-4 mt-2" align="center">
+    <v-row class="my-2" align="center">
       <v-col cols="auto">
         <h5 class="text-h5">Manage metadata</h5>
-      </v-col>
-      <v-col cols="12" sm="3">
-        <v-select
-          v-model="selectedWorkspace"
-          label="Selected Workspace"
-          :items="workspaces"
-          item-title="name"
-          :return-object="true"
-          variant="outlined"
-          hide-details
-        ></v-select>
+        <WorkspaceSelector />
       </v-col>
     </v-row>
 
@@ -142,13 +132,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import UnitTable from '@/components/Metadata/UnitTable.vue'
 import SensorTable from '@/components/Metadata/SensorTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
 import ProcessingLevelTable from '@/components/Metadata/ProcessingLevelTable.vue'
 import ObservedPropertyTable from '@/components/Metadata/ObservedPropertyTable.vue'
-
+import WorkspaceSelector from '@/components/Workspace/WorkspaceSelector.vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
@@ -159,7 +149,7 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { api } from '@/services/api'
 
-const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 const isPageLoaded = ref(false)
 

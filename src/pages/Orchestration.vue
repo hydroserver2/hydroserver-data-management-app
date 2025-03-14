@@ -3,15 +3,7 @@
     <v-row class="my-2" align="center">
       <v-col cols="auto">
         <h5 class="text-h5">Job orchestration</h5>
-        <v-select
-          v-model="selectedWorkspace"
-          hint="Selected Workspace"
-          :items="workspaces"
-          item-title="name"
-          :return-object="true"
-          variant="plain"
-          hide-details
-        ></v-select>
+        <WorkspaceSelector />
       </v-col>
     </v-row>
 
@@ -30,8 +22,9 @@ import EtlSystemTable from '@/components/DataSource/EtlSystemTable.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
+import WorkspaceSelector from '@/components/Workspace/WorkspaceSelector.vue'
 
-const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 
 onMounted(async () => {

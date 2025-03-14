@@ -40,6 +40,11 @@ export function useWorkspacePermissions(
     return user.value.accountType === 'admin'
   }
 
+  const getUserRoleName = (workspace: Workspace) => {
+    if (isOwner(workspace)) return 'Owner'
+    return workspace.collaboratorRole?.name || ''
+  }
+
   const hasPermission = (
     resource: PermissionResource,
     action: PermissionAction,
@@ -141,5 +146,6 @@ export function useWorkspacePermissions(
     hasPermission,
     hasGlobalPermissions,
     checkPermissionsByWorkspaceId,
+    getUserRoleName,
   }
 }

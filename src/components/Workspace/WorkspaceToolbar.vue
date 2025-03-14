@@ -1,15 +1,7 @@
 <template>
   <v-row class="my-4" align="center">
-    <v-col cols="12" sm="3">
-      <v-select
-        v-model="selectedWorkspace"
-        label="Selected Workspace"
-        :items="workspaces"
-        item-title="name"
-        :return-object="true"
-        variant="outlined"
-        hide-details
-      ></v-select>
+    <v-col cols="auto">
+      <WorkspaceSelector />
     </v-col>
     <v-col cols="12" sm="auto">
       <v-btn
@@ -49,15 +41,6 @@
       fixed-header
       loading-text="Loading sites..."
     >
-      <template v-slot:no-data>
-        <div class="text-center pa-4" v-if="workspaces.length === 0">
-          <v-icon size="48" color="grey lighten-1"
-            >mdi-briefcase-outline</v-icon
-          >
-          <h4 class="mt-2">No workspaces found</h4>
-          <p class="mb-4">Click the "Add workspace" button to create one.</p>
-        </div>
-      </template>
       <template v-slot:item.actions="{ item }">
         <v-btn
           variant="outlined"
@@ -123,7 +106,28 @@
             >
             <h4 class="mt-2">No workspaces found</h4>
             <p class="mb-4">Click the "Add workspace" button to create one.</p>
+            <v-icon
+              class="mb-4"
+              @click="showWorkspaceHelp = !showWorkspaceHelp"
+              color="grey"
+              small
+            >
+              mdi-help-circle-outline
+            </v-icon>
+            <p v-if="showWorkspaceHelp" class="mb-4">
+              A workspace is an organizational concept for access control. All
+              resources in HydroServer (Sites, Datastreams, Units, ETL Systems)
+              belong to a workspace. After creating one, you can assign roles
+              (e.g. Editor, Viewer) to users who need different permission
+              levels.
+            </p>
           </div>
+        </template>
+        <template #item.isPrivate="{ item }">
+          {{ item.isPrivate ? 'Private' : 'Public' }}
+        </template>
+        <template #item.collaboratorRole="{ item }">
+          {{ getUserRoleName(item) }}
         </template>
         <template v-slot:item.actions="{ item }">
           <v-btn
@@ -214,10 +218,11 @@ import { api } from '@/services/api'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
+import WorkspaceSelector from './WorkspaceSelector.vue'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
-const { hasPermission } = useWorkspacePermissions()
+const { hasPermission, getUserRoleName } = useWorkspacePermissions()
 const { user } = storeToRefs(useUserStore())
 
 const openWorkspaceTable = ref(!workspaces.value.length)
@@ -228,6 +233,7 @@ const openDelete = ref(false)
 const openAccessControl = ref(false)
 const search = ref<string>('')
 const activeItem = ref<Workspace>(new Workspace())
+const showWorkspaceHelp = ref(false)
 
 const selectedWorkspaceId = ref('')
 watch(
@@ -320,8 +326,9 @@ function switchToAccessControlModal() {
 }
 
 const headers = [
-  { title: 'Name', key: 'name' },
-  { title: 'Is private', key: 'isPrivate' },
+  { title: 'Workspace name', key: 'name' },
+  { title: 'Visibility', key: 'isPrivate' },
+  { title: 'Your role', key: 'collaboratorRole' },
   { title: 'Actions', key: 'actions', align: 'end' },
 ] as const
 
