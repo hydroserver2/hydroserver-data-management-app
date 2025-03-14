@@ -42,17 +42,27 @@ import HydroShareConnectionButton from '@/components/HydroShare/HydroShareConnec
 import { useHydroShare } from '@/composables/useHydroShare'
 import { useRoute } from 'vue-router'
 import { Snackbar } from '@/utils/notifications'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/store/user'
+import { api } from '@/services/api'
 
 const { isHydroShareConnectionEnabled } = useHydroShare()
 const openDelete = ref(false)
 const openForm = ref(false)
+const { user } = storeToRefs(useUserStore())
 
-onMounted(() => {
+onMounted(async () => {
   const route = useRoute()
   if (route?.query?.error === 'connected_other') {
     Snackbar.error(
       'This HydroShare account is already connected to a different HydroServer account.'
     )
+  }
+  try {
+    user.value = await api.fetchUser()
+  } catch (err: any) {
+    Snackbar.error(err.message)
+    console.error('Error fetching user', err)
   }
 })
 </script>
