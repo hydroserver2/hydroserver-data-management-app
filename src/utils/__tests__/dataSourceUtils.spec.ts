@@ -3,46 +3,46 @@ import { getStatus } from '@/utils/dataSourceUtils'
 import dataSourceFixtures from '@/utils/test/fixtures/dataSourceFixtures'
 
 describe('getStatus', () => {
-  it('returns "pending" if lastSynced is not set', () => {
+  it('returns "pending" if lastRun is not set', () => {
     let dataSource = JSON.parse(JSON.stringify(dataSourceFixtures[0]))
-    dataSource = { ...dataSource, lastSynced: null }
+    dataSource = { ...dataSource, lastRun: null }
     expect(getStatus(dataSource)).toBe('pending')
   })
 
-  it('returns "ok" if lastSyncSuccessful is false but nextSync is in the future', () => {
+  it('returns "ok" if lastRunSuccessful is false but nextRun is in the future', () => {
     const futureDate = new Date()
     futureDate.setDate(futureDate.getDate() + 1) // Set to tomorrow
     let dataSource = JSON.parse(JSON.stringify(dataSourceFixtures[0]))
 
     dataSource = {
       ...dataSource,
-      lastSynced: new Date(),
-      lastSyncSuccessful: false,
-      nextSync: futureDate.toISOString(),
+      lastRun: new Date(),
+      lastRunSuccessful: false,
+      nextRun: futureDate.toISOString(),
     }
     expect(getStatus(dataSource)).toBe('ok')
   })
 
-  it('returns "bad" if lastSyncSuccessful is false and dataSourceThru is null', () => {
+  it('returns "bad" if lastRunSuccessful is false and dataSourceThru is null', () => {
     let dataSource = JSON.parse(JSON.stringify(dataSourceFixtures[0]))
     dataSource = {
       ...dataSource,
-      lastSynced: new Date(),
-      lastSyncSuccessful: false,
+      lastRun: new Date(),
+      lastRunSuccessful: false,
       dataSourceThru: null,
     }
     expect(getStatus(dataSource)).toBe('bad')
   })
 
-  it('returns "stale" if nextSync is in the past', () => {
+  it('returns "stale" if nextRun is in the past', () => {
     const pastDate = new Date()
     pastDate.setDate(pastDate.getDate() - 1)
 
     let dataSource = JSON.parse(JSON.stringify(dataSourceFixtures[0]))
     dataSource = {
       ...dataSource,
-      lastSynced: new Date(),
-      nextSync: pastDate.toISOString(),
+      lastRun: new Date(),
+      nextRun: pastDate.toISOString(),
     }
     expect(getStatus(dataSource)).toBe('stale')
   })
@@ -51,8 +51,8 @@ describe('getStatus', () => {
     let dataSource = JSON.parse(JSON.stringify(dataSourceFixtures[1]))
     dataSource = {
       ...dataSource,
-      lastSynced: new Date(),
-      lastSyncSuccessful: true,
+      lastRun: new Date(),
+      lastRunSuccessful: true,
     }
     expect(getStatus(dataSource)).toBe('bad')
   })

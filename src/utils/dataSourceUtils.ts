@@ -3,16 +3,16 @@ import { DataSource } from '@/models'
 export function getStatus(
   ds: DataSource
 ): 'ok' | 'pending' | 'bad' | 'stale' | 'unknown' {
-  if (!ds.lastSynced) return 'pending'
+  if (!ds.lastRun) return 'pending'
 
   let now = new Date()
-  let nextSync = ds.nextSync ? new Date(Date.parse(ds.nextSync)) : null
+  let nextRun = ds.nextRun ? new Date(Date.parse(ds.nextRun)) : null
 
-  if (!ds.lastSyncSuccessful && nextSync && nextSync >= now) {
+  if (!ds.lastRunSuccessful && nextRun && nextRun >= now) {
     return 'ok'
-  } else if (ds.dataSourceThru == null || !ds.lastSyncSuccessful) {
+  } else if (!ds.lastRunSuccessful) {
     return 'bad'
-  } else if (nextSync && nextSync < now) {
+  } else if (nextRun && nextRun < now) {
     return 'stale'
   }
   return 'bad'

@@ -46,6 +46,7 @@ export default defineConfig({
         '**/src/composables/useWorkspacePermissions.ts',
         '**/src/composables/useMetadata.ts',
         '**/src/services/getCSRFToken.ts',
+        '**/src/models/**',
         '**/src/plugins/**',
         '**/src/router/**',
         '**/src/store/**',

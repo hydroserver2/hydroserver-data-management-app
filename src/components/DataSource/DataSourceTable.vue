@@ -132,11 +132,11 @@ const headers = [
   },
   {
     title: 'Last Synced',
-    key: 'lastSynced',
+    key: 'lastRun',
   },
   {
     title: 'Next Sync',
-    key: 'nextSync',
+    key: 'nextRun',
   },
   {
     title: 'Pause',

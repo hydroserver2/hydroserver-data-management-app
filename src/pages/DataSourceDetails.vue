@@ -165,11 +165,6 @@ const dataSourceInformation = computed(() => {
       value: dataSource.value.id,
     },
     {
-      icon: 'mdi-clock-outline',
-      label: 'Timestamp column',
-      value: dataSource.value.timestampColumn,
-    },
-    {
       icon: 'mdi-calendar-clock',
       label: 'Schedule',
       value: scheduleString,
@@ -177,21 +172,21 @@ const dataSourceInformation = computed(() => {
     {
       icon: 'mdi-history',
       label: 'Last synced',
-      value: dataSource.value.lastSynced
-        ? formatTime(dataSource.value.lastSynced)
+      value: dataSource.value.lastRun
+        ? formatTime(dataSource.value.lastRun)
         : '',
     },
     {
       icon: 'mdi-calendar-sync',
       label: 'Next sync',
-      value: dataSource.value.nextSync
-        ? formatTime(dataSource.value.nextSync)
+      value: dataSource.value.nextRun
+        ? formatTime(dataSource.value.nextRun)
         : '',
     },
     {
       icon: 'mdi-message-text-outline',
       label: 'Last sync message',
-      value: dataSource.value.lastSyncMessage,
+      value: dataSource.value.lastRunMessage,
     },
     {
       icon: 'mdi-information-outline',
