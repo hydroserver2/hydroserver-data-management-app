@@ -307,8 +307,9 @@ async function onTransferOwnership() {
     await api.transferWorkspace(props.workspace!.id, newOwnerEmail.value)
     emits('needs-refresh')
     Snackbar.success('Workspace transfer initiated.')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error transferring workspace.', error)
+    Snackbar.error(error.message)
   }
   newOwnerEmail.value = ''
   showTransferConfirmation.value = false
