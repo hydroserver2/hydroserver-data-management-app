@@ -60,5 +60,6 @@ const onDelete = () => {
     return
   }
   emit('delete')
+  emit('close')
 }
 </script>
