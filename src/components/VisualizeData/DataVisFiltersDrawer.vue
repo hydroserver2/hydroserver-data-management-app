@@ -108,7 +108,7 @@
   </v-navigation-drawer>
 
   <div class="mt-4 mx-4" v-if="!drawer">
-    <v-icon @click="drawer = !drawer">mdi-menu</v-icon>
+    <v-icon @click="drawer = !drawer">mdi-menu-close</v-icon>
   </div>
 </template>
 
