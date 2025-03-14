@@ -137,7 +137,7 @@ import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import { api } from '@/services/api'
-import { PermissionType, ResourceType, Thing } from '@/types'
+import { PermissionResource, PermissionAction, Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
 import { ThingWithColor } from '@/types'
 import { Snackbar } from '@/utils/notifications'
@@ -177,7 +177,7 @@ const matchesSearchCriteria = (thing: Thing) => {
 }
 
 const onClickRegisterSite = () => {
-  if (hasPermission(PermissionType.Thing, ResourceType.Create))
+  if (hasPermission(PermissionResource.Thing, PermissionAction.Create))
     showSiteForm.value = true
   else
     Snackbar.error(

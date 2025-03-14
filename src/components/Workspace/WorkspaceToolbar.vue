@@ -136,7 +136,11 @@
 
           <v-btn
             :disabled="
-              !hasPermission(PermissionType.Workspace, ResourceType.Edit, item)
+              !hasPermission(
+                PermissionResource.Workspace,
+                PermissionAction.Edit,
+                item
+              )
             "
             variant="text"
             color="grey-darken-2"
@@ -148,8 +152,8 @@
           <v-btn
             :disabled="
               !hasPermission(
-                PermissionType.Workspace,
-                ResourceType.Delete,
+                PermissionResource.Workspace,
+                PermissionAction.Delete,
                 item
               )
             "
@@ -205,7 +209,7 @@ import DeleteWorkspaceCard from './DeleteWorkspaceCard.vue'
 import WorkspaceAccessControl from './WorkspaceAccessControl.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { PermissionType, ResourceType, Workspace } from '@/types'
+import { PermissionResource, PermissionAction, Workspace } from '@/types'
 import { api } from '@/services/api'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'

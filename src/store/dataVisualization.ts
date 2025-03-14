@@ -4,8 +4,6 @@ import {
   ProcessingLevel,
   Thing,
   GraphSeries,
-  PermissionType,
-  ResourceType,
 } from '@/types'
 import {
   SummaryStatistics,
@@ -17,7 +15,6 @@ import { EChartsOption } from 'echarts'
 import { EChartsColors } from '@/utils/materialColors'
 import { createEChartsOption } from '@/utils/plotting/echarts'
 import { useObservationStore } from '@/store/observations'
-import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 export const useDataVisStore = defineStore('dataVisualization', () => {
   const { fetchGraphSeries, fetchGraphSeriesData } = useObservationStore()

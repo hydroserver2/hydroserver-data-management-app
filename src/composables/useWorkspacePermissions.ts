@@ -2,7 +2,12 @@ import { computed, Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useUserStore } from '@/store/user'
-import { Permission, PermissionType, ResourceType, Workspace } from '@/types'
+import {
+  Permission,
+  PermissionResource,
+  PermissionAction,
+  Workspace,
+} from '@/types'
 
 export function useWorkspacePermissions(
   localWorkspace?: Ref<Workspace | undefined>
@@ -36,8 +41,8 @@ export function useWorkspacePermissions(
   }
 
   const hasPermission = (
-    permissionType: PermissionType,
-    resourceType: ResourceType,
+    resource: PermissionResource,
+    action: PermissionAction,
     workspace?: Workspace
   ) => {
     const w = workspace ?? selectedWorkspace.value
@@ -48,18 +53,14 @@ export function useWorkspacePermissions(
     const perms = w.collaboratorRole?.permissions ?? []
     return (
       hasGlobalPermissions(perms) ||
-      perms.some(
-        (p) =>
-          p.permission_type === permissionType &&
-          p.resource_type === resourceType
-      )
+      perms.some((p) => p.action === action && p.resource === resource)
     )
   }
 
   function checkPermissionsByWorkspaceId(
     workspaceId: string,
-    permissionType: PermissionType,
-    resourceType: ResourceType
+    permissionType: PermissionResource,
+    resourceType: PermissionAction
   ) {
     const workspace = workspaces.value.find((ws) => ws.id === workspaceId)
     if (!workspace) return false
@@ -70,56 +71,56 @@ export function useWorkspacePermissions(
   const hasGlobalPermissions = (permissions: Permission[]) =>
     permissions.some(
       (p) =>
-        p.permission_type === PermissionType.Global &&
-        p.resource_type === ResourceType.Global
+        p.resource === PermissionResource.Global &&
+        p.action === PermissionAction.Global
     )
 
   const canEditWorkspace = computed(() =>
-    hasPermission(PermissionType.Workspace, ResourceType.Edit)
+    hasPermission(PermissionResource.Workspace, PermissionAction.Edit)
   )
 
   const canDeleteThings = computed(() =>
-    hasPermission(PermissionType.Thing, ResourceType.Delete)
+    hasPermission(PermissionResource.Thing, PermissionAction.Delete)
   )
 
   const canEditThings = computed(() =>
-    hasPermission(PermissionType.Thing, ResourceType.Edit)
+    hasPermission(PermissionResource.Thing, PermissionAction.Edit)
   )
 
   const canCreateDatastreams = computed(() =>
-    hasPermission(PermissionType.Datastream, ResourceType.Create)
+    hasPermission(PermissionResource.Datastream, PermissionAction.Create)
   )
 
   const canEditDatastreams = computed(() =>
-    hasPermission(PermissionType.Datastream, ResourceType.Edit)
+    hasPermission(PermissionResource.Datastream, PermissionAction.Edit)
   )
 
   const canDeleteDatastreams = computed(() =>
-    hasPermission(PermissionType.Datastream, ResourceType.Delete)
+    hasPermission(PermissionResource.Datastream, PermissionAction.Delete)
   )
 
   const canViewDatastreams = computed(() =>
-    hasPermission(PermissionType.Datastream, ResourceType.View)
+    hasPermission(PermissionResource.Datastream, PermissionAction.View)
   )
 
   const canCreateSensors = computed(() =>
-    hasPermission(PermissionType.Sensor, ResourceType.Create)
+    hasPermission(PermissionResource.Sensor, PermissionAction.Create)
   )
 
   const canCreateUnits = computed(() =>
-    hasPermission(PermissionType.Unit, ResourceType.Create)
+    hasPermission(PermissionResource.Unit, PermissionAction.Create)
   )
 
   const canCreateObservedProperties = computed(() =>
-    hasPermission(PermissionType.ObservedProperty, ResourceType.Create)
+    hasPermission(PermissionResource.ObservedProperty, PermissionAction.Create)
   )
 
   const canCreateProcessingLevels = computed(() =>
-    hasPermission(PermissionType.ProcessingLevel, ResourceType.Create)
+    hasPermission(PermissionResource.ProcessingLevel, PermissionAction.Create)
   )
 
   const canViewObservations = computed(() =>
-    hasPermission(PermissionType.Observation, ResourceType.View)
+    hasPermission(PermissionResource.Observation, PermissionAction.View)
   )
 
   return {

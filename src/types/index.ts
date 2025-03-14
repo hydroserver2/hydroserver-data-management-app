@@ -339,7 +339,7 @@ export class OAuthProvider {
   }
 }
 
-export enum ResourceType {
+export enum PermissionAction {
   Global = '*',
   View = 'view',
   Create = 'create',
@@ -347,7 +347,7 @@ export enum ResourceType {
   Delete = 'delete',
 }
 
-export enum PermissionType {
+export enum PermissionResource {
   Global = '*',
   Workspace = 'Workspace',
   Collaborator = 'Collaborator',
@@ -361,8 +361,8 @@ export enum PermissionType {
 }
 
 export interface Permission {
-  resource_type: ResourceType
-  permission_type: PermissionType
+  action: PermissionAction
+  resource: PermissionResource
 }
 
 export interface CollaboratorRole {
