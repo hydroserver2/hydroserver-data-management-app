@@ -27,14 +27,11 @@
         </v-row>
 
         <v-card-text v-if="showAddCollaboratorHelp">
-          The new collaborator will be given the following permissions:
-          <ul>
-            <li class="v-list-item">
-              Create, read, update, delete for all site metadata and datastreams
-            </li>
-            <li class="v-list-item">Make site private or public</li>
-            <li class="v-list-item">Remove themselves as collaborator</li>
-          </ul>
+          You can add collaborators to this workspace with either Editor or
+          Viewer roles. Viewers can see everything in the workspace but cannot
+          edit. Editors can create, read, update, and delete all sites,
+          metadata, and datastreams as well as set their visibility. Users can
+          remove themselves as collaborators.
         </v-card-text>
 
         <v-card-text>
