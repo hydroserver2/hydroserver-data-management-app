@@ -57,7 +57,7 @@
             >Filter sites</v-btn
           >
 
-          <v-btn-add class="mr-2" @click="showSiteForm = true" color="white">
+          <v-btn-add class="mr-2" @click="onClickRegisterSite" color="white">
             Register a new site
           </v-btn-add>
         </v-toolbar>
@@ -137,22 +137,23 @@ import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import { api } from '@/services/api'
-import { Thing } from '@/types'
+import { PermissionType, ResourceType, Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
 import { ThingWithColor } from '@/types'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 
 const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
+const { hasPermission } = useWorkspacePermissions()
 
 const ownedThings = ref<Thing[]>([])
 const useColors = ref(true)
 const isFiltered = ref(false)
 const isPageLoaded = ref(false)
-const showSitesTable = ref(false)
 const filterCriteria = ref({ key: '', values: [] as string[] })
 const search = ref()
 
@@ -173,6 +174,15 @@ const matchesSearchCriteria = (thing: Thing) => {
     thing.name?.toLowerCase().includes(searchLower) ||
     thing.siteType?.toLowerCase().includes(searchLower)
   )
+}
+
+const onClickRegisterSite = () => {
+  if (hasPermission(PermissionType.Thing, ResourceType.Create))
+    showSiteForm.value = true
+  else
+    Snackbar.error(
+      "You don't have permissions to register a site for this workspace."
+    )
 }
 
 const workspaceThings = computed(() =>
