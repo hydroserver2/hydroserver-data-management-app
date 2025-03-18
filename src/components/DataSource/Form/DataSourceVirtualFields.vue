@@ -45,14 +45,14 @@
     </v-row>
   </v-card-item>
 
-  <v-dialog v-model="showSourceModal" width="60rem">
+  <v-dialog v-model="showSourceModal" width="40rem">
     <DatastreamTemplateModal
       @selected-datastream-id="selectedSourceID = $event"
       @close="showSourceModal = false"
     />
   </v-dialog>
 
-  <v-dialog v-model="showDestinationModal" width="60rem">
+  <v-dialog v-model="showDestinationModal" width="40rem">
     <DatastreamTemplateModal
       @selected-datastream-id="selectedDestinationID = $event"
       @close="showDestinationModal = false"

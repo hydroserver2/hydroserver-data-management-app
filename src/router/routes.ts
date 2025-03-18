@@ -63,11 +63,6 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/sites/:id/datastreams/form/:datastreamId?',
-    name: 'DatastreamForm',
-    component: () => import('@/pages/DatastreamForm.vue'),
-  },
-  {
     path: '/about',
     name: 'Contact',
     component: () => import('@/pages/About.vue'),

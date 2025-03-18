@@ -1,8 +1,8 @@
 <template>
   <v-card>
-    <v-card-title>Use an existing datastream as a template</v-card-title>
-
-    <v-divider class="my-4"></v-divider>
+    <v-toolbar color="primary-darken-2">
+      <v-card-title>Use an existing datastream as a template</v-card-title>
+    </v-toolbar>
 
     <v-card-text>
       <v-col cols="12">

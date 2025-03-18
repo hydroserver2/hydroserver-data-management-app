@@ -3,25 +3,23 @@
 
   <v-row class="pb-4">
     <v-col cols="auto" v-if="canCreateDatastreams">
-      <v-btn-secondary
-        prependIcon="mdi-plus"
-        :to="{ name: 'DatastreamForm', params: { id: thingId } }"
+      <v-btn-secondary prependIcon="mdi-plus" @click="openCreate = true"
         >Add new datastream</v-btn-secondary
       >
     </v-col>
-    <v-col v-if="datastreams.length">
+    <v-col>
       <v-btn
         color="blue-grey-lighten-2"
         prependIcon="mdi-chart-line"
         variant="elevated"
-        :to="{ name: 'VisualizeData', query: { sites: thingId } }"
+        :to="{ name: 'VisualizeData', query: { sites: thing!.id } }"
         >View on Data Visualization Page</v-btn
       >
     </v-col>
   </v-row>
 
   <h6 class="text-h6" style="color: #b71c1c">
-    {{ thing?.dataDisclaimer }}
+    {{ thing!.dataDisclaimer }}
   </h6>
 
   <v-data-table-virtual
@@ -89,48 +87,199 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <DatastreamTableActions
+      <!-- <DatastreamTableActions
         v-if="canEditDatastreams"
         :key="actionKey"
         :datastream="item"
-        :thing-id="thingId"
+        :thing-id="thing!.id"
         @deleted="onDeleteDatastream(item.id)"
         @linkUpdated="loadDatastreams"
-      />
+      /> -->
+      <v-row>
+        <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
+          <template v-slot:activator="{ props }">
+            <v-icon
+              :icon="
+                item.isDataVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
+              "
+              :color="item.isDataVisible ? 'grey' : 'grey-lighten-1'"
+              small
+              v-bind="props"
+              @click="toggleDataVisibility(item)"
+            />
+          </template>
+          <span v-if="item.isDataVisible"
+            >Hide the data for this datastream from guests of your site while
+            keeping the metadata public. Owners will still see it
+          </span>
+          <span v-else>Make the data for this datastream publicly visible</span>
+        </v-tooltip>
+
+        <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
+          <template v-slot:activator="{ props }">
+            <v-icon
+              :icon="item.isVisible ? 'mdi-eye' : 'mdi-eye-off'"
+              :color="item.isVisible ? 'grey' : 'grey-lighten-1'"
+              small
+              v-bind="props"
+              @click="toggleVisibility(item)"
+            />
+          </template>
+          <span v-if="item.isVisible"
+            >Hide this datastream from guests of your site. Owners will still
+            see it</span
+          >
+          <span v-else>Make this datastream publicly visible</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="!canViewDatastreams && !item.isDataVisible"
+          bottom
+          :openDelay="100"
+        >
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" icon="mdi-lock" />
+          </template>
+          <span>The data for this datastream is private </span>
+        </v-tooltip>
+
+        <v-menu v-else>
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" icon="mdi-dots-vertical" />
+          </template>
+          <v-list>
+            <!-- <div v-if="canEditDatastreams"> -->
+            <!-- <v-list-item
+                prepend-icon="mdi-link-variant"
+                title="Link Data Source"
+                @click="openLinker = true"
+              /> -->
+            <v-list-item
+              v-if="canEditDatastreams"
+              prepend-icon="mdi-pencil"
+              title="Edit Datastream Metadata"
+              @click="openDialog(item, 'edit')"
+            />
+            <!-- </div> -->
+            <div v-if="canDeleteDatastreams">
+              <v-list-item
+                prepend-icon="mdi-delete"
+                title="Delete Datastream"
+                @click="openDialog(item, 'delete')"
+              />
+            </div>
+            <v-list-item
+              prepend-icon="mdi-chart-line"
+              title="Visualize Data"
+              :to="{
+                name: 'VisualizeData',
+                query: { sites: item.thingId, datastreams: item.id },
+              }"
+            />
+            <v-list-item
+              prepend-icon="mdi-download"
+              title="Download Data"
+              @click="downloadDatastreamCSV(item.id)"
+            />
+          </v-list>
+        </v-menu>
+      </v-row>
     </template>
   </v-data-table-virtual>
+
+  <v-dialog v-model="openCreate" width="80rem">
+    <DatastreamForm
+      :thing="thing!"
+      :workspace="workspace"
+      @close="openCreate = false"
+      @created="onCreated"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="openEdit" width="80rem">
+    <DatastreamForm
+      :thing="thing!"
+      :workspace="workspace"
+      :datastream="item"
+      @close="openEdit = false"
+      @updated="onUpdate"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="openDelete" width="40rem">
+    <DatastreamDeleteCard
+      :datastream="item"
+      @close="openDelete = false"
+      @delete="onDelete"
+    />
+  </v-dialog>
+
+  <!-- <v-dialog v-model="openLinker" width="40rem">
+    <DatastreamSourceLinker
+      :datastream="item"
+      @close="openLinker = false"
+      @updated="handleLinkUpdated"
+    />
+  </v-dialog> -->
 </template>
 
 <script setup lang="ts">
 import DatastreamPopupPlot from '@/components/Datastream/DatastreamPopupPlot.vue'
-import DatastreamTableActions from '@/components/Datastream/DatastreamTableActions.vue'
+import DatastreamForm from '@/components/Datastream/DatastreamForm.vue'
+import DatastreamDeleteCard from './DatastreamDeleteCard.vue'
 import Sparkline from '@/components/Sparkline.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, toRef } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
 import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
-import { DataArray, Datastream } from '@/types'
+import { DataArray, Datastream, Workspace } from '@/types'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import { useTableLogic } from '@/composables/useTableLogic'
+import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 
 const props = defineProps({
-  thingId: {
-    type: String,
-    required: true,
-  },
+  workspace: { type: Object as () => Workspace, required: true },
 })
 
-const { canEditDatastreams, canViewDatastreams, canCreateDatastreams } =
-  useWorkspacePermissions()
+const { thing } = storeToRefs(useThingStore())
+const actionKey = ref(1)
+const openCreate = ref(false)
+const workspaceRef = toRef(props, 'workspace')
+const thingIdRef = computed(() => thing.value!.id)
+
+const {
+  canCreateDatastreams,
+  canViewDatastreams,
+  canEditDatastreams,
+  canDeleteDatastreams,
+} = useWorkspacePermissions(workspaceRef)
 
 const { observations } = storeToRefs(useObservationStore())
 
-const { thing } = storeToRefs(useThingStore())
-const datastreams = ref<Datastream[]>([])
-const actionKey = ref(1)
+// const openLinker = ref(false)
+const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
+  useTableLogic(
+    async (thingId: string) => await api.fetchDatastreamsForThing(thingId),
+    api.deleteDatastream,
+    Datastream,
+    thingIdRef
+  )
 
 const { sensors, units, observedProperties, processingLevels } = useMetadata()
+
+const visibleDatastreams = computed(() => {
+  return items.value
+    .filter((d) => d.isVisible || canViewDatastreams)
+    .map((d) => ({
+      ...d,
+      chartOpen: false,
+      OPName: observedProperties.value.find(
+        (op) => op.id === d.observedPropertyId
+      )?.name,
+    }))
+})
 
 const getMostRecentObsTime = (dataArray: DataArray) => {
   if (!dataArray.length) return undefined
@@ -148,6 +297,38 @@ function formatDate(dateString: string) {
   )
 }
 
+const onCreated = async () => {
+  await loadDatastreams()
+}
+
+async function toggleDataVisibility(datastream: Datastream) {
+  datastream.isDataVisible = !datastream.isDataVisible
+  if (datastream.isDataVisible) datastream.isVisible = true
+  patchDatastream({
+    id: datastream.id,
+    isVisible: datastream.isVisible,
+    isDataVisible: datastream.isDataVisible,
+  })
+}
+
+async function toggleVisibility(datastream: Datastream) {
+  datastream.isVisible = !datastream.isVisible
+  if (!datastream.isVisible) datastream.isDataVisible = false
+  patchDatastream({
+    id: datastream.id,
+    isVisible: datastream.isVisible,
+    isDataVisible: datastream.isDataVisible,
+  })
+}
+
+const patchDatastream = async (patchBody: {}) => {
+  try {
+    await api.updateDatastream(patchBody as Datastream)
+  } catch (error) {
+    console.error('Error updating datastream', error)
+  }
+}
+
 const formatNumber = (value: string | number): string => {
   if (typeof value === 'number') {
     const formatter = new Intl.NumberFormat('en-US', {
@@ -159,18 +340,6 @@ const formatNumber = (value: string | number): string => {
 
   return value?.toString()
 }
-
-const visibleDatastreams = computed(() => {
-  return datastreams.value
-    .filter((d) => d.isVisible || canViewDatastreams)
-    .map((d) => ({
-      ...d,
-      chartOpen: false,
-      OPName: observedProperties.value.find(
-        (op) => op.id === d.observedPropertyId
-      )?.name,
-    }))
-})
 
 const sortBy = [{ key: 'OPName' }]
 const headers = [
@@ -189,20 +358,12 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-function onDeleteDatastream(id: string) {
-  datastreams.value = datastreams.value.filter((ds) => ds.id !== id)
-}
-
 const loadDatastreams = async () => {
   try {
-    datastreams.value = await api.fetchDatastreamsForThing(props.thingId)
+    items.value = await api.fetchDatastreamsForThing(thing.value!.id)
     actionKey.value += 1
   } catch (e) {
     console.error('Error fetching datastreams', e)
   }
 }
-
-onMounted(async () => {
-  await loadDatastreams()
-})
 </script>

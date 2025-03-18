@@ -93,7 +93,7 @@
       </v-col>
     </v-row>
 
-    <DatastreamTable v-if="thing" :thing-id="thingId" />
+    <DatastreamTable v-if="thing && workspace" :workspace="workspace" />
   </v-container>
   <v-container v-else-if="loaded && !authorized">
     <h5 class="text-h5 my-4">
