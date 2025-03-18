@@ -29,7 +29,7 @@
       @submit.prevent="onSubmit"
       ref="myForm"
       v-model="valid"
-      validate-on="blur"
+      validate-on="input"
     >
       <v-row>
         <v-col cols="12" md="6">
@@ -74,7 +74,7 @@
                   @click="showSensorModal = true"
                   >mdi-plus</v-icon
                 >
-                <v-dialog v-model="showSensorModal" width="60rem">
+                <v-dialog v-model="showSensorModal" width="30rem">
                   <SensorFormCard
                     v-if="workspace"
                     :workspace-id="workspace.id"
@@ -136,7 +136,7 @@
                 <v-icon color="secondary-darken-2" @click="showOPModal = true"
                   >mdi-plus</v-icon
                 >
-                <v-dialog v-model="showOPModal" width="60rem">
+                <v-dialog v-model="showOPModal" width="30rem">
                   <ObservedPropertyFormCard
                     v-if="workspace"
                     :workspace-id="workspace.id"
@@ -166,7 +166,7 @@
                 <v-icon color="secondary-darken-2" @click="openUnitForm = true"
                   >mdi-plus</v-icon
                 >
-                <v-dialog v-model="openUnitForm" width="60rem">
+                <v-dialog v-model="openUnitForm" width="30rem">
                   <UnitFormCard
                     v-if="workspace"
                     :workspace-id="workspace.id"
@@ -209,7 +209,7 @@
                 <v-icon color="secondary-darken-2" @click="showPLModal = true"
                   >mdi-plus</v-icon
                 >
-                <v-dialog v-model="showPLModal" width="60rem">
+                <v-dialog v-model="showPLModal" width="30rem">
                   <ProcessingLevelFormCard
                     v-if="workspace"
                     :workspace-id="workspace.id"
@@ -281,6 +281,7 @@
             </v-col>
 
             <v-text-field
+              ref="intendedTimeSpacingRef"
               v-model="datastream.intendedTimeSpacing"
               label="Intended time spacing"
               :rules="[
@@ -309,6 +310,7 @@
                 color="primary"
                 density="compact"
                 rounded="xl"
+                @update:model-value="onSpacingUnitChange"
                 divided
               >
                 <v-btn v-for="unit in timeUnits" :value="unit">{{
@@ -508,6 +510,7 @@ const showLinkedMetadataHelp = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
 const selectedDatastreamID = ref('')
+const intendedTimeSpacingRef = ref<VForm>()
 
 const {
   canCreateObservedProperties,
@@ -586,6 +589,10 @@ watch(selectedDatastreamID, async () => {
   }
   await myForm.value?.validate()
 })
+
+function onSpacingUnitChange() {
+  intendedTimeSpacingRef.value?.validate()
+}
 
 async function onSubmit() {
   await myForm.value?.validate()

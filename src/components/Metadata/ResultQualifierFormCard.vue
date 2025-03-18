@@ -1,8 +1,10 @@
 <template>
   <v-card>
-    <v-card-title>
-      {{ isEdit ? 'Edit' : 'Add' }} Result Qualifier
-    </v-card-title>
+    <v-toolbar color="brown">
+      <v-card-title>
+        {{ isEdit ? 'Edit' : 'Add' }} Result Qualifier
+      </v-card-title>
+    </v-toolbar>
 
     <v-form
       @submit.prevent="onSubmit"

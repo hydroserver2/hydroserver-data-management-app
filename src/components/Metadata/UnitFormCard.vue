@@ -1,6 +1,8 @@
 <template>
   <v-card>
-    <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Unit </v-card-title>
+    <v-toolbar color="brown">
+      <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Unit </v-card-title>
+    </v-toolbar>
     <v-divider />
 
     <v-form
