@@ -52,6 +52,9 @@
             available in the drop down menus below, click the "+" button or
             visit the
             <router-link to="/Metadata"> Manage metadata page. </router-link>
+            Options in the drop down menus come from both metadata associated
+            with the workspace as well as system level metadata managed by the
+            system admin.
           </v-card-text>
 
           <v-card-text>
