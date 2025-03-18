@@ -1,11 +1,11 @@
 <template>
   <v-container v-if="isPageLoaded">
-    <v-row class="my-2" align="center">
-      <v-col cols="auto">
+    <v-row class="mt-2" align="center">
+      <v-col cols="auto" class="pb-0">
         <h5 class="text-h5">Manage metadata</h5>
-        <WorkspaceSelector />
       </v-col>
     </v-row>
+    <WorkspaceToolbar />
 
     <v-card>
       <v-toolbar color="brown">
@@ -138,7 +138,7 @@ import SensorTable from '@/components/Metadata/SensorTable.vue'
 import ResultQualifierTable from '@/components/Metadata/ResultQualifierTable.vue'
 import ProcessingLevelTable from '@/components/Metadata/ProcessingLevelTable.vue'
 import ObservedPropertyTable from '@/components/Metadata/ObservedPropertyTable.vue'
-import WorkspaceSelector from '@/components/Workspace/WorkspaceSelector.vue'
+import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'

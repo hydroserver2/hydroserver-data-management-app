@@ -1,5 +1,5 @@
 <template>
-  <v-row class="my-4" align="center">
+  <v-row class="mt-0 mb-2" align="center">
     <v-col cols="auto">
       <WorkspaceSelector />
     </v-col>
