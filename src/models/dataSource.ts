@@ -67,7 +67,7 @@ export interface LinkedDatastream {
 
 export class DataSource {
   // TODO: Match with db
-  type = 'ETL'
+  type: DataSourceType = 'ETL'
   name = ''
   id = ''
   etlSystemId = ''

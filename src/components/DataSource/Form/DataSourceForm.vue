@@ -116,15 +116,13 @@
       <template v-if="dataSource.type === 'ETL'">
         <DataSourceETLFields />
       </template>
-      <template v-else-if="dataSource.type === 'HydroServer aggregation'">
+      <template v-else-if="dataSource.type === 'Aggregation'">
         <DataSourceAggregationFields />
       </template>
-      <template
-        v-else-if="dataSource.type === 'HydroServer virtual datastream'"
-      >
+      <template v-else-if="dataSource.type === 'Virtual'">
         <DataSourceVirtualFields />
       </template>
-      <template v-else-if="dataSource.type === 'Streaming ETL System'">
+      <template v-else-if="dataSource.type === 'SDL'">
         <DataSourceSDLFields />
       </template>
 
@@ -163,10 +161,10 @@ if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
 
 const etlSystems = etlSystemFixtures as EtlSystem[]
 const workflowTypes = [
-  'ETL',
-  'HydroServer aggregation',
-  'HydroServer virtual datastream',
-  'Streaming ETL System',
+  { title: 'ETL', value: 'ETL' },
+  { title: 'HydroServer aggregation', value: 'Aggregation' },
+  { title: 'HydroServer virtual datastream', value: 'Virtual' },
+  { title: 'Streaming Data Loader', value: 'SDL' },
 ]
 
 function toLocalDateString(iso: string): string {
