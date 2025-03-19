@@ -185,8 +185,6 @@ export const api = {
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
-  fetchUnownedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=noUser`),
-  fetchOwnedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=anyUser`),
   fetchWorkspaceUnits: async (id: string) =>
     apiMethods.fetch(`${UNIT_BASE}?workspace_id=${id}`),
   updateUnit: async (newUnit: Unit, oldUnit: Unit | null = null) =>

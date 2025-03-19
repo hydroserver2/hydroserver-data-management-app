@@ -44,7 +44,7 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
     }))
   )
 
-  const fetchMetadata = async (id: string) => {
+  const fetchMetadata = async (id: string | null) => {
     try {
       const [
         unitsResponse,
@@ -62,9 +62,7 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
 
       units.value = (unitsResponse as Unit[])
         .filter(
-          (u) =>
-            (u.type !== 'Time' && u.workspaceId === null) ||
-            u.workspaceId === id
+          (u) => (u.type !== 'Time' && !u.workspaceId) || u.workspaceId === id
         )
         .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -97,7 +95,7 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
   watch(
     workspaceId,
     async (id) => {
-      if (id) await fetchMetadata(id)
+      if (id !== null) await fetchMetadata(id)
     },
     { immediate: true }
   )

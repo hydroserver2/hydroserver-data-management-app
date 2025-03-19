@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar title="Data sources" flat color="blue-grey" class="elevation-1">
+    <v-toolbar title="Data sources" flat color="blue-grey">
       <v-spacer />
       <v-text-field
         class="mx-2"

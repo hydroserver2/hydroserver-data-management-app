@@ -8,7 +8,7 @@ export function useTableLogic<T extends WithId>(
   fetchFn: (wsId: string) => Promise<T[]>,
   deleteFn: (id: string) => Promise<any>,
   ItemClass: new () => T,
-  workspaceId: Ref<string>
+  workspaceId: Ref<string | null>
 ) {
   const openEdit = ref(false)
   const openDelete = ref(false)

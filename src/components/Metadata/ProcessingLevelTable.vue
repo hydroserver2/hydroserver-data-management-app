@@ -3,7 +3,7 @@
     :headers="ProcLevelHeaders"
     :items="sortedItems"
     :search="search"
-    :style="{ 'max-height': `200vh` }"
+    :style="{ 'max-height': `400px` }"
     fixed-header
   >
     <template v-slot:item.actions="{ item }">

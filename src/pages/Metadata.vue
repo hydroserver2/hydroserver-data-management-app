@@ -8,15 +8,17 @@
     <WorkspaceToolbar />
 
     <v-card>
-      <v-toolbar color="brown">
+      <v-toolbar color="brown" title="Workspace metadata">
+        <v-spacer />
         <v-text-field
-          class="mx-4"
+          class="mx-2"
           clearable
           v-model="search"
           prepend-inner-icon="mdi-magnify"
           label="Search"
           hide-details
           density="compact"
+          variant="underlined"
           rounded="xl"
           maxWidth="300"
         />
@@ -32,12 +34,10 @@
           </v-tabs>
         </template>
 
-        <v-spacer />
-
         <v-btn-add
           prependIcon="mdi-plus"
           color="white"
-          class="mr-2"
+          class="mx-2"
           @click="metaMap[tab]?.openDialog()"
           >Add new {{ metaMap[tab]?.singularName }}</v-btn-add
         >
@@ -127,6 +127,77 @@
         />
       </v-dialog>
     </v-card>
+
+    <v-card class="mt-6">
+      <v-toolbar color="deep-orange-darken-4" title="System metadata">
+        <v-spacer />
+
+        <template v-slot:extension>
+          <v-tabs
+            v-model="tab"
+            color="secondary-lighten-5"
+            scrollable
+            class="my-2"
+          >
+            <v-tab v-for="item in metaMap">{{ item.name }}</v-tab>
+          </v-tabs>
+        </template>
+      </v-toolbar>
+
+      <v-toolbar color="deep-orange-darken-4" height="5"></v-toolbar>
+
+      <v-window v-model="tab" class="elevation-3">
+        <v-window-item value="0">
+          <v-data-table-virtual
+            :headers="sensorHeaders"
+            :items="sensors"
+            :search="search"
+            fixed-header
+          >
+          </v-data-table-virtual>
+        </v-window-item>
+
+        <v-window-item value="1">
+          <v-data-table-virtual
+            :headers="OPheaders"
+            :items="observedProperties"
+            :search="search"
+            fixed-header
+          >
+          </v-data-table-virtual>
+        </v-window-item>
+
+        <v-window-item value="2">
+          <v-data-table-virtual
+            :headers="procLevelHeaders"
+            :items="processingLevels"
+            :search="search"
+            fixed-header
+          >
+          </v-data-table-virtual>
+        </v-window-item>
+
+        <v-window-item value="3">
+          <v-data-table-virtual
+            :headers="unitHeaders"
+            :items="units"
+            :search="search"
+            fixed-header
+          >
+          </v-data-table-virtual>
+        </v-window-item>
+
+        <v-window-item value="4">
+          <v-data-table-virtual
+            :headers="resultQualifierHeaders"
+            :items="resultQualifiers"
+            :search="search"
+            fixed-header
+          >
+          </v-data-table-virtual>
+        </v-window-item>
+      </v-window>
+    </v-card>
   </v-container>
   <FullScreenLoader v-else />
 </template>
@@ -148,6 +219,8 @@ import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { api } from '@/services/api'
+import { Workspace } from '@/types'
+import { useMetadata } from '@/composables/useMetadata'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
@@ -176,6 +249,7 @@ const sensorKey = ref(0)
 const refreshSensorTable = () => (sensorKey.value += 1)
 
 const search = ref()
+const systemSearch = ref()
 
 const metaMap: Record<string, any> = {
   0: {
@@ -204,6 +278,47 @@ const metaMap: Record<string, any> = {
     singularName: 'result qualifier',
   },
 }
+
+const unitHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Type', key: 'type' },
+  { title: 'Symbol', key: 'symbol' },
+] as const
+
+const sensorHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Method Type', key: 'methodType' },
+  { title: 'Method Code', key: 'methodCode' },
+  { title: 'UUID', key: 'id' },
+] as const
+
+const OPheaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Type', key: 'type' },
+  { title: 'Code', key: 'code' },
+] as const
+
+const procLevelHeaders = [
+  { title: 'Code', key: 'code' },
+  { title: 'Definition', key: 'definition' },
+  { title: 'Explanation', key: 'explanation' },
+] as const
+
+const resultQualifierHeaders = [
+  { title: 'Code', key: 'code' },
+  { title: 'Description', key: 'description' },
+] as const
+
+// workspace.id will be null
+const systemWorkspace = ref(new Workspace())
+
+const {
+  sensors,
+  units,
+  observedProperties,
+  processingLevels,
+  resultQualifiers,
+} = useMetadata(systemWorkspace)
 
 onMounted(async () => {
   try {
