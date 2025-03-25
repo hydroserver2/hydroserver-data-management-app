@@ -21,14 +21,15 @@
 
           <v-card-text>
             <v-select
-              v-model="dataSource.type"
+              v-model="dataSource.etlConfigurationSettings.type"
               label="Workflow type *"
-              :items="workflowTypes"
+              :items="WORKFLOW_TYPES"
               variant="outlined"
               density="compact"
+              class="mb-1"
             />
             <v-text-field
-              class="mt-1"
+              class="mt-2"
               v-model="dataSource.name"
               label="Data source name *"
               :rules="rules.requiredAndMaxLength255"
@@ -44,15 +45,22 @@
             <v-select
               v-model="dataSource.etlSystemId"
               label="ETL system *"
-              :items="etlSystems"
-              :item-title="
-                (etlSystem) =>
-                  etlSystem ? `${etlSystem.name} (${etlSystem.type})` : ''
-              "
-              :item-value="(etlSystem) => etlSystem?.id"
+              :items="filteredEtlSystems"
+              item-title="name"
               variant="outlined"
               density="compact"
-            />
+            >
+              <template #item="{ props, item }">
+                <v-list-item
+                  v-bind="props"
+                  :title="item.raw.name"
+                  :subtitle="item.raw.type"
+                  :class="
+                    item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
+                  "
+                />
+              </template>
+            </v-select>
           </v-card-text>
         </v-col>
 
@@ -65,12 +73,15 @@
               hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
               type="datetime-local"
               density="compact"
+              clearable
+              class="mb-1"
             />
             <v-text-field
               v-model="dataSource.endTime"
               label="End Time"
               hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
               type="datetime-local"
+              clearable
               density="compact"
             />
           </v-card-text>
@@ -113,17 +124,21 @@
 
       <div class="mb-4" />
 
-      <template v-if="dataSource.type === 'ETL'">
-        <DataSourceETLFields />
-      </template>
-      <template v-else-if="dataSource.type === 'Aggregation'">
+      <template
+        v-if="dataSource.etlConfigurationSettings.type === 'Aggregation'"
+      >
         <DataSourceAggregationFields />
       </template>
-      <template v-else-if="dataSource.type === 'Virtual'">
-        <DataSourceVirtualFields />
+      <template v-else-if="dataSource.etlConfigurationSettings.type === 'ETL'">
+        <DataSourceETLFields />
       </template>
-      <template v-else-if="dataSource.type === 'SDL'">
-        <DataSourceSDLFields />
+      <template v-else-if="dataSource.etlConfigurationSettings.type === 'SDL'">
+        <DataSourceETLFields />
+      </template>
+      <template
+        v-else-if="dataSource.etlConfigurationSettings.type === 'Virtual'"
+      >
+        <DataSourceVirtualFields />
       </template>
 
       <v-divider />
@@ -137,35 +152,56 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { api } from '@/services/api'
+import { computed, onMounted, ref, watch } from 'vue'
 import { EtlSystem } from '@/types'
 import { DataSource } from '@/models'
 import { rules } from '@/utils/rules'
-import DataSourceETLFields from './ETL/DataSourceETLFields.vue'
-import DataSourceAggregationFields from './DataSourceAggregationFields.vue'
-import DataSourceVirtualFields from './DataSourceVirtualFields.vue'
-import DataSourceSDLFields from './DataSourceSDLFields.vue'
+import DataSourceETLFields from './DataSourceETLFields.vue'
+import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
+import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
 import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
 import { VForm } from 'vuetify/components'
+import { WORKFLOW_TYPES } from '@/models/dataSource'
+import { storeToRefs } from 'pinia'
+import { useETLStore } from '@/store/etl'
+import { api } from '@/services/api'
+import { useWorkspaceStore } from '@/store/workspaces'
 
 const props = defineProps({ oldDataSource: Object as () => DataSource })
 const emit = defineEmits(['created', 'updated', 'close'])
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 const isEdit = computed(() => !!props.oldDataSource || undefined)
 const valid = ref(false)
 const myForm = ref<VForm>()
+const etlSystems = ref(etlSystemFixtures as EtlSystem[])
 
-const dataSource = ref<DataSource>(new DataSource())
+const { dataSource } = storeToRefs(useETLStore())
 if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
+else
+  dataSource.value = new DataSource({
+    workspaceId: selectedWorkspace.value!.id,
+  })
 
-const etlSystems = etlSystemFixtures as EtlSystem[]
-const workflowTypes = [
-  { title: 'ETL', value: 'ETL' },
-  { title: 'HydroServer aggregation', value: 'Aggregation' },
-  { title: 'HydroServer virtual datastream', value: 'Virtual' },
-  { title: 'Streaming Data Loader', value: 'SDL' },
-]
+const filteredEtlSystems = computed(() => {
+  if (dataSource.value.etlConfigurationSettings.type === 'SDL')
+    return etlSystems.value.filter((s) => s.type === 'SDL')
+  else return etlSystems.value.filter((s) => s.type !== 'SDL')
+})
+
+watch(
+  () => dataSource.value.etlConfigurationSettings.type,
+  (newVal, oldVal) => {
+    // SDL workflows should only be run on machines running the SDL orchestration software.
+    if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.etlSystemId = ''
+    if (newVal === 'SDL') {
+      if (dataSource.value.etlConfigurationSettings.extractor.type !== 'local')
+        dataSource.value.switchExtractor('local')
+      if (dataSource.value.etlConfigurationSettings.transformer.type !== 'CSV')
+        dataSource.value.switchTransformer('CSV')
+    }
+  }
+)
 
 function toLocalDateString(iso: string): string {
   if (!iso) return ''
@@ -188,8 +224,9 @@ const intervalUnitValues = [
 ]
 
 async function uploadItem() {
+  console.log('dataSource', dataSource.value)
   await myForm.value?.validate()
-  if (!valid.value) return
+  if (!valid.value) return false
   if (isEdit.value)
     return await api.updateDataSource(dataSource.value, props.oldDataSource!)
   return await api.createDataSource(dataSource.value)
@@ -197,10 +234,14 @@ async function uploadItem() {
 
 async function onSubmit() {
   try {
-    const newItem = await uploadItem()
-    if (!newItem) return
-    if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem.id)
+    console.log('datasource', dataSource.value)
+    // const newItem = await uploadItem()
+    // if (!newItem) {
+    //   if (isEdit.value) emit('close')
+    //   return
+    // }
+    // if (isEdit.value) emit('updated', newItem)
+    // else emit('created', newItem.id)
   } catch (error) {
     console.error('Error uploading DataSource', error)
   }

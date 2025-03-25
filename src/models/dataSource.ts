@@ -1,4 +1,65 @@
-type DataSourceType = 'ETL' | 'SDL' | 'Virtual' | 'Aggregation'
+export const TIMEZONE_OFFSETS = [
+  { title: 'UTC-12:00 (International Date Line West)', value: '-1200' },
+  { title: 'UTC-11:00 (Samoa Standard Time)', value: '-1100' },
+  { title: 'UTC-10:00 (Hawaii-Aleutian Standard Time)', value: '-1000' },
+  { title: 'UTC-09:00 (Alaska Standard Time)', value: '-0900' },
+  { title: 'UTC-08:00 (Pacific Standard Time)', value: '-0800' },
+  { title: 'UTC-07:00 (Mountain Standard Time)', value: '-0700' },
+  { title: 'UTC-06:00 (Central Standard Time)', value: '-0600' },
+  { title: 'UTC-05:00 (Eastern Standard Time)', value: '-0500' },
+  { title: 'UTC-04:30 (Venezuelan Standard Time)', value: '-0430' },
+  { title: 'UTC-04:00 (Atlantic Standard Time)', value: '-0400' },
+  { title: 'UTC-03:30 (Newfoundland Standard Time)', value: '-0330' },
+  { title: 'UTC-03:00 (Argentina Standard Time)', value: '-0300' },
+  { title: 'UTC-02:00 (Brazil Time)', value: '-0200' },
+  { title: 'UTC-01:00 (Azores Standard Time)', value: '-0100' },
+  { title: 'UTC+00:00 (Greenwich Mean Time)', value: '+0000' },
+  { title: 'UTC+01:00 (Central European Time)', value: '+0100' },
+  { title: 'UTC+02:00 (Eastern European Time)', value: '+0200' },
+  { title: 'UTC+03:00 (Moscow Standard Time)', value: '+0300' },
+  { title: 'UTC+03:30 (Iran Standard Time)', value: '+0330' },
+  { title: 'UTC+04:00 (Azerbaijan Standard Time)', value: '+0400' },
+  { title: 'UTC+04:30 (Afghanistan Time)', value: '+0430' },
+  { title: 'UTC+05:00 (Pakistan Standard Time)', value: '+0500' },
+  { title: 'UTC+05:30 (Indian Standard Time)', value: '+0530' },
+  { title: 'UTC+05:45 (Nepal Time)', value: '+0545' },
+  { title: 'UTC+06:00 (Bangladesh Standard Time)', value: '+0600' },
+  { title: 'UTC+06:30 (Cocos Islands Time)', value: '+0630' },
+  { title: 'UTC+07:00 (Indochina Time)', value: '+0700' },
+  { title: 'UTC+08:00 (China Standard Time)', value: '+0800' },
+  {
+    title: 'UTC+08:45 (Australia Central Western Standard Time)',
+    value: '+0845',
+  },
+  { title: 'UTC+09:00 (Japan Standard Time)', value: '+0900' },
+  { title: 'UTC+09:30 (Australian Central Standard Time)', value: '+0930' },
+  { title: 'UTC+10:00 (Australian Eastern Standard Time)', value: '+1000' },
+  { title: 'UTC+10:30 (Lord Howe Standard Time)', value: '+1030' },
+  { title: 'UTC+11:00 (Solomon Islands Time)', value: '+1100' },
+  { title: 'UTC+11:30 (Norfolk Island Time)', value: '+1130' },
+  { title: 'UTC+12:00 (Fiji Time)', value: '+1200' },
+  { title: 'UTC+12:45 (Chatham Islands Time)', value: '+1245' },
+  { title: 'UTC+13:00 (Tonga Time)', value: '+1300' },
+  { title: 'UTC+14:00 (Line Islands Time)', value: '+1400' },
+] as const
+export type TimezoneOffsetType = (typeof TIMEZONE_OFFSETS)[number]['value']
+
+export const WORKFLOW_TYPES = [
+  { title: 'ETL', value: 'ETL' },
+  { title: 'HydroServer aggregation', value: 'Aggregation' },
+  { title: 'HydroServer virtual datastream', value: 'Virtual' },
+  { title: 'Streaming Data Loader', value: 'SDL' },
+] as const
+export type WorkflowType = (typeof WORKFLOW_TYPES)[number]['value']
+
+export const CSV_DELIMITER_OPTIONS = [
+  { value: ',', title: 'Comma' },
+  { value: '|', title: 'Pipe' },
+  { value: '\\t', title: 'Tab' },
+  { value: ';', title: 'Semicolon' },
+  { value: ' ', title: 'Space' },
+] as const
+export type CSVDelimiterType = (typeof CSV_DELIMITER_OPTIONS)[number]['value']
 
 interface UrlTemplateVariable {
   name: string
@@ -6,34 +67,110 @@ interface UrlTemplateVariable {
   dynamicValue: string
 }
 
-interface ExtractorConfig {
-  type: string
+export const EXTRACTOR_OPTIONS = ['HTTP', 'local'] as const
+export type ExtractorType = (typeof EXTRACTOR_OPTIONS)[number]
+
+interface BaseExtractor {
+  type: ExtractorType
 }
 
-interface HTTPExtractorConfig extends ExtractorConfig {
+export interface HTTPExtractor extends BaseExtractor {
+  type: 'HTTP'
   urlTemplate: string
   urlTemplateVariables: UrlTemplateVariable[]
 }
 
-interface TransformerConfig {
-  type: string
-  mapping: string
-  ruleset: string
-  timestamp_key: string
+export interface LocalFileExtractor extends BaseExtractor {
+  type: 'local'
+  path: string
 }
 
-interface JSONTransformerConfig extends TransformerConfig {
+export type ExtractorConfig = HTTPExtractor | LocalFileExtractor
+
+const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
+  HTTP: {
+    type: 'HTTP',
+    urlTemplate: '',
+    urlTemplateVariables: [],
+  } as HTTPExtractor,
+  local: {
+    type: 'local',
+    path: '',
+  } as LocalFileExtractor,
+}
+
+export const TRANSFORMER_OPTIONS = ['JSON', 'CSV'] as const
+export type TransformerType = (typeof TRANSFORMER_OPTIONS)[number]
+export enum IdentifierType {
+  Name = 'name',
+  Index = 'index',
+}
+
+interface BaseTransformer {
+  type: TransformerType
+  mapping: string
+  timestampKey: string
+  identifierType: IdentifierType
+}
+
+interface JSONtransformer extends BaseTransformer {
+  type: 'JSON'
   JMESPath: string
 }
 
-interface LoaderConfig {
-  type: string
-  destination: string
-  authKey: string
+export interface CSVTransformer extends BaseTransformer {
+  type: 'CSV'
+  headerRow: number | null
+  dataStartRow: number
+  delimiter: CSVDelimiterType
+  timestampFormat: string
+  timestampOffset: TimezoneOffsetType
+}
+
+export type TransformerConfig = JSONtransformer | CSVTransformer
+
+export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
+  JSON: {
+    type: 'JSON',
+    mapping: '',
+    timestampKey: '',
+    JMESPath: '',
+    identifierType: IdentifierType.Name,
+  } as JSONtransformer,
+  CSV: {
+    type: 'CSV',
+    mapping: '',
+    timestampKey: '',
+    timestampFormat: 'ISO8601',
+    headerRow: 1,
+    dataStartRow: 2,
+    delimiter: ',' as CSVDelimiterType,
+    identifierType: IdentifierType.Name,
+    timestampOffset: '+0000',
+  } as CSVTransformer,
+}
+
+export const LOADER_OPTIONS = ['HydroServer'] as const
+export type LoaderType = (typeof LOADER_OPTIONS)[number]
+
+interface BaseLoaderConfig {
+  type: LoaderType
+}
+
+interface HydroServerLoaderConfig extends BaseLoaderConfig {
+  type: 'HydroServer'
+}
+
+export type LoaderConfig = HydroServerLoaderConfig
+
+export const loaderDefaults: Record<LoaderType, LoaderConfig> = {
+  HydroServer: {
+    type: 'HydroServer',
+  },
 }
 
 interface EtlConfiguration {
-  type: DataSourceType
+  type: WorkflowType
   extractor: ExtractorConfig
   transformer: TransformerConfig
   loader: LoaderConfig
@@ -66,8 +203,6 @@ export interface LinkedDatastream {
 }
 
 export class DataSource {
-  // TODO: Match with db
-  type: DataSourceType = 'ETL'
   name = ''
   id = ''
   etlSystemId = ''
@@ -82,11 +217,34 @@ export class DataSource {
   nextRun: string | null = null
   lastRunMessage = ''
   etlConfigurationId: string = ''
-  // etlConfigurationSettings: EtlConfiguration = {}
+  etlConfigurationSettings: EtlConfiguration = {
+    type: 'SDL',
+    extractor: JSON.parse(JSON.stringify(extractorDefaults['local'])),
+    transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
+    loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
+  }
   workspaceId: string = ''
   linkedDatastreams: LinkedDatastream[] = []
 
   constructor(init?: Partial<DataSource>) {
     Object.assign(this, init)
+  }
+
+  switchExtractor(newType: ExtractorType) {
+    this.etlConfigurationSettings.extractor = JSON.parse(
+      JSON.stringify(extractorDefaults[newType])
+    )
+  }
+
+  switchTransformer(newType: TransformerType) {
+    this.etlConfigurationSettings.transformer = JSON.parse(
+      JSON.stringify(transformerDefaults[newType])
+    )
+  }
+
+  switchLoader(newType: LoaderType) {
+    this.etlConfigurationSettings.loader = JSON.parse(
+      JSON.stringify(loaderDefaults[newType])
+    )
   }
 }

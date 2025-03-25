@@ -6,7 +6,7 @@
       </v-col>
     </v-row>
 
-    <v-toolbar color="blue-grey" rounded="t-lg" density="compact">
+    <v-toolbar color="blue-grey" rounded="t-lg">
       <h6 class="text-h6 ml-4">Data source details</h6>
     </v-toolbar>
     <v-data-table
@@ -57,7 +57,7 @@
       </v-col>
     </v-row>
 
-    <v-toolbar color="blue-grey-darken-2" rounded="t-lg" density="compact">
+    <v-toolbar color="blue-grey-darken-2" rounded="t-lg">
       <h6 class="text-h6 ml-4">Linked ETL system</h6>
     </v-toolbar>
     <v-data-table
@@ -100,7 +100,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { EtlSystem, Datastream } from '@/types'
 import { DataSource } from '@/models'
-import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
+import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 import PayloadTable from '@/components/DataSource/PayloadTable.vue'

@@ -1,8 +1,7 @@
 <template>
-  <h5 class="text-h5 mt-8 mb-6">Payloads for this data source</h5>
-
   <v-card>
-    <v-toolbar title="Payloads" flat color="secondary">
+    <v-toolbar flat color="secondary">
+      <h6 class="text-h6 ml-4">Payloads for this data source</h6>
       <v-spacer />
       <v-text-field
         :disabled="!payloads?.length"
@@ -17,7 +16,7 @@
         rounded="xl"
       />
 
-      <v-btn-add class="mr-2" @click="openCreate = true" color="white">
+      <v-btn-add class="mx-4" @click="openCreate = true" color="white">
         Add new payload
       </v-btn-add>
     </v-toolbar>

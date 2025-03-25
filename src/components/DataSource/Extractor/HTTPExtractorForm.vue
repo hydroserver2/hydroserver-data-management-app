@@ -3,7 +3,7 @@
     <v-col cols="12">
       <v-card-title>URL template</v-card-title>
       <v-text-field
-        v-model="extractorConfig.urlTemplate"
+        v-model="httpExtractor.urlTemplate"
         label="URL template"
         density="compact"
         rounded="lg"
@@ -12,10 +12,10 @@
     </v-col>
   </v-row>
 
-  <v-card-title v-if="extractorConfig.urlTemplateVariables.length !== 0"
+  <v-card-title v-if="httpExtractor.urlTemplateVariables.length !== 0"
     >URL template variables</v-card-title
   >
-  <v-row class="mb-2" v-for="variable in extractorConfig.urlTemplateVariables">
+  <v-row class="mb-2" v-for="variable in httpExtractor.urlTemplateVariables">
     <!-- Variable Name -->
     <v-col cols="12" md="3">
       <v-text-field
@@ -55,13 +55,21 @@
 </template>
 
 <script setup lang="ts">
+import { HTTPExtractor } from '@/models/dataSource'
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 
-const { extractorConfig } = storeToRefs(useETLStore())
+const { extractor } = storeToRefs(useETLStore())
 
 const dynamicVariables = ['Loader.start_time', 'Loader.end_time', 'Now']
+
+const httpExtractor = computed<HTTPExtractor>({
+  get: () => extractor.value as HTTPExtractor,
+  set: (val: HTTPExtractor) => {
+    extractor.value = val
+  },
+})
 
 /**
  * Watch the urlTemplate for any new or removed {variables}.
@@ -69,10 +77,10 @@ const dynamicVariables = ['Loader.start_time', 'Loader.end_time', 'Now']
  * Variables not found in the URL anymore are removed.
  */
 watch(
-  () => extractorConfig.value.urlTemplate,
+  () => httpExtractor.value.urlTemplate,
   (newTemplate) => {
     if (!newTemplate) {
-      extractorConfig.value.urlTemplateVariables = []
+      httpExtractor.value.urlTemplateVariables = []
       return
     }
 
@@ -91,7 +99,7 @@ watch(
 
     // Rebuild urlTemplateVariables so they remain in the correct order.
     const newVariables = matchedNames.map((name) => {
-      const existingVar = extractorConfig.value.urlTemplateVariables.find(
+      const existingVar = httpExtractor.value.urlTemplateVariables.find(
         (v) => v.name === name
       )
       return existingVar
@@ -103,7 +111,7 @@ watch(
           }
     })
 
-    extractorConfig.value.urlTemplateVariables = newVariables
+    httpExtractor.value.urlTemplateVariables = newVariables
   }
 )
 </script>

@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, toRef } from 'vue'
-import DataSourceForm from '@/components/DataSource/Form/DataSourceForm.vue'
+import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { DataSource } from '@/models'
 import { EtlSystem } from '@/types'
@@ -108,9 +108,9 @@ const tableData = computed(() =>
     .sort((a, b) => a.name.localeCompare(b.name))
 )
 
-async function togglePaused(ds: DataSource) {
+async function togglePaused(ds: any) {
   ds.paused = !ds.paused
-  await api.updateDataSource(ds)
+  await api.updateDataSource({ paused: ds.paused } as DataSource)
 }
 
 const onRowClick = (event: Event, item: any) => {

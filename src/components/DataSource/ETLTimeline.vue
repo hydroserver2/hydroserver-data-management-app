@@ -15,13 +15,13 @@
           <span>
             :
             <template v-if="step.name === 'extractor'">
-              {{ extractorConfig.type }}
+              {{ extractor.type }}
             </template>
             <template v-else-if="step.name === 'transformer'">
-              {{ transformerConfig.type }}
+              {{ transformer.type }}
             </template>
             <template v-else-if="step.name === 'loader'">
-              {{ loaderConfig.type }}
+              {{ loader.type }}
             </template>
           </span>
         </v-card-title>
@@ -34,8 +34,9 @@
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
 
-const { selectedETLStep, extractorConfig, transformerConfig, loaderConfig } =
-  storeToRefs(useETLStore())
+const { selectedETLStep, extractor, transformer, loader } = storeToRefs(
+  useETLStore()
+)
 
 const steps = [
   {

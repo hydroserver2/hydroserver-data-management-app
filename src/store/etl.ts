@@ -1,63 +1,79 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-
-interface UrlTemplateVariable {
-  name: string
-  isDynamic: boolean
-  dynamicValue: string
-}
-
-interface ExtractorConfig {
-  type: string
-  urlTemplate: string
-  urlTemplateVariables: UrlTemplateVariable[]
-}
-
-interface TransformerConfig {
-  type: string
-  mapping: string
-  ruleset: string
-  timestamp_key: string
-  JMESPath: string
-}
-
-interface LoaderConfig {
-  type: string
-  destination: string
-  authKey: string
-}
+import { computed, ref, watch } from 'vue'
+import {
+  ExtractorConfig,
+  TransformerConfig,
+  LoaderConfig,
+  DataSource,
+} from '@/models/dataSource'
 
 export const useETLStore = defineStore('etl', () => {
-  const etlSystems = ref<{ id: string; name: string }[]>([])
-  const timeUnits = ref(['seconds', 'minutes', 'hours', 'days'] as string[])
   const selectedETLStep = ref('extractor')
+  const dataSource = ref(new DataSource())
 
-  const extractorConfig = ref<ExtractorConfig>({
-    type: 'HTTP',
-    urlTemplate: '',
-    urlTemplateVariables: [],
+  // const extractor = ref<extractor>({
+  //   type: 'HTTP',
+  //   urlTemplate: '',
+  //   urlTemplateVariables: [],
+  // })
+
+  const extractor = computed<ExtractorConfig>({
+    get() {
+      return dataSource.value.etlConfigurationSettings.extractor
+    },
+    set(newVal) {
+      dataSource.value.etlConfigurationSettings.extractor = newVal
+    },
   })
 
-  const transformerConfig = ref<TransformerConfig>({
-    type: 'JSON',
-    mapping: '',
-    ruleset: '',
-    timestamp_key: '',
-    JMESPath: '',
+  watch(
+    () => dataSource.value.etlConfigurationSettings.extractor.type,
+    (newType) => {
+      dataSource.value.switchExtractor(newType)
+    }
+  )
+
+  const transformer = computed<TransformerConfig>({
+    get() {
+      return dataSource.value.etlConfigurationSettings.transformer
+    },
+    set(newVal) {
+      dataSource.value.etlConfigurationSettings.transformer = newVal
+    },
   })
 
-  const loaderConfig = ref<LoaderConfig>({
-    type: 'HydroServer',
-    destination: '',
-    authKey: '',
+  const loader = computed<LoaderConfig>({
+    get() {
+      return dataSource.value.etlConfigurationSettings.loader
+    },
+    set(newVal) {
+      dataSource.value.etlConfigurationSettings.loader = newVal
+    },
   })
+
+  // const transformer = ref<transformer>({
+  //   type: 'CSV',
+  //   mapping: '',
+  //   headerRow: null,
+  //   dataStartRow: 1,
+  //   delimiter: ',',
+  //   timestampKey: '',
+  //   timestampFormat: 'ISO8601',
+  // })
+  // // type: 'JSON',
+  // // mapping: '',
+  // // timestampKey: '',
+  // // JMESPath: '',
+
+  // const loader = ref<loader>({
+  //   type: 'HydroServer',
+  // })
 
   return {
-    etlSystems,
-    timeUnits,
-    extractorConfig,
-    transformerConfig,
-    loaderConfig,
+    dataSource,
+    extractor,
+    transformer,
+    loader,
     selectedETLStep,
   }
 })

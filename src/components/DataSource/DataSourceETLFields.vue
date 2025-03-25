@@ -9,9 +9,9 @@
 
 <script setup lang="ts">
 import ETLTimeline from './ETLTimeline.vue'
-import ExtractorForm from './ExtractorForm.vue'
-import TransformerForm from './TransformerForm.vue'
-import LoaderForm from './LoaderForm.vue'
+import ExtractorForm from './Extractor/ExtractorForm.vue'
+import TransformerForm from './Transformer/TransformerForm.vue'
+import LoaderForm from './Loader/LoaderForm.vue'
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
 
