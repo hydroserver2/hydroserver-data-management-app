@@ -15,8 +15,9 @@
       >
     </v-toolbar>
 
-    <v-dialog v-model="showTemplateModal" width="40rem">
-      <DatastreamTemplateModal
+    <v-dialog v-model="showTemplateModal" width="75rem">
+      <DatastreamSelectorCard
+        card-title="Use an existing datastream as a template"
         @selected-datastream-id="selectedDatastreamID = $event"
         @close="showTemplateModal = false"
       />
@@ -470,7 +471,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, toRef } from 'vue'
-import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
+import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'

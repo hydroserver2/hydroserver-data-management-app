@@ -84,7 +84,20 @@
                   />
                 </v-col>
                 <v-col md="6">
+                  <template
+                    v-if="
+                      dataSource.etlConfigurationSettings?.loader?.type ===
+                      'HydroServer'
+                    "
+                  >
+                    <DatastreamSelectAndDisplay
+                      button-name="Select target datastream"
+                      :datastream-id="String(row.targetIdentifier)"
+                      @update-selected-id="row.targetIdentifier = $event"
+                    />
+                  </template>
                   <v-text-field
+                    v-else
                     v-model="row.targetIdentifier"
                     placeholder="Target identifier"
                     density="compact"
@@ -130,7 +143,24 @@
                   />
                 </v-col>
                 <v-col md="6" v-if="row.dataTransformation.doSaveRawDataCopy">
+                  <template
+                    v-if="
+                      dataSource.etlConfigurationSettings?.loader?.type ===
+                      'HydroServer'
+                    "
+                  >
+                    <DatastreamSelectAndDisplay
+                      button-name="Select target datastream"
+                      :datastream-id="
+                        String(row.dataTransformation.rawTargetIdentifier)
+                      "
+                      @update-selected-id="
+                        row.dataTransformation.rawTargetIdentifier = $event
+                      "
+                    />
+                  </template>
                   <v-text-field
+                    v-else
                     v-model="row.dataTransformation.rawTargetIdentifier"
                     placeholder="Raw data target identifier"
                     density="compact"
@@ -174,7 +204,12 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { Payload } from '@/models'
 import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useDataSourceStore } from '@/store/dataSource'
+import DatastreamSelectAndDisplay from '../Datastream/DatastreamSelectAndDisplay.vue'
 
+const { dataSource } = storeToRefs(useDataSourceStore())
+console.log('dataSource', dataSource)
 const props = defineProps({ oldPayload: Object as () => Payload })
 const emit = defineEmits(['created', 'updated', 'close'])
 const isEdit = computed(() => !!props.oldPayload || undefined)

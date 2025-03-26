@@ -14,10 +14,7 @@
             >
           </v-col>
           <v-col v-if="sourceDatastream.id">
-            <DatastreamOverviewCard
-              color="blue-grey-darken-3"
-              :datastream="sourceDatastream"
-            />
+            <DatastreamOverviewCard :datastream="sourceDatastream" />
           </v-col>
         </v-row>
       </v-col>
@@ -35,25 +32,24 @@
             >
           </v-col>
           <v-col v-if="destinationDatastream.id">
-            <DatastreamOverviewCard
-              color="brown-darken-3"
-              :datastream="destinationDatastream"
-            />
+            <DatastreamOverviewCard :datastream="destinationDatastream" />
           </v-col>
         </v-row>
       </v-col>
     </v-row>
   </v-card-item>
 
-  <v-dialog v-model="showSourceModal" width="40rem">
-    <DatastreamTemplateModal
+  <v-dialog v-model="showSourceModal" width="80rem">
+    <DatastreamSelectorCard
+      card-title="Add a source datastream"
       @selected-datastream-id="selectedSourceID = $event"
       @close="showSourceModal = false"
     />
   </v-dialog>
 
-  <v-dialog v-model="showDestinationModal" width="40rem">
-    <DatastreamTemplateModal
+  <v-dialog v-model="showDestinationModal" width="80rem">
+    <DatastreamSelectorCard
+      card-title="Select the destination datastream"
       @selected-datastream-id="selectedDestinationID = $event"
       @close="showDestinationModal = false"
     />
@@ -62,7 +58,7 @@
 
 <script setup lang="ts">
 import { watch, ref } from 'vue'
-import DatastreamTemplateModal from '@/components/Datastream/DatastreamTemplateModal.vue'
+import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import DatastreamOverviewCard from '@/components/Datastream/DatastreamOverviewCard.vue'
 import { Datastream } from '@/types'
 import { api } from '@/services/api'

@@ -1,5 +1,7 @@
+import { DataSource } from '@/models'
+
 export default [
-  {
+  new DataSource({
     id: 'ds1',
     name: 'DataSource One',
     interval: 30,
@@ -13,8 +15,8 @@ export default [
     lastRunMessage: 'Success',
     lastRun: '2022-06-01T12:00:00Z',
     nextRun: '2022-06-01T12:30:00Z',
-  },
-  {
+  }),
+  new DataSource({
     id: 'ds2',
     name: 'DataSource Two',
     interval: null,
@@ -24,9 +26,10 @@ export default [
     endTime: null,
     paused: true,
     etlSystemId: 'orchestrator2',
+
     lastRunSuccessful: false,
     lastRunMessage: 'Failure',
     lastRun: '2022-05-31T11:00:00Z',
     nextRun: null,
-  },
+  }),
 ]

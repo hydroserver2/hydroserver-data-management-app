@@ -1,31 +1,66 @@
 <template>
-  <v-card class="my-2" :loading="loading">
-    <v-card-text class="py-1" style="font-size: 1.2em">
-      <strong> Observed Property: {{ observedProperty?.name }} </strong>
-    </v-card-text>
-    <v-card-text class="py-1">
-      <strong class="mr-2">Identifier:</strong> {{ datastream.id }}
-    </v-card-text>
-    <v-card-text class="py-1">
-      <strong class="mr-2">Processing Level:</strong>
-      {{ processingLevel?.code }}
-    </v-card-text>
-    <v-card-text class="py-1">
-      <strong class="mr-2">Sampled Medium:</strong>
-      {{ datastream.sampledMedium }}
-    </v-card-text>
-    <v-card-text class="py-1">
-      <strong class="mr-2">Sensor:</strong>
-      {{ sensor?.name }}
-    </v-card-text>
-    <v-card-text class="py-1">
-      <strong class="mr-2">Aggregation statistic:</strong>
-      {{ datastream?.aggregationStatistic }}
-    </v-card-text>
-    <v-card-text class="py-1">
-      <strong class="mr-2">Aggregation statistic interval:</strong>
-      {{ datastream?.timeAggregationInterval }}
-      {{ datastream?.timeAggregationIntervalUnit }}
+  <v-card :loading="loading" color="blue-darken-4" variant="outlined">
+    <v-card-text>
+      <div class="mb-4">
+        <div class="text-h6 font-weight-bold text-primary-darken-1">
+          {{ observedProperty.name }}
+        </div>
+        <div class="text-caption font-weight-medium text-grey-darken-1">
+          Observed Property
+        </div>
+      </div>
+      <!-- Processing Level -->
+      <div class="mb-3">
+        <div class="text-subtitle-1 font-weight-medium">
+          {{ processingLevel.definition }}
+        </div>
+        <div class="text-caption text-grey-darken-1">Processing Level</div>
+      </div>
+
+      <v-divider class="my-3" />
+
+      <!-- Sensor and Sampled Medium (Less important) -->
+      <div class="grid gap-y-2">
+        <div class="flex items-center opacity-80">
+          <span class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
+            >Sensor:</span
+          >
+          <span class="text-body-2">
+            {{ sensor.name }}
+          </span>
+        </div>
+
+        <div class="flex items-center opacity-80">
+          <span class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
+            >Sampled Medium:</span
+          >
+          <span class="text-body-2">{{ datastream.sampledMedium }}</span>
+        </div>
+
+        <div class="flex items-center opacity-90">
+          <span class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
+            >Identifier:</span
+          >
+          <span class="text-body-2">{{ datastream.id }}</span>
+        </div>
+      </div>
+
+      <div v-if="addAggregation" class="flex items-center opacity-80">
+        <span class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
+          >Aggregation Statistic:</span
+        >
+        <span class="text-body-2">{{ datastream?.aggregationStatistic }}</span>
+      </div>
+
+      <div v-if="addAggregation" class="flex items-center opacity-80">
+        <span class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
+          >Aggregation Interval:</span
+        >
+        <span class="text-body-2">
+          {{ datastream?.timeAggregationInterval }}
+          {{ datastream?.timeAggregationIntervalUnit }}
+        </span>
+      </div>
     </v-card-text>
   </v-card>
 </template>
@@ -39,6 +74,10 @@ const props = defineProps({
   datastream: {
     type: Object as () => Datastream,
     required: true,
+  },
+  addAggregation: {
+    type: Boolean,
+    default: false,
   },
 })
 

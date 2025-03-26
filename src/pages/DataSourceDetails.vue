@@ -109,13 +109,15 @@ import { computed } from 'vue'
 import { getStatus } from '@/utils/dataSourceUtils'
 import { Snackbar } from '@/utils/notifications'
 import dataSourceFixtures from '@/utils/test/fixtures/dataSourceFixtures'
+import { storeToRefs } from 'pinia'
+import { useDataSourceStore } from '@/store/dataSource'
 
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
 const datastreams = ref<Datastream[]>([])
 const etlSystem = ref<EtlSystem>(new EtlSystem())
-const dataSource = ref<DataSource>(new DataSource())
+const { dataSource } = storeToRefs(useDataSourceStore())
 
 const status = computed(() =>
   dataSource.value ? getStatus(dataSource.value) : 'pending'

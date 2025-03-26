@@ -48,11 +48,11 @@
     </v-data-table-virtual>
   </v-card>
 
-  <v-dialog v-model="openCreate" width="40rem">
+  <v-dialog v-model="openCreate" width="80rem">
     <PayloadForm @close="openCreate = false" />
   </v-dialog>
 
-  <v-dialog v-model="openEdit" width="40rem">
+  <v-dialog v-model="openEdit" width="80rem">
     <PayloadForm :oldPayload="selectedPayload" @close="openEdit = false" />
   </v-dialog>
 </template>
@@ -91,7 +91,7 @@ const payloads = [
       },
       {
         sourceIdentifier: 'temperature_f',
-        targetIdentifier: '0985-157-3486-3257',
+        targetIdentifier: '1be5f967-d855-404a-8a33-a70ffe430b73',
         dataTransformation: null,
       },
     ],
