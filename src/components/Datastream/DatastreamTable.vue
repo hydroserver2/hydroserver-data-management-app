@@ -87,14 +87,6 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <!-- <DatastreamTableActions
-        v-if="canEditDatastreams"
-        :key="actionKey"
-        :datastream="item"
-        :thing-id="thing!.id"
-        @deleted="onDeleteDatastream(item.id)"
-        @linkUpdated="loadDatastreams"
-      /> -->
       <v-row>
         <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
           <template v-slot:activator="{ props }">
@@ -202,7 +194,7 @@
       :workspace="workspace"
       :datastream="item"
       @close="openEdit = false"
-      @updated="onUpdate"
+      @updated="updateDatastream"
     />
   </v-dialog>
 
@@ -258,6 +250,16 @@ const {
 
 const { observations } = storeToRefs(useObservationStore())
 
+const updateDatastream = async (updatedDatastream: Datastream) => {
+  await fetchMetadata(props.workspace.id)
+  onUpdate(updatedDatastream)
+}
+
+const onCreated = async () => {
+  await fetchMetadata(props.workspace.id)
+  await loadDatastreams()
+}
+
 // const openLinker = ref(false)
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
@@ -267,7 +269,8 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
     thingIdRef
   )
 
-const { sensors, units, observedProperties, processingLevels } = useMetadata()
+const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
+  useMetadata()
 
 const visibleDatastreams = computed(() => {
   return items.value
@@ -295,10 +298,6 @@ function formatDate(dateString: string) {
   return (
     new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
   )
-}
-
-const onCreated = async () => {
-  await loadDatastreams()
 }
 
 async function toggleDataVisibility(datastream: Datastream) {
