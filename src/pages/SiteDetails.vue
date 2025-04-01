@@ -50,7 +50,7 @@
         </v-dialog>
       </v-col>
 
-      <!-- <v-spacer />
+      <v-spacer />
 
       <v-col cols="auto" v-if="canEditThings && hydroShareConnected">
         <v-btn
@@ -66,7 +66,7 @@
             @close="isHydroShareModalOpen = false"
           />
         </v-dialog>
-      </v-col> -->
+      </v-col>
     </v-row>
 
     <v-row class="mb-6">
@@ -121,15 +121,19 @@ import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { Workspace } from '@/types'
+import { useHydroShare } from '@/composables/useHydroShare'
+import { useHydroShareStore } from '@/store/hydroShare'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
 const workspace = ref<Workspace>()
 
-// const { isConnected: hydroShareConnected } = useHydroShare()
-// const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
-//   useHydroShareStore()
-// )
+const { isConnected: hydroShareConnected } = useHydroShare()
+const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
+  useHydroShareStore()
+)
+const vocabularyStore = useVocabularyStore()
 
 const { canEditThings, canDeleteThings } = useWorkspacePermissions(workspace)
 const loaded = ref(false)
@@ -139,19 +143,19 @@ const { tags } = storeToRefs(useTagStore())
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
-// const archivalBtnName = computed(() => {
-//   const BASE_NAME = 'HydroShare Archival'
-//   if (hydroShareArchive.value) {
-//     if (hydroShareArchive.value.frequency)
-//       return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
-//     else return `${BASE_NAME} (manual)`
-//   } else return `Configure ${BASE_NAME}`
-// })
+const archivalBtnName = computed(() => {
+  const BASE_NAME = 'HydroShare Archival'
+  if (hydroShareArchive.value) {
+    if (hydroShareArchive.value.frequency)
+      return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
+    else return `${BASE_NAME} (manual)`
+  } else return `Configure ${BASE_NAME}`
+})
 
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-// const isHydroShareModalOpen = ref(false)
+const isHydroShareModalOpen = ref(false)
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
@@ -184,22 +188,23 @@ onMounted(async () => {
     .then((data) => (photos.value = data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
-    const [thingResponse, tagResponse] = await Promise.all([
-      api.fetchThing(thingId).catch((error: any) => {
-        if (parseInt(error.status) === 403) authorized.value = false
-        else console.error('Error fetching thing', error)
+    const [thingResponse, hydroShareArchiveResponse, tagResponse] =
+      await Promise.all([
+        api.fetchThing(thingId).catch((error: any) => {
+          if (parseInt(error.status) === 403) authorized.value = false
+          else console.error('Error fetching thing', error)
 
-        return null
-      }),
-      // api.fetchHydroShareArchive(thingId).catch((error) => {
-      //   console.error('Error fetching hydroShareArchive', error)
-      //   return null
-      // }),
-      api.fetchSiteTags(thingId).catch((error) => {
-        console.error('Error fetching additional metadata tags', error)
-        return null
-      }),
-    ])
+          return null
+        }),
+        api.fetchHydroShareArchive(thingId).catch((error) => {
+          console.error('Error fetching hydroShareArchive', error)
+          return null
+        }),
+        api.fetchSiteTags(thingId).catch((error) => {
+          console.error('Error fetching additional metadata tags', error)
+          return null
+        }),
+      ])
 
     tags.value = tagResponse
     thing.value = thingResponse
@@ -209,7 +214,7 @@ onMounted(async () => {
       console.error('Error fetching workspace', error)
     }
 
-    // hydroShareArchive.value = hydroShareArchiveResponse
+    hydroShareArchive.value = hydroShareArchiveResponse
   } finally {
     loaded.value = true
   }

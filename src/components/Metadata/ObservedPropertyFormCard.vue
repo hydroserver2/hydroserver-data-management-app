@@ -36,7 +36,7 @@
         ></v-textarea>
 
         <v-combobox
-          :items="OPVariableTypes"
+          :items="vocabularyStore.variableTypes"
           v-model="item.type"
           label="Variable Type *"
           :rules="rules.requiredAndMaxLength500"
@@ -67,8 +67,9 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
-import { OPVariableTypes, OPNameTypes } from '@/config/vocabularies'
+import { OPNameTypes } from '@/config/vocabularies'
 import { ObservedProperty } from '@/types'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const OPNames = Object.keys(OPNameTypes)
 
@@ -85,6 +86,7 @@ const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   ObservedProperty,
   props.observedProperty || undefined
 )
+const vocabularyStore = useVocabularyStore()
 
 const handleNameUpdated = () => {
   const name = item.value.name

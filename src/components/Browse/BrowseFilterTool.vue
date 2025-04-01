@@ -51,7 +51,7 @@
           class="pt-2"
           label="Site types"
           v-model="selectedSiteTypes"
-          :items="siteTypes"
+          :items="vocabularyStore.siteTypes"
           clearable
           prepend-inner-icon="mdi-water-pump"
           multiple
@@ -78,12 +78,14 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { Thing, Workspace } from '@/types'
-import { siteTypes } from '@/config/vocabularies'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useSidebarStore } from '@/store/useSidebar'
 import { api } from '@/services/api'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const { smAndDown } = useDisplay()
+const vocabularyStore = useVocabularyStore()
+
 const selectedSiteTypes = ref<string[]>([])
 const selectedWorkspaces = ref<Workspace[]>([])
 const panelOpen = ref([0])

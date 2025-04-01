@@ -29,12 +29,14 @@ export const TAG_BASE = `${BASE_URL}/data/tags`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
 export const THINGS_BASE = `${BASE_URL}/data/things`
-const DATA_LOADERS_BASE = `${BASE_URL}/data/data-loaders`
+const ETL_SYSTEMS_BASE = `${BASE_URL}/data/etl-systems`
 const DATA_SOURCES_BASE = `${BASE_URL}/data/data-sources`
 const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
+const VOCABULARY_BASE = `${BASE_URL}/data/vocabulary`
+
 export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
 export const getObservationsEndpoint = (
@@ -337,14 +339,16 @@ export const api = {
     apiMethods.delete(`${RQ_BASE}/${id}`),
 
   createEtlSystem: async (etlSystem: EtlSystem) =>
-    apiMethods.post(DATA_LOADERS_BASE, etlSystem),
-  fetchEtlSystems: async () => apiMethods.fetch(DATA_LOADERS_BASE),
+    apiMethods.post(ETL_SYSTEMS_BASE, etlSystem),
+  fetchEtlSystems: async () => apiMethods.fetch(ETL_SYSTEMS_BASE),
+  fetchWorkspaceEtlSystems: async (id: string) =>
+    apiMethods.fetch(`${ETL_SYSTEMS_BASE}?workspace_id=${id}`),
   fetchEtlSystem: async (id: string) =>
-    apiMethods.fetch(`${DATA_LOADERS_BASE}/${id}`),
+    apiMethods.fetch(`${ETL_SYSTEMS_BASE}/${id}`),
   updateEtlSystem: async (id: string, etlSystem: EtlSystem) =>
-    apiMethods.patch(`${DATA_LOADERS_BASE}/${id}`, etlSystem),
+    apiMethods.patch(`${ETL_SYSTEMS_BASE}/${id}`, etlSystem),
   deleteEtlSystem: async (id: string) =>
-    apiMethods.delete(`${DATA_LOADERS_BASE}/${id}`),
+    apiMethods.delete(`${ETL_SYSTEMS_BASE}/${id}`),
 
   createDataSource: async (dataSource: DataSource) =>
     apiMethods.post(DATA_SOURCES_BASE, dataSource),
@@ -357,6 +361,17 @@ export const api = {
     apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS, oldS),
   deleteDataSource: async (id: string) =>
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
+
+  fetchDataSourceLinkedDatastreams: async (id: string) =>
+    apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}/datastreams`),
+  linkDatastreamToDataSource: async (
+    dataSourceId: string,
+    datastreamId: string
+  ) =>
+    apiMethods.fetch(
+      `${DATA_SOURCES_BASE}/${dataSourceId}/datastreams/${datastreamId}`
+    ),
+  // TODO: Linked datastream endpoints
 
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
 
@@ -371,4 +386,23 @@ export const api = {
       newPayload,
       oldPayload
     ),
+
+  fetchSiteTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/things/site-types`),
+  fetchSamplingFeatureTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/things/sampling-feature-types`),
+  fetchSensorEncodingTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/sensors/encoding-types`),
+  fetchMethodTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/sensors/method-types`),
+  fetchVariableTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/observed-properties/variable-types`),
+  fetchUnitTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/units/types`),
+  fetchDatastreamStatuses: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/statuses`),
+  fetchDatastreamAggregations: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/aggregations`),
+  fetchSampledMediums: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/sampled-mediums`),
 }

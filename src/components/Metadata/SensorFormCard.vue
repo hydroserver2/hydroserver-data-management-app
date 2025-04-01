@@ -14,7 +14,7 @@
       <v-card-text>
         <v-combobox
           v-model="item.methodType"
-          :items="methodTypes"
+          :items="vocabularyStore.methodTypes"
           label="Method Type *"
           hide-details
           density="comfortable"
@@ -89,8 +89,8 @@ import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { computed } from 'vue'
-import { methodTypes } from '@/config/vocabularies'
 import { Sensor } from '@/types'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const props = defineProps<{
   sensor?: Sensor
@@ -105,6 +105,7 @@ const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
   Sensor,
   props.sensor || undefined
 )
+const vocabularyStore = useVocabularyStore()
 
 const isInstrument = computed(
   () => item.value.methodType === 'Instrument Deployment'

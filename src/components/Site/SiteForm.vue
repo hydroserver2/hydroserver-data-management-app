@@ -55,7 +55,7 @@
               <v-col cols="12">
                 <v-combobox
                   label="Select Site Type *"
-                  :items="siteTypes"
+                  :items="vocabularyStore.siteTypes"
                   v-model="thing.siteType"
                   :rules="rules.required"
                 />
@@ -180,7 +180,6 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import GoogleMap from '../GoogleMap.vue'
 import { useThingStore } from '@/store/thing'
 import { Thing } from '@/types'
-import { siteTypes } from '@/config/vocabularies'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
@@ -190,6 +189,7 @@ import SiteTagManager from '@/components/Site/SiteTagManager.vue'
 import { usePhotosStore } from '@/store/photos'
 import { useTagStore } from '@/store/tags'
 import countryList from 'country-list'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const countries = ref<{ name: string; code: string }[]>([])
 const countryTitle = (item: { name: string; code: string } | undefined) => {
@@ -201,6 +201,7 @@ const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
 const { tags } = storeToRefs(useTagStore())
 const { updateTags } = useTagStore()
+const vocabularyStore = useVocabularyStore()
 
 const props = defineProps({
   thingId: String,

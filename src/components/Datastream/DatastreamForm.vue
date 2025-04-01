@@ -336,7 +336,7 @@
           </v-card-text>
           <v-card-text class="pb-0">
             <v-combobox
-              :items="mediumTypes"
+              :items="vocabularyStore.sampledMediums"
               v-model="datastream.sampledMedium"
               label="Medium *"
               :rules="rules.required"
@@ -346,7 +346,7 @@
             />
 
             <v-combobox
-              :items="statusTypes"
+              :items="vocabularyStore.datastreamStatuses"
               v-model="datastream.status"
               label="Status"
               density="compact"
@@ -355,7 +355,7 @@
             />
 
             <v-combobox
-              :items="aggregationTypes"
+              :items="vocabularyStore.datastreamAggregations"
               v-model="datastream.aggregationStatistic"
               label="Aggregation statistic *"
               :rules="rules.requiredAndMaxLength255"
@@ -478,17 +478,13 @@ import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import { rules } from '@/utils/rules'
 import { Snackbar } from '@/utils/notifications'
-import {
-  mediumTypes,
-  aggregationTypes,
-  statusTypes,
-} from '@/config/vocabularies'
 import { useMetadata } from '@/composables/useMetadata'
 import { Thing } from '@/types'
 import { api } from '@/services/api'
 import { Datastream, Workspace } from '@/types'
 import { VForm } from 'vuetify/components'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const emit = defineEmits(['close', 'updated', 'created'])
 
@@ -497,6 +493,8 @@ const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
   datastream: { type: Object as () => Datastream, required: false },
 })
+
+const vocabularyStore = useVocabularyStore()
 
 const thing = ref<Thing>()
 const datastream = ref<Datastream>(new Datastream(props.thing.id))

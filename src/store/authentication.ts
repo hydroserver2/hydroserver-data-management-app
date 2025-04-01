@@ -7,6 +7,7 @@ import router from '@/router/router'
 import Storage from '@/utils/storage'
 import { useUserStore } from './user'
 import { useWorkspaceStore } from './workspaces'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 export interface AllAuthFlowItem {
   id: string
@@ -89,10 +90,13 @@ export const useAuthStore = defineStore('authentication', () => {
    * for this instance of HydroServer.
    */
   async function initializeSession() {
+    const vocabularyStore = useVocabularyStore()
+
     try {
       const [authMethodsResponse, sessionResponse] = await Promise.all([
         api.fetchAuthMethods(),
         api.fetchSession(),
+        vocabularyStore.fetchAllVocabularies(),
       ])
       // const authMethodsResponse = await api.fetchAuthMethods()
       // const sessionResponse = await api.fetchSession()
@@ -101,7 +105,7 @@ export const useAuthStore = defineStore('authentication', () => {
       signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
       setSession(sessionResponse)
     } catch (error) {
-      console.log('Error fetching initializing session', error)
+      console.log('Error initializing session', error)
     }
 
     if (isAuthenticated.value) {
