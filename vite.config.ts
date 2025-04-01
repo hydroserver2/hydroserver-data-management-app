@@ -45,6 +45,7 @@ export default defineConfig({
         '**/src/composables/useHydroShare.ts',
         '**/src/composables/useWorkspacePermissions.ts',
         '**/src/composables/useMetadata.ts',
+        '**/src/composables/useVocabulary.ts',
         '**/src/services/getCSRFToken.ts',
         '**/src/models/**',
         '**/src/plugins/**',
