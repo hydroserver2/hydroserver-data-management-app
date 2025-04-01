@@ -113,8 +113,8 @@ async function togglePaused(ds: any) {
   await api.updateDataSource({ paused: ds.paused } as DataSource)
 }
 
-const onRowClick = (event: Event, item: any) => {
-  router.push({ name: 'DataSource', params: { id: item.item.id } })
+const onRowClick = async (event: Event, item: any) => {
+  await router.push({ name: 'DataSource', params: { id: item.item.id } })
 }
 
 const headers = [
