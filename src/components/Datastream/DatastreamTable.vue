@@ -55,7 +55,7 @@
     </template>
 
     <template v-slot:item.observations="{ item }">
-      <div v-if="!canViewDatastreams && !item.isDataVisible">
+      <div v-if="!canViewDatastreams && !item.isVisible">
         Data is private for this datastream
       </div>
       <div v-else>
@@ -72,7 +72,7 @@
     <template v-slot:item.last_observation="{ item }">
       <div
         v-if="
-          (canViewDatastreams || item.isDataVisible) &&
+          (canViewDatastreams || item.isVisible) &&
           observations[item.id]?.dataArray?.length
         "
       >
@@ -92,15 +92,15 @@
           <template v-slot:activator="{ props }">
             <v-icon
               :icon="
-                item.isDataVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
+                item.isVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
               "
-              :color="item.isDataVisible ? 'grey' : 'grey-lighten-1'"
+              :color="item.isVisible ? 'grey' : 'grey-lighten-1'"
               small
               v-bind="props"
               @click="toggleDataVisibility(item)"
             />
           </template>
-          <span v-if="item.isDataVisible"
+          <span v-if="item.isVisible"
             >Hide the data for this datastream from guests of your site while
             keeping the metadata public. Owners will still see it
           </span>
@@ -110,14 +110,14 @@
         <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
           <template v-slot:activator="{ props }">
             <v-icon
-              :icon="item.isVisible ? 'mdi-eye' : 'mdi-eye-off'"
-              :color="item.isVisible ? 'grey' : 'grey-lighten-1'"
+              :icon="item.isPrivate ? 'mdi-eye' : 'mdi-eye-off'"
+              :color="item.isPrivate ? 'grey' : 'grey-lighten-1'"
               small
               v-bind="props"
               @click="toggleVisibility(item)"
             />
           </template>
-          <span v-if="item.isVisible"
+          <span v-if="item.isPrivate"
             >Hide this datastream from guests of your site. Owners will still
             see it</span
           >
@@ -125,7 +125,7 @@
         </v-tooltip>
 
         <v-tooltip
-          v-if="!canViewDatastreams && !item.isDataVisible"
+          v-if="!canViewDatastreams && !item.isVisible"
           bottom
           :openDelay="100"
         >
@@ -274,7 +274,7 @@ const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
 
 const visibleDatastreams = computed(() => {
   return items.value
-    .filter((d) => d.isVisible || canViewDatastreams)
+    .filter((d) => d.isPrivate || canViewDatastreams)
     .map((d) => ({
       ...d,
       chartOpen: false,
@@ -301,22 +301,22 @@ function formatDate(dateString: string) {
 }
 
 async function toggleDataVisibility(datastream: Datastream) {
-  datastream.isDataVisible = !datastream.isDataVisible
-  if (datastream.isDataVisible) datastream.isVisible = true
+  datastream.isVisible = !datastream.isVisible
+  if (datastream.isVisible) datastream.isPrivate = true
   patchDatastream({
     id: datastream.id,
+    isPrivate: datastream.isPrivate,
     isVisible: datastream.isVisible,
-    isDataVisible: datastream.isDataVisible,
   })
 }
 
 async function toggleVisibility(datastream: Datastream) {
-  datastream.isVisible = !datastream.isVisible
-  if (!datastream.isVisible) datastream.isDataVisible = false
+  datastream.isPrivate = !datastream.isPrivate
+  if (!datastream.isPrivate) datastream.isVisible = false
   patchDatastream({
     id: datastream.id,
+    isPrivate: datastream.isPrivate,
     isVisible: datastream.isVisible,
-    isDataVisible: datastream.isDataVisible,
   })
 }
 

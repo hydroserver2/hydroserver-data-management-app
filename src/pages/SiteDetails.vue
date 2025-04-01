@@ -123,7 +123,7 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { Workspace } from '@/types'
 import { useHydroShare } from '@/composables/useHydroShare'
 import { useHydroShareStore } from '@/store/hydroShare'
-import { useVocabularyStore } from '@/composables/useVocabulary'
+import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
@@ -133,7 +133,6 @@ const { isConnected: hydroShareConnected } = useHydroShare()
 const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
   useHydroShareStore()
 )
-const vocabularyStore = useVocabularyStore()
 
 const { canEditThings, canDeleteThings } = useWorkspacePermissions(workspace)
 const loaded = ref(false)

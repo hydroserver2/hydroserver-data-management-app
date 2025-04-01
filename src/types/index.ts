@@ -132,8 +132,8 @@ export class Datastream {
   observedPropertyId: string
   sensorId: string
   processingLevelId: string
+  isPrivate: boolean
   isVisible: boolean
-  isDataVisible: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
@@ -161,9 +161,9 @@ export class Datastream {
     this.processingLevelId = ''
     this.timeAggregationInterval = null
     this.timeAggregationIntervalUnit = 'seconds'
+    this.isPrivate = true
     this.isVisible = true
     this.valueCount = 0
-    this.isDataVisible = true
   }
 }
 
