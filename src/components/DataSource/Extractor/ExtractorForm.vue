@@ -15,9 +15,7 @@
       />
     </v-toolbar>
 
-    <v-card-text>
-      <component v-if="currentForm" :is="currentForm" />
-    </v-card-text>
+    <component v-if="currentForm" :is="currentForm" />
   </v-card>
 </template>
 

@@ -140,18 +140,19 @@ const searchProcessingLevel = ref('')
 // Only show list items that are referenced by at least one datastream
 // Then mutually filter the lists by selected filters.
 const sortedProcessingLevelNames = computed(() => {
-  const filteredPLs = processingLevels.value.filter(
-    (pl) =>
-      pl.definition
-        .toLowerCase()
-        .includes(searchProcessingLevel.value.toLowerCase()) &&
+  const searchQuery = (searchProcessingLevel.value ?? '').toLowerCase()
+  const filteredPLs = processingLevels.value.filter((pl) => {
+    const definition = pl.definition ?? ''
+    return (
+      definition.toLowerCase().includes(searchQuery) &&
       datastreams.value.some(
         (ds) =>
           ds.processingLevelId === pl.id &&
           matchesSelectedThing(ds) &&
           matchesSelectedObservedProperty(ds)
       )
-  )
+    )
+  })
   const names = filteredPLs.map((pl) => pl.definition)
   return [...new Set(names)].sort()
 })

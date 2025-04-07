@@ -1,7 +1,9 @@
 <template>
   <v-row>
     <v-col>
-      <v-card-title>Payload structure</v-card-title>
+      <v-card-item>
+        <v-card-title>Payload structure</v-card-title>
+      </v-card-item>
       <v-card-text>
         <v-row>
           <v-col>
@@ -28,7 +30,7 @@
               :disabled="transformer.identifierType === IdentifierType.Index"
               v-model.number="(transformer as CSVTransformer).headerRow"
               label="File header row number *"
-              hint="Enter the row that contains file headers, if any."
+              hint="Enter the line number of the row that contains file headers (1-based)."
               type="number"
               clearable
               :rules="[
@@ -44,7 +46,7 @@
             <v-text-field
               v-model.number="(transformer as CSVTransformer).dataStartRow"
               label="Data start row number *"
-              hint="Enter the row that data starts on."
+              hint="Enter the line number of the row the data starts on (1-based)."
               type="number"
               :rules="[
                 ...rules.greaterThan(0),
@@ -70,7 +72,9 @@
       </v-card-text>
     </v-col>
     <v-col md="6">
-      <v-card-title>Payload timestamp</v-card-title>
+      <v-card-item>
+        <v-card-title>Payload timestamp</v-card-title>
+      </v-card-item>
       <v-card-text>
         <v-row>
           <v-col>
@@ -94,7 +98,7 @@
         </v-row>
 
         <v-row>
-          <v-col>
+          <v-col class="pt-0">
             <v-radio-group
               v-model="timestampFormatType"
               label="Timestamp format"
@@ -125,14 +129,13 @@
           </v-col>
         </v-row>
 
-        <v-row class="mt-0">
+        <v-row class="mt-0" v-if="timestampFormatType === 'custom'">
           <v-col>
             <v-text-field
               v-model="(transformer as CSVTransformer).timestampFormat"
               :label="`Custom Timestamp Format *`"
               hint="Enter the timestamp format."
               :rules="timestampFormatType === 'custom' ? rules.required : []"
-              :disabled="timestampFormatType !== 'custom'"
             >
               <template v-slot:append-inner>
                 <v-btn

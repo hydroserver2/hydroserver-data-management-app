@@ -1,57 +1,65 @@
 <template>
-  <v-row>
-    <v-col cols="12">
-      <v-card-title>URL template</v-card-title>
-      <v-text-field
-        v-model="httpExtractor.urlTemplate"
-        label="URL template"
-        density="compact"
-        rounded="lg"
-        prepend-inner-icon="mdi-code-braces"
-      />
-    </v-col>
-  </v-row>
+  <v-card-item>
+    <v-card-title>URL template</v-card-title>
+  </v-card-item>
+  <v-card-text>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          v-model="httpExtractor.urlTemplate"
+          label="URL template *"
+          density="compact"
+          rounded="lg"
+          prepend-inner-icon="mdi-code-braces"
+        />
+      </v-col>
+    </v-row>
+  </v-card-text>
 
-  <v-card-title v-if="httpExtractor.urlTemplateVariables.length !== 0"
-    >URL template variables</v-card-title
-  >
-  <v-row class="mb-2" v-for="variable in httpExtractor.urlTemplateVariables">
-    <!-- Variable Name -->
-    <v-col cols="12" md="3">
-      <v-text-field
-        v-model="variable.name"
-        label="Variable"
-        density="compact"
-        rounded="lg"
-        prepend-inner-icon="mdi-code-braces"
-        hide-details
-        disabled
-      />
-    </v-col>
+  <v-card-item>
+    <v-card-title v-if="httpExtractor.urlTemplateVariables.length !== 0">
+      URL template variables
+    </v-card-title>
+  </v-card-item>
+  <v-card-text>
+    <v-row class="mb-2" v-for="variable in httpExtractor.urlTemplateVariables">
+      <!-- Variable Name -->
+      <v-col cols="12" md="3">
+        <v-text-field
+          v-model="variable.name"
+          label="Variable"
+          density="compact"
+          rounded="lg"
+          prepend-inner-icon="mdi-code-braces"
+          hide-details
+          disabled
+        />
+      </v-col>
 
-    <!-- Is Dynamic? -->
-    <v-col cols="12" md="3">
-      <v-checkbox
-        v-model="variable.isDynamic"
-        color="primary"
-        label="Value is dynamic"
-        hide-details
-      />
-    </v-col>
+      <!-- Is Dynamic? -->
+      <v-col cols="12" md="3">
+        <v-checkbox
+          v-model="variable.isDynamic"
+          color="primary"
+          label="Value is dynamic"
+          hide-details
+        />
+      </v-col>
 
-    <!-- Dynamic Value -->
-    <v-col cols="12" md="4" v-if="variable.isDynamic">
-      <v-select
-        v-model="variable.dynamicValue"
-        :items="dynamicVariables"
-        label="Dynamic Value"
-        density="compact"
-        rounded="lg"
-        variant="outlined"
-        hide-details
-      />
-    </v-col>
-  </v-row>
+      <!-- Dynamic Value -->
+      <v-col cols="12" md="4" v-if="variable.isDynamic">
+        <v-select
+          v-model="variable.dynamicValue"
+          :items="dynamicVariables"
+          label="Dynamic Value"
+          density="compact"
+          rounded="lg"
+          variant="outlined"
+          hide-details
+        />
+      </v-col>
+    </v-row>
+  </v-card-text>
 </template>
 
 <script setup lang="ts">
@@ -112,6 +120,7 @@ watch(
     })
 
     httpExtractor.value.urlTemplateVariables = newVariables
-  }
+  },
+  { immediate: true }
 )
 </script>

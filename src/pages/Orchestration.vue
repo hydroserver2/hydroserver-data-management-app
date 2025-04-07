@@ -9,8 +9,6 @@
 
     <template v-if="!!selectedWorkspace">
       <DataSourceTable :workspace-id="selectedWorkspace.id" />
-      <v-divider class="mb-6" opacity="0" />
-      <EtlSystemTable />
     </template>
   </v-container>
 </template>
@@ -18,7 +16,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import DataSourceTable from '@/components/DataSource/DataSourceTable.vue'
-import EtlSystemTable from '@/components/DataSource/EtlSystemTable.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'

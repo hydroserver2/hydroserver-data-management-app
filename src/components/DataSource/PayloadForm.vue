@@ -51,9 +51,11 @@
         </v-row>
 
         <div v-if="showDataTransformationHelp" class="mb-4">
-          A source to target mapping allows you to map columns or keys in your
-          source payload to specific destinations. HydroServer uses the
-          datastream's ID as its identifier.
+          A source to target mapping allows you to map a unique source
+          identifier to a unique target identifier. These identifiers depend on
+          the payload type, but can be column names or indexes for CSV, object
+          keys for JSON, etc. HydroServer uses the datastream's ID as its
+          identifier.
         </div>
         <div v-if="showDataTransformationHelp" class="mb-4">
           Adding a data transformation will allow you to apply a unit conversion
@@ -70,14 +72,23 @@
             density="compact"
             color="blue-grey-lighten-5"
             class="no-expansion-padding"
-            :title="row.getTitle()"
           >
+            <v-expansion-panel-title>
+              <span class="text-medium-emphasis">{{
+                row.sourceIdentifier
+              }}</span>
+              <v-icon color="green-lighten-2" small class="mx-2"
+                >mdi-arrow-right</v-icon
+              >
+              <span>{{ row.targetIdentifier }}</span>
+            </v-expansion-panel-title>
             <v-expansion-panel-text class="pa-0 pb-2">
               <v-row class="mx-1 mt-1">
                 <v-col md="6" c>
                   <v-text-field
                     v-model="row.sourceIdentifier"
                     placeholder="Source identifier"
+                    label="Source identifier (column name or index)"
                     density="compact"
                     variant="outlined"
                     hide-details

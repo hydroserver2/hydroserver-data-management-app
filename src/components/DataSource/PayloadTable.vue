@@ -29,14 +29,16 @@
       fixed-header
     >
       <template v-slot:item.info="{ item }">
-        <v-col>
+        <v-col class="my-1">
           <v-row
             v-for="{ sourceIdentifier, targetIdentifier } in item.mappings"
             style="font-size: 1.2em"
           >
-            <p>
-              <strong>{{ sourceIdentifier }}: </strong> {{ targetIdentifier }}
-            </p>
+            <span class="text-medium-emphasis">{{ sourceIdentifier }}</span>
+            <v-icon color="green-lighten-2" small class="mx-2"
+              >mdi-arrow-right</v-icon
+            >
+            <span>{{ targetIdentifier }}</span>
           </v-row>
         </v-col>
       </template>

@@ -13,7 +13,9 @@
     </v-row>
     <v-row v-if="transformer.type === 'JSON'">
       <v-col cols="12">
-        <v-card-title>JMESPath</v-card-title>
+        <v-card-item>
+          <v-card-title>JMESPath</v-card-title>
+        </v-card-item>
         <v-text-field
           v-model="transformer.JMESPath"
           label="JMESPath"

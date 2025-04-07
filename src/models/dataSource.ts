@@ -90,7 +90,8 @@ export type ExtractorConfig = HTTPExtractor | LocalFileExtractor
 const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
   HTTP: {
     type: 'HTTP',
-    urlTemplate: '',
+    urlTemplate:
+      'https://example.com/{route_variable}?query_parameter={query_parameter}',
     urlTemplateVariables: [],
   } as HTTPExtractor,
   local: {
@@ -133,14 +134,14 @@ export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
     mapping: '',
-    timestampKey: '',
+    timestampKey: 'timestamp',
     JMESPath: '',
     identifierType: IdentifierType.Name,
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
     mapping: '',
-    timestampKey: '',
+    timestampKey: 'timestamp',
     timestampFormat: 'ISO8601',
     headerRow: 1,
     dataStartRow: 2,
@@ -202,10 +203,31 @@ export interface LinkedDatastream {
   datastream: PartialDatastream
 }
 
+export const DATASOURCE_STATUS_OPTIONS = [
+  { color: 'green', title: 'OK' },
+  { color: 'blue', title: 'Pending' },
+  { color: 'red', title: 'Needs attention' },
+  { color: 'orange-darken-4', title: 'Behind schedule' },
+  { color: 'gray', title: 'Unknown' },
+  { color: 'gray', title: 'Loading paused' },
+] as const
+export type StatusType = (typeof DATASOURCE_STATUS_OPTIONS)[number]['title']
+
 export class DataSource {
   name = ''
   id = ''
   etlSystemId = ''
+  // etlSystem: {
+  //   id
+  //   workspaceId
+  //   etlSystemPlatform: {
+  //     workspaceId
+  //     name // selection of SDL | aggregation | ETL | virtual
+  //     intervalScheduleSupported
+  //     crontabScheduleSupported
+  //   }
+  //   name
+  // }
   interval: number | null = null
   intervalUnits: string | null = null
   startTime: string | null = null
@@ -216,13 +238,33 @@ export class DataSource {
   lastRun: string | null = null
   nextRun: string | null = null
   lastRunMessage = ''
-  etlConfigurationId: string = ''
+  // etlConfiguration: {
+  //   id
+  //   name:
+  //   schema? {}
+  //   etlConfigurationModel: 'datastream' or 'datasource'
+  //   type: 'extractor' | 'transformer' | 'loader'
+  //   workspaceId? //usually null
+  // }
+  // etlConfigurationId: string = ''
   etlConfigurationSettings: EtlConfiguration = {
     type: 'SDL',
-    extractor: JSON.parse(JSON.stringify(extractorDefaults['local'])),
+    extractor: JSON.parse(JSON.stringify(extractorDefaults['HTTP'])),
     transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
     loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
   }
+  // // extractorConfigurationId: string = ''
+  // extractorConfigurationSettings: ExtractorConfig = JSON.parse(
+  //   JSON.stringify(extractorDefaults['local'])
+  // )
+  // // transformerConfigurationId: string = ''
+  // transformerConfigurationSettings: TransformerConfig = JSON.parse(
+  //   JSON.stringify(transformerDefaults['CSV'])
+  // )
+  // // loaderConfigurationId: string = ''
+  // loaderConfigurationSettings: LoaderConfig = JSON.parse(
+  //   JSON.stringify(loaderDefaults['HydroServer'])
+  // )
   workspaceId: string = ''
   linkedDatastreams: LinkedDatastream[] = []
 
@@ -230,21 +272,36 @@ export class DataSource {
     Object.assign(this, init)
   }
 
-  switchExtractor(newType: ExtractorType) {
-    this.etlConfigurationSettings.extractor = JSON.parse(
-      JSON.stringify(extractorDefaults[newType])
-    )
-  }
+  // switchExtractor(newType: ExtractorType) {
+  //   this.etlConfigurationSettings.extractor = JSON.parse(
+  //     JSON.stringify(extractorDefaults[newType])
+  //   )
+  // }
 
-  switchTransformer(newType: TransformerType) {
-    this.etlConfigurationSettings.transformer = JSON.parse(
-      JSON.stringify(transformerDefaults[newType])
-    )
-  }
+  // switchTransformer(newType: TransformerType) {
+  //   this.etlConfigurationSettings.transformer = JSON.parse(
+  //     JSON.stringify(transformerDefaults[newType])
+  //   )
+  // }
 
-  switchLoader(newType: LoaderType) {
-    this.etlConfigurationSettings.loader = JSON.parse(
-      JSON.stringify(loaderDefaults[newType])
-    )
+  // switchLoader(newType: LoaderType) {
+  //   this.etlConfigurationSettings.loader = JSON.parse(
+  //     JSON.stringify(loaderDefaults[newType])
+  //   )
+  // }
+  getStatus(): StatusType {
+    if (!this.lastRun) return 'Pending'
+
+    let now = new Date()
+    let nextRun = this.nextRun ? new Date(Date.parse(this.nextRun)) : null
+
+    if (this.lastRunSuccessful && nextRun && nextRun >= now) {
+      return 'OK'
+    } else if (!this.lastRunSuccessful) {
+      return 'Needs attention'
+    } else if (nextRun && nextRun < now) {
+      return 'Behind schedule'
+    }
+    return 'Unknown'
   }
 }

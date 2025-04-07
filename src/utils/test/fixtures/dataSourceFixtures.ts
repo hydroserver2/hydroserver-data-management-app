@@ -1,5 +1,8 @@
 import { DataSource } from '@/models'
 
+const fifteenMinutesAgo = new Date(Date.now() - 15 * 60_000).toISOString()
+const fifteenMinutesFromNow = new Date(Date.now() + 15 * 60_000).toISOString()
+
 export default [
   new DataSource({
     id: 'ds1',
@@ -17,6 +20,36 @@ export default [
     nextRun: '2022-06-01T12:30:00Z',
   }),
   new DataSource({
+    id: 'ds5',
+    name: 'DataSource Five',
+    interval: 30,
+    intervalUnits: 'minutes',
+    crontab: '*/30 * * * *',
+    startTime: '2022-01-01T00:00:00Z',
+    endTime: '2022-12-31T23:59:59Z',
+    paused: false,
+    etlSystemId: 'orchestrator1',
+    lastRunSuccessful: false,
+    lastRunMessage: 'Success',
+    lastRun: '2022-06-01T12:00:00Z',
+    nextRun: '2022-06-01T12:30:00Z',
+  }),
+  new DataSource({
+    id: 'ds4',
+    name: 'DataSource Four',
+    interval: 30,
+    intervalUnits: 'minutes',
+    crontab: '*/30 * * * *',
+    startTime: null,
+    endTime: null,
+    paused: false,
+    etlSystemId: 'orchestrator1',
+    lastRunSuccessful: true,
+    lastRunMessage: 'Success',
+    lastRun: fifteenMinutesAgo,
+    nextRun: fifteenMinutesFromNow,
+  }),
+  new DataSource({
     id: 'ds2',
     name: 'DataSource Two',
     interval: null,
@@ -25,6 +58,22 @@ export default [
     startTime: null,
     endTime: null,
     paused: true,
+    etlSystemId: 'orchestrator2',
+
+    lastRunSuccessful: false,
+    lastRunMessage: 'Failure',
+    lastRun: '2022-05-31T11:00:00Z',
+    nextRun: null,
+  }),
+  new DataSource({
+    id: 'ds3',
+    name: 'DataSource Three',
+    interval: 15,
+    intervalUnits: 'minutes',
+    crontab: '',
+    startTime: null,
+    endTime: null,
+    paused: false,
     etlSystemId: 'orchestrator2',
 
     lastRunSuccessful: false,

@@ -24,7 +24,11 @@
       </template>
       <template #item.value="{ item }">
         <template v-if="item.label === 'Status'">
-          <DataSourceStatus :status="status" :paused="!!item.paused" />
+          <DataSourceStatus
+            v-if="item.status"
+            :status="item.status"
+            :paused="!!item.paused"
+          />
         </template>
         <template v-else>
           {{ item.value }}
@@ -98,15 +102,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { EtlSystem, Datastream } from '@/types'
+import { EtlSystem } from '@/types'
 import { DataSource } from '@/models'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 import PayloadTable from '@/components/DataSource/PayloadTable.vue'
-import { api } from '@/services/api'
 import { computed } from 'vue'
-import { getStatus } from '@/utils/dataSourceUtils'
 import { Snackbar } from '@/utils/notifications'
 import dataSourceFixtures from '@/utils/test/fixtures/dataSourceFixtures'
 import { storeToRefs } from 'pinia'
@@ -115,13 +117,8 @@ import { useDataSourceStore } from '@/store/dataSource'
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const datastreams = ref<Datastream[]>([])
 const etlSystem = ref<EtlSystem>(new EtlSystem())
 const { dataSource } = storeToRefs(useDataSourceStore())
-
-const status = computed(() =>
-  dataSource.value ? getStatus(dataSource.value) : 'pending'
-)
 
 const formatTime = (time: string) =>
   new Intl.DateTimeFormat('en-US', {
@@ -193,7 +190,7 @@ const dataSourceInformation = computed(() => {
     {
       icon: 'mdi-information-outline',
       label: 'Status',
-      status: status,
+      status: dataSource.value.getStatus(),
       paused: dataSource.value.paused,
     },
   ].filter(Boolean)
@@ -241,9 +238,7 @@ const etlSystemInformation = computed(() => {
 
 const fetchData = async () => {
   try {
-    const [data, source] = await Promise.all([
-      api.fetchDatastreams(),
-      // api.fetchDataSource(route.params.id.toString()),
+    const [source] = await Promise.all([
       dataSourceFixtures.find(
         (ds) => ds.id === route.params.id.toString()
       ) as DataSource,
@@ -255,11 +250,9 @@ const fetchData = async () => {
       id: 'ETL-SYS-1',
       name: 'ETL System 1',
       type: 'Aiflow Orchestrator',
+      etlSystemPlatform: null,
       workspaceId: 'workspace 1',
     }
-    datastreams.value = (data as Datastream[]).filter(
-      (d) => d.dataSourceId === dataSource.value.id
-    )
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')
     console.error('error fetching dataSource', e)

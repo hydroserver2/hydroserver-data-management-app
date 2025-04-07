@@ -7,44 +7,24 @@
     <v-card-text>
       <v-row>
         <v-col cols="6">
-          <v-list
+          <v-autocomplete
+            v-model="selectedThingId"
             :items="things"
             item-title="name"
             item-value="id"
-            variant="tonal"
+            variant="outlined"
+            label="Select a site"
           >
-            <v-list-subheader>Sites</v-list-subheader>
-            <div style="max-height: 800px; overflow-y: auto">
-              <v-card
-                v-for="site in things"
-                :key="site.id"
-                @click="selectedThingId = site.id"
-                :color="
-                  selectedThingId === site.id ? 'primary' : 'blue-darken-4'
-                "
-                :variant="selectedThingId === site.id ? 'tonal' : 'outlined'"
-                class="mb-2"
-              >
-                <v-card-text class="py-3">
-                  <div
-                    class="text-subtitle-1 font-weight-bold text-primary-darken-1"
-                  >
-                    {{ site.name }}
-                  </div>
-                  <div class="text-caption text-grey-darken-1">
-                    {{ site.siteType }}
-                  </div>
-                </v-card-text>
-              </v-card>
-            </div>
-          </v-list>
+          </v-autocomplete>
         </v-col>
-        <v-col cols="6">
+      </v-row>
+      <v-row>
+        <v-col cols="12">
           <v-list>
             <v-list-subheader>Datastreams</v-list-subheader>
             <div
               style="max-height: 800px; overflow-y: auto"
-              v-if="datastreamsForThing.length || !selectedThingId"
+              v-if="datastreamsForThing.length"
             >
               <v-card
                 class="mb-2"
@@ -123,6 +103,11 @@
                 </v-card-text>
               </v-card>
             </div>
+            <template v-else-if="!selectedThingId">
+              <v-card-text>
+                Select a site in order to view its datastreams.
+              </v-card-text>
+            </template>
             <template v-else>
               <v-card-text> No datastreams found for this site. </v-card-text>
             </template>
@@ -158,7 +143,6 @@ const props = defineProps({
 watch(
   selectedThingId,
   async (newId) => {
-    console.log('newID', newId)
     if (!newId) {
       datastreamsForThing.value = []
       return

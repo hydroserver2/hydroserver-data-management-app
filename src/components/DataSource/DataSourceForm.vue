@@ -17,7 +17,9 @@
     >
       <v-row>
         <v-col cols="12" md="6">
-          <v-card-title>Workflow configurations</v-card-title>
+          <v-card-item>
+            <v-card-title>Workflow configurations</v-card-title>
+          </v-card-item>
 
           <v-card-text>
             <v-select
@@ -36,7 +38,7 @@
               density="compact"
             />
           </v-card-text>
-
+          <!-- 
           <v-card-text class="text-subtitle-2 text-medium-emphasis">
             Which system would you like to run this data source workflow on?
           </v-card-text>
@@ -47,6 +49,7 @@
               label="ETL system *"
               :items="filteredEtlSystems"
               item-title="name"
+              item-value="id"
               variant="outlined"
               density="compact"
             >
@@ -54,62 +57,76 @@
                 <v-list-item
                   v-bind="props"
                   :title="item.raw.name"
-                  :subtitle="item.raw.type"
+                  :subtitle="item.raw.etlSystemPlatform?.name"
                   :class="
                     item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
                   "
                 />
               </template>
             </v-select>
-          </v-card-text>
+          </v-card-text> -->
         </v-col>
 
         <v-col cols="12" md="6">
-          <v-card-title>Schedule</v-card-title>
-          <v-card-text>
-            <v-text-field
-              v-model="dataSource.startTime"
-              label="Start Time"
-              hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
-              type="datetime-local"
-              density="compact"
-              clearable
-              class="mb-1"
-            />
-            <v-text-field
-              v-model="dataSource.endTime"
-              label="End Time"
-              hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
-              type="datetime-local"
-              clearable
-              density="compact"
-            />
+          <v-card-item>
+            <v-card-title>Schedule</v-card-title>
+          </v-card-item>
+          <v-card-text class="pb-0">
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="dataSource.startTime"
+                  label="Start Time"
+                  hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
+                  type="datetime-local"
+                  density="compact"
+                  clearable
+                  class="mb-1"
+                />
+              </v-col>
+              <v-col>
+                <v-text-field
+                  v-model="dataSource.endTime"
+                  label="End Time"
+                  hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
+                  type="datetime-local"
+                  clearable
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
           </v-card-text>
 
-          <v-card-text>
+          <v-card-text class="pt-2">
             <v-radio-group v-model="scheduleType" inline>
               <v-radio label="Interval" value="interval" />
               <v-radio label="Crontab" value="crontab" />
             </v-radio-group>
             <template v-if="scheduleType === 'interval'">
-              <v-text-field
-                v-model="dataSource.interval"
-                label="Interval *"
-                hint="Enter the interval data should be loaded on."
-                type="number"
-                :rules="[
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="dataSource.interval"
+                    label="Interval *"
+                    hint="Enter the interval data should be loaded on."
+                    type="number"
+                    :rules="[
                             (val: string) => val != null && val !== '' || 'Interval value is required.',
                             (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
                             (val: string) => +val > 0 || 'Interval must be greater than zero.'
                           ]"
-              />
-              <v-select
-                v-model="dataSource.intervalUnits"
-                label="Interval Units"
-                :items="intervalUnitValues"
-                variant="outlined"
-                density="comfortable"
-              />
+                  />
+                </v-col>
+                <v-col md="6">
+                  <v-select
+                    v-model="dataSource.intervalUnits"
+                    label="Interval Units *"
+                    :items="intervalUnitValues"
+                    variant="outlined"
+                    :rules="required"
+                  />
+                </v-col>
+              </v-row>
             </template>
             <template v-if="scheduleType === 'crontab'">
               <v-text-field
@@ -155,7 +172,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { EtlSystem } from '@/types'
 import { DataSource } from '@/models'
-import { rules } from '@/utils/rules'
+import { required, rules } from '@/utils/rules'
 import DataSourceETLFields from './DataSourceETLFields.vue'
 import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
@@ -183,25 +200,29 @@ else
     workspaceId: selectedWorkspace.value!.id,
   })
 
-const filteredEtlSystems = computed(() => {
-  if (dataSource.value.etlConfigurationSettings.type === 'SDL')
-    return etlSystems.value.filter((s) => s.type === 'SDL')
-  else return etlSystems.value.filter((s) => s.type !== 'SDL')
-})
+// const filteredEtlSystems = computed(() => {
+//   if (dataSource.value.etlConfigurationSettings.type === 'SDL')
+//     return etlSystems.value.filter((s) => s?.etlSystemPlatform?.name === 'SDL')
+//   else
+//     return etlSystems.value.filter((s) => s?.etlSystemPlatform?.name !== 'SDL')
+// })
 
-watch(
-  () => dataSource.value.etlConfigurationSettings.type,
-  (newVal, oldVal) => {
-    // SDL workflows should only be run on machines running the SDL orchestration software.
-    if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.etlSystemId = ''
-    if (newVal === 'SDL') {
-      if (dataSource.value.etlConfigurationSettings.extractor.type !== 'local')
-        dataSource.value.switchExtractor('local')
-      if (dataSource.value.etlConfigurationSettings.transformer.type !== 'CSV')
-        dataSource.value.switchTransformer('CSV')
-    }
-  }
-)
+// TODO: We'll know the workflow type is SDL when we're opening this form,
+// so no need to watch. But, make sure the options are limited to CSV when the form
+// is open and make sure type is always SDL for an SDL orchestration system.
+// watch(
+//   () => dataSource.value.etlConfigurationSettings.type,
+//   (newVal, oldVal) => {
+//     // SDL workflows should only be run on machines running the SDL orchestration software.
+//     if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.etlSystemId = ''
+//     if (newVal === 'SDL') {
+//       if (dataSource.value.etlConfigurationSettings.extractor.type !== 'local')
+//         dataSource.value.switchExtractor('local')
+//       if (dataSource.value.etlConfigurationSettings.transformer.type !== 'CSV')
+//         dataSource.value.switchTransformer('CSV')
+//     }
+//   }
+// )
 
 function toLocalDateString(iso: string): string {
   if (!iso) return ''
@@ -224,24 +245,25 @@ const intervalUnitValues = [
 ]
 
 async function uploadItem() {
-  console.log('dataSource', dataSource.value)
   await myForm.value?.validate()
+  console.log('validating', myForm.value)
   if (!valid.value) return false
-  if (isEdit.value)
+  if (isEdit.value) {
+    console.log('hello?')
     return await api.updateDataSource(dataSource.value, props.oldDataSource!)
+  }
   return await api.createDataSource(dataSource.value)
 }
 
 async function onSubmit() {
   try {
-    console.log('datasource', dataSource.value)
-    // const newItem = await uploadItem()
-    // if (!newItem) {
-    //   if (isEdit.value) emit('close')
-    //   return
-    // }
-    // if (isEdit.value) emit('updated', newItem)
-    // else emit('created', newItem.id)
+    const newItem = await uploadItem()
+    if (!newItem) {
+      if (isEdit.value) emit('close')
+      return
+    }
+    if (isEdit.value) emit('updated', newItem)
+    else emit('created', newItem.id)
   } catch (error) {
     console.error('Error uploading DataSource', error)
   }
@@ -255,7 +277,9 @@ onMounted(async () => {
   if (dataSource.value.endTime) {
     dataSource.value.endTime = toLocalDateString(dataSource.value.endTime)
   }
-  // etlSystems.value = await api.fetchEtlSystems()
+  etlSystems.value = await api.fetchWorkspaceEtlSystems(
+    selectedWorkspace.value!.id
+  )
   loaded.value = true
 })
 </script>

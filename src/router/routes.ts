@@ -22,7 +22,6 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/Browse.vue'),
     meta: {
       hideFooter: true,
-      isFullScreen: true,
       hasSidebar: true,
       title: 'Browse Monitoring Sites',
       metaTags: [
@@ -171,7 +170,6 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'VisualizeData',
       hideFooter: true,
-      isFullScreen: true,
       metaTags: [
         {
           name: 'keywords',

@@ -26,7 +26,7 @@ export class SourceTargetMapping {
   getTitle(): string {
     if (this.sourceIdentifier !== 0 && !this.sourceIdentifier)
       return 'New mapping'
-    return `${this.sourceIdentifier} - ${this.targetIdentifier}`
+    return `Source: ${this.sourceIdentifier} - Target: ${this.targetIdentifier}`
   }
 }
 

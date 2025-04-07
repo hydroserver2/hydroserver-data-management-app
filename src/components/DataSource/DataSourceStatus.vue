@@ -1,33 +1,33 @@
 <template>
-  <v-chip density="compact" :color="chipData.color" class="ma-0 pa-2">
-    {{ chipData.text }}
+  <v-chip :color="chipColor" density="compact" class="ma-0 pa-2">
+    {{ chipText }}
   </v-chip>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { DATASOURCE_STATUS_OPTIONS, StatusType } from '@/models/dataSource'
 
 interface Props {
-  status: 'ok' | 'pending' | 'bad' | 'stale' | 'unknown'
+  status: StatusType
   paused: boolean
 }
-
 const props = defineProps<Props>()
 
-const statusMap = {
-  ok: { color: 'green', text: 'Up-To-Date' },
-  pending: { color: 'blue', text: 'Pending' },
-  bad: { color: 'red', text: 'Needs attention' },
-  stale: { color: 'orange-darken-4', text: 'Behind schedule' },
-  unknown: { color: 'gray', text: 'Unknown' },
-}
-
-const chipData = computed(() => {
-  if (props.paused) {
-    return { color: 'gray', text: 'Loading paused' }
+const chipColor = computed(() => {
+  if (props.paused && props.status !== 'Needs attention') {
+    return 'gray'
   }
-  return statusMap[props.status]
-    ? statusMap[props.status]
-    : { color: 'gray', text: 'Unknown' }
+  return (
+    DATASOURCE_STATUS_OPTIONS.find((s) => s.title === props.status)?.color ??
+    'gray'
+  )
+})
+
+const chipText = computed(() => {
+  if (props.paused && props.status !== 'Needs attention') {
+    return 'Loading paused'
+  }
+  return props.status
 })
 </script>

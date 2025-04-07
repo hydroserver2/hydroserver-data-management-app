@@ -26,12 +26,12 @@ export const useETLStore = defineStore('etl', () => {
     },
   })
 
-  watch(
-    () => dataSource.value.etlConfigurationSettings.extractor.type,
-    (newType) => {
-      dataSource.value.switchExtractor(newType)
-    }
-  )
+  // watch(
+  //   () => dataSource.value.etlConfigurationSettings.extractor.type,
+  //   (newType) => {
+  //     dataSource.value.switchExtractor(newType)
+  //   }
+  // )
 
   const transformer = computed<TransformerConfig>({
     get() {

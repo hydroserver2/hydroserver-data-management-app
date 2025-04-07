@@ -15,6 +15,14 @@
         :subtitle="`Your role: ${getUserRoleName(item.raw)}`"
       />
     </template>
+
+    <template #selection="{ item }">
+      <span v-if="item">
+        <span class="opacity-60"> Selected workspace: </span>
+        {{ item.raw.name }}
+      </span>
+      <span v-else>Select a workspace</span>
+    </template>
   </v-select>
 </template>
 
