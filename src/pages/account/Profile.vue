@@ -46,7 +46,7 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
 import { api } from '@/services/api'
 
-const { isHydroShareConnectionEnabled } = useHydroShare()
+const { isConnectionEnabled: isHydroShareConnectionEnabled } = useHydroShare()
 const openDelete = ref(false)
 const openForm = ref(false)
 const { user } = storeToRefs(useUserStore())

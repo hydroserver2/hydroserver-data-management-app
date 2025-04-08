@@ -30,7 +30,7 @@ export function useHydroShare() {
 
   const isConnected = computed(() => !!hydroShareProvider.value)
 
-  const isHydroShareConnectionEnabled = computed(() =>
+  const isConnectionEnabled = computed(() =>
     oAuthProviders.value.some((p) => p.id === 'hydroshare' && p.connectEnabled)
   )
 
@@ -72,7 +72,7 @@ export function useHydroShare() {
   return {
     isLoaded,
     isConnected,
-    isHydroShareConnectionEnabled,
+    isConnectionEnabled,
     connectHydroShare,
     disconnectHydroShare,
   }

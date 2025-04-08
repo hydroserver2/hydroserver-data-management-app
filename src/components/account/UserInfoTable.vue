@@ -29,8 +29,10 @@ import { api } from '@/services/api'
 import { useHydroShare } from '@/composables/useHydroShare'
 
 const { user } = storeToRefs(useUserStore())
-const { isConnected: isHydroShareConnected, isHydroShareConnectionEnabled } =
-  useHydroShare()
+const {
+  isConnected: isHydroShareConnected,
+  isConnectionEnabled: isHydroShareConnectionEnabled,
+} = useHydroShare()
 
 onMounted(async () => {
   try {

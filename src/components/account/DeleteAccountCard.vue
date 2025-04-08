@@ -16,7 +16,7 @@
       be deleted with your account. If you have collaborators for these
       workspaces, we strongly recommend transferring ownership to one of them
       before deleting your account. Additionally, you have the option to store
-      your site data in hydroshare or download your data before deleting your
+      your site data in HydroShare or download your data before deleting your
       account.
     </v-card-text>
     <v-card-text v-for="workspace in ownedWorkspaces" class="py-0">
