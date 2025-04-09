@@ -11,12 +11,6 @@ export const useETLStore = defineStore('etl', () => {
   const selectedETLStep = ref('extractor')
   const dataSource = ref(new DataSource())
 
-  // const extractor = ref<extractor>({
-  //   type: 'HTTP',
-  //   urlTemplate: '',
-  //   urlTemplateVariables: [],
-  // })
-
   const extractor = computed<ExtractorConfig>({
     get() {
       return dataSource.value.etlConfigurationSettings.extractor
@@ -25,13 +19,6 @@ export const useETLStore = defineStore('etl', () => {
       dataSource.value.etlConfigurationSettings.extractor = newVal
     },
   })
-
-  // watch(
-  //   () => dataSource.value.etlConfigurationSettings.extractor.type,
-  //   (newType) => {
-  //     dataSource.value.switchExtractor(newType)
-  //   }
-  // )
 
   const transformer = computed<TransformerConfig>({
     get() {
@@ -51,23 +38,9 @@ export const useETLStore = defineStore('etl', () => {
     },
   })
 
-  // const transformer = ref<transformer>({
-  //   type: 'CSV',
-  //   mapping: '',
-  //   headerRow: null,
-  //   dataStartRow: 1,
-  //   delimiter: ',',
-  //   timestampKey: '',
-  //   timestampFormat: 'ISO8601',
-  // })
-  // // type: 'JSON',
-  // // mapping: '',
-  // // timestampKey: '',
-  // // JMESPath: '',
-
-  // const loader = ref<loader>({
-  //   type: 'HydroServer',
-  // })
+  const isExtractorValid = ref(true)
+  const isTransformerValid = ref(true)
+  const isLoaderValid = ref(true)
 
   return {
     dataSource,
@@ -75,5 +48,8 @@ export const useETLStore = defineStore('etl', () => {
     transformer,
     loader,
     selectedETLStep,
+    isExtractorValid,
+    isTransformerValid,
+    isLoaderValid,
   }
 })

@@ -11,6 +11,7 @@
           density="compact"
           rounded="lg"
           prepend-inner-icon="mdi-code-braces"
+          :rules="rules.requiredAndNoSpaces"
         />
       </v-col>
     </v-row>
@@ -65,6 +66,7 @@
 <script setup lang="ts">
 import { HTTPExtractor } from '@/models/dataSource'
 import { useETLStore } from '@/store/etl'
+import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
 import { computed, watch } from 'vue'
 

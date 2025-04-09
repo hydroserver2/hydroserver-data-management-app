@@ -38,33 +38,6 @@
               density="compact"
             />
           </v-card-text>
-          <!-- 
-          <v-card-text class="text-subtitle-2 text-medium-emphasis">
-            Which system would you like to run this data source workflow on?
-          </v-card-text>
-
-          <v-card-text>
-            <v-select
-              v-model="dataSource.etlSystemId"
-              label="ETL system *"
-              :items="filteredEtlSystems"
-              item-title="name"
-              item-value="id"
-              variant="outlined"
-              density="compact"
-            >
-              <template #item="{ props, item }">
-                <v-list-item
-                  v-bind="props"
-                  :title="item.raw.name"
-                  :subtitle="item.raw.etlSystemPlatform?.name"
-                  :class="
-                    item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
-                  "
-                />
-              </template>
-            </v-select>
-          </v-card-text> -->
         </v-col>
 
         <v-col cols="12" md="6">
@@ -146,11 +119,13 @@
       >
         <DataSourceAggregationFields />
       </template>
-      <template v-else-if="dataSource.etlConfigurationSettings.type === 'ETL'">
-        <DataSourceETLFields />
-      </template>
-      <template v-else-if="dataSource.etlConfigurationSettings.type === 'SDL'">
-        <DataSourceETLFields />
+      <template
+        v-else-if="
+          dataSource.etlConfigurationSettings.type === 'ETL' ||
+          dataSource.etlConfigurationSettings.type === 'SDL'
+        "
+      >
+        <DataSourceETLFields ref="etlFieldsRef" />
       </template>
       <template
         v-else-if="dataSource.etlConfigurationSettings.type === 'Virtual'"
@@ -192,6 +167,7 @@ const isEdit = computed(() => !!props.oldDataSource || undefined)
 const valid = ref(false)
 const myForm = ref<VForm>()
 const etlSystems = ref(etlSystemFixtures as EtlSystem[])
+const etlFieldsRef = ref<any>(null)
 
 const { dataSource } = storeToRefs(useETLStore())
 if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
@@ -244,26 +220,34 @@ const intervalUnitValues = [
   { value: 'days', title: 'Days' },
 ]
 
-async function uploadItem() {
-  await myForm.value?.validate()
-  console.log('validating', myForm.value)
-  if (!valid.value) return false
-  if (isEdit.value) {
-    console.log('hello?')
-    return await api.updateDataSource(dataSource.value, props.oldDataSource!)
-  }
-  return await api.createDataSource(dataSource.value)
-}
-
 async function onSubmit() {
+  if (
+    dataSource.value.etlConfigurationSettings.type === 'ETL' ||
+    dataSource.value.etlConfigurationSettings.type === 'SDL'
+  ) {
+    const etlValid = await etlFieldsRef.value.validate()
+    if (!etlValid) return
+  }
+
+  await myForm.value?.validate()
+  if (!valid.value) return false
+
   try {
-    const newItem = await uploadItem()
+    const newItem: DataSource | null = isEdit.value
+      ? await api.updateDataSource(dataSource.value, props.oldDataSource!)
+      : await api.createDataSource(dataSource.value)
+
     if (!newItem) {
-      if (isEdit.value) emit('close')
+      emit('close')
       return
     }
-    if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem.id)
+
+    if (isEdit.value) {
+      emit('updated', newItem)
+      return
+    } else {
+      emit('created', newItem.id)
+    }
   } catch (error) {
     console.error('Error uploading DataSource', error)
   }

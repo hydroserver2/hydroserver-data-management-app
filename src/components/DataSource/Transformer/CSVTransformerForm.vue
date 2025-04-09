@@ -93,6 +93,11 @@
                   : 'number'
               }`"
               prepend-inner-icon="mdi-table-column-width"
+              :rules="
+                transformer.identifierType === IdentifierType.Name
+                  ? rules.requiredAndMaxLength150
+                  : rules.requiredNumber
+              "
             />
           </v-col>
         </v-row>
@@ -165,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { rules } from '@/utils/rules'
@@ -182,4 +187,13 @@ const timestampFormatType = ref('ISO8601')
 
 const openStrftimeHelp = () =>
   window.open('https://devhints.io/strftime', '_blank', 'noreferrer')
+
+watch(
+  () => transformer.value.identifierType,
+  (newType) => {
+    transformer.value.timestampKey =
+      newType === IdentifierType.Name ? 'timestamp' : '1'
+  },
+  { immediate: true }
+)
 </script>

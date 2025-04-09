@@ -91,7 +91,7 @@ const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
   HTTP: {
     type: 'HTTP',
     urlTemplate:
-      'https://example.com/{route_variable}?query_parameter={query_parameter}',
+      'https://example.com/{path_parameter}?query_parameter={query_parameter}',
     urlTemplateVariables: [],
   } as HTTPExtractor,
   local: {

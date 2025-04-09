@@ -62,7 +62,7 @@
     </v-row>
 
     <v-toolbar color="blue-grey-darken-2" rounded="t-lg">
-      <h6 class="text-h6 ml-4">Linked ETL system</h6>
+      <h6 class="text-h6 ml-4">Linked orchestration system</h6>
     </v-toolbar>
     <v-data-table
       :headers="etlSystemHeaders"
