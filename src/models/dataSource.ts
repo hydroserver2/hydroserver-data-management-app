@@ -213,6 +213,13 @@ export const DATASOURCE_STATUS_OPTIONS = [
 ] as const
 export type StatusType = (typeof DATASOURCE_STATUS_OPTIONS)[number]['title']
 
+export const INTERVAL_UNIT_OPTIONS = [
+  { value: 'minutes', title: 'Minutes' },
+  { value: 'hours', title: 'Hours' },
+  { value: 'days', title: 'Days' },
+]
+export type IntervalUnitType = (typeof INTERVAL_UNIT_OPTIONS)[number]['value']
+
 export class DataSource {
   name = ''
   id = ''
@@ -229,7 +236,7 @@ export class DataSource {
   //   name
   // }
   interval: number | null = null
-  intervalUnits: string | null = null
+  intervalUnits: IntervalUnitType | null = 'minutes'
   startTime: string | null = null
   endTime: string | null = null
   paused = false

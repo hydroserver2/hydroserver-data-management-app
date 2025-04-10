@@ -94,7 +94,7 @@
                   <v-select
                     v-model="dataSource.intervalUnits"
                     label="Interval Units *"
-                    :items="intervalUnitValues"
+                    :items="INTERVAL_UNIT_OPTIONS"
                     variant="outlined"
                     :rules="required"
                   />
@@ -104,8 +104,9 @@
             <template v-if="scheduleType === 'crontab'">
               <v-text-field
                 v-model="dataSource.crontab"
-                label="Crontab"
+                label="Crontab *"
                 hint="Enter a crontab schedule for the data to be loaded on."
+                :rules="rules.required"
               />
             </template>
           </v-card-text>
@@ -153,7 +154,7 @@ import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
 import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
 import { VForm } from 'vuetify/components'
-import { WORKFLOW_TYPES } from '@/models/dataSource'
+import { INTERVAL_UNIT_OPTIONS, WORKFLOW_TYPES } from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { api } from '@/services/api'
@@ -213,12 +214,6 @@ function toLocalDateString(iso: string): string {
 
 const loaded = ref(false)
 const scheduleType = ref('interval')
-
-const intervalUnitValues = [
-  { value: 'minutes', title: 'Minutes' },
-  { value: 'hours', title: 'Hours' },
-  { value: 'days', title: 'Days' },
-]
 
 async function onSubmit() {
   if (
