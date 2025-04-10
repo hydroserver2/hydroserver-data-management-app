@@ -89,7 +89,6 @@
                     v-model="row.sourceIdentifier"
                     placeholder="Source identifier"
                     label="Source identifier (column name or index)"
-                    density="compact"
                     variant="outlined"
                     hide-details
                   />
@@ -131,15 +130,30 @@
                 </v-col>
               </v-row>
               <v-row v-if="!!row.dataTransformation" class="mx-1 mt-0">
-                <v-spacer />
-                <v-col cols="12">
+                <v-col>
+                  <v-radio-group
+                    inline
+                    v-model="row.dataTransformation.transformationType"
+                  >
+                    <v-radio
+                      label="Python expression"
+                      value="expression"
+                      @click=""
+                    />
+                    <v-radio label="Lookup table" value="lookup" />
+                  </v-radio-group>
+                </v-col>
+
+                <v-col cols="6">
                   <v-text-field
                     v-model="row.dataTransformation.operation"
-                    placeholder="Data transformation operation"
+                    placeholder="(input - 32) * 5/9"
                     density="compact"
                     variant="outlined"
                     hide-details
-                  />
+                  >
+                    <template v-slot:prepend>output =</template>
+                  </v-text-field>
                 </v-col>
               </v-row>
               <v-row v-if="!!row.dataTransformation" class="mx-1 mt-0 mb-1">

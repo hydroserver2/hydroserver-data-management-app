@@ -1,4 +1,7 @@
 export interface DataTransformation {
+  transformationType: 'expression' | 'lookup'
+  expression?: string
+  lookupTableUuid?: string
   operation: string
   doSaveRawDataCopy: boolean
   rawTargetIdentifier: string | number
@@ -17,6 +20,7 @@ export class SourceTargetMapping {
     this.dataTransformation = !!this.dataTransformation
       ? null
       : {
+          transformationType: 'expression',
           operation: '',
           doSaveRawDataCopy: false,
           rawTargetIdentifier: '',
