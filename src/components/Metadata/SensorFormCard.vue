@@ -119,7 +119,6 @@ async function onSubmit() {
   try {
     item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
-    console.log('new item', newItem)
     if (!newItem) {
       if (isEdit.value) emit('close')
       return

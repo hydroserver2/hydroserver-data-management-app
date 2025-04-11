@@ -10,7 +10,7 @@ import { DATASOURCE_STATUS_OPTIONS, StatusType } from '@/models/dataSource'
 
 interface Props {
   status: StatusType
-  paused: boolean
+  paused: boolean | undefined
 }
 const props = defineProps<Props>()
 

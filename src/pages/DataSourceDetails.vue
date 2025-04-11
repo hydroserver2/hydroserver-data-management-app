@@ -65,8 +65,8 @@
       <h6 class="text-h6 ml-4">Linked orchestration system</h6>
     </v-toolbar>
     <v-data-table
-      :headers="etlSystemHeaders"
-      :items="etlSystemInformation"
+      :headers="orchestrationSystemHeaders"
+      :items="orchestrationSystemInformation"
       :items-per-page="-1"
       hide-default-header
       hide-default-footer
@@ -102,22 +102,20 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { EtlSystem } from '@/types'
-import { DataSource } from '@/models'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 import PayloadTable from '@/components/DataSource/PayloadTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
-import dataSourceFixtures from '@/utils/test/fixtures/dataSourceFixtures'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/dataSource'
+import { api } from '@/services/api'
+import { getStatusText } from '@/models/dataSource'
 
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const etlSystem = ref<EtlSystem>(new EtlSystem())
 const { dataSource } = storeToRefs(useDataSourceStore())
 
 const formatTime = (time: string) =>
@@ -130,7 +128,7 @@ const formatTime = (time: string) =>
 const scheduleString = computed(() => {
   if (!dataSource.value) return ''
   const { interval, intervalUnits, crontab, startTime, endTime } =
-    dataSource.value
+    dataSource.value.schedule
 
   let schedule = interval
     ? `Every ${interval} ${intervalUnits}`
@@ -149,7 +147,7 @@ const dataSourceHeaders = [
   { key: 'value', title: 'Value' },
 ]
 
-const etlSystemHeaders = [
+const orchestrationSystemHeaders = [
   { key: 'label', title: 'Label' },
   { key: 'value', title: 'Value' },
 ]
@@ -171,88 +169,55 @@ const dataSourceInformation = computed(() => {
     {
       icon: 'mdi-history',
       label: 'Last synced',
-      value: dataSource.value.lastRun
-        ? formatTime(dataSource.value.lastRun)
+      value: dataSource.value.status.lastRun
+        ? formatTime(dataSource.value.status.lastRun)
         : '',
     },
     {
       icon: 'mdi-calendar-sync',
       label: 'Next sync',
-      value: dataSource.value.nextRun
-        ? formatTime(dataSource.value.nextRun)
+      value: dataSource.value.status.nextRun
+        ? formatTime(dataSource.value.status.nextRun)
         : '',
     },
     {
       icon: 'mdi-message-text-outline',
       label: 'Last sync message',
-      value: dataSource.value.lastRunMessage,
+      value: dataSource.value.status.lastRunMessage,
     },
     {
       icon: 'mdi-information-outline',
       label: 'Status',
-      status: dataSource.value.getStatus(),
-      paused: dataSource.value.paused,
+      status: getStatusText(dataSource.value.status),
+      paused: dataSource.value.status.paused,
     },
   ].filter(Boolean)
 })
 
-const etlSystemInformation = computed(() => {
-  if (!dataSource.value || !etlSystem.value) return []
+const orchestrationSystemInformation = computed(() => {
+  if (!dataSource.value) return []
 
   return [
     {
       icon: 'mdi-rename-box-outline',
       label: 'Name',
-      value: etlSystem.value.name,
+      value: dataSource.value.orchestrationSystem.name,
     },
     {
       icon: 'mdi-broadcast',
       label: 'Type',
-      value: etlSystem.value.type,
+      value: dataSource.value.orchestrationSystem.type,
     },
   ].filter(Boolean)
 })
 
-// const linkedDatastreamColumns = [
-//   {
-//     title: 'ID',
-//     key: 'name',
-//   },
-//   {
-//     title: 'Name',
-//     key: 'description',
-//   },
-//   {
-//     title: 'Status',
-//     key: 'status',
-//   },
-//   {
-//     title: 'Last Loaded Timestamp',
-//     key: 'phenomenonEndTime',
-//   },
-//   {
-//     title: 'Data Source Column',
-//     key: 'dataSourceColumn',
-//   },
-// ] as const
-
 const fetchData = async () => {
   try {
     const [source] = await Promise.all([
-      dataSourceFixtures.find(
-        (ds) => ds.id === route.params.id.toString()
-      ) as DataSource,
+      api.fetchDataSource(route.params.id.toString()),
     ])
 
     dataSource.value = source
-    // etlSystem.value = await api.fetchEtlSystem(dataSource.value.etlSystemId)
-    etlSystem.value = {
-      id: 'ETL-SYS-1',
-      name: 'ETL System 1',
-      type: 'Aiflow Orchestrator',
-      etlSystemPlatform: null,
-      workspaceId: 'workspace 1',
-    }
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')
     console.error('error fetching dataSource', e)

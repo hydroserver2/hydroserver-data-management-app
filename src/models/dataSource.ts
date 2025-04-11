@@ -1,3 +1,5 @@
+import { Datastream } from '@/types'
+
 export const TIMEZONE_OFFSETS = [
   { title: 'UTC-12:00 (International Date Line West)', value: '-1200' },
   { title: 'UTC-11:00 (Samoa Standard Time)', value: '-1100' },
@@ -177,7 +179,6 @@ interface EtlConfiguration {
   loader: LoaderConfig
 }
 
-import { Datastream } from '@/types'
 export type PartialDatastream = Pick<
   Datastream,
   | 'name'
@@ -194,14 +195,6 @@ export type PartialDatastream = Pick<
 >
 
 export interface PayloadConfigurations {}
-
-export interface LinkedDatastream {
-  dataSourceId: string
-  datastreamId: string
-  etlConfigurationId: string
-  etlConfigurationSettings: PayloadConfigurations
-  datastream: PartialDatastream
-}
 
 export const DATASOURCE_STATUS_OPTIONS = [
   { color: 'green', title: 'OK' },
@@ -220,95 +213,86 @@ export const INTERVAL_UNIT_OPTIONS = [
 ]
 export type IntervalUnitType = (typeof INTERVAL_UNIT_OPTIONS)[number]['value']
 
+export interface Schedule {
+  interval: number
+  intervalUnits?: IntervalUnitType
+  crontab?: string
+  startTime?: string
+  endTime?: string
+}
+
+export interface Status {
+  lastRunSuccessful?: boolean
+  lastRunMessage?: string
+  lastRun?: string
+  nextRun?: string
+  paused: boolean
+}
+
+export interface OrchestrationSystem {
+  name: string
+  id: string
+  workspaceId: string
+  type: string
+}
+
 export class DataSource {
   name = ''
-  id = ''
-  etlSystemId = ''
-  // etlSystem: {
-  //   id
-  //   workspaceId
-  //   etlSystemPlatform: {
-  //     workspaceId
-  //     name // selection of SDL | aggregation | ETL | virtual
-  //     intervalScheduleSupported
-  //     crontabScheduleSupported
-  //   }
-  //   name
-  // }
-  interval: number | null = null
-  intervalUnits: IntervalUnitType | null = 'minutes'
-  startTime: string | null = null
-  endTime: string | null = null
-  paused = false
-  crontab = ''
-  lastRunSuccessful = false
-  lastRun: string | null = null
-  nextRun: string | null = null
-  lastRunMessage = ''
-  // etlConfiguration: {
-  //   id
-  //   name:
-  //   schema? {}
-  //   etlConfigurationModel: 'datastream' or 'datasource'
-  //   type: 'extractor' | 'transformer' | 'loader'
-  //   workspaceId? //usually null
-  // }
-  // etlConfigurationId: string = ''
-  etlConfigurationSettings: EtlConfiguration = {
+  settings: EtlConfiguration = {
     type: 'SDL',
     extractor: JSON.parse(JSON.stringify(extractorDefaults['HTTP'])),
     transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
     loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
   }
-  // // extractorConfigurationId: string = ''
-  // extractorConfigurationSettings: ExtractorConfig = JSON.parse(
-  //   JSON.stringify(extractorDefaults['local'])
-  // )
-  // // transformerConfigurationId: string = ''
-  // transformerConfigurationSettings: TransformerConfig = JSON.parse(
-  //   JSON.stringify(transformerDefaults['CSV'])
-  // )
-  // // loaderConfigurationId: string = ''
-  // loaderConfigurationSettings: LoaderConfig = JSON.parse(
-  //   JSON.stringify(loaderDefaults['HydroServer'])
-  // )
+  id = ''
   workspaceId: string = ''
-  linkedDatastreams: LinkedDatastream[] = []
+  orchestrationSystem: OrchestrationSystem = {
+    id: '',
+    name: '',
+    workspaceId: '',
+    type: '',
+  }
+  schedule: Schedule = {
+    interval: 15,
+    intervalUnits: 'minutes',
+  }
+  status: Status = { paused: true }
+  datastreams: Datastream[] = []
 
   constructor(init?: Partial<DataSource>) {
     Object.assign(this, init)
   }
-
-  // switchExtractor(newType: ExtractorType) {
-  //   this.etlConfigurationSettings.extractor = JSON.parse(
-  //     JSON.stringify(extractorDefaults[newType])
-  //   )
-  // }
-
-  // switchTransformer(newType: TransformerType) {
-  //   this.etlConfigurationSettings.transformer = JSON.parse(
-  //     JSON.stringify(transformerDefaults[newType])
-  //   )
-  // }
-
-  // switchLoader(newType: LoaderType) {
-  //   this.etlConfigurationSettings.loader = JSON.parse(
-  //     JSON.stringify(loaderDefaults[newType])
-  //   )
-  // }
-  getStatus(): StatusType {
-    if (!this.lastRun) return 'Pending'
-
-    let now = new Date()
-    let nextRun = this.nextRun ? new Date(Date.parse(this.nextRun)) : null
-
-    if (this.lastRunSuccessful && nextRun && nextRun >= now) {
-      return 'OK'
-    } else if (!this.lastRunSuccessful) {
-      return 'Needs attention'
-    } else if (nextRun && nextRun < now) {
-      return 'Behind schedule'
-    }
-    return 'Unknown'
-  }
 }
+
+export function getStatusText(status: Status): StatusType {
+  if (!status.lastRun) return 'Pending'
+
+  let now = new Date()
+  let nextRun = status.nextRun ? new Date(Date.parse(status.nextRun)) : null
+
+  if (status.lastRunSuccessful && nextRun && nextRun >= now) {
+    return 'OK'
+  } else if (!status.lastRunSuccessful) {
+    return 'Needs attention'
+  } else if (nextRun && nextRun < now) {
+    return 'Behind schedule'
+  }
+  return 'Unknown'
+}
+// switchExtractor(newType: ExtractorType) {
+//   this.settings.extractor = JSON.parse(
+//     JSON.stringify(extractorDefaults[newType])
+//   )
+// }
+
+// switchTransformer(newType: TransformerType) {
+//   this.settings.transformer = JSON.parse(
+//     JSON.stringify(transformerDefaults[newType])
+//   )
+// }
+
+// switchLoader(newType: LoaderType) {
+//   this.settings.loader = JSON.parse(
+//     JSON.stringify(loaderDefaults[newType])
+//   )
+// }

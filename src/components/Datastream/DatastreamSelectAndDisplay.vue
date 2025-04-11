@@ -42,7 +42,6 @@ const props = defineProps({
 const emit = defineEmits(['updateSelectedId'])
 
 const selectedId = ref(props.datastreamId ? props.datastreamId : '')
-console.log('selectedId', selectedId.value)
 watch(
   selectedId,
   async () => {

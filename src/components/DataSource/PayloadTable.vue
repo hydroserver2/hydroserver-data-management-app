@@ -117,7 +117,6 @@ const payloads = [
 
 function openDialog(selectedItem: Payload, dialog: string) {
   selectedPayload.value = new Payload(selectedItem)
-  console.log('selectedItem', selectedItem)
   if (dialog === 'edit') openEdit.value = true
   else if (dialog === 'delete') openDelete.value = true
 }

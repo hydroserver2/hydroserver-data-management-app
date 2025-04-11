@@ -13,28 +13,28 @@ export const useETLStore = defineStore('etl', () => {
 
   const extractor = computed<ExtractorConfig>({
     get() {
-      return dataSource.value.etlConfigurationSettings.extractor
+      return dataSource.value.settings.extractor
     },
     set(newVal) {
-      dataSource.value.etlConfigurationSettings.extractor = newVal
+      dataSource.value.settings.extractor = newVal
     },
   })
 
   const transformer = computed<TransformerConfig>({
     get() {
-      return dataSource.value.etlConfigurationSettings.transformer
+      return dataSource.value.settings.transformer
     },
     set(newVal) {
-      dataSource.value.etlConfigurationSettings.transformer = newVal
+      dataSource.value.settings.transformer = newVal
     },
   })
 
   const loader = computed<LoaderConfig>({
     get() {
-      return dataSource.value.etlConfigurationSettings.loader
+      return dataSource.value.settings.loader
     },
     set(newVal) {
-      dataSource.value.etlConfigurationSettings.loader = newVal
+      dataSource.value.settings.loader = newVal
     },
   })
 

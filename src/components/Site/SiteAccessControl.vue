@@ -74,7 +74,6 @@ async function toggleSitePrivacy() {
       props.thingId,
       thing.value!.isPrivate
     )
-    console.log('thing.value', thing.value)
   } catch (error) {
     console.error('Error updating thing privacy', error)
   } finally {

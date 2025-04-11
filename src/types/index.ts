@@ -263,30 +263,6 @@ export class ResultQualifier {
   }
 }
 
-export interface EtlSystemPlatform {
-  name: string
-  intervalScheduleSupported: boolean
-  crontabScheduleSupported: boolean
-  id: string
-  workspaceId: string
-}
-
-export class EtlSystem {
-  name: string
-  id: string
-  workspaceId: string
-  etlSystemPlatform: EtlSystemPlatform | null
-  type: string
-
-  constructor() {
-    this.id = ''
-    this.workspaceId = ''
-    this.name = ''
-    this.etlSystemPlatform = null
-    this.type = ''
-  }
-}
-
 export class Organization {
   name?: string
   code?: string

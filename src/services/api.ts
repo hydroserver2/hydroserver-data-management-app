@@ -2,7 +2,6 @@ import { apiMethods } from '@/services/apiMethods'
 import {
   Unit,
   Thing,
-  EtlSystem,
   Sensor,
   ResultQualifier,
   ProcessingLevel,
@@ -15,6 +14,7 @@ import {
   Workspace,
 } from '@/types'
 import { Payload, DataSource } from '@/models'
+import { OrchestrationSystem } from '@/models/dataSource'
 import { getCSRFToken } from './getCSRFToken'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
@@ -29,7 +29,7 @@ export const TAG_BASE = `${BASE_URL}/data/tags`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
 export const THINGS_BASE = `${BASE_URL}/data/things`
-const ETL_SYSTEMS_BASE = `${BASE_URL}/data/etl-systems`
+const ETL_SYSTEMS_BASE = `${BASE_URL}/data/orchestration-systems`
 const DATA_SOURCES_BASE = `${BASE_URL}/data/data-sources`
 const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
@@ -338,20 +338,29 @@ export const api = {
   deleteResultQualifier: async (id: string) =>
     apiMethods.delete(`${RQ_BASE}/${id}`),
 
-  createEtlSystem: async (etlSystem: EtlSystem) =>
-    apiMethods.post(ETL_SYSTEMS_BASE, etlSystem),
-  fetchEtlSystems: async () => apiMethods.fetch(ETL_SYSTEMS_BASE),
-  fetchWorkspaceEtlSystems: async (id: string) =>
+  createOrchestrationSystem: async (system: OrchestrationSystem) =>
+    apiMethods.post(ETL_SYSTEMS_BASE, system),
+  fetchOrchestrationSystems: async () => apiMethods.fetch(ETL_SYSTEMS_BASE),
+  fetchWorkspaceOrchestrationSystems: async (id: string) =>
     apiMethods.fetch(`${ETL_SYSTEMS_BASE}?workspace_id=${id}`),
-  fetchEtlSystem: async (id: string) =>
+  fetchOrchestrationSystem: async (id: string) =>
     apiMethods.fetch(`${ETL_SYSTEMS_BASE}/${id}`),
-  updateEtlSystem: async (id: string, etlSystem: EtlSystem) =>
-    apiMethods.patch(`${ETL_SYSTEMS_BASE}/${id}`, etlSystem),
-  deleteEtlSystem: async (id: string) =>
+  updateOrchestrationSystem: async (id: string, system: OrchestrationSystem) =>
+    apiMethods.patch(`${ETL_SYSTEMS_BASE}/${id}`, system),
+  deleteOrchestrationSystem: async (id: string) =>
     apiMethods.delete(`${ETL_SYSTEMS_BASE}/${id}`),
 
-  createDataSource: async (dataSource: DataSource) =>
-    apiMethods.post(DATA_SOURCES_BASE, dataSource),
+  createDataSource: async (dataSource: DataSource) => {
+    const payload = {
+      name: dataSource.name,
+      settings: dataSource.settings,
+      workspaceId: dataSource.workspaceId,
+      orchestrationSystemId: dataSource.orchestrationSystem.id,
+      schedule: dataSource.schedule,
+      status: dataSource.status,
+    }
+    return apiMethods.post(DATA_SOURCES_BASE, payload)
+  },
   fetchDataSources: async () => apiMethods.fetch(DATA_SOURCES_BASE),
   fetchWorkspaceDataSources: async (id: string) =>
     apiMethods.fetch(`${DATA_SOURCES_BASE}?workspace_id=${id}`),

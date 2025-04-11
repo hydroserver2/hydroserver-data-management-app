@@ -23,7 +23,7 @@
 
           <v-card-text>
             <v-select
-              v-model="dataSource.etlConfigurationSettings.type"
+              v-model="dataSource.settings.type"
               label="Workflow type *"
               :items="WORKFLOW_TYPES"
               variant="outlined"
@@ -48,7 +48,7 @@
             <v-row>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="dataSource.startTime"
+                  v-model="dataSource.schedule.startTime"
                   label="Start Time"
                   hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
                   type="datetime-local"
@@ -59,7 +59,7 @@
               </v-col>
               <v-col>
                 <v-text-field
-                  v-model="dataSource.endTime"
+                  v-model="dataSource.schedule.endTime"
                   label="End Time"
                   hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
                   type="datetime-local"
@@ -79,7 +79,7 @@
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="dataSource.interval"
+                    v-model="dataSource.schedule.interval"
                     label="Interval *"
                     hint="Enter the interval data should be loaded on."
                     type="number"
@@ -92,7 +92,7 @@
                 </v-col>
                 <v-col md="6">
                   <v-select
-                    v-model="dataSource.intervalUnits"
+                    v-model="dataSource.schedule.intervalUnits"
                     label="Interval Units *"
                     :items="INTERVAL_UNIT_OPTIONS"
                     variant="outlined"
@@ -103,7 +103,7 @@
             </template>
             <template v-if="scheduleType === 'crontab'">
               <v-text-field
-                v-model="dataSource.crontab"
+                v-model="dataSource.schedule.crontab"
                 label="Crontab *"
                 hint="Enter a crontab schedule for the data to be loaded on."
                 :rules="rules.required"
@@ -115,22 +115,18 @@
 
       <div class="mb-4" />
 
-      <template
-        v-if="dataSource.etlConfigurationSettings.type === 'Aggregation'"
-      >
+      <template v-if="dataSource.settings.type === 'Aggregation'">
         <DataSourceAggregationFields />
       </template>
       <template
         v-else-if="
-          dataSource.etlConfigurationSettings.type === 'ETL' ||
-          dataSource.etlConfigurationSettings.type === 'SDL'
+          dataSource.settings.type === 'ETL' ||
+          dataSource.settings.type === 'SDL'
         "
       >
         <DataSourceETLFields ref="etlFieldsRef" />
       </template>
-      <template
-        v-else-if="dataSource.etlConfigurationSettings.type === 'Virtual'"
-      >
+      <template v-else-if="dataSource.settings.type === 'Virtual'">
         <DataSourceVirtualFields />
       </template>
 
@@ -146,28 +142,33 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { EtlSystem } from '@/types'
 import { DataSource } from '@/models'
 import { required, rules } from '@/utils/rules'
 import DataSourceETLFields from './DataSourceETLFields.vue'
 import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
-import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
 import { VForm } from 'vuetify/components'
-import { INTERVAL_UNIT_OPTIONS, WORKFLOW_TYPES } from '@/models/dataSource'
+import {
+  INTERVAL_UNIT_OPTIONS,
+  WORKFLOW_TYPES,
+  OrchestrationSystem,
+} from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { api } from '@/services/api'
 import { useWorkspaceStore } from '@/store/workspaces'
 
-const props = defineProps({ oldDataSource: Object as () => DataSource })
+const props = defineProps({
+  oldDataSource: Object as () => DataSource,
+  orchestrationSystem: Object as () => OrchestrationSystem,
+})
 const emit = defineEmits(['created', 'updated', 'close'])
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
 const isEdit = computed(() => !!props.oldDataSource || undefined)
 const valid = ref(false)
 const myForm = ref<VForm>()
-const etlSystems = ref(etlSystemFixtures as EtlSystem[])
+const orchestrationSystems = ref([] as OrchestrationSystem[])
 const etlFieldsRef = ref<any>(null)
 
 const { dataSource } = storeToRefs(useETLStore())
@@ -175,27 +176,21 @@ if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
 else
   dataSource.value = new DataSource({
     workspaceId: selectedWorkspace.value!.id,
+    orchestrationSystem: props.orchestrationSystem,
   })
-
-// const filteredEtlSystems = computed(() => {
-//   if (dataSource.value.etlConfigurationSettings.type === 'SDL')
-//     return etlSystems.value.filter((s) => s?.etlSystemPlatform?.name === 'SDL')
-//   else
-//     return etlSystems.value.filter((s) => s?.etlSystemPlatform?.name !== 'SDL')
-// })
 
 // TODO: We'll know the workflow type is SDL when we're opening this form,
 // so no need to watch. But, make sure the options are limited to CSV when the form
 // is open and make sure type is always SDL for an SDL orchestration system.
 // watch(
-//   () => dataSource.value.etlConfigurationSettings.type,
+//   () => dataSource.value.settings.type,
 //   (newVal, oldVal) => {
 //     // SDL workflows should only be run on machines running the SDL orchestration software.
-//     if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.etlSystemId = ''
+//     if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.orchestrationSystemId = ''
 //     if (newVal === 'SDL') {
-//       if (dataSource.value.etlConfigurationSettings.extractor.type !== 'local')
+//       if (dataSource.value.settings.extractor.type !== 'local')
 //         dataSource.value.switchExtractor('local')
-//       if (dataSource.value.etlConfigurationSettings.transformer.type !== 'CSV')
+//       if (dataSource.value.settings.transformer.type !== 'CSV')
 //         dataSource.value.switchTransformer('CSV')
 //     }
 //   }
@@ -217,8 +212,8 @@ const scheduleType = ref('interval')
 
 async function onSubmit() {
   if (
-    dataSource.value.etlConfigurationSettings.type === 'ETL' ||
-    dataSource.value.etlConfigurationSettings.type === 'SDL'
+    dataSource.value.settings.type === 'ETL' ||
+    dataSource.value.settings.type === 'SDL'
   ) {
     const etlValid = await etlFieldsRef.value.validate()
     if (!etlValid) return
@@ -250,13 +245,17 @@ async function onSubmit() {
 }
 
 onMounted(async () => {
-  if (dataSource.value.startTime) {
-    dataSource.value.startTime = toLocalDateString(dataSource.value.startTime)
+  if (dataSource.value.schedule.startTime) {
+    dataSource.value.schedule.startTime = toLocalDateString(
+      dataSource.value.schedule.startTime
+    )
   }
-  if (dataSource.value.endTime) {
-    dataSource.value.endTime = toLocalDateString(dataSource.value.endTime)
+  if (dataSource.value.schedule.endTime) {
+    dataSource.value.schedule.endTime = toLocalDateString(
+      dataSource.value.schedule.endTime
+    )
   }
-  etlSystems.value = await api.fetchWorkspaceEtlSystems(
+  orchestrationSystems.value = await api.fetchWorkspaceOrchestrationSystems(
     selectedWorkspace.value!.id
   )
   loaded.value = true

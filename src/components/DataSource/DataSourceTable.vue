@@ -74,7 +74,9 @@
               <v-btn-add
                 class="mx-2"
                 color="white"
-                @click.stop="openCreate = true"
+                @click.stop="
+                  openCreateDialog(item.items[0].raw.orchestrationSystem)
+                "
               >
                 Add data source
               </v-btn-add>
@@ -84,14 +86,19 @@
       </template>
 
       <template v-slot:item.status="{ item }">
-        <DataSourceStatus :status="item.status" :paused="item.paused" />
+        <DataSourceStatus
+          v-if="!item.isPlaceholder"
+          :status="item.statusName"
+          :paused="item.status.paused"
+        />
       </template>
 
       <template v-slot:item.actions="{ item }">
         <v-btn
+          v-if="!item.isPlaceholder"
           variant="text"
           color="black"
-          :icon="item.paused ? 'mdi-play' : 'mdi-pause'"
+          :icon="item.status.paused ? 'mdi-play' : 'mdi-pause'"
           @click.stop="togglePaused(item)"
         />
       </template>
@@ -100,6 +107,7 @@
     <v-dialog v-model="openEdit">
       <DataSourceForm
         :old-data-source="item"
+        :orchestration-system="item.orchestrationSystem"
         @close="openEdit = false"
         @updated="onUpdate"
       />
@@ -114,8 +122,12 @@
     </v-dialog>
   </v-card>
 
-  <v-dialog v-model="openCreate">
-    <DataSourceForm @close="openCreate = false" @created="refreshTable" />
+  <v-dialog v-model="openCreate" v-if="selectedOrchestrationSystem">
+    <DataSourceForm
+      :orchestration-system="selectedOrchestrationSystem"
+      @close="openCreate = false"
+      @created="refreshTable"
+    />
   </v-dialog>
 </template>
 
@@ -124,51 +136,75 @@ import { onMounted, ref, toRef } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { DataSource } from '@/models'
-import { EtlSystem } from '@/types'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
-import dataSourceFixtures from '@/utils/test/fixtures/dataSourceFixtures'
 import router from '@/router/router'
-import etlSystemFixtures from '@/utils/test/fixtures/etlSystemFixtures'
+import { getStatusText, OrchestrationSystem, Status } from '@/models/dataSource'
+import { StatusType } from '@/models/dataSource'
 
-const groupBy = [{ key: 'etlSystemName', order: 'asc' }] as const
+const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 
 const props = defineProps<{
   workspaceId: string
 }>()
 
 const openCreate = ref(false)
-const etlSystems = ref<EtlSystem[]>(etlSystemFixtures as EtlSystem[])
 const key = ref(0)
 const refreshTable = () => (key.value += 1)
 const search = ref()
+const orchestrationSystems = ref<OrchestrationSystem[]>([])
+const selectedOrchestrationSystem = ref<OrchestrationSystem>()
 
-const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
-  useTableLogic(
-    // async (wsId: string) => await api.fetchWorkspaceDataSources(wsId),
-    async (wsId: string) => dataSourceFixtures as DataSource[],
-    api.deleteDataSource,
-    DataSource,
-    toRef(props, 'workspaceId')
-  )
-
-const tableData = computed(() =>
-  items.value
-    .map((d) => ({
-      ...d,
-      status: d.getStatus(),
-      etlSystemName:
-        etlSystems.value.find((dl) => dl.id === d.etlSystemId)?.name || '',
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name))
+const { item, items, openEdit, openDelete, onDelete, onUpdate } = useTableLogic(
+  async (wsId: string) => await api.fetchWorkspaceDataSources(wsId),
+  api.deleteDataSource,
+  DataSource,
+  toRef(props, 'workspaceId')
 )
 
+const tableData = computed(() => {
+  const dsList = items.value.map((d) => ({
+    ...d,
+    statusName: getStatusText(d.status),
+    lastRun: d.status.lastRun,
+    nextRun: d.status.nextRun,
+    orchestrationSystemName: d.orchestrationSystem.name,
+    isPlaceholder: false,
+  }))
+
+  const existingNames = new Set(dsList.map((ds) => ds.orchestrationSystemName))
+
+  const placeholders = orchestrationSystems.value
+    .filter((os) => !existingNames.has(os.name))
+    .map((os) => ({
+      id: `placeholder-${os.id}`,
+      name: '',
+      statusName: 'Unknown' as StatusType,
+      status: {} as Status,
+      orchestrationSystemName: os.name,
+      orchestrationSystem: JSON.parse(JSON.stringify(os)),
+      isPlaceholder: true,
+    }))
+
+  const combined = [...dsList, ...placeholders]
+  return combined.sort((a, b) => {
+    if (a.orchestrationSystemName === b.orchestrationSystemName) {
+      return a.name.localeCompare(b.name)
+    }
+    return a.orchestrationSystemName.localeCompare(b.orchestrationSystemName)
+  })
+})
+
 async function togglePaused(ds: any) {
-  ds.paused = !ds.paused
-  console.log('ds', ds)
-  await api.updateDataSource({ paused: ds.paused } as DataSource)
+  ds.status.paused = !ds.status.paused
+  await api.updateDataSource({ status: ds.status } as DataSource)
+}
+
+const openCreateDialog = (selectedItem: any) => {
+  selectedOrchestrationSystem.value = selectedItem
+  openCreate.value = true
 }
 
 function getBadCountText(groupItems: any[]) {
@@ -189,6 +225,7 @@ function getBehindScheduleCountText(groupItems: any[]) {
 }
 
 const onRowClick = async (event: Event, item: any) => {
+  if (item.item.isPlaceholder) return
   await router.push({ name: 'DataSource', params: { id: item.item.id } })
 }
 
@@ -217,6 +254,6 @@ const headers = [
 ] as const
 
 onMounted(async () => {
-  // etlSystems.value = await api.fetchEtlSystems()
+  orchestrationSystems.value = await api.fetchOrchestrationSystems()
 })
 </script>

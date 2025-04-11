@@ -95,10 +95,7 @@
                 </v-col>
                 <v-col md="6">
                   <template
-                    v-if="
-                      dataSource.etlConfigurationSettings?.loader?.type ===
-                      'HydroServer'
-                    "
+                    v-if="dataSource.settings?.loader?.type === 'HydroServer'"
                   >
                     <DatastreamSelectAndDisplay
                       button-name="Select target datastream"
@@ -169,10 +166,7 @@
                 </v-col>
                 <v-col md="6" v-if="row.dataTransformation.doSaveRawDataCopy">
                   <template
-                    v-if="
-                      dataSource.etlConfigurationSettings?.loader?.type ===
-                      'HydroServer'
-                    "
+                    v-if="dataSource.settings?.loader?.type === 'HydroServer'"
                   >
                     <DatastreamSelectAndDisplay
                       button-name="Select target datastream"
@@ -234,7 +228,6 @@ import { useDataSourceStore } from '@/store/dataSource'
 import DatastreamSelectAndDisplay from '../Datastream/DatastreamSelectAndDisplay.vue'
 
 const { dataSource } = storeToRefs(useDataSourceStore())
-console.log('dataSource', dataSource)
 const props = defineProps({ oldPayload: Object as () => Payload })
 const emit = defineEmits(['created', 'updated', 'close'])
 const isEdit = computed(() => !!props.oldPayload || undefined)

@@ -53,7 +53,7 @@ const formComponents = {
 } as any
 
 const allowedOptions = computed(() => {
-  return dataSource.value.etlConfigurationSettings.type === 'SDL'
+  return dataSource.value.settings.type === 'SDL'
     ? ['CSV']
     : TRANSFORMER_OPTIONS
 })
