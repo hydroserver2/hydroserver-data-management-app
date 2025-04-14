@@ -18,18 +18,19 @@
         />
       </v-toolbar>
 
-      <component v-if="currentForm" :is="currentForm" />
+      <JSONTransformerForm v-if="transformer.type === 'JSON'" />
+      <CSVTransformerForm v-else-if="transformer.type === 'CSV'" />
     </v-card>
   </v-form>
 </template>
 
 <script setup lang="ts">
 import JSONTransformerForm from './JSONTransformerForm.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
 import CSVTransformerForm from './CSVTransformerForm.vue'
-import { TRANSFORMER_OPTIONS } from '@/models/dataSource'
+import { TRANSFORMER_OPTIONS, TransformerConfig } from '@/models/dataSource'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 
 const localForm = ref<VForm>()
@@ -47,18 +48,22 @@ const {
   isTransformerValid: isValid,
 } = storeToRefs(useETLStore())
 
-const formComponents = {
-  JSON: JSONTransformerForm,
-  CSV: CSVTransformerForm,
-} as any
+const savedTransformer: TransformerConfig = JSON.parse(
+  JSON.stringify(transformer.value)
+)
+
+watch(
+  () => transformer.value.type,
+  (newType) => {
+    if (savedTransformer.type === newType)
+      transformer.value = JSON.parse(JSON.stringify(savedTransformer))
+    else dataSource.value.switchTransformer(newType)
+  }
+)
 
 const allowedOptions = computed(() => {
   return dataSource.value.settings.type === 'SDL'
     ? ['CSV']
     : TRANSFORMER_OPTIONS
 })
-
-const currentForm = computed(
-  () => formComponents[transformer.value.type] || null
-)
 </script>

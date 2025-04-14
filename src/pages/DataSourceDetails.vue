@@ -94,6 +94,7 @@
   <v-dialog v-model="openDelete" width="40rem">
     <DeleteDataSourceCard
       @close="openDelete = false"
+      @delete="onDelete"
       :itemName="dataSource.name"
     />
   </v-dialog>
@@ -112,6 +113,7 @@ import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/dataSource'
 import { api } from '@/services/api'
 import { getStatusText } from '@/models/dataSource'
+import router from '@/router/router'
 
 const route = useRoute()
 const openEdit = ref(false)
@@ -210,6 +212,17 @@ const orchestrationSystemInformation = computed(() => {
     },
   ].filter(Boolean)
 })
+
+const onDelete = async () => {
+  try {
+    await api.deleteDataSource(dataSource.value.id)
+    await router.push({ name: 'Orchestration' })
+    Snackbar.success('Datasource deleted.')
+  } catch (error: any) {
+    Snackbar.error(error.message)
+    console.error('Error deleting datasource', error)
+  }
+}
 
 const fetchData = async () => {
   try {

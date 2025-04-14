@@ -14,7 +14,10 @@ import {
   Workspace,
 } from '@/types'
 import { Payload, DataSource } from '@/models'
-import { OrchestrationSystem } from '@/models/dataSource'
+import {
+  convertDataSourceToPostObject,
+  OrchestrationSystem,
+} from '@/models/dataSource'
 import { getCSRFToken } from './getCSRFToken'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
@@ -351,23 +354,21 @@ export const api = {
     apiMethods.delete(`${ETL_SYSTEMS_BASE}/${id}`),
 
   createDataSource: async (dataSource: DataSource) => {
-    const payload = {
-      name: dataSource.name,
-      settings: dataSource.settings,
-      workspaceId: dataSource.workspaceId,
-      orchestrationSystemId: dataSource.orchestrationSystem.id,
-      schedule: dataSource.schedule,
-      status: dataSource.status,
-    }
-    return apiMethods.post(DATA_SOURCES_BASE, payload)
+    return apiMethods.post(
+      DATA_SOURCES_BASE,
+      convertDataSourceToPostObject(dataSource)
+    )
   },
   fetchDataSources: async () => apiMethods.fetch(DATA_SOURCES_BASE),
   fetchWorkspaceDataSources: async (id: string) =>
     apiMethods.fetch(`${DATA_SOURCES_BASE}?workspace_id=${id}`),
   fetchDataSource: async (id: string) =>
     apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}`),
-  updateDataSource: async (newS: DataSource, oldS: DataSource | null = null) =>
-    apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS, oldS),
+  updateDataSource: async (newS: DataSource) =>
+    apiMethods.patch(
+      `${DATA_SOURCES_BASE}/${newS.id}`,
+      convertDataSourceToPostObject(newS)
+    ),
   deleteDataSource: async (id: string) =>
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 

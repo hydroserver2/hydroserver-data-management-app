@@ -16,7 +16,8 @@
         />
       </v-toolbar>
 
-      <component v-if="currentForm" :is="currentForm" />
+      <HTTPExtractorForm v-if="extractor.type === 'HTTP'" />
+      <LocalFileExtractorForm v-else-if="extractor.type === 'local'" />
     </v-card>
   </v-form>
 </template>
@@ -24,10 +25,10 @@
 <script setup lang="ts">
 import HTTPExtractorForm from './HTTPExtractorForm.vue'
 import LocalFileExtractorForm from './LocalFileExtractorForm.vue'
-import { computed, ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
-import { EXTRACTOR_OPTIONS } from '@/models/dataSource'
+import { EXTRACTOR_OPTIONS, ExtractorConfig } from '@/models/dataSource'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 
 const localForm = ref<VForm>()
@@ -39,14 +40,22 @@ async function validate() {
 
 defineExpose({ validate })
 
-const { extractor, isExtractorValid: isValid } = storeToRefs(useETLStore())
+const {
+  extractor,
+  isExtractorValid: isValid,
+  dataSource,
+} = storeToRefs(useETLStore())
 
-const formComponents = {
-  HTTP: HTTPExtractorForm,
-  local: LocalFileExtractorForm,
-} as any
+const savedExtractor: ExtractorConfig = JSON.parse(
+  JSON.stringify(extractor.value)
+)
 
-const currentForm = computed(
-  () => formComponents[extractor.value!.type] || null
+watch(
+  () => extractor.value.type,
+  (newType) => {
+    if (savedExtractor.type === newType)
+      extractor.value = JSON.parse(JSON.stringify(savedExtractor))
+    else dataSource.value.switchExtractor(newType)
+  }
 )
 </script>

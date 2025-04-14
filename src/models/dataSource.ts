@@ -1,4 +1,5 @@
 import { Datastream } from '@/types'
+import { Payload } from './payload'
 
 export const TIMEZONE_OFFSETS = [
   { title: 'UTC-12:00 (International Date Line West)', value: '-1200' },
@@ -89,7 +90,7 @@ export interface LocalFileExtractor extends BaseExtractor {
 
 export type ExtractorConfig = HTTPExtractor | LocalFileExtractor
 
-const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
+export const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
   HTTP: {
     type: 'HTTP',
     urlTemplate:
@@ -120,6 +121,17 @@ interface JSONtransformer extends BaseTransformer {
   type: 'JSON'
   JMESPath: string
 }
+
+export const TIMESTAMP_OPTIONS = [
+  { label: 'UTC (YYYY-MM-DD hh:mm:ss)', value: 'UTC' },
+  {
+    label: 'Constant Offset (YYYY-MM-DD hh:mm:ss; set offset)',
+    value: 'constant',
+  },
+  { label: 'Full ISO 8601 (YYYY-MM-DD hh:mm:ss.ssss+hh:mm)', value: 'ISO8601' },
+  { label: 'Custom Format', value: 'custom' },
+] as const
+export type TimestampFormatType = (typeof TIMESTAMP_OPTIONS)[number]['value']
 
 export interface CSVTransformer extends BaseTransformer {
   type: 'CSV'
@@ -177,6 +189,7 @@ interface EtlConfiguration {
   extractor: ExtractorConfig
   transformer: TransformerConfig
   loader: LoaderConfig
+  payloads: Payload[]
 }
 
 export type PartialDatastream = Pick<
@@ -243,6 +256,7 @@ export class DataSource {
     extractor: JSON.parse(JSON.stringify(extractorDefaults['HTTP'])),
     transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
     loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
+    payloads: [],
   }
   id = ''
   workspaceId: string = ''
@@ -262,6 +276,22 @@ export class DataSource {
   constructor(init?: Partial<DataSource>) {
     Object.assign(this, init)
   }
+
+  switchExtractor(newType: ExtractorType) {
+    this.settings.extractor = JSON.parse(
+      JSON.stringify(extractorDefaults[newType])
+    )
+  }
+
+  switchTransformer(newType: TransformerType) {
+    this.settings.transformer = JSON.parse(
+      JSON.stringify(transformerDefaults[newType])
+    )
+  }
+
+  switchLoader(newType: LoaderType) {
+    this.settings.loader = JSON.parse(JSON.stringify(loaderDefaults[newType]))
+  }
 }
 
 export function getStatusText(status: Status): StatusType {
@@ -279,20 +309,14 @@ export function getStatusText(status: Status): StatusType {
   }
   return 'Unknown'
 }
-// switchExtractor(newType: ExtractorType) {
-//   this.settings.extractor = JSON.parse(
-//     JSON.stringify(extractorDefaults[newType])
-//   )
-// }
 
-// switchTransformer(newType: TransformerType) {
-//   this.settings.transformer = JSON.parse(
-//     JSON.stringify(transformerDefaults[newType])
-//   )
-// }
-
-// switchLoader(newType: LoaderType) {
-//   this.settings.loader = JSON.parse(
-//     JSON.stringify(loaderDefaults[newType])
-//   )
-// }
+export function convertDataSourceToPostObject(dataSource: DataSource) {
+  return {
+    name: dataSource.name,
+    settings: dataSource.settings,
+    workspaceId: dataSource.workspaceId,
+    orchestrationSystemId: dataSource.orchestrationSystem.id,
+    schedule: dataSource.schedule,
+    status: dataSource.status,
+  }
+}

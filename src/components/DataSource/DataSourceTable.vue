@@ -103,23 +103,6 @@
         />
       </template>
     </v-data-table-virtual>
-
-    <v-dialog v-model="openEdit">
-      <DataSourceForm
-        :old-data-source="item"
-        :orchestration-system="item.orchestrationSystem"
-        @close="openEdit = false"
-        @updated="onUpdate"
-      />
-    </v-dialog>
-
-    <v-dialog v-model="openDelete" max-width="500">
-      <DeleteDataSourceCard
-        :item-name="item.name"
-        @delete="onDelete"
-        @close="openDelete = false"
-      />
-    </v-dialog>
   </v-card>
 
   <v-dialog v-model="openCreate" v-if="selectedOrchestrationSystem">
@@ -132,40 +115,59 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, toRef } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import { DataSource } from '@/models'
 import { api } from '@/services/api'
 import { computed } from 'vue'
-import { useTableLogic } from '@/composables/useTableLogic'
-import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
 import router from '@/router/router'
 import { getStatusText, OrchestrationSystem, Status } from '@/models/dataSource'
 import { StatusType } from '@/models/dataSource'
-
-const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 
 const props = defineProps<{
   workspaceId: string
 }>()
 
 const openCreate = ref(false)
-const key = ref(0)
-const refreshTable = () => (key.value += 1)
 const search = ref()
 const orchestrationSystems = ref<OrchestrationSystem[]>([])
+const dataSources = ref<DataSource[]>([])
 const selectedOrchestrationSystem = ref<OrchestrationSystem>()
+const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 
-const { item, items, openEdit, openDelete, onDelete, onUpdate } = useTableLogic(
-  async (wsId: string) => await api.fetchWorkspaceDataSources(wsId),
-  api.deleteDataSource,
-  DataSource,
-  toRef(props, 'workspaceId')
+const fetchOrchestrationData = async (newId: string) => {
+  try {
+    const [orchestrationSystemResponse, dataSourceResponse] = await Promise.all(
+      [api.fetchOrchestrationSystems(), api.fetchDataSources()]
+    )
+
+    orchestrationSystems.value = orchestrationSystemResponse.filter(
+      (os: OrchestrationSystem) => os.workspaceId === newId || !os.workspaceId
+    )
+    dataSources.value = dataSourceResponse.filter(
+      (d: DataSource) => d.workspaceId === newId
+    )
+  } catch (error) {
+    console.error('Error fetching orchestration data', error)
+  }
+}
+
+const refreshTable = async () => {
+  await fetchOrchestrationData(props.workspaceId)
+}
+
+watch(
+  () => props.workspaceId,
+  async (newId) => {
+    if (newId == null) return
+    await fetchOrchestrationData(newId)
+  },
+  { immediate: true }
 )
 
 const tableData = computed(() => {
-  const dsList = items.value.map((d) => ({
+  const dsList = dataSources.value.map((d) => ({
     ...d,
     statusName: getStatusText(d.status),
     lastRun: d.status.lastRun,
@@ -252,8 +254,4 @@ const headers = [
     align: 'end',
   },
 ] as const
-
-onMounted(async () => {
-  orchestrationSystems.value = await api.fetchOrchestrationSystems()
-})
 </script>

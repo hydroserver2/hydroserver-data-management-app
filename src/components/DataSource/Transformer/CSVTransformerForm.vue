@@ -179,11 +179,20 @@ import {
   CSVTransformer,
   IdentifierType,
   TIMEZONE_OFFSETS,
+  TimestampFormatType,
+  TIMESTAMP_OPTIONS,
 } from '@/models/dataSource'
 
 const { transformer } = storeToRefs(useETLStore())
 
-const timestampFormatType = ref('ISO8601')
+const TIMESTAMP_VALUES = TIMESTAMP_OPTIONS.map((opt) => opt.value)
+const savedFormat = (transformer.value as CSVTransformer).timestampFormat
+
+const timestampFormatType = ref<TimestampFormatType>(
+  TIMESTAMP_VALUES.includes(savedFormat as TimestampFormatType)
+    ? (savedFormat as TimestampFormatType)
+    : 'custom'
+)
 
 const openStrftimeHelp = () =>
   window.open('https://devhints.io/strftime', '_blank', 'noreferrer')
@@ -193,7 +202,14 @@ watch(
   (newType) => {
     transformer.value.timestampKey =
       newType === IdentifierType.Name ? 'timestamp' : '1'
-  },
-  { immediate: true }
+  }
+)
+
+watch(
+  () => timestampFormatType.value,
+  (newType) => {
+    if (newType === 'custom')
+      (transformer.value as CSVTransformer).timestampFormat = savedFormat
+  }
 )
 </script>

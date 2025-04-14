@@ -57,6 +57,7 @@
           rounded="lg"
           variant="outlined"
           hide-details
+          clearable
         />
       </v-col>
     </v-row>

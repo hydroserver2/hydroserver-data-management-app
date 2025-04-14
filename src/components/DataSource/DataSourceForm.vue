@@ -224,7 +224,7 @@ async function onSubmit() {
 
   try {
     const newItem: DataSource | null = isEdit.value
-      ? await api.updateDataSource(dataSource.value, props.oldDataSource!)
+      ? await api.updateDataSource(dataSource.value)
       : await api.createDataSource(dataSource.value)
 
     if (!newItem) {
@@ -234,7 +234,6 @@ async function onSubmit() {
 
     if (isEdit.value) {
       emit('updated', newItem)
-      return
     } else {
       emit('created', newItem.id)
     }
