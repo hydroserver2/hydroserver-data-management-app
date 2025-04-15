@@ -113,7 +113,7 @@
                   />
                 </v-col>
               </v-row>
-              <v-row align="center" class="mx-1 mt-0">
+              <!-- <v-row align="center" class="mx-1 mt-0">
                 <v-col md="6">
                   <v-checkbox
                     :v-model="!!row.dataTransformation"
@@ -187,7 +187,7 @@
                     hide-details
                   />
                 </v-col>
-              </v-row>
+              </v-row> -->
               <v-row class="mx-1">
                 <v-spacer />
                 <v-col cols="auto">

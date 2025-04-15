@@ -22,16 +22,15 @@
           </v-card-item>
 
           <v-card-text>
-            <v-select
+            <!-- <v-select
               v-model="dataSource.settings.type"
               label="Workflow type *"
               :items="WORKFLOW_TYPES"
               variant="outlined"
               density="compact"
-              class="mb-1"
-            />
+              class="mb-3"
+            /> -->
             <v-text-field
-              class="mt-2"
               v-model="dataSource.name"
               label="Data source name *"
               :rules="rules.requiredAndMaxLength255"
