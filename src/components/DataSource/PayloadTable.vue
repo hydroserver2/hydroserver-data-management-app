@@ -51,18 +51,44 @@
   </v-card>
 
   <v-dialog v-model="openCreate" width="80rem">
-    <PayloadForm @close="openCreate = false" />
+    <PayloadForm @close="openCreate = false" :old-payload-index="-1" />
   </v-dialog>
 
   <v-dialog v-model="openEdit" width="80rem">
-    <PayloadForm :oldPayload="selectedPayload" @close="openEdit = false" />
+    <PayloadForm
+      :oldPayload="selectedPayload"
+      :old-payload-index="
+        payloads.findIndex(
+          (p) => JSON.stringify(p) === JSON.stringify(selectedPayload)
+        )
+      "
+      @close="openEdit = false"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="openDelete" width="40rem">
+    <DeletePayloadCard
+      v-if="selectedPayload"
+      :payload="selectedPayload"
+      :payload-index="
+        payloads.findIndex(
+          (p) => JSON.stringify(p) === JSON.stringify(selectedPayload)
+        )
+      "
+      @close="openDelete = false"
+    ></DeletePayloadCard>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
 import PayloadForm from '@/components/DataSource/PayloadForm.vue'
+import DeletePayloadCard from './Payload/DeletePayloadCard.vue'
 import { Payload } from '@/models'
+import { useETLStore } from '@/store/etl'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
+
+const { payloads } = storeToRefs(useETLStore())
 
 const selectedPayload = ref<Payload>()
 const search = ref()
@@ -81,39 +107,6 @@ const payloadHeaders = [
   },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
-
-const payloads = [
-  {
-    name: 'Example Payload 1',
-    mappings: [
-      {
-        sourceIdentifier: 'water_level_ft',
-        targetIdentifier: '1928-125-3484-8348',
-        dataTransformation: null,
-      },
-      {
-        sourceIdentifier: 'temperature_f',
-        targetIdentifier: '1be5f967-d855-404a-8a33-a70ffe430b73',
-        dataTransformation: null,
-      },
-    ],
-  },
-  {
-    name: 'Example Payload 2',
-    mappings: [
-      {
-        sourceIdentifier: 'water_level_ft',
-        targetIdentifier: '1928-125-3484-8348',
-        dataTransformation: null,
-      },
-      {
-        sourceIdentifier: 'temperature_f',
-        targetIdentifier: '0985-157-3486-3257',
-        dataTransformation: null,
-      },
-    ],
-  },
-] as Payload[]
 
 function openDialog(selectedItem: Payload, dialog: string) {
   selectedPayload.value = new Payload(selectedItem)

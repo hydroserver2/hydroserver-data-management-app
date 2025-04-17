@@ -147,11 +147,7 @@ import DataSourceETLFields from './DataSourceETLFields.vue'
 import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
 import { VForm } from 'vuetify/components'
-import {
-  INTERVAL_UNIT_OPTIONS,
-  WORKFLOW_TYPES,
-  OrchestrationSystem,
-} from '@/models/dataSource'
+import { INTERVAL_UNIT_OPTIONS, OrchestrationSystem } from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { api } from '@/services/api'

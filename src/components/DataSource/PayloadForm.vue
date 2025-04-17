@@ -20,6 +20,25 @@
           :rules="rules.requiredAndMaxLength255"
         />
 
+        <template v-if="extractor.type === 'HTTP'">
+          <v-row>
+            <v-col col="auto">
+              <v-card-title
+                class="text-subtitle-1 text-medium-emphasis px-0 mb-1"
+                >HTTP extractor payload-level configurations</v-card-title
+              >
+            </v-col>
+          </v-row>
+          <template v-for="variable in extractor.urlTemplateVariables">
+            <v-text-field
+              v-if="!variable.isDynamic"
+              v-model="payload.extractorVariables[variable.name]"
+              label="Payload name *"
+              :rules="rules.requiredAndMaxLength255"
+            />
+          </template>
+        </template>
+
         <v-row align="center">
           <v-col cols="auto">
             <v-card-title class="text-subtitle-1 text-medium-emphasis px-0 mb-1"
@@ -42,7 +61,7 @@
             <v-btn-add
               variant="text"
               class="mr-2"
-              @click="() => payload.addMapping()"
+              @click="onAddMapping"
               color="secondary-darken-1"
             >
               Add row
@@ -65,7 +84,12 @@
           this data source.
         </div>
 
-        <v-expansion-panels variant="accordion" multiple elevation="1">
+        <v-expansion-panels
+          v-model="expandedPanels"
+          variant="accordion"
+          multiple
+          elevation="1"
+        >
           <v-expansion-panel
             v-for="(row, index) in payload.mappings"
             :key="index"
@@ -195,7 +219,7 @@
                     icon
                     variant="text"
                     color="error"
-                    @click="() => payload.removeMapping(index)"
+                    @click="onRemoveMapping(index)"
                   >
                     <v-icon>mdi-trash-can-outline</v-icon>
                   </v-btn>
@@ -222,37 +246,68 @@ import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { Payload } from '@/models'
+import { addMapping } from '@/models/payload'
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDataSourceStore } from '@/store/dataSource'
 import DatastreamSelectAndDisplay from '../Datastream/DatastreamSelectAndDisplay.vue'
+import { useETLStore } from '@/store/etl'
 
-const { dataSource } = storeToRefs(useDataSourceStore())
-const props = defineProps({ oldPayload: Object as () => Payload })
+const props = defineProps({
+  oldPayload: { type: Object as () => Payload },
+  oldPayloadIndex: { type: Number, required: true },
+})
+
+const { dataSource, payloads, extractor } = storeToRefs(useETLStore())
+const { updateLinkedDatastreams } = useETLStore()
+
 const emit = defineEmits(['created', 'updated', 'close'])
 const isEdit = computed(() => !!props.oldPayload || undefined)
 const valid = ref(false)
 const myForm = ref<VForm>()
 
-const payload = ref<Payload>(new Payload())
-if (props.oldPayload) payload.value = new Payload(props.oldPayload!)
+const payload = ref<Payload>(
+  props.oldPayload
+    ? JSON.parse(JSON.stringify(props.oldPayload))
+    : new Payload()
+)
 
 const showDataTransformationHelp = ref(false)
+const expandedPanels = ref<number[]>([])
+
+function onAddMapping() {
+  addMapping(payload.value)
+  const newIndex = payload.value.mappings.length - 1
+  expandedPanels.value.push(newIndex)
+}
+
+function onRemoveMapping(index: number) {
+  payload.value.mappings.splice(index, 1)
+  expandedPanels.value = expandedPanels.value
+    .filter((p) => p !== index)
+    .map((p) => (p > index ? p - 1 : p))
+}
 
 async function uploadItem() {
   await myForm.value?.validate()
   if (!valid.value) return
-  if (isEdit.value)
-    return await api.updateDataSourcePayload(payload.value, props.oldPayload!)
-  return await api.createDataSourcePayload(payload.value)
+
+  if (props.oldPayloadIndex === -1)
+    // Reactivity doesn't persist in deeply nested arrays, therefore can't do arr.push()
+    payloads.value = payloads.value
+      ? [...payloads.value, payload.value]
+      : [payload.value]
+  else payloads.value[props.oldPayloadIndex] = payload.value
+  console.log('datasource?', dataSource)
+  await updateLinkedDatastreams(payload.value, props.oldPayload)
+  const updatedDataSource = await api.updateDataSource(dataSource.value)
 }
 
 async function onSubmit() {
   try {
-    const newItem = await uploadItem()
-    if (!newItem) return
-    if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem.id)
+    await uploadItem()
+    // if (!newItem) return
+    // if (isEdit.value) emit('updated', newItem)
+    // else emit('created', newItem.id)
   } catch (error) {
     console.error('Error uploading payload', error)
   }

@@ -110,15 +110,15 @@ import PayloadTable from '@/components/DataSource/PayloadTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
-import { useDataSourceStore } from '@/store/dataSource'
 import { api } from '@/services/api'
 import { getStatusText } from '@/models/dataSource'
 import router from '@/router/router'
+import { useETLStore } from '@/store/etl'
 
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const { dataSource } = storeToRefs(useDataSourceStore())
+const { dataSource } = storeToRefs(useETLStore())
 
 const formatTime = (time: string) =>
   new Intl.DateTimeFormat('en-US', {

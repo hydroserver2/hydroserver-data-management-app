@@ -372,30 +372,22 @@ export const api = {
   deleteDataSource: async (id: string) =>
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 
-  fetchDataSourceLinkedDatastreams: async (id: string) =>
-    apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}/datastreams`),
   linkDatastreamToDataSource: async (
     dataSourceId: string,
     datastreamId: string
   ) =>
-    apiMethods.fetch(
+    apiMethods.post(
       `${DATA_SOURCES_BASE}/${dataSourceId}/datastreams/${datastreamId}`
     ),
-  // TODO: Linked datastream endpoints
+  unlinkDatastreamFromDataSource: async (
+    dataSourceId: string,
+    datastreamId: string
+  ) =>
+    apiMethods.delete(
+      `${DATA_SOURCES_BASE}/${dataSourceId}/datastreams/${datastreamId}`
+    ),
 
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
-
-  createDataSourcePayload: async (payload: Payload) =>
-    apiMethods.post(
-      `${DATA_SOURCES_BASE}/${payload.dataSourceId}/payload`,
-      payload
-    ),
-  updateDataSourcePayload: async (newPayload: Payload, oldPayload?: Payload) =>
-    apiMethods.patch(
-      `${DATA_SOURCES_BASE}/${newPayload.dataSourceId}/${newPayload.id}`,
-      newPayload,
-      oldPayload
-    ),
 
   fetchSiteTypes: async () =>
     apiMethods.fetch(`${VOCABULARY_BASE}/things/site-types`),

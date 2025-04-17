@@ -147,14 +147,12 @@ export type TransformerConfig = JSONtransformer | CSVTransformer
 export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
-    mapping: '',
     timestampKey: 'timestamp',
     JMESPath: '',
     identifierType: IdentifierType.Name,
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
-    mapping: '',
     timestampKey: 'timestamp',
     timestampFormat: 'ISO8601',
     headerRow: 1,
@@ -206,8 +204,6 @@ export type PartialDatastream = Pick<
   | 'intendedTimeSpacing'
   | 'intendedTimeSpacingUnit'
 >
-
-export interface PayloadConfigurations {}
 
 export const DATASOURCE_STATUS_OPTIONS = [
   { color: 'green', title: 'OK' },
