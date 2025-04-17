@@ -33,7 +33,7 @@
             <v-text-field
               v-if="!variable.isDynamic"
               v-model="payload.extractorVariables[variable.name]"
-              label="Payload name *"
+              :label="`${variable.name} *`"
               :rules="rules.requiredAndMaxLength255"
             />
           </template>
@@ -287,7 +287,7 @@ function onRemoveMapping(index: number) {
     .map((p) => (p > index ? p - 1 : p))
 }
 
-async function uploadItem() {
+async function onSubmit() {
   await myForm.value?.validate()
   if (!valid.value) return
 
@@ -297,20 +297,9 @@ async function uploadItem() {
       ? [...payloads.value, payload.value]
       : [payload.value]
   else payloads.value[props.oldPayloadIndex] = payload.value
-  console.log('datasource?', dataSource)
+
   await updateLinkedDatastreams(payload.value, props.oldPayload)
   const updatedDataSource = await api.updateDataSource(dataSource.value)
-}
-
-async function onSubmit() {
-  try {
-    await uploadItem()
-    // if (!newItem) return
-    // if (isEdit.value) emit('updated', newItem)
-    // else emit('created', newItem.id)
-  } catch (error) {
-    console.error('Error uploading payload', error)
-  }
   emit('close')
 }
 </script>
