@@ -93,8 +93,8 @@ export type ExtractorConfig = HTTPExtractor | LocalFileExtractor
 export const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
   HTTP: {
     type: 'HTTP',
-    urlTemplate:
-      'https://example.com/{path_parameter}?query_parameter={query_parameter}',
+    urlTemplate: '',
+    // 'https://example.com/{path_parameter}?query_parameter={query_parameter}',
     urlTemplateVariables: [],
   } as HTTPExtractor,
   local: {

@@ -20,7 +20,8 @@
           :rules="rules.requiredAndMaxLength255"
         />
 
-        <template v-if="extractor.type === 'HTTP'">
+        <!-- TODO: Comment out once SDL supports template variables -->
+        <!-- <template v-if="extractor.type === 'HTTP'">
           <v-row>
             <v-col col="auto">
               <v-card-title
@@ -37,7 +38,7 @@
               :rules="rules.requiredAndMaxLength255"
             />
           </template>
-        </template>
+        </template> -->
 
         <v-row align="center">
           <v-col cols="auto">
