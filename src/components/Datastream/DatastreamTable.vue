@@ -216,14 +216,6 @@
       @delete="onDelete"
     />
   </v-dialog>
-
-  <!-- <v-dialog v-model="openLinker" width="40rem">
-    <DatastreamSourceLinker
-      :datastream="item"
-      @close="openLinker = false"
-      @updated="handleLinkUpdated"
-    />
-  </v-dialog> -->
 </template>
 
 <script setup lang="ts">

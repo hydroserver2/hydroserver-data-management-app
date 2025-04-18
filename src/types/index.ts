@@ -141,7 +141,6 @@ export class Datastream {
   timeAggregationInterval: number | null
   timeAggregationIntervalUnit: string
   dataSourceId?: string | null
-  dataSourceColumn?: string | number | null
   valueCount: number
 
   constructor(thingId?: string) {
