@@ -329,6 +329,7 @@ const headers = [
   { title: 'Workspace name', key: 'name' },
   { title: 'Visibility', key: 'isPrivate' },
   { title: 'Your role', key: 'collaboratorRole' },
+  { title: 'Id', key: 'id' },
   { title: 'Actions', key: 'actions', align: 'end' },
 ] as const
 
