@@ -23,6 +23,7 @@
           class="pt-2"
           v-model="selectedWorkspaces"
           :items="workspaces"
+          :item-props="(ws) => ({ subtitle: `Owned by: ${ws?.owner?.name}` })"
           item-title="name"
           return-object
           clearable
