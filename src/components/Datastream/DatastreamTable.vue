@@ -110,8 +110,8 @@
         <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
           <template v-slot:activator="{ props }">
             <v-icon
-              :icon="item.isPrivate ? 'mdi-eye' : 'mdi-eye-off'"
-              :color="item.isPrivate ? 'grey' : 'grey-lighten-1'"
+              :icon="item.isPrivate ? 'mdi-eye-off' : 'mdi-eye'"
+              :color="item.isPrivate ? 'grey-lighten-1' : 'grey'"
               small
               v-bind="props"
               @click="toggleVisibility(item)"
@@ -279,7 +279,7 @@ const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
 
 const visibleDatastreams = computed(() => {
   return items.value
-    .filter((d) => d.isPrivate || canViewDatastreams)
+    .filter((d) => !d.isPrivate || canViewDatastreams.value)
     .map((d) => ({
       ...d,
       chartOpen: false,
@@ -321,7 +321,7 @@ function formatDate(dateString: string) {
 
 async function toggleDataVisibility(datastream: Datastream) {
   datastream.isVisible = !datastream.isVisible
-  if (datastream.isVisible) datastream.isPrivate = true
+  if (datastream.isVisible) datastream.isPrivate = false
   patchDatastream({
     id: datastream.id,
     isPrivate: datastream.isPrivate,
@@ -331,7 +331,7 @@ async function toggleDataVisibility(datastream: Datastream) {
 
 async function toggleVisibility(datastream: Datastream) {
   datastream.isPrivate = !datastream.isPrivate
-  if (!datastream.isPrivate) datastream.isVisible = false
+  if (datastream.isPrivate) datastream.isVisible = false
   patchDatastream({
     id: datastream.id,
     isPrivate: datastream.isPrivate,
