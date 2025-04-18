@@ -142,8 +142,11 @@ const fetchOrchestrationData = async (newId: string) => {
       [api.fetchOrchestrationSystems(), api.fetchDataSources()]
     )
 
+    // TODO: Allow HydroShare as an option once we have archival functionality in the orchestration system
     orchestrationSystems.value = orchestrationSystemResponse.filter(
-      (os: OrchestrationSystem) => os.workspaceId === newId || !os.workspaceId
+      (os: OrchestrationSystem) =>
+        (os.workspaceId === newId || !os.workspaceId) &&
+        os.type !== 'HydroShare'
     )
     dataSources.value = dataSourceResponse.filter(
       (d: DataSource) => d.workspaceId === newId
