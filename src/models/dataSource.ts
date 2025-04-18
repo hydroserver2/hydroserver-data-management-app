@@ -249,7 +249,7 @@ export class DataSource {
   name = ''
   settings: EtlConfiguration = {
     type: 'SDL',
-    extractor: JSON.parse(JSON.stringify(extractorDefaults['HTTP'])),
+    extractor: JSON.parse(JSON.stringify(extractorDefaults['local'])),
     transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
     loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
     payloads: [],
