@@ -171,10 +171,21 @@
             <v-list-item
               prepend-icon="mdi-download"
               title="Download Data"
-              @click="downloadDatastreamCSV(item.id)"
+              @click="onDownload(item.id)"
             />
           </v-list>
         </v-menu>
+      </v-row>
+      <v-row v-if="downloading[item.id]">
+        <v-col class="px-0">
+          <v-progress-circular
+            indeterminate
+            size="16"
+            width="2"
+            color="primary"
+          />
+          preparing file...
+        </v-col>
       </v-row>
     </template>
   </v-data-table-virtual>
@@ -220,7 +231,7 @@ import DatastreamPopupPlot from '@/components/Datastream/DatastreamPopupPlot.vue
 import DatastreamForm from '@/components/Datastream/DatastreamForm.vue'
 import DatastreamDeleteCard from './DatastreamDeleteCard.vue'
 import Sparkline from '@/components/Sparkline.vue'
-import { computed, ref, toRef } from 'vue'
+import { computed, reactive, ref, toRef } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
 import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
@@ -230,6 +241,7 @@ import { DataArray, Datastream, Workspace } from '@/types'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
+import { Snackbar } from '@/utils/notifications'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
@@ -240,6 +252,7 @@ const actionKey = ref(1)
 const openCreate = ref(false)
 const workspaceRef = toRef(props, 'workspace')
 const thingIdRef = computed(() => thing.value!.id)
+const downloading = reactive<Record<string, boolean>>({})
 
 const {
   canCreateDatastreams,
@@ -283,6 +296,20 @@ const visibleDatastreams = computed(() => {
       )?.name,
     }))
 })
+
+const onDownload = async (datastreamId: string) => {
+  if (downloading[datastreamId]) return
+  downloading[datastreamId] = true
+
+  try {
+    await downloadDatastreamCSV(datastreamId)
+  } catch (err: any) {
+    console.error('Error downloading datastream CSV', err)
+    Snackbar.error(err.message)
+  } finally {
+    downloading[datastreamId] = false
+  }
+}
 
 const getMostRecentObsTime = (dataArray: DataArray) => {
   if (!dataArray.length) return undefined
