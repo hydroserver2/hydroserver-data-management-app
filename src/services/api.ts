@@ -369,6 +369,8 @@ export const api = {
       `${DATA_SOURCES_BASE}/${newS.id}`,
       convertDataSourceToPostObject(newS)
     ),
+  updateDataSourcePartial: async (newS: DataSource) =>
+    apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS),
   deleteDataSource: async (id: string) =>
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 

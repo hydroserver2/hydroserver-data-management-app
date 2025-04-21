@@ -204,7 +204,10 @@ const tableData = computed(() => {
 
 async function togglePaused(ds: any) {
   ds.status.paused = !ds.status.paused
-  await api.updateDataSource({ status: ds.status } as DataSource)
+  await api.updateDataSourcePartial({
+    status: ds.status,
+    id: ds.id,
+  } as DataSource)
 }
 
 const openCreateDialog = (selectedItem: any) => {

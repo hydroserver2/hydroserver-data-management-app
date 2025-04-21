@@ -1,8 +1,19 @@
 <template>
   <v-container v-if="dataSource">
-    <v-row class="my-4">
+    <v-row class="my-4" align="center">
       <v-col cols="auto">
         <h5 class="text-h5">{{ dataSource.name }}</h5>
+      </v-col>
+      <v-spacer />
+      <v-col cols="auto">
+        <v-btn
+          variant="text"
+          color="black"
+          :prepend-icon="dataSource.status.paused ? 'mdi-play' : 'mdi-pause'"
+          @click.stop="togglePaused(dataSource)"
+        >
+          Pause/Run
+        </v-btn>
       </v-col>
     </v-row>
 
@@ -111,7 +122,7 @@ import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
-import { getStatusText } from '@/models/dataSource'
+import { DataSource, getStatusText } from '@/models/dataSource'
 import router from '@/router/router'
 import { useETLStore } from '@/store/etl'
 
@@ -212,6 +223,14 @@ const orchestrationSystemInformation = computed(() => {
     },
   ].filter(Boolean)
 })
+
+async function togglePaused(ds: any) {
+  ds.status.paused = !ds.status.paused
+  await api.updateDataSourcePartial({
+    status: ds.status,
+    id: ds.id,
+  } as DataSource)
+}
 
 const onDelete = async () => {
   try {
