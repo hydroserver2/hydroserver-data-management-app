@@ -48,7 +48,7 @@
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="dataSource.schedule.startTime"
-                  label="Start Time"
+                  label="Start Time (UTC)"
                   hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
                   type="datetime-local"
                   density="compact"
@@ -59,7 +59,7 @@
               <v-col>
                 <v-text-field
                   v-model="dataSource.schedule.endTime"
-                  label="End Time"
+                  label="End Time (UTC)"
                   hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
                   type="datetime-local"
                   clearable
