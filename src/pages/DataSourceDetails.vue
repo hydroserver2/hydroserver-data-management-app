@@ -181,21 +181,21 @@ const dataSourceInformation = computed(() => {
     },
     {
       icon: 'mdi-history',
-      label: 'Last synced',
+      label: 'Last run',
       value: dataSource.value.status.lastRun
         ? formatTime(dataSource.value.status.lastRun)
         : '',
     },
     {
       icon: 'mdi-calendar-sync',
-      label: 'Next sync',
+      label: 'Next run',
       value: dataSource.value.status.nextRun
         ? formatTime(dataSource.value.status.nextRun)
         : '',
     },
     {
       icon: 'mdi-message-text-outline',
-      label: 'Last sync message',
+      label: 'Last run message',
       value: dataSource.value.status.lastRunMessage,
     },
     {
@@ -250,6 +250,7 @@ const fetchData = async () => {
     ])
 
     dataSource.value = source
+    console.log('datasource', dataSource.value)
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')
     console.error('error fetching dataSource', e)
