@@ -7,7 +7,7 @@
       :icon="step.icon"
       fill-dot
       style="cursor: pointer"
-      @click="toggleETLProcess(step.name)"
+      @click="selectETLStep(step.name)"
     >
       <v-card :variant="selectedETLStep === step.name ? 'elevated' : 'flat'">
         <v-card-title :class="['text-header-6', `bg-${step.color}`]">
@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { ETLStep } from '@/models/dataSource'
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
@@ -53,21 +54,21 @@ const {
 
 const steps = computed(() => [
   {
-    name: 'extractor',
+    name: 'extractor' as ETLStep,
     color: 'brown',
     icon: 'mdi-database-export',
     title: 'Extractor',
     valid: isExtractorValid.value,
   },
   {
-    name: 'transformer',
+    name: 'transformer' as ETLStep,
     color: 'green',
     icon: 'mdi-table-pivot',
     title: 'Transformer',
     valid: isTransformerValid.value,
   },
   {
-    name: 'loader',
+    name: 'loader' as ETLStep,
     color: 'blue-grey-darken-2',
     icon: 'mdi-database-import',
     title: 'Loader',
@@ -75,7 +76,7 @@ const steps = computed(() => [
   },
 ])
 
-function toggleETLProcess(value: string) {
-  selectedETLStep.value = selectedETLStep.value === value ? '' : value
+function selectETLStep(newSelection: ETLStep) {
+  selectedETLStep.value = newSelection
 }
 </script>

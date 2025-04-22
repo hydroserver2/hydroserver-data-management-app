@@ -5,6 +5,7 @@ import {
   TransformerConfig,
   LoaderConfig,
   DataSource,
+  ETLStep,
 } from '@/models/dataSource'
 import { Payload } from '@/models'
 import { SourceTargetMapping } from '@/models/payload'
@@ -12,7 +13,7 @@ import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 
 export const useETLStore = defineStore('etl', () => {
-  const selectedETLStep = ref('extractor')
+  const selectedETLStep = ref<ETLStep>('extractor')
   const dataSource = ref(new DataSource())
 
   const extractor = computed<ExtractorConfig>({

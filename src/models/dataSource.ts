@@ -72,6 +72,7 @@ interface UrlTemplateVariable {
 
 export const EXTRACTOR_OPTIONS = ['HTTP', 'local'] as const
 export type ExtractorType = (typeof EXTRACTOR_OPTIONS)[number]
+export type ETLStep = 'extractor' | 'transformer' | 'loader'
 
 interface BaseExtractor {
   type: ExtractorType
