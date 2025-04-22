@@ -13,7 +13,7 @@
       @submit.prevent="onSubmit"
       ref="myForm"
       v-model="valid"
-      validate-on="blur"
+      validate-on="input"
     >
       <v-row>
         <v-col cols="12" md="6">

@@ -27,34 +27,24 @@
         <v-row>
           <v-col>
             <v-text-field
+              ref="headerRowField"
               :disabled="transformer.identifierType === IdentifierType.Index"
               v-model.number="(transformer as CSVTransformer).headerRow"
               label="File header row number *"
               hint="Enter the line number of the row that contains file headers (1-based)."
               type="number"
               clearable
-              :rules="[
-                ...rules.greaterThan(0),
-                ...rules.lessThan(
-                  (transformer as CSVTransformer).dataStartRow,
-                  'the data start row'
-                ),
-              ]"
+              :rules="headerRowRules"
             />
           </v-col>
           <v-col>
             <v-text-field
+              ref="dataStartRowField"
               v-model.number="(transformer as CSVTransformer).dataStartRow"
               label="Data start row number *"
               hint="Enter the line number of the row the data starts on (1-based)."
               type="number"
-              :rules="[
-                ...rules.greaterThan(0),
-                ...rules.greaterThan(
-                  (transformer as CSVTransformer).headerRow || 0,
-                  'the file header row'
-                ),
-              ]"
+              :rules="dataStartRowRules"
             />
           </v-col>
         </v-row>
@@ -170,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { rules } from '@/utils/rules'
@@ -182,6 +172,7 @@ import {
   TimestampFormatType,
   TIMESTAMP_OPTIONS,
 } from '@/models/dataSource'
+import { VTextField } from 'vuetify/lib/components/index.mjs'
 
 const { transformer } = storeToRefs(useETLStore())
 
@@ -193,6 +184,43 @@ const timestampFormatType = ref<TimestampFormatType>(
     ? (savedFormat as TimestampFormatType)
     : 'custom'
 )
+
+const headerRowField = ref<InstanceType<typeof VTextField>>()
+const dataStartRowField = ref<InstanceType<typeof VTextField>>()
+
+watch(
+  () => (transformer.value as CSVTransformer).dataStartRow,
+  () => {
+    nextTick(() => {
+      headerRowField.value?.validate()
+    })
+  }
+)
+
+watch(
+  () => (transformer.value as CSVTransformer).headerRow,
+  () => {
+    nextTick(() => {
+      dataStartRowField.value?.validate()
+    })
+  }
+)
+
+const headerRowRules = computed(() => [
+  ...rules.greaterThan(0),
+  ...rules.lessThan(
+    (transformer.value as CSVTransformer).dataStartRow,
+    'the data start row'
+  ),
+])
+
+const dataStartRowRules = computed(() => [
+  ...rules.greaterThan(0),
+  ...rules.greaterThan(
+    (transformer.value as CSVTransformer).headerRow || 0,
+    'the file header row'
+  ),
+])
 
 const openStrftimeHelp = () =>
   window.open('https://devhints.io/strftime', '_blank', 'noreferrer')
