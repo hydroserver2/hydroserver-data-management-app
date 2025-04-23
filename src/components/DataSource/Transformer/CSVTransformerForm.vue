@@ -70,6 +70,7 @@
           <v-col>
             <v-text-field
               v-model="transformer.timestampKey"
+              placeholder="timestamp"
               :label="`Timestamp column ${
                 transformer.identifierType === IdentifierType.Name
                   ? 'name'

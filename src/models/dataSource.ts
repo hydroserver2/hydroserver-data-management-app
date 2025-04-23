@@ -148,13 +148,13 @@ export type TransformerConfig = JSONtransformer | CSVTransformer
 export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
-    timestampKey: 'timestamp',
+    timestampKey: '',
     JMESPath: '',
     identifierType: IdentifierType.Name,
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
-    timestampKey: 'timestamp',
+    timestampKey: '',
     timestampFormat: 'ISO8601',
     headerRow: 1,
     dataStartRow: 2,

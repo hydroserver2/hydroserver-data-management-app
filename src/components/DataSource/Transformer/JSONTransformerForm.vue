@@ -5,6 +5,7 @@
         <v-text-field
           v-model="transformer.timestampKey"
           label="Timestamp key"
+          placeholder="timestamp"
           density="compact"
           rounded="lg"
           prepend-inner-icon="mdi-table-column-width"
