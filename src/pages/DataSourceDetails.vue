@@ -122,7 +122,7 @@ import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
-import { DataSource, getStatusText } from '@/models/dataSource'
+import { DataSource, getStatusText, WORKFLOW_TYPES } from '@/models/dataSource'
 import router from '@/router/router'
 import { useETLStore } from '@/store/etl'
 
@@ -219,7 +219,10 @@ const orchestrationSystemInformation = computed(() => {
     {
       icon: 'mdi-broadcast',
       label: 'Type',
-      value: dataSource.value.orchestrationSystem.type,
+      value:
+        WORKFLOW_TYPES.find(
+          (t) => t.value === dataSource.value.orchestrationSystem.type
+        )?.title ?? dataSource.value.orchestrationSystem.type,
     },
   ].filter(Boolean)
 })
