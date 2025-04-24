@@ -253,7 +253,6 @@ const fetchData = async () => {
     ])
 
     dataSource.value = source
-    console.log('datasource', dataSource.value)
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')
     console.error('error fetching dataSource', e)

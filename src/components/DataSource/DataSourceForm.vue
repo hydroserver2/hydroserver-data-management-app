@@ -22,14 +22,6 @@
           </v-card-item>
 
           <v-card-text>
-            <!-- <v-select
-              v-model="dataSource.settings.type"
-              label="Workflow type *"
-              :items="WORKFLOW_TYPES"
-              variant="outlined"
-              density="compact"
-              class="mb-3"
-            /> -->
             <v-text-field
               v-model="dataSource.name"
               label="Data source name *"
@@ -44,11 +36,20 @@
             <v-card-title>Schedule</v-card-title>
           </v-card-item>
           <v-card-text class="pb-0">
+            <v-radio-group v-model="displayTz" inline class="mt-1">
+              <span class="mr-2"> View as </span>
+              <v-radio label="Local" value="local" />
+              <v-radio label="UTC" value="utc" />
+            </v-radio-group>
             <v-row>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="dataSource.schedule.startTime"
-                  label="Start Time (UTC)"
+                  v-model="startInput"
+                  :label="
+                    displayTz === 'local'
+                      ? 'Start time (local)'
+                      : 'Start time (UTC)'
+                  "
                   hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
                   type="datetime-local"
                   density="compact"
@@ -58,8 +59,12 @@
               </v-col>
               <v-col>
                 <v-text-field
-                  v-model="dataSource.schedule.endTime"
-                  label="End Time (UTC)"
+                  v-model="endInput"
+                  :label="
+                    displayTz === 'local'
+                      ? 'End time (local)'
+                      : 'End time (UTC)'
+                  "
                   hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
                   type="datetime-local"
                   clearable
@@ -165,6 +170,9 @@ const valid = ref(false)
 const myForm = ref<VForm>()
 const orchestrationSystems = ref([] as OrchestrationSystem[])
 const etlFieldsRef = ref<any>(null)
+const loaded = ref(false)
+const scheduleType = ref('interval')
+const displayTz = ref<'local' | 'utc'>('local')
 
 const { dataSource } = storeToRefs(useETLStore())
 if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
@@ -173,6 +181,38 @@ else
     workspaceId: selectedWorkspace.value!.id,
     orchestrationSystem: props.orchestrationSystem,
   })
+
+const startInput = computed({
+  get: () => isoToInput(dataSource.value.schedule.startTime, displayTz.value),
+  set: (v: string) => {
+    dataSource.value.schedule.startTime = inputToIso(v, displayTz.value)
+  },
+})
+
+const endInput = computed({
+  get: () => isoToInput(dataSource.value.schedule.endTime, displayTz.value),
+  set: (v: string) => {
+    dataSource.value.schedule.endTime = inputToIso(v, displayTz.value)
+  },
+})
+
+function ensureIsoUtc(s = ''): string {
+  return s && !/([Zz]|[+-]\d{2}:\d{2})$/.test(s) ? s + 'Z' : s
+}
+
+function isoToInput(iso = '', mode: 'local' | 'utc') {
+  if (!iso) return ''
+  const d = new Date(ensureIsoUtc(iso))
+  const ms =
+    mode === 'utc' ? d.getTime() : d.getTime() - d.getTimezoneOffset() * 60_000
+  return new Date(ms).toISOString().slice(0, 16)
+}
+
+function inputToIso(str = '', mode: 'local' | 'utc') {
+  if (!str) return ''
+  const parsed = mode === 'utc' ? new Date(str + 'Z') : new Date(str)
+  return parsed.toISOString()
+}
 
 // TODO: We'll know the workflow type is SDL when we're opening this form,
 // so no need to watch. But, make sure the options are limited to CSV when the form
@@ -190,20 +230,6 @@ else
 //     }
 //   }
 // )
-
-function toLocalDateString(iso: string): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const hours = String(d.getHours()).padStart(2, '0')
-  const minutes = String(d.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day}T${hours}:${minutes}`
-}
-
-const loaded = ref(false)
-const scheduleType = ref('interval')
 
 async function onSubmit() {
   if (
@@ -239,16 +265,12 @@ async function onSubmit() {
 }
 
 onMounted(async () => {
-  if (dataSource.value.schedule.startTime) {
-    dataSource.value.schedule.startTime = toLocalDateString(
-      dataSource.value.schedule.startTime
-    )
-  }
-  if (dataSource.value.schedule.endTime) {
-    dataSource.value.schedule.endTime = toLocalDateString(
-      dataSource.value.schedule.endTime
-    )
-  }
+  const timeKeys: Array<'startTime' | 'endTime'> = ['startTime', 'endTime']
+
+  timeKeys.forEach((k) => {
+    dataSource.value.schedule[k] = ensureIsoUtc(dataSource.value.schedule[k])
+  })
+
   orchestrationSystems.value = await api.fetchWorkspaceOrchestrationSystems(
     selectedWorkspace.value!.id
   )
