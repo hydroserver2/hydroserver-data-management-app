@@ -302,19 +302,21 @@ export function convertDataSourceToPostObject(dataSource: DataSource) {
   }
 }
 
-export function getStatusText(status: Status): StatusType {
-  if (!status.lastRun) return 'Pending'
+export function getStatusText({
+  lastRun,
+  lastRunSuccessful,
+  nextRun,
+  paused,
+}: Status): StatusType {
+  if (paused) return 'Loading paused'
+  if (!lastRun) return 'Pending'
+  if (!lastRunSuccessful) return 'Needs attention'
 
-  let now = new Date()
-  let nextRun = status.nextRun ? new Date(Date.parse(status.nextRun)) : null
-
-  if (status.lastRunSuccessful && nextRun && nextRun >= now) {
-    return 'OK'
-  } else if (!status.lastRunSuccessful) {
-    return 'Needs attention'
-  } else if (nextRun && nextRun < now) {
-    return 'Behind schedule'
+  const next = nextRun ? new Date(nextRun) : undefined
+  if (next && !Number.isNaN(next.valueOf())) {
+    return next.getTime() < Date.now() ? 'Behind schedule' : 'OK'
   }
+
   return 'Unknown'
 }
 
@@ -331,7 +333,6 @@ export function getBehindScheduleCountText(statusArray: Status[]) {
   const behindCount = statusArray.filter(
     (s) => getStatusText(s) === 'Behind schedule'
   ).length
-  console.log('getBehinds', statusArray)
   if (!behindCount) return ''
   return `${behindCount} behind schedule`
 }
