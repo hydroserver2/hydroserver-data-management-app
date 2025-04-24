@@ -123,17 +123,6 @@ interface JSONtransformer extends BaseTransformer {
   JMESPath: string
 }
 
-export const TIMESTAMP_OPTIONS = [
-  { label: 'UTC (YYYY-MM-DD hh:mm:ss)', value: 'UTC' },
-  {
-    label: 'Constant Offset (YYYY-MM-DD hh:mm:ss; set offset)',
-    value: 'constant',
-  },
-  { label: 'Full ISO 8601 (YYYY-MM-DD hh:mm:ss.ssss+hh:mm)', value: 'ISO8601' },
-  { label: 'Custom Format', value: 'custom' },
-] as const
-export type TimestampFormatType = (typeof TIMESTAMP_OPTIONS)[number]['value']
-
 export interface CSVTransformer extends BaseTransformer {
   type: 'CSV'
   headerRow: number | null

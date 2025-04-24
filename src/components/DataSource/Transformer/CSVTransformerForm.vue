@@ -170,21 +170,37 @@ import {
   CSVTransformer,
   IdentifierType,
   TIMEZONE_OFFSETS,
-  TimestampFormatType,
-  TIMESTAMP_OPTIONS,
 } from '@/models/dataSource'
 import { VTextField } from 'vuetify/lib/components/index.mjs'
 
 const { transformer } = storeToRefs(useETLStore())
 
-const TIMESTAMP_VALUES = TIMESTAMP_OPTIONS.map((opt) => opt.value)
-const savedFormat = (transformer.value as CSVTransformer).timestampFormat
+const CORE_FORMATS = ['utc', 'constant', 'ISO8601'] as const
 
-const timestampFormatType = ref<TimestampFormatType>(
-  TIMESTAMP_VALUES.includes(savedFormat as TimestampFormatType)
-    ? (savedFormat as TimestampFormatType)
-    : 'custom'
-)
+const customFormatCache = ref('')
+const savedFormat = (transformer.value as CSVTransformer).timestampFormat
+if (savedFormat && !CORE_FORMATS.includes(savedFormat as any)) {
+  customFormatCache.value = savedFormat
+}
+
+const timestampFormatType = computed({
+  get() {
+    const fmt = (transformer.value as CSVTransformer).timestampFormat ?? ''
+    return CORE_FORMATS.includes(fmt as any) ? fmt : 'custom'
+  },
+  set(choice) {
+    const t = transformer.value as CSVTransformer
+
+    if (choice === 'custom') {
+      t.timestampFormat = customFormatCache.value
+    } else {
+      if (!CORE_FORMATS.includes(t.timestampFormat as any)) {
+        customFormatCache.value = t.timestampFormat
+      }
+      t.timestampFormat = choice
+    }
+  },
+})
 
 const headerRowField = ref<InstanceType<typeof VTextField>>()
 const dataStartRowField = ref<InstanceType<typeof VTextField>>()
@@ -231,14 +247,6 @@ watch(
   (newType) => {
     transformer.value.timestampKey =
       newType === IdentifierType.Name ? 'timestamp' : '1'
-  }
-)
-
-watch(
-  () => timestampFormatType.value,
-  (newType) => {
-    if (newType === 'custom')
-      (transformer.value as CSVTransformer).timestampFormat = savedFormat
   }
 )
 </script>
