@@ -291,6 +291,17 @@ export class DataSource {
   }
 }
 
+export function convertDataSourceToPostObject(dataSource: DataSource) {
+  return {
+    name: dataSource.name,
+    settings: dataSource.settings,
+    workspaceId: dataSource.workspaceId,
+    orchestrationSystemId: dataSource.orchestrationSystem.id,
+    schedule: dataSource.schedule,
+    status: dataSource.status,
+  }
+}
+
 export function getStatusText(status: Status): StatusType {
   if (!status.lastRun) return 'Pending'
 
@@ -307,13 +318,20 @@ export function getStatusText(status: Status): StatusType {
   return 'Unknown'
 }
 
-export function convertDataSourceToPostObject(dataSource: DataSource) {
-  return {
-    name: dataSource.name,
-    settings: dataSource.settings,
-    workspaceId: dataSource.workspaceId,
-    orchestrationSystemId: dataSource.orchestrationSystem.id,
-    schedule: dataSource.schedule,
-    status: dataSource.status,
-  }
+export function getBadCountText(statusArray: Status[]) {
+  const badCount = statusArray.filter(
+    (s) => getStatusText(s) === 'Needs attention'
+  ).length
+  if (!badCount) return ''
+  if (badCount === 1) return '1 error'
+  return `${badCount} errors`
+}
+
+export function getBehindScheduleCountText(statusArray: Status[]) {
+  const behindCount = statusArray.filter(
+    (s) => getStatusText(s) === 'Behind schedule'
+  ).length
+  console.log('getBehinds', statusArray)
+  if (!behindCount) return ''
+  return `${behindCount} behind schedule`
 }
