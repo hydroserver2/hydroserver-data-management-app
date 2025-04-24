@@ -130,6 +130,7 @@ import {
   Status,
   getBadCountText,
   getBehindScheduleCountText,
+  formatTime,
 } from '@/models/dataSource'
 import { StatusType } from '@/models/dataSource'
 
@@ -182,8 +183,8 @@ const tableData = computed(() => {
   const dsList = dataSources.value.map((d) => ({
     ...d,
     statusName: getStatusText(d.status),
-    lastRun: d.status.lastRun,
-    nextRun: d.status.nextRun,
+    lastRun: d.status.lastRun ? formatTime(d.status.lastRun) : '',
+    nextRun: d.status.nextRun ? formatTime(d.status.nextRun) : '',
     orchestrationSystemName: d.orchestrationSystem.name,
     isPlaceholder: false,
   }))

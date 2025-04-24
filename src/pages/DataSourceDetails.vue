@@ -122,7 +122,12 @@ import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
-import { DataSource, getStatusText, WORKFLOW_TYPES } from '@/models/dataSource'
+import {
+  DataSource,
+  formatTime,
+  getStatusText,
+  WORKFLOW_TYPES,
+} from '@/models/dataSource'
 import router from '@/router/router'
 import { useETLStore } from '@/store/etl'
 
@@ -130,13 +135,6 @@ const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
 const { dataSource } = storeToRefs(useETLStore())
-
-const formatTime = (time: string) =>
-  new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(new Date(time)) + ' UTC'
 
 const scheduleString = computed(() => {
   if (!dataSource.value) return ''
