@@ -82,6 +82,15 @@
               >
                 Add data source
               </v-btn-add>
+
+              <v-btn
+                variant="text"
+                color="red-darken-2"
+                icon="mdi-trash-can-outline"
+                @click.stop="
+                  openDeleteDialog(item.items[0].raw.orchestrationSystem)
+                "
+              />
             </div>
           </td>
         </tr>
@@ -114,12 +123,25 @@
       @created="refreshTable"
     />
   </v-dialog>
+
+  <v-dialog
+    v-model="openDelete"
+    v-if="selectedOrchestrationSystem"
+    width="40rem"
+  >
+    <DeleteOrchestrationSystemCard
+      :orchestration-system="selectedOrchestrationSystem"
+      @close="openDelete = false"
+      @delete="refreshTable"
+    />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
+import DeleteOrchestrationSystemCard from '@/components/OrchestrationSystem/DeleteOrchestrationSystemCard.vue'
 import { DataSource } from '@/models'
 import { api } from '@/services/api'
 import { computed } from 'vue'
@@ -139,6 +161,7 @@ const props = defineProps<{
 }>()
 
 const openCreate = ref(false)
+const openDelete = ref(false)
 const search = ref()
 const orchestrationSystems = ref<OrchestrationSystem[]>([])
 const dataSources = ref<DataSource[]>([])
@@ -174,7 +197,6 @@ watch(
   async (newId) => {
     if (newId == null) return
     await fetchOrchestrationData(newId)
-    console.log('datasource coming in ', dataSources.value)
   },
   { immediate: true }
 )
@@ -230,6 +252,11 @@ function statusesOf(rows: any[]): Status[] {
 const openCreateDialog = (selectedItem: any) => {
   selectedOrchestrationSystem.value = selectedItem
   openCreate.value = true
+}
+
+const openDeleteDialog = (selectedItem: any) => {
+  selectedOrchestrationSystem.value = selectedItem
+  openDelete.value = true
 }
 
 const onRowClick = async (event: Event, item: any) => {
