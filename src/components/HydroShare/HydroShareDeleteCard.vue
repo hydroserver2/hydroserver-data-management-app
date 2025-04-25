@@ -1,19 +1,20 @@
 <template>
   <v-card>
-    <v-card-title class="text-h5">Unlink HydroShare Archival</v-card-title>
-
-    <v-divider />
+    <v-toolbar flat color="red-darken-4">
+      <v-card-title class="text-h5">
+        <v-icon>mdi-alert</v-icon> Confirm unlinking HydroShare archival
+      </v-card-title>
+    </v-toolbar>
 
     <v-card-text>
-      Are you sure you want to unlink your site from HydroShare? This action
-      will stop any scheduled archival for this site and permanently delete any
-      archival configurations you have set for this site. Any datastreams and
-      observations in HydroShare or HydroServer will remain unaffected.
+      This action will permanently delete any archival configurations you have
+      set for this site and stop any scheduled archival. Related files in
+      HydroShare will remain unaffected.
     </v-card-text>
 
     <v-card-text>
       Please type the following text to confirm deletion:
-      <strong>Unlink Archive</strong>
+      <strong>unlink archival</strong>
       <v-form>
         <v-text-field
           v-model="deleteInput"
@@ -22,8 +23,6 @@
         ></v-text-field>
       </v-form>
     </v-card-text>
-
-    <v-divider></v-divider>
 
     <v-card-actions>
       <v-spacer />
@@ -45,14 +44,15 @@ const props = defineProps({
 const deleteInput = ref('')
 
 async function deleteLink() {
-  if (deleteInput.value.toLowerCase() !== 'unlink archive') {
+  if (deleteInput.value.toLowerCase() !== 'unlink archival') {
     Snackbar.error("input doesn't match")
     return
   }
   try {
-    emit('close')
     await api.deleteHydroShareArchive(props.thingId)
     Snackbar.info('Your site has been unlinked')
+    emit('delete')
+    emit('close')
   } catch (error) {
     console.error('Error unlinking site', error)
   }
