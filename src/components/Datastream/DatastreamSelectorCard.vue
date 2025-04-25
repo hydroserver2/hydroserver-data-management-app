@@ -18,109 +18,94 @@
           </v-autocomplete>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-list>
-            <v-list-subheader>Datastreams</v-list-subheader>
-            <div
-              style="max-height: 800px; overflow-y: auto"
-              v-if="datastreamsForThing.length"
-            >
-              <v-card
-                class="mb-2"
-                v-for="datastream in datastreamsForThing"
-                :key="datastream.id"
-                @click="datastreamSelected(datastream.id)"
-                color="blue-darken-4"
-                variant="outlined"
-              >
-                <v-card-text class="py-4">
-                  <!-- Observed Property (Most important) -->
-                  <div class="mb-4">
-                    <div class="text-h6 font-weight-bold text-primary-darken-1">
-                      {{
-                        observedProperties.find(
-                          (op) => op.id === datastream.observedPropertyId
-                        )?.name
-                      }}
-                    </div>
-                    <div
-                      class="text-caption font-weight-medium text-grey-darken-1"
-                    >
-                      Observed Property
-                    </div>
-                  </div>
 
-                  <!-- Processing Level -->
-                  <div class="mb-3">
-                    <div class="text-subtitle-1 font-weight-medium">
-                      {{
-                        processingLevels.find(
-                          (pl) => pl.id === datastream.processingLevelId
-                        )?.definition
-                      }}
-                    </div>
-                    <div class="text-caption text-grey-darken-1">
-                      Processing Level
-                    </div>
-                  </div>
+      <v-toolbar title="Select a datastream" color="surface">
+        <v-text-field
+          class="mx-4"
+          clearable
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          hide-details
+          density="compact"
+          variant="underlined"
+          maxWidth="300"
+        />
+      </v-toolbar>
+      <v-divider />
+      <div
+        style="max-height: 1000px; overflow-y: auto"
+        v-if="datastreamsForThing.length"
+      >
+        <v-data-table-virtual
+          :headers="headers"
+          :items="tableItems"
+          :sort-by="[{ key: 'observedProperty' }]"
+          :search="search"
+          @click:row="onRowClick"
+          color="blue-darken-2"
+          hover
+          multi-sort
+        >
+          <template #item.description="{ item }">
+            <v-tooltip activator="parent" location="top">
+              {{ item.description }}
+            </v-tooltip>
 
-                  <v-divider class="my-3" />
+            <span class="clamp-2" style="--clamp-width: 220px">
+              {{ item.description }}
+            </span>
+          </template>
+          <template #item.name="{ item }">
+            <v-tooltip activator="parent" location="top">
+              {{ item.name }}
+            </v-tooltip>
 
-                  <!-- Sensor and Sampled Medium (Less important) -->
-                  <div class="grid gap-y-2">
-                    <div class="flex items-center opacity-80">
-                      <span
-                        class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
-                        >Sensor:</span
-                      >
-                      <span class="text-body-2">
-                        {{
-                          sensors.find((s) => s.id === datastream.sensorId)
-                            ?.name
-                        }}
-                      </span>
-                    </div>
-
-                    <div class="flex items-center opacity-80">
-                      <span
-                        class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
-                        >Sampled Medium:</span
-                      >
-                      <span class="text-body-2">{{
-                        datastream.sampledMedium
-                      }}</span>
-                    </div>
-
-                    <div class="flex items-center opacity-90">
-                      <span
-                        class="text-body-2 font-weight-medium text-grey-darken-2 mr-2"
-                        >Identifier:</span
-                      >
-                      <span class="text-body-2">{{ datastream.id }}</span>
-                    </div>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </div>
-            <template v-else-if="!selectedThingId">
-              <v-card-text>
-                Select a site in order to view its datastreams.
-              </v-card-text>
-            </template>
-            <template v-else>
-              <v-card-text> No datastreams found for this site. </v-card-text>
-            </template>
-          </v-list>
-        </v-col>
-      </v-row>
+            <span class="clamp-2" style="--clamp-width: 220px">
+              {{ item.name }}
+            </span>
+          </template>
+          <template #item.id="{ item }">
+            <span class="one-line">
+              {{ item.id }}
+            </span>
+          </template>
+          <template #item.resultType="{ item }">
+            <span class="one-line">
+              {{ item.resultType }}
+            </span>
+          </template>
+          <template #item.unit="{ item }">
+            <span class="one-line">
+              {{ item.unit }}
+            </span>
+          </template>
+          <template #item.sensor="{ item }">
+            <span class="one-line">
+              {{ item.sensor }}
+            </span>
+          </template>
+        </v-data-table-virtual>
+      </div>
+      <template v-else-if="!selectedThingId">
+        <v-card-text>
+          Select a site in order to view its datastreams.
+        </v-card-text>
+      </template>
+      <template v-else>
+        <v-card-text> No datastreams found for this site. </v-card-text>
+      </template>
     </v-card-text>
+    <v-card-actions>
+      <v-spacer />
+      <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+    </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import { watch, onMounted, ref } from 'vue'
+import { watch, onMounted, ref, computed } from 'vue'
 import { Datastream, Thing, Workspace } from '@/types'
 import { useMetadata } from '@/composables/useMetadata'
 import { storeToRefs } from 'pinia'
@@ -128,17 +113,53 @@ import { useWorkspaceStore } from '@/store/workspaces'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
-const { sensors, observedProperties, processingLevels } = useMetadata()
+const { sensors, observedProperties, processingLevels, units } = useMetadata()
 
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
 const selectedThingId = ref('')
+const search = ref()
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 const props = defineProps({
   cardTitle: { type: String, required: true },
   workspace: { type: Workspace, required: false },
 })
+
+const headers = [
+  { title: 'ID', key: 'id' },
+  { title: 'Name', key: 'name' },
+  { title: 'Observed property', key: 'observedProperty' },
+  { title: 'Processing level', key: 'processingLevel' },
+  { title: 'Description', key: 'description', sortable: false },
+  { title: 'Observation type', key: 'observationType' },
+
+  { title: 'No-data value', key: 'noDataValue' },
+  { title: 'Aggregation statistic', key: 'aggregationStatistic' },
+  { title: 'Unit', key: 'unit' },
+  { title: 'Sensor', key: 'sensor' },
+
+  { title: 'Phenomenon begin', key: 'phenomenonBeginTime', class: 'one-line' },
+  { title: 'Phenomenon end', key: 'phenomenonEndTime' },
+
+  { title: 'Sampled medium', key: 'sampledMedium' },
+  { title: 'Intended spacing', key: 'intendedTimeSpacing' },
+  { title: 'Spacing unit', key: 'intendedTimeSpacingUnit' },
+  { title: 'Aggregation interval', key: 'timeAggregationInterval' },
+  { title: 'Interval unit', key: 'timeAggregationIntervalUnit' },
+
+  { title: 'Is private', key: 'isPrivate' },
+  { title: 'Is data visible', key: 'isVisible' },
+  { title: 'Result type', key: 'resultType' },
+  { title: 'Value count', key: 'valueCount' },
+] as const
+
+const formatTime = (time: string) =>
+  new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(time)) + ' UTC'
 
 watch(
   selectedThingId,
@@ -152,8 +173,36 @@ watch(
   { immediate: true }
 )
 
-function datastreamSelected(id: string) {
-  emit('selectedDatastreamId', id)
+const tableItems = computed(() =>
+  datastreamsForThing.value.map((ds) => ({
+    ...ds,
+    observedProperty:
+      observedProperties.value.find((op) => op.id === ds.observedPropertyId)
+        ?.name ?? ds.observedPropertyId, // fallback to UUID
+
+    sensor:
+      sensors.value.find((s) => s.id === ds.sensorId)?.name ?? ds.sensorId,
+
+    processingLevel:
+      processingLevels.value.find((pl) => pl.id === ds.processingLevelId)
+        ?.definition ?? ds.processingLevelId,
+
+    unit: units.value.find((u) => u.id === ds.unitId)?.name,
+
+    phenomenonBeginTime: ds.phenomenonBeginTime
+      ? formatTime(ds.phenomenonBeginTime)
+      : '',
+    phenomenonEndTime: ds.phenomenonEndTime
+      ? formatTime(ds.phenomenonEndTime)
+      : '',
+    isPrivate: ds.isPrivate ? 'Yes' : 'No',
+    isVisible: ds.isVisible ? 'Yes' : 'No',
+  }))
+)
+
+function onRowClick(event: Event, item: any) {
+  console.log('item', item)
+  emit('selectedDatastreamId', item.item.id)
   emit('close')
 }
 
@@ -165,3 +214,19 @@ onMounted(async () => {
   things.value.sort((a, b) => a.name.localeCompare(b.name))
 })
 </script>
+
+<style lang="scss" scoped>
+.clamp-2 {
+  min-width: var(--clamp-width, 120px);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* show two lines */
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.one-line {
+  white-space: nowrap;
+  min-width: max-content;
+}
+</style>
