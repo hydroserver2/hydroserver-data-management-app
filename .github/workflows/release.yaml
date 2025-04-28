@@ -2,7 +2,7 @@ name: Build and Upload Data Management App
 
 on:
   release:
-    types: [created]
+    types: [created, edited]
 
 jobs:
   build:
