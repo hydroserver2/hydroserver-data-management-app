@@ -131,6 +131,7 @@
   >
     <DeleteOrchestrationSystemCard
       :orchestration-system="selectedOrchestrationSystem"
+      :data-sources="dataSources"
       @close="openDelete = false"
       @delete="refreshTable"
     />

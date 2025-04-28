@@ -6,9 +6,12 @@
       </v-card-title>
     </v-toolbar>
 
-    <v-card-text>
-      Removing <strong> {{ orchestrationSystem.name }} </strong> as an
-      orchestration system will also delete all associated data sources.
+    <v-card-text v-if="relatedSources.length > 0">
+      <v-alert>
+        Before you remove <strong> {{ orchestrationSystem.name }} </strong> as
+        an orchestration system, you must delete all of its related data
+        sources.
+      </v-alert>
     </v-card-text>
 
     <v-card-text>
@@ -44,16 +47,18 @@
     <v-card-actions>
       <v-spacer />
       <v-btn-cancel @click="emit('close')">Cancel</v-btn-cancel>
-      <v-btn-delete color="delete" @click="onDelete"> Delete </v-btn-delete>
+      <v-btn-delete color="delete" @click="onDelete" :disabled="!canDelete">
+        Delete
+      </v-btn-delete>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { OrchestrationSystem } from '@/models/dataSource'
+import { DataSource, OrchestrationSystem } from '@/models/dataSource'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
@@ -61,9 +66,23 @@ const props = defineProps({
     type: Object as () => OrchestrationSystem,
     required: true,
   },
+  dataSources: { type: Object as () => DataSource[], required: true },
 })
 
 const deleteInput = ref('')
+
+const relatedSources = computed(() =>
+  props.dataSources.filter(
+    (ds) => ds.orchestrationSystem.id === props.orchestrationSystem.id
+  )
+)
+
+const canDelete = computed(
+  () =>
+    relatedSources.value.length === 0 &&
+    deleteInput.value.trim().toLowerCase() ===
+      props.orchestrationSystem.name.toLowerCase()
+)
 
 const onDelete = async () => {
   if (
@@ -71,6 +90,12 @@ const onDelete = async () => {
     props.orchestrationSystem.name.toLowerCase()
   ) {
     Snackbar.warn('Name does not match.')
+    return
+  }
+  if (relatedSources.value.length > 0) {
+    Snackbar.warn(
+      `Before you remove ${props.orchestrationSystem.name} as an orchestration system, you must delete all of its related data sources.`
+    )
     return
   }
 
