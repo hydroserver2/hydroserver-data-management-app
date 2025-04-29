@@ -3,6 +3,7 @@
     v-if="thing?.id && openDelete"
     :thing-id="thing.id"
     @close="openDelete = false"
+    @delete="onDelete"
   />
   <v-card v-else-if="!openDelete">
     <v-card-title>
@@ -166,12 +167,10 @@
           </template>
         </v-autocomplete>
 
-        <v-switch
+        <v-checkbox
           v-if="!isEdit && !linkToExistingAccount"
           v-model="item.publicResource"
-          :label="`Resource Sharing Status: ${
-            item.publicResource ? 'Public' : 'Private'
-          }`"
+          label="Make resource public"
           color="primary"
           hide-details
         />
@@ -203,7 +202,7 @@ import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.v
 import { useHydroShareStore } from '@/store/hydroShare'
 import { Snackbar } from '@/utils/notifications'
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'delete'])
 const { hydroShareArchive: archive, loading } = storeToRefs(
   useHydroShareStore()
 )
@@ -265,9 +264,15 @@ function generateDefaultFormData() {
     `researchers and stakeholders.`
 }
 
+async function onDelete() {
+  archive.value = null
+  emit('close')
+}
+
 async function onSubmit() {
   try {
     loading.value = true
+    if (!linkToExistingAccount.value) item.value.link = ''
     emit('close')
     Snackbar.info('Uploading site data to HydroShare. This may take a minute.')
     const newItem = await uploadItem()

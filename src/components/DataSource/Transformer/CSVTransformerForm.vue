@@ -27,34 +27,24 @@
         <v-row>
           <v-col>
             <v-text-field
+              ref="headerRowField"
               :disabled="transformer.identifierType === IdentifierType.Index"
               v-model.number="(transformer as CSVTransformer).headerRow"
               label="File header row number *"
               hint="Enter the line number of the row that contains file headers (1-based)."
               type="number"
               clearable
-              :rules="[
-                ...rules.greaterThan(0),
-                ...rules.lessThan(
-                  (transformer as CSVTransformer).dataStartRow,
-                  'the data start row'
-                ),
-              ]"
+              :rules="headerRowRules"
             />
           </v-col>
           <v-col>
             <v-text-field
+              ref="dataStartRowField"
               v-model.number="(transformer as CSVTransformer).dataStartRow"
               label="Data start row number *"
               hint="Enter the line number of the row the data starts on (1-based)."
               type="number"
-              :rules="[
-                ...rules.greaterThan(0),
-                ...rules.greaterThan(
-                  (transformer as CSVTransformer).headerRow || 0,
-                  'the file header row'
-                ),
-              ]"
+              :rules="dataStartRowRules"
             />
           </v-col>
         </v-row>
@@ -80,6 +70,7 @@
           <v-col>
             <v-text-field
               v-model="transformer.timestampKey"
+              placeholder="timestamp"
               :label="`Timestamp column ${
                 transformer.identifierType === IdentifierType.Name
                   ? 'name'
@@ -170,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { rules } from '@/utils/rules'
@@ -179,20 +170,74 @@ import {
   CSVTransformer,
   IdentifierType,
   TIMEZONE_OFFSETS,
-  TimestampFormatType,
-  TIMESTAMP_OPTIONS,
 } from '@/models/dataSource'
+import { VTextField } from 'vuetify/lib/components/index.mjs'
 
 const { transformer } = storeToRefs(useETLStore())
 
-const TIMESTAMP_VALUES = TIMESTAMP_OPTIONS.map((opt) => opt.value)
-const savedFormat = (transformer.value as CSVTransformer).timestampFormat
+const CORE_FORMATS = ['utc', 'constant', 'ISO8601'] as const
 
-const timestampFormatType = ref<TimestampFormatType>(
-  TIMESTAMP_VALUES.includes(savedFormat as TimestampFormatType)
-    ? (savedFormat as TimestampFormatType)
-    : 'custom'
+const customFormatCache = ref('')
+const savedFormat = (transformer.value as CSVTransformer).timestampFormat
+if (savedFormat && !CORE_FORMATS.includes(savedFormat as any)) {
+  customFormatCache.value = savedFormat
+}
+
+const timestampFormatType = computed({
+  get() {
+    const fmt = (transformer.value as CSVTransformer).timestampFormat ?? ''
+    return CORE_FORMATS.includes(fmt as any) ? fmt : 'custom'
+  },
+  set(choice) {
+    const t = transformer.value as CSVTransformer
+
+    if (choice === 'custom') {
+      t.timestampFormat = customFormatCache.value
+    } else {
+      if (!CORE_FORMATS.includes(t.timestampFormat as any)) {
+        customFormatCache.value = t.timestampFormat
+      }
+      t.timestampFormat = choice
+    }
+  },
+})
+
+const headerRowField = ref<InstanceType<typeof VTextField>>()
+const dataStartRowField = ref<InstanceType<typeof VTextField>>()
+
+watch(
+  () => (transformer.value as CSVTransformer).dataStartRow,
+  () => {
+    nextTick(() => {
+      headerRowField.value?.validate()
+    })
+  }
 )
+
+watch(
+  () => (transformer.value as CSVTransformer).headerRow,
+  () => {
+    nextTick(() => {
+      dataStartRowField.value?.validate()
+    })
+  }
+)
+
+const headerRowRules = computed(() => [
+  ...rules.greaterThan(0),
+  ...rules.lessThan(
+    (transformer.value as CSVTransformer).dataStartRow,
+    'the data start row'
+  ),
+])
+
+const dataStartRowRules = computed(() => [
+  ...rules.greaterThan(0),
+  ...rules.greaterThan(
+    (transformer.value as CSVTransformer).headerRow || 0,
+    'the file header row'
+  ),
+])
 
 const openStrftimeHelp = () =>
   window.open('https://devhints.io/strftime', '_blank', 'noreferrer')
@@ -202,14 +247,6 @@ watch(
   (newType) => {
     transformer.value.timestampKey =
       newType === IdentifierType.Name ? 'timestamp' : '1'
-  }
-)
-
-watch(
-  () => timestampFormatType.value,
-  (newType) => {
-    if (newType === 'custom')
-      (transformer.value as CSVTransformer).timestampFormat = savedFormat
   }
 )
 </script>

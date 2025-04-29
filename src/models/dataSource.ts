@@ -72,6 +72,7 @@ interface UrlTemplateVariable {
 
 export const EXTRACTOR_OPTIONS = ['HTTP', 'local'] as const
 export type ExtractorType = (typeof EXTRACTOR_OPTIONS)[number]
+export type ETLStep = 'extractor' | 'transformer' | 'loader'
 
 interface BaseExtractor {
   type: ExtractorType
@@ -122,17 +123,6 @@ interface JSONtransformer extends BaseTransformer {
   JMESPath: string
 }
 
-export const TIMESTAMP_OPTIONS = [
-  { label: 'UTC (YYYY-MM-DD hh:mm:ss)', value: 'UTC' },
-  {
-    label: 'Constant Offset (YYYY-MM-DD hh:mm:ss; set offset)',
-    value: 'constant',
-  },
-  { label: 'Full ISO 8601 (YYYY-MM-DD hh:mm:ss.ssss+hh:mm)', value: 'ISO8601' },
-  { label: 'Custom Format', value: 'custom' },
-] as const
-export type TimestampFormatType = (typeof TIMESTAMP_OPTIONS)[number]['value']
-
 export interface CSVTransformer extends BaseTransformer {
   type: 'CSV'
   headerRow: number | null
@@ -147,13 +137,13 @@ export type TransformerConfig = JSONtransformer | CSVTransformer
 export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
-    timestampKey: 'timestamp',
+    timestampKey: '',
     JMESPath: '',
     identifierType: IdentifierType.Name,
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
-    timestampKey: 'timestamp',
+    timestampKey: '',
     timestampFormat: 'ISO8601',
     headerRow: 1,
     dataStartRow: 2,
@@ -290,22 +280,6 @@ export class DataSource {
   }
 }
 
-export function getStatusText(status: Status): StatusType {
-  if (!status.lastRun) return 'Pending'
-
-  let now = new Date()
-  let nextRun = status.nextRun ? new Date(Date.parse(status.nextRun)) : null
-
-  if (status.lastRunSuccessful && nextRun && nextRun >= now) {
-    return 'OK'
-  } else if (!status.lastRunSuccessful) {
-    return 'Needs attention'
-  } else if (nextRun && nextRun < now) {
-    return 'Behind schedule'
-  }
-  return 'Unknown'
-}
-
 export function convertDataSourceToPostObject(dataSource: DataSource) {
   return {
     name: dataSource.name,
@@ -316,3 +290,45 @@ export function convertDataSourceToPostObject(dataSource: DataSource) {
     status: dataSource.status,
   }
 }
+
+export function getStatusText({
+  lastRun,
+  lastRunSuccessful,
+  nextRun,
+  paused,
+}: Status): StatusType {
+  if (paused) return 'Loading paused'
+  if (!lastRun) return 'Pending'
+  if (!lastRunSuccessful) return 'Needs attention'
+
+  const next = nextRun ? new Date(nextRun) : undefined
+  if (next && !Number.isNaN(next.valueOf())) {
+    return next.getTime() < Date.now() ? 'Behind schedule' : 'OK'
+  }
+
+  return 'Unknown'
+}
+
+export function getBadCountText(statusArray: Status[]) {
+  const badCount = statusArray.filter(
+    (s) => getStatusText(s) === 'Needs attention'
+  ).length
+  if (!badCount) return ''
+  if (badCount === 1) return '1 error'
+  return `${badCount} errors`
+}
+
+export function getBehindScheduleCountText(statusArray: Status[]) {
+  const behindCount = statusArray.filter(
+    (s) => getStatusText(s) === 'Behind schedule'
+  ).length
+  if (!behindCount) return ''
+  return `${behindCount} behind schedule`
+}
+
+export const formatTime = (time: string) =>
+  new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(time)) + ' UTC'

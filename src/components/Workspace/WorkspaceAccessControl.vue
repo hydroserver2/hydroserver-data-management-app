@@ -178,8 +178,8 @@
               required
             />
             <p v-if="showTransferConfirmation" style="color: red" class="pb-4">
-              WARNING: Once the transfer has been accepted by the chosen user,
-              your permissions will be reduced to those of a collaborator.
+              WARNING: Once transfer has been accepted by the chosen user, you
+              will no longer have access to this workspace.
             </p>
             <v-btn-primary
               v-if="showTransferConfirmation"

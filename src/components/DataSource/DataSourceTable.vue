@@ -52,24 +52,26 @@
               <span class="ms-4">{{ item.value }}</span>
               <v-spacer />
               <v-chip
-                v-if="getBehindScheduleCountText(item.items as any[])"
+                v-if="getBehindScheduleCountText(statusesOf(item.items as any[]))"
                 prepend-icon="mdi-clock-alert-outline"
                 variant="text"
                 class="ms-4"
                 rounded="xl"
                 color="orange-darken-4"
               >
-                {{ getBehindScheduleCountText(item.items as any[]) }}
+                {{
+                  getBehindScheduleCountText(statusesOf(item.items as any[]))
+                }}
               </v-chip>
               <v-chip
-                v-if="getBadCountText(item.items as any[])"
+                v-if="getBadCountText(statusesOf(item.items as any[]))"
                 prepend-icon="mdi-alert"
                 variant="text"
                 class="ms-4"
                 rounded="xl"
                 color="error"
               >
-                {{ getBadCountText(item.items as any[]) }}
+                {{ getBadCountText(statusesOf(item.items as any[])) }}
               </v-chip>
               <v-btn-add
                 class="mx-2"
@@ -80,6 +82,15 @@
               >
                 Add data source
               </v-btn-add>
+
+              <v-btn
+                variant="text"
+                color="red-darken-2"
+                icon="mdi-trash-can-outline"
+                @click.stop="
+                  openDeleteDialog(item.items[0].raw.orchestrationSystem)
+                "
+              />
             </div>
           </td>
         </tr>
@@ -112,17 +123,38 @@
       @created="refreshTable"
     />
   </v-dialog>
+
+  <v-dialog
+    v-model="openDelete"
+    v-if="selectedOrchestrationSystem"
+    width="40rem"
+  >
+    <DeleteOrchestrationSystemCard
+      :orchestration-system="selectedOrchestrationSystem"
+      :data-sources="dataSources"
+      @close="openDelete = false"
+      @delete="refreshTable"
+    />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
+import DeleteOrchestrationSystemCard from '@/components/OrchestrationSystem/DeleteOrchestrationSystemCard.vue'
 import { DataSource } from '@/models'
 import { api } from '@/services/api'
 import { computed } from 'vue'
 import router from '@/router/router'
-import { getStatusText, OrchestrationSystem, Status } from '@/models/dataSource'
+import {
+  getStatusText,
+  OrchestrationSystem,
+  Status,
+  getBadCountText,
+  getBehindScheduleCountText,
+  formatTime,
+} from '@/models/dataSource'
 import { StatusType } from '@/models/dataSource'
 
 const props = defineProps<{
@@ -130,6 +162,7 @@ const props = defineProps<{
 }>()
 
 const openCreate = ref(false)
+const openDelete = ref(false)
 const search = ref()
 const orchestrationSystems = ref<OrchestrationSystem[]>([])
 const dataSources = ref<DataSource[]>([])
@@ -173,8 +206,8 @@ const tableData = computed(() => {
   const dsList = dataSources.value.map((d) => ({
     ...d,
     statusName: getStatusText(d.status),
-    lastRun: d.status.lastRun,
-    nextRun: d.status.nextRun,
+    lastRun: d.status.lastRun ? formatTime(d.status.lastRun) : '',
+    nextRun: d.status.nextRun ? formatTime(d.status.nextRun) : '',
     orchestrationSystemName: d.orchestrationSystem.name,
     isPlaceholder: false,
   }))
@@ -210,26 +243,21 @@ async function togglePaused(ds: any) {
   } as DataSource)
 }
 
+function statusesOf(rows: any[]): Status[] {
+  return rows
+    .filter((r) => !r.isPlaceholder)
+    .map((r) => (r.status ?? r.raw?.status) as Status)
+    .filter(Boolean)
+}
+
 const openCreateDialog = (selectedItem: any) => {
   selectedOrchestrationSystem.value = selectedItem
   openCreate.value = true
 }
 
-function getBadCountText(groupItems: any[]) {
-  const badCount = groupItems.filter(
-    (i) => i.raw.status === 'Needs attention'
-  ).length
-  if (!badCount) return ''
-  if (badCount === 1) return '1 error'
-  return `${badCount} errors`
-}
-
-function getBehindScheduleCountText(groupItems: any[]) {
-  const behindCount = groupItems.filter(
-    (i) => i.raw.status === 'Behind schedule'
-  ).length
-  if (!behindCount) return ''
-  return `${behindCount} behind schedule`
+const openDeleteDialog = (selectedItem: any) => {
+  selectedOrchestrationSystem.value = selectedItem
+  openDelete.value = true
 }
 
 const onRowClick = async (event: Event, item: any) => {

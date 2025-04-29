@@ -1,15 +1,15 @@
 <template>
   <v-card>
-    <v-card-title> Confirm Delete Data Source </v-card-title>
-
-    <v-divider class="my-4" />
+    <v-toolbar flat color="red-darken-4">
+      <v-card-title class="text-h5">
+        <v-icon>mdi-alert</v-icon> Confirm data source deletion
+      </v-card-title>
+    </v-toolbar>
 
     <v-card-text>
-      Are you sure you want to delete
-      <strong> {{ itemName }} </strong>?
+      This action will permanently delete
+      <strong> {{ itemName }} </strong>
     </v-card-text>
-
-    <v-divider class="my-4" />
 
     <v-card-actions>
       <v-spacer />

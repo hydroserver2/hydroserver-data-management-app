@@ -53,19 +53,7 @@
       <v-spacer />
 
       <v-col cols="auto" v-if="canEditThings && hydroShareConnected">
-        <v-btn
-          color="deep-orange-lighten-1"
-          @click="isHydroShareModalOpen = true"
-          :loading="hydroShareLoading"
-        >
-          {{ archivalBtnName }}
-        </v-btn>
-        <v-dialog v-model="isHydroShareModalOpen" width="60rem">
-          <HydroShareFormCard
-            :archive="hydroShareArchive || undefined"
-            @close="isHydroShareModalOpen = false"
-          />
-        </v-dialog>
+        <HydroShareArchivalButton />
       </v-col>
     </v-row>
 
@@ -123,16 +111,14 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { Workspace } from '@/types'
 import { useHydroShare } from '@/composables/useHydroShare'
 import { useHydroShareStore } from '@/store/hydroShare'
-import HydroShareFormCard from '@/components/HydroShare/HydroShareFormCard.vue'
+import HydroShareArchivalButton from '@/components/HydroShare/HydroShareArchivalButton.vue'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
 const workspace = ref<Workspace>()
 
 const { isConnected: hydroShareConnected } = useHydroShare()
-const { hydroShareArchive, loading: hydroShareLoading } = storeToRefs(
-  useHydroShareStore()
-)
+const { hydroShareArchive } = storeToRefs(useHydroShareStore())
 
 const { canEditThings, canDeleteThings } = useWorkspacePermissions(workspace)
 const loaded = ref(false)
@@ -142,19 +128,9 @@ const { tags } = storeToRefs(useTagStore())
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 
-const archivalBtnName = computed(() => {
-  const BASE_NAME = 'HydroShare Archival'
-  if (hydroShareArchive.value) {
-    if (hydroShareArchive.value.frequency)
-      return `${BASE_NAME} (${hydroShareArchive.value.frequency})`
-    else return `${BASE_NAME} (manual)`
-  } else return `Configure ${BASE_NAME}`
-})
-
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-const isHydroShareModalOpen = ref(false)
 
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false

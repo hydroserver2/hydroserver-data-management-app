@@ -122,7 +122,12 @@ import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
-import { DataSource, getStatusText } from '@/models/dataSource'
+import {
+  DataSource,
+  formatTime,
+  getStatusText,
+  WORKFLOW_TYPES,
+} from '@/models/dataSource'
 import router from '@/router/router'
 import { useETLStore } from '@/store/etl'
 
@@ -130,13 +135,6 @@ const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
 const { dataSource } = storeToRefs(useETLStore())
-
-const formatTime = (time: string) =>
-  new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(new Date(time)) + ' UTC'
 
 const scheduleString = computed(() => {
   if (!dataSource.value) return ''
@@ -181,21 +179,21 @@ const dataSourceInformation = computed(() => {
     },
     {
       icon: 'mdi-history',
-      label: 'Last synced',
+      label: 'Last run',
       value: dataSource.value.status.lastRun
         ? formatTime(dataSource.value.status.lastRun)
         : '',
     },
     {
       icon: 'mdi-calendar-sync',
-      label: 'Next sync',
+      label: 'Next run',
       value: dataSource.value.status.nextRun
         ? formatTime(dataSource.value.status.nextRun)
         : '',
     },
     {
       icon: 'mdi-message-text-outline',
-      label: 'Last sync message',
+      label: 'Last run message',
       value: dataSource.value.status.lastRunMessage,
     },
     {
@@ -219,7 +217,10 @@ const orchestrationSystemInformation = computed(() => {
     {
       icon: 'mdi-broadcast',
       label: 'Type',
-      value: dataSource.value.orchestrationSystem.type,
+      value:
+        WORKFLOW_TYPES.find(
+          (t) => t.value === dataSource.value.orchestrationSystem.type
+        )?.title ?? dataSource.value.orchestrationSystem.type,
     },
   ].filter(Boolean)
 })
