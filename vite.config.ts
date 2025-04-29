@@ -41,7 +41,13 @@ export default defineConfig({
     coverage: {
       exclude: [
         '**/src/**/*.vue',
-        '**/src/composables/useUserTags.ts',
+        '**/src/composables/useWorkspaceTags.ts',
+        '**/src/composables/useHydroShare.ts',
+        '**/src/composables/useWorkspacePermissions.ts',
+        '**/src/composables/useMetadata.ts',
+        '**/src/composables/useVocabulary.ts',
+        '**/src/services/getCSRFToken.ts',
+        '**/src/models/**',
         '**/src/plugins/**',
         '**/src/router/**',
         '**/src/store/**',

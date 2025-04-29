@@ -101,16 +101,16 @@ export function addNaNForGaps(data: DataPoint[], maxGap: number): DataPoint[] {
 }
 
 export function preProcessData(dataArray: DataArray, datastream: Datastream) {
-  const { noDataValue, intendedTimeSpacing, intendedTimeSpacingUnits } =
+  const { noDataValue, intendedTimeSpacing, intendedTimeSpacingUnit } =
     datastream
 
   let data = toDataPointArray(dataArray)
   data = replaceNoDataValues(data, noDataValue)
 
-  if (intendedTimeSpacingUnits && intendedTimeSpacing) {
+  if (intendedTimeSpacingUnit && intendedTimeSpacing) {
     const maxGap = convertTimeSpacingToMilliseconds(
       intendedTimeSpacing,
-      intendedTimeSpacingUnits as TimeSpacingUnit
+      intendedTimeSpacingUnit as TimeSpacingUnit
     )
 
     data = addNaNForGaps(data, maxGap)

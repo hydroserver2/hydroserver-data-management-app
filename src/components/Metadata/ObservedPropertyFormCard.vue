@@ -1,8 +1,10 @@
 <template>
   <v-card>
-    <v-card-title>
-      {{ isEdit ? 'Edit' : 'Add' }} Observed Property
-    </v-card-title>
+    <v-toolbar color="brown">
+      <v-card-title>
+        {{ isEdit ? 'Edit' : 'Add' }} Observed Property
+      </v-card-title>
+    </v-toolbar>
     <v-divider />
 
     <v-form
@@ -12,9 +14,8 @@
       validate-on="blur"
     >
       <v-card-text>
-        <v-combobox
+        <v-text-field
           v-model="item.name"
-          :items="OPNames"
           hide-details
           label="Name *"
           :rules="rules.requiredAndMaxLength255"
@@ -35,7 +36,7 @@
         ></v-textarea>
 
         <v-combobox
-          :items="OPVariableTypes"
+          :items="vocabularyStore.variableTypes"
           v-model="item.type"
           label="Variable Type *"
           :rules="rules.requiredAndMaxLength500"
@@ -66,24 +67,26 @@ import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
-import { OPVariableTypes, OPNameTypes } from '@/config/vocabularies'
+import { OPNameTypes } from '@/config/vocabularies'
 import { ObservedProperty } from '@/types'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const OPNames = Object.keys(OPNameTypes)
 
-const props = defineProps({
-  observedProperty: Object as () => ObservedProperty,
-})
+const props = defineProps<{
+  observedProperty?: ObservedProperty
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchUnownedObservedProperties,
   api.createObservedProperty,
   api.updateObservedProperty,
   ObservedProperty,
-  props.observedProperty || undefined,
-  false
+  props.observedProperty || undefined
 )
+const vocabularyStore = useVocabularyStore()
 
 const handleNameUpdated = () => {
   const name = item.value.name
@@ -95,8 +98,12 @@ const handleNameUpdated = () => {
 
 async function onSubmit() {
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
-    if (!newItem) return
+    if (!newItem) {
+      if (isEdit.value) emit('close')
+      return
+    }
     if (isEdit.value) emit('updated', newItem)
     else emit('created', newItem.id)
   } catch (error) {

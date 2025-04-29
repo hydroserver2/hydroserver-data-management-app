@@ -94,21 +94,10 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     )
   }
 
-  /** Filter out this datastream if the data is marked private and the current user
-   * is not an owner of the associated site
-   */
-  function hasObservationsReadPermission(datastream: Datastream) {
-    if (datastream.isDataVisible) return true
-
-    const matchingThing = things.value.find((t) => t.id === datastream.thingId)
-    return matchingThing?.ownsThing
-  }
-
   const filteredDatastreams = computed(() => {
     return datastreams.value.filter(
       (datastream) =>
         matchesSelectedThing(datastream) &&
-        hasObservationsReadPermission(datastream) &&
         matchesSelectedObservedProperty(datastream) &&
         matchesSelectedProcessingLevel(datastream)
     )

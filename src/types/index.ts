@@ -29,16 +29,7 @@ export interface GraphSeries {
 
 export type TimeSpacingUnit = 'seconds' | 'minutes' | 'hours' | 'days'
 
-export interface Owner {
-  firstName: string
-  lastName: string
-  organizationName: string
-  isPrimaryOwner: boolean
-  email: string
-}
-
 export interface Tag {
-  id: string
   key: string
   value: string
 }
@@ -80,8 +71,8 @@ export class PostHydroShareArchive extends HydroShareArchive {
 
 export class Thing {
   id: string
+  workspaceId: string
   name: string
-  owners: Owner[]
   tags: Tag[]
   hydroShareArchive?: HydroShareArchive | null
   siteType: string
@@ -91,33 +82,27 @@ export class Thing {
   longitude?: number | ''
   elevation_m?: number | ''
   elevationDatum: string
-  ownsThing: boolean
-  followsThing: boolean
   description: string
   samplingFeatureType: string
   state: string
   county: string
   country: string
-  isPrimaryOwner: boolean
   dataDisclaimer: string
 
   constructor() {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
-    this.owners = []
     this.tags = []
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
     this.elevationDatum = 'WGS84'
-    this.ownsThing = false
-    this.followsThing = false
     this.description = ''
     this.samplingFeatureType = 'Site'
     this.state = ''
     this.county = ''
     this.country = ''
-    this.isPrimaryOwner = false
     this.dataDisclaimer = ''
   }
 }
@@ -133,6 +118,7 @@ export interface ThingWithColor extends Thing {
 
 export class Datastream {
   id: string
+  workspaceId: string
   name: string
   description: string
   thingId: string
@@ -146,20 +132,20 @@ export class Datastream {
   observedPropertyId: string
   sensorId: string
   processingLevelId: string
+  isPrivate: boolean
   isVisible: boolean
-  isDataVisible: boolean
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
-  intendedTimeSpacingUnits?: string | null
+  intendedTimeSpacingUnit?: string | null
   timeAggregationInterval: number | null
-  timeAggregationIntervalUnits: string
+  timeAggregationIntervalUnit: string
   dataSourceId?: string | null
-  dataSourceColumn?: string | number | null
   valueCount: number
 
   constructor(thingId?: string) {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
     this.description = ''
     this.thingId = thingId || ''
@@ -173,16 +159,16 @@ export class Datastream {
     this.sensorId = ''
     this.processingLevelId = ''
     this.timeAggregationInterval = null
-    this.timeAggregationIntervalUnits = 'seconds'
+    this.timeAggregationIntervalUnit = 'seconds'
+    this.isPrivate = true
     this.isVisible = true
     this.valueCount = 0
-    this.isDataVisible = true
   }
 }
 
 export class Unit {
   id: string
-  owner: string | null
+  workspaceId: string
   name: string
   symbol: string
   definition: string
@@ -190,7 +176,7 @@ export class Unit {
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.name = ''
     this.symbol = ''
     this.definition = ''
@@ -200,7 +186,7 @@ export class Unit {
 
 export class Sensor {
   id: string
-  owner: string | null
+  workspaceId: string
   name: string
   description: string
   manufacturer: string
@@ -213,7 +199,7 @@ export class Sensor {
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.name = ''
     this.description = ''
     this.manufacturer = ''
@@ -228,8 +214,8 @@ export class Sensor {
 
 export class ObservedProperty {
   id: string
+  workspaceId: string
   name: string
-  owner: string | null
   definition: string
   description: string
   type: string
@@ -237,8 +223,8 @@ export class ObservedProperty {
 
   constructor() {
     this.id = ''
+    this.workspaceId = ''
     this.name = ''
-    this.owner = null
     this.definition = ''
     this.description = ''
     this.type = 'Hydrology'
@@ -248,14 +234,14 @@ export class ObservedProperty {
 
 export class ProcessingLevel {
   id: string
-  owner: string | null
+  workspaceId: string
   code: string
   definition: string
   explanation: string
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.code = ''
     this.definition = ''
     this.explanation = ''
@@ -264,74 +250,15 @@ export class ProcessingLevel {
 
 export class ResultQualifier {
   id: string
-  owner: string | null
+  workspaceId: string
   code: string
   description: string
 
   constructor() {
     this.id = ''
-    this.owner = null
+    this.workspaceId = ''
     this.code = ''
     this.description = ''
-  }
-}
-
-export class DataSource {
-  id: string
-  name: string
-  path: string
-  link: string | null
-  headerRow?: number
-  dataStartRow: number
-  delimiter: string
-  interval: number | null
-  intervalUnits: string | null
-  crontab: string
-  startTime: string | null
-  endTime: string | null
-  paused: boolean
-  timestampColumn: string | number
-  timestampFormat: string
-  timestampOffset: string
-  dataLoaderId: string
-  dataSourceThru: string | null
-  lastSyncSuccessful: boolean
-  lastSyncMessage: string
-  lastSynced: string | null
-  nextSync: string | null
-
-  constructor() {
-    this.id = ''
-    this.name = ''
-    this.path = ''
-    this.link = null
-    this.dataStartRow = 1
-    this.delimiter = ','
-    this.interval = null
-    this.intervalUnits = null
-    this.crontab = ''
-    this.startTime = null
-    this.endTime = null
-    this.paused = false
-    this.timestampColumn = ''
-    this.timestampFormat = ''
-    this.timestampOffset = ''
-    this.dataLoaderId = ''
-    this.dataSourceThru = null
-    this.lastSyncSuccessful = false
-    this.lastSyncMessage = ''
-    this.lastSynced = null
-    this.nextSync = null
-  }
-}
-
-export class DataLoader {
-  id: string
-  name: string
-
-  constructor() {
-    this.id = ''
-    this.name = ''
   }
 }
 
@@ -356,8 +283,8 @@ export class User {
   address: string
   organization?: Organization | null
   type: string
-  isVerified: boolean
   link: string
+  accountType: 'admin' | 'standard' | 'limited'
   hydroShareConnected: boolean
 
   constructor() {
@@ -370,28 +297,129 @@ export class User {
     this.phone = ''
     this.address = ''
     this.type = ''
-    this.isVerified = false
     this.link = ''
+    this.accountType = 'standard'
     this.hydroShareConnected = false
   }
 }
 
-export interface DatastreamMetadata {
-  units: Unit[]
-  sensors: Sensor[]
-  processingLevels: ProcessingLevel[]
-  observedProperties: ObservedProperty[]
-}
-
 export interface Photo {
-  id: string
-  thingId: string
-  filePath: string
+  name: string
   link: string
 }
 
-export enum OAuthProvider {
-  google = 'google',
-  orcid = 'orcid',
-  hydroshare = 'hydroshare',
+export class OAuthProvider {
+  id: string
+  name: string
+  iconLink: string
+  signupEnabled: boolean
+  connectEnabled: boolean
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.iconLink = ''
+    this.signupEnabled = true
+    this.connectEnabled = true
+  }
+}
+
+export enum PermissionAction {
+  Global = '*',
+  View = 'view',
+  Create = 'create',
+  Edit = 'edit',
+  Delete = 'delete',
+}
+
+export enum PermissionResource {
+  Global = '*',
+  Workspace = 'Workspace',
+  Collaborator = 'Collaborator',
+  Thing = 'Thing',
+  Datastream = 'Datastream',
+  Sensor = 'Sensor',
+  Unit = 'Unit',
+  ObservedProperty = 'ObservedProperty',
+  ProcessingLevel = 'ProcessingLevel',
+  Observation = 'Observation',
+}
+
+export interface Permission {
+  action: PermissionAction
+  resource: PermissionResource
+}
+
+export interface CollaboratorRole {
+  name: string
+  description: string
+  id: string
+  workspaceId: string
+  permissions: Permission[]
+}
+
+export interface WorkspaceData {
+  id: string
+  name: string
+  isPrivate: boolean
+  owner: User
+  collaboratorRole: CollaboratorRole
+  pendingTransferTo?: User | null
+}
+
+export class Workspace {
+  id: string
+  name: string
+  isPrivate: boolean
+  owner: UserInfo | null
+  collaboratorRole: CollaboratorRole | null
+  pendingTransferTo?: UserInfo | null
+
+  constructor() {
+    this.id = ''
+    this.name = ''
+    this.isPrivate = false
+    this.owner = null
+    this.collaboratorRole = null
+    this.pendingTransferTo = null
+  }
+}
+
+export interface UserInfo {
+  name: string
+  email: string
+  phone: string
+  address: string
+  link: string
+  type: string
+  organizationName: string
+}
+
+export class Collaborator {
+  user: UserInfo
+  role: CollaboratorRole
+
+  constructor() {
+    this.user = {
+      phone: '',
+      address: '',
+      link: '',
+      type: '',
+      name: '',
+      email: '',
+      organizationName: '',
+    }
+    this.role = {
+      name: '',
+      description: '',
+      id: '',
+      workspaceId: '',
+      permissions: [],
+    }
+  }
+}
+
+export interface ApiError {
+  status: number
+  message?: string
 }

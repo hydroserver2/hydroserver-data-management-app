@@ -1,127 +1,263 @@
 <template>
-  <v-data-table-virtual
-    :headers="headers"
-    :items="tableData"
-    :search="search"
-    :hover="true"
-    class="elevation-2"
-  >
-    <template v-slot:item.status="{ item }">
-      <DataSourceStatus :status="item.status" :paused="item.paused" />
-    </template>
-
-    <template v-slot:item.actions="{ item }">
-      <v-icon
-        :icon="item.paused ? 'mdi-play' : 'mdi-pause'"
-        @click="togglePaused(item)"
+  <v-card>
+    <v-toolbar title="Orchestration systems" flat color="blue-grey">
+      <v-spacer />
+      <v-text-field
+        class="mx-2"
+        clearable
+        v-model="search"
+        prepend-inner-icon="mdi-magnify"
+        label="Search"
+        hide-details
+        density="compact"
+        variant="underlined"
+        rounded="xl"
+        maxWidth="300"
       />
 
-      <v-menu>
-        <template v-slot:activator="{ props }">
-          <v-icon v-bind="props" icon="mdi-dots-vertical" />
-        </template>
-        <v-list>
-          <v-list-item
-            title="Data Source Details"
-            prepend-icon="mdi-information"
-            :to="{
-              name: 'DataSource',
-              params: { id: item.id },
-            }"
-          />
-          <v-list-item
-            title="Edit Data Source"
-            prepend-icon="mdi-pencil"
-            @click="openDialog(item, 'edit')"
-          />
-          <v-list-item
-            title="Delete Data Source"
-            prepend-icon="mdi-delete"
-            @click="openDialog(item, 'delete')"
-          />
-        </v-list>
-      </v-menu>
-    </template>
-  </v-data-table-virtual>
+      <v-btn
+        class="mx-2"
+        append-icon="mdi-chevron-right"
+        color="white"
+        :to="{ name: 'HydroLoader' }"
+      >
+        Download Streaming Data Loader
+      </v-btn>
+    </v-toolbar>
 
-  <v-dialog v-model="openEdit">
+    <v-data-table-virtual
+      :group-by="groupBy"
+      :headers="headers"
+      :items="tableData"
+      :search="search"
+      :hover="true"
+      class="elevation-2"
+      @click:row="onRowClick"
+    >
+      <template
+        v-slot:group-header="{ item, columns, toggleGroup, isGroupOpen }"
+      >
+        <tr class="bg-blue-grey-lighten-5" @click="toggleGroup(item)">
+          <td :colspan="columns.length">
+            <div class="d-flex align-center">
+              <v-btn
+                :icon="isGroupOpen(item) ? '$expand' : '$next'"
+                color="medium-emphasis"
+                density="comfortable"
+                size="small"
+                variant="outlined"
+                @click.stop="toggleGroup(item)"
+              ></v-btn>
+
+              <span class="ms-4">{{ item.value }}</span>
+              <v-spacer />
+              <v-chip
+                v-if="getBehindScheduleCountText(item.items as any[])"
+                prepend-icon="mdi-clock-alert-outline"
+                variant="text"
+                class="ms-4"
+                rounded="xl"
+                color="orange-darken-4"
+              >
+                {{ getBehindScheduleCountText(item.items as any[]) }}
+              </v-chip>
+              <v-chip
+                v-if="getBadCountText(item.items as any[])"
+                prepend-icon="mdi-alert"
+                variant="text"
+                class="ms-4"
+                rounded="xl"
+                color="error"
+              >
+                {{ getBadCountText(item.items as any[]) }}
+              </v-chip>
+              <v-btn-add
+                class="mx-2"
+                color="white"
+                @click.stop="
+                  openCreateDialog(item.items[0].raw.orchestrationSystem)
+                "
+              >
+                Add data source
+              </v-btn-add>
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template v-slot:item.status="{ item }">
+        <DataSourceStatus
+          v-if="!item.isPlaceholder"
+          :status="item.statusName"
+          :paused="item.status.paused"
+        />
+      </template>
+
+      <template v-slot:item.actions="{ item }">
+        <v-btn
+          v-if="!item.isPlaceholder"
+          variant="text"
+          color="black"
+          :icon="item.status.paused ? 'mdi-play' : 'mdi-pause'"
+          @click.stop="togglePaused(item)"
+        />
+      </template>
+    </v-data-table-virtual>
+  </v-card>
+
+  <v-dialog v-model="openCreate" v-if="selectedOrchestrationSystem">
     <DataSourceForm
-      :data-source="item"
-      @close="openEdit = false"
-      @updated="onUpdate"
-    />
-  </v-dialog>
-
-  <v-dialog v-model="openDelete" max-width="500">
-    <DeleteDataSourceCard
-      :item-name="item.name"
-      @delete="onDelete"
-      @close="openDelete = false"
+      :orchestration-system="selectedOrchestrationSystem"
+      @close="openCreate = false"
+      @created="refreshTable"
     />
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
-import { DataLoader, DataSource } from '@/types'
+import { DataSource } from '@/models'
 import { api } from '@/services/api'
 import { computed } from 'vue'
-import { getStatus } from '@/utils/dataSourceUtils'
-import { useTableLogic } from '@/composables/useTableLogic'
-import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
+import router from '@/router/router'
+import { getStatusText, OrchestrationSystem, Status } from '@/models/dataSource'
+import { StatusType } from '@/models/dataSource'
 
-defineProps({ search: String })
-const dataLoaders = ref<DataLoader[]>([])
+const props = defineProps<{
+  workspaceId: string
+}>()
 
-const { item, items, openEdit, openDelete, openDialog, onDelete, onUpdate } =
-  useTableLogic(api.fetchDataSources, api.deleteDataSource, DataSource)
+const openCreate = ref(false)
+const search = ref()
+const orchestrationSystems = ref<OrchestrationSystem[]>([])
+const dataSources = ref<DataSource[]>([])
+const selectedOrchestrationSystem = ref<OrchestrationSystem>()
+const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 
-const tableData = computed(() =>
-  items.value
-    .map((d) => ({
-      ...d,
-      status: getStatus(d),
-      dataLoaderName:
-        dataLoaders.value.find((dl) => dl.id === d.dataLoaderId)?.name || '',
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name))
+const fetchOrchestrationData = async (newId: string) => {
+  try {
+    const [orchestrationSystemResponse, dataSourceResponse] = await Promise.all(
+      [api.fetchOrchestrationSystems(), api.fetchDataSources()]
+    )
+
+    // TODO: Allow HydroShare as an option once we have archival functionality in the orchestration system
+    orchestrationSystems.value = orchestrationSystemResponse.filter(
+      (os: OrchestrationSystem) =>
+        (os.workspaceId === newId || !os.workspaceId) &&
+        os.type !== 'HydroShare'
+    )
+    dataSources.value = dataSourceResponse.filter(
+      (d: DataSource) => d.workspaceId === newId
+    )
+  } catch (error) {
+    console.error('Error fetching orchestration data', error)
+  }
+}
+
+const refreshTable = async () => {
+  await fetchOrchestrationData(props.workspaceId)
+}
+
+watch(
+  () => props.workspaceId,
+  async (newId) => {
+    if (newId == null) return
+    await fetchOrchestrationData(newId)
+  },
+  { immediate: true }
 )
 
-async function togglePaused(ds: DataSource) {
-  ds.paused = !ds.paused
-  await api.updateDataSource(ds)
+const tableData = computed(() => {
+  const dsList = dataSources.value.map((d) => ({
+    ...d,
+    statusName: getStatusText(d.status),
+    lastRun: d.status.lastRun,
+    nextRun: d.status.nextRun,
+    orchestrationSystemName: d.orchestrationSystem.name,
+    isPlaceholder: false,
+  }))
+
+  const existingNames = new Set(dsList.map((ds) => ds.orchestrationSystemName))
+
+  const placeholders = orchestrationSystems.value
+    .filter((os) => !existingNames.has(os.name))
+    .map((os) => ({
+      id: `placeholder-${os.id}`,
+      name: '',
+      statusName: 'Unknown' as StatusType,
+      status: {} as Status,
+      orchestrationSystemName: os.name,
+      orchestrationSystem: JSON.parse(JSON.stringify(os)),
+      isPlaceholder: true,
+    }))
+
+  const combined = [...dsList, ...placeholders]
+  return combined.sort((a, b) => {
+    if (a.orchestrationSystemName === b.orchestrationSystemName) {
+      return a.name.localeCompare(b.name)
+    }
+    return a.orchestrationSystemName.localeCompare(b.orchestrationSystemName)
+  })
+})
+
+async function togglePaused(ds: any) {
+  ds.status.paused = !ds.status.paused
+  await api.updateDataSourcePartial({
+    status: ds.status,
+    id: ds.id,
+  } as DataSource)
+}
+
+const openCreateDialog = (selectedItem: any) => {
+  selectedOrchestrationSystem.value = selectedItem
+  openCreate.value = true
+}
+
+function getBadCountText(groupItems: any[]) {
+  const badCount = groupItems.filter(
+    (i) => i.raw.status === 'Needs attention'
+  ).length
+  if (!badCount) return ''
+  if (badCount === 1) return '1 error'
+  return `${badCount} errors`
+}
+
+function getBehindScheduleCountText(groupItems: any[]) {
+  const behindCount = groupItems.filter(
+    (i) => i.raw.status === 'Behind schedule'
+  ).length
+  if (!behindCount) return ''
+  return `${behindCount} behind schedule`
+}
+
+const onRowClick = async (event: Event, item: any) => {
+  if (item.item.isPlaceholder) return
+  await router.push({ name: 'DataSource', params: { id: item.item.id } })
 }
 
 const headers = [
   {
-    title: 'Name',
+    title: 'Data source name',
     key: 'name',
-  },
-  {
-    title: 'Data Loader',
-    key: 'dataLoaderName',
   },
   {
     title: 'Status',
     key: 'status',
   },
   {
-    title: 'Last Synced',
-    key: 'lastSynced',
+    title: 'Last run',
+    key: 'lastRun',
   },
   {
-    title: 'Next Sync',
-    key: 'nextSync',
+    title: 'Next run',
+    key: 'nextRun',
   },
   {
-    title: 'Actions',
+    title: 'Pause',
     key: 'actions',
+    align: 'end',
   },
 ] as const
-
-onMounted(async () => {
-  dataLoaders.value = await api.fetchDataLoaders()
-})
 </script>

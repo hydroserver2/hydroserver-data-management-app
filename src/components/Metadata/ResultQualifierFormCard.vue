@@ -1,8 +1,10 @@
 <template>
   <v-card>
-    <v-card-title>
-      {{ isEdit ? 'Edit' : 'Add' }} Result Qualifier
-    </v-card-title>
+    <v-toolbar color="brown">
+      <v-card-title>
+        {{ isEdit ? 'Edit' : 'Add' }} Result Qualifier
+      </v-card-title>
+    </v-toolbar>
 
     <v-form
       @submit.prevent="onSubmit"
@@ -42,22 +44,28 @@ import { ResultQualifier } from '@/types'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { api } from '@/services/api'
 
-const props = defineProps({ resultQualifier: Object as () => ResultQualifier })
+const props = defineProps<{
+  resultQualifier?: ResultQualifier
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['updated', 'created', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  () => Promise.resolve([]), // No need to fetch RQs so do nothing
   api.createResultQualifier,
   api.updateResultQualifier,
   ResultQualifier,
-  props.resultQualifier || undefined,
-  false
+  props.resultQualifier || undefined
 )
 
 async function onSubmit() {
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
-    if (!newItem) return
+    if (!newItem) {
+      if (isEdit.value) emit('close')
+      return
+    }
     if (isEdit.value) emit('updated', newItem)
     else emit('created', newItem.id)
   } catch (error) {

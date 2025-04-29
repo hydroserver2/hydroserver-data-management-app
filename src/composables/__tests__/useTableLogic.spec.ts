@@ -1,15 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useTableLogic } from '../useTableLogic'
 import { Unit } from '@/types'
 import unitFixtures from '@/utils/test/fixtures/unitFixtures'
 
-const defaultFetchFunction: () => Promise<Unit[]> = () => {
-  return Promise.resolve(JSON.parse(JSON.stringify(unitFixtures)))
-}
+const defaultFetchFunction = (wsId: string): Promise<Unit[]> =>
+  Promise.resolve(JSON.parse(JSON.stringify(unitFixtures)))
 
-const defaultDeleteFunction: () => Promise<void> = () => Promise.resolve()
+const defaultDeleteFunction = (id: string): Promise<void> => Promise.resolve()
 
 const createDummyComponent = ({
   apiFetchFunction = defaultFetchFunction,
@@ -17,9 +16,15 @@ const createDummyComponent = ({
 } = {}) =>
   defineComponent({
     setup() {
-      return useTableLogic(apiFetchFunction, apiDeleteFunction, Unit)
+      const workspaceId = ref('test-workspace')
+      return useTableLogic(
+        apiFetchFunction,
+        apiDeleteFunction,
+        Unit,
+        workspaceId
+      )
     },
-    template: '<div>{{items}}</div>',
+    template: '<div>{{ items }}</div>',
   })
 
 describe('useTableLogic', () => {
@@ -33,41 +38,51 @@ describe('useTableLogic', () => {
     expect(wrapper.vm.items).toEqual(unitFixtures)
   })
 
-  it('opens edit dialog and sets the item correctly', () => {
+  it('opens edit dialog and sets the item correctly', async () => {
     const wrapper = mount(createDummyComponent())
-    wrapper.vm.openDialog(unitFixtures[0], 'edit')
+    await flushPromises()
 
+    wrapper.vm.openDialog(unitFixtures[0], 'edit')
     expect(wrapper.vm.openEdit).toBe(true)
     expect(wrapper.vm.item).toEqual(unitFixtures[0])
   })
 
-  it('opens delete dialog and sets the item correctly', () => {
+  it('opens delete dialog and sets the item correctly', async () => {
     const wrapper = mount(createDummyComponent())
-    wrapper.vm.openDialog(unitFixtures[1], 'delete')
+    await flushPromises()
 
+    wrapper.vm.openDialog(unitFixtures[1], 'delete')
     expect(wrapper.vm.openDelete).toBe(true)
     expect(wrapper.vm.item).toEqual(unitFixtures[1])
+  })
+
+  it('opens access control dialog and sets the item correctly', async () => {
+    const wrapper = mount(createDummyComponent())
+    await flushPromises()
+
+    wrapper.vm.openDialog(unitFixtures[2], 'accessControl')
+    expect(wrapper.vm.openAccessControl).toBe(true)
+    expect(wrapper.vm.item).toEqual(unitFixtures[2])
   })
 
   it('updates an item correctly', async () => {
     const wrapper = mount(createDummyComponent())
     await flushPromises()
 
-    let updatedItem = JSON.parse(JSON.stringify(unitFixtures[0]))
-    updatedItem.name = 'Updated'
+    const updatedItem = { ...unitFixtures[0], name: 'Updated' }
     wrapper.vm.onUpdate(updatedItem)
-
     expect(wrapper.vm.items).toContainEqual(updatedItem)
   })
 
-  it('Deletes an item correctly', async () => {
+  it('deletes an item correctly', async () => {
     const wrapper = mount(createDummyComponent())
     await flushPromises()
 
     wrapper.vm.openDialog(unitFixtures[0], 'delete')
-    wrapper.vm.onDelete()
+    await wrapper.vm.onDelete()
     await flushPromises()
 
     expect(wrapper.vm.items).not.toContainEqual(unitFixtures[0])
+    expect(wrapper.vm.openDelete).toBe(false)
   })
 })

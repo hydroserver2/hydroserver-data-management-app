@@ -9,7 +9,7 @@
 
     <div class="d-flex justify-end my-4 mx-2">
       <v-btn color="blue-grey-lighten-4" elevation="3" @click="clearFilters"
-        >Clear Filters</v-btn
+        >Clear filters</v-btn
       >
     </div>
 
@@ -108,7 +108,7 @@
   </v-navigation-drawer>
 
   <div class="mt-4 mx-4" v-if="!drawer">
-    <v-icon @click="drawer = !drawer">mdi-menu</v-icon>
+    <v-icon @click="drawer = !drawer">mdi-menu-close</v-icon>
   </div>
 </template>
 
@@ -140,18 +140,19 @@ const searchProcessingLevel = ref('')
 // Only show list items that are referenced by at least one datastream
 // Then mutually filter the lists by selected filters.
 const sortedProcessingLevelNames = computed(() => {
-  const filteredPLs = processingLevels.value.filter(
-    (pl) =>
-      pl.definition
-        .toLowerCase()
-        .includes(searchProcessingLevel.value.toLowerCase()) &&
+  const searchQuery = (searchProcessingLevel.value ?? '').toLowerCase()
+  const filteredPLs = processingLevels.value.filter((pl) => {
+    const definition = pl.definition ?? ''
+    return (
+      definition.toLowerCase().includes(searchQuery) &&
       datastreams.value.some(
         (ds) =>
           ds.processingLevelId === pl.id &&
           matchesSelectedThing(ds) &&
           matchesSelectedObservedProperty(ds)
       )
-  )
+    )
+  })
   const names = filteredPLs.map((pl) => pl.definition)
   return [...new Set(names)].sort()
 })

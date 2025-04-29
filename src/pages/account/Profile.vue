@@ -4,7 +4,7 @@
     <OrganizationTable />
 
     <v-row class="mb-8">
-      <v-col v-if="hydroShareOauthEnabled === 'true'">
+      <v-col v-if="isHydroShareConnectionEnabled">
         <HydroShareConnectionButton />
       </v-col>
 
@@ -33,16 +33,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import AccountForm from '@/components/account/AccountForm.vue'
 import UserInfoTable from '@/components/account/UserInfoTable.vue'
 import OrganizationTable from '@/components/account/OrganizationTable.vue'
 import DeleteAccountCard from '@/components/account/DeleteAccountCard.vue'
 import HydroShareConnectionButton from '@/components/HydroShare/HydroShareConnectionButton.vue'
+import { useHydroShare } from '@/composables/useHydroShare'
+import { useRoute } from 'vue-router'
+import { Snackbar } from '@/utils/notifications'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/store/user'
+import { api } from '@/services/api'
 
+const { isConnectionEnabled: isHydroShareConnectionEnabled } = useHydroShare()
 const openDelete = ref(false)
 const openForm = ref(false)
+const { user } = storeToRefs(useUserStore())
 
-const hydroShareOauthEnabled =
-  import.meta.env.VITE_APP_HYDROSHARE_OAUTH_ENABLED || 'false'
+onMounted(async () => {
+  const route = useRoute()
+  if (route?.query?.error === 'connected_other') {
+    Snackbar.error(
+      'This HydroShare account is already connected to a different HydroServer account.'
+    )
+  }
+  try {
+    user.value = await api.fetchUser()
+  } catch (err: any) {
+    Snackbar.error(err.message)
+    console.error('Error fetching user', err)
+  }
+})
 </script>

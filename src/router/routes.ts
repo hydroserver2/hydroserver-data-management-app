@@ -22,7 +22,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/Browse.vue'),
     meta: {
       hideFooter: true,
-      isFullScreen: true,
+      hasSidebar: true,
       title: 'Browse Monitoring Sites',
       metaTags: [
         {
@@ -37,7 +37,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'Sites',
     component: () => import('@/pages/Sites.vue'),
     meta: {
-      hasAuthGuard: true,
+      requiresAuth: true,
       title: 'Your Sites',
       metaTags: [
         {
@@ -62,12 +62,6 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/sites/:id/datastreams/form/:datastreamId?',
-    name: 'DatastreamForm',
-    component: () => import('@/pages/DatastreamForm.vue'),
-    meta: { hasThingOwnershipGuard: true },
-  },
-  {
     path: '/about',
     name: 'Contact',
     component: () => import('@/pages/About.vue'),
@@ -82,21 +76,16 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/data-sources',
-    name: 'DataSources',
-    component: () => import('@/pages/DataSourceDashboard.vue'),
-    meta: { hasAuthGuard: true },
+    path: '/orchestration',
+    name: 'Orchestration',
+    component: () => import('@/pages/Orchestration.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/data-sources/:id',
     name: 'DataSource',
-    component: () => import('@/pages/DataSourceDetail.vue'),
-  },
-  {
-    path: '/data-loaders',
-    name: 'DataLoaders',
-    component: () => import('@/pages/DataLoaderDashboard.vue'),
-    meta: { hasAuthGuard: true },
+    component: () => import('@/pages/DataSourceDetails.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/hydroloader/download',
@@ -104,6 +93,8 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/HydroLoaderDownload.vue'),
   },
   {
+    // AllAuth emails will link users to this page if a password reset was requested but the email provided does not
+    // have an account associated with it yet.
     path: '/sign-up',
     name: 'SignUp',
     component: () => {
@@ -114,7 +105,7 @@ export const routes: RouteRecordRaw[] = [
       }
     },
     meta: {
-      hasLoggedOutGuard: true,
+      requiresLoggedOut: true,
       title: 'Sign Up',
       metaTags: [
         {
@@ -130,23 +121,17 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/account/Login.vue'),
     meta: {
       title: 'Login',
-      hasLoggedOutGuard: true,
+      requiresLoggedOut: true,
     },
   },
   {
-    path: '/password_reset',
-    name: 'PasswordResetRequest',
-    component: () =>
-      import('@/pages/account/PasswordRecovery/PasswordResetRequest.vue'),
-    meta: {
-      title: 'Reset Password',
-    },
-  },
-  {
-    path: '/password_reset/:uid/:token',
-    name: 'PasswordReset',
-    component: () =>
-      import('@/pages/account/PasswordRecovery/PasswordReset.vue'),
+    // AllAuth password reset emails will link users to this page. This page will need to request the user for a new
+    // password and then POST the password and reset key to the resetPassword endpoint complete the password reset
+    // process. Full docs here:
+    // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Password-Reset/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1password~1reset/post
+    path: '/reset-password/:passwordResetKey?',
+    name: 'ResetPassword',
+    component: () => import('@/pages/account/ResetPassword.vue'),
     meta: {
       title: 'Reset Password',
     },
@@ -155,31 +140,28 @@ export const routes: RouteRecordRaw[] = [
     path: '/profile',
     name: 'Profile',
     component: () => import('@/pages/account/Profile.vue'),
-    meta: { hasAuthGuard: true, title: 'Profile' },
+    meta: { requiresAuth: true, title: 'Profile' },
   },
   {
     path: '/complete-profile',
     name: 'CompleteProfile',
     component: () => import('@/pages/account/CompleteProfile.vue'),
-    meta: { hasUnverifiedAuthGuard: true, title: 'Complete Profile' },
+    meta: { title: 'Complete Profile' },
   },
   {
+    // AllAuth verification emails will link users to this page. This page will need to POST a key to the verifyEmail
+    // endpoint to complete the verification process. Full docs here:
+    // https://docs.allauth.org/en/dev/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1email~1verify/post
     path: '/verify-email',
     name: 'VerifyEmail',
     component: () => import('@/pages/account/VerifyEmail.vue'),
-    meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
-  },
-  {
-    path: '/activate',
-    name: 'ActivateAccount',
-    component: () => import('@/pages/account/ActivateAccount.vue'),
-    meta: { hasUnverifiedAuthGuard: true, title: 'Verify Email' },
+    meta: { title: 'Verify Email' },
   },
   {
     path: '/metadata',
     name: 'Metadata',
     component: () => import('@/pages/Metadata.vue'),
-    meta: { hasAuthGuard: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/visualize-data/:thingId?',
@@ -188,7 +170,6 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'VisualizeData',
       hideFooter: true,
-      isFullScreen: true,
       metaTags: [
         {
           name: 'keywords',

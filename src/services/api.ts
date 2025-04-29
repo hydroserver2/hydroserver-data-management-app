@@ -2,36 +2,45 @@ import { apiMethods } from '@/services/apiMethods'
 import {
   Unit,
   Thing,
-  DataLoader,
   Sensor,
   ResultQualifier,
   ProcessingLevel,
   ObservedProperty,
   Datastream,
-  DataSource,
   Tag,
   PostHydroShareArchive,
   HydroShareArchive,
   User,
+  Workspace,
 } from '@/types'
+import { Payload, DataSource } from '@/models'
+import {
+  convertDataSourceToPostObject,
+  OrchestrationSystem,
+} from '@/models/dataSource'
+import { getCSRFToken } from './getCSRFToken'
 
 export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
 
-export const ACCOUNT_BASE = `${BASE_URL}/account`
+export const AUTH_BASE = `${BASE_URL}/auth`
+export const ACCOUNT_BASE = `${AUTH_BASE}/browser/account`
+export const SESSION_BASE = `${AUTH_BASE}/browser/session`
+export const PROVIDER_BASE = `${AUTH_BASE}/browser/provider`
+const WORKSPACES_BASE = `${AUTH_BASE}/workspaces`
+
 export const TAG_BASE = `${BASE_URL}/data/tags`
-export const USER_BASE = `${BASE_URL}/account/user`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
 export const THINGS_BASE = `${BASE_URL}/data/things`
-const DATA_LOADERS_BASE = `${BASE_URL}/data/data-loaders`
+const ETL_SYSTEMS_BASE = `${BASE_URL}/data/orchestration-systems`
 const DATA_SOURCES_BASE = `${BASE_URL}/data/data-sources`
 const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
-export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
+const VOCABULARY_BASE = `${BASE_URL}/data/vocabulary`
 
-export const JWT_REFRESH = `${ACCOUNT_BASE}/jwt/refresh`
+export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
 export const getObservationsEndpoint = (
   id: string,
@@ -42,60 +51,147 @@ export const getObservationsEndpoint = (
 ) => {
   let url = `${SENSORTHINGS_BASE}/Datastreams('${id}')/Observations?$resultFormat=dataArray`
   url += `&$top=${pageSize}`
-  url += `&$filter=phenomenonTime%20gt%20${startTime}`
-  if (endTime) url += `%20and%20phenomenonTime%20le%20${endTime}`
+  url += `&$filter=phenomenonTime%20gt%20${encodeURIComponent(startTime)}`
+  if (endTime)
+    url += `%20and%20phenomenonTime%20le%20${encodeURIComponent(endTime)}`
   if (skipCount) url += `&$skip=${skipCount}`
   return url
 }
 
-export const OAUTH_ENDPOINT = (
+/**
+ * Initiates a synchronous form submission to redirect the user for OAuth login in a Django AllAuth
+ * environment. This allows the server to return a 302 redirect that the browser will follow,
+ * preserving session cookies and enabling AllAuth to handle the full OAuth handshake.
+ *
+ * @param {string} provider - The ID of the OAuth provider (e.g. "google", "hydroshare").
+ * @param {string} callbackUrl - The URL to which the user is redirected after the OAuth flow completes.
+ * @param {string} process - Enum: "login" or "connect" The process to be executed when the user successfully authenticates.
+ *                           When set to login, the user will be logged into the account to which the provider account is connected,
+ *                           or if no such account exists, a signup will occur. If set to connect, the provider account will
+ *                           be connected to the list of provider accounts for the currently authenticated user.
+ */
+const providerRedirect = (
   provider: string,
-  uid?: string,
-  token?: string
+  callbackUrl: string,
+  process: string
 ) => {
-  let url = `${ACCOUNT_BASE}/${provider}/login`
-  if (uid && token) {
-    url += `?uid=${uid}&token=${token}`
+  const data: Record<string, string> = {
+    provider: provider,
+    callback_url: callbackUrl,
+    process: process,
   }
-  return url
+  const csrfToken = getCSRFToken()
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = `${PROVIDER_BASE}/redirect`
+  if (csrfToken) {
+    const csrfInput = document.createElement('input')
+    csrfInput.type = 'hidden'
+    csrfInput.name = 'csrfmiddlewaretoken'
+    csrfInput.value = csrfToken
+    form.appendChild(csrfInput)
+  }
+  for (const key in data) {
+    const input = document.createElement('input')
+    input.type = 'hidden'
+    input.name = key
+    input.value = data[key]
+    form.appendChild(input)
+  }
+  document.body.appendChild(form)
+  form.submit()
 }
 
 export const api = {
-  createUser: async (user: User) => apiMethods.post(USER_BASE, user),
-  fetchUser: async () => apiMethods.fetch(USER_BASE),
-  updateUser: async (user: User, oldUser: User) =>
-    apiMethods.patch(USER_BASE, user, oldUser),
-  deleteUser: async () => apiMethods.delete(USER_BASE),
-
-  resetPassword: async (uid: string, token: string, password: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/reset-password`, {
-      uid: uid,
-      token: token,
-      password: password,
-    }),
-  sendPasswordRestEmail: async (email: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/send-password-reset-email`, {
-      email: email,
-    }),
+  fetchAuthMethods: async () => apiMethods.fetch(`${AUTH_BASE}/methods`),
+  fetchSession: async () => apiMethods.fetch(`${SESSION_BASE}`),
   login: async (email: string, password: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/jwt/pair`, {
+    apiMethods.post(`${SESSION_BASE}`, { email, password }),
+  logout: async () => apiMethods.delete(`${SESSION_BASE}`),
+
+  fetchUser: async () => apiMethods.fetch(`${ACCOUNT_BASE}`),
+  signup: async (user: User) => apiMethods.post(`${ACCOUNT_BASE}`, user),
+  updateUser: async (user: User, oldUser: User) =>
+    apiMethods.patch(`${ACCOUNT_BASE}`, user, oldUser),
+  deleteUser: async () => apiMethods.delete(`${ACCOUNT_BASE}`),
+
+  sendVerificationEmail: async (email: string) =>
+    apiMethods.put(`${ACCOUNT_BASE}/email/verify`, {
       email: email,
+    }),
+  verifyEmailWithCode: async (key: string) =>
+    apiMethods.post(`${ACCOUNT_BASE}/email/verify`, { key }),
+
+  requestPasswordReset: async (email: string) =>
+    apiMethods.post(`${ACCOUNT_BASE}/password/request`, {
+      email: email,
+    }),
+  resetPassword: async (key: string, password: string) =>
+    apiMethods.post(`${ACCOUNT_BASE}/password/reset`, {
+      key: key,
       password: password,
     }),
-  activateAccount: async (uid: string, token: string) =>
-    apiMethods.post(`${ACCOUNT_BASE}/activate`, {
-      uid: uid,
-      token: token,
+
+  fetchWorkspaces: async () => apiMethods.fetch(WORKSPACES_BASE),
+  fetchAssociatedWorkspaces: async () =>
+    apiMethods.fetch(`${WORKSPACES_BASE}?associated_only=true`),
+  fetchWorkspace: async (id: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${id}`),
+  createWorkspace: async (postWorkspace: Workspace) =>
+    apiMethods.post(WORKSPACES_BASE, postWorkspace),
+  updateWorkspace: async (
+    newWorkspace: Workspace,
+    oldWorkspace: Workspace | null = null
+  ) =>
+    apiMethods.patch(
+      `${WORKSPACES_BASE}/${newWorkspace.id}`,
+      newWorkspace,
+      oldWorkspace
+    ),
+  deleteWorkspace: async (id: string) =>
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}`),
+  transferWorkspace: async (id: string, newOwner: string) =>
+    apiMethods.post(`${WORKSPACES_BASE}/${id}/transfer`, { newOwner }),
+  acceptWorkspaceTransfer: async (id: string) =>
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/transfer`),
+  rejectWorkspaceTransfer: async (id: string) =>
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}/transfer`),
+
+  getCollaboratorRoles: async (id: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${id}/roles`),
+  getCollaboratorRole: async (workspaceId: string, roleId: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/roles/${roleId}`),
+
+  getCollaborators: async (id: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${id}/collaborators`),
+  addCollaborator: async (id: string, email: string, roleId: string) =>
+    apiMethods.post(`${WORKSPACES_BASE}/${id}/collaborators`, {
+      email,
+      roleId,
     }),
-  sendVerificationEmail: async () =>
-    apiMethods.post(`${ACCOUNT_BASE}/send-verification-email`),
+  updateCollaboratorRole: async (id: string, email: string, roleId: string) =>
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/collaborators`, {
+      email,
+      roleId,
+    }),
+  removeCollaborator: async (id: string, email: string) =>
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
+
+  fetchConnectedProviders: async () =>
+    apiMethods.fetch(`${PROVIDER_BASE}/connections`),
+  providerRedirect,
+  providerSignup: async (user: User) =>
+    apiMethods.post(`${PROVIDER_BASE}/signup`, user),
+  deleteProvider: async (provider: string, account: string) =>
+    apiMethods.delete(`${PROVIDER_BASE}/connections`, {
+      provider: provider,
+      account: account,
+    }),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
   fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
-  fetchUnownedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=noUser`),
-  fetchOwnedUnits: async () => apiMethods.fetch(`${UNIT_BASE}?owner=anyUser`),
-  fetchCurrentUserUnits: async () =>
-    apiMethods.fetch(`${UNIT_BASE}?owner=currentUser`),
+  fetchWorkspaceUnits: async (id: string) =>
+    apiMethods.fetch(`${UNIT_BASE}?workspace_id=${id}`),
   updateUnit: async (newUnit: Unit, oldUnit: Unit | null = null) =>
     apiMethods.patch(`${UNIT_BASE}/${newUnit.id}`, newUnit, oldUnit),
   deleteUnit: async (id: string) => apiMethods.delete(`${UNIT_BASE}/${id}`),
@@ -116,12 +212,10 @@ export const api = {
       email: email,
       transferPrimary: true,
     }),
-  updateThingPrivacy: async (id: string, thingPrivacy: boolean) =>
-    apiMethods.patch(`${THINGS_BASE}/${id}/privacy`, {
-      isPrivate: thingPrivacy,
-    }),
   createThing: async (thing: Thing) => apiMethods.post(THINGS_BASE, thing),
   fetchThings: async () => apiMethods.fetch(THINGS_BASE),
+  fetchThingsForWorkspace: async (id: string) =>
+    apiMethods.fetch(`${THINGS_BASE}?workspace_id=${id}`),
   fetchPrimaryOwnedThings: async () =>
     apiMethods.fetch(`${THINGS_BASE}?primary_owned_only=true`),
   fetchOwnedThings: async () =>
@@ -129,6 +223,8 @@ export const api = {
   fetchThing: async (id: string) => apiMethods.fetch(`${THINGS_BASE}/${id}`),
   updateThing: async (thing: Thing) =>
     apiMethods.patch(`${THINGS_BASE}/${thing.id}`, thing),
+  updateThingPrivacy: async (id: string, isPrivate: boolean) =>
+    apiMethods.patch(`${THINGS_BASE}/${id}`, { isPrivate }),
   deleteThing: async (id: string) => apiMethods.delete(`${THINGS_BASE}/${id}`),
   fetchMetadataForThingOwner: async (thingId: string) =>
     apiMethods.fetch(
@@ -140,24 +236,21 @@ export const api = {
     apiMethods.post(`${THINGS_BASE}/${thingId}/photos`, data),
   fetchSitePhotos: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
-  deleteSitePhoto: async (thingId: string, photoId: string) =>
-    apiMethods.delete(`${THINGS_BASE}/${thingId}/photos/${photoId}`),
+  deleteSitePhoto: async (thingId: string, name: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/photos`, { name }),
 
   createSiteTag: async (thingId: string, tag: Tag) =>
     apiMethods.post(`${THINGS_BASE}/${thingId}/tags`, tag),
+  editSiteTag: async (thingId: string, tag: Tag) =>
+    apiMethods.put(`${THINGS_BASE}/${thingId}/tags`, tag),
   fetchSiteTags: async (thingId: string) =>
     apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
   fetchUsersSiteTags: async () => apiMethods.fetch(`${TAG_BASE}`),
-  deleteSiteTag: async (thingId: string, tagId: string) =>
-    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags/${tagId}`),
+  deleteSiteTag: async (thingId: string, key: string) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags`, { key }),
+  fetchWorkspaceTags: async (workspaceId: string) =>
+    apiMethods.fetch(`${TAG_BASE}/keys?workspace_id=${workspaceId}`),
 
-  fetchDatastreamsForThing: async (thingId: string) =>
-    apiMethods.fetch(`${THINGS_BASE}/${thingId}/datastreams`),
-
-  connectToHydroShare: async () =>
-    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/connect`),
-  disconnectFromHydroShare: async () =>
-    apiMethods.fetch(`${ACCOUNT_BASE}/hydroshare/disconnect`),
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
   updateHydroShareArchive: async (
@@ -179,6 +272,8 @@ export const api = {
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
   fetchDatastreams: async () => apiMethods.fetch(DS_BASE),
+  fetchDatastreamsForThing: async (thingId: string) =>
+    apiMethods.fetch(`${DS_BASE}?thing_id=${thingId}`),
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),
   fetchUsersDatastreams: async () =>
     apiMethods.fetch(`${DS_BASE}?exclude_unowned=true`),
@@ -197,14 +292,8 @@ export const api = {
   fetchObservedProperty: async (id: string) =>
     apiMethods.fetch(`${OP_BASE}/${id}`),
   fetchObservedProperties: async () => apiMethods.fetch(OP_BASE),
-  fetchUnownedObservedProperties: async () =>
-    apiMethods.fetch(`${OP_BASE}?owner=noUser`),
-  fetchOwnedObservedProperties: async () =>
-    apiMethods.fetch(`${OP_BASE}?owner=anyUser`),
-  fetchCurrentUserObservedProperties: async () =>
-    apiMethods.fetch(`${OP_BASE}?owner=currentUser`),
-  fetchCurrentUserOrNoUserObservedProperties: async () =>
-    apiMethods.fetch(`${OP_BASE}?owner=currentUserOrNoUser`),
+  fetchWorkspaceObservedProperties: async (id: string) =>
+    apiMethods.fetch(`${OP_BASE}?workspace_id=${id}`),
   updateObservedProperty: async (
     newOP: ObservedProperty,
     oldOP: ObservedProperty | null = null
@@ -215,14 +304,10 @@ export const api = {
   createProcessingLevel: async (pl: ProcessingLevel) =>
     apiMethods.post(PL_BASE, pl),
   fetchProcessingLevels: async () => apiMethods.fetch(PL_BASE),
-  fetchUnownedProcessingLevels: async () =>
-    apiMethods.fetch(`${PL_BASE}?owner=noUser`),
-  fetchOwnedProcessingLevels: async () =>
-    apiMethods.fetch(`${PL_BASE}?owner=anyUser`),
-  fetchCurrentUserProcessingLevels: async () =>
-    apiMethods.fetch(`${PL_BASE}?owner=currentUser`),
-  fetchCurrentUserOrUnownedProcessingLevels: async () =>
-    apiMethods.fetch(`${PL_BASE}?owner=currentUserOrNoUser`),
+  fetchProcessingLevel: async (id: string) =>
+    apiMethods.fetch(`${PL_BASE}/${id}`),
+  fetchWorkspaceProcessingLevels: async (id: string) =>
+    apiMethods.fetch(`${PL_BASE}?workspace_id=${id}`),
   updateProcessingLevel: async (
     newPL: ProcessingLevel,
     oldPL: ProcessingLevel | null = null
@@ -232,10 +317,9 @@ export const api = {
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
   fetchSensors: async () => apiMethods.fetch(SENSOR_BASE),
-  fetchOwnedSensors: async () =>
-    apiMethods.fetch(`${SENSOR_BASE}?owner=anyUser`),
-  fetchCurrentUserSensors: async () =>
-    apiMethods.fetch(`${SENSOR_BASE}?owner=currentUser`),
+  fetchSensor: async (id: string) => apiMethods.fetch(`${SENSOR_BASE}/${id}`),
+  fetchWorkspaceSensors: async (id: string) =>
+    apiMethods.fetch(`${SENSOR_BASE}?workspace_id=${id}`),
   updateSensor: async (newSensor: Sensor, oldSensor: Sensor | null = null) =>
     apiMethods.patch(`${SENSOR_BASE}/${newSensor.id}`, newSensor, oldSensor),
   deleteSensor: async (id: string) => apiMethods.delete(`${SENSOR_BASE}/${id}`),
@@ -243,8 +327,8 @@ export const api = {
   createResultQualifier: async (resultQualifier: ResultQualifier) =>
     apiMethods.post(RQ_BASE, resultQualifier),
   fetchResultQualifiers: async () => apiMethods.fetch(RQ_BASE),
-  fetchCurrentUserResultQualifiers: async () =>
-    apiMethods.fetch(`${RQ_BASE}?owner=currentUser`),
+  fetchWorkspaceResultQualifiers: async (id: string) =>
+    apiMethods.fetch(`${RQ_BASE}?workspace_id=${id}`),
   updateResultQualifier: async (
     newResultQualifier: ResultQualifier,
     oldResultQualifier: ResultQualifier | null = null
@@ -257,25 +341,72 @@ export const api = {
   deleteResultQualifier: async (id: string) =>
     apiMethods.delete(`${RQ_BASE}/${id}`),
 
-  createDataLoader: async (dataLoader: DataLoader) =>
-    apiMethods.post(DATA_LOADERS_BASE, dataLoader),
-  fetchDataLoaders: async () => apiMethods.fetch(DATA_LOADERS_BASE),
-  fetchDataLoader: async (id: string) =>
-    apiMethods.fetch(`${DATA_LOADERS_BASE}/${id}`),
-  updateDataLoader: async (id: string, dataLoader: DataLoader) =>
-    apiMethods.patch(`${DATA_LOADERS_BASE}/${id}`, dataLoader),
-  deleteDataLoader: async (id: string) =>
-    apiMethods.delete(`${DATA_LOADERS_BASE}/${id}`),
+  createOrchestrationSystem: async (system: OrchestrationSystem) =>
+    apiMethods.post(ETL_SYSTEMS_BASE, system),
+  fetchOrchestrationSystems: async () => apiMethods.fetch(ETL_SYSTEMS_BASE),
+  fetchWorkspaceOrchestrationSystems: async (id: string) =>
+    apiMethods.fetch(`${ETL_SYSTEMS_BASE}?workspace_id=${id}`),
+  fetchOrchestrationSystem: async (id: string) =>
+    apiMethods.fetch(`${ETL_SYSTEMS_BASE}/${id}`),
+  updateOrchestrationSystem: async (id: string, system: OrchestrationSystem) =>
+    apiMethods.patch(`${ETL_SYSTEMS_BASE}/${id}`, system),
+  deleteOrchestrationSystem: async (id: string) =>
+    apiMethods.delete(`${ETL_SYSTEMS_BASE}/${id}`),
 
-  createDataSource: async (dataSource: DataSource) =>
-    apiMethods.post(DATA_SOURCES_BASE, dataSource),
+  createDataSource: async (dataSource: DataSource) => {
+    return apiMethods.post(
+      DATA_SOURCES_BASE,
+      convertDataSourceToPostObject(dataSource)
+    )
+  },
   fetchDataSources: async () => apiMethods.fetch(DATA_SOURCES_BASE),
+  fetchWorkspaceDataSources: async (id: string) =>
+    apiMethods.fetch(`${DATA_SOURCES_BASE}?workspace_id=${id}`),
   fetchDataSource: async (id: string) =>
     apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}`),
-  updateDataSource: async (newS: DataSource, oldS: DataSource | null = null) =>
-    apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS, oldS),
+  updateDataSource: async (newS: DataSource) =>
+    apiMethods.patch(
+      `${DATA_SOURCES_BASE}/${newS.id}`,
+      convertDataSourceToPostObject(newS)
+    ),
+  updateDataSourcePartial: async (newS: DataSource) =>
+    apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS),
   deleteDataSource: async (id: string) =>
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 
+  linkDatastreamToDataSource: async (
+    dataSourceId: string,
+    datastreamId: string
+  ) =>
+    apiMethods.post(
+      `${DATA_SOURCES_BASE}/${dataSourceId}/datastreams/${datastreamId}`
+    ),
+  unlinkDatastreamFromDataSource: async (
+    dataSourceId: string,
+    datastreamId: string
+  ) =>
+    apiMethods.delete(
+      `${DATA_SOURCES_BASE}/${dataSourceId}/datastreams/${datastreamId}`
+    ),
+
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
+
+  fetchSiteTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/things/site-types`),
+  fetchSamplingFeatureTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/things/sampling-feature-types`),
+  fetchSensorEncodingTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/sensors/encoding-types`),
+  fetchMethodTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/sensors/method-types`),
+  fetchVariableTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/observed-properties/variable-types`),
+  fetchUnitTypes: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/units/types`),
+  fetchDatastreamStatuses: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/statuses`),
+  fetchDatastreamAggregations: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/aggregations`),
+  fetchSampledMediums: async () =>
+    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/sampled-mediums`),
 }

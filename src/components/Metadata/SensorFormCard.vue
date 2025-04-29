@@ -1,6 +1,8 @@
 <template>
   <v-card>
-    <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Sensor </v-card-title>
+    <v-toolbar color="brown">
+      <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Sensor </v-card-title>
+    </v-toolbar>
     <v-divider />
 
     <v-form
@@ -12,7 +14,7 @@
       <v-card-text>
         <v-combobox
           v-model="item.methodType"
-          :items="methodTypes"
+          :items="vocabularyStore.methodTypes"
           label="Method Type *"
           hide-details
           density="comfortable"
@@ -87,20 +89,23 @@ import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { computed } from 'vue'
-import { methodTypes } from '@/config/vocabularies'
 import { Sensor } from '@/types'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
-const props = defineProps({ sensor: Object as () => Sensor })
+const props = defineProps<{
+  sensor?: Sensor
+  workspaceId: string
+}>()
+
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchSensors,
   api.createSensor,
   api.updateSensor,
   Sensor,
-  props.sensor || undefined,
-  false
+  props.sensor || undefined
 )
+const vocabularyStore = useVocabularyStore()
 
 const isInstrument = computed(
   () => item.value.methodType === 'Instrument Deployment'
@@ -112,8 +117,12 @@ async function onSubmit() {
     item.value.name = `${manufacturer}: ${model}`
   }
   try {
+    item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
-    if (!newItem) return
+    if (!newItem) {
+      if (isEdit.value) emit('close')
+      return
+    }
     if (isEdit.value) emit('updated', newItem)
     else emit('created', newItem.id)
   } catch (error) {

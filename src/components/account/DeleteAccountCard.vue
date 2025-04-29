@@ -11,16 +11,16 @@
       information, and preferences. This action cannot be undone.
     </v-card-text>
 
-    <v-card-text v-if="usersThings.length > 0">
-      The following is a list of the sites you have primary ownership of that
-      will be deleted with your account. If you have secondary owners, we
-      strongly recommend transferring primary ownership to one of them before
-      deleting your account. Additionally, you have the option to store your
-      site data in hydroshare or download your data before deleting your
+    <v-card-text v-if="ownedWorkspaces.length > 0">
+      The following is a list of the workspaces you have ownership of that will
+      be deleted with your account. If you have collaborators for these
+      workspaces, we strongly recommend transferring ownership to one of them
+      before deleting your account. Additionally, you have the option to store
+      your site data in HydroShare or download your data before deleting your
       account.
     </v-card-text>
-    <v-card-text v-for="thing in usersThings" class="py-0">
-      {{ thing.name }}
+    <v-card-text v-for="workspace in ownedWorkspaces" class="py-0">
+      {{ workspace.name }}
     </v-card-text>
 
     <v-card-text>
@@ -48,14 +48,16 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
-import { useAuthStore } from '@/store/authentication'
 import { computed, onMounted, ref } from 'vue'
 import { Thing } from '@/types'
+import { useAuthStore } from '@/store/authentication'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
 
 const { logout } = useAuthStore()
+const { ownedWorkspaces } = storeToRefs(useWorkspaceStore())
 
 const things = ref<Thing[]>([])
-const usersThings = computed(() => things.value.filter((t) => t.isPrimaryOwner))
 
 const emit = defineEmits(['delete', 'close'])
 const deleteInput = ref('')

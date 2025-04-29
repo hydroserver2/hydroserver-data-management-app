@@ -1,9 +1,12 @@
-v-col
 <template>
   <v-card v-if="loaded">
-    <v-card-title class="text-h5"
-      >{{ isEdit ? 'Edit' : 'Add' }} Data Source</v-card-title
-    >
+    <v-toolbar flat color="white">
+      <v-card-title class="text-medium-emphasis">
+        {{ isEdit ? 'Edit' : 'Add' }} data source
+        <span v-if="isEdit" class="opacity-80">- {{ dataSource?.name }}</span>
+      </v-card-title>
+    </v-toolbar>
+
     <v-divider />
 
     <v-form
@@ -12,231 +15,119 @@ v-col
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-item class="mt-4">
-        <h6 class="text-h6 mb-6">Data Source File Configuration</h6>
-        <v-row>
-          <v-col>
-            <v-text-field
-              v-model="item.name"
-              label="Data Source Name *"
-              :rules="rules.requiredAndMaxLength255"
-            />
-          </v-col>
-          <v-col>
-            <v-autocomplete
-              v-model="item.dataLoaderId"
-              label="Data Loader *"
-              hint="Select the data loader which will load this data source."
-              :items="dataLoaders"
-              item-title="name"
-              item-value="id"
-              :rules="rules.required"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-text-field
-              v-model="item.path"
-              label="Local File Path *"
-              hint="Enter the absolute path to the data source file."
-              :rules="rules.requiredAndMaxLength255"
-            />
-          </v-col>
-          <v-col>
-            <v-select
-              v-model="item.delimiter"
-              label="File Delimiter *"
-              hint="Select the type of delimiter used for this data file."
-              :items="intervalDelimiterValues"
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-card-item>
+            <v-card-title>Workflow configurations</v-card-title>
+          </v-card-item>
+
+          <v-card-text>
+            <!-- <v-select
+              v-model="dataSource.settings.type"
+              label="Workflow type *"
+              :items="WORKFLOW_TYPES"
               variant="outlined"
-              density="comfortable"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
+              density="compact"
+              class="mb-3"
+            /> -->
             <v-text-field
-              v-model.number="item.headerRow"
-              label="File Header Row"
-              hint="Enter the row that contains file headers, if any."
-              type="number"
-              clearable
-              :rules="[
-                ...rules.greaterThan(0),
-                ...rules.lessThan(item.dataStartRow, 'the data start row'),
-              ]"
+              v-model="dataSource.name"
+              label="Data source name *"
+              :rules="rules.requiredAndMaxLength255"
+              density="compact"
             />
-          </v-col>
-          <v-col>
-            <v-text-field
-              v-model.number="item.dataStartRow"
-              label="Data Start Row *"
-              hint="Enter the row that data starts on."
-              type="number"
-              :rules="[
-                ...rules.greaterThan(0),
-                ...rules.greaterThan(
-                  item.headerRow || 0,
-                  'the file header row'
-                ),
-              ]"
-            />
-          </v-col>
-        </v-row>
-      </v-card-item>
+          </v-card-text>
+        </v-col>
 
-      <v-card-item class="mt-4">
-        <h6 class="text-h6 mb-6">Data Source Schedule</h6>
+        <v-col cols="12" md="6">
+          <v-card-item>
+            <v-card-title>Schedule</v-card-title>
+          </v-card-item>
+          <v-card-text class="pb-0">
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="dataSource.schedule.startTime"
+                  label="Start Time"
+                  hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
+                  type="datetime-local"
+                  density="compact"
+                  clearable
+                  class="mb-1"
+                />
+              </v-col>
+              <v-col>
+                <v-text-field
+                  v-model="dataSource.schedule.endTime"
+                  label="End Time"
+                  hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
+                  type="datetime-local"
+                  clearable
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
 
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-text-field
-              v-model="item.startTime"
-              label="Start Time"
-              hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
-              type="datetime-local"
-              clearable
-            />
-          </v-col>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-text-field
-              v-model="item.endTime"
-              label="End Time"
-              hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
-              type="datetime-local"
-              clearable
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
+          <v-card-text class="pt-2">
             <v-radio-group v-model="scheduleType" inline>
               <v-radio label="Interval" value="interval" />
               <v-radio label="Crontab" value="crontab" />
             </v-radio-group>
-          </v-col>
-          <template v-if="scheduleType === 'interval'">
-            <v-col class="v-col-xs-6 v-col-sm-3">
+            <template v-if="scheduleType === 'interval'">
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="dataSource.schedule.interval"
+                    label="Interval *"
+                    hint="Enter the interval data should be loaded on."
+                    type="number"
+                    :rules="[
+                            (val: string) => val != null && val !== '' || 'Interval value is required.',
+                            (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
+                            (val: string) => +val > 0 || 'Interval must be greater than zero.'
+                          ]"
+                  />
+                </v-col>
+                <v-col md="6">
+                  <v-select
+                    v-model="dataSource.schedule.intervalUnits"
+                    label="Interval Units *"
+                    :items="INTERVAL_UNIT_OPTIONS"
+                    variant="outlined"
+                    :rules="required"
+                  />
+                </v-col>
+              </v-row>
+            </template>
+            <template v-if="scheduleType === 'crontab'">
               <v-text-field
-                v-model="item.interval"
-                label="Interval *"
-                hint="Enter the interval data should be loaded on."
-                type="number"
-                :rules="[
-              (val: string) => val != null && val !== '' || 'Interval value is required.',
-              (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
-              (val: string) => +val > 0 || 'Interval must be greater than zero.'
-            ]"
-              />
-            </v-col>
-            <v-col class="v-col-xs-6 v-col-sm-3">
-              <v-select
-                v-model="item.intervalUnits"
-                label="Interval Units"
-                :items="intervalUnitValues"
-                variant="outlined"
-                density="comfortable"
-              />
-            </v-col>
-          </template>
-          <template v-if="scheduleType === 'crontab'">
-            <v-col class="v-col-xs-12 v-col-sm-6">
-              <v-text-field
-                v-model="item.crontab"
-                label="Crontab"
+                v-model="dataSource.schedule.crontab"
+                label="Crontab *"
                 hint="Enter a crontab schedule for the data to be loaded on."
+                :rules="rules.required"
               />
-            </v-col>
-          </template>
-        </v-row>
-      </v-card-item>
+            </template>
+          </v-card-text>
+        </v-col>
+      </v-row>
 
-      <v-card-item class="mt-4">
-        <h6 class="text-h6 mb-6">Data Source Timestamp</h6>
+      <div class="mb-4" />
 
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-radio-group v-model="timestampType" inline>
-              <v-radio label="Column Index" value="index"></v-radio>
-              <v-radio label="Column Name" value="name"></v-radio>
-            </v-radio-group>
-          </v-col>
-
-          <v-col
-            v-if="timestampType === 'index'"
-            class="v-col-xs-12 v-col-sm-6"
-          >
-            <v-text-field
-              v-model.number="item.timestampColumn"
-              label="Timestamp Column *"
-              hint="Enter the column index that contains timestamps for the datastreams."
-              type="number"
-              :rules="[...rules.required,
-             ...rules.greaterThan(0),
-             (val: string) => +val === parseInt(val, 10) || 'Interval must be an integer.',
-          ]"
-            />
-          </v-col>
-          <v-col v-if="timestampType === 'name'" class="v-col-xs-12 v-col-sm-6">
-            <v-text-field
-              v-model="item.timestampColumn"
-              label="Timestamp Column *"
-              hint="Enter the column name that contains timestamps for the datastreams."
-              :rules="[
-            (val: string) => val !== '' && val != null || 'Must enter timestamp column name.'
-          ]"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-radio-group v-model="timestampFormatType" inline>
-              <v-radio
-                label="ISO 8601 Format"
-                value="iso"
-                @click="item.timestampFormat = 'iso'"
-              />
-              <v-radio label="Custom Format" value="custom" />
-            </v-radio-group>
-          </v-col>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-text-field
-              v-model="item.timestampFormat"
-              :label="`Custom Timestamp Format *`"
-              hint="Enter the timestamp format."
-              :rules="timestampFormatType === 'custom' ? rules.required : []"
-              :disabled="timestampFormatType !== 'custom'"
-            >
-              <template v-slot:append-inner>
-                <v-btn
-                  size="lg"
-                  color="gray"
-                  icon="mdi-help-circle"
-                  @click="openStrftimeHelp"
-                />
-              </template>
-            </v-text-field>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-checkbox
-              v-model="useOffset"
-              label="Append Timezone Offset?"
-            ></v-checkbox>
-          </v-col>
-          <v-col class="v-col-xs-12 v-col-sm-6">
-            <v-autocomplete
-              v-model="item.timestampOffset"
-              :label="`Timezone Offset *`"
-              hint="Enter an optional timezone offset to apply to the timestamp column."
-              :items="timezoneOffsets"
-              :disabled="!useOffset"
-            ></v-autocomplete>
-          </v-col>
-        </v-row>
-      </v-card-item>
+      <template v-if="dataSource.settings.type === 'Aggregation'">
+        <DataSourceAggregationFields />
+      </template>
+      <template
+        v-else-if="
+          dataSource.settings.type === 'ETL' ||
+          dataSource.settings.type === 'SDL'
+        "
+      >
+        <DataSourceETLFields ref="etlFieldsRef" />
+      </template>
+      <template v-else-if="dataSource.settings.type === 'Virtual'">
+        <DataSourceVirtualFields />
+      </template>
 
       <v-divider />
       <v-card-actions>
@@ -249,128 +140,118 @@ v-col
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useFormLogic } from '@/composables/useFormLogic'
+import { computed, onMounted, ref, watch } from 'vue'
+import { DataSource } from '@/models'
+import { required, rules } from '@/utils/rules'
+import DataSourceETLFields from './DataSourceETLFields.vue'
+import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
+import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
+import { VForm } from 'vuetify/components'
+import { INTERVAL_UNIT_OPTIONS, OrchestrationSystem } from '@/models/dataSource'
+import { storeToRefs } from 'pinia'
+import { useETLStore } from '@/store/etl'
 import { api } from '@/services/api'
-import { DataLoader, DataSource } from '@/types'
-import { rules } from '@/utils/rules'
+import { useWorkspaceStore } from '@/store/workspaces'
 
-const props = defineProps(['dataSource'])
+const props = defineProps({
+  oldDataSource: Object as () => DataSource,
+  orchestrationSystem: Object as () => OrchestrationSystem,
+})
 const emit = defineEmits(['created', 'updated', 'close'])
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
-const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.fetchDataSources,
-  api.createDataSource,
-  api.updateDataSource,
-  DataSource,
-  props.dataSource || undefined,
-  false
-)
+const isEdit = computed(() => !!props.oldDataSource || undefined)
+const valid = ref(false)
+const myForm = ref<VForm>()
+const orchestrationSystems = ref([] as OrchestrationSystem[])
+const etlFieldsRef = ref<any>(null)
 
-const dataLoaders = ref<DataLoader[]>([])
-const scheduleType = ref('interval')
-const timestampType = ref('index')
-const timestampFormatType = ref('iso')
-const useOffset = ref(false)
+const { dataSource } = storeToRefs(useETLStore())
+if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
+else
+  dataSource.value = new DataSource({
+    workspaceId: selectedWorkspace.value!.id,
+    orchestrationSystem: props.orchestrationSystem,
+  })
+
+// TODO: We'll know the workflow type is SDL when we're opening this form,
+// so no need to watch. But, make sure the options are limited to CSV when the form
+// is open and make sure type is always SDL for an SDL orchestration system.
+// watch(
+//   () => dataSource.value.settings.type,
+//   (newVal, oldVal) => {
+//     // SDL workflows should only be run on machines running the SDL orchestration software.
+//     if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.orchestrationSystemId = ''
+//     if (newVal === 'SDL') {
+//       if (dataSource.value.settings.extractor.type !== 'local')
+//         dataSource.value.switchExtractor('local')
+//       if (dataSource.value.settings.transformer.type !== 'CSV')
+//         dataSource.value.switchTransformer('CSV')
+//     }
+//   }
+// )
+
+function toLocalDateString(iso: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
 const loaded = ref(false)
-
-const intervalDelimiterValues = [
-  { value: ',', title: 'Comma' },
-  { value: '|', title: 'Pipe' },
-  { value: '\\t', title: 'Tab' },
-  { value: ';', title: 'Semicolon' },
-  { value: ' ', title: 'Space' },
-]
-
-const intervalUnitValues = [
-  { value: 'minutes', title: 'Minutes' },
-  { value: 'hours', title: 'Hours' },
-  { value: 'days', title: 'Days' },
-]
-
-const timezoneOffsets = ref([
-  '-1200',
-  '-1100',
-  '-1000',
-  '-0900',
-  '-0800',
-  '-0700',
-  '-0600',
-  '-0500',
-  '-0430',
-  '-0400',
-  '-0330',
-  '-0300',
-  '-0200',
-  '-0100',
-  '+0000',
-  '+0100',
-  '+0200',
-  '+0300',
-  '+0330',
-  '+0400',
-  '+0430',
-  '+0500',
-  '+0530',
-  '+0545',
-  '+0600',
-  '+0630',
-  '+0700',
-  '+0800',
-  '+0845',
-  '+0900',
-  '+0930',
-  '+1000',
-  '+1030',
-  '+1100',
-  '+1130',
-  '+1200',
-  '+1245',
-  '+1300',
-  '+1400',
-])
+const scheduleType = ref('interval')
 
 async function onSubmit() {
+  if (
+    dataSource.value.settings.type === 'ETL' ||
+    dataSource.value.settings.type === 'SDL'
+  ) {
+    const etlValid = await etlFieldsRef.value.validate()
+    if (!etlValid) return
+  }
+
+  await myForm.value?.validate()
+  if (!valid.value) return false
+
   try {
-    const newItem = await uploadItem()
-    if (!newItem) return
-    if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem.id)
+    const newItem: DataSource | null = isEdit.value
+      ? await api.updateDataSource(dataSource.value)
+      : await api.createDataSource(dataSource.value)
+
+    if (!newItem) {
+      emit('close')
+      return
+    }
+
+    if (isEdit.value) {
+      emit('updated', newItem)
+    } else {
+      emit('created', newItem.id)
+    }
   } catch (error) {
     console.error('Error uploading DataSource', error)
   }
   emit('close')
 }
 
-const openStrftimeHelp = () =>
-  window.open('https://devhints.io/strftime', '_blank', 'noreferrer')
-
-const initializeForm = () => {
-  if (!item.value) return
-  let {
-    crontab,
-    timestampColumn,
-    timestampFormat,
-    timestampOffset,
-    startTime,
-    endTime,
-  } = item.value
-
-  if (crontab) scheduleType.value = 'crontab'
-  if (timestampOffset) useOffset.value = true
-
-  if (timestampColumn && typeof timestampColumn === 'string')
-    timestampType.value = 'name'
-  if (timestampFormat && timestampFormat !== 'iso')
-    timestampFormatType.value = 'custom'
-
-  if (startTime) item.value.startTime = startTime.replace('Z', '')
-  if (endTime) item.value.endTime = endTime.replace('Z', '')
-}
-
 onMounted(async () => {
-  dataLoaders.value = await api.fetchDataLoaders()
-  if (isEdit.value) initializeForm()
+  if (dataSource.value.schedule.startTime) {
+    dataSource.value.schedule.startTime = toLocalDateString(
+      dataSource.value.schedule.startTime
+    )
+  }
+  if (dataSource.value.schedule.endTime) {
+    dataSource.value.schedule.endTime = toLocalDateString(
+      dataSource.value.schedule.endTime
+    )
+  }
+  orchestrationSystems.value = await api.fetchWorkspaceOrchestrationSystems(
+    selectedWorkspace.value!.id
+  )
   loaded.value = true
 })
 </script>

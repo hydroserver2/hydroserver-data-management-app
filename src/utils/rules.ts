@@ -98,6 +98,11 @@ export const passwordMatch = (password: string) => [
   },
 ]
 
+export const noSpaces = [
+  (value: string) =>
+    !value || !/\s/.test(value) || 'This field cannot contain spaces.',
+]
+
 export const urlFormat = [
   (value: string) => {
     const pattern = new RegExp(
@@ -148,6 +153,7 @@ export const rules = {
   requiredAndMaxLength200: [...required, ...maxLength(200)],
   requiredAndMaxLength255: [...required, ...maxLength(255)],
   requiredAndMaxLength500: [...required, ...maxLength(500)],
+  requiredAndNoSpaces: [...required, ...noSpaces],
   description: [...maxLength(3000)],
   requiredDescription: [...maxLength(3000), ...required],
   requiredCode: [...maxLength(200), ...required],

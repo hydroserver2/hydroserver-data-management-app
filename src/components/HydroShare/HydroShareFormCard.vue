@@ -209,12 +209,10 @@ const { hydroShareArchive: archive, loading } = storeToRefs(
 )
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  () => Promise.resolve([]),
   api.createHydroShareArchive,
   api.updateHydroShareArchive,
   PostHydroShareArchive,
-  archive.value || undefined,
-  false
+  archive.value || undefined
 )
 
 const { thing } = storeToRefs(useThingStore())

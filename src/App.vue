@@ -2,7 +2,7 @@
   <v-app>
     <Navbar v-if="!route.meta.hideNavBar" />
 
-    <v-main :class="`is-full-screen:${route.meta.isFullScreen} flex-grow-1`">
+    <v-main>
       <router-view />
     </v-main>
 
@@ -20,14 +20,14 @@ import Navbar from '@/components/base/Navbar.vue'
 import Footer from '@/components/base/Footer.vue'
 import Notifications from '@/components/base/Notifications.vue'
 import { useRoute } from 'vue-router'
-import { setupRouteGuards } from './router/router'
 
 const route = useRoute()
-setupRouteGuards()
 </script>
 
-<style scoped lang="scss">
-.v-main.is-full-screen {
-  height: 100vh;
+<style lang="scss">
+html {
+  // Vuetify sets overflow-y to scroll by default. Therefore, we'll override to get rid
+  // of the permanent scroll bar
+  overflow-y: auto !important;
 }
 </style>

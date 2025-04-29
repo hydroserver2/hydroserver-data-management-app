@@ -7,7 +7,7 @@ export default [
     definition: 'First unit for testing.',
     symbol: 'U1',
     type: 'TestType',
-    owner: 'Owner1',
+    workspaceId: 'Workspace1',
   },
 
   {
@@ -16,6 +16,6 @@ export default [
     definition: 'Second unit for testing.',
     symbol: 'U2',
     type: 'TestType',
-    owner: 'Owner2',
+    workspaceId: 'Workspace2',
   },
 ] as Unit[]
