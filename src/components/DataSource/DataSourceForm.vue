@@ -152,7 +152,14 @@ import DataSourceETLFields from './DataSourceETLFields.vue'
 import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
 import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
 import { VForm } from 'vuetify/components'
-import { INTERVAL_UNIT_OPTIONS, OrchestrationSystem } from '@/models/dataSource'
+import {
+  extractorDefaults,
+  INTERVAL_UNIT_OPTIONS,
+  loaderDefaults,
+  OrchestrationSystem,
+  transformerDefaults,
+  WorkflowType,
+} from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { api } from '@/services/api'
@@ -176,11 +183,23 @@ const displayTz = ref<'local' | 'utc'>('local')
 
 const { dataSource } = storeToRefs(useETLStore())
 if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
-else
+else {
+  let workflowType = 'SDL'
+  if (props.orchestrationSystem?.type === 'airflow') {
+    workflowType = 'ETL'
+  }
   dataSource.value = new DataSource({
+    settings: {
+      type: workflowType as WorkflowType,
+      extractor: JSON.parse(JSON.stringify(extractorDefaults['local'])),
+      transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
+      loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
+      payloads: [],
+    },
     workspaceId: selectedWorkspace.value!.id,
     orchestrationSystem: props.orchestrationSystem,
   })
+}
 
 const startInput = computed({
   get: () => isoToInput(dataSource.value.schedule.startTime, displayTz.value),
