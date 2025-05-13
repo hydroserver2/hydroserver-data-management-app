@@ -58,7 +58,7 @@ export type WorkflowType = (typeof WORKFLOW_TYPES)[number]['value']
 export const CSV_DELIMITER_OPTIONS = [
   { value: ',', title: 'Comma' },
   { value: '|', title: 'Pipe' },
-  { value: '\\t', title: 'Tab' },
+  { value: '\t', title: 'Tab' },
   { value: ';', title: 'Semicolon' },
   { value: ' ', title: 'Space' },
 ] as const
