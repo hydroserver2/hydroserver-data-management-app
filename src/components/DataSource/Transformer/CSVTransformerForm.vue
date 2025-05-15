@@ -9,7 +9,7 @@
           <v-col>
             <v-radio-group
               class="mt-1"
-              v-model="transformer.identifierType"
+              v-model="(transformer as CSVTransformer).identifierType"
               inline
             >
               <v-radio
@@ -28,7 +28,7 @@
           <v-col>
             <v-text-field
               ref="headerRowField"
-              :disabled="transformer.identifierType === IdentifierType.Index"
+              :disabled="(transformer as CSVTransformer).identifierType === IdentifierType.Index"
               v-model.number="(transformer as CSVTransformer).headerRow"
               label="File header row number *"
               hint="Enter the line number of the row that contains file headers (1-based)."
@@ -120,7 +120,7 @@ const dataStartRowRules = computed(() => [
 ])
 
 watch(
-  () => transformer.value.identifierType,
+  () => (transformer.value as CSVTransformer).identifierType,
   (newType) => {
     transformer.value.timestampKey =
       newType === IdentifierType.Name ? 'timestamp' : '1'

@@ -8,24 +8,12 @@
         <v-text-field
           v-model="transformer.timestampKey"
           placeholder="timestamp"
-          :label="`Timestamp column ${
-            transformer.identifierType === IdentifierType.Name
-              ? 'name'
-              : 'index'
-          } *`"
+          :label="timestampKeyLabel"
           density="compact"
           rounded="lg"
-          :type="`${
-            transformer.identifierType === IdentifierType.Name
-              ? 'text'
-              : 'number'
-          }`"
+          :type="timestampInputType"
           prepend-inner-icon="mdi-table-column-width"
-          :rules="
-            transformer.identifierType === IdentifierType.Name
-              ? rules.requiredAndMaxLength150
-              : rules.requiredNumber
-          "
+          :rules="timestampKeyRules"
         />
       </v-col>
     </v-row>
@@ -104,6 +92,40 @@ import { rules } from '@/utils/rules'
 const { transformer } = storeToRefs(useETLStore())
 
 const CORE_FORMATS = ['utc', 'constant', 'ISO8601'] as const
+
+const isCSV = (t?: any | null) => !!t && t.type === 'CSV'
+
+const timestampKeyLabel = computed(() => {
+  const t = transformer.value
+  if (isCSV(t)) {
+    return `Timestamp column ${
+      (t as CSVTransformer).identifierType === IdentifierType.Name
+        ? 'name'
+        : 'index'
+    } *`
+  }
+  return 'Timestamp key *'
+})
+
+const timestampInputType = computed(() => {
+  if (isCSV(transformer.value)) {
+    return (transformer.value as CSVTransformer).identifierType ===
+      IdentifierType.Index
+      ? 'number'
+      : 'text'
+  }
+  return 'text'
+})
+
+const timestampKeyRules = computed(() => {
+  const t = transformer.value
+  if (isCSV(t)) {
+    return (t as CSVTransformer).identifierType === IdentifierType.Name
+      ? rules.requiredAndMaxLength150
+      : rules.requiredNumber
+  }
+  return rules.requiredAndMaxLength150
+})
 
 const customFormatCache = ref('')
 const savedFormat = (transformer.value as CSVTransformer).timestampFormat

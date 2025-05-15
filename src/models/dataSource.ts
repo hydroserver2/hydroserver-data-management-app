@@ -113,13 +113,11 @@ export enum IdentifierType {
 
 interface BaseTransformer {
   type: TransformerType
-  mapping: string
   timestampKey: string
   timestampFormat: string
-  identifierType: IdentifierType
 }
 
-interface JSONtransformer extends BaseTransformer {
+export interface JSONtransformer extends BaseTransformer {
   type: 'JSON'
   JMESPath: string
 }
@@ -130,6 +128,7 @@ export interface CSVTransformer extends BaseTransformer {
   dataStartRow: number
   delimiter: CSVDelimiterType
   timestampOffset: TimezoneOffsetType
+  identifierType: IdentifierType
 }
 
 export type TransformerConfig = JSONtransformer | CSVTransformer
@@ -140,7 +139,6 @@ export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
     timestampKey: '',
     timestampFormat: 'ISO8601',
     JMESPath: '',
-    identifierType: IdentifierType.Name,
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
