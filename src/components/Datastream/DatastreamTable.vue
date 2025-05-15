@@ -275,7 +275,7 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   )
 
 const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
-  useMetadata(toRef(props, 'workspace'))
+  useMetadata()
 
 const visibleDatastreams = computed(() => {
   return items.value
