@@ -115,6 +115,7 @@ interface BaseTransformer {
   type: TransformerType
   mapping: string
   timestampKey: string
+  timestampFormat: string
   identifierType: IdentifierType
 }
 
@@ -128,7 +129,6 @@ export interface CSVTransformer extends BaseTransformer {
   headerRow: number | null
   dataStartRow: number
   delimiter: CSVDelimiterType
-  timestampFormat: string
   timestampOffset: TimezoneOffsetType
 }
 
@@ -138,6 +138,7 @@ export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
     timestampKey: '',
+    timestampFormat: 'ISO8601',
     JMESPath: '',
     identifierType: IdentifierType.Name,
   } as JSONtransformer,
