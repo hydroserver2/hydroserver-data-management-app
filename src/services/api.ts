@@ -49,12 +49,12 @@ export const getObservationsEndpoint = (
   endTime?: string,
   skipCount?: number
 ) => {
-  let url = `${SENSORTHINGS_BASE}/Datastreams('${id}')/Observations?$resultFormat=dataArray`
-  url += `&$top=${pageSize}`
-  url += `&$filter=phenomenonTime%20gt%20${encodeURIComponent(startTime)}`
+  let url = `${DS_BASE}/${id}/observations`
+  url += `?page_size=${pageSize}`
+  url += `&phenomenon_start_time=${encodeURIComponent(startTime)}`
   if (endTime)
-    url += `%20and%20phenomenonTime%20le%20${encodeURIComponent(endTime)}`
-  if (skipCount) url += `&$skip=${skipCount}`
+    url += `&phenomenon_end_time=${encodeURIComponent(endTime)}`
+  if (skipCount) url += `&page=${Math.floor(skipCount / pageSize) + 1}`
   return url
 }
 

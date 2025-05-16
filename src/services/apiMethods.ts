@@ -2,6 +2,10 @@ import { requestInterceptor } from '@/services/requestInterceptor'
 import { responseInterceptor } from '@/services/responseInterceptor'
 import { Snackbar } from '@/utils/notifications'
 import { createPatchObject } from '@/services/createPatchObject'
+import pLimit from 'p-limit'
+
+const limit = pLimit(10)
+
 
 async function interceptedFetch(endpoint: string, options: any) {
   const opts = requestInterceptor(options)
@@ -18,7 +22,7 @@ async function interceptedFetch(endpoint: string, options: any) {
 export const apiMethods = {
   async fetch(endpoint: string, options: any = {}): Promise<any> {
     options.method = 'GET'
-    return await interceptedFetch(endpoint, options)
+    return await limit(() => interceptedFetch(endpoint, options))
   },
   async patch(
     endpoint: string,
@@ -29,7 +33,7 @@ export const apiMethods = {
     options.method = 'PATCH'
     options.body = originalBody ? createPatchObject(originalBody, body) : body
     if (Object.keys(options.body).length === 0) return
-    return await interceptedFetch(endpoint, options)
+    return await limit(() => interceptedFetch(endpoint, options))
   },
   async post(
     endpoint: string,
@@ -38,7 +42,7 @@ export const apiMethods = {
   ): Promise<any> {
     options.method = 'POST'
     options.body = body
-    return await interceptedFetch(endpoint, options)
+    return await limit(() => interceptedFetch(endpoint, options))
   },
   async put(
     endpoint: string,
@@ -47,7 +51,7 @@ export const apiMethods = {
   ): Promise<any> {
     options.method = 'PUT'
     options.body = body
-    return await interceptedFetch(endpoint, options)
+    return await limit(() => interceptedFetch(endpoint, options))
   },
   async delete(
     endpoint: string,
@@ -56,6 +60,6 @@ export const apiMethods = {
   ): Promise<any> {
     options.method = 'DELETE'
     options.body = body
-    return await interceptedFetch(endpoint, options)
+    return await limit(() => interceptedFetch(endpoint, options))
   },
 }
