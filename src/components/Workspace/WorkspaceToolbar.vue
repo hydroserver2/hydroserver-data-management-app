@@ -210,7 +210,7 @@
 import { computed, ref, watch } from 'vue'
 import WorkspaceFormCard from '@/components/Workspace/WorkspaceFormCard.vue'
 import DeleteWorkspaceCard from './DeleteWorkspaceCard.vue'
-import WorkspaceAccessControl from './WorkspaceAccessControl.vue'
+import WorkspaceAccessControl from '@/components/Workspace/AccessControl/WorkspaceAccessControl.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { PermissionResource, PermissionAction, Workspace } from '@/types'
