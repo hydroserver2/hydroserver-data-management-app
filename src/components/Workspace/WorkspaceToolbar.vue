@@ -179,7 +179,7 @@
     />
   </v-dialog>
 
-  <v-dialog v-model="openAccessControl" width="60rem">
+  <v-dialog v-model="openAccessControl" width="70rem">
     <WorkspaceAccessControl
       :workspace="activeItem"
       @close="openAccessControl = false"

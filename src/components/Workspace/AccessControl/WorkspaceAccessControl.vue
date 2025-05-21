@@ -35,6 +35,10 @@
           :workspace="workspace"
           @privacy-updated="emits('privacy-updated')"
         />
+        <ManageApiKeys
+          v-else-if="selected === 'api-keys'"
+          :workspace-id="workspace.id"
+        />
       </v-col>
     </v-row>
 
@@ -52,6 +56,7 @@ import { Workspace } from '@/types'
 import WorkspaceCollaborators from './ManageCollaborators.vue'
 import TransferWorkspaceOwnership from './TransferWorkspaceOwnership.vue'
 import ManageWorkspacePrivacy from './ManageWorkspacePrivacy.vue'
+import ManageApiKeys from './ManageApiKeys.vue'
 import { ref } from 'vue'
 
 const props = defineProps({

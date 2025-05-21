@@ -246,7 +246,9 @@ onMounted(async () => {
       api.getCollaboratorRoles(props.workspace.id),
     ])
 
-    roles.value = rolesResponse
+    roles.value = rolesResponse.filter(
+      (r: CollaboratorRole) => r.isUserRole === true
+    )
     setCollaboratorList(collaboratorsResponse)
   } catch (error) {
     console.error('Error fetching collaborators for workspace', error)
