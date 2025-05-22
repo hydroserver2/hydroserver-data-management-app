@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar color="blue-darken-4">
       <v-card-title>
-        {{ isEdit ? 'Edit' : 'Add' }} API key
+        {{ isEdit ? 'Edit' : 'Create' }} API key
         <span v-if="isEdit" class="opacity-80">- {{ item.name }}</span>
       </v-card-title>
     </v-toolbar>
@@ -24,7 +24,7 @@
         <v-select
           v-model="item.role"
           :items="roles"
-          label="New API key's role"
+          label="New API key's role *"
           item-title="name"
           :return-object="true"
           variant="outlined"

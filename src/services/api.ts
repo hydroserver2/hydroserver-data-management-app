@@ -208,7 +208,7 @@ export const api = {
         : oldKey
     ),
   regenerateApiKey: async (id: string, apiKeyId: string) =>
-    apiMethods.put(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}`),
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}/regenerate`),
   deleteApiKey: async (id: string, apiKeyId: string) =>
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}`),
 
