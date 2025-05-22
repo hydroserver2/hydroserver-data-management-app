@@ -50,7 +50,7 @@ export const getObservationsEndpoint = (
   skipCount?: number
 ) => {
   let url = `${DS_BASE}/${id}/observations`
-  url += `?page_size=${pageSize}`
+  url += `?order=asc&page_size=${pageSize}`
   url += `&phenomenon_start_time=${encodeURIComponent(startTime)}`
   if (endTime)
     url += `&phenomenon_end_time=${encodeURIComponent(endTime)}`
