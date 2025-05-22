@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Datastream, ObservationRecord, GraphSeries } from '@/types'
 import {
-  fetchObservationsParallel,
+  fetchObservations,
   preProcessData,
 } from '@/utils/observationsUtils'
 import { Snackbar } from '@/utils/notifications'
@@ -31,7 +31,7 @@ export const useObservationStore = defineStore('observations', () => {
         loading: true,
       }
 
-      const fetchedData = await fetchObservationsParallel(
+      const fetchedData = await fetchObservations(
         datastream,
         beginTime,
         endTime
@@ -47,12 +47,12 @@ export const useObservationStore = defineStore('observations', () => {
       const storedBeginTime = new Date(existingRecord.beginTime).getTime()
       const storedEndTime = new Date(existingRecord.endTime).getTime()
 
-      let beginDataPromise = Promise.resolve([])
-      let endDataPromise = Promise.resolve([])
+      let beginDataPromise: Promise<[string, number][]> = Promise.resolve([])
+      let endDataPromise: Promise<[string, number][]> = Promise.resolve([])
 
       // Check if new data before the stored data is needed
       if (newBeginTime < storedBeginTime) {
-        beginDataPromise = fetchObservationsParallel(
+        beginDataPromise = fetchObservations(
           datastream,
           beginTime,
           existingRecord.beginTime
@@ -61,7 +61,7 @@ export const useObservationStore = defineStore('observations', () => {
 
       // Check if new data after the stored data is needed
       if (newEndTime > storedEndTime) {
-        endDataPromise = fetchObservationsParallel(
+        endDataPromise = fetchObservations(
           datastream,
           existingRecord.endTime,
           endTime
@@ -145,7 +145,7 @@ export const useObservationStore = defineStore('observations', () => {
       fetchObservedPropertyPromise,
     ])
 
-    const processedData = preProcessData(observations, datastream)
+    const processedData = preProcessData(observations ?? [], datastream)
 
     const yAxisLabel =
       observedProperty && unit
