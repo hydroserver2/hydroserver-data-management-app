@@ -7,44 +7,51 @@ export function subtractHours(timestamp: string, hours: number): string {
   return date.toISOString()
 }
 
-export const fetchObservationsParallel = async (
+export const fetchObservations = async (
   datastream: Datastream,
   startTime: string | null = null,
   endTime: string | null = null
 ) => {
-  const { id, phenomenonBeginTime, phenomenonEndTime, valueCount } = datastream
-  if (!phenomenonBeginTime || !phenomenonEndTime) return
+  const { id, phenomenonBeginTime, phenomenonEndTime } = datastream
+  if (!phenomenonBeginTime || !phenomenonEndTime) return []
 
-  const pageSize = 50_000
-  const endpoints: string[] = []
-  let skipCount = 0
-  while (skipCount < valueCount) {
-    endpoints.push(
-      getObservationsEndpoint(
-        id,
-        pageSize,
-        startTime ? startTime : phenomenonBeginTime,
-        endTime ? endTime : phenomenonEndTime,
-        skipCount
-      )
-    )
-    skipCount += pageSize
-  }
+  const pageSize = 100_000
+  const observations: [string, number][] = []
 
-  try {
-    const results = await Promise.all(
-      endpoints.map((endpoint) => api.fetchObservations(endpoint))
+  let page = 1
+  let fetchObservations = true
+
+  while (fetchObservations) {
+    const endpoint = getObservationsEndpoint(
+      id,
+      pageSize,
+      startTime ?? phenomenonBeginTime,
+      endTime ?? phenomenonEndTime,
+      page
     )
-    return results.reduce((acc, data) => {
-      if (data?.value?.length > 0 && data.value[0].dataArray) {
-        return acc.concat(data.value[0].dataArray)
+
+    try {
+      const data = await api.fetchObservations(endpoint)
+      if (data?.phenomenon_time?.length && data?.result?.length) {
+        const dataArray = data.phenomenon_time.map((time: string, index: number) => [
+          time,
+          data.result[index],
+        ])
+        observations.push(...dataArray)
+        if (dataArray.length < pageSize) {
+          fetchObservations = false
+        } else {
+          page += 1
+        }
+      } else {
+        fetchObservations = false
       }
-      return acc
-    }, [])
-  } catch (error) {
-    console.error('Error fetching data:', error)
-    return Promise.reject(error)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      return Promise.reject(error)
+    }
   }
+  return observations
 }
 
 export function toDataPointArray(dataArray: DataArray) {
