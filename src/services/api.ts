@@ -12,8 +12,9 @@ import {
   HydroShareArchive,
   User,
   Workspace,
+  ApiKey,
 } from '@/types'
-import { Payload, DataSource } from '@/models'
+import { DataSource } from '@/models'
 import {
   convertDataSourceToPostObject,
   OrchestrationSystem,
@@ -176,6 +177,40 @@ export const api = {
     }),
   removeCollaborator: async (id: string, email: string) =>
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
+
+  fetchApiKeys: async (workspaceId: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys`),
+  fetchApiKey: async (workspaceId: string, apiKeyId: string) =>
+    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}`),
+  createApiKey: async (apiKey: ApiKey) =>
+    apiMethods.post(`${WORKSPACES_BASE}/${apiKey.workspaceId}/api-keys`, {
+      name: apiKey.name,
+      description: apiKey.description,
+      isActive: true,
+      roleId: apiKey.role!.id,
+    }),
+  updateApiKey: async (newKey: ApiKey, oldKey?: ApiKey) =>
+    apiMethods.patch(
+      `${WORKSPACES_BASE}/${newKey.workspaceId}/api-keys/${newKey.id}`,
+      {
+        name: newKey.name,
+        description: newKey.description,
+        isActive: true,
+        roleId: newKey.role!.id,
+      },
+      oldKey
+        ? {
+            name: oldKey.name,
+            description: oldKey.description,
+            isActive: true,
+            roleId: oldKey.role!.id,
+          }
+        : oldKey
+    ),
+  regenerateApiKey: async (id: string, apiKeyId: string) =>
+    apiMethods.put(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}/regenerate`),
+  deleteApiKey: async (id: string, apiKeyId: string) =>
+    apiMethods.delete(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}`),
 
   fetchConnectedProviders: async () =>
     apiMethods.fetch(`${PROVIDER_BASE}/connections`),

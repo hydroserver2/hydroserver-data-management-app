@@ -355,7 +355,26 @@ export interface CollaboratorRole {
   description: string
   id: string
   workspaceId: string
+  isApikeyRole: boolean
+  isUserRole: boolean
   permissions: Permission[]
+}
+
+export class ApiKey {
+  id = ''
+  key = ''
+  name = ''
+  description = ''
+  isActive = true
+  expiresAt = ''
+  createdAt = ''
+  lastUsed = ''
+  workspaceId = ''
+  role: CollaboratorRole | null = null
+
+  constructor(init?: Partial<ApiKey>) {
+    Object.assign(this, init)
+  }
 }
 
 export interface WorkspaceData {
@@ -413,6 +432,8 @@ export class Collaborator {
       name: '',
       description: '',
       id: '',
+      isApikeyRole: false,
+      isUserRole: false,
       workspaceId: '',
       permissions: [],
     }

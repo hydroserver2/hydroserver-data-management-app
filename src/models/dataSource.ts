@@ -58,7 +58,7 @@ export type WorkflowType = (typeof WORKFLOW_TYPES)[number]['value']
 export const CSV_DELIMITER_OPTIONS = [
   { value: ',', title: 'Comma' },
   { value: '|', title: 'Pipe' },
-  { value: '\\t', title: 'Tab' },
+  { value: '\t', title: 'Tab' },
   { value: ';', title: 'Semicolon' },
   { value: ' ', title: 'Space' },
 ] as const
@@ -113,12 +113,11 @@ export enum IdentifierType {
 
 interface BaseTransformer {
   type: TransformerType
-  mapping: string
   timestampKey: string
-  identifierType: IdentifierType
+  timestampFormat: string
 }
 
-interface JSONtransformer extends BaseTransformer {
+export interface JSONtransformer extends BaseTransformer {
   type: 'JSON'
   JMESPath: string
 }
@@ -128,8 +127,8 @@ export interface CSVTransformer extends BaseTransformer {
   headerRow: number | null
   dataStartRow: number
   delimiter: CSVDelimiterType
-  timestampFormat: string
   timestampOffset: TimezoneOffsetType
+  identifierType: IdentifierType
 }
 
 export type TransformerConfig = JSONtransformer | CSVTransformer
@@ -138,8 +137,8 @@ export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
     timestampKey: '',
+    timestampFormat: 'ISO8601',
     JMESPath: '',
-    identifierType: IdentifierType.Name,
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
