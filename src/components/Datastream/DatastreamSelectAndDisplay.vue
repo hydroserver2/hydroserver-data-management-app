@@ -21,6 +21,7 @@
       card-title="Select destination datastream"
       @selected-datastream-id="selectedId = $event"
       @close="showModal = false"
+      :enforce-unique-selections="true"
     />
   </v-dialog>
 </template>

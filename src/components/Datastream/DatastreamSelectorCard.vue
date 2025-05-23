@@ -19,7 +19,19 @@
         </v-col>
       </v-row>
 
-      <v-toolbar title="Select a datastream" color="surface">
+      <v-toolbar color="surface">
+        <v-card-title class="opacity-90 text-medium-emphasis"
+          >Select a datastream</v-card-title
+        >
+        <v-switch
+          v-if="enforceUniqueSelections"
+          class="ml-2"
+          color="primary"
+          v-model="showLinkedDatastreams"
+          label="Show already linked"
+          hide-details
+        />
+        <v-spacer />
         <v-text-field
           class="mx-4"
           clearable
@@ -35,7 +47,7 @@
       <v-divider />
       <div
         style="max-height: 1000px; overflow-y: auto"
-        v-if="datastreamsForThing.length"
+        v-if="filteredDatastreams.length"
       >
         <v-data-table-virtual
           :headers="headers"
@@ -44,6 +56,7 @@
           :search="search"
           @click:row="onRowClick"
           color="blue-darken-2"
+          :row-props="getRowProps"
           hover
           multi-sort
         >
@@ -101,6 +114,29 @@
       <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
     </v-card-actions>
   </v-card>
+
+  <v-dialog width="40rem" v-model="openLinkConflictModal">
+    <v-card>
+      <v-toolbar color="yellow-darken-2">
+        <v-card-title class="text-medium-emphasis">
+          <v-icon class="mr-2">mdi-alert</v-icon>Conflicting links
+        </v-card-title>
+      </v-toolbar>
+      <v-card-text>
+        This datastream is already linked to a data source. To reassign it here,
+        you’ll first need to unlink it from that source.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn-cancel @click="openLinkConflictModal = false"
+          >Cancel</v-btn-cancel
+        >
+        <v-btn-primary color="yellow-darken-2" @click="goToDataSource">
+          View existing data source
+        </v-btn-primary>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -110,21 +146,28 @@ import { Datastream, Thing, Workspace } from '@/types'
 import { useMetadata } from '@/composables/useMetadata'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useRoute, useRouter } from 'vue-router'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
-
 const { sensors, observedProperties, processingLevels, units } = useMetadata()
+
+const router = useRouter()
+const route = useRoute()
 
 const datastreamsForThing = ref<Datastream[]>([])
 const things = ref<Thing[]>([])
 const selectedThingId = ref('')
 const search = ref()
+const openLinkConflictModal = ref(false)
+const currentSourceId = ref('')
 
 const emit = defineEmits(['selectedDatastreamId', 'close'])
 const props = defineProps({
   cardTitle: { type: String, required: true },
   workspace: { type: Workspace, required: false },
+  enforceUniqueSelections: { type: Boolean, default: false },
 })
+const showLinkedDatastreams = ref(!props.enforceUniqueSelections)
 
 const headers = [
   { title: 'ID', key: 'id' },
@@ -173,8 +216,14 @@ watch(
   { immediate: true }
 )
 
+const filteredDatastreams = computed(() =>
+  props.enforceUniqueSelections && !showLinkedDatastreams.value
+    ? datastreamsForThing.value.filter((ds) => !ds.dataSourceId)
+    : datastreamsForThing.value
+)
+
 const tableItems = computed(() =>
-  datastreamsForThing.value.map((ds) => ({
+  filteredDatastreams.value.map((ds) => ({
     ...ds,
     observedProperty:
       observedProperties.value.find((op) => op.id === ds.observedPropertyId)
@@ -201,9 +250,39 @@ const tableItems = computed(() =>
 )
 
 function onRowClick(event: Event, item: any) {
-  console.log('item', item)
-  emit('selectedDatastreamId', item.item.id)
-  emit('close')
+  if (props.enforceUniqueSelections && item.item.dataSourceId) {
+    currentSourceId.value = item.item.dataSourceId
+    openLinkConflictModal.value = true
+  } else {
+    emit('selectedDatastreamId', item.item.id)
+    emit('close')
+  }
+}
+
+const getRowProps = ({ item }: { item: any }) => {
+  if (props.enforceUniqueSelections)
+    return {
+      class: item.dataSourceId ? 'bg-red-lighten-2 text--disabled' : '',
+    }
+  else return ''
+}
+
+function goToDataSource() {
+  if (!currentSourceId.value) return
+
+  openLinkConflictModal.value = false
+
+  const samePage =
+    route.name === 'DataSource' && route.params.id === currentSourceId.value
+
+  if (samePage) {
+    router.go(0)
+  } else {
+    router.push({
+      name: 'DataSource',
+      params: { id: currentSourceId.value },
+    })
+  }
 }
 
 onMounted(async () => {
