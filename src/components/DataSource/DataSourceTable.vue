@@ -34,6 +34,21 @@
       class="elevation-2"
       @click:row="onRowClick"
     >
+      <template v-slot:no-data>
+        <div class="text-center pa-4" v-if="tableData.length === 0">
+          <v-icon size="48" color="grey lighten-1">mdi-desktop-classic</v-icon>
+          <h4 class="mt-2">
+            You have not registered any orchestration systems.
+          </h4>
+          <p class="mb-4">
+            Click the 'download Streaming Data Loader' button to get started or
+            <a href="https://hydroserver.org" target="_blank"
+              >read the documentation</a
+            >
+            to learn more.
+          </p>
+        </div>
+      </template>
       <template
         v-slot:group-header="{ item, columns, toggleGroup, isGroupOpen }"
       >
