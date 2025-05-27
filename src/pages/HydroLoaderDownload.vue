@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-let version = 'v1.0.11' // TODO: Add this as an environment variable
+let version = 'v1.1.0' // TODO: Add this as an environment variable
 let macosLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.MacOS.dmg`
 let windowsLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.Windows.zip`
 let ubuntuLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.Ubuntu.zip`
