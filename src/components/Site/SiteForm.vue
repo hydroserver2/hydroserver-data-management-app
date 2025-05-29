@@ -4,7 +4,7 @@
       >{{ thingId ? 'Edit' : 'Register a' }} Site</v-card-title
     >
     <div class="flex-shrink-0" style="height: 20rem">
-      <GoogleMap
+      <MapWrapper
         v-if="loaded"
         :singleMarkerMode="true"
         @location-clicked="onMapLocationClicked"
@@ -177,7 +177,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
-import GoogleMap from '../GoogleMap.vue'
+import MapWrapper from '@/components/Maps/MapWrapper.vue'
 import { useThingStore } from '@/store/thing'
 import { Thing } from '@/types'
 import { VForm } from 'vuetify/components'

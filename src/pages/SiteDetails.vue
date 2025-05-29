@@ -4,7 +4,7 @@
 
     <v-row v-if="thing" style="height: 25rem">
       <v-col>
-        <GoogleMap :things="[thing]" :mapOptions="mapOptions" />
+        <MapWrapper :things="[thing]" :mapOptions="mapOptions" />
       </v-col>
     </v-row>
 
@@ -100,7 +100,7 @@ import { useTagStore } from '@/store/tags'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 import router from '@/router/router'
-import GoogleMap from '@/components/GoogleMap.vue'
+import MapWrapper from '@/components/Maps/MapWrapper.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'

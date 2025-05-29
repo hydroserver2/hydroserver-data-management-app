@@ -1,7 +1,7 @@
 <template>
   <template v-if="isPageLoaded">
     <div class="map-container flex-shrink-0">
-      <GoogleMap
+      <MapWrapper
         v-if="workspaceThings"
         :colorKey="useColors ? filterCriteria.key : ''"
         :things="filteredThings"
@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
-import GoogleMap from '@/components/GoogleMap.vue'
+import MapWrapper from '@/components/Maps/MapWrapper.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'

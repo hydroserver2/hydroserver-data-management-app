@@ -73,7 +73,7 @@ const createMarker = (
   return marker
 }
 
-function generateMarkerContent(markerData: Thing): string {
+export function generateMarkerContent(markerData: Thing): string {
   return `
       <div class='ma-2'>
         <div class='d-flex justify-space-between'>
@@ -81,7 +81,7 @@ function generateMarkerContent(markerData: Thing): string {
             markerData.name
           }</h6>
         </div>
-        <p class="text-medium-emphasis opacity-60" style="font-size: 1.2em;"><b>
+        <p class="text-medium-emphasis opacity-80" style="font-size: 1.2em;"><b>
         ${markerData.county ? markerData.county : ''}
         ${markerData.county && markerData.state ? ',' : ''}
         ${markerData.state ? markerData.state : ''}
