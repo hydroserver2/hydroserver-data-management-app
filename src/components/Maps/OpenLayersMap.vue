@@ -37,10 +37,11 @@ import OSM from 'ol/source/OSM'
 import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
-import { Style, Icon } from 'ol/style'
+import { Style, Fill, Stroke } from 'ol/style'
 import { fromLonLat } from 'ol/proj'
 import { defaultOpenLayersMapOptions } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
+import CircleStyle from 'ol/style/Circle'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -66,6 +67,14 @@ const clusterSource = new Cluster({
 })
 const markerLayer = ref<VectorLayer>()
 
+const defaultMarkerStyle = new Style({
+  image: new CircleStyle({
+    radius: 8,
+    fill: new Fill({ color: '#2196F3' }),
+    stroke: new Stroke({ color: '#fff', width: 2 }),
+  }),
+})
+
 const uniqueColoredThings = computed(() => {
   const firstOccurrenceMap = new Map()
   coloredThings.value.forEach((thing) => {
@@ -80,22 +89,11 @@ const uniqueColoredThings = computed(() => {
 
 const createFeature = (thing: ThingWithColor) => {
   if (!thing.latitude || !thing.longitude) return null
-
   const feature = new Feature({
     geometry: new Point(fromLonLat([thing.longitude, thing.latitude])),
     thing,
   })
-
-  feature.setStyle(
-    new Style({
-      image: new Icon({
-        src: '/marker-icon.svg',
-        color: thing.color?.background,
-        scale: 2.2,
-      }),
-    })
-  )
-
+  feature.setStyle(defaultMarkerStyle)
   return feature
 }
 
@@ -123,7 +121,6 @@ function updateFeatures() {
   // 3) zoom to the extent of whatever source we used
 
   const extent = vectorSource.getExtent() as Extent
-  console.log('extent', extent)
   if (extentIsEmpty(extent)) return
   map.getView().fit(extent, {
     padding: [100, 100, 100, 100],
