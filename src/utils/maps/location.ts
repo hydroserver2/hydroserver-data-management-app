@@ -38,8 +38,12 @@ export async function getGeoData(latitude: number, longitude: number) {
 }
 
 export async function fetchLocationData(latitude: number, longitude: number) {
-  const elevation_m = await getElevation(latitude, longitude)
-  const { state, county, country } = await getGeoData(latitude, longitude)
+  const [elevation_m, geo] = await Promise.all([
+    getElevation(latitude, longitude),
+    getGeoData(latitude, longitude),
+  ])
+
+  const { state, county, country } = geo
 
   return {
     latitude: latitude.toFixed(6),
