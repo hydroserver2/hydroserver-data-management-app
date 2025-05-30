@@ -42,6 +42,7 @@ import { fromLonLat } from 'ol/proj'
 import { defaultOpenLayersMapOptions } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import CircleStyle from 'ol/style/Circle'
+import { defaults as defaultControls } from 'ol/control'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -156,6 +157,11 @@ const initializeMap = () => {
 
   map = new OlMap({
     target: mapContainer.value,
+    controls: defaultControls({
+      attribution: false,
+      zoom: false,
+      rotate: false,
+    }),
     layers: [rasterLayer, markerLayer.value],
     overlays: [overlay],
     view: new View({
