@@ -1,9 +1,9 @@
 <template>
   <div ref="mapContainer" class="fill-width fill-height"></div>
 
-  <div id="popup" class="ol-popup">
-    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-    <div id="popup-content"></div>
+  <div ref="popupContainer" class="ol-popup">
+    <a href="#" ref="popupCloser" class="ol-popup-closer" />
+    <div ref="popupContent" />
   </div>
 
   <div v-if="uniqueColoredThings.length" class="legend">
@@ -23,11 +23,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { Thing, ThingWithColor } from '@/types'
-import {
-  addColorToMarkers,
-  generateMarkerContent,
-} from '@/utils/googleMaps/markers'
-import { useSingleMarkerMode } from '@/utils/googleMaps/mapUtils'
+import { addColorToMarkers } from '@/utils/googleMaps/markers'
+import { generateMarkerContent } from '@/utils/maps/markers'
 import OlMap from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
@@ -38,11 +35,12 @@ import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
 import { Style, Fill, Stroke } from 'ol/style'
-import { fromLonLat } from 'ol/proj'
+import { fromLonLat, toLonLat } from 'ol/proj'
 import { defaultOpenLayersMapOptions } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import CircleStyle from 'ol/style/Circle'
 import { defaults as defaultControls } from 'ol/control'
+import { fetchLocationData } from '@/utils/maps/location'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -58,6 +56,10 @@ const props = defineProps({
 const emit = defineEmits(['location-clicked'])
 
 const mapContainer = ref<HTMLElement>()
+const popupContainer = ref<HTMLElement>()
+const popupContent = ref<HTMLElement>()
+const popupCloser = ref<HTMLElement>()
+
 const coloredThings = ref<ThingWithColor[]>([])
 
 let map: OlMap
@@ -142,18 +144,12 @@ const initializeMap = () => {
       : vectorSource,
   })
 
-  const container = document.getElementById('popup')!
-  const content = document.getElementById('popup-content')!
-  const closer = document.getElementById('popup-closer')!
-
   const overlay = new Overlay({
-    element: container,
+    element: popupContainer.value,
     autoPan: { animation: { duration: 250 } },
   })
 
-  closer.onclick = () => {
-    overlay.setPosition(undefined)
-  }
+  popupCloser.value!.onclick = () => overlay.setPosition(undefined)
 
   map = new OlMap({
     target: mapContainer.value,
@@ -170,7 +166,20 @@ const initializeMap = () => {
     }),
   })
 
-  map.on('click', function (evt) {
+  map.on('click', async (evt) => {
+    if (props.singleMarkerMode) {
+      // single‑marker placement
+      const [lon, lat] = toLonLat(evt.coordinate)
+      vectorSource.clear()
+      const single = new Feature(new Point(evt.coordinate))
+      single.setStyle(defaultMarkerStyle)
+      vectorSource.addFeature(single)
+
+      const locationData = await fetchLocationData(lat, lon)
+      emit('location-clicked', locationData)
+      return
+    }
+
     const rawFeatures = map.forEachFeatureAtPixel(
       evt.pixel,
       (feature) => feature
@@ -185,7 +194,7 @@ const initializeMap = () => {
       : rawFeatures
 
     const thing = clicked.get('thing')
-    content.innerHTML = generateMarkerContent(thing)
+    popupContent.value!.innerHTML = generateMarkerContent(thing)
     overlay.setPosition(evt.coordinate)
   })
 
