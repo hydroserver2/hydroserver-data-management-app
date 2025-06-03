@@ -24,7 +24,10 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { Thing, ThingWithColor } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
-import { generateMarkerContent } from '@/utils/maps/markers'
+import {
+  generateMarkerContent,
+  getMarkerLayerStyles,
+} from '@/utils/maps/markers'
 import OlMap from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
@@ -34,15 +37,11 @@ import OSM from 'ol/source/OSM'
 import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
-import { Style, Fill, Stroke } from 'ol/style'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { defaultOpenLayersMapOptions } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
-import CircleStyle from 'ol/style/Circle'
 import { defaults as defaultControls } from 'ol/control'
 import { fetchLocationData } from '@/utils/maps/location'
-import Text from 'ol/style/Text.js'
-import { FeatureLike } from 'ol/Feature'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -113,37 +112,6 @@ function updateFeatures() {
     maxZoom: 14,
     duration: 0,
   })
-}
-
-const markerStyle = new Style({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({ color: '#2196F3' }),
-    stroke: new Stroke({ color: '#fff', width: 2 }),
-  }),
-})
-
-const getClusterStyle = (features: Feature[]) => {
-  const radius = 8 + Math.min(features.length, 20)
-  return new Style({
-    image: new CircleStyle({
-      radius,
-      fill: new Fill({ color: '#4CAF50' }),
-      stroke: new Stroke({ color: '#fff', width: 2 }),
-    }),
-    text: new Text({
-      text: features.length.toString(),
-      fill: new Fill({
-        color: '#fff',
-      }),
-    }),
-  })
-}
-
-function getMarkerLayerStyles(feature: FeatureLike, res: number) {
-  const features = feature.get('features') as Feature[] | undefined
-  const isCluster = Array.isArray(features) && features.length > 1
-  return isCluster ? getClusterStyle(features) : markerStyle
 }
 
 const initializeMap = () => {
