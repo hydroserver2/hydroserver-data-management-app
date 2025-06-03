@@ -41,6 +41,8 @@ import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import CircleStyle from 'ol/style/Circle'
 import { defaults as defaultControls } from 'ol/control'
 import { fetchLocationData } from '@/utils/maps/location'
+import Text from 'ol/style/Text.js'
+import { FeatureLike } from 'ol/Feature'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -49,9 +51,7 @@ const props = defineProps({
     default: defaultOpenLayersMapOptions,
   },
   colorKey: { type: String, default: '' },
-  useBounds: Boolean,
   singleMarkerMode: Boolean,
-  useMarkerClusterer: Boolean,
 })
 const emit = defineEmits(['location-clicked'])
 
@@ -63,20 +63,11 @@ const popupCloser = ref<HTMLElement>()
 const coloredThings = ref<ThingWithColor[]>([])
 
 let map: OlMap
-const vectorSource = new VectorSource<Feature>()
 const clusterSource = new Cluster({
-  distance: 40,
-  source: vectorSource,
+  distance: 18,
+  source: new VectorSource<Feature>(),
 })
 const markerLayer = ref<VectorLayer>()
-
-const defaultMarkerStyle = new Style({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({ color: '#2196F3' }),
-    stroke: new Stroke({ color: '#fff', width: 2 }),
-  }),
-})
 
 const uniqueColoredThings = computed(() => {
   const firstOccurrenceMap = new Map()
@@ -90,15 +81,13 @@ const uniqueColoredThings = computed(() => {
   })
 })
 
-const createFeature = (thing: ThingWithColor) => {
-  if (!thing.latitude || !thing.longitude) return null
-  const feature = new Feature({
-    geometry: new Point(fromLonLat([thing.longitude, thing.latitude])),
-    thing,
-  })
-  feature.setStyle(defaultMarkerStyle)
-  return feature
-}
+const createFeature = (thing: ThingWithColor) =>
+  !thing.latitude || !thing.longitude
+    ? null
+    : new Feature({
+        geometry: new Point(fromLonLat([thing.longitude, thing.latitude])),
+        thing,
+      })
 
 function updateFeatures() {
   // 1) Rebuild features
@@ -111,37 +100,57 @@ function updateFeatures() {
     .filter((feature) => feature !== null)
 
   // 2) clear & add
-  if (props.useMarkerClusterer) {
-    const src = clusterSource.getSource()
-    if (!src) return
-    src.clear()
-    src.addFeatures(features)
-  } else {
-    vectorSource.clear()
-    vectorSource.addFeatures(features)
-  }
+  const src = clusterSource.getSource()
+  if (!src) return
+  src.clear()
+  src.addFeatures(features)
 
   // 3) zoom to the extent of whatever source we used
-
-  const extent = vectorSource.getExtent() as Extent
+  const extent = src.getExtent() as Extent
   if (extentIsEmpty(extent)) return
   map.getView().fit(extent, {
     padding: [100, 100, 100, 100],
     maxZoom: 14,
-    duration: 300,
+    duration: 0,
   })
+}
+
+const markerStyle = new Style({
+  image: new CircleStyle({
+    radius: 8,
+    fill: new Fill({ color: '#2196F3' }),
+    stroke: new Stroke({ color: '#fff', width: 2 }),
+  }),
+})
+
+const getClusterStyle = (features: Feature[]) => {
+  const radius = 8 + Math.min(features.length, 20)
+  return new Style({
+    image: new CircleStyle({
+      radius,
+      fill: new Fill({ color: '#4CAF50' }),
+      stroke: new Stroke({ color: '#fff', width: 2 }),
+    }),
+    text: new Text({
+      text: features.length.toString(),
+      fill: new Fill({
+        color: '#fff',
+      }),
+    }),
+  })
+}
+
+function getMarkerLayerStyles(feature: FeatureLike, res: number) {
+  const features = feature.get('features') as Feature[] | undefined
+  const isCluster = Array.isArray(features) && features.length > 1
+  return isCluster ? getClusterStyle(features) : markerStyle
 }
 
 const initializeMap = () => {
   const rasterLayer = new TileLayer({ source: new OSM() })
-
   markerLayer.value = new VectorLayer({
-    source: props.useMarkerClusterer
-      ? new Cluster({
-          distance: 40,
-          source: vectorSource,
-        })
-      : vectorSource,
+    source: clusterSource,
+    style: getMarkerLayerStyles,
   })
 
   const overlay = new Overlay({
@@ -160,21 +169,19 @@ const initializeMap = () => {
     }),
     layers: [rasterLayer, markerLayer.value],
     overlays: [overlay],
-    view: new View({
-      ...props.mapOptions,
-      center: fromLonLat(props.mapOptions.center),
-    }),
+    view: new View(props.mapOptions),
   })
 
   map.on('click', async (evt) => {
     if (props.singleMarkerMode) {
       // single‑marker placement
-      const [lon, lat] = toLonLat(evt.coordinate)
-      vectorSource.clear()
+      const src = clusterSource.getSource()
+      if (!src) return
+      src.clear()
       const single = new Feature(new Point(evt.coordinate))
-      single.setStyle(defaultMarkerStyle)
-      vectorSource.addFeature(single)
+      src.addFeature(single)
 
+      const [lon, lat] = toLonLat(evt.coordinate)
       const locationData = await fetchLocationData(lat, lon)
       emit('location-clicked', locationData)
       return

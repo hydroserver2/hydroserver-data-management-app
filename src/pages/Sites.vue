@@ -1,11 +1,10 @@
 <template>
   <template v-if="isPageLoaded">
     <div class="map-container flex-shrink-0">
-      <MapWrapper
+      <OpenLayersMap
         v-if="workspaceThings"
         :colorKey="useColors ? filterCriteria.key : ''"
         :things="filteredThings"
-        useBounds
       />
     </div>
 
@@ -132,7 +131,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
-import MapWrapper from '@/components/Maps/MapWrapper.vue'
+import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'

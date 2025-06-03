@@ -4,11 +4,10 @@
       >{{ thingId ? 'Edit' : 'Register a' }} Site</v-card-title
     >
     <div class="flex-shrink-0" style="height: 20rem">
-      <MapWrapper
+      <OpenLayersMap
         v-if="loaded"
         :singleMarkerMode="true"
         @location-clicked="onMapLocationClicked"
-        :mapOptions="mapOptions"
         :things="thingId ? [thing] : []"
       />
     </div>
@@ -177,7 +176,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
-import MapWrapper from '@/components/Maps/MapWrapper.vue'
+import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import { useThingStore } from '@/store/thing'
 import { Thing } from '@/types'
 import { VForm } from 'vuetify/components'
@@ -228,12 +227,12 @@ watch(
 async function populateThing() {
   Object.assign(thing, storedThing.value)
   if (thing.latitude && thing.longitude)
-    mapOptions.value = {
-      center: { lat: thing.latitude, lng: thing.longitude },
-      zoom: 15,
-      mapTypeId: 'satellite',
-    }
-  loaded.value = true
+    // mapOptions.value = {
+    //   center: { lat: thing.latitude, lng: thing.longitude },
+    //   zoom: 15,
+    //   mapTypeId: 'satellite',
+    // }
+    loaded.value = true
 }
 
 function closeDialog() {

@@ -4,7 +4,7 @@
 
     <v-row v-if="thing" style="height: 25rem">
       <v-col>
-        <MapWrapper :things="[thing]" :mapOptions="mapOptions" />
+        <OpenLayersMap :things="[thing]" />
       </v-col>
     </v-row>
 
@@ -100,7 +100,7 @@ import { useTagStore } from '@/store/tags'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 import router from '@/router/router'
-import MapWrapper from '@/components/Maps/MapWrapper.vue'
+import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
