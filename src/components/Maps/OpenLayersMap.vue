@@ -33,22 +33,17 @@ import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
-import OSM from 'ol/source/OSM'
 import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
 import { fromLonLat, toLonLat } from 'ol/proj'
-import { defaultOpenLayersMapOptions } from '@/config/openLayersMapConfig'
+import { defaultView, tileSource } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import { defaults as defaultControls } from 'ol/control'
 import { fetchLocationData } from '@/utils/maps/location'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
-  mapOptions: {
-    type: Object,
-    default: defaultOpenLayersMapOptions,
-  },
   colorKey: { type: String, default: '' },
   singleMarkerMode: Boolean,
 })
@@ -115,7 +110,7 @@ function updateFeatures() {
 }
 
 const initializeMap = () => {
-  const rasterLayer = new TileLayer({ source: new OSM() })
+  const rasterLayer = new TileLayer({ source: tileSource })
   markerLayer.value = new VectorLayer({
     source: clusterSource,
     style: getMarkerLayerStyles,
@@ -137,7 +132,7 @@ const initializeMap = () => {
     }),
     layers: [rasterLayer, markerLayer.value],
     overlays: [overlay],
-    view: new View(props.mapOptions),
+    view: new View(defaultView),
   })
 
   map.on('click', async (evt) => {

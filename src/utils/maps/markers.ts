@@ -35,9 +35,9 @@ const getColoredMarkerStyle = (feature: Feature) => {
   return new Style({
     image: new CircleStyle({
       radius: 8,
-      fill: new Fill({ color: thing.color?.background || '#2196F3' }),
+      fill: new Fill({ color: thing?.color?.background || '#2196F3' }),
       stroke: new Stroke({
-        color: thing.color?.borderColor || '#ffffff',
+        color: thing?.color?.borderColor || '#ffffff',
         width: 2,
       }),
     }),
