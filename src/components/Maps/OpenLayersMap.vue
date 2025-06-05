@@ -37,7 +37,7 @@ import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
 import { fromLonLat, toLonLat } from 'ol/proj'
-import { defaultView, tileSource } from '@/config/openLayersMapConfig'
+import { defaultView, tileSources } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import { defaults as defaultControls } from 'ol/control'
 import { fetchLocationData } from '@/utils/maps/location'
@@ -45,6 +45,7 @@ import { fetchLocationData } from '@/utils/maps/location'
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
   colorKey: { type: String, default: '' },
+  startInSatellite: Boolean,
   singleMarkerMode: Boolean,
 })
 const emit = defineEmits(['location-clicked'])
@@ -110,7 +111,20 @@ function updateFeatures() {
 }
 
 const initializeMap = () => {
-  const rasterLayer = new TileLayer({ source: tileSource })
+  if (!tileSources.length) {
+    console.error(
+      '[OpenLayersMap] No tile services available.' +
+        ' Please check you openLayers Map Config file and make sure' +
+        ' you have at least one valid tile source defined.'
+    )
+    return
+  }
+
+  const desiredType = props.startInSatellite ? 'satellite' : 'base'
+  let chosenSource = tileSources.find((s) => s.type === desiredType)
+  if (!chosenSource) chosenSource = tileSources[0]
+
+  const rasterLayer = new TileLayer({ source: chosenSource.source })
   markerLayer.value = new VectorLayer({
     source: clusterSource,
     style: getMarkerLayerStyles,

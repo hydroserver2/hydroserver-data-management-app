@@ -6,7 +6,8 @@
     <div class="flex-shrink-0" style="height: 20rem">
       <OpenLayersMap
         v-if="loaded"
-        :singleMarkerMode="true"
+        singleMarkerMode
+        startInSatellite
         @location-clicked="onMapLocationClicked"
         :things="thingId ? [thing] : []"
       />

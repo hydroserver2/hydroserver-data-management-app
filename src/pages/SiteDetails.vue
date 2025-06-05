@@ -4,7 +4,7 @@
 
     <v-row v-if="thing" style="height: 25rem">
       <v-col>
-        <OpenLayersMap :things="[thing]" />
+        <OpenLayersMap :things="[thing]" startInSatellite />
       </v-col>
     </v-row>
 
