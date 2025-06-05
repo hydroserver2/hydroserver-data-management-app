@@ -1,22 +1,38 @@
 <template>
-  <div ref="mapContainer" class="fill-width fill-height"></div>
+  <div class="map-wrapper">
+    <!-- 2) Dropdown, absolutely positioned -->
+    <div class="tile-select-container" v-if="tileSources.length > 1">
+      <v-select
+        v-model="selectedTileSourceName"
+        :items="tileSources"
+        item-title="name"
+        item-value="name"
+        label="Map Options"
+        dense
+        hide-details
+        variant="solo-filled"
+        style="width: 180px"
+      />
+    </div>
+    <div ref="mapContainer" class="fill-width fill-height"></div>
 
-  <div ref="popupContainer" class="ol-popup">
-    <a href="#" ref="popupCloser" class="ol-popup-closer" />
-    <div ref="popupContent" />
-  </div>
+    <div ref="popupContainer" class="ol-popup">
+      <a href="#" ref="popupCloser" class="ol-popup-closer" />
+      <div ref="popupContent" />
+    </div>
 
-  <div v-if="uniqueColoredThings.length" class="legend">
-    <h3>Legend</h3>
-    <ul>
-      <li v-for="thing in uniqueColoredThings" :key="thing.tagValue">
-        <v-icon
-          icon="mdi-map-marker"
-          :style="{ color: thing.color?.background }"
-        ></v-icon>
-        {{ thing?.tagValue }}
-      </li>
-    </ul>
+    <div v-if="uniqueColoredThings.length" class="legend">
+      <h3>Legend</h3>
+      <ul>
+        <li v-for="thing in uniqueColoredThings" :key="thing.tagValue">
+          <v-icon
+            icon="mdi-map-marker"
+            :style="{ color: thing.color?.background }"
+          ></v-icon>
+          {{ thing?.tagValue }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -37,9 +53,12 @@ import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
 import { fromLonLat, toLonLat } from 'ol/proj'
-import { defaultView, tileSources } from '@/config/openLayersMapConfig'
+import {
+  ConfigTileSource,
+  defaultView,
+  tileSources,
+} from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
-import { defaults as defaultControls } from 'ol/control'
 import { fetchLocationData } from '@/utils/maps/location'
 
 const props = defineProps({
@@ -56,8 +75,10 @@ const popupContent = ref<HTMLElement>()
 const popupCloser = ref<HTMLElement>()
 
 const coloredThings = ref<ThingWithColor[]>([])
+const selectedTileSourceName = ref<string>(tileSources[0].name)
 
 let map: OlMap
+let rasterLayer: TileLayer
 const clusterSource = new Cluster({
   distance: 18,
   source: new VectorSource<Feature>(),
@@ -123,8 +144,9 @@ const initializeMap = () => {
   const desiredType = props.startInSatellite ? 'satellite' : 'base'
   let chosenSource = tileSources.find((s) => s.type === desiredType)
   if (!chosenSource) chosenSource = tileSources[0]
+  selectedTileSourceName.value = chosenSource.name
 
-  const rasterLayer = new TileLayer({ source: chosenSource.source })
+  rasterLayer = new TileLayer({ source: chosenSource.source })
   markerLayer.value = new VectorLayer({
     source: clusterSource,
     style: getMarkerLayerStyles,
@@ -139,11 +161,6 @@ const initializeMap = () => {
 
   map = new OlMap({
     target: mapContainer.value,
-    controls: defaultControls({
-      attribution: false,
-      zoom: false,
-      rotate: false,
-    }),
     layers: [rasterLayer, markerLayer.value],
     overlays: [overlay],
     view: new View(defaultView),
@@ -197,9 +214,37 @@ onMounted(() => {
 })
 
 watch(() => [props.things] as const, updateFeatures, { deep: true })
+
+function getConfigByName(name: string): ConfigTileSource {
+  const found = tileSources.find((cfg) => cfg.name === name)
+  return found || tileSources[0]
+}
+watch(
+  () => selectedTileSourceName.value,
+  (newName) => {
+    const cfg = getConfigByName(newName)
+    if (cfg && rasterLayer) {
+      rasterLayer.setSource(cfg.source)
+    }
+  }
+)
 </script>
 
 <style scoped>
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 2) Position the dropdown in the top-right corner */
+.tile-select-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2; /* above the map tiles */
+}
+
 .fill-width {
   width: 100%;
 }

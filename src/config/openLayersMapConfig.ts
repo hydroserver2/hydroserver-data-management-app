@@ -16,45 +16,27 @@ export const defaultView = {
   zoom: defaultZoom,
 }
 
-// Your tile source is the API where the actual map tiles are pulled from.
-// Open Street Maps is selected by default. It's free and requires no API key
-// or additional configuration, but will throttle speeds at medium to heavy use.
-// Optionally, GoogleMaps is available, but you'll need to create an API key and
-// paste it in your .env file at the root of this directory.
-
-export interface TileSource {
+export interface ConfigTileSource {
   name: string
   type: 'base' | 'satellite'
-  source: OSM | XYZ
+  source: import('ol/source/Tile').default
 }
 
-export const tileSources: TileSource[] = [
-  // {
-  //   name: 'OpenStreetMap',
-  //   type: 'base',
-  //   source: new OSM({
-  //     attributions: '© OpenStreetMap contributors',
-  //   }),
-  // },
+// Your tile sources are the APIs where the actual map tiles are pulled from.
+// Open Street Maps and Esri are selected by default. They're free and require no API key
+// or additional configuration, but will throttle speeds at medium to heavy use.
+// Optionally, any other tile source you'd like can be added to the list below.
+// Just comment out the tile layers you don't want to see and add the layers you do.
+// The first source in the list with type: 'base' will be the default for pages that load a 'base' style.
+// Likewise, the first type: 'satellite' source will be the default for pages that load with a satellite style.
+
+// Some paid tile services require an API key. In that case, add your key to your .env file and follow the
+// commented out GoogleMaps examples below.
+export const tileSources: ConfigTileSource[] = [
   {
     name: 'Default',
     type: 'base',
-    source: new XYZ({
-      url: `https://mt1.googleapis.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=${
-        import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY
-      }`,
-      attributions: 'Map data © Google',
-    }),
-  },
-  {
-    name: 'Satellite',
-    type: 'satellite',
-    source: new XYZ({
-      url: `https://mt1.googleapis.com/vt/lyrs=s&x={x}&y={y}&z={z}&key=${
-        import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY
-      }`,
-      attributions: 'Map data © Google',
-    }),
+    source: new OSM(),
   },
   {
     name: 'Esri World Imagery',
@@ -66,17 +48,28 @@ export const tileSources: TileSource[] = [
       attributions: 'Tiles © Esri',
     }),
   },
-  {
-    name: 'MapTiler Satellite',
-    type: 'satellite',
-    source: new XYZ({
-      url: `https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=${
-        import.meta.env.VITE_APP_MAPTILER_KEY
-      }`,
-      attributions: '© MapTiler © OpenStreetMap contributors',
-    }),
-  },
-  // You can add more here (e.g. GoogleRoad, GoogleSat, EOX, etc.)
+  // {
+  //   name: 'Google Default',
+  //   type: 'base',
+  //   source: new XYZ({
+  //     url: `https://mt1.googleapis.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=${
+  //       import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY
+  //     }`,
+  //     attributions: 'Map data © Google',
+  //   }),
+  // },
+  // {
+  //   name: 'Google Satellite',
+  //   type: 'satellite',
+  //   source: new XYZ({
+  //     url: `https://mt1.googleapis.com/vt/lyrs=s&x={x}&y={y}&z={z}&key=${
+  //       import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY
+  //     }`,
+  //     attributions: 'Map data © Google',
+  //   }),
+  // },
+
+  // You can add more here (e.g. MapTiler, EOX, etc.)
 ]
 
 export enum ElevationServices {
