@@ -7,7 +7,7 @@
       <OpenLayersMap
         v-if="loaded"
         singleMarkerMode
-        startInSatellite
+        :startInSatellite="!!thingId"
         @location-clicked="onMapLocationClicked"
         :things="thingId ? [thing] : []"
       />

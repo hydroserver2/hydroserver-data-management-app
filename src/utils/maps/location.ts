@@ -18,14 +18,33 @@ interface ElevationResponse {
     elevation: number
   }>
 }
+
+import { Loader } from '@googlemaps/js-api-loader'
+
+let googleMapsPromise: Promise<typeof google.maps.Map> | null = null
+
+export function loadGoogleMapsApi(): Promise<typeof google.maps.Map> {
+  if (googleMapsPromise) return googleMapsPromise
+  const loader = new Loader({
+    apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
+    version: 'weekly',
+    libraries: ['places'],
+  })
+  googleMapsPromise = (async () => {
+    const { Map } = await loader.importLibrary('maps')
+    return Map
+  })()
+  return googleMapsPromise
+}
+
 export async function getElevationGoogle(latitude: number, longitude: number) {
-  const url = new URL('https://maps.googleapis.com/maps/api/elevation/json')
-  url.searchParams.set('locations', `${latitude},${longitude}`)
-  url.searchParams.set('key', import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY)
-  const res = await fetch(url.toString())
-  if (!res.ok) throw new Error(`Google Elevation error: ${res.status}`)
-  const data = (await res.json()) as ElevationResponse
-  return data.results[0].elevation
+  const Map = await loadGoogleMapsApi()
+  const elevator = new google.maps.ElevationService()
+  const { results } = await elevator.getElevationForLocations({
+    locations: [{ lat: latitude, lng: longitude }],
+  })
+  if (!results[0]) throw new Error('No elevation found')
+  return results[0].elevation
 }
 
 export async function getOpenElevation(latitude: number, longitude: number) {
@@ -94,28 +113,21 @@ function parseGoogleAddress(response: GoogleGeocodeResponse) {
 }
 
 export async function getGeoDataGoogle(latitude: number, longitude: number) {
-  if (!import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY) {
+  if (!import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY)
     throw new Error('Missing Google Maps API key')
-  }
-
   const url = new URL('https://maps.googleapis.com/maps/api/geocode/json')
   url.searchParams.set('latlng', `${latitude},${longitude}`)
   url.searchParams.set('key', import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY)
-
   const res = await fetch(url.toString())
-  if (!res.ok) {
-    throw new Error(`Google Geocoding HTTP error: ${res.status}`)
-  }
-
+  if (!res.ok) throw new Error(`Google Geocoding HTTP error: ${res.status}`)
   const data = (await res.json()) as GoogleGeocodeResponse
-
   return parseGoogleAddress(data)
 }
 
 export async function getGeoData(latitude: number, longitude: number) {
   return geoService === GeoServices.Nominatim
-    ? getGeoDataNominatim(latitude, longitude)
-    : getGeoDataGoogle(latitude, longitude)
+    ? await getGeoDataNominatim(latitude, longitude)
+    : await getGeoDataGoogle(latitude, longitude)
 }
 
 export async function fetchLocationData(latitude: number, longitude: number) {
