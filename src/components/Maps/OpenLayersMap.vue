@@ -101,15 +101,15 @@ const createFeature = (thing: ThingWithColor) => {
   return f
 }
 
-function updateFeatures() {
+async function updateFeatures() {
   // 1) Rebuild features
   coloredThings.value = props.colorKey
     ? addColorToMarkers(props.things, props.colorKey)
     : props.things
 
-  const features = props.colorKey
-    ? coloredThings.value.map(createFeature).filter((f) => f !== null)
-    : props.things.map(createFeature).filter((f) => f !== null)
+  const features = coloredThings.value
+    .map(createFeature)
+    .filter((feature) => feature !== null)
 
   // 2) clear & add
   if (!vectorSource) return
@@ -227,7 +227,7 @@ const initializeMap = () => {
   updateFeatures()
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!mapContainer.value) return
   initializeMap()
 })
