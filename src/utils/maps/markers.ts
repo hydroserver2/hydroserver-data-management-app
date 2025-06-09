@@ -1,57 +1,52 @@
-import { Thing, ThingWithColor } from '@/types'
-import { Feature } from 'ol'
-import { Style, Fill, Stroke } from 'ol/style'
-import CircleStyle from 'ol/style/Circle'
-import Text from 'ol/style/Text.js'
-import { FeatureLike } from 'ol/Feature'
+import { Thing } from '@/types'
+// export const markerStyle = new Style({
+//   image: new CircleStyle({
+//     radius: 8,
+//     fill: new Fill({ color: '#2196F3' }),
+//     stroke: new Stroke({ color: '#fff', width: 2 }),
+//   }),
+// })
 
-export const markerStyle = new Style({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({ color: '#2196F3' }),
-    stroke: new Stroke({ color: '#fff', width: 2 }),
-  }),
-})
+// const getClusterStyle = (features: Feature[]) => {
+//   // const radius = 8 + Math.min(features.length, 20)
+//   const radius = 8
+//   return new Style({
+//     image: new CircleStyle({
+//       radius,
+//       fill: new Fill({ color: '#4CAF50' }),
+//       stroke: new Stroke({ color: '#fff', width: 2 }),
+//     }),
+//     text: new Text({
+//       text: features.length.toString(),
+//       fill: new Fill({
+//         color: '#fff',
+//       }),
+//     }),
+//   })
+// }
 
-const getClusterStyle = (features: Feature[]) => {
-  const radius = 8 + Math.min(features.length, 20)
-  return new Style({
-    image: new CircleStyle({
-      radius,
-      fill: new Fill({ color: '#4CAF50' }),
-      stroke: new Stroke({ color: '#fff', width: 2 }),
-    }),
-    text: new Text({
-      text: features.length.toString(),
-      fill: new Fill({
-        color: '#fff',
-      }),
-    }),
-  })
-}
+// const getColoredMarkerStyle = (feature: Feature) => {
+//   const thing = feature.get('thing') as ThingWithColor
+//   return new Style({
+//     image: new CircleStyle({
+//       radius: 8,
+//       fill: new Fill({ color: thing?.color?.background || '#2196F3' }),
+//       stroke: new Stroke({
+//         color: thing?.color?.borderColor || '#ffffff',
+//         width: 2,
+//       }),
+//     }),
+//   })
+// }
 
-const getColoredMarkerStyle = (feature: Feature) => {
-  const thing = feature.get('thing') as ThingWithColor
-  return new Style({
-    image: new CircleStyle({
-      radius: 8,
-      fill: new Fill({ color: thing?.color?.background || '#2196F3' }),
-      stroke: new Stroke({
-        color: thing?.color?.borderColor || '#ffffff',
-        width: 2,
-      }),
-    }),
-  })
-}
-
-export function getMarkerLayerStyles(featureLike: FeatureLike, res: number) {
-  const features = featureLike.get('features')
-  if (Array.isArray(features)) {
-    if (features.length > 1) return getClusterStyle(features)
-    return getColoredMarkerStyle(features[0])
-  }
-  return markerStyle
-}
+// export function getMarkerLayerStyles(featureLike: FeatureLike, res: number) {
+//   const features = featureLike.get('features')
+//   if (Array.isArray(features)) {
+//     if (features.length > 1) return getClusterStyle(features)
+//     return getColoredMarkerStyle(features[0])
+//   }
+//   return markerStyle
+// }
 
 export function generateMarkerContent(markerData: Thing): string {
   return `

@@ -40,16 +40,11 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { Thing, ThingWithColor } from '@/types'
 import { addColorToMarkers } from '@/utils/googleMaps/markers'
-import {
-  generateMarkerContent,
-  getMarkerLayerStyles,
-} from '@/utils/maps/markers'
+import { generateMarkerContent } from '@/utils/maps/markers'
 import OlMap from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
-import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
-import Cluster from 'ol/source/Cluster'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
 import { fromLonLat, toLonLat } from 'ol/proj'
@@ -60,6 +55,8 @@ import {
 } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import { fetchLocationData } from '@/utils/maps/location'
+import WebGLVectorLayer from 'ol/layer/WebGLVector.js'
+import mapMarkerUrl from '@/assets/map-marker.png?url'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -79,11 +76,8 @@ const selectedTileSourceName = ref<string>(tileSources[0].name)
 
 let map: OlMap
 let rasterLayer: TileLayer
-const clusterSource = new Cluster({
-  distance: 18,
-  source: new VectorSource<Feature>(),
-})
-const markerLayer = ref<VectorLayer>()
+const vectorSource = new VectorSource<Feature>()
+const markerLayer = ref<WebGLVectorLayer>()
 
 const uniqueColoredThings = computed(() => {
   const firstOccurrenceMap = new Map()
@@ -97,13 +91,15 @@ const uniqueColoredThings = computed(() => {
   })
 })
 
-const createFeature = (thing: ThingWithColor) =>
-  !thing.latitude || !thing.longitude
-    ? null
-    : new Feature({
-        geometry: new Point(fromLonLat([thing.longitude, thing.latitude])),
-        thing,
-      })
+const createFeature = (thing: ThingWithColor) => {
+  if (!thing.latitude || !thing.longitude) return null
+  const f = new Feature({
+    geometry: new Point(fromLonLat([thing.longitude, thing.latitude])),
+  })
+  f.set('markerColor', thing?.color?.background || '#D32F2F')
+  f.set('thing', thing)
+  return f
+}
 
 function updateFeatures() {
   // 1) Rebuild features
@@ -111,22 +107,21 @@ function updateFeatures() {
     ? addColorToMarkers(props.things, props.colorKey)
     : props.things
 
-  const features = coloredThings.value
-    .map(createFeature)
-    .filter((feature) => feature !== null)
+  const features = props.colorKey
+    ? coloredThings.value.map(createFeature).filter((f) => f !== null)
+    : props.things.map(createFeature).filter((f) => f !== null)
 
   // 2) clear & add
-  const src = clusterSource.getSource()
-  if (!src) return
-  src.clear()
-  src.addFeatures(features)
+  if (!vectorSource) return
+  vectorSource.clear()
+  vectorSource.addFeatures(features)
 
   // 3) zoom to the extent of whatever source we used
-  const extent = src.getExtent() as Extent
+  const extent = vectorSource.getExtent() as Extent
   if (extentIsEmpty(extent)) return
   map.getView().fit(extent, {
     padding: [100, 100, 100, 100],
-    maxZoom: 14,
+    maxZoom: 16,
     duration: 0,
   })
 }
@@ -147,9 +142,36 @@ const initializeMap = () => {
   selectedTileSourceName.value = chosenSource.name
 
   rasterLayer = new TileLayer({ source: chosenSource.source })
-  markerLayer.value = new VectorLayer({
-    source: clusterSource,
-    style: getMarkerLayerStyles,
+  markerLayer.value = new WebGLVectorLayer({
+    source: vectorSource,
+    style: {
+      'icon-src': mapMarkerUrl,
+      'icon-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        4,
+        16, // at zoom level 4 → 16px
+        10,
+        32, // at zoom level 10 → 32px
+        16,
+        48, // at zoom level 16 → 48px
+      ],
+      'icon-height': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        4,
+        16,
+        10,
+        32,
+        16,
+        48,
+      ],
+      'icon-anchor': [0.5, 1],
+      'icon-color': ['get', 'markerColor'], // red-darken-2
+      'icon-opacity': 0.75,
+    },
   })
 
   const overlay = new Overlay({
@@ -168,12 +190,9 @@ const initializeMap = () => {
 
   map.on('click', async (evt) => {
     if (props.singleMarkerMode) {
-      // single‑marker placement
-      const src = clusterSource.getSource()
-      if (!src) return
-      src.clear()
+      vectorSource.clear()
       const single = new Feature(new Point(evt.coordinate))
-      src.addFeature(single)
+      vectorSource.addFeature(single)
 
       const [lon, lat] = toLonLat(evt.coordinate)
       const locationData = await fetchLocationData(lat, lon)
