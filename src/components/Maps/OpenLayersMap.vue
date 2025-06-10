@@ -150,8 +150,8 @@ const initializeMap = () => {
         'interpolate',
         ['linear'],
         ['zoom'],
-        4,
-        16, // at zoom level 4 → 16px
+        2,
+        8, // at zoom level 2 → 8px
         10,
         32, // at zoom level 10 → 32px
         16,
@@ -161,8 +161,8 @@ const initializeMap = () => {
         'interpolate',
         ['linear'],
         ['zoom'],
-        4,
-        16,
+        2,
+        8,
         10,
         32,
         16,
