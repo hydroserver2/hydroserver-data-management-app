@@ -150,24 +150,14 @@ const initializeMap = () => {
         'interpolate',
         ['linear'],
         ['zoom'],
-        2,
-        8, // at zoom level 2 → 8px
-        10,
-        32, // at zoom level 10 → 32px
+        1,
+        4, // at zoom level 1 → 4px
+        8,
+        32, // at zoom level 8 → 32px
         16,
         48, // at zoom level 16 → 48px
       ],
-      'icon-height': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        2,
-        8,
-        10,
-        32,
-        16,
-        48,
-      ],
+      'icon-height': ['interpolate', ['linear'], ['zoom'], 1, 4, 8, 32, 16, 48],
       'icon-anchor': [0.5, 1],
       'icon-color': ['get', 'markerColor'], // red-darken-2
       'icon-opacity': 0.85,
@@ -200,14 +190,7 @@ const initializeMap = () => {
       return
     }
 
-    const rawFeatures = map.forEachFeatureAtPixel(
-      evt.pixel,
-      (feature) => feature,
-      {
-        hitTolerance: 12, // ← allow 12px “fuzz”
-        layerFilter: (l) => l === markerLayer.value,
-      }
-    )
+    const rawFeatures = map.forEachFeatureAtPixel(evt.pixel, (f) => f)
     if (!rawFeatures) {
       overlay.setPosition(undefined)
       return
@@ -293,7 +276,7 @@ watch(
   border: 1px solid #cccccc;
   bottom: 12px;
   left: -50px;
-  min-width: 280px;
+  min-width: 400px;
 }
 .ol-popup:after,
 .ol-popup:before {
