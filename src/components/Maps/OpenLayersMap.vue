@@ -56,7 +56,7 @@ import {
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import { fetchLocationData } from '@/utils/maps/location'
 import WebGLVectorLayer from 'ol/layer/WebGLVector.js'
-import mapMarkerUrl from '@/assets/map-marker.png?url'
+import mapMarkerUrl from '@/assets/map-marker-64.png?url'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -170,7 +170,7 @@ const initializeMap = () => {
       ],
       'icon-anchor': [0.5, 1],
       'icon-color': ['get', 'markerColor'], // red-darken-2
-      'icon-opacity': 0.75,
+      'icon-opacity': 0.85,
     },
   })
 
@@ -202,7 +202,11 @@ const initializeMap = () => {
 
     const rawFeatures = map.forEachFeatureAtPixel(
       evt.pixel,
-      (feature) => feature
+      (feature) => feature,
+      {
+        hitTolerance: 12, // ← allow 12px “fuzz”
+        layerFilter: (l) => l === markerLayer.value,
+      }
     )
     if (!rawFeatures) {
       overlay.setPosition(undefined)
