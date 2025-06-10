@@ -39,8 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { Thing, ThingWithColor } from '@/types'
-import { addColorToMarkers } from '@/utils/googleMaps/markers'
-import { generateMarkerContent } from '@/utils/maps/markers'
+import { addColorToMarkers, generateMarkerContent } from '@/utils/maps/markers'
 import OlMap from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'

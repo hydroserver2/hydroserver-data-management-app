@@ -1,4 +1,24 @@
 import { Thing } from '@/types'
+import { mapMarkerColors } from '@/utils/materialColors'
+
+export const addColorToMarkers = (things: Thing[], key: string) => {
+  let colorIndex = 0
+  const colorMap = new Map()
+
+  return things.map((thing) => {
+    const tagValue = thing.tags.find((tag) => tag.key === key)?.value
+    if (tagValue === undefined) return thing
+
+    if (!colorMap.has(tagValue)) {
+      colorMap.set(
+        tagValue,
+        mapMarkerColors[colorIndex % mapMarkerColors.length]
+      )
+      colorIndex++
+    }
+    return { ...thing, color: colorMap.get(tagValue), tagValue: tagValue }
+  })
+}
 
 export function generateMarkerContent(markerData: Thing): string {
   return `
