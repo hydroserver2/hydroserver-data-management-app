@@ -227,13 +227,7 @@ watch(
 
 async function populateThing() {
   Object.assign(thing, storedThing.value)
-  if (thing.latitude && thing.longitude)
-    // mapOptions.value = {
-    //   center: { lat: thing.latitude, lng: thing.longitude },
-    //   zoom: 15,
-    //   mapTypeId: 'satellite',
-    // }
-    loaded.value = true
+  if (thing.latitude && thing.longitude) loaded.value = true
 }
 
 function closeDialog() {
@@ -244,7 +238,6 @@ async function uploadThing() {
   await myForm.value?.validate()
   if (!valid.value) return
   if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
-
   try {
     thing.workspaceId = props.workspaceId
     storedThing.value = props.thingId

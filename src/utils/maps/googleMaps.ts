@@ -41,20 +41,21 @@ function parseGoogleAddress(response: GoogleGeocodeResponse) {
     throw new Error(`Google Geocoding API error: ${response.status}`)
   }
 
-  const components = response.results[0].address_components
-  const lookup: Record<string, string> = {}
+  const { state, county, country } =
+    response.results[0].address_components.reduce(
+      (acc: any, component: any) => {
+        if (component.types.includes('administrative_area_level_1'))
+          acc.state = component.short_name
+        if (component.types.includes('administrative_area_level_2'))
+          acc.county = component.short_name
+        if (component.types.includes('country'))
+          acc.country = component.short_name
+        return acc
+      },
+      { state: '', county: '', country: '' }
+    )
 
-  components.forEach((comp) => {
-    comp.types.forEach((t) => {
-      lookup[t] = comp.long_name
-    })
-  })
-
-  return {
-    state: lookup['administrative_area_level_1'] || '',
-    county: lookup['administrative_area_level_2'] || '',
-    country: lookup['country'] || '',
-  }
+  return { state, county, country }
 }
 
 export async function getGeoDataGoogle(latitude: number, longitude: number) {

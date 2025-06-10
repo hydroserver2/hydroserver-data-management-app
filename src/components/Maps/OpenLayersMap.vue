@@ -181,6 +181,7 @@ const initializeMap = () => {
     if (props.singleMarkerMode) {
       vectorSource.clear()
       const single = new Feature(new Point(evt.coordinate))
+      single.set('markerColor', '#D32F2F')
       vectorSource.addFeature(single)
 
       const [lon, lat] = toLonLat(evt.coordinate)

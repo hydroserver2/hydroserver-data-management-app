@@ -6,26 +6,12 @@ import {
 } from '@/config/openLayersMapConfig'
 import { getElevationGoogle, getGeoDataGoogle } from './googleMaps'
 
-interface NominatimResponse {
-  address: {
-    state: string
-    county: string
-    country: string
-  }
-}
-
-interface ElevationResponse {
-  results: Array<{
-    elevation: number
-  }>
-}
-
 export async function getOpenElevation(latitude: number, longitude: number) {
   const elevUrl = new URL('https://api.open-elevation.com/api/v1/lookup')
   elevUrl.searchParams.set('locations', `${latitude},${longitude}`)
   const elevRes = await fetch(elevUrl.toString())
   if (!elevRes.ok) throw new Error(`Elevation error: ${elevRes.status}`)
-  const elevData = (await elevRes.json()) as ElevationResponse
+  const elevData = await elevRes.json()
   return elevData.results?.[0]?.elevation ?? 0
 }
 
@@ -50,8 +36,12 @@ export async function getGeoDataNominatim(latitude: number, longitude: number) {
   if (!res.ok)
     throw new Error(`Nominatim location fetching error: ${res.status}`)
 
-  const { address } = (await res.json()) as NominatimResponse
-  return address
+  const { address } = await res.json()
+  return {
+    state: address.state,
+    county: address.county,
+    country: address.country_code.toUpperCase(),
+  }
 }
 
 export async function getGeoData(latitude: number, longitude: number) {
