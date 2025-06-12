@@ -117,7 +117,7 @@ async function updateFeatures() {
 
   // 3) zoom to the extent of whatever source we used
   const extent = vectorSource.getExtent() as Extent
-  if (extentIsEmpty(extent)) return
+  if (extentIsEmpty(extent) || props.singleMarkerMode) return
   map.getView().fit(extent, {
     padding: [100, 100, 100, 100],
     maxZoom: 16,
@@ -165,7 +165,7 @@ const initializeMap = () => {
 
   const overlay = new Overlay({
     element: popupContainer.value,
-    autoPan: { animation: { duration: 250 } },
+    autoPan: props.singleMarkerMode ? false : { animation: { duration: 250 } },
   })
 
   popupCloser.value!.onclick = () => overlay.setPosition(undefined)
@@ -212,6 +212,13 @@ const initializeMap = () => {
   })
 
   updateFeatures()
+
+  const extent = vectorSource.getExtent() as Extent
+  map.getView().fit(extent, {
+    padding: [100, 100, 100, 100],
+    maxZoom: 16,
+    duration: 0,
+  })
 }
 
 onMounted(async () => {
