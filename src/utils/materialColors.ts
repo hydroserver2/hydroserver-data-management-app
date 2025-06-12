@@ -50,7 +50,7 @@ export const EChartsColors = [
   '#80d4f4', // light blue
 ]
 
-export const googlePinColors = [
+export const mapMarkerColors = [
   { borderColor: '#B71C1C', background: '#F44336', glyphColor: '#B71C1C' }, // Red
   { borderColor: '#0D47A1', background: '#2196F3', glyphColor: '#0D47A1' }, // Blue
   { borderColor: '#1B5E20', background: '#4CAF50', glyphColor: '#1B5E20' }, // Green

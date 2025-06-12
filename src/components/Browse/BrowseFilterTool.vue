@@ -132,5 +132,7 @@ onMounted(async () => {
   }
 })
 
-watch([selectedSiteTypes, selectedWorkspaces], emitFilteredThings)
+watch([selectedSiteTypes, selectedWorkspaces], emitFilteredThings, {
+  deep: true,
+})
 </script>
