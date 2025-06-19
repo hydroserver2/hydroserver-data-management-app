@@ -53,15 +53,14 @@
   <v-card-text>
     <v-row class="mb-2" v-for="variable in httpExtractor.placeholderVariables">
       <v-col cols="12" md="3">
-        <v-text-field
-          v-model="variable.name"
-          label="Variable"
+        <v-chip
+          variant="text"
           density="compact"
-          rounded="lg"
-          prepend-inner-icon="mdi-code-braces"
-          hide-details
-          disabled
-        />
+          prepend-icon="mdi-code-braces"
+          class="ma-0"
+        >
+          {{ variable.name }}
+        </v-chip>
       </v-col>
 
       <v-col cols="12" md="3">

@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col class="py-0">
+    <v-col>
       <v-select
         v-model="timestampFormatType"
         :items="FORMAT_OPTIONS"
