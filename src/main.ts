@@ -1,4 +1,5 @@
 import '@/styles/global.scss'
+import 'ol/ol.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'

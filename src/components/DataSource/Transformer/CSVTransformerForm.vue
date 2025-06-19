@@ -78,7 +78,7 @@ import {
   IdentifierType,
 } from '@/models/dataSource'
 import { VTextField } from 'vuetify/lib/components/index.mjs'
-import TimestampFields from './TimestampFields.vue'
+import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
 
 const { transformer } = storeToRefs(useETLStore())
 

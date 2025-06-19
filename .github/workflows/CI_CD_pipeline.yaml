@@ -28,8 +28,6 @@ jobs:
         run: |
           cat << EOF > .env
           VITE_APP_VERSION=${{ secrets.VITE_APP_VERSION }}
-          VITE_APP_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_APP_GOOGLE_MAPS_API_KEY }}
-          VITE_APP_GOOGLE_MAPS_API_ID=${{ secrets.VITE_APP_GOOGLE_MAPS_API_ID }}
           VITE_APP_PROXY_BASE_URL=${{ secrets.VITE_PROXY_BASE_URL_DEV }}
           EOF
 

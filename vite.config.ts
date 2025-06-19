@@ -63,6 +63,7 @@ export default defineConfig({
         '**/src/utils/plotting/graphSeriesUtils.ts',
         '**/src/utils/test/**',
         '**/src/utils/googleMaps/**',
+        '**/src/utils/maps/**',
         '**/src/utils/rules.ts',
         '**/src/App.vue',
         '**/src/main.ts',

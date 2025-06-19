@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { useETLStore } from '@/store/etl'
 import { storeToRefs } from 'pinia'
-import TimestampFields from './TimestampFields.vue'
+import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
 import { rules } from '@/utils/rules'
 
 const { transformer } = storeToRefs(useETLStore())
