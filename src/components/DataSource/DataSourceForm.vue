@@ -233,23 +233,6 @@ function inputToIso(str = '', mode: 'local' | 'utc') {
   return parsed.toISOString()
 }
 
-// TODO: We'll know the workflow type is SDL when we're opening this form,
-// so no need to watch. But, make sure the options are limited to CSV when the form
-// is open and make sure type is always SDL for an SDL orchestration system.
-// watch(
-//   () => dataSource.value.settings.type,
-//   (newVal, oldVal) => {
-//     // SDL workflows should only be run on machines running the SDL orchestration software.
-//     if (newVal === 'SDL' || oldVal === 'SDL') dataSource.value.orchestrationSystemId = ''
-//     if (newVal === 'SDL') {
-//       if (dataSource.value.settings.extractor.type !== 'local')
-//         dataSource.value.switchExtractor('local')
-//       if (dataSource.value.settings.transformer.type !== 'CSV')
-//         dataSource.value.switchTransformer('CSV')
-//     }
-//   }
-// )
-
 async function onSubmit() {
   if (
     dataSource.value.settings.type === 'ETL' ||

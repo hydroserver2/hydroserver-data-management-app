@@ -20,8 +20,7 @@
           :rules="rules.requiredAndMaxLength255"
         />
 
-        <!-- TODO: Comment out once SDL supports template variables -->
-        <!-- <template v-if="extractor.type === 'HTTP'">
+        <template v-if="extractor.type === 'HTTP'">
           <v-row>
             <v-col col="auto">
               <v-card-title
@@ -30,15 +29,15 @@
               >
             </v-col>
           </v-row>
-          <template v-for="variable in extractor.urlTemplateVariables">
+          <template v-for="variable in extractor.placeholderVariables">
             <v-text-field
-              v-if="!variable.isDynamic"
+              v-if="variable.type == 'perPayload'"
               v-model="payload.extractorVariables[variable.name]"
-              :label="`${variable.name} *`"
+              :label="`URL template variable: ${variable.name} *`"
               :rules="rules.requiredAndMaxLength255"
             />
           </template>
-        </template> -->
+        </template>
 
         <v-row align="center">
           <v-col cols="auto">

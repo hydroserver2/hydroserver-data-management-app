@@ -20,7 +20,9 @@
           variant="outlined"
         />
       </v-toolbar>
-      <v-card-text> </v-card-text>
+      <v-card-text>
+        No additional configurations needed for loading into HydroServer.
+      </v-card-text>
     </v-card>
   </v-form>
 </template>

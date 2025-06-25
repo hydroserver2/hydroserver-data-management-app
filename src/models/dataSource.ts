@@ -1,51 +1,6 @@
 import { Datastream } from '@/types'
 import { Payload } from './payload'
-
-export const TIMEZONE_OFFSETS = [
-  { title: 'UTC-12:00 (International Date Line West)', value: '-1200' },
-  { title: 'UTC-11:00 (Samoa Standard Time)', value: '-1100' },
-  { title: 'UTC-10:00 (Hawaii-Aleutian Standard Time)', value: '-1000' },
-  { title: 'UTC-09:00 (Alaska Standard Time)', value: '-0900' },
-  { title: 'UTC-08:00 (Pacific Standard Time)', value: '-0800' },
-  { title: 'UTC-07:00 (Mountain Standard Time)', value: '-0700' },
-  { title: 'UTC-06:00 (Central Standard Time)', value: '-0600' },
-  { title: 'UTC-05:00 (Eastern Standard Time)', value: '-0500' },
-  { title: 'UTC-04:30 (Venezuelan Standard Time)', value: '-0430' },
-  { title: 'UTC-04:00 (Atlantic Standard Time)', value: '-0400' },
-  { title: 'UTC-03:30 (Newfoundland Standard Time)', value: '-0330' },
-  { title: 'UTC-03:00 (Argentina Standard Time)', value: '-0300' },
-  { title: 'UTC-02:00 (Brazil Time)', value: '-0200' },
-  { title: 'UTC-01:00 (Azores Standard Time)', value: '-0100' },
-  { title: 'UTC+00:00 (Greenwich Mean Time)', value: '+0000' },
-  { title: 'UTC+01:00 (Central European Time)', value: '+0100' },
-  { title: 'UTC+02:00 (Eastern European Time)', value: '+0200' },
-  { title: 'UTC+03:00 (Moscow Standard Time)', value: '+0300' },
-  { title: 'UTC+03:30 (Iran Standard Time)', value: '+0330' },
-  { title: 'UTC+04:00 (Azerbaijan Standard Time)', value: '+0400' },
-  { title: 'UTC+04:30 (Afghanistan Time)', value: '+0430' },
-  { title: 'UTC+05:00 (Pakistan Standard Time)', value: '+0500' },
-  { title: 'UTC+05:30 (Indian Standard Time)', value: '+0530' },
-  { title: 'UTC+05:45 (Nepal Time)', value: '+0545' },
-  { title: 'UTC+06:00 (Bangladesh Standard Time)', value: '+0600' },
-  { title: 'UTC+06:30 (Cocos Islands Time)', value: '+0630' },
-  { title: 'UTC+07:00 (Indochina Time)', value: '+0700' },
-  { title: 'UTC+08:00 (China Standard Time)', value: '+0800' },
-  {
-    title: 'UTC+08:45 (Australia Central Western Standard Time)',
-    value: '+0845',
-  },
-  { title: 'UTC+09:00 (Japan Standard Time)', value: '+0900' },
-  { title: 'UTC+09:30 (Australian Central Standard Time)', value: '+0930' },
-  { title: 'UTC+10:00 (Australian Eastern Standard Time)', value: '+1000' },
-  { title: 'UTC+10:30 (Lord Howe Standard Time)', value: '+1030' },
-  { title: 'UTC+11:00 (Solomon Islands Time)', value: '+1100' },
-  { title: 'UTC+11:30 (Norfolk Island Time)', value: '+1130' },
-  { title: 'UTC+12:00 (Fiji Time)', value: '+1200' },
-  { title: 'UTC+12:45 (Chatham Islands Time)', value: '+1245' },
-  { title: 'UTC+13:00 (Tonga Time)', value: '+1300' },
-  { title: 'UTC+14:00 (Line Islands Time)', value: '+1400' },
-] as const
-export type TimezoneOffsetType = (typeof TIMEZONE_OFFSETS)[number]['value']
+import { HasTimestamp } from './timestamp'
 
 export const WORKFLOW_TYPES = [
   { title: 'ETL', value: 'ETL' },
@@ -64,11 +19,18 @@ export const CSV_DELIMITER_OPTIONS = [
 ] as const
 export type CSVDelimiterType = (typeof CSV_DELIMITER_OPTIONS)[number]['value']
 
-interface UrlTemplateVariable {
+export interface PerPayloadPlaceholder {
   name: string
-  isDynamic: boolean
-  dynamicValue: string
+  type: 'perPayload'
 }
+
+export interface RunTimePlaceholder extends HasTimestamp {
+  name: string
+  type: 'runTime'
+  runTimeValue: 'startTime' | 'now'
+}
+
+export type PlaceholderVariable = PerPayloadPlaceholder | RunTimePlaceholder
 
 export const EXTRACTOR_OPTIONS = ['HTTP', 'local'] as const
 export type ExtractorType = (typeof EXTRACTOR_OPTIONS)[number]
@@ -76,17 +38,16 @@ export type ETLStep = 'extractor' | 'transformer' | 'loader'
 
 interface BaseExtractor {
   type: ExtractorType
+  sourceUri: string
+  placeholderVariables: PlaceholderVariable[]
 }
 
 export interface HTTPExtractor extends BaseExtractor {
   type: 'HTTP'
-  urlTemplate: string
-  urlTemplateVariables: UrlTemplateVariable[]
 }
 
 export interface LocalFileExtractor extends BaseExtractor {
   type: 'local'
-  path: string
 }
 
 export type ExtractorConfig = HTTPExtractor | LocalFileExtractor
@@ -94,13 +55,13 @@ export type ExtractorConfig = HTTPExtractor | LocalFileExtractor
 export const extractorDefaults: Record<ExtractorType, ExtractorConfig> = {
   HTTP: {
     type: 'HTTP',
-    urlTemplate: '',
-    // 'https://example.com/{path_parameter}?query_parameter={query_parameter}',
-    urlTemplateVariables: [],
+    sourceUri: '',
+    placeholderVariables: [],
   } as HTTPExtractor,
   local: {
     type: 'local',
-    path: '',
+    sourceUri: '',
+    placeholderVariables: [],
   } as LocalFileExtractor,
 }
 
@@ -111,10 +72,9 @@ export enum IdentifierType {
   Index = 'index',
 }
 
-interface BaseTransformer {
+interface BaseTransformer extends HasTimestamp {
   type: TransformerType
   timestampKey: string
-  timestampFormat: string
 }
 
 export interface JSONtransformer extends BaseTransformer {
@@ -127,7 +87,6 @@ export interface CSVTransformer extends BaseTransformer {
   headerRow: number | null
   dataStartRow: number
   delimiter: CSVDelimiterType
-  timestampOffset: TimezoneOffsetType
   identifierType: IdentifierType
 }
 
@@ -144,11 +103,11 @@ export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
     type: 'CSV',
     timestampKey: '',
     timestampFormat: 'ISO8601',
+    timestampOffset: '+0000',
     headerRow: 1,
     dataStartRow: 2,
     delimiter: ',' as CSVDelimiterType,
     identifierType: IdentifierType.Name,
-    timestampOffset: '+0000',
   } as CSVTransformer,
 }
 
