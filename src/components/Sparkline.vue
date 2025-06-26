@@ -1,11 +1,19 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
   <div v-else-if="!loading && obs72.length" @click="handleEmit">
-    <v-chart
-      :option="chartOption"
-      autoresize
-      style="height: 100px; width: 300px"
-    />
+    <div style="width: 300px">
+      <v-chart
+        :option="chartOption"
+        autoresize
+        style="height: 100px; width: 100%"
+      />
+      <div class="mt-1" style="width: 100%">
+        <span class="text-subtitle-2 font-weight-medium">
+          <strong>Latest Value:</strong>
+          {{ mostRecentDataValue }} {{ unitName }}
+        </span>
+      </div>
+    </div>
   </div>
   <div v-else-if="!obs72.length">No data for this datastream</div>
 </template>
@@ -41,6 +49,7 @@ const props = defineProps({
     type: Object as PropType<Datastream>,
     required: true,
   },
+  unitName: String,
 })
 
 const emit = defineEmits(['openChart'])
@@ -51,8 +60,19 @@ const handleEmit = () => {
 const obs72 = ref<DataArray>([])
 const loading = ref(true)
 
+const processedObs = computed(() =>
+  preProcessData(obs72.value, props.datastream)
+)
+
+const mostRecentDataValue = computed(() => {
+  const arr = processedObs.value
+  if (!arr.length) return ''
+  const latest = arr[arr.length - 1].value
+  return formatNumber(latest)
+})
+
 const chartOption = computed(() => {
-  const observations = preProcessData(obs72.value, props.datastream)
+  const observations = processedObs.value
   if (!observations.length) return {}
 
   let colors = isStale(props.datastream.phenomenonEndTime)
@@ -110,6 +130,18 @@ const fetchObsLast72Hours = async (ds: Datastream) => {
       return null
     })
   }
+}
+
+const formatNumber = (value: string | number): string => {
+  if (typeof value === 'number') {
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+    return formatter.format(value)
+  }
+
+  return value?.toString()
 }
 
 onMounted(async () => {
