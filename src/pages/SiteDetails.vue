@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="loaded && authorized">
+  <div v-if="loaded && authorized" class="my-4 mx-6">
     <h5 class="text-h5 my-4">{{ thing?.name }}</h5>
 
     <v-row v-if="thing" style="height: 25rem">
@@ -82,7 +82,7 @@
     </v-row>
 
     <DatastreamTable v-if="thing && workspace" :workspace="workspace" />
-  </v-container>
+  </div>
   <v-container v-else-if="loaded && !authorized">
     <h5 class="text-h5 my-4">
       You are not authorized to view this private site.
