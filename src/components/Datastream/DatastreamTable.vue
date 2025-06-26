@@ -45,6 +45,8 @@
       :sort-by="sortBy"
       :style="{ 'max-height': `100vh` }"
       fixed-header
+      @click:row="onRowClick"
+      hover
     >
       <template
         v-slot:item.info="{ item, internalItem, isExpanded, toggleExpand }"
@@ -92,23 +94,19 @@
       <template v-slot:item.time="{ item }">
         <p class="mt-2">
           <strong class="mr-2">Begin date:</strong>
-          {{
-            item.phenomenonBeginTime ? formatTime(item.phenomenonBeginTime) : ''
-          }}
+          {{ item.beginDate }}
         </p>
         <p>
           <strong class="mr-2">End date:</strong>
-          {{ item.phenomenonEndTime ? formatTime(item.phenomenonEndTime) : '' }}
+          {{ item.endDate }}
         </p>
         <p>
           <strong class="mr-2">Time aggregation interval:</strong>
-          {{ item.timeAggregationInterval }}
-          {{ item.timeAggregationIntervalUnit }}
+          {{ item.aggregationInterval }}
         </p>
         <p>
           <strong class="mr-2">Intended time spacing:</strong>
-          {{ item.intendedTimeSpacing }}
-          {{ item.intendedTimeSpacingUnit }}
+          {{ item.spacingInterval }}
         </p>
         <p>
           <strong class="mr-2">Status:</strong>
@@ -273,6 +271,13 @@
       @delete="onDelete"
     />
   </v-dialog>
+
+  <v-dialog v-model="openInfoCard" width="50rem" v-if="selectedDatastream">
+    <DatastreamTableInfoCard
+      :datastream="selectedDatastream"
+      @close="openInfoCard = false"
+    />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -282,17 +287,16 @@ import DatastreamDeleteCard from './DatastreamDeleteCard.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, reactive, ref, toRef } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
-import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
-import { DataArray, Datastream, Workspace } from '@/types'
+import { Datastream, Workspace } from '@/types'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import { Snackbar } from '@/utils/notifications'
 import { formatTime } from '@/utils/time'
-
+import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
 })
@@ -305,14 +309,15 @@ const thingIdRef = computed(() => thing.value!.id)
 const downloading = reactive<Record<string, boolean>>({})
 const search = ref()
 
+const openInfoCard = ref(false)
+const selectedDatastream = ref<Datastream | null>(null)
+
 const {
   canCreateDatastreams,
   canViewDatastreams,
   canEditDatastreams,
   canDeleteDatastreams,
 } = useWorkspacePermissions(workspaceRef)
-
-const { observations } = storeToRefs(useObservationStore())
 
 const updateDatastream = async (updatedDatastream: Datastream) => {
   await fetchMetadata(props.workspace.id)
@@ -358,12 +363,18 @@ const visibleDatastreams = computed(() => {
       const mapped = {
         ...d,
         chartOpen: false,
-        OPName: op?.name ?? '',
+        OPName: op ? `${op.name} (${op.code})` : '',
         processingLevelCode: pl?.code ?? '',
         processingLevelName: pl?.definition ?? '',
         sensorName: sensor?.name ?? '',
         unitName: unit?.name ?? '',
         searchText: ',',
+        beginDate: d.phenomenonBeginTime
+          ? formatTime(d.phenomenonBeginTime)
+          : '',
+        endDate: d.phenomenonEndTime ? formatTime(d.phenomenonEndTime) : '',
+        aggregationInterval: `${d.timeAggregationInterval} ${d.timeAggregationIntervalUnit}`,
+        spacingInterval: `${d.intendedTimeSpacing} ${d.intendedTimeSpacingUnit}`,
       }
 
       mapped.searchText = [
@@ -377,8 +388,10 @@ const visibleDatastreams = computed(() => {
         mapped.unitName,
         mapped.status,
         mapped.valueCount,
-        mapped.phenomenonBeginTime,
-        mapped.phenomenonEndTime,
+        mapped.beginDate,
+        mapped.endDate,
+        mapped.aggregationInterval,
+        mapped.spacingInterval,
       ]
         .filter(Boolean)
         .join(' ')
@@ -420,6 +433,21 @@ async function toggleVisibility(datastream: Datastream) {
     isPrivate: datastream.isPrivate,
     isVisible: datastream.isVisible,
   })
+}
+
+const onRowClick = (event: Event, item: any) => {
+  let targetElement = event.target as HTMLElement
+  if (targetElement.tagName == 'CANVAS') return
+  if (targetElement.closest('.v-icon')) return
+
+  const selectedDatastreamId = item.item.id
+  const foundDatastream = visibleDatastreams.value.find(
+    (d) => d.id === selectedDatastreamId
+  )
+  if (foundDatastream) {
+    selectedDatastream.value = foundDatastream
+    openInfoCard.value = true
+  } else selectedDatastream.value = null
 }
 
 const patchDatastream = async (patchBody: {}) => {

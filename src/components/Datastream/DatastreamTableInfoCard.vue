@@ -15,22 +15,14 @@
     <DatastreamInformationPanels :datastream="datastream" />
 
     <v-card-actions>
-      <v-btn-primary color="blue" variant="text" @click="addToPlot(datastream)"
-        >Add to Current Plot</v-btn-primary
-      >
       <v-spacer />
       <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
-      <v-btn-primary type="submit" @click="clearAndPlot(datastream)"
-        >Clear and Plot</v-btn-primary
-      >
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { useDataVisStore } from '@/store/dataVisualization'
 import { Datastream } from '@/types'
-import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import DatastreamInformationPanels from '@/components/Datastream/DatastreamInformationPanels.vue'
@@ -38,8 +30,6 @@ import DatastreamInformationPanels from '@/components/Datastream/DatastreamInfor
 defineProps({
   datastream: { type: Object as () => Datastream, required: true },
 })
-
-const { plottedDatastreams } = storeToRefs(useDataVisStore())
 
 const emit = defineEmits(['close'])
 
@@ -53,19 +43,5 @@ const downloadDatastream = async (id: string) => {
     console.error('Error downloading datastream', error)
   }
   downloading.value = false
-}
-
-const addToPlot = (datastream: Datastream) => {
-  const index = plottedDatastreams.value.findIndex(
-    (ds) => ds.id === datastream.id
-  )
-  if (index === -1) plottedDatastreams.value.push(datastream)
-  emit('close')
-}
-
-const clearAndPlot = (datastream: Datastream) => {
-  emit('close')
-  plottedDatastreams.value = []
-  plottedDatastreams.value.push(datastream)
 }
 </script>
