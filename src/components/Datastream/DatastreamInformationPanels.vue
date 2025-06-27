@@ -91,25 +91,26 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import { useDataVisStore } from '@/store/dataVisualization'
-import { Datastream, Sensor, Unit } from '@/types'
-import { storeToRefs } from 'pinia'
+import {
+  Datastream,
+  ObservedProperty,
+  ProcessingLevel,
+  Sensor,
+  Thing,
+  Unit,
+} from '@/types'
 import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps({
   datastream: { type: Object as () => Datastream, required: true },
+  thing: { type: Object as () => Thing, required: true },
 })
 
 const unit = ref<Unit | null>(null)
 const sensor = ref<Sensor | null>(null)
+const observedProperty = ref<ObservedProperty | null>(null)
+const processingLevel = ref<ProcessingLevel | null>(null)
 const expandedPanels = ref<number[]>([])
-
-const { processingLevels, observedProperties, things, plottedDatastreams } =
-  storeToRefs(useDataVisStore())
-
-const matchingThing = computed(() => {
-  return things.value.find((t) => t.id === props.datastream.thingId)
-})
 
 const generalItems = computed(() => [
   { label: 'Datastream name', value: props.datastream.name },
@@ -151,7 +152,7 @@ const generalItems = computed(() => [
 ])
 
 const locationItems = computed(() => {
-  if (!matchingThing.value) return []
+  if (!props.thing) return []
 
   const {
     name,
@@ -169,7 +170,7 @@ const locationItems = computed(() => {
     isPrivate,
     workspaceId,
     id,
-  } = matchingThing.value
+  } = props.thing
   return [
     { label: 'Site name', value: name },
     { label: 'Site code', value: samplingFeatureCode },
@@ -190,11 +191,7 @@ const locationItems = computed(() => {
 })
 
 const observedPropertyItems = computed(() => {
-  if (!props.datastream.observedPropertyId) return []
-
-  const op = observedProperties.value.find(
-    (op) => op.id === props.datastream.observedPropertyId
-  )
+  const op = observedProperty.value
   return op
     ? [
         { label: 'Name', value: op.name },
@@ -233,9 +230,7 @@ const sensorItems = computed(() => {
     : []
 })
 const processingLevelItems = computed(() => {
-  const pl = processingLevels.value.find(
-    (pl) => pl.id === props.datastream.processingLevelId
-  )
+  const pl = processingLevel.value
   return pl
     ? [
         { label: 'Code', value: pl.code },
@@ -246,11 +241,15 @@ const processingLevelItems = computed(() => {
 })
 
 onMounted(async () => {
-  const [unitResult, sensorResult] = await Promise.all([
+  const [unitResult, sensorResult, plResult, opResult] = await Promise.all([
     api.getUnit(props.datastream.unitId),
     api.fetchSensor(props.datastream.sensorId),
+    api.fetchProcessingLevel(props.datastream.processingLevelId),
+    api.fetchObservedProperty(props.datastream.observedPropertyId),
   ])
   unit.value = unitResult
   sensor.value = sensorResult
+  processingLevel.value = plResult
+  observedProperty.value = opResult
 })
 </script>

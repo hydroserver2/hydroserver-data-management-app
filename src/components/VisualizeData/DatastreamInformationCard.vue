@@ -12,7 +12,7 @@
       >
     </v-toolbar>
 
-    <DatastreamInformationPanels :datastream="datastream" />
+    <DatastreamInformationPanels :datastream="datastream" :thing="thing" />
 
     <v-card-actions>
       <v-btn-primary color="blue" variant="text" @click="addToPlot(datastream)"
@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { useDataVisStore } from '@/store/dataVisualization'
-import { Datastream } from '@/types'
+import { Datastream, Thing } from '@/types'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
@@ -37,6 +37,7 @@ import DatastreamInformationPanels from '@/components/Datastream/DatastreamInfor
 
 defineProps({
   datastream: { type: Object as () => Datastream, required: true },
+  thing: { type: Object as () => Thing, required: true },
 })
 
 const { plottedDatastreams } = storeToRefs(useDataVisStore())

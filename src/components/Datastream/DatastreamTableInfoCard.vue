@@ -12,7 +12,7 @@
       >
     </v-toolbar>
 
-    <DatastreamInformationPanels :datastream="datastream" />
+    <DatastreamInformationPanels :datastream="datastream" :thing="thing" />
 
     <v-card-actions>
       <v-spacer />
@@ -22,13 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream } from '@/types'
+import { Datastream, Thing } from '@/types'
 import { ref } from 'vue'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import DatastreamInformationPanels from '@/components/Datastream/DatastreamInformationPanels.vue'
 
 defineProps({
   datastream: { type: Object as () => Datastream, required: true },
+  thing: { type: Object as () => Thing, required: true },
 })
 
 const emit = defineEmits(['close'])

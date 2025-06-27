@@ -272,9 +272,14 @@
     />
   </v-dialog>
 
-  <v-dialog v-model="openInfoCard" width="50rem" v-if="selectedDatastream">
+  <v-dialog
+    v-model="openInfoCard"
+    width="50rem"
+    v-if="selectedDatastream && thing"
+  >
     <DatastreamTableInfoCard
       :datastream="selectedDatastream"
+      :thing="thing"
       @close="openInfoCard = false"
     />
   </v-dialog>
