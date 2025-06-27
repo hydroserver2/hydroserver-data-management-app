@@ -85,9 +85,14 @@
     </template>
   </v-data-table-virtual>
 
-  <v-dialog v-model="openInfoCard" width="50rem" v-if="selectedDatastream">
+  <v-dialog
+    v-model="openInfoCard"
+    width="50rem"
+    v-if="selectedDatastream && selectedThing"
+  >
     <DatastreamInformationCard
       :datastream="selectedDatastream"
+      :thing="selectedThing"
       @close="openInfoCard = false"
     />
   </v-dialog>
@@ -95,11 +100,12 @@
 
 <script setup lang="ts">
 import { useDataVisStore } from '@/store/dataVisualization'
-import { Datastream } from '@/types'
+import { Datastream, Thing } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { downloadPlottedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
+import { thing } from '@/utils/test/fixtures'
 
 const {
   things,
@@ -116,6 +122,7 @@ const showOnlySelected = ref(false)
 const openInfoCard = ref(false)
 const downloading = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
+const selectedThing = ref<Thing | null>(null)
 
 const copyStateToClipboard = async () => {
   emit('copyState')
@@ -135,6 +142,9 @@ const onRowClick = (event: Event, item: any) => {
   // If the click came from a checkbox, do nothing.
   let targetElement = event.target as HTMLElement
   if (targetElement.id && targetElement.id.startsWith('checkbox-')) return
+
+  const foundThing = things.value.find((t) => t.id === item.item.thingId)
+  if (foundThing) selectedThing.value = foundThing
 
   const selectedDatastreamId = item.item.id
   const foundDatastream = filteredDatastreams.value.find(

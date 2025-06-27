@@ -1,194 +1,249 @@
 <template>
   <h5 class="text-h5 my-6">Datastreams available at this site</h5>
 
-  <v-row class="pb-4">
-    <v-col cols="auto" v-if="canCreateDatastreams">
-      <v-btn-secondary prependIcon="mdi-plus" @click="openCreate = true"
-        >Add new datastream</v-btn-secondary
-      >
-    </v-col>
-    <v-col>
-      <v-btn
-        color="blue-grey-lighten-2"
-        prependIcon="mdi-chart-line"
-        variant="elevated"
-        :to="{ name: 'VisualizeData', query: { sites: thing!.id } }"
-        >View on Data Visualization Page</v-btn
-      >
-    </v-col>
-  </v-row>
-
   <h6 class="text-h6" style="color: #b71c1c">
     {{ thing!.dataDisclaimer }}
   </h6>
 
-  <v-data-table-virtual
-    class="elevation-3 my-4"
-    :headers="headers"
-    :items="visibleDatastreams"
-    :sort-by="sortBy"
-    :style="{ 'max-height': `100vh` }"
-    fixed-header
-  >
-    <template v-slot:item.info="{ item }">
-      <v-col>
-        <v-row style="font-size: 1.2em">
-          <strong class="mr-2">Observed Property:</strong>
+  <v-card>
+    <v-toolbar color="secondary">
+      <v-text-field
+        class="mx-4"
+        clearable
+        v-model="search"
+        prepend-inner-icon="mdi-magnify"
+        label="Search"
+        hide-details
+        density="compact"
+        variant="underlined"
+        rounded="xl"
+        maxWidth="300"
+      />
+      <v-spacer />
+      <v-btn
+        color="white"
+        variant="outlined"
+        prependIcon="mdi-chart-line"
+        class="mr-2"
+        :to="{ name: 'VisualizeData', query: { sites: thing!.id } }"
+        >View on Data Visualization Page</v-btn
+      >
+      <v-btn-add
+        v-if="canCreateDatastreams"
+        color="white"
+        prependIcon="mdi-plus"
+        @click="openCreate = true"
+        class="mr-2"
+        >Add new datastream</v-btn-add
+      >
+    </v-toolbar>
+
+    <v-data-table-virtual
+      :headers="headers"
+      :items="visibleDatastreams"
+      :search="search"
+      :sort-by="sortBy"
+      :style="{ 'max-height': `100vh` }"
+      fixed-header
+      @click:row="onRowClick"
+      hover
+    >
+      <template
+        v-slot:item.info="{ item, internalItem, isExpanded, toggleExpand }"
+      >
+        <p style="font-size: 1.2em" class="mt-2">
+          <strong class="mr-2">Observed property:</strong>
           <strong>{{ item.OPName }}</strong>
-        </v-row>
-        <v-row> <strong class="mr-2">Identifier:</strong> {{ item.id }} </v-row>
-        <v-row>
-          <strong class="mr-2">Processing Level:</strong>
-          {{
-            processingLevels.find((p) => p.id === item.processingLevelId)?.code
-          }}
-        </v-row>
-        <v-row>
-          <strong class="mr-2">Sampled Medium:</strong>
+        </p>
+        <p><strong class="mr-2">Identifier:</strong> {{ item.id }}</p>
+        <p>
+          <strong class="mr-2">Processing level:</strong>
+          {{ item.processingLevelName }}
+        </p>
+        <!-- <template v-if="isExpanded(internalItem)"> -->
+        <p>
+          <strong class="mr-2">Sampled medium:</strong>
           {{ item.sampledMedium }}
-        </v-row>
-        <v-row>
+        </p>
+        <p>
           <strong class="mr-2">Sensor:</strong>
           {{ sensors.find((s) => s.id === item.sensorId)?.name }}
-        </v-row>
-      </v-col>
-    </template>
+        </p>
+        <p>
+          <strong class="mr-2">No data value:</strong> {{ item.noDataValue }}
+        </p>
+        <p class="mb-2">
+          <strong class="mr-2">Aggregation statistic:</strong>
+          {{ item.aggregationStatistic }}
+        </p>
+        <!-- </template> -->
+        <!-- <v-btn
+          class="pl-0"
+          color="medium-emphasis"
+          size="small"
+          variant="text"
+          :append-icon="
+            isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'
+          "
+          @click.stop="toggleExpand(internalItem)"
+        >
+          {{ isExpanded(internalItem) ? '... Show less' : '... Show more' }}
+        </v-btn> -->
+      </template>
 
-    <template v-slot:item.observations="{ item }">
-      <div v-if="!canViewDatastreams && !item.isVisible">
-        Data is private for this datastream
-      </div>
-      <div v-else>
+      <template v-slot:item.time="{ item }">
+        <p class="mt-2">
+          <strong class="mr-2">Begin date:</strong>
+          {{ item.beginDate }}
+        </p>
+        <p>
+          <strong class="mr-2">End date:</strong>
+          {{ item.endDate }}
+        </p>
+        <p>
+          <strong class="mr-2">Time aggregation interval:</strong>
+          {{ item.aggregationInterval }}
+        </p>
+        <p>
+          <strong class="mr-2">Intended time spacing:</strong>
+          {{ item.spacingInterval }}
+        </p>
+        <p>
+          <strong class="mr-2">Status:</strong>
+          {{ item.status }}
+        </p>
+        <p>
+          <strong class="mr-2">Value count:</strong>
+          {{ item.valueCount }}
+        </p>
+      </template>
+
+      <template v-slot:item.observations="{ item }">
+        <div v-if="!canViewDatastreams && !item.isVisible" class="mt-2">
+          Data is private for this datastream
+        </div>
+        <Sparkline
+          v-else
+          class="mt-2"
+          :datastream="item"
+          @open-chart="item.chartOpen = true"
+          :unitName="item.unitName"
+        />
+
         <v-dialog v-model="item.chartOpen" width="80rem">
           <DatastreamPopupPlot
             :datastream="item"
             @close="item.chartOpen = false"
           />
         </v-dialog>
-        <Sparkline :datastream="item" @open-chart="item.chartOpen = true" />
-      </div>
-    </template>
+      </template>
 
-    <template v-slot:item.last_observation="{ item }">
-      <div
-        v-if="
-          (canViewDatastreams || item.isVisible) &&
-          observations[item.id]?.dataArray?.length
-        "
-      >
-        <v-row>
-          {{ getMostRecentObsTime(observations[item.id].dataArray) }}
-        </v-row>
-        <v-row>
-          {{ getMostRecentObsVal(observations[item.id].dataArray) }}&nbsp;
-          {{ units.find((u) => u.id === item.unitId)?.name }}
-        </v-row>
-      </div>
-    </template>
+      <template v-slot:item.actions="{ item }">
+        <v-row align="center" style="height: 90%" class="mt-2">
+          <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
+            <template v-slot:activator="{ props }">
+              <v-icon
+                :icon="
+                  item.isVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
+                "
+                :color="item.isVisible ? 'grey' : 'grey-lighten-1'"
+                small
+                v-bind="props"
+                @click="toggleDataVisibility(item)"
+              />
+            </template>
+            <span v-if="item.isVisible"
+              >Hide the data for this datastream from guests of your site while
+              keeping the metadata public. Owners will still see it
+            </span>
+            <span v-else
+              >Make the data for this datastream publicly visible</span
+            >
+          </v-tooltip>
 
-    <template v-slot:item.actions="{ item }">
-      <v-row>
-        <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
-          <template v-slot:activator="{ props }">
-            <v-icon
-              :icon="
-                item.isVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
-              "
-              :color="item.isVisible ? 'grey' : 'grey-lighten-1'"
-              small
-              v-bind="props"
-              @click="toggleDataVisibility(item)"
-            />
-          </template>
-          <span v-if="item.isVisible"
-            >Hide the data for this datastream from guests of your site while
-            keeping the metadata public. Owners will still see it
-          </span>
-          <span v-else>Make the data for this datastream publicly visible</span>
-        </v-tooltip>
+          <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
+            <template v-slot:activator="{ props }">
+              <v-icon
+                :icon="item.isPrivate ? 'mdi-eye-off' : 'mdi-eye'"
+                :color="item.isPrivate ? 'grey-lighten-1' : 'grey'"
+                small
+                v-bind="props"
+                @click="toggleVisibility(item)"
+              />
+            </template>
+            <span v-if="item.isPrivate"
+              >Hide this datastream from guests of your site. Owners will still
+              see it</span
+            >
+            <span v-else>Make this datastream publicly visible</span>
+          </v-tooltip>
 
-        <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
-          <template v-slot:activator="{ props }">
-            <v-icon
-              :icon="item.isPrivate ? 'mdi-eye-off' : 'mdi-eye'"
-              :color="item.isPrivate ? 'grey-lighten-1' : 'grey'"
-              small
-              v-bind="props"
-              @click="toggleVisibility(item)"
-            />
-          </template>
-          <span v-if="item.isPrivate"
-            >Hide this datastream from guests of your site. Owners will still
-            see it</span
+          <v-tooltip
+            v-if="!canViewDatastreams && !item.isVisible"
+            bottom
+            :openDelay="100"
           >
-          <span v-else>Make this datastream publicly visible</span>
-        </v-tooltip>
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props" icon="mdi-lock" />
+            </template>
+            <span>The data for this datastream is private </span>
+          </v-tooltip>
 
-        <v-tooltip
-          v-if="!canViewDatastreams && !item.isVisible"
-          bottom
-          :openDelay="100"
-        >
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" icon="mdi-lock" />
-          </template>
-          <span>The data for this datastream is private </span>
-        </v-tooltip>
-
-        <v-menu v-else>
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" icon="mdi-dots-vertical" />
-          </template>
-          <v-list>
-            <!-- <div v-if="canEditDatastreams"> -->
-            <!-- <v-list-item
+          <v-menu v-else>
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props" icon="mdi-dots-vertical" />
+            </template>
+            <v-list>
+              <!-- <div v-if="canEditDatastreams"> -->
+              <!-- <v-list-item
                 prepend-icon="mdi-link-variant"
                 title="Link Data Source"
                 @click="openLinker = true"
               /> -->
-            <v-list-item
-              v-if="canEditDatastreams"
-              prepend-icon="mdi-pencil"
-              title="Edit Datastream Metadata"
-              @click="openDialog(item, 'edit')"
-            />
-            <!-- </div> -->
-            <div v-if="canDeleteDatastreams">
               <v-list-item
-                prepend-icon="mdi-delete"
-                title="Delete Datastream"
-                @click="openDialog(item, 'delete')"
+                v-if="canEditDatastreams"
+                prepend-icon="mdi-pencil"
+                title="Edit Datastream Metadata"
+                @click="openDialog(item, 'edit')"
               />
-            </div>
-            <v-list-item
-              prepend-icon="mdi-chart-line"
-              title="Visualize Data"
-              :to="{
-                name: 'VisualizeData',
-                query: { sites: item.thingId, datastreams: item.id },
-              }"
+              <!-- </div> -->
+              <div v-if="canDeleteDatastreams">
+                <v-list-item
+                  prepend-icon="mdi-delete"
+                  title="Delete Datastream"
+                  @click="openDialog(item, 'delete')"
+                />
+              </div>
+              <v-list-item
+                prepend-icon="mdi-chart-line"
+                title="Visualize Data"
+                :to="{
+                  name: 'VisualizeData',
+                  query: { sites: item.thingId, datastreams: item.id },
+                }"
+              />
+              <v-list-item
+                prepend-icon="mdi-download"
+                title="Download Data"
+                @click="onDownload(item.id)"
+              />
+            </v-list>
+          </v-menu>
+        </v-row>
+        <v-row v-if="downloading[item.id]">
+          <v-col class="px-0">
+            <v-progress-circular
+              indeterminate
+              size="16"
+              width="2"
+              color="primary"
             />
-            <v-list-item
-              prepend-icon="mdi-download"
-              title="Download Data"
-              @click="onDownload(item.id)"
-            />
-          </v-list>
-        </v-menu>
-      </v-row>
-      <v-row v-if="downloading[item.id]">
-        <v-col class="px-0">
-          <v-progress-circular
-            indeterminate
-            size="16"
-            width="2"
-            color="primary"
-          />
-          preparing file...
-        </v-col>
-      </v-row>
-    </template>
-  </v-data-table-virtual>
+            preparing file...
+          </v-col>
+        </v-row>
+      </template>
+    </v-data-table-virtual>
+  </v-card>
 
   <v-dialog v-model="openCreate" width="80rem">
     <DatastreamForm
@@ -216,6 +271,18 @@
       @delete="onDelete"
     />
   </v-dialog>
+
+  <v-dialog
+    v-model="openInfoCard"
+    width="50rem"
+    v-if="selectedDatastream && thing"
+  >
+    <DatastreamTableInfoCard
+      :datastream="selectedDatastream"
+      :thing="thing"
+      @close="openInfoCard = false"
+    />
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -225,16 +292,16 @@ import DatastreamDeleteCard from './DatastreamDeleteCard.vue'
 import Sparkline from '@/components/Sparkline.vue'
 import { computed, reactive, ref, toRef } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
-import { useObservationStore } from '@/store/observations'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { api } from '@/services/api'
-import { DataArray, Datastream, Workspace } from '@/types'
+import { Datastream, Workspace } from '@/types'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import { Snackbar } from '@/utils/notifications'
-
+import { formatTime } from '@/utils/time'
+import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
 })
@@ -245,6 +312,10 @@ const openCreate = ref(false)
 const workspaceRef = toRef(props, 'workspace')
 const thingIdRef = computed(() => thing.value!.id)
 const downloading = reactive<Record<string, boolean>>({})
+const search = ref()
+
+const openInfoCard = ref(false)
+const selectedDatastream = ref<Datastream | null>(null)
 
 const {
   canCreateDatastreams,
@@ -253,12 +324,16 @@ const {
   canDeleteDatastreams,
 } = useWorkspacePermissions(workspaceRef)
 
-const { observations } = storeToRefs(useObservationStore())
-
 const updateDatastream = async (updatedDatastream: Datastream) => {
   await fetchMetadata(props.workspace.id)
   onUpdate(updatedDatastream)
 }
+
+// function formatDate(dateString: string) {
+//   return (
+//     new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
+//   )
+// }
 
 const onCreated = async () => {
   await fetchMetadata(props.workspace.id)
@@ -280,13 +355,55 @@ const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
 const visibleDatastreams = computed(() => {
   return items.value
     .filter((d) => !d.isPrivate || canViewDatastreams.value)
-    .map((d) => ({
-      ...d,
-      chartOpen: false,
-      OPName: observedProperties.value.find(
-        (op) => op.id === d.observedPropertyId
-      )?.name,
-    }))
+    .map((d) => {
+      const unit = units.value.find((u) => u.id === d.unitId)
+      const sensor = sensors.value.find((s) => s.id === d.sensorId)
+      const op = observedProperties.value.find(
+        (o) => o.id === d.observedPropertyId
+      )
+      const pl = processingLevels.value.find(
+        (p) => p.id === d.processingLevelId
+      )
+
+      const mapped = {
+        ...d,
+        chartOpen: false,
+        OPName: op ? `${op.name} (${op.code})` : '',
+        processingLevelCode: pl?.code ?? '',
+        processingLevelName: pl?.definition ?? '',
+        sensorName: sensor?.name ?? '',
+        unitName: unit?.name ?? '',
+        searchText: ',',
+        beginDate: d.phenomenonBeginTime
+          ? formatTime(d.phenomenonBeginTime)
+          : '',
+        endDate: d.phenomenonEndTime ? formatTime(d.phenomenonEndTime) : '',
+        aggregationInterval: `${d.timeAggregationInterval} ${d.timeAggregationIntervalUnit}`,
+        spacingInterval: `${d.intendedTimeSpacing} ${d.intendedTimeSpacingUnit}`,
+      }
+
+      mapped.searchText = [
+        mapped.OPName,
+        mapped.id,
+        mapped.processingLevelName,
+        mapped.sampledMedium,
+        mapped.sensorName,
+        mapped.noDataValue,
+        mapped.aggregationStatistic,
+        mapped.unitName,
+        mapped.status,
+        mapped.valueCount,
+        mapped.beginDate,
+        mapped.endDate,
+        mapped.aggregationInterval,
+        mapped.spacingInterval,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      return mapped
+    })
 })
 
 const onDownload = async (datastreamId: string) => {
@@ -301,22 +418,6 @@ const onDownload = async (datastreamId: string) => {
   } finally {
     downloading[datastreamId] = false
   }
-}
-
-const getMostRecentObsTime = (dataArray: DataArray) => {
-  if (!dataArray.length) return undefined
-  return formatDate(dataArray[dataArray.length - 1][0])
-}
-
-const getMostRecentObsVal = (dataArray: DataArray) => {
-  if (!dataArray.length) return undefined
-  return formatNumber(dataArray[dataArray.length - 1][1])
-}
-
-function formatDate(dateString: string) {
-  return (
-    new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
-  )
 }
 
 async function toggleDataVisibility(datastream: Datastream) {
@@ -339,6 +440,21 @@ async function toggleVisibility(datastream: Datastream) {
   })
 }
 
+const onRowClick = (event: Event, item: any) => {
+  let targetElement = event.target as HTMLElement
+  if (targetElement.tagName == 'CANVAS') return
+  if (targetElement.closest('.v-icon')) return
+
+  const selectedDatastreamId = item.item.id
+  const foundDatastream = visibleDatastreams.value.find(
+    (d) => d.id === selectedDatastreamId
+  )
+  if (foundDatastream) {
+    selectedDatastream.value = foundDatastream
+    openInfoCard.value = true
+  } else selectedDatastream.value = null
+}
+
 const patchDatastream = async (patchBody: {}) => {
   try {
     await api.updateDatastream(patchBody as Datastream)
@@ -347,32 +463,25 @@ const patchDatastream = async (patchBody: {}) => {
   }
 }
 
-const formatNumber = (value: string | number): string => {
-  if (typeof value === 'number') {
-    const formatter = new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-    return formatter.format(value)
-  }
-
-  return value?.toString()
-}
-
 const sortBy = [{ key: 'OPName' }]
 const headers = [
   {
-    title: 'DataStream Info',
+    title: 'Datastream information',
     key: 'info',
-    value: 'OPName',
+    value: 'searchText',
     sortable: false,
   },
   {
-    title: 'Observations (Last 72 Hours)',
+    title: 'Time information (UTC)',
+    key: 'time',
+
+    sortable: false,
+  },
+  {
+    title: 'Observations (Last 72 hours)',
     key: 'observations',
     sortable: false,
   },
-  { title: 'Last Observation', key: 'last_observation', sortable: false },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -385,3 +494,9 @@ const loadDatastreams = async () => {
   }
 }
 </script>
+
+<style scoped>
+::v-deep tbody .v-data-table__td {
+  vertical-align: top;
+}
+</style>
