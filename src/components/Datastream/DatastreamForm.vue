@@ -72,6 +72,46 @@
               density="compact"
               rounded="lg"
             >
+              <template v-slot:item="{ props, item }">
+                <v-tooltip
+                  bottom
+                  :openDelay="500"
+                  content-class="pa-0 ma-0 bg-transparent"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <v-list-item
+                      v-bind="{ ...props, ...tooltipProps }"
+                      :subtitle="
+                        item.raw.workspaceId == null
+                          ? 'System variable'
+                          : 'Workspace variable'
+                      "
+                      :class="
+                        item.raw.workspaceId == null ? 'bg-grey-lighten-5' : ''
+                      "
+                    />
+                  </template>
+
+                  <InfoCard
+                    :title="item.raw.name"
+                    :subtitle="{
+                      label: 'Method type',
+                      value: item.raw.methodType,
+                    }"
+                    :items="[
+                      { label: 'Description', value: item.raw.description },
+                      { label: 'Make', value: item.raw.manufacturer },
+                      { label: 'Model', value: item.raw.model },
+                      { label: 'Method Code', value: item.raw.methodCode },
+                      { label: 'Method Link', value: item.raw.methodLink },
+                      { label: 'Encoding Type', value: item.raw.encodingType },
+                      { label: 'Model Link', value: item.raw.modelLink },
+                    ]"
+                    :isWorkspace="!!item.raw.workspaceId"
+                  />
+                </v-tooltip>
+              </template>
+
               <template v-slot:append v-if="canCreateSensors">
                 <v-icon
                   color="secondary-darken-2"
@@ -86,21 +126,6 @@
                     @close="showSensorModal = false"
                   />
                 </v-dialog>
-              </template>
-
-              <template v-slot:item="{ props, item }">
-                <v-list-item
-                  v-bind="props"
-                  :title="item.raw.name"
-                  :subtitle="
-                    item.raw.workspaceId === null
-                      ? 'System variable'
-                      : 'Workspace variable'
-                  "
-                  :class="
-                    item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
-                  "
-                />
               </template>
             </v-autocomplete>
 
@@ -118,7 +143,11 @@
               class="mt-2"
             >
               <template v-slot:item="{ props, item }">
-                <v-tooltip bottom :openDelay="500">
+                <v-tooltip
+                  bottom
+                  :openDelay="500"
+                  content-class="pa-0 ma-0 bg-transparent"
+                >
                   <template v-slot:activator="{ props: tooltipProps }">
                     <v-list-item
                       :subtitle="
@@ -133,7 +162,22 @@
                     >
                     </v-list-item>
                   </template>
-                  <span>{{ item.title }}</span>
+                  <InfoCard
+                    :title="item.raw.name"
+                    :subtitle="{ label: 'Code', value: item.raw.code }"
+                    :items="[
+                      {
+                        label: 'Definition',
+                        value: item.raw.definition,
+                      },
+                      {
+                        label: 'Description',
+                        value: item.raw.description,
+                      },
+                      { label: 'Type', value: item.raw.type },
+                    ]"
+                    :isWorkspace="!!item.raw.workspaceId"
+                  />
                 </v-tooltip>
               </template>
               <template v-slot:append v-if="canCreateObservedProperties">
@@ -166,33 +210,50 @@
               rounded="lg"
               class="mt-2"
             >
-              <template v-slot:append v-if="canCreateUnits">
-                <v-icon color="secondary-darken-2" @click="openUnitForm = true"
-                  >mdi-plus</v-icon
+              <template #item="{ props, item }">
+                <v-tooltip
+                  bottom
+                  :openDelay="500"
+                  content-class="pa-0 ma-0 bg-transparent"
                 >
+                  <template #activator="{ props: tooltipProps }">
+                    <v-list-item
+                      v-bind="{ ...props, ...tooltipProps }"
+                      :subtitle="
+                        item.raw.workspaceId == null
+                          ? 'System unit'
+                          : 'Workspace unit'
+                      "
+                      :class="
+                        item.raw.workspaceId == null ? 'bg-grey-lighten-5' : ''
+                      "
+                    />
+                  </template>
+
+                  <InfoCard
+                    :title="item.raw.name"
+                    :subtitle="{ label: 'Symbol', value: item.raw.symbol }"
+                    :items="[
+                      { label: 'Definition', value: item.raw.definition },
+                      { label: 'Type', value: item.raw.type },
+                    ]"
+                    :isWorkspace="!!item.raw.workspaceId"
+                  />
+                </v-tooltip>
+              </template>
+
+              <template #append v-if="canCreateUnits">
+                <v-icon color="secondary-darken-2" @click="openUnitForm = true">
+                  mdi-plus
+                </v-icon>
                 <v-dialog v-model="openUnitForm" width="30rem">
                   <UnitFormCard
                     v-if="workspace"
                     :workspace-id="workspace.id"
                     @created="handleMetadataUploaded('unitId', $event)"
                     @close="openUnitForm = false"
-                    >Add New</UnitFormCard
-                  >
+                  />
                 </v-dialog>
-              </template>
-              <template v-slot:item="{ props, item }">
-                <v-list-item
-                  v-bind="props"
-                  :title="item.raw.name"
-                  :subtitle="
-                    item.raw.workspaceId === null
-                      ? 'System variable'
-                      : 'Workspace variable'
-                  "
-                  :class="
-                    item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
-                  "
-                />
               </template>
             </v-autocomplete>
 
@@ -209,10 +270,44 @@
               rounded="lg"
               class="mt-2"
             >
-              <template v-slot:append v-if="canCreateProcessingLevels">
-                <v-icon color="secondary-darken-2" @click="showPLModal = true"
-                  >mdi-plus</v-icon
+              <template #item="{ props, item }">
+                <v-tooltip
+                  bottom
+                  :openDelay="500"
+                  content-class="pa-0 ma-0 bg-transparent"
                 >
+                  <template #activator="{ props: tooltipProps }">
+                    <v-list-item
+                      v-bind="{ ...props, ...tooltipProps }"
+                      :subtitle="
+                        item.raw.workspaceId == null
+                          ? 'System level'
+                          : 'Workspace level'
+                      "
+                      :class="
+                        item.raw.workspaceId == null ? 'bg-grey-lighten-5' : ''
+                      "
+                    />
+                  </template>
+
+                  <InfoCard
+                    :title="item.raw.definition"
+                    :subtitle="{
+                      label: 'Code',
+                      value: item.raw.code,
+                    }"
+                    :items="[
+                      { label: 'Explanation', value: item.raw.explanation },
+                    ]"
+                    :isWorkspace="!!item.raw.workspaceId"
+                  />
+                </v-tooltip>
+              </template>
+
+              <template #append v-if="canCreateProcessingLevels">
+                <v-icon color="secondary-darken-2" @click="showPLModal = true">
+                  mdi-plus
+                </v-icon>
                 <v-dialog v-model="showPLModal" width="30rem">
                   <ProcessingLevelFormCard
                     v-if="workspace"
@@ -221,23 +316,8 @@
                       handleMetadataUploaded('processingLevelId', $event)
                     "
                     @close="showPLModal = false"
-                    >Add New</ProcessingLevelFormCard
-                  >
+                  />
                 </v-dialog>
-              </template>
-              <template v-slot:item="{ props, item }">
-                <v-list-item
-                  v-bind="props"
-                  :title="item.raw.title"
-                  :subtitle="
-                    item.raw.workspaceId
-                      ? 'Workspace variable'
-                      : 'System variable'
-                  "
-                  :class="
-                    item.raw.workspaceId === null ? 'bg-grey-lighten-5' : ''
-                  "
-                />
               </template>
             </v-autocomplete>
           </v-card-text>
@@ -485,6 +565,7 @@ import { Datastream, Workspace } from '@/types'
 import { VForm } from 'vuetify/components'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useVocabularyStore } from '@/composables/useVocabulary'
+import InfoCard from '../Metadata/InfoCard.vue'
 
 const emit = defineEmits(['close', 'updated', 'created'])
 

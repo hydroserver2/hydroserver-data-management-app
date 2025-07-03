@@ -172,10 +172,12 @@
               />
             </template>
             <span v-if="item.isPrivate"
+              >Make this datastream publicly visible</span
+            >
+            <span v-else
               >Hide this datastream from guests of your site. Owners will still
               see it</span
             >
-            <span v-else>Make this datastream publicly visible</span>
           </v-tooltip>
 
           <v-tooltip

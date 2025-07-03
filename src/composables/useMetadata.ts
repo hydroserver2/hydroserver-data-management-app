@@ -29,18 +29,16 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
   const formattedObservedProperties = computed(() =>
     observedProperties.value
       .map((op) => ({
-        id: op.id,
+        ...op,
         title: `${op.code}: ${op.name}, ${op.type}`,
-        workspaceId: op.workspaceId,
       }))
       .sort((a, b) => a.title.localeCompare(b.title))
   )
 
   const formattedProcessingLevels = computed(() =>
     processingLevels.value.map((pl) => ({
-      id: pl.id,
+      ...pl,
       title: `${pl.code}: ${pl.definition}`,
-      workspaceId: pl.workspaceId,
     }))
   )
 
