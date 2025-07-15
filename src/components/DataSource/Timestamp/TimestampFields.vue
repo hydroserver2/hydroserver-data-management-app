@@ -6,7 +6,7 @@
     <v-row>
       <v-col>
         <v-text-field
-          v-model="transformer.timestampKey"
+          v-model="transformer.timestamp.key"
           placeholder="timestamp"
           :label="timestampKeyLabel"
           density="compact"
@@ -19,7 +19,7 @@
     </v-row>
   </v-card-text>
   <v-card-item>
-    <TimestampFormat :target="transformer" />
+    <TimestampFormat :target="transformer.timestamp" color="green-darken-4" />
   </v-card-item>
 </template>
 

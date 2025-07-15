@@ -1,6 +1,6 @@
 import { Datastream } from '@/types'
 import { Payload } from './payload'
-import { HasTimestamp } from './timestamp'
+import { Timestamp } from './timestamp'
 
 export const WORKFLOW_TYPES = [
   { title: 'ETL', value: 'ETL' },
@@ -24,10 +24,11 @@ export interface PerPayloadPlaceholder {
   type: 'perPayload'
 }
 
-export interface RunTimePlaceholder extends HasTimestamp {
+export interface RunTimePlaceholder {
   name: string
   type: 'runTime'
   runTimeValue: 'startTime' | 'now'
+  timestamp: Timestamp
 }
 
 export type PlaceholderVariable = PerPayloadPlaceholder | RunTimePlaceholder
@@ -72,9 +73,9 @@ export enum IdentifierType {
   Index = 'index',
 }
 
-interface BaseTransformer extends HasTimestamp {
+interface BaseTransformer {
   type: TransformerType
-  timestampKey: string
+  timestamp: Timestamp
 }
 
 export interface JSONtransformer extends BaseTransformer {
@@ -95,15 +96,20 @@ export type TransformerConfig = JSONtransformer | CSVTransformer
 export const transformerDefaults: Record<TransformerType, TransformerConfig> = {
   JSON: {
     type: 'JSON',
-    timestampKey: '',
-    timestampFormat: 'ISO8601',
+    timestamp: {
+      key: '',
+      format: 'ISO8601',
+      timezoneMode: 'embeddedOffset',
+    },
     JMESPath: '',
   } as JSONtransformer,
   CSV: {
     type: 'CSV',
-    timestampKey: '',
-    timestampFormat: 'ISO8601',
-    timestampOffset: '+0000',
+    timestamp: {
+      key: '',
+      format: 'ISO8601',
+      timezoneMode: 'embeddedOffset',
+    },
     headerRow: 1,
     dataStartRow: 2,
     delimiter: ',' as CSVDelimiterType,
