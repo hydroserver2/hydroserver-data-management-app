@@ -33,7 +33,7 @@ export const useTagStore = defineStore('tags', () => {
       const requests = [
         ...tagsToAdd.map((tag) => api.createSiteTag(thingId, tag)),
         ...tagsToEdit.map((tag) => api.editSiteTag(thingId, tag)),
-        ...tagsToDelete.map((tag) => api.deleteSiteTag(thingId, tag.key)),
+        ...tagsToDelete.map((tag) => api.deleteSiteTag(thingId, tag)),
       ]
 
       await Promise.all(requests)

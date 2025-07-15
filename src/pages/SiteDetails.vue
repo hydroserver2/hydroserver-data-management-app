@@ -149,7 +149,7 @@ async function onDeleteThing() {
 const mapOptions = computed(() =>
   thing.value
     ? {
-        center: { lat: thing.value.latitude, lng: thing.value.longitude },
+        center: { lat: thing.value.location.latitude, lng: thing.value.location.longitude },
         zoom: 16,
         mapTypeId: 'satellite',
       }

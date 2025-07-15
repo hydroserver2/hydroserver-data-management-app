@@ -86,7 +86,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Latitude *"
-                  v-model="thing.latitude"
+                  v-model="thing.location.latitude"
                   type="number"
                   :rules="[
                     ...rules.requiredNumber,
@@ -99,7 +99,7 @@
               <v-col cols="12" sm="6"
                 ><v-text-field
                   label="Longitude *"
-                  v-model="thing.longitude"
+                  v-model="thing.location.longitude"
                   type="number"
                   :rules="[
                     ...rules.requiredNumber,
@@ -112,7 +112,7 @@
               <v-col cols="12" sm="6"
                 ><v-text-field
                   label="Elevation (m) *"
-                  v-model="thing.elevation_m"
+                  v-model="thing.location.elevation_m"
                   type="number"
                   :rules="[
                     ...rules.requiredNumber,
@@ -125,15 +125,15 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="State/Province/Region"
-                  v-model="thing.state"
-                  :rules="thing.state ? rules.name : []"
+                  v-model="thing.location.state"
+                  :rules="thing.location.state ? rules.name : []"
                 />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="County/District"
-                  v-model="thing.county"
-                  :rules="thing.county ? rules.name : []"
+                  v-model="thing.location.county"
+                  :rules="thing.location.county ? rules.name : []"
                 />
               </v-col>
               <v-col cols="12" sm="6">
@@ -143,10 +143,10 @@
                   :item-title="countryTitle"
                   item-value="code"
                   clearable
-                  v-model="thing.country"
+                  v-model="thing.location.country"
                 >
                   <template v-slot:selection="{ item, index }">
-                    <span>{{ thing.country }}</span>
+                    <span>{{ thing.location.country }}</span>
                   </template></v-autocomplete
                 >
               </v-col>
@@ -227,7 +227,7 @@ watch(
 
 async function populateThing() {
   Object.assign(thing, storedThing.value)
-  if (thing.latitude && thing.longitude) loaded.value = true
+  if (thing.location.latitude && thing.location.longitude) loaded.value = true
 }
 
 function closeDialog() {
@@ -259,12 +259,12 @@ async function uploadThing() {
 }
 
 function onMapLocationClicked(locationData: Thing) {
-  thing.latitude = locationData.latitude
-  thing.longitude = locationData.longitude
-  thing.elevation_m = locationData.elevation_m
-  thing.state = locationData.state
-  thing.county = locationData.county
-  thing.country = locationData.country
+  thing.location.latitude = locationData.location.latitude
+  thing.location.longitude = locationData.location.longitude
+  thing.location.elevation_m = locationData.location.elevation_m
+  thing.location.state = locationData.location.state
+  thing.location.county = locationData.location.county
+  thing.location.country = locationData.location.country
 }
 
 onMounted(async () => {

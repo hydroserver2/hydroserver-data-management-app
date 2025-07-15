@@ -69,24 +69,35 @@ export class PostHydroShareArchive extends HydroShareArchive {
   }
 }
 
+export class Location {
+  latitude?: number | ''
+  longitude?: number | ''
+  elevation_m?: number | ''
+  elevationDatum: string
+  state: string
+  county: string
+  country: string
+
+  constructor() {
+    this.elevationDatum = 'WGS84'
+    this.state = ''
+    this.county = ''
+    this.country = ''
+  }
+}
+
 export class Thing {
   id: string
   workspaceId: string
   name: string
+  location: Location = new Location()
   tags: Tag[]
   hydroShareArchive?: HydroShareArchive | null
   siteType: string
   samplingFeatureCode: string
   isPrivate: boolean
-  latitude?: number | ''
-  longitude?: number | ''
-  elevation_m?: number | ''
-  elevationDatum: string
   description: string
   samplingFeatureType: string
-  state: string
-  county: string
-  country: string
   dataDisclaimer: string
 
   constructor() {
@@ -97,12 +108,8 @@ export class Thing {
     this.siteType = ''
     this.samplingFeatureCode = ''
     this.isPrivate = false
-    this.elevationDatum = 'WGS84'
     this.description = ''
     this.samplingFeatureType = 'Site'
-    this.state = ''
-    this.county = ''
-    this.country = ''
     this.dataDisclaimer = ''
   }
 }
