@@ -15,7 +15,7 @@
     <v-col>
       <v-text-field
         v-model="target.customFormat"
-        :label="`Custom timestamp format *`"
+        label="Custom timestamp format *"
         hint="Enter the timestamp format."
         :rules="rules.required"
       >
@@ -54,7 +54,7 @@
     <v-col>
       <v-autocomplete
         v-model="target.timezone"
-        :label="`Fixed timezone offset *`"
+        label="Fixed timezone offset *"
         hint="Enter a timezone offset to apply to the timestamp column."
         :items="FIXED_OFFSET_TIMEZONES"
       ></v-autocomplete>
@@ -65,7 +65,7 @@
     <v-col>
       <v-autocomplete
         v-model="target.timezone"
-        :label="`Daylight savings aware timezone offset *`"
+        label="Daylight savings aware timezone offset *"
         hint="Enter a timezone offset to apply to the timestamp column."
         :items="DST_AWARE_TIMEZONES"
       ></v-autocomplete>

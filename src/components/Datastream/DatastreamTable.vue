@@ -302,7 +302,7 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import { Snackbar } from '@/utils/notifications'
-import { formatTime } from '@/utils/time'
+import { formatTime, getLocalTimeZone } from '@/utils/time'
 import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
@@ -376,10 +376,8 @@ const visibleDatastreams = computed(() => {
         sensorName: sensor?.name ?? '',
         unitName: unit?.name ?? '',
         searchText: ',',
-        beginDate: d.phenomenonBeginTime
-          ? formatTime(d.phenomenonBeginTime)
-          : '',
-        endDate: d.phenomenonEndTime ? formatTime(d.phenomenonEndTime) : '',
+        beginDate: formatTime(d.phenomenonBeginTime),
+        endDate: formatTime(d.phenomenonEndTime),
         aggregationInterval: `${d.timeAggregationInterval} ${d.timeAggregationIntervalUnit}`,
         spacingInterval: `${d.intendedTimeSpacing} ${d.intendedTimeSpacingUnit}`,
       }
@@ -474,7 +472,7 @@ const headers = [
     sortable: false,
   },
   {
-    title: 'Time information (UTC)',
+    title: `Time information (${getLocalTimeZone()})`,
     key: 'time',
 
     sortable: false,

@@ -122,7 +122,7 @@ const dataStartRowRules = computed(() => [
 watch(
   () => (transformer.value as CSVTransformer).identifierType,
   (newType) => {
-    transformer.value.timestampKey =
+    transformer.value.timestamp.key =
       newType === IdentifierType.Name ? 'timestamp' : '1'
   }
 )
