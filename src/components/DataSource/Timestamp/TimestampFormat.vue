@@ -57,6 +57,7 @@
         label="Fixed timezone offset *"
         hint="Enter a timezone offset to apply to the timestamp column."
         :items="FIXED_OFFSET_TIMEZONES"
+        :rules="rules.required"
       ></v-autocomplete>
     </v-col>
   </v-row>
@@ -68,6 +69,7 @@
         label="Daylight savings aware timezone offset *"
         hint="Enter a timezone offset to apply to the timestamp column."
         :items="DST_AWARE_TIMEZONES"
+        :rules="rules.required"
       ></v-autocomplete>
     </v-col>
   </v-row>
