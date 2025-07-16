@@ -62,6 +62,7 @@ export default defineConfig({
         '**/src/utils/plotting/echarts.ts',
         '**/src/utils/plotting/graphSeriesUtils.ts',
         '**/src/utils/test/**',
+        '**/src/utils/time.ts',
         '**/src/utils/googleMaps/**',
         '**/src/utils/maps/**',
         '**/src/utils/rules.ts',

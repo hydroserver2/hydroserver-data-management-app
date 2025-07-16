@@ -168,9 +168,9 @@ import {
   Status,
   getBadCountText,
   getBehindScheduleCountText,
-  formatTime,
 } from '@/models/dataSource'
 import { StatusType } from '@/models/dataSource'
+import { formatTime } from '@/utils/time'
 
 const props = defineProps<{
   workspaceId: string

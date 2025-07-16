@@ -7,7 +7,7 @@
     </v-toolbar>
 
     <v-card-text>
-      This action will permanently delete
+      This action will permanently delete the datasource
       <strong> {{ itemName }} </strong>
     </v-card-text>
 

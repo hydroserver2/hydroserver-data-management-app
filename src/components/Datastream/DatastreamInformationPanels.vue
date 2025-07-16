@@ -99,6 +99,7 @@ import {
   Thing,
   Unit,
 } from '@/types'
+import { formatTimeWithZone } from '@/utils/time'
 import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps({
@@ -116,9 +117,18 @@ const generalItems = computed(() => [
   { label: 'Datastream name', value: props.datastream.name },
   { label: 'Description', value: props.datastream.description },
   { label: 'Number Of Observations', value: props.datastream.valueCount },
-  { label: 'Date Last Updated', value: props.datastream.phenomenonEndTime },
-  { label: 'Begin Date', value: props.datastream.phenomenonBeginTime },
-  { label: 'End Date', value: props.datastream.phenomenonEndTime },
+  {
+    label: 'Date Last Updated',
+    value: formatTimeWithZone(props.datastream.phenomenonEndTime),
+  },
+  {
+    label: 'Begin Date',
+    value: formatTimeWithZone(props.datastream.phenomenonBeginTime),
+  },
+  {
+    label: 'End Date',
+    value: formatTimeWithZone(props.datastream.phenomenonEndTime),
+  },
   { label: 'Data Type', value: props.datastream.observationType },
   { label: 'Value Type', value: props.datastream.resultType },
   { label: 'Sample Medium', value: props.datastream.sampledMedium },

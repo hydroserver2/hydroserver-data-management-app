@@ -2,6 +2,7 @@ import { EChartsOption, YAXisComponentOption, SeriesOption } from 'echarts'
 import { GraphSeries } from '@/types'
 import { storeToRefs } from 'pinia'
 import { useDataVisStore } from '@/store/dataVisualization'
+import { formatTimeWithZone } from '../time'
 
 type yAxisConfigurationMap = Map<
   string,
@@ -167,6 +168,15 @@ export const createEChartsOption = (
     tooltip: {
       confine: true,
       trigger: 'axis',
+      formatter: (params: any) => {
+        const items = Array.isArray(params) ? params : [params]
+        const ts = items[0].value[0]
+        let html = formatTimeWithZone(ts) + '<br/>'
+        items.forEach((item) => {
+          html += `${item.marker} ${item.seriesName}: ${item.value[1]}<br/>`
+        })
+        return html
+      },
       axisPointer: {
         type: 'cross',
         animation: false,

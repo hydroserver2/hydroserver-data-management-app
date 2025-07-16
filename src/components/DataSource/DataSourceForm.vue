@@ -33,23 +33,14 @@
 
         <v-col cols="12" md="6">
           <v-card-item>
-            <v-card-title>Schedule</v-card-title>
+            <v-card-title>Schedule ({{ getLocalTimeZone() }})</v-card-title>
           </v-card-item>
           <v-card-text class="pb-0">
-            <v-radio-group v-model="displayTz" inline class="mt-1">
-              <span class="mr-2"> View as </span>
-              <v-radio label="Local" value="local" />
-              <v-radio label="UTC" value="utc" />
-            </v-radio-group>
             <v-row>
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="startInput"
-                  :label="
-                    displayTz === 'local'
-                      ? 'Start time (local)'
-                      : 'Start time (UTC)'
-                  "
+                  label="Start time"
                   hint="Enter an optional start time for loading data. Otherwise, data loading will begin immediately."
                   type="datetime-local"
                   density="compact"
@@ -60,11 +51,7 @@
               <v-col>
                 <v-text-field
                   v-model="endInput"
-                  :label="
-                    displayTz === 'local'
-                      ? 'End time (local)'
-                      : 'End time (UTC)'
-                  "
+                  label="End time"
                   hint="Enter an optional end time for loading data. Otherwise, data will be loaded indefinitely."
                   type="datetime-local"
                   clearable
@@ -164,6 +151,7 @@ import { storeToRefs } from 'pinia'
 import { useETLStore } from '@/store/etl'
 import { api } from '@/services/api'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { getLocalTimeZone } from '@/utils/time'
 
 const props = defineProps({
   oldDataSource: Object as () => DataSource,
@@ -179,7 +167,6 @@ const orchestrationSystems = ref([] as OrchestrationSystem[])
 const etlFieldsRef = ref<any>(null)
 const loaded = ref(false)
 const scheduleType = ref('interval')
-const displayTz = ref<'local' | 'utc'>('local')
 
 const { dataSource } = storeToRefs(useETLStore())
 if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
@@ -201,17 +188,17 @@ else {
   })
 }
 
-const startInput = computed({
-  get: () => isoToInput(dataSource.value.schedule.startTime, displayTz.value),
-  set: (v: string) => {
-    dataSource.value.schedule.startTime = inputToIso(v, displayTz.value)
+const startInput = computed<string>({
+  get: () => isoToInput(dataSource.value.schedule.startTime, 'local'),
+  set: (v) => {
+    dataSource.value.schedule.startTime = inputToIso(v, 'local')
   },
 })
 
-const endInput = computed({
-  get: () => isoToInput(dataSource.value.schedule.endTime, displayTz.value),
-  set: (v: string) => {
-    dataSource.value.schedule.endTime = inputToIso(v, displayTz.value)
+const endInput = computed<string>({
+  get: () => isoToInput(dataSource.value.schedule.endTime, 'local'),
+  set: (v) => {
+    dataSource.value.schedule.endTime = inputToIso(v, 'local')
   },
 })
 

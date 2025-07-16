@@ -122,14 +122,10 @@ import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
-import {
-  DataSource,
-  formatTime,
-  getStatusText,
-  WORKFLOW_TYPES,
-} from '@/models/dataSource'
+import { DataSource, getStatusText, WORKFLOW_TYPES } from '@/models/dataSource'
 import router from '@/router/router'
 import { useETLStore } from '@/store/etl'
+import { formatTimeWithZone } from '@/utils/time'
 
 const route = useRoute()
 const openEdit = ref(false)
@@ -146,9 +142,11 @@ const scheduleString = computed(() => {
     : `Crontab: ${crontab}`
 
   if (startTime && endTime)
-    schedule += ` from ${formatTime(startTime)} to ${formatTime(endTime)}`
-  else if (startTime) schedule += ` beginning ${formatTime(startTime)}`
-  else if (endTime) schedule += ` until ${formatTime(endTime)}`
+    schedule += ` from ${formatTimeWithZone(startTime)} to ${formatTimeWithZone(
+      endTime
+    )}`
+  else if (startTime) schedule += ` beginning ${formatTimeWithZone(startTime)}`
+  else if (endTime) schedule += ` until ${formatTimeWithZone(endTime)}`
 
   return schedule
 })
@@ -180,21 +178,17 @@ const dataSourceInformation = computed(() => {
     {
       icon: 'mdi-history',
       label: 'Last run',
-      value: dataSource.value.status.lastRun
-        ? formatTime(dataSource.value.status.lastRun)
-        : '',
+      value: formatTimeWithZone(dataSource.value.status.lastRun),
     },
     {
       icon: 'mdi-calendar-sync',
       label: 'Next run',
-      value: dataSource.value.status.nextRun
-        ? formatTime(dataSource.value.status.nextRun)
-        : '',
+      value: formatTimeWithZone(dataSource.value.status.nextRun),
     },
     {
       icon: 'mdi-message-text-outline',
       label: 'Last run message',
-      value: dataSource.value.status.lastRunMessage,
+      value: dataSource.value.status.lastRunMessage || '–',
     },
     {
       icon: 'mdi-information-outline',

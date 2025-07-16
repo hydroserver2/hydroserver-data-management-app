@@ -85,8 +85,11 @@
           hide-details
           clearable
         />
-        <div class="mt-8">
-          <TimestampFormat :target="variable" />
+        <div class="mt-8" v-if="variable.timestamp">
+          <TimestampFormat
+            :target="variable.timestamp"
+            color="brown-darken-4"
+          />
         </div>
       </v-col>
     </v-row>
@@ -94,7 +97,11 @@
 </template>
 
 <script setup lang="ts">
-import { HTTPExtractor, PlaceholderVariable } from '@/models/dataSource'
+import {
+  HTTPExtractor,
+  PlaceholderVariable,
+  RunTimePlaceholder,
+} from '@/models/dataSource'
 import { useETLStore } from '@/store/etl'
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
@@ -162,5 +169,29 @@ watch(
     httpExtractor.value.placeholderVariables = newVariables
   },
   { immediate: true }
+)
+
+// Whenever any variable flips to runTime, give it a default `timestamp`
+// and when it flips back remove those fields
+watch(
+  () => httpExtractor.value.placeholderVariables.map((v) => v.type),
+  () => {
+    httpExtractor.value.placeholderVariables.forEach((v) => {
+      if (v.type === 'runTime') {
+        const rt = v as RunTimePlaceholder
+        if (!rt.timestamp) {
+          rt.runTimeValue = rt.runTimeValue || runTimeOptions[0].value
+          rt.timestamp = {
+            format: 'naive',
+            timezoneMode: 'utc',
+          }
+        }
+      } else {
+        // strip runtime‐only props off perPayload ones
+        if ('timestamp' in v) delete v.timestamp
+      }
+    })
+  },
+  { deep: true }
 )
 </script>

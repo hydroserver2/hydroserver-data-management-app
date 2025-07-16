@@ -147,6 +147,7 @@ import { useMetadata } from '@/composables/useMetadata'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useRoute, useRouter } from 'vue-router'
+import { formatTime } from '@/utils/time'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { sensors, observedProperties, processingLevels, units } = useMetadata()
@@ -197,13 +198,6 @@ const headers = [
   { title: 'Value count', key: 'valueCount' },
 ] as const
 
-const formatTime = (time: string) =>
-  new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(new Date(time)) + ' UTC'
-
 watch(
   selectedThingId,
   async (newId) => {
@@ -235,15 +229,9 @@ const tableItems = computed(() =>
     processingLevel:
       processingLevels.value.find((pl) => pl.id === ds.processingLevelId)
         ?.definition ?? ds.processingLevelId,
-
     unit: units.value.find((u) => u.id === ds.unitId)?.name,
-
-    phenomenonBeginTime: ds.phenomenonBeginTime
-      ? formatTime(ds.phenomenonBeginTime)
-      : '',
-    phenomenonEndTime: ds.phenomenonEndTime
-      ? formatTime(ds.phenomenonEndTime)
-      : '',
+    phenomenonBeginTime: formatTime(ds.phenomenonBeginTime),
+    phenomenonEndTime: formatTime(ds.phenomenonEndTime),
     isPrivate: ds.isPrivate ? 'Yes' : 'No',
     isVisible: ds.isVisible ? 'Yes' : 'No',
   }))
