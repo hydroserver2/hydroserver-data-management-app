@@ -66,17 +66,17 @@ const thingProperties = computed(() => {
         {
           icon: 'mdi-map',
           label: 'Latitude',
-          value: thing.value.latitude,
+          value: thing.value.location.latitude,
         },
         {
           icon: 'mdi-map',
           label: 'Longitude',
-          value: thing.value.longitude,
+          value: thing.value.location.longitude,
         },
         {
           icon: 'mdi-image-filter-hdr',
           label: 'Elevation',
-          value: thing.value.elevation_m,
+          value: thing.value.location.elevation_m,
         },
         {
           icon: 'mdi-file-document-outline',
@@ -91,17 +91,17 @@ const thingProperties = computed(() => {
         {
           icon: 'mdi-car-back',
           label: 'County/District',
-          value: thing.value.county,
+          value: thing.value.location.county,
         },
         {
           icon: 'mdi-plane-train',
           label: 'State/Province/Region',
-          value: thing.value.state,
+          value: thing.value.location.state,
         },
         {
           icon: 'mdi-earth',
           label: 'Country',
-          value: thing.value.country,
+          value: thing.value.location.country,
         },
         {
           icon: thing.value.isPrivate ? 'mdi-lock' : 'mdi-lock-open-variant',

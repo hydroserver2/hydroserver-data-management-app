@@ -32,11 +32,10 @@ export const fetchObservations = async (
 
     try {
       const data = await api.fetchObservations(endpoint)
-      if (data?.phenomenon_time?.length && data?.result?.length) {
-        const dataArray = data.phenomenon_time.map((time: string, index: number) => [
-          time,
-          data.result[index],
-        ])
+      if (data?.phenomenonTime?.length && data?.result?.length) {
+        const dataArray = data.phenomenonTime.map(
+          (time: string, index: number) => [time, data.result[index]]
+        )
         observations.push(...dataArray)
         if (dataArray.length < pageSize) {
           fetchObservations = false

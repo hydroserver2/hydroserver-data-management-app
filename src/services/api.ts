@@ -27,35 +27,32 @@ export const AUTH_BASE = `${BASE_URL}/auth`
 export const ACCOUNT_BASE = `${AUTH_BASE}/browser/account`
 export const SESSION_BASE = `${AUTH_BASE}/browser/session`
 export const PROVIDER_BASE = `${AUTH_BASE}/browser/provider`
-const WORKSPACES_BASE = `${AUTH_BASE}/workspaces`
+const WORKSPACES_BASE = `${BASE_URL}/data/workspaces`
+const ROLES_BASE = `${BASE_URL}/data/roles`
 
-export const TAG_BASE = `${BASE_URL}/data/tags`
 const DS_BASE = `${BASE_URL}/data/datastreams`
 const SENSOR_BASE = `${BASE_URL}/data/sensors`
 export const THINGS_BASE = `${BASE_URL}/data/things`
+export const TAG_BASE = `${THINGS_BASE}/tags`
 const ETL_SYSTEMS_BASE = `${BASE_URL}/data/orchestration-systems`
 const DATA_SOURCES_BASE = `${BASE_URL}/data/data-sources`
 const OP_BASE = `${BASE_URL}/data/observed-properties`
 const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
-const VOCABULARY_BASE = `${BASE_URL}/data/vocabulary`
-
-export const SENSORTHINGS_BASE = `${BASE_URL}/sensorthings/v1.1`
 
 export const getObservationsEndpoint = (
   id: string,
   pageSize: number,
   startTime: string,
   endTime?: string,
-  skipCount?: number
+  page?: number
 ) => {
-  let url = `${DS_BASE}/${id}/observations`
-  url += `?order=asc&page_size=${pageSize}`
-  url += `&phenomenon_start_time=${encodeURIComponent(startTime)}`
-  if (endTime)
-    url += `&phenomenon_end_time=${encodeURIComponent(endTime)}`
-  if (skipCount) url += `&page=${Math.floor(skipCount / pageSize) + 1}`
+  let url = `${DS_BASE}/${id}/observations?format=column`
+  url += `&order_by=phenomenonTime&page_size=${pageSize}`
+  url += `&phenomenon_time_min=${encodeURIComponent(startTime)}`
+  if (endTime) url += `&phenomenon_time_max=${encodeURIComponent(endTime)}`
+  if (page) url += `&page=${page}`
   return url
 }
 
@@ -133,9 +130,9 @@ export const api = {
       password: password,
     }),
 
-  fetchWorkspaces: async () => apiMethods.fetch(WORKSPACES_BASE),
+  fetchWorkspaces: async () => apiMethods.paginatedFetch(`${WORKSPACES_BASE}`),
   fetchAssociatedWorkspaces: async () =>
-    apiMethods.fetch(`${WORKSPACES_BASE}?associated_only=true`),
+    apiMethods.paginatedFetch(`${WORKSPACES_BASE}?is_associated=true`),
   fetchWorkspace: async (id: string) =>
     apiMethods.fetch(`${WORKSPACES_BASE}/${id}`),
   createWorkspace: async (postWorkspace: Workspace) =>
@@ -159,12 +156,14 @@ export const api = {
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/transfer`),
 
   getCollaboratorRoles: async (id: string) =>
-    apiMethods.fetch(`${WORKSPACES_BASE}/${id}/roles`),
-  getCollaboratorRole: async (workspaceId: string, roleId: string) =>
-    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/roles/${roleId}`),
+    apiMethods.paginatedFetch(`${ROLES_BASE}?is_user_role=true`),
+  getAPIKeyRoles: async (id: string) =>
+    apiMethods.paginatedFetch(`${ROLES_BASE}?is_apikey_role=true`),
+  getRole: async (roleId: string) =>
+    apiMethods.fetch(`${ROLES_BASE}/${roleId}`),
 
   getCollaborators: async (id: string) =>
-    apiMethods.fetch(`${WORKSPACES_BASE}/${id}/collaborators`),
+    apiMethods.paginatedFetch(`${WORKSPACES_BASE}/${id}/collaborators`),
   addCollaborator: async (id: string, email: string, roleId: string) =>
     apiMethods.post(`${WORKSPACES_BASE}/${id}/collaborators`, {
       email,
@@ -179,7 +178,7 @@ export const api = {
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
 
   fetchApiKeys: async (workspaceId: string) =>
-    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys`),
+    apiMethods.paginatedFetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys`),
   fetchApiKey: async (workspaceId: string, apiKeyId: string) =>
     apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}`),
   createApiKey: async (apiKey: ApiKey) =>
@@ -224,9 +223,9 @@ export const api = {
     }),
 
   createUnit: async (unit: Unit) => apiMethods.post(UNIT_BASE, unit),
-  fetchUnits: async () => apiMethods.fetch(UNIT_BASE),
+  fetchUnits: async () => apiMethods.paginatedFetch(`${UNIT_BASE}`),
   fetchWorkspaceUnits: async (id: string) =>
-    apiMethods.fetch(`${UNIT_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${UNIT_BASE}?workspace_id=${id}`),
   updateUnit: async (newUnit: Unit, oldUnit: Unit | null = null) =>
     apiMethods.patch(`${UNIT_BASE}/${newUnit.id}`, newUnit, oldUnit),
   deleteUnit: async (id: string) => apiMethods.delete(`${UNIT_BASE}/${id}`),
@@ -248,13 +247,13 @@ export const api = {
       transferPrimary: true,
     }),
   createThing: async (thing: Thing) => apiMethods.post(THINGS_BASE, thing),
-  fetchThings: async () => apiMethods.fetch(THINGS_BASE),
+  fetchThings: async () => apiMethods.paginatedFetch(`${THINGS_BASE}`),
   fetchThingsForWorkspace: async (id: string) =>
-    apiMethods.fetch(`${THINGS_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${THINGS_BASE}?workspace_id=${id}`),
   fetchPrimaryOwnedThings: async () =>
-    apiMethods.fetch(`${THINGS_BASE}?primary_owned_only=true`),
+    apiMethods.paginatedFetch(`${THINGS_BASE}?primary_owned_only=true`),
   fetchOwnedThings: async () =>
-    apiMethods.fetch(`${THINGS_BASE}?owned_only=true`),
+    apiMethods.paginatedFetch(`${THINGS_BASE}?owned_only=true`),
   fetchThing: async (id: string) => apiMethods.fetch(`${THINGS_BASE}/${id}`),
   updateThing: async (thing: Thing) =>
     apiMethods.patch(`${THINGS_BASE}/${thing.id}`, thing),
@@ -262,7 +261,7 @@ export const api = {
     apiMethods.patch(`${THINGS_BASE}/${id}`, { isPrivate }),
   deleteThing: async (id: string) => apiMethods.delete(`${THINGS_BASE}/${id}`),
   fetchMetadataForThingOwner: async (thingId: string) =>
-    apiMethods.fetch(
+    apiMethods.paginatedFetch(
       `${THINGS_BASE}/${thingId}/metadata?include_assignable_metadata=true`
     ),
   fetchMetadataForThing: async (thingId: string) =>
@@ -270,7 +269,7 @@ export const api = {
   uploadSitePhotos: async (thingId: string, data: FormData) =>
     apiMethods.post(`${THINGS_BASE}/${thingId}/photos`, data),
   fetchSitePhotos: async (thingId: string) =>
-    apiMethods.fetch(`${THINGS_BASE}/${thingId}/photos`),
+    apiMethods.paginatedFetch(`${THINGS_BASE}/${thingId}/photos`),
   deleteSitePhoto: async (thingId: string, name: string) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/photos`, { name }),
 
@@ -279,12 +278,12 @@ export const api = {
   editSiteTag: async (thingId: string, tag: Tag) =>
     apiMethods.put(`${THINGS_BASE}/${thingId}/tags`, tag),
   fetchSiteTags: async (thingId: string) =>
-    apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
-  fetchUsersSiteTags: async () => apiMethods.fetch(`${TAG_BASE}`),
-  deleteSiteTag: async (thingId: string, key: string) =>
-    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags`, { key }),
+    apiMethods.paginatedFetch(`${THINGS_BASE}/${thingId}/tags`),
+  fetchUsersSiteTags: async () => apiMethods.paginatedFetch(`${TAG_BASE}`),
+  deleteSiteTag: async (thingId: string, tag: Tag) =>
+    apiMethods.delete(`${THINGS_BASE}/${thingId}/tags`, tag),
   fetchWorkspaceTags: async (workspaceId: string) =>
-    apiMethods.fetch(`${TAG_BASE}/keys?workspace_id=${workspaceId}`),
+    apiMethods.paginatedFetch(`${TAG_BASE}/keys?workspace_id=${workspaceId}`),
 
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
@@ -306,14 +305,14 @@ export const api = {
 
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
-  fetchDatastreams: async () => apiMethods.fetch(DS_BASE),
+  fetchDatastreams: async () => apiMethods.paginatedFetch(`${DS_BASE}`),
   fetchDatastreamsForThing: async (thingId: string) =>
-    apiMethods.fetch(`${DS_BASE}?thing_id=${thingId}`),
+    apiMethods.paginatedFetch(`${DS_BASE}?thing_id=${thingId}`),
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),
   fetchUsersDatastreams: async () =>
-    apiMethods.fetch(`${DS_BASE}?exclude_unowned=true`),
+    apiMethods.paginatedFetch(`${DS_BASE}?exclude_unowned=true`),
   fetchPrimaryOwnedDatastreams: async () =>
-    apiMethods.fetch(`${DS_BASE}?primary_owned_only=true`),
+    apiMethods.paginatedFetch(`${DS_BASE}?primary_owned_only=true`),
   updateDatastream: async (
     newDS: Datastream,
     oldDS: Datastream | null = null
@@ -326,9 +325,9 @@ export const api = {
     apiMethods.post(OP_BASE, op),
   fetchObservedProperty: async (id: string) =>
     apiMethods.fetch(`${OP_BASE}/${id}`),
-  fetchObservedProperties: async () => apiMethods.fetch(OP_BASE),
+  fetchObservedProperties: async () => apiMethods.paginatedFetch(`${OP_BASE}`),
   fetchWorkspaceObservedProperties: async (id: string) =>
-    apiMethods.fetch(`${OP_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${OP_BASE}?workspace_id=${id}`),
   updateObservedProperty: async (
     newOP: ObservedProperty,
     oldOP: ObservedProperty | null = null
@@ -338,11 +337,11 @@ export const api = {
 
   createProcessingLevel: async (pl: ProcessingLevel) =>
     apiMethods.post(PL_BASE, pl),
-  fetchProcessingLevels: async () => apiMethods.fetch(PL_BASE),
+  fetchProcessingLevels: async () => apiMethods.paginatedFetch(`${PL_BASE}`),
   fetchProcessingLevel: async (id: string) =>
     apiMethods.fetch(`${PL_BASE}/${id}`),
   fetchWorkspaceProcessingLevels: async (id: string) =>
-    apiMethods.fetch(`${PL_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${PL_BASE}?workspace_id=${id}`),
   updateProcessingLevel: async (
     newPL: ProcessingLevel,
     oldPL: ProcessingLevel | null = null
@@ -351,19 +350,20 @@ export const api = {
     apiMethods.delete(`${PL_BASE}/${id}`),
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
-  fetchSensors: async () => apiMethods.fetch(SENSOR_BASE),
-  fetchSensor: async (id: string) => apiMethods.fetch(`${SENSOR_BASE}/${id}`),
+  fetchSensors: async () => apiMethods.paginatedFetch(`${SENSOR_BASE}`),
+  fetchSensor: async (id: string) =>
+    apiMethods.paginatedFetch(`${SENSOR_BASE}/${id}`),
   fetchWorkspaceSensors: async (id: string) =>
-    apiMethods.fetch(`${SENSOR_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${SENSOR_BASE}?workspace_id=${id}`),
   updateSensor: async (newSensor: Sensor, oldSensor: Sensor | null = null) =>
     apiMethods.patch(`${SENSOR_BASE}/${newSensor.id}`, newSensor, oldSensor),
   deleteSensor: async (id: string) => apiMethods.delete(`${SENSOR_BASE}/${id}`),
 
   createResultQualifier: async (resultQualifier: ResultQualifier) =>
     apiMethods.post(RQ_BASE, resultQualifier),
-  fetchResultQualifiers: async () => apiMethods.fetch(RQ_BASE),
+  fetchResultQualifiers: async () => apiMethods.paginatedFetch(`${RQ_BASE}`),
   fetchWorkspaceResultQualifiers: async (id: string) =>
-    apiMethods.fetch(`${RQ_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${RQ_BASE}?workspace_id=${id}`),
   updateResultQualifier: async (
     newResultQualifier: ResultQualifier,
     oldResultQualifier: ResultQualifier | null = null
@@ -378,9 +378,10 @@ export const api = {
 
   createOrchestrationSystem: async (system: OrchestrationSystem) =>
     apiMethods.post(ETL_SYSTEMS_BASE, system),
-  fetchOrchestrationSystems: async () => apiMethods.fetch(ETL_SYSTEMS_BASE),
+  fetchOrchestrationSystems: async () =>
+    apiMethods.paginatedFetch(ETL_SYSTEMS_BASE),
   fetchWorkspaceOrchestrationSystems: async (id: string) =>
-    apiMethods.fetch(`${ETL_SYSTEMS_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(`${ETL_SYSTEMS_BASE}?workspace_id=${id}`),
   fetchOrchestrationSystem: async (id: string) =>
     apiMethods.fetch(`${ETL_SYSTEMS_BASE}/${id}`),
   updateOrchestrationSystem: async (id: string, system: OrchestrationSystem) =>
@@ -390,22 +391,28 @@ export const api = {
 
   createDataSource: async (dataSource: DataSource) => {
     return apiMethods.post(
-      DATA_SOURCES_BASE,
+      `${DATA_SOURCES_BASE}?expand_related=true`,
       convertDataSourceToPostObject(dataSource)
     )
   },
-  fetchDataSources: async () => apiMethods.fetch(DATA_SOURCES_BASE),
+  fetchDataSources: async () =>
+    apiMethods.paginatedFetch(`${DATA_SOURCES_BASE}?expand_related=true`),
   fetchWorkspaceDataSources: async (id: string) =>
-    apiMethods.fetch(`${DATA_SOURCES_BASE}?workspace_id=${id}`),
+    apiMethods.paginatedFetch(
+      `${DATA_SOURCES_BASE}?workspace_id=${id}&expand_related=true`
+    ),
   fetchDataSource: async (id: string) =>
-    apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}`),
+    apiMethods.fetch(`${DATA_SOURCES_BASE}/${id}?expand_related=true`),
   updateDataSource: async (newS: DataSource) =>
     apiMethods.patch(
-      `${DATA_SOURCES_BASE}/${newS.id}`,
+      `${DATA_SOURCES_BASE}/${newS.id}?expand_related=true`,
       convertDataSourceToPostObject(newS)
     ),
   updateDataSourcePartial: async (newS: DataSource) =>
-    apiMethods.patch(`${DATA_SOURCES_BASE}/${newS.id}`, newS),
+    apiMethods.patch(
+      `${DATA_SOURCES_BASE}/${newS.id}?expand_related=true`,
+      newS
+    ),
   deleteDataSource: async (id: string) =>
     apiMethods.delete(`${DATA_SOURCES_BASE}/${id}`),
 
@@ -426,22 +433,20 @@ export const api = {
 
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
 
-  fetchSiteTypes: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/things/site-types`),
+  fetchSiteTypes: async () => apiMethods.fetch(`${THINGS_BASE}/site-types`),
   fetchSamplingFeatureTypes: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/things/sampling-feature-types`),
+    apiMethods.paginatedFetch(`${THINGS_BASE}/sampling-feature-types`),
   fetchSensorEncodingTypes: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/sensors/encoding-types`),
+    apiMethods.paginatedFetch(`${SENSOR_BASE}/encoding-types`),
   fetchMethodTypes: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/sensors/method-types`),
+    apiMethods.paginatedFetch(`${SENSOR_BASE}/method-types`),
   fetchVariableTypes: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/observed-properties/variable-types`),
-  fetchUnitTypes: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/units/types`),
+    apiMethods.paginatedFetch(`${OP_BASE}/variable-types`),
+  fetchUnitTypes: async () => apiMethods.paginatedFetch(`${UNIT_BASE}/types`),
   fetchDatastreamStatuses: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/statuses`),
+    apiMethods.paginatedFetch(`${DS_BASE}/statuses`),
   fetchDatastreamAggregations: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/aggregations`),
+    apiMethods.paginatedFetch(`${DS_BASE}/aggregation-statistics`),
   fetchSampledMediums: async () =>
-    apiMethods.fetch(`${VOCABULARY_BASE}/datastreams/sampled-mediums`),
+    apiMethods.paginatedFetch(`${DS_BASE}/sampled-mediums`),
 }

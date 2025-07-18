@@ -91,9 +91,9 @@ const uniqueColoredThings = computed(() => {
 })
 
 const createFeature = (thing: ThingWithColor) => {
-  if (!thing.latitude || !thing.longitude) return null
+  if (!thing.location.latitude || !thing.location.longitude) return null
   const f = new Feature({
-    geometry: new Point(fromLonLat([thing.longitude, thing.latitude])),
+    geometry: new Point(fromLonLat([thing.location.longitude, thing.location.latitude])),
   })
   f.set('markerColor', thing?.color?.background || '#D32F2F')
   f.set('thing', thing)

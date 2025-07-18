@@ -59,11 +59,13 @@ export async function fetchLocationData(latitude: number, longitude: number) {
   const { state, county, country } = geo
 
   return {
-    latitude: latitude.toFixed(6),
-    longitude: longitude.toFixed(6),
-    elevation_m: Math.round(elevation_m),
-    state: state,
-    county: county,
-    country: country,
+    location: {
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6),
+      elevation_m: Math.round(elevation_m),
+      state: state,
+      county: county,
+      country: country
+    }
   }
 }
