@@ -5,7 +5,7 @@ import { createPatchObject } from '@/services/createPatchObject'
 import pLimit from 'p-limit'
 
 const limit = pLimit(10)
-
+const DEFAULT_PAGE_SIZE = 1000
 
 async function interceptedFetch(endpoint: string, options: any) {
   const opts = requestInterceptor(options)
@@ -61,5 +61,25 @@ export const apiMethods = {
     options.method = 'DELETE'
     options.body = body
     return await limit(() => interceptedFetch(endpoint, options))
+  },
+
+  async paginatedFetch<T>(base: string, pageSize?: number): Promise<any> {
+    const size = pageSize ?? DEFAULT_PAGE_SIZE
+    const sep = base.includes('?') ? '&' : '?'
+    const url = `${base}${sep}page_size=${size}&page=1`
+
+    const opts = requestInterceptor({ method: 'GET' })
+    const response = await limit(() => fetch(url, opts))
+    const totalPages = Number(response.headers.get('x-total-pages')) || 1
+    const firstData = await responseInterceptor(response)
+
+    const all = [...firstData]
+    for (let p = 2; p <= totalPages; p++) {
+      const url = `${base}${sep}page_size=${size}&page=${p}`
+      const data = await limit(() => interceptedFetch(url, { method: 'GET' }))
+      all.push(...data)
+    }
+
+    return all
   },
 }
