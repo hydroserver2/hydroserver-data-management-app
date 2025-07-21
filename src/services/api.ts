@@ -278,12 +278,12 @@ export const api = {
   editSiteTag: async (thingId: string, tag: Tag) =>
     apiMethods.put(`${THINGS_BASE}/${thingId}/tags`, tag),
   fetchSiteTags: async (thingId: string) =>
-    apiMethods.paginatedFetch(`${THINGS_BASE}/${thingId}/tags`),
-  fetchUsersSiteTags: async () => apiMethods.paginatedFetch(`${TAG_BASE}`),
+    apiMethods.fetch(`${THINGS_BASE}/${thingId}/tags`),
+  fetchUsersSiteTags: async () => apiMethods.fetch(`${TAG_BASE}`),
   deleteSiteTag: async (thingId: string, tag: Tag) =>
     apiMethods.delete(`${THINGS_BASE}/${thingId}/tags`, tag),
   fetchWorkspaceTags: async (workspaceId: string) =>
-    apiMethods.paginatedFetch(`${TAG_BASE}/keys?workspace_id=${workspaceId}`),
+    apiMethods.fetch(`${TAG_BASE}/keys?workspace_id=${workspaceId}`),
 
   createHydroShareArchive: async (archive: PostHydroShareArchive) =>
     apiMethods.post(`${THINGS_BASE}/${archive.thingId}/archive`, archive),
