@@ -478,7 +478,7 @@ const headers = [
     sortable: false,
   },
   {
-    title: 'Observations (Last 100 values)',
+    title: 'Observation information',
     key: 'observations',
     sortable: false,
   },
