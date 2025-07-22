@@ -1,4 +1,4 @@
-export const TIMEZONE_OFFSETS = [
+export const FIXED_OFFSET_TIMEZONES = [
   { title: 'UTC-12:00 (International Date Line West)', value: '-1200' },
   { title: 'UTC-11:00 (Samoa Standard Time)', value: '-1100' },
   { title: 'UTC-10:00 (Hawaii-Aleutian Standard Time)', value: '-1000' },
@@ -42,9 +42,67 @@ export const TIMEZONE_OFFSETS = [
   { title: 'UTC+13:00 (Tonga Time)', value: '+1300' },
   { title: 'UTC+14:00 (Line Islands Time)', value: '+1400' },
 ] as const
-export type TimezoneOffsetType = (typeof TIMEZONE_OFFSETS)[number]['value']
+export type FixedOffsetTimezone =
+  (typeof FIXED_OFFSET_TIMEZONES)[number]['value']
 
-export interface HasTimestamp {
-  timestampFormat: string
-  timestampOffset?: TimezoneOffsetType
+const WINTER = new Date('2025-01-01T00:00:00Z')
+const SUMMER = new Date('2025-07-01T00:00:00Z')
+
+function getLocaleOffset(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    timeZoneName: 'shortOffset',
+  }).formatToParts(date)
+
+  let off =
+    parts.find((p) => p.type === 'timeZoneName')?.value.replace('GMT', '') || ''
+  if (off === '+0' || off === '-0' || off === '') return '0'
+  return off
+}
+
+export const DST_AWARE_TIMEZONES = Intl.supportedValuesOf('timeZone').map(
+  (tz) => {
+    const w = getLocaleOffset(WINTER, tz)
+    const s = getLocaleOffset(SUMMER, tz)
+    return {
+      title: `${tz} (Winter ${w} / Summer ${s})`,
+      value: tz,
+    }
+  }
+)
+
+Object.freeze(DST_AWARE_TIMEZONES)
+
+export type DstAwareTimezone = (typeof DST_AWARE_TIMEZONES)[number]['value']
+
+export const TIMESTAMP_FORMATS = [
+  { text: 'Full ISO 8601 (YYYY-MM-DD hh:mm:ss.ssss+hh:mm)', value: 'ISO8601' },
+  {
+    text: 'Timezone naive (YYYY-MM-DD hh:mm:ss)',
+    value: 'naive',
+  },
+  { text: 'Custom Format', value: 'custom' },
+] as const
+export type TimestampFormat = (typeof TIMESTAMP_FORMATS)[number]['value']
+
+export type TimezoneMode =
+  | 'utc' // always UTC
+  | 'daylightSavings' // IANA / DST-aware
+  | 'fixedOffset' // constant offset
+  | 'embeddedOffset' // offset is in the ISO string itself
+
+export interface Timestamp {
+  key?: string
+  format: TimestampFormat
+  customFormat?: string
+
+  /**
+   * Determines how we interpret the timestamp’s timezone:
+   * - `utc`:              timestamp is naive and UTC
+   * - `daylightSavings`:  use an IANA zone from DST_AWARE_TIMEZONES
+   * - `fixedOffset`:      use a value from FIXED_OFFSET_TIMEZONES
+   * - `embeddedOffset`:   rely on the ±HH:MM in the ISO8601 string
+   */
+  timezoneMode: TimezoneMode
+  timezone?: FixedOffsetTimezone | DstAwareTimezone
 }

@@ -83,6 +83,9 @@
         @change="() => updatePlottedDatastreams(item)"
       />
     </template>
+    <template v-slot:item.phenomenonEndTime="{ item }">
+      {{ formatTime(item.phenomenonEndTime) }}
+    </template>
   </v-data-table-virtual>
 
   <v-dialog
@@ -105,7 +108,7 @@ import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { downloadPlottedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
-import { thing } from '@/utils/test/fixtures'
+import { formatTime } from '@/utils/time'
 
 const {
   things,
