@@ -1,6 +1,6 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
-  <div v-else-if="!loading && obs72.length" @click="handleEmit">
+  <div v-else-if="!loading && sparklineObservations.length" @click="handleEmit">
     <div style="width: 300px">
       <v-chart
         :option="chartOption"
@@ -13,9 +13,17 @@
           {{ mostRecentDataValue }} {{ unitName }}
         </span>
       </div>
+      <div style="width: 100%">
+        <span class="text-body-3 font-weight-low opacity-70">
+          Sparkline is showing most recent
+          {{ sparklineObservations.length }} values
+        </span>
+      </div>
     </div>
   </div>
-  <div v-else-if="!obs72.length">No data for this datastream</div>
+  <div v-else-if="!sparklineObservations.length">
+    No data for this datastream
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -25,7 +33,7 @@ import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
-import { DataArray, Datastream } from '@/types'
+import { DataArray, Datastream, TimeSpacingUnit } from '@/types'
 import { preProcessData, subtractHours } from '@/utils/observationsUtils'
 import { useObservationStore } from '@/store/observations'
 import {
@@ -57,11 +65,11 @@ const handleEmit = () => {
   emit('openChart')
 }
 
-const obs72 = ref<DataArray>([])
+const sparklineObservations = ref<DataArray>([])
 const loading = ref(true)
 
 const processedObs = computed(() =>
-  preProcessData(obs72.value, props.datastream)
+  preProcessData(sparklineObservations.value, props.datastream)
 )
 
 const mostRecentDataValue = computed(() => {
@@ -121,15 +129,57 @@ function isStale(timestamp: string | null | undefined) {
   return endTime < seventyTwoHoursAgo
 }
 
-const fetchObsLast72Hours = async (ds: Datastream) => {
-  const { phenomenonEndTime: endTime } = ds
-  if (endTime) {
-    const beginTime = subtractHours(endTime, 72)
-    return fetchObservationsInRange(ds, beginTime, endTime).catch((error) => {
-      console.error('Failed to fetch observations:', error)
-      return null
-    })
+const convertToMilliseconds = (
+  amount: number,
+  unit: TimeSpacingUnit
+): number => {
+  switch (unit) {
+    case 'seconds':
+      return amount * 1000
+    case 'minutes':
+      return amount * 60 * 1000
+    case 'hours':
+      return amount * 60 * 60 * 1000
+    case 'days':
+      return amount * 24 * 60 * 60 * 1000
   }
+}
+
+const fetchSparklineObservations = async (ds: Datastream) => {
+  const {
+    phenomenonEndTime: endTime,
+    intendedTimeSpacing,
+    intendedTimeSpacingUnit,
+  } = ds
+
+  if (!endTime) return null
+
+  let beginTime: string
+  if (intendedTimeSpacing && intendedTimeSpacingUnit) {
+    const spacingMs = convertToMilliseconds(
+      intendedTimeSpacing,
+      intendedTimeSpacingUnit
+    )
+
+    const observationCount =
+      spacingMs >= 86_400_000
+        ? 30 // daily data should display 30 values
+        : spacingMs >= 3_600_000
+        ? 50 // hourly data should display 50 values
+        : 200 // sub-hourly data should display 200 values
+
+    const totalDurationMs = spacingMs * observationCount
+    beginTime = new Date(
+      new Date(endTime).getTime() - totalDurationMs
+    ).toISOString()
+  } else {
+    beginTime = subtractHours(endTime, 72)
+  }
+
+  return fetchObservationsInRange(ds, beginTime, endTime).catch((error) => {
+    console.error('Failed to fetch observations:', error)
+    return null
+  })
 }
 
 const formatNumber = (value: string | number): string => {
@@ -145,7 +195,8 @@ const formatNumber = (value: string | number): string => {
 }
 
 onMounted(async () => {
-  obs72.value = (await fetchObsLast72Hours(props.datastream)) || []
+  sparklineObservations.value =
+    (await fetchSparklineObservations(props.datastream)) || []
   loading.value = false
 })
 </script>
