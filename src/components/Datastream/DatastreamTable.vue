@@ -196,29 +196,28 @@
               <v-icon v-bind="props" icon="mdi-dots-vertical" />
             </template>
             <v-list>
-              <!-- <div v-if="canEditDatastreams"> -->
-              <!-- <v-list-item
-                prepend-icon="mdi-link-variant"
-                title="Link Data Source"
-                @click="openLinker = true"
-              /> -->
               <v-list-item
                 v-if="canEditDatastreams"
                 prepend-icon="mdi-pencil"
-                title="Edit Datastream Metadata"
+                title="Edit datastream metadata"
                 @click="openDialog(item, 'edit')"
               />
-              <!-- </div> -->
               <div v-if="canDeleteDatastreams">
                 <v-list-item
                   prepend-icon="mdi-delete"
-                  title="Delete Datastream"
+                  title="Delete datastream"
                   @click="openDialog(item, 'delete')"
                 />
               </div>
               <v-list-item
+                v-if="canDeleteObservations"
+                prepend-icon="mdi-delete-outline"
+                title="Delete data from datastream"
+                @click="openObservationDialog(item)"
+              />
+              <v-list-item
                 prepend-icon="mdi-chart-line"
-                title="Visualize Data"
+                title="Visualize data"
                 :to="{
                   name: 'VisualizeData',
                   query: { sites: item.thingId, datastreams: item.id },
@@ -226,7 +225,7 @@
               />
               <v-list-item
                 prepend-icon="mdi-download"
-                title="Download Data"
+                title="Download data"
                 @click="onDownload(item.id)"
               />
             </v-list>
@@ -274,6 +273,14 @@
     />
   </v-dialog>
 
+  <v-dialog v-model="openObservationsDelete" width="40rem">
+    <ObservationsDeleteCard
+      :datastream="item"
+      @close="openObservationsDelete = false"
+      @delete="onObservationsDelete"
+    />
+  </v-dialog>
+
   <v-dialog
     v-model="openInfoCard"
     width="50rem"
@@ -304,6 +311,7 @@ import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import { Snackbar } from '@/utils/notifications'
 import { formatTime, getLocalTimeZone } from '@/utils/time'
 import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
+import ObservationsDeleteCard from '../Observation/ObservationsDeleteCard.vue'
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
 })
@@ -316,6 +324,12 @@ const thingIdRef = computed(() => thing.value!.id)
 const downloading = reactive<Record<string, boolean>>({})
 const search = ref()
 
+const openObservationsDelete = ref(false)
+function openObservationDialog(selectedItem: any) {
+  item.value = selectedItem
+  openObservationsDelete.value = true
+}
+
 const openInfoCard = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
 
@@ -324,6 +338,7 @@ const {
   canViewDatastreams,
   canEditDatastreams,
   canDeleteDatastreams,
+  canDeleteObservations,
 } = useWorkspacePermissions(workspaceRef)
 
 const updateDatastream = async (updatedDatastream: Datastream) => {
@@ -461,6 +476,18 @@ const patchDatastream = async (patchBody: {}) => {
   } catch (error) {
     console.error('Error updating datastream', error)
   }
+}
+
+async function onObservationsDelete() {
+  try {
+    await api.deleteObservationsForDatastream(item.value.id)
+    items.value = []
+    await loadDatastreams()
+  } catch (error) {
+    console.error('Failed to delete observations', error)
+    Snackbar.error('Failed to delete observations')
+  }
+  openObservationsDelete.value = false
 }
 
 const sortBy = [{ key: 'OPName' }]
