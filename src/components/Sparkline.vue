@@ -1,6 +1,6 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
-  <div v-else-if="!loading && obs72.length" @click="handleEmit">
+  <div v-else-if="!loading && obs100.length" @click="handleEmit">
     <div style="width: 300px">
       <v-chart
         :option="chartOption"
@@ -15,7 +15,7 @@
       </div>
     </div>
   </div>
-  <div v-else-if="!obs72.length">No data for this datastream</div>
+  <div v-else-if="!obs100.length">No data for this datastream</div>
 </template>
 
 <script setup lang="ts">
@@ -57,11 +57,11 @@ const handleEmit = () => {
   emit('openChart')
 }
 
-const obs72 = ref<DataArray>([])
+const obs100 = ref<DataArray>([])
 const loading = ref(true)
 
 const processedObs = computed(() =>
-  preProcessData(obs72.value, props.datastream)
+  preProcessData(obs100.value, props.datastream)
 )
 
 const mostRecentDataValue = computed(() => {
@@ -121,15 +121,49 @@ function isStale(timestamp: string | null | undefined) {
   return endTime < seventyTwoHoursAgo
 }
 
-const fetchObsLast72Hours = async (ds: Datastream) => {
-  const { phenomenonEndTime: endTime } = ds
-  if (endTime) {
-    const beginTime = subtractHours(endTime, 72)
-    return fetchObservationsInRange(ds, beginTime, endTime).catch((error) => {
-      console.error('Failed to fetch observations:', error)
-      return null
-    })
+const convertToMilliseconds = (
+  amount: number,
+  unit: 'seconds' | 'minutes' | 'hours' | 'days'
+): number => {
+  switch (unit) {
+    case 'seconds':
+      return amount * 1000
+    case 'minutes':
+      return amount * 60 * 1000
+    case 'hours':
+      return amount * 60 * 60 * 1000
+    case 'days':
+      return amount * 24 * 60 * 60 * 1000
   }
+}
+
+const fetchObsLast100 = async (ds: Datastream) => {
+  const {
+    phenomenonEndTime: endTime,
+    intendedTimeSpacing,
+    intendedTimeSpacingUnit,
+  } = ds
+
+  if (!endTime) return null
+
+  let beginTime: string
+  if (intendedTimeSpacing && intendedTimeSpacingUnit) {
+    const spacingMs = convertToMilliseconds(
+      intendedTimeSpacing,
+      intendedTimeSpacingUnit
+    )
+    const totalDurationMs = spacingMs * 100
+    beginTime = new Date(
+      new Date(endTime).getTime() - totalDurationMs
+    ).toISOString()
+  } else {
+    beginTime = subtractHours(endTime, 72)
+  }
+
+  return fetchObservationsInRange(ds, beginTime, endTime).catch((error) => {
+    console.error('Failed to fetch observations:', error)
+    return null
+  })
 }
 
 const formatNumber = (value: string | number): string => {
@@ -145,7 +179,7 @@ const formatNumber = (value: string | number): string => {
 }
 
 onMounted(async () => {
-  obs72.value = (await fetchObsLast72Hours(props.datastream)) || []
+  obs100.value = (await fetchObsLast100(props.datastream)) || []
   loading.value = false
 })
 </script>

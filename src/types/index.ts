@@ -144,9 +144,9 @@ export class Datastream {
   phenomenonBeginTime?: string | null
   phenomenonEndTime?: string | null
   intendedTimeSpacing?: number
-  intendedTimeSpacingUnit?: string | null
+  intendedTimeSpacingUnit?: TimeSpacingUnit | null
   timeAggregationInterval: number | null
-  timeAggregationIntervalUnit: string
+  timeAggregationIntervalUnit: TimeSpacingUnit
   dataSourceId?: string | null
   valueCount: number
 
