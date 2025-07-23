@@ -1,0 +1,73 @@
+{
+  "compilerOptions": {
+    // *** Module targets
+    // Compile to the latest ECMAScript standard
+    "target": "ESNext",
+    // Format the emitted code into native import/export
+    "module": "ESNext",
+    // We're building for the web with Vite, so tell TS to loosen its rules and let Vite handle the build
+    "moduleResolution": "bundler",
+
+    // *** Language & transpilation features
+    // Turn on all strict type checks
+    "strict": true,
+    // This makes classes compile to:
+    //  super()
+    //  define public instance fields
+    //  assign public instance fields
+    // As opposed to the legacy version where super() is called second. Prevents some subtle bugs
+    "useDefineForClassFields": true,
+    // Decrease bundle size by importing modern helpers (__extends, __assign) once in tslib rather than once per file.
+    "importHelpers": true,
+    // Vite compiles files one at a time rather than doing a full tsc program build. Therefore, this flag verifies that
+    // every file in the project can be transpiled on its own - without depending on type-information from any other file.
+    // Single-file recompilation also keeps hot-reload snappy
+    "isolatedModules": true,
+    // Emits Vue files with their <MyComponent> tags still in place so that the Vue compiler (@vitejs/plugin-vue)
+    // will take those JSX bits and turn them into render functions.
+    "jsx": "preserve",
+
+    // *** Module import settings
+    // Tells compiler that module import may include .ts, don't treat these as errors. Allows import { foo } from './utils/foo.ts'
+    // with or without the .ts
+    "allowImportingTsExtensions": true,
+    // Allows ES module syntax on commonJS packages by generate a tiny helper at runtime
+    "esModuleInterop": true,
+    // Tells TypeScript to treat .json files as modules - complete with type information inferred from their contents
+    "resolveJsonModule": true,
+
+    // *** Library and type definitions
+    // Controls which built-in declaration files TypeScript includes when type-checking code. Lib overrides the default list.
+    //  ESNext:
+    //    The very latest ECMAScript features - everything from modern Promise methods (allSettled, any)
+    //    and new global constructors (BigInt, WeakRef), to proposed stage‑4 language additions that TS already supports.
+    //  DOM:
+    //    All standard browser APIs:
+    //      Globals like window, self, document, fetch
+    //      DOM interfaces like Element, NodeList, Event
+    //      Web platform types like Headers, Request, Response and their methods
+    "lib": ["ESNext", "DOM"],
+    // Skips the compiler pass over all external .d.ts files so only this project's types are checked, speeding up the build dramatically
+    "skipLibCheck": true,
+    // Tell TypeScript its only job is to perform type-checks. Leave it to Vite to transpile and build.
+    "noEmit": true,
+
+    // *** Path aliases
+    // Define root
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    "typeRoots": ["./node_modules/@types", "src/types"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "vitest.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

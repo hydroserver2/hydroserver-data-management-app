@@ -54,7 +54,7 @@ import {
 } from '@/config/openLayersMapConfig'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import { fetchLocationData } from '@/utils/maps/location'
-import WebGLVectorLayer from 'ol/layer/WebGLVector.js'
+import WebGLVectorLayer from 'ol/layer/WebGLVector'
 import mapMarkerUrl from '@/assets/map-marker-64.png?url'
 
 const props = defineProps({
@@ -93,7 +93,9 @@ const uniqueColoredThings = computed(() => {
 const createFeature = (thing: ThingWithColor) => {
   if (!thing.location.latitude || !thing.location.longitude) return null
   const f = new Feature({
-    geometry: new Point(fromLonLat([thing.location.longitude, thing.location.latitude])),
+    geometry: new Point(
+      fromLonLat([thing.location.longitude, thing.location.latitude])
+    ),
   })
   f.set('markerColor', thing?.color?.background || '#D32F2F')
   f.set('thing', thing)

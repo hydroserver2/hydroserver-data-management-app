@@ -64,7 +64,7 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="userForm.phone"
-              v-maska:[phoneMask]
+              v-maska:phoneMask
               label="Phone Number"
               :rules="rules.phoneNumber"
             />

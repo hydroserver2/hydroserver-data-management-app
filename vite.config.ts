@@ -39,8 +39,8 @@ export default defineConfig({
     },
     environment: 'jsdom',
     coverage: {
+      include: ['src/**/*.{ts,tsx,js,jsx}'],
       exclude: [
-        '**/src/**/*.vue',
         '**/src/composables/useWorkspaceTags.ts',
         '**/src/composables/useHydroShare.ts',
         '**/src/composables/useWorkspacePermissions.ts',

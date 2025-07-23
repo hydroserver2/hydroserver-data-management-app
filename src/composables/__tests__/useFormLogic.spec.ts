@@ -9,7 +9,6 @@ const [unit1, unit2] = unitFixtures
 
 const defaultCreateItem = vi.fn()
 const defaultUpdateItem = vi.fn()
-let defaultInitialUnit: Unit
 
 describe('useFormLogic', () => {
   // onMounted won't work outside of the context of script setup, therefore
@@ -17,7 +16,11 @@ describe('useFormLogic', () => {
   const createDummyComponent = ({
     createItem = defaultCreateItem,
     updateItem = defaultUpdateItem,
-    initialUnit = defaultInitialUnit,
+    initialUnit,
+  }: {
+    createItem?: typeof defaultCreateItem
+    updateItem?: typeof defaultUpdateItem
+    initialUnit?: Unit
   } = {}) =>
     defineComponent({
       setup() {
@@ -39,7 +42,7 @@ describe('useFormLogic', () => {
 
     const wrapper = mount(
       createDummyComponent({
-        initialUnit: initialUnit,
+        initialUnit,
       })
     )
 
