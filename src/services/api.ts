@@ -351,8 +351,7 @@ export const api = {
 
   createSensor: async (sensor: Sensor) => apiMethods.post(SENSOR_BASE, sensor),
   fetchSensors: async () => apiMethods.paginatedFetch(`${SENSOR_BASE}`),
-  fetchSensor: async (id: string) =>
-    apiMethods.paginatedFetch(`${SENSOR_BASE}/${id}`),
+  fetchSensor: async (id: string) => apiMethods.fetch(`${SENSOR_BASE}/${id}`),
   fetchWorkspaceSensors: async (id: string) =>
     apiMethods.paginatedFetch(`${SENSOR_BASE}?workspace_id=${id}`),
   updateSensor: async (newSensor: Sensor, oldSensor: Sensor | null = null) =>
