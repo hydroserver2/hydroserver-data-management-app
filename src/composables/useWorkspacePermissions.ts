@@ -129,6 +129,10 @@ export function useWorkspacePermissions(
     hasPermission(PermissionResource.Observation, PermissionAction.View)
   )
 
+  const canDeleteObservations = computed(() =>
+    hasPermission(PermissionResource.Observation, PermissionAction.Delete)
+  )
+
   return {
     isWorkspaceOwner,
     canEditWorkspace,
@@ -143,6 +147,7 @@ export function useWorkspacePermissions(
     canCreateProcessingLevels,
     canCreateObservedProperties,
     canViewObservations,
+    canDeleteObservations,
     isOwner,
     hasPermission,
     hasGlobalPermissions,

@@ -431,6 +431,11 @@ export const api = {
     ),
 
   fetchObservations: async (endpoint: string) => apiMethods.fetch(endpoint),
+  deleteObservationsForDatastream: async (datastreamId: string) =>
+    apiMethods.post(`${DS_BASE}/${datastreamId}/observations/bulk-delete`, {
+      phenomenonTimeStart: null,
+      phenomenonTimeEnd: null,
+    }),
 
   fetchSiteTypes: async () => apiMethods.fetch(`${THINGS_BASE}/site-types`),
   fetchSamplingFeatureTypes: async () =>
