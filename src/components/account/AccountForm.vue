@@ -64,7 +64,7 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="userForm.phone"
-              v-maska:[phoneMask]
+              v-maska="phoneMask"
               label="Phone Number"
               :rules="rules.phoneNumber"
             />
@@ -174,7 +174,7 @@ import { rules } from '@/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
 import { userTypes, organizationTypes } from '@/config/vocabularies'
 import { VForm } from 'vuetify/components'
-import { vMaska } from 'maska'
+import { vMaska } from 'maska/vue'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'

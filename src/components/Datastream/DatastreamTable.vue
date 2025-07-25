@@ -126,14 +126,14 @@
           v-else
           class="mt-2"
           :datastream="item"
-          @open-chart="item.chartOpen = true"
+          @openChart="openCharts[item.id] = true"
           :unitName="item.unitName"
         />
 
-        <v-dialog v-model="item.chartOpen" width="80rem">
+        <v-dialog v-model="openCharts[item.id]" width="80rem">
           <DatastreamPopupPlot
             :datastream="item"
-            @close="item.chartOpen = false"
+            @close="openCharts[item.id] = false"
           />
         </v-dialog>
       </template>
@@ -369,6 +369,8 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
 const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
   useMetadata(toRef(props, 'workspace'))
 
+const openCharts = reactive<Record<string, boolean>>({})
+
 const visibleDatastreams = computed(() => {
   return items.value
     .filter((d) => !d.isPrivate || canViewDatastreams.value)
@@ -384,7 +386,6 @@ const visibleDatastreams = computed(() => {
 
       const mapped = {
         ...d,
-        chartOpen: false,
         OPName: op ? `${op.name} (${op.code})` : '',
         processingLevelCode: pl?.code ?? '',
         processingLevelName: pl?.definition ?? '',
