@@ -178,19 +178,24 @@ export const api = {
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
 
   fetchApiKeys: async (workspaceId: string) =>
-    apiMethods.paginatedFetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys`),
+    apiMethods.paginatedFetch(
+      `${WORKSPACES_BASE}/${workspaceId}/api-keys?expand_related=true`
+    ),
   fetchApiKey: async (workspaceId: string, apiKeyId: string) =>
     apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}`),
   createApiKey: async (apiKey: ApiKey) =>
-    apiMethods.post(`${WORKSPACES_BASE}/${apiKey.workspaceId}/api-keys`, {
-      name: apiKey.name,
-      description: apiKey.description,
-      isActive: true,
-      roleId: apiKey.role!.id,
-    }),
+    apiMethods.post(
+      `${WORKSPACES_BASE}/${apiKey.workspaceId}/api-keys?expand_related=true`,
+      {
+        name: apiKey.name,
+        description: apiKey.description,
+        isActive: true,
+        roleId: apiKey.role!.id,
+      }
+    ),
   updateApiKey: async (newKey: ApiKey, oldKey?: ApiKey) =>
     apiMethods.patch(
-      `${WORKSPACES_BASE}/${newKey.workspaceId}/api-keys/${newKey.id}`,
+      `${WORKSPACES_BASE}/${newKey.workspaceId}/api-keys/${newKey.id}?expand_related=true`,
       {
         name: newKey.name,
         description: newKey.description,
