@@ -46,7 +46,7 @@
       <v-toolbar color="brown" height="5"></v-toolbar>
 
       <v-window v-model="tab" class="elevation-3" v-if="selectedWorkspace">
-        <v-window-item value="0">
+        <v-window-item :value="0">
           <SensorTable
             :key="sensorKey"
             :search="search"
@@ -54,7 +54,7 @@
           />
         </v-window-item>
 
-        <v-window-item value="1">
+        <v-window-item :value="1">
           <ObservedPropertyTable
             :key="OPKey"
             :search="search"
@@ -62,7 +62,7 @@
           />
         </v-window-item>
 
-        <v-window-item value="2">
+        <v-window-item :value="2">
           <ProcessingLevelTable
             :key="PLKey"
             :search="search"
@@ -70,7 +70,7 @@
           />
         </v-window-item>
 
-        <v-window-item value="3">
+        <v-window-item :value="3">
           <UnitTable
             :key="unitKey"
             :search="search"
@@ -78,7 +78,7 @@
           />
         </v-window-item>
 
-        <v-window-item value="4">
+        <v-window-item :value="4">
           <ResultQualifierTable
             :key="qualifierKey"
             :search="search"
@@ -147,7 +147,7 @@
       <v-toolbar color="deep-orange-darken-4" height="5"></v-toolbar>
 
       <v-window v-model="tab" class="elevation-3">
-        <v-window-item value="0">
+        <v-window-item :value="0">
           <v-data-table-virtual
             :headers="sensorHeaders"
             :items="sensors"
@@ -157,7 +157,7 @@
           </v-data-table-virtual>
         </v-window-item>
 
-        <v-window-item value="1">
+        <v-window-item :value="1">
           <v-data-table-virtual
             :headers="OPheaders"
             :items="observedProperties"
@@ -167,7 +167,7 @@
           </v-data-table-virtual>
         </v-window-item>
 
-        <v-window-item value="2">
+        <v-window-item :value="2">
           <v-data-table-virtual
             :headers="procLevelHeaders"
             :items="processingLevels"
@@ -177,7 +177,7 @@
           </v-data-table-virtual>
         </v-window-item>
 
-        <v-window-item value="3">
+        <v-window-item :value="3">
           <v-data-table-virtual
             :headers="unitHeaders"
             :items="units"
@@ -187,7 +187,7 @@
           </v-data-table-virtual>
         </v-window-item>
 
-        <v-window-item value="4">
+        <v-window-item :value="4">
           <v-data-table-virtual
             :headers="resultQualifierHeaders"
             :items="resultQualifiers"
