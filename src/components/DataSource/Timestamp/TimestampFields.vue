@@ -2,7 +2,7 @@
   <v-card-item>
     <v-card-title>Payload timestamp</v-card-title>
   </v-card-item>
-  <v-card-text class="pb-1">
+  <v-card-text class="pb-0">
     <v-row>
       <v-col>
         <v-text-field
@@ -18,9 +18,9 @@
       </v-col>
     </v-row>
   </v-card-text>
-  <v-card-item>
+  <v-card-text>
     <TimestampFormat :target="transformer.timestamp" color="green-darken-4" />
-  </v-card-item>
+  </v-card-text>
 </template>
 
 <script setup lang="ts">
