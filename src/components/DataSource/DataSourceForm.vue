@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRaw } from 'vue'
 import { DataSource } from '@/models'
 import { required, rules } from '@/utils/rules'
 import DataSourceETLFields from './DataSourceETLFields.vue'
@@ -154,22 +154,24 @@ import { useWorkspaceStore } from '@/store/workspaces'
 import { getLocalTimeZone } from '@/utils/time'
 
 const props = defineProps({
-  oldDataSource: Object as () => DataSource,
+  isEdit: Boolean,
   orchestrationSystem: Object as () => OrchestrationSystem,
 })
 const emit = defineEmits(['created', 'updated', 'close'])
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+const { dataSource } = storeToRefs(useETLStore())
 
-const isEdit = computed(() => !!props.oldDataSource || undefined)
 const valid = ref(false)
 const myForm = ref<VForm>()
 const orchestrationSystems = ref([] as OrchestrationSystem[])
 const etlFieldsRef = ref<any>(null)
 const loaded = ref(false)
 const scheduleType = ref('interval')
+const isSubmitting = ref(false)
 
-const { dataSource } = storeToRefs(useETLStore())
-if (props.oldDataSource) dataSource.value = new DataSource(props.oldDataSource!)
+let prevDataSource = undefined
+if (props.isEdit)
+  prevDataSource = JSON.parse(JSON.stringify(toRaw(dataSource.value)))
 else {
   let workflowType = 'SDL'
   if (props.orchestrationSystem?.type === 'airflow') {
@@ -229,11 +231,13 @@ async function onSubmit() {
     if (!etlValid) return
   }
 
+  isSubmitting.value = true
+
   await myForm.value?.validate()
   if (!valid.value) return false
 
   try {
-    const newItem: DataSource | null = isEdit.value
+    const newItem: DataSource | null = props.isEdit
       ? await api.updateDataSource(dataSource.value)
       : await api.createDataSource(dataSource.value)
 
@@ -242,7 +246,7 @@ async function onSubmit() {
       return
     }
 
-    if (isEdit.value) {
+    if (props.isEdit) {
       emit('updated', newItem)
     } else {
       emit('created', newItem.id)
@@ -252,6 +256,12 @@ async function onSubmit() {
   }
   emit('close')
 }
+
+onBeforeUnmount(() => {
+  if (!isSubmitting.value) {
+    dataSource.value = new DataSource(prevDataSource)
+  }
+})
 
 onMounted(async () => {
   const timeKeys: Array<'startTime' | 'endTime'> = ['startTime', 'endTime']
