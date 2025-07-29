@@ -41,6 +41,13 @@ const PL_BASE = `${BASE_URL}/data/processing-levels`
 const RQ_BASE = `${BASE_URL}/data/result-qualifiers`
 const UNIT_BASE = `${BASE_URL}/data/units`
 
+type DatastreamFilterKey =
+  | 'unit_id'
+  | 'sensor_id'
+  | 'observed_property_id'
+  | 'processing_level_id'
+  | 'result_qualifier_id'
+
 export const getObservationsEndpoint = (
   id: string,
   pageSize: number,
@@ -178,19 +185,26 @@ export const api = {
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/collaborators`, { email }),
 
   fetchApiKeys: async (workspaceId: string) =>
-    apiMethods.paginatedFetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys`),
+    apiMethods.paginatedFetch(
+      `${WORKSPACES_BASE}/${workspaceId}/api-keys?expand_related=true`
+    ),
   fetchApiKey: async (workspaceId: string, apiKeyId: string) =>
-    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}`),
+    apiMethods.fetch(
+      `${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}?expand_related=true`
+    ),
   createApiKey: async (apiKey: ApiKey) =>
-    apiMethods.post(`${WORKSPACES_BASE}/${apiKey.workspaceId}/api-keys`, {
-      name: apiKey.name,
-      description: apiKey.description,
-      isActive: true,
-      roleId: apiKey.role!.id,
-    }),
+    apiMethods.post(
+      `${WORKSPACES_BASE}/${apiKey.workspaceId}/api-keys?expand_related=true`,
+      {
+        name: apiKey.name,
+        description: apiKey.description,
+        isActive: true,
+        roleId: apiKey.role!.id,
+      }
+    ),
   updateApiKey: async (newKey: ApiKey, oldKey?: ApiKey) =>
     apiMethods.patch(
-      `${WORKSPACES_BASE}/${newKey.workspaceId}/api-keys/${newKey.id}`,
+      `${WORKSPACES_BASE}/${newKey.workspaceId}/api-keys/${newKey.id}?expand_related=true`,
       {
         name: newKey.name,
         description: newKey.description,
@@ -207,7 +221,9 @@ export const api = {
         : oldKey
     ),
   regenerateApiKey: async (id: string, apiKeyId: string) =>
-    apiMethods.put(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}/regenerate`),
+    apiMethods.put(
+      `${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}/regenerate?expand_related=true`
+    ),
   deleteApiKey: async (id: string, apiKeyId: string) =>
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}`),
 
@@ -250,8 +266,6 @@ export const api = {
   fetchThings: async () => apiMethods.paginatedFetch(`${THINGS_BASE}`),
   fetchThingsForWorkspace: async (id: string) =>
     apiMethods.paginatedFetch(`${THINGS_BASE}?workspace_id=${id}`),
-  fetchPrimaryOwnedThings: async () =>
-    apiMethods.paginatedFetch(`${THINGS_BASE}?primary_owned_only=true`),
   fetchOwnedThings: async () =>
     apiMethods.paginatedFetch(`${THINGS_BASE}?owned_only=true`),
   fetchThing: async (id: string) => apiMethods.fetch(`${THINGS_BASE}/${id}`),
@@ -305,14 +319,25 @@ export const api = {
 
   createDatastream: async (datastream: Datastream) =>
     apiMethods.post(DS_BASE, datastream),
-  fetchDatastreams: async () => apiMethods.paginatedFetch(`${DS_BASE}`),
+  fetchDatastreams: async (
+    filters?: Partial<Record<DatastreamFilterKey, string>>
+  ) => {
+    const parts: string[] = []
+    if (filters) {
+      for (const [key, val] of Object.entries(filters)) {
+        parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+      }
+    }
+    const query = parts.length ? `?${parts.join('&')}` : ''
+    return apiMethods.paginatedFetch(`${DS_BASE}${query}`)
+  },
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.paginatedFetch(`${DS_BASE}?thing_id=${thingId}`),
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),
+  fetchDatastreamExpanded: async (id: string) =>
+    apiMethods.fetch(`${DS_BASE}/${id}?expand_related=true`),
   fetchUsersDatastreams: async () =>
     apiMethods.paginatedFetch(`${DS_BASE}?exclude_unowned=true`),
-  fetchPrimaryOwnedDatastreams: async () =>
-    apiMethods.paginatedFetch(`${DS_BASE}?primary_owned_only=true`),
   updateDatastream: async (
     newDS: Datastream,
     oldDS: Datastream | null = null

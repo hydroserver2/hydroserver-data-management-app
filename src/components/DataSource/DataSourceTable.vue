@@ -33,6 +33,7 @@
       :hover="true"
       class="elevation-2"
       @click:row="onRowClick"
+      :loading="loading"
     >
       <template v-slot:no-data>
         <div class="text-center pa-4" v-if="tableData.length === 0">
@@ -183,8 +184,10 @@ const orchestrationSystems = ref<OrchestrationSystem[]>([])
 const dataSources = ref<DataSource[]>([])
 const selectedOrchestrationSystem = ref<OrchestrationSystem>()
 const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
+const loading = ref(false)
 
 const fetchOrchestrationData = async (newId: string) => {
+  loading.value = true
   try {
     const [orchestrationSystemResponse, dataSourceResponse] = await Promise.all(
       [api.fetchOrchestrationSystems(), api.fetchDataSources()]
@@ -201,6 +204,8 @@ const fetchOrchestrationData = async (newId: string) => {
     )
   } catch (error) {
     console.error('Error fetching orchestration data', error)
+  } finally {
+    loading.value = false
   }
 }
 

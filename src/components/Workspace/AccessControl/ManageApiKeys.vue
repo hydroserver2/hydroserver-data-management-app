@@ -199,7 +199,7 @@ async function copyKey(key: string) {
 
 onMounted(async () => {
   try {
-    const rolesResponse = await api.getCollaboratorRoles(props.workspaceId)
+    const rolesResponse = await api.getAPIKeyRoles(props.workspaceId)
     roles.value = rolesResponse.filter(
       (r: CollaboratorRole) => r.isApikeyRole === true
     )

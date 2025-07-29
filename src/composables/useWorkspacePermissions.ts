@@ -148,9 +148,9 @@ export function useWorkspacePermissions(
     canCreateObservedProperties,
     canViewObservations,
     canDeleteObservations,
+    isAdmin,
     isOwner,
     hasPermission,
-    hasGlobalPermissions,
     checkPermissionsByWorkspaceId,
     getUserRoleName,
   }

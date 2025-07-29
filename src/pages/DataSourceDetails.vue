@@ -95,11 +95,7 @@
   <v-container v-else>Loading...</v-container>
 
   <v-dialog v-model="openEdit" width="80rem">
-    <DataSourceForm
-      @close="openEdit = false"
-      :old-data-source="dataSource"
-      @updated="fetchData"
-    />
+    <DataSourceForm @close="openEdit = false" @updated="fetchData" is-edit />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">

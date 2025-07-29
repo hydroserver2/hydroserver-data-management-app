@@ -6,7 +6,7 @@
     :style="{ 'max-height': `400px` }"
     fixed-header
   >
-    <template v-slot:item.actions="{ item }">
+    <template v-slot:item.actions="{ item }" v-if="canEdit">
       <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
@@ -17,7 +17,9 @@
       :processing-level="item"
       @close="openEdit = false"
       @updated="onUpdate"
-      :workspace-id="workspaceId"
+      v-bind="{
+        ...(workspaceId ? { 'workspace-id': workspaceId } : {}),
+      }"
     />
   </v-dialog>
 
@@ -25,7 +27,7 @@
     <DeleteMetadataCard
       itemName="processing level"
       :itemID="item.id"
-      parameter-name="processingLevelId"
+      parameter-name="processing_level_id"
       @delete="onDelete"
       @close="openDelete = false"
     />
@@ -39,19 +41,27 @@ import { api } from '@/services/api'
 import { ProcessingLevel } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
+import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
 
 const props = defineProps<{
   search: string | undefined
-  workspaceId: string
+  workspaceId?: string
+  canEdit: Boolean
 }>()
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
-  useTableLogic(
-    async (wsId: string) => await api.fetchWorkspaceProcessingLevels(wsId),
-    api.deleteProcessingLevel,
-    ProcessingLevel,
-    toRef(props, 'workspaceId')
-  )
+  props.workspaceId
+    ? useTableLogic(
+        async (wsId: string) => await api.fetchWorkspaceProcessingLevels(wsId),
+        api.deleteProcessingLevel,
+        ProcessingLevel,
+        toRef(props, 'workspaceId')
+      )
+    : useSystemTableLogic(
+        api.fetchProcessingLevels,
+        api.deleteProcessingLevel,
+        ProcessingLevel
+      )
 
 const ProcLevelHeaders = [
   { title: 'Code', key: 'code' },

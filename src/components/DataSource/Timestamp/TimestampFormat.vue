@@ -6,12 +6,13 @@
         :items="TIMESTAMP_FORMATS"
         item-title="text"
         item-value="value"
-        label="Timestamp format"
+        label="Timestamp format *"
+        hide-details
       />
     </v-col>
   </v-row>
 
-  <v-row class="mt-0" v-if="target.format === 'custom'">
+  <v-row v-if="target.format === 'custom'">
     <v-col>
       <v-text-field
         v-model="target.customFormat"

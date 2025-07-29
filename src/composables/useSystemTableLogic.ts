@@ -1,14 +1,13 @@
-import { Ref, ref, watch } from 'vue'
+import { onMounted, Ref, ref, watch } from 'vue'
 
 interface WithId {
   id: string
 }
 
-export function useTableLogic<T extends WithId>(
-  fetchFn: (wsId: string) => Promise<T[]>,
+export function useSystemTableLogic<T extends WithId>(
+  fetchFn: () => Promise<T[]>,
   deleteFn: (id: string) => Promise<any>,
-  ItemClass: new () => T,
-  workspaceId: Ref<string | null | undefined>
+  ItemClass: new () => T
 ) {
   const openEdit = ref(false)
   const openDelete = ref(false)
@@ -20,7 +19,6 @@ export function useTableLogic<T extends WithId>(
     item.value = selectedItem
     if (dialog === 'edit') openEdit.value = true
     else if (dialog === 'delete') openDelete.value = true
-    else if (dialog === 'accessControl') openAccessControl.value = true
   }
 
   // For emitting the updated item to parent. Assume child calls api update.
@@ -40,25 +38,13 @@ export function useTableLogic<T extends WithId>(
     }
   }
 
-  async function loadData() {
+  onMounted(async () => {
     try {
-      if (!workspaceId.value) {
-        items.value = []
-        return
-      }
-      items.value = await fetchFn(workspaceId.value)
+      items.value = await fetchFn()
     } catch (error) {
       console.error(`Error fetching table items`, error)
     }
-  }
-
-  watch(
-    workspaceId,
-    async (newVal, oldVal) => {
-      if (newVal !== oldVal) await loadData()
-    },
-    { immediate: true }
-  )
+  })
 
   return {
     openEdit,

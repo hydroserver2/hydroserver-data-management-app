@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar color="brown">
+    <v-toolbar :color="workspaceId ? 'brown' : 'deep-orange-darken-4'">
       <v-card-title>
         {{ isEdit ? 'Edit' : 'Add' }} Result Qualifier
       </v-card-title>
@@ -46,7 +46,7 @@ import { api } from '@/services/api'
 
 const props = defineProps<{
   resultQualifier?: ResultQualifier
-  workspaceId: string
+  workspaceId?: string
 }>()
 
 const emit = defineEmits(['updated', 'created', 'close'])
@@ -60,7 +60,7 @@ const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
 
 async function onSubmit() {
   try {
-    item.value.workspaceId = props.workspaceId
+    if (props.workspaceId) item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) {
       if (isEdit.value) emit('close')
