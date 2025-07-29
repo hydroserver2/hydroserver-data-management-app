@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar color="brown">
+    <v-toolbar :color="workspaceId ? 'brown' : 'deep-orange-darken-4'">
       <v-card-title> {{ isEdit ? 'Edit' : 'Add' }} Sensor </v-card-title>
     </v-toolbar>
     <v-divider />
@@ -94,7 +94,7 @@ import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const props = defineProps<{
   sensor?: Sensor
-  workspaceId: string
+  workspaceId?: string
 }>()
 
 const emit = defineEmits(['created', 'updated', 'close'])
@@ -117,7 +117,7 @@ async function onSubmit() {
     item.value.name = `${manufacturer}: ${model}`
   }
   try {
-    item.value.workspaceId = props.workspaceId
+    if (props.workspaceId) item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) {
       if (isEdit.value) emit('close')

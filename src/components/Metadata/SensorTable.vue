@@ -6,7 +6,7 @@
     :style="{ 'max-height': `400px` }"
     fixed-header
   >
-    <template v-slot:item.actions="{ item }">
+    <template v-slot:item.actions="{ item }" v-if="canEdit">
       <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
       <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
     </template>
@@ -17,7 +17,9 @@
       :sensor="item"
       @close="openEdit = false"
       @updated="onUpdate"
-      :workspace-id="workspaceId"
+      v-bind="{
+        ...(workspaceId ? { 'workspace-id': workspaceId } : {}),
+      }"
     />
   </v-dialog>
 
@@ -25,7 +27,7 @@
     <DeleteMetadataCard
       itemName="sensor"
       :itemID="item.id"
-      parameter-name="sensorId"
+      parameter-name="sensor_id"
       @delete="onDelete"
       @close="openDelete = false"
     />
@@ -39,19 +41,23 @@ import { api } from '@/services/api'
 import { Sensor } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
+import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
 
 const props = defineProps<{
   search: string | undefined
-  workspaceId: string
+  workspaceId?: string
+  canEdit: Boolean
 }>()
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
-  useTableLogic(
-    async (wsId: string) => await api.fetchWorkspaceSensors(wsId),
-    api.deleteSensor,
-    Sensor,
-    toRef(props, 'workspaceId')
-  )
+  props.workspaceId
+    ? useTableLogic(
+        async (wsId: string) => await api.fetchWorkspaceSensors(wsId),
+        api.deleteSensor,
+        Sensor,
+        toRef(props, 'workspaceId')
+      )
+    : useSystemTableLogic(api.fetchSensors, api.deleteSensor, Sensor)
 
 const headers = [
   { title: 'Name', key: 'name' },

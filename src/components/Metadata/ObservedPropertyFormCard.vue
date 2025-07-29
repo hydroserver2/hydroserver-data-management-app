@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar color="brown">
+    <v-toolbar :color="workspaceId ? 'brown' : 'deep-orange-darken-4'">
       <v-card-title>
         {{ isEdit ? 'Edit' : 'Add' }} Observed Property
       </v-card-title>
@@ -75,7 +75,7 @@ const OPNames = Object.keys(OPNameTypes)
 
 const props = defineProps<{
   observedProperty?: ObservedProperty
-  workspaceId: string
+  workspaceId?: string
 }>()
 
 const emit = defineEmits(['created', 'updated', 'close'])
@@ -98,7 +98,7 @@ const handleNameUpdated = () => {
 
 async function onSubmit() {
   try {
-    item.value.workspaceId = props.workspaceId
+    if (props.workspaceId) item.value.workspaceId = props.workspaceId
     const newItem = await uploadItem()
     if (!newItem) {
       if (isEdit.value) emit('close')
