@@ -76,19 +76,6 @@
           <strong class="mr-2">Aggregation statistic:</strong>
           {{ item.aggregationStatistic }}
         </p>
-        <!-- </template> -->
-        <!-- <v-btn
-          class="pl-0"
-          color="medium-emphasis"
-          size="small"
-          variant="text"
-          :append-icon="
-            isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'
-          "
-          @click.stop="toggleExpand(internalItem)"
-        >
-          {{ isExpanded(internalItem) ? '... Show less' : '... Show more' }}
-        </v-btn> -->
       </template>
 
       <template v-slot:item.time="{ item }">
@@ -346,18 +333,11 @@ const updateDatastream = async (updatedDatastream: Datastream) => {
   onUpdate(updatedDatastream)
 }
 
-// function formatDate(dateString: string) {
-//   return (
-//     new Date(dateString).toUTCString().split(' ').slice(1, 5).join(' ') + ' UTC'
-//   )
-// }
-
 const onCreated = async () => {
   await fetchMetadata(props.workspace.id)
   await loadDatastreams()
 }
 
-// const openLinker = ref(false)
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
     async (thingId: string) => await api.fetchDatastreamsForThing(thingId),
