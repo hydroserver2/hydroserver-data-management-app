@@ -95,7 +95,7 @@
         item-value="id"
         class="elevation-3 owned-sites-table"
         color="secondary-darken-2"
-        :style="{ 'max-height': `200vh` }"
+        :style="{ 'max-height': `400px` }"
         fixed-header
         loading-text="Loading sites..."
       >
