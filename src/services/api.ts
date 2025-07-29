@@ -182,7 +182,9 @@ export const api = {
       `${WORKSPACES_BASE}/${workspaceId}/api-keys?expand_related=true`
     ),
   fetchApiKey: async (workspaceId: string, apiKeyId: string) =>
-    apiMethods.fetch(`${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}`),
+    apiMethods.fetch(
+      `${WORKSPACES_BASE}/${workspaceId}/api-keys/${apiKeyId}?expand_related=true`
+    ),
   createApiKey: async (apiKey: ApiKey) =>
     apiMethods.post(
       `${WORKSPACES_BASE}/${apiKey.workspaceId}/api-keys?expand_related=true`,
@@ -212,7 +214,9 @@ export const api = {
         : oldKey
     ),
   regenerateApiKey: async (id: string, apiKeyId: string) =>
-    apiMethods.put(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}/regenerate`),
+    apiMethods.put(
+      `${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}/regenerate?expand_related=true`
+    ),
   deleteApiKey: async (id: string, apiKeyId: string) =>
     apiMethods.delete(`${WORKSPACES_BASE}/${id}/api-keys/${apiKeyId}`),
 
