@@ -12,7 +12,7 @@
       >
     </v-toolbar>
 
-    <DatastreamInformationPanels :datastream="datastream" :thing="thing" />
+    <DatastreamInformationPanels :datastream-id="datastream.id" />
 
     <v-card-actions>
       <v-spacer />
