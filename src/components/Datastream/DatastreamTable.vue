@@ -416,7 +416,11 @@ const onDownload = async (datastreamId: string) => {
   }
 }
 
-async function toggleDataVisibility(datastream: Datastream) {
+async function toggleDataVisibility(computedDatastream: Datastream) {
+  // mutate the original
+  const datastream = items.value.find((d) => d.id === computedDatastream.id)
+  if (!datastream) return
+
   datastream.isVisible = !datastream.isVisible
   if (datastream.isVisible) datastream.isPrivate = false
   patchDatastream({
@@ -426,7 +430,11 @@ async function toggleDataVisibility(datastream: Datastream) {
   })
 }
 
-async function toggleVisibility(datastream: Datastream) {
+async function toggleVisibility(computedDatastream: Datastream) {
+  // mutate the original
+  const datastream = items.value.find((d) => d.id === computedDatastream.id)
+  if (!datastream) return
+
   datastream.isPrivate = !datastream.isPrivate
   if (datastream.isPrivate) datastream.isVisible = false
   patchDatastream({
