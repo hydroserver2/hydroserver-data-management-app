@@ -651,7 +651,7 @@ watch(selectedDatastreamID, async () => {
     const fetchedDS = await api.fetchDatastream(selectedDatastreamID.value)
     if (!fetchedDS) return
     Object.assign(datastream.value, {
-      ...datastream,
+      ...datastream.value,
       sensorId: fetchedDS.sensorId,
       observedPropertyId: fetchedDS.observedPropertyId,
       processingLevelId: fetchedDS.processingLevelId,
