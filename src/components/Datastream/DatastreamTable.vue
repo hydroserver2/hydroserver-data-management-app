@@ -127,44 +127,66 @@
 
       <template v-slot:item.actions="{ item }">
         <v-row align="center" style="height: 90%" class="mt-2">
-          <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
-            <template v-slot:activator="{ props }">
+          <v-tooltip
+            bottom
+            :openDelay="500"
+            content-class="pa-0 ma-0 bg-transparent"
+            v-if="canEditDatastreams"
+          >
+            <template #activator="{ props: tp }">
               <v-icon
+                v-bind="tp"
                 :icon="
                   item.isVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
                 "
-                :color="item.isVisible ? 'grey' : 'grey-lighten-1'"
+                :color="item.isVisible ? 'green' : 'deep-orange-darken-4'"
                 small
-                v-bind="props"
                 @click="toggleDataVisibility(item)"
               />
             </template>
-            <span v-if="item.isVisible"
-              >Hide the data for this datastream from guests of your site while
-              keeping the metadata public. Owners will still see it
-            </span>
-            <span v-else
-              >Make the data for this datastream publicly visible</span
-            >
+
+            <VisibilityTooltipCard
+              title="Observations are currently"
+              :items="[
+                {
+                  label: 'Clicking this will',
+                  value: item.isVisible
+                    ? 'Hide data for this datastream from guests of your site while keeping the datastream metadata publicly visible.'
+                    : 'Make the observations and metadata for this datastream visible to guests of your site.',
+                },
+              ]"
+              :is-visible="item.isVisible"
+            />
           </v-tooltip>
 
-          <v-tooltip bottom :openDelay="500" v-if="canEditDatastreams">
+          <v-tooltip
+            bottom
+            :openDelay="500"
+            v-if="canEditDatastreams"
+            content-class="pa-0 ma-0 bg-transparent"
+          >
             <template v-slot:activator="{ props }">
               <v-icon
                 :icon="item.isPrivate ? 'mdi-eye-off' : 'mdi-eye'"
-                :color="item.isPrivate ? 'grey-lighten-1' : 'grey'"
+                :color="item.isPrivate ? 'deep-orange-darken-4' : 'green'"
                 small
                 v-bind="props"
                 @click="toggleVisibility(item)"
               />
             </template>
-            <span v-if="item.isPrivate"
-              >Make this datastream publicly visible</span
-            >
-            <span v-else
-              >Hide this datastream from guests of your site. Owners will still
-              see it</span
-            >
+
+            <VisibilityTooltipCard
+              title="Datastream is currently"
+              :items="[
+                {
+                  label: 'Clicking this will',
+                  value: item.isPrivate
+                    ? 'Make this datastream and all its metadata and observations publicly visible.'
+                    : 'Hide this datastream from guests of your site along with all its metadata and observations.',
+                },
+              ]"
+              :is-visible="!item.isPrivate"
+            />
           </v-tooltip>
 
           <v-tooltip
@@ -299,6 +321,8 @@ import { Snackbar } from '@/utils/notifications'
 import { formatTime, getLocalTimeZone } from '@/utils/time'
 import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 import ObservationsDeleteCard from '../Observation/ObservationsDeleteCard.vue'
+import VisibilityTooltipCard from '@/components/Datastream/VisibilityTooltipCard.vue'
+
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
 })
