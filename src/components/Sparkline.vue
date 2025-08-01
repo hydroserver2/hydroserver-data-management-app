@@ -161,13 +161,14 @@ const fetchSparklineObservations = async (ds: Datastream) => {
       intendedTimeSpacingUnit
     )
 
-    const observationCount =
+    const timeIntervalCount =
       spacingMs >= 86_400_000
         ? 30 // daily data should display 30 values
         : spacingMs >= 3_600_000
         ? 50 // hourly data should display 50 values
         : 200 // sub-hourly data should display 200 values
 
+    const observationCount = timeIntervalCount - 1
     const totalDurationMs = spacingMs * observationCount
     beginTime = new Date(
       new Date(endTime).getTime() - totalDurationMs

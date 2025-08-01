@@ -70,14 +70,16 @@
       <v-toolbar flat color="secondary-darken-2">
         <v-text-field
           :disabled="!workspaces?.length"
-          class="mx-2"
+          class="mx-4"
           clearable
           v-model="search"
           prepend-inner-icon="mdi-magnify"
           label="Search"
           hide-details
           density="compact"
+          variant="underlined"
           rounded="xl"
+          maxWidth="300"
         />
 
         <v-spacer />
