@@ -1,11 +1,10 @@
-/// <reference types="vitest" />
-
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: mode === 'django' ? '/static/web/' : '',
   plugins: [
     vue(),
     vuetify({
@@ -82,4 +81,4 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
   },
-})
+}))

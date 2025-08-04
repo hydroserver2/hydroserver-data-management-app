@@ -21,8 +21,7 @@ import {
 } from '@/models/dataSource'
 import { getCSRFToken } from './getCSRFToken'
 
-export const BASE_URL = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/api`
-
+export const BASE_URL = `${import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''}/api`
 export const AUTH_BASE = `${BASE_URL}/auth`
 export const ACCOUNT_BASE = `${AUTH_BASE}/browser/account`
 export const SESSION_BASE = `${AUTH_BASE}/browser/session`

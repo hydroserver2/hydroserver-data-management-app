@@ -7,6 +7,7 @@
     "dev": "vite",
     "docker-dev": "vite --host 0.0.0.0",
     "build": "vue-tsc && vite build",
+    "django-build": "vue-tsc && vite build --mode django",
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage --environment jsdom"
