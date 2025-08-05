@@ -9,7 +9,6 @@ let scriptTag: HTMLScriptElement | null;
 if (import.meta.env.DEV) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', 'http://127.0.0.1:8000', false);
-  xhr.timeout = 3000;
   xhr.send(null);
   const indexHtml = xhr.status >= 200 && xhr.status < 300 ? xhr.responseText : null
   const parser = new DOMParser();
