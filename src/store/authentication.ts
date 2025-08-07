@@ -1,6 +1,7 @@
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
-import { OAuthProvider, User } from '@/types'
+import { User } from '@/types'
+import { Provider } from '@/models/settings'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import router from '@/router/router'
@@ -8,6 +9,7 @@ import Storage from '@/utils/storage'
 import { useUserStore } from './user'
 import { useWorkspaceStore } from './workspaces'
 import { useVocabularyStore } from '@/composables/useVocabulary'
+import { settings } from '@/config/settings'
 
 export interface AllAuthFlowItem {
   id: string
@@ -57,7 +59,7 @@ export const useAuthStore = defineStore('authentication', () => {
    *
    * This array determines which login with OAuth buttons are available on the login and signup pages.
    */
-  const oAuthProviders = ref<OAuthProvider[]>([])
+  const oAuthProviders = ref<Provider[]>([])
 
   const login = async () => {
     try {
@@ -93,16 +95,15 @@ export const useAuthStore = defineStore('authentication', () => {
     const vocabularyStore = useVocabularyStore()
 
     try {
-      const [authMethodsResponse, sessionResponse] = await Promise.all([
-        api.fetchAuthMethods(),
+      const [sessionResponse] = await Promise.all([
         api.fetchSession(),
         vocabularyStore.fetchAllVocabularies(),
       ])
       // const authMethodsResponse = await api.fetchAuthMethods()
       // const sessionResponse = await api.fetchSession()
 
-      oAuthProviders.value = authMethodsResponse.providers
-      signupEnabled.value = authMethodsResponse.hydroserverSignupEnabled
+      oAuthProviders.value = settings.authenticationConfiguration.providers
+      signupEnabled.value = settings.authenticationConfiguration.hydroserverSignupEnabled
       setSession(sessionResponse)
     } catch (error) {
       console.log('Error initializing session', error)
