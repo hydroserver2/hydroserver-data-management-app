@@ -4,12 +4,12 @@
       <v-row class="justify-space-around" align="center">
         <v-col v-if="hasPolicies" cols="12" md="auto">
           <router-link to="/about"> About </router-link>
-          <span v-if="!!termsOfUse" class="text-h6 mx-1">|</span>
-          <a v-if="!!termsOfUse" :href="termsOfUse" target="_blank">
+          <span v-if="!!termsOfUseLink" class="text-h6 mx-1">|</span>
+          <a v-if="!!termsOfUseLink" :href="termsOfUseLink" target="_blank">
             Terms of use
           </a>
-          <span v-if="!!privacyPolicy" class="text-h6 mx-1">|</span>
-          <a v-if="!!privacyPolicy" :href="privacyPolicy" target="_blank">
+          <span v-if="!!privacyPolicyLink" class="text-h6 mx-1">|</span>
+          <a v-if="!!privacyPolicyLink" :href="privacyPolicyLink" target="_blank">
             Privacy policy
           </a>
         </v-col>
@@ -57,10 +57,10 @@ import uwrlLogo from '@/assets/UWRL-min.png'
 import HydroServerLogo from '@/assets/hydroserver-icon-min.png'
 import { settings } from '@/config/settings'
 
-const termsOfUse = settings.legalInformation.termsOfUse
-const privacyPolicy = settings.legalInformation.privacyPolicy
+const termsOfUseLink = settings.legalInformation.termsOfUseLink
+const privacyPolicyLink = settings.legalInformation.privacyPolicyLink
 const copyright = settings.legalInformation.copyright
-const hasPolicies = !!termsOfUse || !!privacyPolicy
+const hasPolicies = !!termsOfUseLink || !!privacyPolicyLink
 </script>
 
 <style scoped>

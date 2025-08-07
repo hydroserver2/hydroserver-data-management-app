@@ -61,8 +61,8 @@ export interface AnalyticsConfiguration {
 }
 
 export interface LegalInformation {
-  termsOfUse?: string | null
-  privacyPolicy?: string | null
+  termsOfUseLink?: string | null
+  privacyPolicyLink?: string | null
   copyright?: string | null
 }
 
