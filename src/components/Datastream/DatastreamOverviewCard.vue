@@ -1,9 +1,9 @@
 <template>
-  <v-card :loading="loading" color="blue-darken-4" variant="outlined">
+  <v-card color="blue-darken-4" variant="outlined">
     <v-card-text>
       <div class="mb-4">
         <div class="text-h6 font-weight-bold text-primary-darken-1">
-          {{ observedProperty.name }}
+          {{ datastream.observedProperty.name }}
         </div>
         <div class="text-caption font-weight-medium text-grey-darken-1">
           Observed Property
@@ -12,7 +12,7 @@
       <!-- Processing Level -->
       <div class="mb-3">
         <div class="text-subtitle-1 font-weight-medium">
-          {{ processingLevel.definition }}
+          {{ datastream.processingLevel.definition }}
         </div>
         <div class="text-caption text-grey-darken-1">Processing Level</div>
       </div>
@@ -26,7 +26,7 @@
             >Sensor:</span
           >
           <span class="text-body-2">
-            {{ sensor.name }}
+            {{ datastream.sensor.name }}
           </span>
         </div>
 
@@ -66,13 +66,9 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
-import { Datastream, ObservedProperty, ProcessingLevel, Sensor } from '@/types'
-import { onMounted, ref, watch } from 'vue'
-
 const props = defineProps({
   datastream: {
-    type: Object as () => Datastream,
+    type: Object as () => any,
     required: true,
   },
   addAggregation: {
@@ -80,42 +76,4 @@ const props = defineProps({
     default: false,
   },
 })
-
-const processingLevel = ref(new ProcessingLevel())
-const observedProperty = ref(new ObservedProperty())
-const sensor = ref(new Sensor())
-const loading = ref(false)
-
-async function fetchData() {
-  try {
-    loading.value = true
-    const [fetchedProcessingLevel, fetchedObservedProperty, fetchedSensor] =
-      await Promise.all([
-        api.fetchProcessingLevel(props.datastream.processingLevelId),
-        api.fetchObservedProperty(props.datastream.observedPropertyId),
-        api.fetchSensor(props.datastream.sensorId),
-      ])
-    processingLevel.value = fetchedProcessingLevel
-    observedProperty.value = fetchedObservedProperty
-    sensor.value = fetchedSensor
-  } catch (error) {
-    console.error(
-      'unable to fetch linked metadata for DatastreamOverviewCard',
-      error
-    )
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(async () => {
-  await fetchData()
-})
-
-watch(
-  () => props.datastream.id,
-  () => {
-    fetchData()
-  }
-)
 </script>

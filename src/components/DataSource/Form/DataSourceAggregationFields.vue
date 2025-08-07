@@ -75,7 +75,7 @@ const showDestinationModal = ref(false)
 
 watch(selectedSourceID, async () => {
   try {
-    const fetchedDS = await api.fetchDatastream(selectedSourceID.value)
+    const fetchedDS = await api.fetchDatastreamExpanded(selectedSourceID.value)
     if (!fetchedDS) return
     Object.assign(sourceDatastream.value, fetchedDS)
   } catch (error) {
@@ -85,7 +85,9 @@ watch(selectedSourceID, async () => {
 
 watch(selectedDestinationID, async () => {
   try {
-    const fetchedDS = await api.fetchDatastream(selectedDestinationID.value)
+    const fetchedDS = await api.fetchDatastreamExpanded(
+      selectedDestinationID.value
+    )
     if (!fetchedDS) return
     Object.assign(destinationDatastream.value, fetchedDS)
   } catch (error) {

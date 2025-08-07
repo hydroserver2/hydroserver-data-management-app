@@ -48,7 +48,7 @@ watch(
   async () => {
     if (!selectedId.value) return
     try {
-      const fetchedDS = await api.fetchDatastream(selectedId.value)
+      const fetchedDS = await api.fetchDatastreamExpanded(selectedId.value)
       if (!fetchedDS) return
       Object.assign(datastream.value, fetchedDS)
       emit('updateSelectedId', selectedId.value)
