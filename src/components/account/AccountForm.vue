@@ -74,7 +74,7 @@
             <v-combobox
               v-model="userForm.type"
               label="User Type *"
-              :items="userTypes"
+              :items="vocabularyStore.userTypes"
               :rules="rules.required"
             />
           </v-col>
@@ -120,7 +120,7 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-combobox
-              :items="organizationTypes"
+              :items="vocabularyStore.organizationTypes"
               v-model="userForm.organization.type"
               label="Organization Type *"
               :rules="rules.requiredAndMaxLength255"
@@ -172,7 +172,6 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
-import { userTypes, organizationTypes } from '@/config/vocabularies'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska/vue'
 import { Organization, User } from '@/types'
@@ -182,6 +181,7 @@ import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
 import { useAuthStore } from '@/store/authentication'
+import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
@@ -193,6 +193,7 @@ const { login, setSession } = useAuthStore()
 const { inProviderSignupFlow, inEmailVerificationFlow, unverifiedEmail } =
   storeToRefs(useAuthStore())
 const { user } = storeToRefs(useUserStore())
+const vocabularyStore = useVocabularyStore()
 
 let userForm = reactive<User>(
   props.isEdit ? JSON.parse(JSON.stringify(user.value)) : new User()

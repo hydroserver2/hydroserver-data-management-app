@@ -3,8 +3,8 @@
     <v-container fluid class="py-2 text-body-2">
       <v-row class="justify-space-around" align="center">
         <v-col v-if="hasPolicies" cols="12" md="auto">
-          <router-link v-if="showAbout" to="/about"> About </router-link>
-          <span v-if="!!termsOfUse && showAbout" class="text-h6 mx-1">|</span>
+          <router-link to="/about"> About </router-link>
+          <span v-if="!!termsOfUse" class="text-h6 mx-1">|</span>
           <a v-if="!!termsOfUse" :href="termsOfUse" target="_blank">
             Terms of use
           </a>
@@ -55,10 +55,12 @@
 <script setup lang="ts">
 import uwrlLogo from '@/assets/UWRL-min.png'
 import HydroServerLogo from '@/assets/hydroserver-icon-min.png'
-import footerConfig from '@/config/footerConfig'
+import { settings } from '@/config/settings'
 
-const { termsOfUse, showAbout, privacyPolicy, copyright } = footerConfig
-const hasPolicies = !!termsOfUse || !!privacyPolicy || showAbout
+const termsOfUse = settings.legalInformation.termsOfUse
+const privacyPolicy = settings.legalInformation.privacyPolicy
+const copyright = settings.legalInformation.copyright
+const hasPolicies = !!termsOfUse || !!privacyPolicy
 </script>
 
 <style scoped>

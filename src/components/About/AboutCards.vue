@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-interface Card {
+export interface Card {
   title: string
   titleIcon?: string
   text: string

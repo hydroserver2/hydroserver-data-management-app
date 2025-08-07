@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { api } from '@/services/api'
 
 export const useVocabularyStore = defineStore('vocabulary', () => {
+  const userTypes = ref<string[]>([])
+  const organizationTypes = ref<string[]>([])
   const siteTypes = ref<string[]>([])
   const samplingFeatureTypes = ref<string[]>([])
   const sensorEncodingTypes = ref<string[]>([])
@@ -12,6 +14,14 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   const datastreamStatuses = ref<string[]>([])
   const datastreamAggregations = ref<string[]>([])
   const sampledMediums = ref<string[]>([])
+
+  async function fetchUserTypes() {
+    userTypes.value = await api.fetchUserTypes()
+  }
+
+  async function fetchOrganizationTypes() {
+    organizationTypes.value = await api.fetchOrganizationTypes()
+  }
 
   async function fetchSiteTypes() {
     siteTypes.value = await api.fetchSiteTypes()
@@ -52,6 +62,8 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   // Fetch all vocabularies in parallel
   async function fetchAllVocabularies() {
     await Promise.all([
+      fetchUserTypes(),
+      fetchOrganizationTypes(),
       fetchSiteTypes(),
       fetchSamplingFeatureTypes(),
       fetchSensorEncodingTypes(),
@@ -65,6 +77,8 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   }
 
   return {
+    userTypes,
+    organizationTypes,
     siteTypes,
     samplingFeatureTypes,
     sensorEncodingTypes,
@@ -75,6 +89,8 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
     datastreamAggregations,
     sampledMediums,
 
+    fetchUserTypes,
+    fetchOrganizationTypes,
     fetchSiteTypes,
     fetchSamplingFeatureTypes,
     fetchSensorEncodingTypes,

@@ -20,7 +20,7 @@
         class="py-4"
       >
         <v-img
-          :src="provider.iconLink"
+          :src="provider.iconLink || undefined"
           class="mr-1"
           width="100%"
           max-width="1.5rem"

@@ -1,8 +1,4 @@
-interface AppSettings {
-  auth: object;
-  map: object;
-  about: object;
-}
+import { AppSettings } from '@/models/settings'
 
 let scriptTag: HTMLScriptElement | null;
 
@@ -15,9 +11,9 @@ if (import.meta.env.DEV) {
   const doc = indexHtml
     ? parser.parseFromString(indexHtml, 'text/html')
     : document.implementation.createHTMLDocument('');
-  scriptTag = doc.getElementById('app-settings') as HTMLScriptElement | null;
+  scriptTag = doc.getElementById('app-settings') as HTMLScriptElement;
 } else {
-  scriptTag = document.getElementById('app-settings') as HTMLScriptElement | null;
+  scriptTag = document.getElementById('app-settings') as HTMLScriptElement;
 }
 
-export const settings: AppSettings | null = scriptTag ? JSON.parse(scriptTag.textContent || "{}") : null;
+export const settings: AppSettings = JSON.parse(scriptTag.textContent || "{}");

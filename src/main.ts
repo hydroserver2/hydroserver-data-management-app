@@ -8,7 +8,7 @@ import vuetify from '@/plugins/vuetify'
 import { useAuthStore } from '@/store/authentication'
 import { createPinia } from 'pinia'
 import { injectClarity } from '@/plugins/clarity'
-import { useClarity, projectId } from './config/microsoftClarityConfig'
+import { settings } from '@/config/settings'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -24,7 +24,9 @@ async function initializeApp() {
 
   app.use(router)
   app.use(vuetify)
-  if (useClarity) injectClarity(projectId)
+  settings.analyticsConfiguration.enableClarityAnalytics &&
+  settings.analyticsConfiguration.clarityProjectId &&
+  injectClarity(settings.analyticsConfiguration.clarityProjectId);
   app.mount('#app')
 }
 
