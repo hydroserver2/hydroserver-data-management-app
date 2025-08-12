@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div class="my-4 mx-6">
     <v-row class="my-2">
       <v-col cols="12">
         <h5 class="text-h5">Job orchestration</h5>
@@ -10,7 +10,7 @@
     <template v-if="!!selectedWorkspace">
       <DataSourceTable :workspace-id="selectedWorkspace.id" />
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">

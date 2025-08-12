@@ -1,0 +1,105 @@
+<template>
+  <v-card>
+    <v-toolbar color="secondary-lighten-1" density="comfortable">
+      <v-card-title class="text-medium-emphasis">
+        {{ isEdit ? 'Edit' : 'Add' }} payload
+        <span v-if="isEdit" class="opacity-80">· {{ payload?.name }}</span>
+      </v-card-title>
+    </v-toolbar>
+
+    <v-form
+      @submit.prevent="onSubmit"
+      ref="myForm"
+      v-model="valid"
+      validate-on="blur"
+    >
+      <v-card-text v-if="payload">
+        <v-text-field
+          v-model="payload.name"
+          label="Payload name *"
+          :rules="rules.requiredAndMaxLength255"
+          density="comfortable"
+        />
+
+        <template v-if="extractor?.type === 'HTTP'">
+          <div class="section-title mb-2">
+            HTTP extractor payload-level configurations
+          </div>
+          <template
+            v-for="variable in extractor.placeholderVariables"
+            :key="variable.name"
+          >
+            <v-text-field
+              v-if="variable.type === 'perPayload'"
+              v-model="payload.extractorVariables[variable.name]"
+              :label="`URL template variable: ${variable.name} *`"
+              :rules="rules.requiredAndMaxLength255"
+              density="comfortable"
+            />
+          </template>
+        </template>
+        <MappingForm v-model:payload="payload" />
+      </v-card-text>
+
+      <v-divider />
+      <v-card-actions class="actions">
+        <v-spacer />
+        <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+        <v-btn-primary type="submit">Save</v-btn-primary>
+      </v-card-actions>
+    </v-form>
+  </v-card>
+</template>
+
+<script setup lang="ts">
+import { rules } from '@/utils/rules'
+import { api } from '@/services/api'
+import { VForm } from 'vuetify/components'
+import { Payload } from '@/models'
+import MappingForm from './MappingForm.vue'
+import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useETLStore } from '@/store/etl'
+
+const props = defineProps({
+  oldPayload: { type: Object as () => Payload },
+  oldPayloadIndex: { type: Number, required: true },
+})
+
+const { dataSource, payloads, extractor } = storeToRefs(useETLStore())
+const { updateLinkedDatastreams } = useETLStore()
+
+const emit = defineEmits(['created', 'updated', 'close'])
+const isEdit = computed(() => !!props.oldPayload || undefined)
+const valid = ref<boolean | null>(null)
+const myForm = ref<VForm>()
+
+const payload = ref<Payload>(
+  props.oldPayload
+    ? new Payload(JSON.parse(JSON.stringify(props.oldPayload)))
+    : new Payload()
+)
+
+async function onSubmit() {
+  await myForm.value?.validate()
+  if (!valid.value) return
+
+  if (props.oldPayloadIndex === -1) {
+    payloads.value = payloads.value
+      ? [...payloads.value, payload.value]
+      : [payload.value]
+  } else {
+    payloads.value[props.oldPayloadIndex] = payload.value
+  }
+
+  await updateLinkedDatastreams(payload.value, props.oldPayload)
+  await api.updateDataSource(dataSource.value)
+  emit('close')
+}
+</script>
+
+<style scoped>
+::v-deep .v-expansion-panel-text__wrapper {
+  padding: 0px 0px 0px !important;
+}
+</style>
