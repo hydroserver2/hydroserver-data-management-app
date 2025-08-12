@@ -97,11 +97,7 @@ function handleMouseUp() {
 }
 
 const generateStateUrl = () => {
-  const BASE_URL = `${
-    import.meta.env.MODE === 'development'
-      ? 'http://127.0.0.1:5173'
-      : ''
-  }/visualize-data/`
+  const BASE_URL = `${window.location.origin}/visualize-data/`
 
   const queryParams = new URLSearchParams()
 
