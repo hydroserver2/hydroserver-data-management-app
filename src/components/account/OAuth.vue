@@ -45,7 +45,7 @@ const filteredOAuthProviders = computed(() =>
 )
 
 const signupOrLoginWithOAuth = (providerId: string) => {
-  const callbackUrl = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/Sites`
+  const callbackUrl = '/Sites'
   api.providerRedirect(providerId, callbackUrl, 'login')
 }
 </script>
