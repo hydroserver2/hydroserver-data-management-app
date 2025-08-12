@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="dataSource">
+  <div class="my-4 mx-6" v-if="dataSource">
     <v-row class="my-4" align="center">
       <v-col cols="auto">
         <h5 class="text-h5">{{ dataSource.name }}</h5>
@@ -91,7 +91,7 @@
     </v-data-table>
 
     <PayloadTable />
-  </v-container>
+  </div>
   <v-container v-else>Loading...</v-container>
 
   <v-dialog v-model="openEdit" width="80rem">
@@ -113,7 +113,7 @@ import { useRoute } from 'vue-router'
 import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
-import PayloadTable from '@/components/DataSource/PayloadTable.vue'
+import PayloadTable from '@/components/DataSource/Payload/PayloadTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'

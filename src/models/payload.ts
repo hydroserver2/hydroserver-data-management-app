@@ -1,21 +1,30 @@
-export interface DataTransformation {
-  transformationType: 'expression' | 'lookup'
-  expression?: string
-  lookupTableUuid?: string
-  operation: string
-  doSaveRawDataCopy: boolean
-  rawTargetIdentifier: string | number
+export interface ExpressionDataTransformation {
+  type: 'expression'
+  expression: string
 }
 
-export interface SourceTargetMapping {
-  sourceIdentifier: string | number
+export interface LookupTableDataTransformation {
+  lookupTableId: string
+  type: 'lookup'
+}
+
+export type DataTransformation =
+  | ExpressionDataTransformation
+  | LookupTableDataTransformation
+
+export interface MappingPath {
   targetIdentifier: string | number
-  dataTransformation: DataTransformation | null
+  dataTransformations: DataTransformation[]
+}
+
+export interface Mapping {
+  sourceIdentifier: string | number
+  paths: MappingPath[]
 }
 
 export class Payload {
   name = ''
-  mappings: SourceTargetMapping[] = []
+  mappings: Mapping[] = []
   extractorVariables: Record<string, string> = {}
 
   constructor(init?: Partial<Payload>) {
@@ -23,27 +32,9 @@ export class Payload {
   }
 }
 
-// toggleDataTransformation(): void {
-//   this.dataTransformation = !!this.dataTransformation
-//     ? null
-//     : {
-//         transformationType: 'expression',
-//         operation: '',
-//         doSaveRawDataCopy: false,
-//         rawTargetIdentifier: '',
-//       }
-// }
-
-// getTitle(): string {
-//   if (this.sourceIdentifier !== 0 && !this.sourceIdentifier)
-//     return 'New mapping'
-//   return `Source: ${this.sourceIdentifier} - Target: ${this.targetIdentifier}`
-// }
-
 export function addMapping(payload: Payload) {
   payload.mappings.push({
     sourceIdentifier: '',
-    targetIdentifier: '',
-    dataTransformation: null,
+    paths: [{ targetIdentifier: '', dataTransformations: [] }],
   })
 }

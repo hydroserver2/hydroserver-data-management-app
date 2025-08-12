@@ -8,7 +8,7 @@ import {
   ETLStep,
 } from '@/models/dataSource'
 import { Payload } from '@/models'
-import { SourceTargetMapping } from '@/models/payload'
+import { Mapping } from '@/models/payload'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 
@@ -56,16 +56,31 @@ export const useETLStore = defineStore('etl', () => {
     },
   })
 
+  // Remove MappingPath if datastream id is targetId. Remove mappings that now have no paths.
+  function removeTargetFromPayload(
+    payload: Payload,
+    id: string | number
+  ): void {
+    const key = String(id)
+    for (const m of payload.mappings) {
+      m.paths = m.paths.filter((p) => String(p.targetIdentifier) !== key)
+    }
+    payload.mappings = payload.mappings.filter((m) => m.paths.length > 0)
+  }
+
   async function updateLinkedDatastreams(
     newPayload?: Payload,
     oldPayload?: Payload
   ) {
-    const newMappings: SourceTargetMapping[] = newPayload?.mappings || []
-    const oldMappings: SourceTargetMapping[] = oldPayload?.mappings || []
+    const newMappings: Mapping[] = newPayload?.mappings || []
+    const oldMappings: Mapping[] = oldPayload?.mappings || []
 
-    const newIds = new Set(newMappings.map((m) => String(m.targetIdentifier)))
-    const oldIds = new Set(oldMappings.map((m) => String(m.targetIdentifier)))
-
+    const newIds = new Set(
+      newMappings.flatMap((m) => m.paths.map((p) => String(p.targetIdentifier)))
+    )
+    const oldIds = new Set(
+      oldMappings.flatMap((m) => m.paths.map((p) => String(p.targetIdentifier)))
+    )
     const addedIds = newIds.difference(oldIds)
     const removedIds = oldIds.difference(newIds)
 
@@ -90,13 +105,8 @@ export const useETLStore = defineStore('etl', () => {
             .catch((error) => {
               if (error.status === 400) {
                 console.error(error.message)
-                Snackbar.error(
-                  `Datastream is already linked to another datasource.`
-                )
-                // Remove the mapping with this targetIdentifier from newPayload.mappings.
-                newPayload!.mappings = newPayload!.mappings.filter(
-                  (mapping) => String(mapping.targetIdentifier) !== id
-                )
+                Snackbar.error(`Datastream already linked to a datasource.`)
+                removeTargetFromPayload(newPayload!, id)
               } else {
                 console.error(`Error linking datastream ${id}:`, error)
               }
