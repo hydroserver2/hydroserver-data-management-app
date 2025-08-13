@@ -11,10 +11,12 @@ import { Payload } from '@/models'
 import { Mapping } from '@/models/payload'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
+import { Datastream } from '@/types'
 
-export const useETLStore = defineStore('etl', () => {
+export const useDataSourceStore = defineStore('datasource', () => {
   const selectedETLStep = ref<ETLStep>('extractor')
   const dataSource = ref(new DataSource())
+  const linkedDatastreams = ref<Datastream[]>([])
 
   const extractor = computed<ExtractorConfig>({
     get() {
@@ -126,6 +128,7 @@ export const useETLStore = defineStore('etl', () => {
     isExtractorValid,
     isTransformerValid,
     isLoaderValid,
+    linkedDatastreams,
     updateLinkedDatastreams,
   }
 })

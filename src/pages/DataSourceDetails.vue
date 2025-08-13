@@ -120,13 +120,14 @@ import { storeToRefs } from 'pinia'
 import { api } from '@/services/api'
 import { DataSource, getStatusText, WORKFLOW_TYPES } from '@/models/dataSource'
 import router from '@/router/router'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { formatTimeWithZone } from '@/utils/time'
 
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const { dataSource } = storeToRefs(useETLStore())
+const { dataSource, linkedDatastreams } = storeToRefs(useDataSourceStore())
 
 const scheduleString = computed(() => {
   if (!dataSource.value) return ''
@@ -236,11 +237,13 @@ const onDelete = async () => {
 
 const fetchData = async () => {
   try {
-    const [source] = await Promise.all([
+    const [source, datastreams] = await Promise.all([
       api.fetchDataSource(route.params.id.toString()),
+      api.fetchDatastreamsForDataSource(route.params.id.toString()),
     ])
 
     dataSource.value = source
+    linkedDatastreams.value = datastreams
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')
     console.error('error fetching dataSource', e)

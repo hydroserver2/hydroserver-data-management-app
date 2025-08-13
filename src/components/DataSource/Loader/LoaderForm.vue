@@ -28,7 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { storeToRefs } from 'pinia'
 import { LOADER_OPTIONS } from '@/models/dataSource'
 import { ref } from 'vue'
@@ -43,5 +44,5 @@ async function validate() {
 
 defineExpose({ validate })
 
-const { loader, isLoaderValid: isValid } = storeToRefs(useETLStore())
+const { loader, isLoaderValid: isValid } = storeToRefs(useDataSourceStore())
 </script>

@@ -102,13 +102,14 @@ import {
   PlaceholderVariable,
   RunTimePlaceholder,
 } from '@/models/dataSource'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import TimestampFormat from '../Timestamp/TimestampFormat.vue'
 
-const { extractor } = storeToRefs(useETLStore())
+const { extractor } = storeToRefs(useDataSourceStore())
 const showUrlHelp = ref(false)
 
 const runTimeOptions = [

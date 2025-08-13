@@ -26,7 +26,8 @@
 import HTTPExtractorForm from './HTTPExtractorForm.vue'
 import LocalFileExtractorForm from './LocalFileExtractorForm.vue'
 import { ref, watch } from 'vue'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { storeToRefs } from 'pinia'
 import { EXTRACTOR_OPTIONS, ExtractorConfig } from '@/models/dataSource'
 import { VForm } from 'vuetify/lib/components/index.mjs'
@@ -44,7 +45,7 @@ const {
   extractor,
   isExtractorValid: isValid,
   dataSource,
-} = storeToRefs(useETLStore())
+} = storeToRefs(useDataSourceStore())
 
 const savedExtractor: ExtractorConfig = JSON.parse(
   JSON.stringify(extractor.value)

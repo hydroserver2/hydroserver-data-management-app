@@ -27,11 +27,12 @@
 import { computed } from 'vue'
 import { CSVTransformer, IdentifierType } from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { rules } from '@/utils/rules'
 import TimestampFormat from './TimestampFormat.vue'
 
-const { transformer } = storeToRefs(useETLStore())
+const { transformer } = storeToRefs(useDataSourceStore())
 
 const isCSV = (t?: any | null) => !!t && t.type === 'CSV'
 

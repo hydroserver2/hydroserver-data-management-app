@@ -1,7 +1,7 @@
 <template>
   <div class="swimlanes">
     <div class="head">Source</div>
-    <div class="head">Data transformation steps</div>
+    <div class="head">Data transformations</div>
     <div class="head">Target</div>
 
     <template v-for="(m, mi) in payload.mappings" :key="mi">
@@ -33,10 +33,18 @@
           </div>
         </div>
 
-        <div class="cell target">
-          <v-chip size="small" color="green-lighten-1" variant="flat">
-            {{ String(p.targetIdentifier) }}
-          </v-chip>
+        <div class="cell">
+          <div class="text-caption">
+            <span class="font-weight-medium">{{
+              String(p.targetIdentifier)
+            }}</span
+            >&nbsp;&ndash;&nbsp;
+            <span class="text-medium-emphasis">
+              {{
+                linkedDatastreams.find((d) => d.id == p.targetIdentifier)?.name
+              }}
+            </span>
+          </div>
         </div>
       </template>
     </template>
@@ -44,18 +52,35 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import TransformChip from './TransformChip.vue'
 import type { Payload } from '@/models/payload'
+import { useDataSourceStore } from '@/store/datasource'
 
 const props = defineProps<{
   payload: Payload
 }>()
+
+const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+console.log('linked', linkedDatastreams.value)
 </script>
 
 <style scoped>
+.target-wrap {
+  white-space: normal; /* enable wrapping */
+  overflow-wrap: anywhere; /* break long tokens if needed */
+  text-overflow: clip;
+  line-height: 1.25;
+}
+:deep(.chip-wrap .v-chip__content) {
+  white-space: normal !important; /* override Vuetify’s nowrap */
+  overflow-wrap: anywhere; /* break very long tokens */
+  text-overflow: clip;
+  line-height: 1.25;
+}
 .swimlanes {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr 2fr 4fr;
   column-gap: 12px;
   row-gap: 8px;
   margin-bottom: 12px;

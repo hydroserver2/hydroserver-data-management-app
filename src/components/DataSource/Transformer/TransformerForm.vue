@@ -27,7 +27,8 @@
 <script setup lang="ts">
 import JSONTransformerForm from './JSONTransformerForm.vue'
 import { computed, ref, watch } from 'vue'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { storeToRefs } from 'pinia'
 import CSVTransformerForm from './CSVTransformerForm.vue'
 import { TRANSFORMER_OPTIONS, TransformerConfig } from '@/models/dataSource'
@@ -46,7 +47,7 @@ const {
   transformer,
   dataSource,
   isTransformerValid: isValid,
-} = storeToRefs(useETLStore())
+} = storeToRefs(useDataSourceStore())
 
 const savedTransformer: TransformerConfig = JSON.parse(
   JSON.stringify(transformer.value)

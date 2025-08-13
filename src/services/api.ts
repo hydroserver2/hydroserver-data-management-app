@@ -331,6 +331,8 @@ export const api = {
   },
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.paginatedFetch(`${DS_BASE}?thing_id=${thingId}`),
+  fetchDatastreamsForDataSource: async (id: string) =>
+    apiMethods.paginatedFetch(`${DS_BASE}?data_source_id=${id}`),
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),
   fetchDatastreamExpanded: async (id: string) =>
     apiMethods.fetch(`${DS_BASE}/${id}?expand_related=true`),
