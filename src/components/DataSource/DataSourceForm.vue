@@ -148,7 +148,7 @@ import {
   WorkflowType,
 } from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
 import { api } from '@/services/api'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { getLocalTimeZone } from '@/utils/time'
@@ -159,7 +159,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['created', 'updated', 'close'])
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
-const { dataSource } = storeToRefs(useETLStore())
+const { dataSource } = storeToRefs(useDataSourceStore())
 
 const valid = ref(false)
 const myForm = ref<VForm>()

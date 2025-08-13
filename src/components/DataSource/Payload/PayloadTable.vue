@@ -84,11 +84,11 @@
     </v-data-table>
   </v-card>
 
-  <v-dialog v-model="openCreate" width="80rem">
+  <v-dialog v-model="openCreate" width="95rem">
     <PayloadForm @close="openCreate = false" :old-payload-index="-1" />
   </v-dialog>
 
-  <v-dialog v-model="openEdit" width="80rem">
+  <v-dialog v-model="openEdit" width="95rem">
     <PayloadForm
       :oldPayload="selectedPayload"
       :old-payload-index="
@@ -120,10 +120,11 @@ import { storeToRefs } from 'pinia'
 import PayloadForm from '@/components/DataSource/Payload/PayloadForm.vue'
 import DeletePayloadCard from './DeletePayloadCard.vue'
 import Swimlanes from './Swimlanes.vue'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { Payload } from '@/models'
 
-const { payloads } = storeToRefs(useETLStore())
+const { payloads } = storeToRefs(useDataSourceStore())
 
 const selectedPayload = ref<Payload>()
 const search = ref<string | undefined>()

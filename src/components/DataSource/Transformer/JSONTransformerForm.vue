@@ -24,10 +24,11 @@
 </template>
 
 <script setup lang="ts">
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { storeToRefs } from 'pinia'
 import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
 import { rules } from '@/utils/rules'
 
-const { transformer } = storeToRefs(useETLStore())
+const { transformer } = storeToRefs(useDataSourceStore())
 </script>

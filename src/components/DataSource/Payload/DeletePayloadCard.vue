@@ -23,7 +23,8 @@
 <script setup lang="ts">
 import { Payload } from '@/models'
 import { api } from '@/services/api'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { storeToRefs } from 'pinia'
 
 const emit = defineEmits(['delete', 'close'])
@@ -35,8 +36,8 @@ const props = defineProps({
   payloadIndex: { type: Number, required: true },
 })
 
-const { dataSource, payloads } = storeToRefs(useETLStore())
-const { updateLinkedDatastreams } = useETLStore()
+const { dataSource, payloads } = storeToRefs(useDataSourceStore())
+const { updateLinkedDatastreams } = useDataSourceStore()
 
 const onDelete = async () => {
   payloads.value.splice(props.payloadIndex, 1)

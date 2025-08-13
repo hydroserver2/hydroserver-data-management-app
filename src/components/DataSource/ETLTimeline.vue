@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ETLStep } from '@/models/dataSource'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
@@ -50,7 +50,7 @@ const {
   isExtractorValid,
   isTransformerValid,
   isLoaderValid,
-} = storeToRefs(useETLStore())
+} = storeToRefs(useDataSourceStore())
 
 const steps = computed(() => [
   {

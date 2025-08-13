@@ -1,0 +1,325 @@
+<template>
+  <div class="swimlanes">
+    <div class="head">Source (CSV column name/index or JSON key)</div>
+    <div class="head">Data transformations</div>
+    <div class="head">Target</div>
+
+    <template v-for="(m, mi) in payload.mappings" :key="mi">
+      <template v-for="(p, pi) in m.paths" :key="pi">
+        <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
+          <template v-if="pi === 0" class="d-flex align-center w-100">
+            <v-text-field
+              v-model="m.sourceIdentifier"
+              placeholder="e.g., water_level_ft"
+              density="compact"
+              hide-details
+              label="Source *"
+              color="blue"
+            />
+          </template>
+        </div>
+
+        <div class="cell transforms">
+          <div class="transform-row d-flex flex-wrap w-100">
+            <v-chip
+              v-if="!p.dataTransformations?.length"
+              size="small"
+              variant="tonal"
+              color="grey"
+            >
+              no transform
+            </v-chip>
+            <v-chip
+              v-for="t in p.dataTransformations"
+              :key="tKey(t)"
+              size="small"
+              :color="t.type === 'expression' ? 'deep-purple' : 'teal'"
+              variant="tonal"
+              rounded="xl"
+              closable
+              @click.stop="openTransformEditor(p, t)"
+              @click:close.stop="removeTransformObj(p, t)"
+            >
+              <v-icon size="14" class="mr-1">
+                {{
+                  t.type === 'expression'
+                    ? 'mdi-function-variant'
+                    : 'mdi-table-search'
+                }}
+              </v-icon>
+              {{
+                t.type === 'expression'
+                  ? t.expression || 'expression()'
+                  : `lookup: ${t.lookupTableId ?? 'select table'}`
+              }}
+            </v-chip>
+
+            <v-spacer />
+
+            <v-btn
+              variant="text"
+              size="small"
+              color="green-darken-2"
+              class="ms-auto"
+              @click="openNewTransform(p)"
+            >
+              <v-icon start>mdi-plus-circle</v-icon>
+              Add transformation
+            </v-btn>
+          </div>
+        </div>
+
+        <div class="cell d-flex align-center w-100">
+          <template class="d-flex align-center w-100">
+            <v-chip
+              v-if="!p.targetIdentifier"
+              size="small"
+              color="green-lighten-1"
+              class="mr-4"
+              variant="outlined"
+              @click="datastreamSelectorOpen = true"
+              prepend-icon="mdi-import"
+              >Select target datastream
+            </v-chip>
+            <v-chip v-else class="text-caption">
+              <span
+                @click="datastreamSelectorOpen = true"
+                class="font-weight-medium"
+                >{{ String(p.targetIdentifier) }}</span
+              >&nbsp;&ndash;&nbsp;
+              <span class="text-medium-emphasis">
+                {{
+                  linkedDatastreams.find((d) => d.id == p.targetIdentifier)
+                    ?.name
+                }}
+              </span>
+            </v-chip>
+
+            <v-btn
+              icon
+              variant="text"
+              color="red-darken-3"
+              class="ms-auto"
+              title="Remove target path"
+              @click="removeMappingRow(mi, pi)"
+            >
+              <v-icon size="18">mdi-trash-can-outline</v-icon>
+            </v-btn>
+          </template>
+
+          <v-dialog v-model="datastreamSelectorOpen" width="75rem">
+            <DatastreamSelectorCard
+              card-title="Use an existing datastream as a template"
+              @selected-datastream-id="p.targetIdentifier = $event"
+              @close="datastreamSelectorOpen = false"
+            />
+          </v-dialog>
+        </div>
+      </template>
+      <div class="mapping-actions">
+        <v-btn
+          size="small"
+          variant="text"
+          color="red-darken-3"
+          :title="`Remove mapping`"
+          @click.stop="removeMapping(mi)"
+          prepend-icon="mdi-trash-can-outline"
+        >
+          Delete source
+        </v-btn>
+
+        <v-btn
+          size="small"
+          prepend-icon="mdi-source-branch"
+          variant="text"
+          @click="onAddMapping"
+        >
+          Add source
+        </v-btn>
+
+        <v-btn-add size="small" variant="text" @click="onAddPath(mi)">
+          Add target path
+        </v-btn-add>
+      </div>
+      <v-divider
+        v-if="mi < payload.mappings.length - 1"
+        class="mapping-actions"
+      />
+    </template>
+  </div>
+
+  <v-dialog v-model="transformOpen" width="40rem">
+    <DataTransformationForm
+      :transformation="editingTransform || undefined"
+      @created="onCreateTransform"
+      @updated="onUpdateTransform"
+      @close="transformOpen = false"
+    />
+  </v-dialog>
+</template>
+
+<script setup lang="ts">
+import type {
+  DataTransformation,
+  Mapping,
+  MappingPath,
+  Payload,
+} from '@/models/payload'
+import DataTransformationForm from './DataTransformationForm.vue'
+import { ref } from 'vue'
+import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
+import { storeToRefs } from 'pinia'
+import { useDataSourceStore } from '@/store/datasource'
+
+const payload = defineModel<Payload>('payload', { required: true })
+const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+
+if (payload.value.mappings.length === 0) {
+  onAddMapping()
+}
+
+const transformOpen = ref(false)
+const datastreamSelectorOpen = ref(false)
+const editingPath = ref<MappingPath | null>(null)
+const editingTransform = ref<DataTransformation | null>(null)
+
+function openNewTransform(p: MappingPath) {
+  if (!p.dataTransformations) p.dataTransformations = []
+  editingPath.value = p
+  editingTransform.value = null
+  transformOpen.value = true
+}
+
+function openTransformEditor(p: MappingPath, t: DataTransformation) {
+  editingPath.value = p
+  editingTransform.value = t
+  transformOpen.value = true
+}
+
+function onCreateTransform(created: DataTransformation) {
+  if (!editingPath.value) return
+  editingPath.value.dataTransformations.push(created)
+  transformOpen.value = false
+}
+
+function onUpdateTransform(updated: DataTransformation) {
+  const t = editingTransform.value
+  if (!t) return
+  if (updated.type === 'expression') {
+    ;(t as any).type = 'expression'
+    ;(t as any).expression = updated.expression
+    delete (t as any).lookupTableId
+  } else {
+    ;(t as any).type = 'lookup'
+    ;(t as any).lookupTableId = updated.lookupTableId
+    delete (t as any).expression
+  }
+  transformOpen.value = false
+}
+
+const _tKeys = new WeakMap<object, string>()
+function tKey(t: DataTransformation): string {
+  let k = _tKeys.get(t as object)
+  if (!k) {
+    k = crypto.randomUUID()
+    _tKeys.set(t as object, k)
+  }
+  return k
+}
+
+function removeTransformObj(p: MappingPath, t: DataTransformation) {
+  const arr = p.dataTransformations
+  if (!arr) return
+  const i = arr.indexOf(t) // remove by object identity
+  if (i !== -1) arr.splice(i, 1)
+}
+
+function removeMapping(mi: number) {
+  const mappings = payload.value.mappings
+  if (!Array.isArray(mappings) || mi < 0 || mi >= mappings.length) return
+  mappings.splice(mi, 1)
+}
+
+function removeMappingRow(mi: number, pi: number) {
+  const mappings = payload.value.mappings
+  const m = mappings[mi]
+  if (!m) return
+
+  m.paths.splice(pi, 1)
+  if (m.paths.length === 0) mappings.splice(mi, 1)
+}
+
+function onAddPath(mi: number) {
+  const m = payload.value.mappings[mi]
+  if (!m) return
+  if (!Array.isArray(m.paths)) (m as any).paths = []
+  m.paths.push({
+    targetIdentifier: '',
+    dataTransformations: [],
+  } as MappingPath)
+}
+
+function onAddMapping() {
+  if (!payload.value.mappings) (payload.value as any).mappings = []
+
+  const newMapping: Mapping = {
+    sourceIdentifier: '',
+    paths: [
+      {
+        targetIdentifier: '',
+        dataTransformations: [],
+      },
+    ],
+  }
+
+  payload.value.mappings.push(newMapping)
+}
+</script>
+
+<style scoped>
+.swimlanes {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  column-gap: 12px;
+  row-gap: 8px;
+  margin-bottom: 12px;
+}
+.head {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  padding-bottom: 6px;
+}
+.cell {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 6px 8px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.source {
+  background: transparent;
+  border: none;
+  padding-left: 0;
+}
+.source-empty {
+  min-height: 0;
+}
+.transforms.trunk {
+  position: relative;
+}
+.transform-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mapping-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  grid-column: 1 / -1; /* make the action row span all 3 columns */
+  margin-top: 4px;
+}
+</style>

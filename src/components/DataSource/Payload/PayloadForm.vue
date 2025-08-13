@@ -38,7 +38,8 @@
             />
           </template>
         </template>
-        <MappingForm v-model:payload="payload" />
+        <v-divider class="mb-6" />
+        <SwimlanesForm v-model:payload="payload" />
       </v-card-text>
 
       <v-divider />
@@ -56,18 +57,19 @@ import { rules } from '@/utils/rules'
 import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { Payload } from '@/models'
-import MappingForm from './MappingForm.vue'
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
+import SwimlanesForm from './SwimlanesForm.vue'
 
 const props = defineProps({
   oldPayload: { type: Object as () => Payload },
   oldPayloadIndex: { type: Number, required: true },
 })
 
-const { dataSource, payloads, extractor } = storeToRefs(useETLStore())
-const { updateLinkedDatastreams } = useETLStore()
+const { dataSource, payloads, extractor } = storeToRefs(useDataSourceStore())
+const { updateLinkedDatastreams } = useDataSourceStore()
 
 const emit = defineEmits(['created', 'updated', 'close'])
 const isEdit = computed(() => !!props.oldPayload || undefined)

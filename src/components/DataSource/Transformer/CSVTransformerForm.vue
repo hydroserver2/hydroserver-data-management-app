@@ -70,7 +70,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { rules } from '@/utils/rules'
 import {
   CSV_DELIMITER_OPTIONS,
@@ -80,7 +81,7 @@ import {
 import { VTextField } from 'vuetify/lib/components/index.mjs'
 import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
 
-const { transformer } = storeToRefs(useETLStore())
+const { transformer } = storeToRefs(useDataSourceStore())
 
 const headerRowField = ref<InstanceType<typeof VTextField>>()
 const dataStartRowField = ref<InstanceType<typeof VTextField>>()

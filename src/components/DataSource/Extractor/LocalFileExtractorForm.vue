@@ -14,10 +14,11 @@
 </template>
 
 <script setup lang="ts">
-import { useETLStore } from '@/store/etl'
+import { useDataSourceStore } from '@/store/datasource'
+
 import { storeToRefs } from 'pinia'
 import { LocalFileExtractor } from '@/models/dataSource'
 import { rules } from '@/utils/rules'
 
-const { extractor } = storeToRefs(useETLStore())
+const { extractor } = storeToRefs(useDataSourceStore())
 </script>
