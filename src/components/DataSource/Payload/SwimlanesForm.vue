@@ -1,166 +1,166 @@
 <template>
-  <div class="swimlanes">
-    <div class="head">Source (CSV column name/index or JSON key)</div>
-    <div class="head">Data transformations</div>
-    <div class="head">Target</div>
+  <v-form ref="localForm" v-model="isValid" validate-on="input">
+    <div class="swimlanes">
+      <div class="head">Source (CSV column name/index or JSON key)</div>
+      <div class="head">Data transformations</div>
+      <div class="head">Target</div>
 
-    <template v-for="(m, mi) in payload.mappings" :key="mi">
-      <template v-for="(p, pi) in m.paths" :key="pi">
-        <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
-          <template v-if="pi === 0" class="d-flex align-center w-100">
-            <v-text-field
-              v-model="m.sourceIdentifier"
-              placeholder="e.g., water_level_ft"
-              density="compact"
-              hide-details
-              label="Source *"
-              color="blue"
-            />
-          </template>
-        </div>
+      <template v-for="(m, mi) in payload.mappings" :key="mi">
+        <template v-for="(p, pi) in m.paths" :key="pi">
+          <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
+            <template v-if="pi === 0" class="d-flex align-center w-100">
+              <v-text-field
+                v-model="m.sourceIdentifier"
+                placeholder="e.g., water_level_ft"
+                density="compact"
+                label="Source *"
+                color="blue"
+                :rules="rules.requiredAndMaxLength150"
+              />
+            </template>
+          </div>
 
-        <div class="cell transforms">
-          <div class="transform-row d-flex flex-wrap w-100">
-            <v-chip
-              v-if="!p.dataTransformations?.length"
-              size="small"
-              variant="tonal"
-              color="grey"
-            >
-              no transform
-            </v-chip>
-            <v-chip
-              v-for="t in p.dataTransformations"
-              :key="tKey(t)"
-              size="small"
-              :color="t.type === 'expression' ? 'deep-purple' : 'teal'"
-              variant="tonal"
-              rounded="xl"
-              closable
-              @click.stop="openTransformEditor(p, t)"
-              @click:close.stop="removeTransformObj(p, t)"
-            >
-              <v-icon size="14" class="mr-1">
+          <div class="cell transforms">
+            <div class="transform-row d-flex flex-wrap w-100">
+              <v-chip
+                v-if="!p.dataTransformations?.length"
+                size="small"
+                variant="tonal"
+                color="grey"
+              >
+                no transform
+              </v-chip>
+              <v-chip
+                v-for="t in p.dataTransformations"
+                :key="tKey(t)"
+                size="small"
+                :color="t.type === 'expression' ? 'deep-purple' : 'teal'"
+                variant="tonal"
+                rounded="xl"
+                closable
+                @click.stop="openTransformEditor(p, t)"
+                @click:close.stop="removeTransformObj(p, t)"
+              >
+                <v-icon size="14" class="mr-1">
+                  {{
+                    t.type === 'expression'
+                      ? 'mdi-function-variant'
+                      : 'mdi-table-search'
+                  }}
+                </v-icon>
                 {{
                   t.type === 'expression'
-                    ? 'mdi-function-variant'
-                    : 'mdi-table-search'
+                    ? t.expression || 'expression()'
+                    : `lookup: ${t.lookupTableId ?? 'select table'}`
                 }}
-              </v-icon>
-              {{
-                t.type === 'expression'
-                  ? t.expression || 'expression()'
-                  : `lookup: ${t.lookupTableId ?? 'select table'}`
-              }}
-            </v-chip>
+              </v-chip>
 
-            <v-spacer />
+              <v-spacer />
 
-            <v-btn
-              variant="text"
-              size="small"
-              color="green-darken-2"
-              class="ms-auto"
-              @click="openNewTransform(p)"
-            >
-              <v-icon start>mdi-plus-circle</v-icon>
-              Add transformation
-            </v-btn>
+              <v-btn
+                variant="text"
+                size="small"
+                color="green-darken-2"
+                class="ms-auto"
+                @click="openNewTransform(p)"
+              >
+                <v-icon start>mdi-plus-circle</v-icon>
+                Add transformation
+              </v-btn>
+            </div>
           </div>
+
+          <div class="cell d-flex align-center w-100">
+            <template class="d-flex align-center w-100">
+              <v-chip
+                v-if="!p.targetIdentifier"
+                size="small"
+                :color="hasTargetError(mi, pi) ? 'error' : 'green-lighten-1'"
+                class="mr-4"
+                :class="{ 'chip-error': hasTargetError(mi, pi) }"
+                variant="outlined"
+                @click="openTargetSelector(mi, pi)"
+                prepend-icon="mdi-import"
+                >Select target datastream
+              </v-chip>
+              <v-chip v-else class="text-caption">
+                <span
+                  @click="openTargetSelector(mi, pi)"
+                  class="font-weight-medium"
+                  >{{ String(p.targetIdentifier) }}</span
+                >&nbsp;&ndash;&nbsp;
+                <span class="text-medium-emphasis">
+                  {{
+                    linkedDatastreams.find((d) => d.id == p.targetIdentifier)
+                      ?.name ||
+                    draftDatastreams.find((d) => d.id == p.targetIdentifier)
+                      ?.name
+                  }}
+                </span>
+              </v-chip>
+              <div
+                v-if="hasTargetError(mi, pi)"
+                class="text-error text-caption mt-1"
+              >
+                Target is required
+              </div>
+
+              <v-btn
+                icon
+                variant="text"
+                color="red-darken-3"
+                class="ms-auto"
+                title="Remove target path"
+                @click="removeMappingRow(mi, pi)"
+              >
+                <v-icon size="18">mdi-trash-can-outline</v-icon>
+              </v-btn>
+            </template>
+          </div>
+        </template>
+        <div class="mapping-actions">
+          <v-btn
+            size="small"
+            variant="text"
+            color="red-darken-3"
+            :title="`Remove mapping`"
+            @click.stop="removeMapping(mi)"
+            prepend-icon="mdi-trash-can-outline"
+          >
+            Delete source
+          </v-btn>
+
+          <v-btn
+            size="small"
+            prepend-icon="mdi-source-branch"
+            variant="text"
+            @click="onAddMapping"
+          >
+            Add source
+          </v-btn>
+
+          <v-btn-add size="small" variant="text" @click="onAddPath(mi)">
+            Add target path
+          </v-btn-add>
         </div>
-
-        <div class="cell d-flex align-center w-100">
-          <template class="d-flex align-center w-100">
-            <v-chip
-              v-if="!p.targetIdentifier"
-              size="small"
-              color="green-lighten-1"
-              class="mr-4"
-              variant="outlined"
-              @click="datastreamSelectorOpen = true"
-              prepend-icon="mdi-import"
-              >Select target datastream
-            </v-chip>
-            <v-chip v-else class="text-caption">
-              <span
-                @click="datastreamSelectorOpen = true"
-                class="font-weight-medium"
-                >{{ String(p.targetIdentifier) }}</span
-              >&nbsp;&ndash;&nbsp;
-              <span class="text-medium-emphasis">
-                {{
-                  linkedDatastreams.find((d) => d.id == p.targetIdentifier)
-                    ?.name ||
-                  draftDatastreams.find((d) => d.id == p.targetIdentifier)?.name
-                }}
-              </span>
-            </v-chip>
-
-            <v-btn
-              icon
-              variant="text"
-              color="red-darken-3"
-              class="ms-auto"
-              title="Remove target path"
-              @click="removeMappingRow(mi, pi)"
-            >
-              <v-icon size="18">mdi-trash-can-outline</v-icon>
-            </v-btn>
-          </template>
-
-          <v-dialog v-model="datastreamSelectorOpen" width="75rem">
-            <DatastreamSelectorCard
-              card-title="Select a target datastream"
-              @selected-datastream="onTargetSelected($event, p)"
-              @close="datastreamSelectorOpen = false"
-              enforce-unique-selections
-              :draft-datastreams="draftDatastreams"
-            />
-          </v-dialog>
-        </div>
+        <v-divider
+          v-if="mi < payload.mappings.length - 1"
+          class="mapping-actions"
+        />
       </template>
-      <div class="mapping-actions">
-        <v-btn
-          size="small"
-          variant="text"
-          color="red-darken-3"
-          :title="`Remove mapping`"
-          @click.stop="removeMapping(mi)"
-          prepend-icon="mdi-trash-can-outline"
-        >
-          Delete source
-        </v-btn>
+    </div>
 
-        <v-btn
-          size="small"
-          prepend-icon="mdi-source-branch"
-          variant="text"
-          @click="onAddMapping"
-        >
-          Add source
-        </v-btn>
-
-        <v-btn-add size="small" variant="text" @click="onAddPath(mi)">
-          Add target path
-        </v-btn-add>
-      </div>
-      <v-divider
-        v-if="mi < payload.mappings.length - 1"
-        class="mapping-actions"
-      />
-    </template>
-  </div>
-
-  <div class="mapping-actions" v-if="payload.mappings.length === 0">
-    <v-btn
-      size="small"
-      prepend-icon="mdi-source-branch"
-      variant="text"
-      @click="onAddMapping"
-    >
-      Add source
-    </v-btn>
-  </div>
+    <div class="mapping-actions" v-if="payload.mappings.length === 0">
+      <v-btn
+        size="small"
+        prepend-icon="mdi-source-branch"
+        variant="text"
+        @click="onAddMapping"
+      >
+        Add source
+      </v-btn>
+    </div>
+  </v-form>
 
   <v-dialog v-model="transformOpen" width="40rem">
     <DataTransformationForm
@@ -168,6 +168,16 @@
       @created="onCreateTransform"
       @updated="onUpdateTransform"
       @close="transformOpen = false"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="datastreamSelectorOpen" width="75rem">
+    <DatastreamSelectorCard
+      card-title="Select a target datastream"
+      @selected-datastream="onTargetSelected"
+      @close="datastreamSelectorOpen = false"
+      enforce-unique-selections
+      :draft-datastreams="draftDatastreams"
     />
   </v-dialog>
 </template>
@@ -185,20 +195,63 @@ import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCa
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
 import { DatastreamExtended } from '@/types'
+import { required, rules } from '@/utils/rules'
+import { VForm } from 'vuetify/components'
 
 const payload = defineModel<Payload>('payload', { required: true })
 const { linkedDatastreams, draftDatastreams } = storeToRefs(
   useDataSourceStore()
 )
 
+const localForm = ref<VForm>()
+const isValid = ref(true)
+const showErrors = ref(false)
+const missingTargetKeys = ref<Set<string>>(new Set())
+
+function hasTargetError(mi: number, pi: number) {
+  return showErrors.value && missingTargetKeys.value.has(`${mi}:${pi}`)
+}
+
+async function validate() {
+  const vuetify = await localForm.value?.validate()
+  let ok = (vuetify?.valid ?? isValid.value) === true
+
+  showErrors.value = true
+
+  const nextMissingKeys = new Set<string>()
+
+  payload.value.mappings.forEach((m, mi) => {
+    const hasAnyTarget =
+      Array.isArray(m.paths) && m.paths.some((p) => !!p.targetIdentifier)
+    if (!hasAnyTarget) ok = false
+
+    m.paths?.forEach((p, pi) => {
+      if (!p.targetIdentifier) nextMissingKeys.add(`${mi}:${pi}`)
+    })
+  })
+
+  missingTargetKeys.value = nextMissingKeys
+  return ok
+}
+
+defineExpose({ validate })
+
 if (payload.value.mappings.length === 0) {
   onAddMapping()
 }
 
 const transformOpen = ref(false)
-const datastreamSelectorOpen = ref(false)
 const editingPath = ref<MappingPath | null>(null)
 const editingTransform = ref<DataTransformation | null>(null)
+const datastreamSelectorOpen = ref(false)
+const activeMi = ref<number | null>(null)
+const activePi = ref<number | null>(null)
+
+function openTargetSelector(mi: number, pi: number) {
+  activeMi.value = mi
+  activePi.value = pi
+  datastreamSelectorOpen.value = true
+}
 
 function referencedTargetIds(): Set<string> {
   const ids = new Set<string>()
@@ -246,10 +299,26 @@ function onCreateTransform(created: DataTransformation) {
   transformOpen.value = false
 }
 
-function onTargetSelected(event: DatastreamExtended, p: MappingPath) {
+function onTargetSelected(event: DatastreamExtended) {
+  const mi = activeMi.value,
+    pi = activePi.value
+  if (mi == null || pi == null) return
+  const m = payload.value.mappings[mi]
+  const p = m?.paths?.[pi]
+
   p.targetIdentifier = event.id
   draftDatastreams.value = [event, ...draftDatastreams.value]
   syncDraftDatastreams()
+
+  // remove only this row’s error
+  const key = `${mi}:${pi}`
+  if (missingTargetKeys.value.has(key)) {
+    const next = new Set(missingTargetKeys.value)
+    next.delete(key)
+    missingTargetKeys.value = next
+  }
+
+  activeMi.value = activePi.value = null
 }
 
 function onUpdateTransform(updated: DataTransformation) {

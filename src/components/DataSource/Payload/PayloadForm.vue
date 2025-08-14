@@ -39,7 +39,7 @@
           </template>
         </template>
         <v-divider class="mb-6" />
-        <SwimlanesForm v-model:payload="payload" />
+        <SwimlanesForm v-model:payload="payload" ref="swimlanesRef" />
       </v-card-text>
 
       <v-divider />
@@ -73,9 +73,11 @@ const { updateLinkedDatastreams } = useDataSourceStore()
 const { linkedDatastreams } = storeToRefs(useDataSourceStore())
 
 const emit = defineEmits(['created', 'updated', 'close'])
+
 const isEdit = computed(() => !!props.oldPayload || undefined)
 const valid = ref<boolean | null>(null)
 const myForm = ref<VForm>()
+const swimlanesRef = ref<any>(null)
 
 const payload = ref<Payload>(
   props.oldPayload
@@ -84,6 +86,8 @@ const payload = ref<Payload>(
 )
 
 async function onSubmit() {
+  const swimlanesValid = await swimlanesRef.value.validate()
+  if (!swimlanesValid) return
   await myForm.value?.validate()
   if (!valid.value) return
 
