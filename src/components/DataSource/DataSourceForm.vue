@@ -106,7 +106,7 @@
 
       <div class="mb-4" />
 
-      <template v-if="dataSource.settings.type === 'Aggregation'">
+      <!-- <template v-if="dataSource.settings.type === 'Aggregation'">
         <DataSourceAggregationFields />
       </template>
       <template
@@ -114,12 +114,12 @@
           dataSource.settings.type === 'ETL' ||
           dataSource.settings.type === 'SDL'
         "
-      >
-        <DataSourceETLFields ref="etlFieldsRef" />
-      </template>
+      > -->
+      <DataSourceETLFields ref="etlFieldsRef" />
+      <!-- </template>
       <template v-else-if="dataSource.settings.type === 'Virtual'">
         <DataSourceVirtualFields />
-      </template>
+      </template> -->
 
       <v-divider />
       <v-card-actions>
@@ -136,8 +136,6 @@ import { computed, onBeforeUnmount, onMounted, ref, toRaw } from 'vue'
 import { DataSource } from '@/models'
 import { required, rules } from '@/utils/rules'
 import DataSourceETLFields from './DataSourceETLFields.vue'
-import DataSourceAggregationFields from './Form/DataSourceAggregationFields.vue'
-import DataSourceVirtualFields from './Form/DataSourceVirtualFields.vue'
 import { VForm } from 'vuetify/components'
 import {
   extractorDefaults,

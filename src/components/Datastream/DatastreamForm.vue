@@ -18,7 +18,7 @@
     <v-dialog v-model="showTemplateModal" width="75rem">
       <DatastreamSelectorCard
         card-title="Use an existing datastream as a template"
-        @selected-datastream-id="selectedDatastreamID = $event"
+        @selected-datastream="selectedDatastreamID = $event.id"
         @close="showTemplateModal = false"
       />
     </v-dialog>

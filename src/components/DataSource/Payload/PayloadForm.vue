@@ -70,6 +70,7 @@ const props = defineProps({
 
 const { dataSource, payloads, extractor } = storeToRefs(useDataSourceStore())
 const { updateLinkedDatastreams } = useDataSourceStore()
+const { linkedDatastreams } = storeToRefs(useDataSourceStore())
 
 const emit = defineEmits(['created', 'updated', 'close'])
 const isEdit = computed(() => !!props.oldPayload || undefined)
@@ -96,6 +97,9 @@ async function onSubmit() {
 
   await updateLinkedDatastreams(payload.value, props.oldPayload)
   await api.updateDataSource(dataSource.value)
+  linkedDatastreams.value = await api.fetchDatastreamsForDataSource(
+    dataSource.value.id
+  )
   emit('close')
 }
 </script>

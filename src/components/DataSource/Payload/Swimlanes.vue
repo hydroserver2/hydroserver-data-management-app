@@ -62,7 +62,6 @@ const props = defineProps<{
 }>()
 
 const { linkedDatastreams } = storeToRefs(useDataSourceStore())
-console.log('linked', linkedDatastreams.value)
 </script>
 
 <style scoped>

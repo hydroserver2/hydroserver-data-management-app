@@ -333,6 +333,10 @@ export const api = {
   },
   fetchDatastreamsForThing: async (thingId: string) =>
     apiMethods.paginatedFetch(`${DS_BASE}?thing_id=${thingId}`),
+  fetchExpandedDatastreamsForThing: async (thingId: string) =>
+    apiMethods.paginatedFetch(
+      `${DS_BASE}?thing_id=${thingId}&expand_related=true`
+    ),
   fetchDatastreamsForDataSource: async (id: string) =>
     apiMethods.paginatedFetch(`${DS_BASE}?data_source_id=${id}`),
   fetchDatastream: async (id: string) => apiMethods.fetch(`${DS_BASE}/${id}`),

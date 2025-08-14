@@ -19,7 +19,7 @@
   <v-dialog v-model="showModal" width="80rem">
     <DatastreamSelectorCard
       card-title="Select destination datastream"
-      @selected-datastream-id="selectedId = $event"
+      @selected-datastream="selectedId = $event.id"
       @close="showModal = false"
       :enforce-unique-selections="true"
     />
