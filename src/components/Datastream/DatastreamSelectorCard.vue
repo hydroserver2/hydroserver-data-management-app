@@ -52,7 +52,7 @@
         <v-data-table-virtual
           :headers="headers"
           :items="tableItems"
-          :sort-by="[{ key: 'observedProperty' }]"
+          :sort-by="[{ key: 'observedPropertyName' }]"
           :search="search"
           @click:row="onRowClick"
           color="blue-darken-2"
@@ -122,16 +122,25 @@
           <v-icon class="mr-2">mdi-alert</v-icon>Conflicting links
         </v-card-title>
       </v-toolbar>
-      <v-card-text>
+      <v-card-text v-if="currentSourceId">
         This datastream is already linked to a data source. To reassign it here,
         you’ll first need to unlink it from that source.
+      </v-card-text>
+      <v-card-text v-else>
+        This datastream is already being linked to another datasource in the
+        payload form. Check your pending payload configurations to make sure
+        each one is mapping the sources to the correct targets.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn-cancel @click="openLinkConflictModal = false"
           >Cancel</v-btn-cancel
         >
-        <v-btn-primary color="yellow-darken-2" @click="goToDataSource">
+        <v-btn-primary
+          v-if="currentSourceId"
+          color="yellow-darken-2"
+          @click="goToDataSource"
+        >
           View existing data source
         </v-btn-primary>
       </v-card-actions>
@@ -142,46 +151,48 @@
 <script setup lang="ts">
 import { api } from '@/services/api'
 import { watch, onMounted, ref, computed } from 'vue'
-import { Datastream, Thing, Workspace } from '@/types'
-import { useMetadata } from '@/composables/useMetadata'
+import { Datastream, DatastreamExtended, Thing, Workspace } from '@/types'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useRoute, useRouter } from 'vue-router'
 import { formatTime } from '@/utils/time'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
-const { sensors, observedProperties, processingLevels, units } = useMetadata()
 
 const router = useRouter()
 const route = useRoute()
 
-const datastreamsForThing = ref<Datastream[]>([])
+const datastreamsForThing = ref<DatastreamExtended[]>([])
 const things = ref<Thing[]>([])
 const selectedThingId = ref('')
 const search = ref()
 const openLinkConflictModal = ref(false)
 const currentSourceId = ref('')
 
-const emit = defineEmits(['selectedDatastreamId', 'close'])
+const emit = defineEmits(['selectedDatastream', 'close'])
 const props = defineProps({
   cardTitle: { type: String, required: true },
   workspace: { type: Workspace, required: false },
   enforceUniqueSelections: { type: Boolean, default: false },
+  draftDatastreams: {
+    type: Array as () => DatastreamExtended[],
+    required: false,
+  },
 })
 const showLinkedDatastreams = ref(!props.enforceUniqueSelections)
 
 const headers = [
   { title: 'ID', key: 'id' },
   { title: 'Name', key: 'name' },
-  { title: 'Observed property', key: 'observedProperty' },
-  { title: 'Processing level', key: 'processingLevel' },
+  { title: 'Observed property', key: 'observedPropertyName' },
+  { title: 'Processing level', key: 'processingLevelDefinition' },
   { title: 'Description', key: 'description', sortable: false },
   { title: 'Observation type', key: 'observationType' },
 
   { title: 'No-data value', key: 'noDataValue' },
   { title: 'Aggregation statistic', key: 'aggregationStatistic' },
-  { title: 'Unit', key: 'unit' },
-  { title: 'Sensor', key: 'sensor' },
+  { title: 'Unit', key: 'unitName' },
+  { title: 'Sensor', key: 'sensorName' },
 
   { title: 'Phenomenon begin', key: 'phenomenonBeginTime', class: 'one-line' },
   { title: 'Phenomenon end', key: 'phenomenonEndTime' },
@@ -205,31 +216,26 @@ watch(
       datastreamsForThing.value = []
       return
     }
-    datastreamsForThing.value = await api.fetchDatastreamsForThing(newId)
+    datastreamsForThing.value = await api.fetchExpandedDatastreamsForThing(
+      newId
+    )
   },
   { immediate: true }
 )
 
 const filteredDatastreams = computed(() =>
   props.enforceUniqueSelections && !showLinkedDatastreams.value
-    ? datastreamsForThing.value.filter((ds) => !ds.dataSourceId)
+    ? datastreamsForThing.value.filter((ds) => !isLinked(ds))
     : datastreamsForThing.value
 )
 
 const tableItems = computed(() =>
   filteredDatastreams.value.map((ds) => ({
     ...ds,
-    observedProperty:
-      observedProperties.value.find((op) => op.id === ds.observedPropertyId)
-        ?.name ?? ds.observedPropertyId, // fallback to UUID
-
-    sensor:
-      sensors.value.find((s) => s.id === ds.sensorId)?.name ?? ds.sensorId,
-
-    processingLevel:
-      processingLevels.value.find((pl) => pl.id === ds.processingLevelId)
-        ?.definition ?? ds.processingLevelId,
-    unit: units.value.find((u) => u.id === ds.unitId)?.name,
+    observedPropertyName: ds.observedProperty?.name,
+    sensorName: ds.sensor.name,
+    processingLevelDefinition: ds.processingLevel.definition,
+    unit: ds.unit.name,
     phenomenonBeginTime: formatTime(ds.phenomenonBeginTime),
     phenomenonEndTime: formatTime(ds.phenomenonEndTime),
     isPrivate: ds.isPrivate ? 'Yes' : 'No',
@@ -237,20 +243,35 @@ const tableItems = computed(() =>
   }))
 )
 
-function onRowClick(event: Event, item: any) {
-  if (props.enforceUniqueSelections && item.item.dataSourceId) {
-    currentSourceId.value = item.item.dataSourceId
-    openLinkConflictModal.value = true
-  } else {
-    emit('selectedDatastreamId', item.item.id)
-    emit('close')
-  }
+const selectAndClose = (ds: DatastreamExtended) => {
+  emit('selectedDatastream', ds)
+  emit('close')
 }
 
-const getRowProps = ({ item }: { item: any }) => {
+const isLinked = (item: DatastreamExtended) => {
+  const inDraft = props.draftDatastreams?.some((d) => d.id === item.id) ?? false
+  const linkedSourceId = item.dataSource?.id ?? ''
+  return inDraft || linkedSourceId
+}
+
+function onRowClick(_: MouseEvent, { item }: { item: DatastreamExtended }) {
+  if (!props.enforceUniqueSelections) return selectAndClose(item)
+
+  const linkedSourceId = item.dataSource?.id ?? ''
+
+  if (isLinked(item)) {
+    openLinkConflictModal.value = true
+    currentSourceId.value = String(linkedSourceId || '')
+    return
+  }
+
+  selectAndClose(item)
+}
+
+const getRowProps = ({ item }: { item: DatastreamExtended }) => {
   if (props.enforceUniqueSelections)
     return {
-      class: item.dataSourceId ? 'bg-red-lighten-2 text--disabled' : '',
+      class: isLinked(item) ? 'bg-red-lighten-2 text--disabled' : '',
     }
   else return ''
 }

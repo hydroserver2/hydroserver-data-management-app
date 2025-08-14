@@ -90,7 +90,8 @@
               <span class="text-medium-emphasis">
                 {{
                   linkedDatastreams.find((d) => d.id == p.targetIdentifier)
-                    ?.name
+                    ?.name ||
+                  draftDatastreams.find((d) => d.id == p.targetIdentifier)?.name
                 }}
               </span>
             </v-chip>
@@ -109,9 +110,11 @@
 
           <v-dialog v-model="datastreamSelectorOpen" width="75rem">
             <DatastreamSelectorCard
-              card-title="Use an existing datastream as a template"
-              @selected-datastream-id="p.targetIdentifier = $event"
+              card-title="Select a target datastream"
+              @selected-datastream="onTargetSelected($event, p)"
               @close="datastreamSelectorOpen = false"
+              enforce-unique-selections
+              :draft-datastreams="draftDatastreams"
             />
           </v-dialog>
         </div>
@@ -148,6 +151,17 @@
     </template>
   </div>
 
+  <div class="mapping-actions" v-if="payload.mappings.length === 0">
+    <v-btn
+      size="small"
+      prepend-icon="mdi-source-branch"
+      variant="text"
+      @click="onAddMapping"
+    >
+      Add source
+    </v-btn>
+  </div>
+
   <v-dialog v-model="transformOpen" width="40rem">
     <DataTransformationForm
       :transformation="editingTransform || undefined"
@@ -170,9 +184,12 @@ import { ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
+import { DatastreamExtended } from '@/types'
 
 const payload = defineModel<Payload>('payload', { required: true })
-const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+const { linkedDatastreams, draftDatastreams } = storeToRefs(
+  useDataSourceStore()
+)
 
 if (payload.value.mappings.length === 0) {
   onAddMapping()
@@ -182,6 +199,33 @@ const transformOpen = ref(false)
 const datastreamSelectorOpen = ref(false)
 const editingPath = ref<MappingPath | null>(null)
 const editingTransform = ref<DataTransformation | null>(null)
+
+function referencedTargetIds(): Set<string> {
+  const ids = new Set<string>()
+  for (const m of payload.value.mappings) {
+    for (const p of m.paths) {
+      const id = p.targetIdentifier
+      if (id !== undefined && id !== null && String(id) !== '') {
+        ids.add(String(id))
+      }
+    }
+  }
+  return ids
+}
+
+function syncDraftDatastreams() {
+  const refIds = referencedTargetIds()
+  const linkedIds = new Set(linkedDatastreams.value.map((d) => String(d.id)))
+  const keepIds = new Set([...refIds].filter((id) => !linkedIds.has(id)))
+
+  const byId = new Map<string, DatastreamExtended>()
+  for (const ds of draftDatastreams.value) {
+    const key = String(ds.id)
+    if (keepIds.has(key) && !byId.has(key)) byId.set(key, ds)
+  }
+
+  draftDatastreams.value = [...byId.values()]
+}
 
 function openNewTransform(p: MappingPath) {
   if (!p.dataTransformations) p.dataTransformations = []
@@ -200,6 +244,12 @@ function onCreateTransform(created: DataTransformation) {
   if (!editingPath.value) return
   editingPath.value.dataTransformations.push(created)
   transformOpen.value = false
+}
+
+function onTargetSelected(event: DatastreamExtended, p: MappingPath) {
+  p.targetIdentifier = event.id
+  draftDatastreams.value = [event, ...draftDatastreams.value]
+  syncDraftDatastreams()
 }
 
 function onUpdateTransform(updated: DataTransformation) {
@@ -238,6 +288,7 @@ function removeMapping(mi: number) {
   const mappings = payload.value.mappings
   if (!Array.isArray(mappings) || mi < 0 || mi >= mappings.length) return
   mappings.splice(mi, 1)
+  syncDraftDatastreams()
 }
 
 function removeMappingRow(mi: number, pi: number) {
@@ -247,6 +298,7 @@ function removeMappingRow(mi: number, pi: number) {
 
   m.paths.splice(pi, 1)
   if (m.paths.length === 0) mappings.splice(mi, 1)
+  syncDraftDatastreams()
 }
 
 function onAddPath(mi: number) {

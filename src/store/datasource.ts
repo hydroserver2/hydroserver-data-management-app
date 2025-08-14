@@ -11,12 +11,13 @@ import { Payload } from '@/models'
 import { Mapping } from '@/models/payload'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
-import { Datastream } from '@/types'
+import { Datastream, DatastreamExtended } from '@/types'
 
 export const useDataSourceStore = defineStore('datasource', () => {
   const selectedETLStep = ref<ETLStep>('extractor')
   const dataSource = ref(new DataSource())
   const linkedDatastreams = ref<Datastream[]>([])
+  const draftDatastreams = ref<DatastreamExtended[]>([])
 
   const extractor = computed<ExtractorConfig>({
     get() {
@@ -129,6 +130,7 @@ export const useDataSourceStore = defineStore('datasource', () => {
     isTransformerValid,
     isLoaderValid,
     linkedDatastreams,
+    draftDatastreams,
     updateLinkedDatastreams,
   }
 })

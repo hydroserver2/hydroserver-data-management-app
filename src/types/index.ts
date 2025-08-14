@@ -1,3 +1,5 @@
+import { DataSource } from '@/models'
+
 export type DataPoint = {
   date: Date
   value: number
@@ -171,6 +173,36 @@ export class Datastream {
     this.isVisible = true
     this.valueCount = 0
   }
+}
+
+export interface DatastreamExtended {
+  id: string
+  name: string
+  description: string
+  observationType: string
+  resultType?: string
+  status?: string
+  sampledMedium: string
+  noDataValue: number
+  aggregationStatistic: string
+  isPrivate: boolean
+  isVisible: boolean
+  phenomenonBeginTime?: string | null
+  phenomenonEndTime?: string | null
+  intendedTimeSpacing?: number
+  intendedTimeSpacingUnit?: TimeSpacingUnit | null
+  timeAggregationInterval: number | null
+  timeAggregationIntervalUnit: TimeSpacingUnit
+  dataSourceId?: string | null
+  valueCount: number
+
+  thing: Thing
+  workspace: Workspace
+  unit: Unit
+  observedProperty: ObservedProperty
+  sensor: Sensor
+  processingLevel: ProcessingLevel
+  dataSource: DataSource
 }
 
 export class Unit {
