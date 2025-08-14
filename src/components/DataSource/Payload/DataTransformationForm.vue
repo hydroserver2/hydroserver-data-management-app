@@ -10,7 +10,7 @@
     <v-form
       ref="myForm"
       v-model="valid"
-      validate-on="blur"
+      validate-on="input"
       @submit.prevent="onSubmit"
     >
       <v-card-text>
@@ -55,7 +55,12 @@
             v-model="local.expression"
             label="Output = *"
             placeholder="eg. (x - 32) * 5/9"
-            :rules="rules.required"
+            :rules="[
+              ...rules.required,
+              exprContainsX,
+              exprAllowedTokens,
+              exprBalancedParens,
+            ]"
             auto-grow
           />
         </template>
@@ -93,7 +98,7 @@ const emit = defineEmits<{
   (e: 'updated', t: DataTransformation): void
   (e: 'close'): void
 }>()
-const ALLOWED_OPS = ['+', '-', '*', '/', '%', '**', '//', '(', ')']
+const ALLOWED_OPS = ['+', '-', '*', '/', '**', '(', ')']
 
 const isEdit = computed(() => !!props.transformation)
 
@@ -123,5 +128,74 @@ async function onSubmit() {
   if (!valid.value) return
   isEdit.value ? emit('updated', local.value) : emit('created', local.value)
   emit('close')
+}
+
+type Rule = (v: any) => true | string
+
+const exprContainsX: Rule = (v) =>
+  /x/.test((v ?? '') as string) || "Expression must contain input variable 'x'"
+
+const exprAllowedTokens: Rule = (v) => {
+  const s = String(v ?? '').trim()
+  if (!s) return true // let required handle empty
+
+  let i = 0
+  while (i < s.length) {
+    const ch = s[i]
+    if (ch === ' ') {
+      i++
+      continue
+    }
+    if (ch === 'x') {
+      i++
+      continue
+    }
+
+    // number: 123 or 123.45
+    if (/\d/.test(ch)) {
+      i++
+      while (i < s.length && /\d/.test(s[i])) i++
+      if (s[i] === '.') {
+        i++
+        while (i < s.length && /\d/.test(s[i])) i++
+      }
+      continue
+    }
+
+    if (ch === '(' || ch === ')') {
+      i++
+      continue
+    }
+
+    // operators (** before *)
+    if (ch === '*' && s[i + 1] === '*') {
+      i += 2
+      continue
+    }
+    if (ch === '+' || ch === '-' || ch === '*' || ch === '/') {
+      i++
+      continue
+    }
+
+    return "Only numbers, spaces, 'x', and + - * / ** ( ) are allowed"
+  }
+  return true // <-- important
+}
+
+const exprBalancedParens: Rule = (v) => {
+  const s = String(v ?? '')
+  if (!s.trim()) return true
+  let depth = 0
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i]
+    if (ch === '(') depth++
+    else if (ch === ')') {
+      depth--
+      if (depth < 0) return `Unmatched ')' at position ${i + 1}`
+    }
+  }
+  return depth === 0
+    ? true
+    : `Missing ${depth} closing ')'${depth > 1 ? 's' : ''}`
 }
 </script>
