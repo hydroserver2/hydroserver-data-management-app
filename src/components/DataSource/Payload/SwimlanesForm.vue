@@ -1,5 +1,14 @@
 <template>
   <v-form ref="localForm" v-model="isValid" validate-on="input">
+    <v-alert
+      v-if="showErrors && noMappingsError"
+      type="error"
+      variant="tonal"
+      density="compact"
+      class="mb-3"
+    >
+      At least one source target mapping is required.
+    </v-alert>
     <div class="swimlanes">
       <div class="head">Source (CSV column name/index or JSON key)</div>
       <div class="head">Data transformations</div>
@@ -195,7 +204,7 @@ import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCa
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
 import { DatastreamExtended } from '@/types'
-import { required, rules } from '@/utils/rules'
+import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 
 const payload = defineModel<Payload>('payload', { required: true })
@@ -207,6 +216,7 @@ const localForm = ref<VForm>()
 const isValid = ref(true)
 const showErrors = ref(false)
 const missingTargetKeys = ref<Set<string>>(new Set())
+const noMappingsError = ref(false)
 
 function hasTargetError(mi: number, pi: number) {
   return showErrors.value && missingTargetKeys.value.has(`${mi}:${pi}`)
@@ -217,6 +227,8 @@ async function validate() {
   let ok = (vuetify?.valid ?? isValid.value) === true
 
   showErrors.value = true
+  noMappingsError.value = payload.value.mappings.length === 0
+  if (noMappingsError.value) ok = false
 
   const nextMissingKeys = new Set<string>()
 
