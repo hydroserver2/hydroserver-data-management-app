@@ -35,7 +35,7 @@ export function useHydroShare() {
   )
 
   async function connectHydroShare() {
-    const callbackUrl = `${import.meta.env.VITE_APP_PROXY_BASE_URL}/profile`
+    const callbackUrl = '/profile'
     api.providerRedirect('hydroshare', callbackUrl, 'connect')
   }
 

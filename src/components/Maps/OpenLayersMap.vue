@@ -1,13 +1,13 @@
 <template>
   <div class="map-wrapper">
     <!-- 2) Dropdown, absolutely positioned -->
-    <div class="tile-select-container" v-if="tileSources.length > 1">
+    <div class="basemap-select-container" v-if="basemapTileSources.length > 1">
       <v-select
         v-model="selectedTileSourceName"
-        :items="tileSources"
+        :items="basemapTileSources"
         item-title="name"
         item-value="name"
-        label="Map Options"
+        label="Base Map"
         dense
         hide-details
         variant="solo-filled"
@@ -47,15 +47,12 @@ import VectorSource from 'ol/source/Vector'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
 import { fromLonLat, toLonLat } from 'ol/proj'
-import {
-  ConfigTileSource,
-  defaultView,
-  tileSources,
-} from '@/config/openLayersMapConfig'
+import { settings } from '@/config/settings'
 import { Extent, isEmpty as extentIsEmpty } from 'ol/extent'
 import { fetchLocationData } from '@/utils/maps/location'
 import WebGLVectorLayer from 'ol/layer/WebGLVector'
 import mapMarkerUrl from '@/assets/map-marker-64.png?url'
+import { OSM, XYZ } from 'ol/source'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },
@@ -65,13 +62,50 @@ const props = defineProps({
 })
 const emit = defineEmits(['location-clicked'])
 
+interface ConfigTileSource {
+  name: string
+  source: import('ol/source/Tile').default
+}
+
+const defaultView = {
+  center: fromLonLat([
+    settings.mapConfiguration.defaultLongitude,
+    settings.mapConfiguration.defaultLatitude
+  ]),
+  zoom: settings.mapConfiguration.defaultZoomLevel,
+}
+
+const basemapTileSources = settings.mapConfiguration.basemapLayers.map(mapLayer => ({
+  name: mapLayer.name,
+  source: new XYZ({
+    url: mapLayer.source,
+    attributions: mapLayer.attribution
+  })
+}))
+
+// TODO: Create a separate map control to toggle overlay layers
+const overlayTileSources = settings.mapConfiguration.overlayLayers.map(mapLayer => ({
+  name: mapLayer.name,
+  source: new XYZ({
+    url: mapLayer.source,
+    attributions: mapLayer.attribution
+  })
+}))
+
+if (basemapTileSources.length === 0) {
+  basemapTileSources.push({
+    name: 'Open Street Map',
+    source: new OSM(),
+  })
+}
+
 const mapContainer = ref<HTMLElement>()
 const popupContainer = ref<HTMLElement>()
 const popupContent = ref<HTMLElement>()
 const popupCloser = ref<HTMLElement>()
 
 const coloredThings = ref<ThingWithColor[]>([])
-const selectedTileSourceName = ref<string>(tileSources[0].name)
+const selectedTileSourceName = ref<string>(basemapTileSources[0].name)
 
 let map: OlMap
 let rasterLayer: TileLayer
@@ -128,7 +162,7 @@ async function updateFeatures() {
 }
 
 const initializeMap = () => {
-  if (!tileSources.length) {
+  if (!basemapTileSources.length) {
     console.error(
       '[OpenLayersMap] No tile services available.' +
         ' Please check you openLayers Map Config file and make sure' +
@@ -138,8 +172,11 @@ const initializeMap = () => {
   }
 
   const desiredType = props.startInSatellite ? 'satellite' : 'base'
-  let chosenSource = tileSources.find((s) => s.type === desiredType)
-  if (!chosenSource) chosenSource = tileSources[0]
+  const chosenSourceLayerName = desiredType === 'satellite' ?
+    settings.mapConfiguration.defaultSatelliteLayer :
+    settings.mapConfiguration.defaultBaseLayer
+  let chosenSource = basemapTileSources.find((s) => s.name === chosenSourceLayerName)
+  if (!chosenSource) chosenSource = basemapTileSources[0]
   selectedTileSourceName.value = chosenSource.name
 
   rasterLayer = new TileLayer({ source: chosenSource.source })
@@ -231,8 +268,8 @@ onMounted(async () => {
 watch(() => [props.things] as const, updateFeatures, { deep: true })
 
 function getConfigByName(name: string): ConfigTileSource {
-  const found = tileSources.find((cfg) => cfg.name === name)
-  return found || tileSources[0]
+  const found = basemapTileSources.find((cfg) => cfg.name === name)
+  return found || basemapTileSources[0]
 }
 watch(
   () => selectedTileSourceName.value,
@@ -253,7 +290,7 @@ watch(
 }
 
 /* 2) Position the dropdown in the top-right corner */
-.tile-select-container {
+.basemap-select-container {
   position: absolute;
   top: 10px;
   right: 10px;

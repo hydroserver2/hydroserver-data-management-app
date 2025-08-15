@@ -1,9 +1,5 @@
-import {
-  elevationService,
-  ElevationServices,
-  geoService,
-  GeoServices,
-} from '@/config/openLayersMapConfig'
+import { settings } from '@/config/settings'
+import { ElevationService, GeoService } from '@/models/settings'
 import { getElevationGoogle, getGeoDataGoogle } from './googleMaps'
 
 export async function getOpenElevation(latitude: number, longitude: number) {
@@ -16,7 +12,7 @@ export async function getOpenElevation(latitude: number, longitude: number) {
 }
 
 export async function getElevation(latitude: number, longitude: number) {
-  return elevationService === ElevationServices.OpenElevation
+  return settings.mapConfiguration.elevationService === ElevationService.OpenElevation
     ? getOpenElevation(latitude, longitude)
     : getElevationGoogle(latitude, longitude)
 }
@@ -45,7 +41,7 @@ export async function getGeoDataNominatim(latitude: number, longitude: number) {
 }
 
 export async function getGeoData(latitude: number, longitude: number) {
-  return geoService === GeoServices.Nominatim
+  return settings.mapConfiguration.geoService === GeoService.Nominatim
     ? await getGeoDataNominatim(latitude, longitude)
     : await getGeoDataGoogle(latitude, longitude)
 }
