@@ -70,27 +70,31 @@ interface ConfigTileSource {
 const defaultView = {
   center: fromLonLat([
     settings.mapConfiguration.defaultLongitude,
-    settings.mapConfiguration.defaultLatitude
+    settings.mapConfiguration.defaultLatitude,
   ]),
   zoom: settings.mapConfiguration.defaultZoomLevel,
 }
 
-const basemapTileSources = settings.mapConfiguration.basemapLayers.map(mapLayer => ({
-  name: mapLayer.name,
-  source: new XYZ({
-    url: mapLayer.source,
-    attributions: mapLayer.attribution
+const basemapTileSources = settings.mapConfiguration.basemapLayers.map(
+  (mapLayer) => ({
+    name: mapLayer.name,
+    source: new XYZ({
+      url: mapLayer.source,
+      attributions: mapLayer.attribution,
+    }),
   })
-}))
+)
 
 // TODO: Create a separate map control to toggle overlay layers
-const overlayTileSources = settings.mapConfiguration.overlayLayers.map(mapLayer => ({
-  name: mapLayer.name,
-  source: new XYZ({
-    url: mapLayer.source,
-    attributions: mapLayer.attribution
+const overlayTileSources = settings.mapConfiguration.overlayLayers.map(
+  (mapLayer) => ({
+    name: mapLayer.name,
+    source: new XYZ({
+      url: mapLayer.source,
+      attributions: mapLayer.attribution,
+    }),
   })
-}))
+)
 
 if (basemapTileSources.length === 0) {
   basemapTileSources.push({
@@ -172,10 +176,13 @@ const initializeMap = () => {
   }
 
   const desiredType = props.startInSatellite ? 'satellite' : 'base'
-  const chosenSourceLayerName = desiredType === 'satellite' ?
-    settings.mapConfiguration.defaultSatelliteLayer :
-    settings.mapConfiguration.defaultBaseLayer
-  let chosenSource = basemapTileSources.find((s) => s.name === chosenSourceLayerName)
+  const chosenSourceLayerName =
+    desiredType === 'satellite'
+      ? settings.mapConfiguration.defaultSatelliteLayer
+      : settings.mapConfiguration.defaultBaseLayer
+  let chosenSource = basemapTileSources.find(
+    (s) => s.name === chosenSourceLayerName
+  )
   if (!chosenSource) chosenSource = basemapTileSources[0]
   selectedTileSourceName.value = chosenSource.name
 
@@ -253,6 +260,11 @@ const initializeMap = () => {
   updateFeatures()
 
   const extent = vectorSource.getExtent() as Extent
+
+  // The sites likely aren't loaded at this point. Skip fitting the view and let the update function handle fitting when they arrive.
+  const features = vectorSource.getFeatures()
+  if (!features.length) return
+
   map.getView().fit(extent, {
     padding: [100, 100, 100, 100],
     maxZoom: 16,
