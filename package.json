@@ -32,7 +32,7 @@
     "vue": "^3.4.38",
     "vue-echarts": "^6.6.9",
     "vue-router": "^4.2.4",
-    "vuetify": "^3.7.0"
+    "vuetify": "^3.9.5"
   },
   "devDependencies": {
     "@mdi/font": "^7.2.96",
