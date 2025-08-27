@@ -20,68 +20,23 @@
       </v-btn-add>
     </v-toolbar>
 
-    <v-data-table
+    <v-data-table-virtual
       :headers="payloadHeaders"
-      :items="payloads"
+      :items="filteredPayloads"
       :sort-by="sortBy"
       :search="search"
-      :group-by="groupBy"
       :style="{ 'max-height': '100vh' }"
-      fixed-header
+      :virtual-scroll-props="{ itemHeight: 0, bench: 12 }"
       density="compact"
-      hide-default-footer
     >
-      <template
-        v-slot:group-header="{ item, columns, toggleGroup, isGroupOpen }"
-      >
-        <tr class="bg-blue-grey-lighten-5" @click="toggleGroup(item)">
-          <td :colspan="columns.length">
-            <div class="d-flex align-center">
-              <v-btn
-                :icon="isGroupOpen(item) ? '$expand' : '$next'"
-                color="medium-emphasis"
-                density="comfortable"
-                size="small"
-                variant="outlined"
-                @click.stop="toggleGroup(item)"
-              />
-              <span class="ms-4">{{ item.value }}</span>
-              <v-spacer />
-
-              <v-chip
-                v-if="item.items?.length"
-                prepend-icon="mdi-source-branch"
-                variant="text"
-                rounded="xl"
-              >
-                {{ item.items[0]?.raw?.mappings?.length ?? 0 }} source{{
-                  (item.items[0]?.raw?.mappings?.length ?? 0) === 1 ? '' : 's'
-                }}
-              </v-chip>
-
-              <v-btn
-                class="ms-2"
-                variant="text"
-                color="green"
-                icon="mdi-pencil"
-                @click.stop="openDialog(item.items[0].raw, 'edit')"
-              />
-              <v-btn
-                class="ms-1"
-                variant="text"
-                color="red-darken-3"
-                icon="mdi-delete"
-                @click.stop="openDialog(item.items[0].raw, 'delete')"
-              />
-            </div>
-          </td>
-        </tr>
-      </template>
-
       <template #item.overview="{ item }">
-        <Swimlanes :payload="item" />
+        <Swimlanes
+          :payload="item"
+          @edit="openDialog($event, 'edit')"
+          @delete="openDialog($event, 'delete')"
+        />
       </template>
-    </v-data-table>
+    </v-data-table-virtual>
   </v-card>
 
   <v-dialog v-model="openCreate" width="95rem">
@@ -115,34 +70,65 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import PayloadForm from '@/components/DataSource/Payload/PayloadForm.vue'
 import DeletePayloadCard from './DeletePayloadCard.vue'
 import Swimlanes from './Swimlanes.vue'
 import { useDataSourceStore } from '@/store/datasource'
-
 import { Payload } from '@/models'
 
-const { payloads } = storeToRefs(useDataSourceStore())
-
+const { payloads, linkedDatastreams } = storeToRefs(useDataSourceStore())
 const selectedPayload = ref<Payload>()
-const search = ref<string | undefined>()
 const openCreate = ref(false)
 const openEdit = ref(false)
 const openDelete = ref(false)
-
+const search = ref()
 const sortBy = [{ key: 'name' as const }]
-const groupBy = [{ key: 'name', order: 'asc' }] as const
+
+const filteredPayloads = computed(() =>
+  payloads.value.map((p) => {
+    const mapped = {
+      ...p,
+      searchText: '',
+    }
+
+    const sourceIds = (p.mappings ?? []).map((m) =>
+      String(m.sourceIdentifier ?? '')
+    )
+
+    const targetIds = (p.mappings ?? []).flatMap((m) =>
+      (m.paths ?? []).map((path) => String(path.targetIdentifier ?? ''))
+    )
+
+    const targetNames = targetIds.map((tid) => {
+      const ds = (linkedDatastreams.value ?? []).find(
+        (d) => String(d.id) === tid
+      )
+      return ds?.name ?? ''
+    })
+
+    mapped.searchText = [
+      mapped.name,
+      ...sourceIds,
+      ...targetIds,
+      ...targetNames,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+
+    return mapped
+  })
+)
 
 const payloadHeaders = [
   {
-    title:
-      'Source to targets mappings (source → data transformations → target)',
+    title: 'Source → Data transformations → Target',
     key: 'overview',
+    value: 'searchText',
     sortable: false,
   },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 
 function openDialog(selectedItem: Payload, dialog: 'edit' | 'delete') {

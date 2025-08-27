@@ -3,13 +3,15 @@
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
         <v-icon>mdi-alert</v-icon> Confirm payload deletion
-        <span class="opacity-80">- {{ payload.name }}</span>
       </v-card-title>
     </v-toolbar>
     <v-divider />
 
     <v-card-text>
-      This action will permanently delete the payload configuration.
+      This action will permanently delete the payload:
+    </v-card-text>
+    <v-card-text class="py-0">
+      <span class="opacity-80">{{ payload.name }}</span>
     </v-card-text>
 
     <v-card-actions>

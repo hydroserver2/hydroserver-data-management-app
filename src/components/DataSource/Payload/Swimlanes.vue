@@ -1,5 +1,22 @@
 <template>
   <div class="swimlanes">
+    <div class="payload-header">
+      <span class="payload-name">{{ payload.name }}</span>
+      <div class="actions">
+        <v-btn
+          variant="text"
+          color="green"
+          icon="mdi-pencil"
+          @click.stop="$emit('edit', payload)"
+        />
+        <v-btn
+          variant="text"
+          color="red-darken-3"
+          icon="mdi-delete"
+          @click.stop="$emit('delete', payload)"
+        />
+      </div>
+    </div>
     <div class="head">Source</div>
     <div class="head">Data transformations</div>
     <div class="head">Target</div>
@@ -62,9 +79,28 @@ const props = defineProps<{
 }>()
 
 const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+
+defineEmits<{
+  (e: 'edit', payload: Payload): void
+  (e: 'delete', payload: Payload): void
+}>()
 </script>
 
 <style scoped>
+.payload-name {
+  grid-column: 1 / -1;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 4px 0 8px;
+  color: rgba(0, 0, 0, 0.8);
+}
+.payload-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0 8px;
+}
 .target-wrap {
   white-space: normal; /* enable wrapping */
   overflow-wrap: anywhere; /* break long tokens if needed */
