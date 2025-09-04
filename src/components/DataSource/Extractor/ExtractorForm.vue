@@ -29,7 +29,11 @@ import { ref, watch } from 'vue'
 import { useDataSourceStore } from '@/store/datasource'
 
 import { storeToRefs } from 'pinia'
-import { EXTRACTOR_OPTIONS, ExtractorConfig } from '@/models/dataSource'
+import {
+  EXTRACTOR_OPTIONS,
+  ExtractorConfig,
+  switchExtractor,
+} from '@/models/dataSource'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 
 const localForm = ref<VForm>()
@@ -56,7 +60,7 @@ watch(
   (newType) => {
     if (savedExtractor.type === newType)
       extractor.value = JSON.parse(JSON.stringify(savedExtractor))
-    else dataSource.value.switchExtractor(newType)
+    else switchExtractor(dataSource.value, newType)
   }
 )
 </script>

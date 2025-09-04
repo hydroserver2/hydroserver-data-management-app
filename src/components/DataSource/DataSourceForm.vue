@@ -106,20 +106,7 @@
 
       <div class="mb-4" />
 
-      <!-- <template v-if="dataSource.settings.type === 'Aggregation'">
-        <DataSourceAggregationFields />
-      </template>
-      <template
-        v-else-if="
-          dataSource.settings.type === 'ETL' ||
-          dataSource.settings.type === 'SDL'
-        "
-      > -->
       <DataSourceETLFields ref="etlFieldsRef" />
-      <!-- </template>
-      <template v-else-if="dataSource.settings.type === 'Virtual'">
-        <DataSourceVirtualFields />
-      </template> -->
 
       <v-divider />
       <v-card-actions>
@@ -221,13 +208,8 @@ function inputToIso(str = '', mode: 'local' | 'utc') {
 }
 
 async function onSubmit() {
-  if (
-    dataSource.value.settings.type === 'ETL' ||
-    dataSource.value.settings.type === 'SDL'
-  ) {
-    const etlValid = await etlFieldsRef.value.validate()
-    if (!etlValid) return
-  }
+  const etlValid = await etlFieldsRef.value.validate()
+  if (!etlValid) return
 
   isSubmitting.value = true
 

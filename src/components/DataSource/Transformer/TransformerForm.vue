@@ -7,7 +7,7 @@
         <v-select
           class="mx-4"
           v-model="transformer.type"
-          :items="allowedOptions"
+          :items="TRANSFORMER_OPTIONS"
           label="Type"
           density="compact"
           rounded="lg"
@@ -26,12 +26,16 @@
 
 <script setup lang="ts">
 import JSONTransformerForm from './JSONTransformerForm.vue'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useDataSourceStore } from '@/store/datasource'
 
 import { storeToRefs } from 'pinia'
 import CSVTransformerForm from './CSVTransformerForm.vue'
-import { TRANSFORMER_OPTIONS, TransformerConfig } from '@/models/dataSource'
+import {
+  switchTransformer,
+  TRANSFORMER_OPTIONS,
+  TransformerConfig,
+} from '@/models/dataSource'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 
 const localForm = ref<VForm>()
@@ -58,13 +62,7 @@ watch(
   (newType) => {
     if (savedTransformer.type === newType)
       transformer.value = JSON.parse(JSON.stringify(savedTransformer))
-    else dataSource.value.switchTransformer(newType)
+    else switchTransformer(dataSource.value, newType)
   }
 )
-
-const allowedOptions = computed(() => {
-  return dataSource.value.settings.type === 'SDL'
-    ? ['CSV']
-    : TRANSFORMER_OPTIONS
-})
 </script>

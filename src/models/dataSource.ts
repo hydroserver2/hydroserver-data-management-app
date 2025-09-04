@@ -226,22 +226,20 @@ export class DataSource {
   constructor(init?: Partial<DataSource>) {
     Object.assign(this, init)
   }
+}
 
-  switchExtractor(newType: ExtractorType) {
-    this.settings.extractor = JSON.parse(
-      JSON.stringify(extractorDefaults[newType])
-    )
-  }
+export function switchExtractor(ds: DataSource, newType: ExtractorType) {
+  ds.settings.extractor = JSON.parse(JSON.stringify(extractorDefaults[newType]))
+}
 
-  switchTransformer(newType: TransformerType) {
-    this.settings.transformer = JSON.parse(
-      JSON.stringify(transformerDefaults[newType])
-    )
-  }
+export function switchTransformer(ds: DataSource, newType: TransformerType) {
+  ds.settings.transformer = JSON.parse(
+    JSON.stringify(transformerDefaults[newType])
+  )
+}
 
-  switchLoader(newType: LoaderType) {
-    this.settings.loader = JSON.parse(JSON.stringify(loaderDefaults[newType]))
-  }
+export function switchLoader(ds: DataSource, newType: LoaderType) {
+  ds.settings.loader = JSON.parse(JSON.stringify(loaderDefaults[newType]))
 }
 
 export function convertDataSourceToPostObject(dataSource: DataSource) {
