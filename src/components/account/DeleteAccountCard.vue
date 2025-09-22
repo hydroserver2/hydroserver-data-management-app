@@ -46,13 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Thing } from '@/types'
 import { useAuthStore } from '@/store/authentication'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { api } from '@/services/api'
 
 const { logout } = useAuthStore()
 const { ownedWorkspaces } = storeToRefs(useWorkspaceStore())
@@ -69,7 +70,7 @@ async function deleteAccount() {
   }
   try {
     emit('close')
-    await api.deleteUser()
+    await hs.user.delete()
     await logout()
     Snackbar.info('Your account has been deleted')
   } catch (error) {

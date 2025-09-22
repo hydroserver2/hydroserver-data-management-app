@@ -72,11 +72,10 @@
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
-import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { useAuthStore } from '@/store/authentication'
-import { storeToRefs } from 'pinia'
 import router from '@/router/router'
+import hs from '@hydroserver/client'
 
 const email = ref('')
 const password = ref('')
@@ -86,20 +85,17 @@ const loading = ref(false)
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
-const { login, setSession } = useAuthStore()
-const { unverifiedEmail, inEmailVerificationFlow } = storeToRefs(useAuthStore())
+const { login } = useAuthStore()
 
 const formLogin = async () => {
   if (!valid) return
   try {
     loading.value = true
-    const response = await api.login(email.value, password.value)
-    setSession(response)
-
-    if (inEmailVerificationFlow.value) {
+    await hs.session.login(email.value, password.value)
+    if (hs.session.inEmailVerificationFlow) {
       console.info('Email not verified. Redirecting to verify email page.')
       Snackbar.info('Email not verified. Redirecting to verify email page.')
-      unverifiedEmail.value = email.value
+      hs.session.unverifiedEmail = email.value
       await router.push({ name: 'VerifyEmail' })
     } else {
       await login()

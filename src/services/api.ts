@@ -21,7 +21,9 @@ import {
 } from '@/models/dataSource'
 import { getCSRFToken } from './getCSRFToken'
 
-export const BASE_URL = `${import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''}/api`
+export const BASE_URL = `${
+  import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''
+}/api`
 export const AUTH_BASE = `${BASE_URL}/auth`
 export const ACCOUNT_BASE = `${AUTH_BASE}/browser/account`
 export const SESSION_BASE = `${AUTH_BASE}/browser/session`
@@ -111,12 +113,6 @@ export const api = {
   login: async (email: string, password: string) =>
     apiMethods.post(`${SESSION_BASE}`, { email, password }),
   logout: async () => apiMethods.delete(`${SESSION_BASE}`),
-
-  fetchUser: async () => apiMethods.fetch(`${ACCOUNT_BASE}`),
-  signup: async (user: User) => apiMethods.post(`${ACCOUNT_BASE}`, user),
-  updateUser: async (user: User, oldUser: User) =>
-    apiMethods.patch(`${ACCOUNT_BASE}`, user, oldUser),
-  deleteUser: async () => apiMethods.delete(`${ACCOUNT_BASE}`),
 
   sendVerificationEmail: async (email: string) =>
     apiMethods.put(`${ACCOUNT_BASE}/email/verify`, {
@@ -467,7 +463,8 @@ export const api = {
     }),
 
   fetchUserTypes: async () => apiMethods.fetch(`${ACCOUNT_BASE}/user-types`),
-  fetchOrganizationTypes: async () => apiMethods.fetch(`${ACCOUNT_BASE}/organization-types`),
+  fetchOrganizationTypes: async () =>
+    apiMethods.fetch(`${ACCOUNT_BASE}/organization-types`),
   fetchSiteTypes: async () => apiMethods.fetch(`${THINGS_BASE}/site-types`),
   fetchSamplingFeatureTypes: async () =>
     apiMethods.paginatedFetch(`${THINGS_BASE}/sampling-feature-types`),

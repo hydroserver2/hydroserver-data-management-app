@@ -81,15 +81,14 @@ import { onMounted, ref, watch } from 'vue'
 import { Thing, Workspace } from '@/types'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useSidebarStore } from '@/store/useSidebar'
-import { api } from '@/services/api'
 import { useVocabularyStore } from '@/composables/useVocabulary'
+import hs from '@hydroserver/client'
 
 const { smAndDown } = useDisplay()
 const vocabularyStore = useVocabularyStore()
 
 const selectedSiteTypes = ref<string[]>([])
 const selectedWorkspaces = ref<Workspace[]>([])
-const panelOpen = ref([0])
 const workspaces = ref<Workspace[]>([])
 
 const emit = defineEmits(['filter'])
@@ -124,12 +123,14 @@ const onClearFilters = () => {
 }
 
 onMounted(async () => {
-  try {
-    workspaces.value = await api.fetchWorkspaces()
-    workspaces.value.sort((a, b) => a.name.localeCompare(b.name))
-  } catch (error) {
-    console.error('Error fetching workspaces')
-  }
+  // const res = await hs.workspaces.list({
+  //   fetchAll: true,
+  //   orderBy: ['name'],
+  // })
+  // if (res.ok) workspaces.value = res.items
+  // else console.error('Error fetching workspaces', res.message)
+
+  workspaces.value = await hs.workspaces.listAllItems({ orderBy: ['name'] })
 })
 
 watch([selectedSiteTypes, selectedWorkspaces], emitFilteredThings, {

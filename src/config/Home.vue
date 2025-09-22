@@ -14,7 +14,7 @@
         </h4>
       </div>
 
-      <div v-if="isAuthenticated">
+      <div v-if="hs.session.isAuthenticated">
         <h5 class="text-h5 mb-8 has-text-shadow">
           Logged in as {{ user?.firstName }}
           {{ user?.lastName }}
@@ -214,9 +214,8 @@ import sensorThingsLogo from '@/assets/sensorThings-min.png'
 import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
-import { useAuthStore } from '@/store/authentication'
+import hs from '@hydroserver/client'
 
-const { isAuthenticated } = storeToRefs(useAuthStore())
 const { user } = storeToRefs(useUserStore())
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'

@@ -1,7 +1,6 @@
 import { api } from '@/services/api'
-import { useAuthStore } from '@/store/authentication'
 import { Snackbar } from '@/utils/notifications'
-import { storeToRefs } from 'pinia'
+import hs from '@hydroserver/client'
 import { ref, computed, onMounted } from 'vue'
 
 interface ConnectedProvider {
@@ -16,7 +15,7 @@ interface ConnectedProvider {
 }
 
 export function useHydroShare() {
-  const { oAuthProviders } = storeToRefs(useAuthStore())
+  const { oAuthProviders } = hs.session
 
   const connectedProviders = ref([])
   const isLoaded = ref(false)
@@ -31,7 +30,7 @@ export function useHydroShare() {
   const isConnected = computed(() => !!hydroShareProvider.value)
 
   const isConnectionEnabled = computed(() =>
-    oAuthProviders.value.some((p) => p.id === 'hydroshare' && p.connectEnabled)
+    oAuthProviders.some((p) => p.id === 'hydroshare' && p.connectEnabled)
   )
 
   async function connectHydroShare() {

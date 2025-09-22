@@ -221,6 +221,7 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 import WorkspaceSelector from './WorkspaceSelector.vue'
+import hs from '@hydroserver/client'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
@@ -270,7 +271,13 @@ function openDialog(
  */
 const refreshWorkspaces = async (workspace?: Workspace) => {
   try {
-    const workspacesResponse = await api.fetchAssociatedWorkspaces()
+    const workspacesResponse = (
+      await hs.workspaces.list({
+        isAssociated: true,
+        fetchAll: true,
+      })
+    ).items
+    console.log('workspaces', workspaces)
     setWorkspaces(workspacesResponse)
     if (
       workspace &&

@@ -66,7 +66,7 @@
 
       <v-spacer />
 
-      <template v-if="isAuthenticated">
+      <template v-if="hs.session.isAuthenticated">
         <v-btn elevation="2" rounded>
           <v-icon>mdi-account-circle</v-icon>
           <v-icon>mdi-menu-down</v-icon>
@@ -134,7 +134,7 @@
     <v-divider />
 
     <v-list density="compact" nav>
-      <template v-if="isAuthenticated">
+      <template v-if="hs.session.isAuthenticated">
         <v-list-item to="/profile" prepend-icon="mdi-account-circle"
           >Account</v-list-item
         >
@@ -159,17 +159,17 @@
 <script setup lang="ts">
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { Snackbar } from '@/utils/notifications'
-import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { navbarLogo } from '@/config/navbarConfig'
 import { useAuthStore } from '@/store/authentication'
 import { useRoute } from 'vue-router'
 import { useSidebarStore } from '@/store/useSidebar'
+import hs from '@hydroserver/client'
 
 const route = useRoute()
 const { logout } = useAuthStore()
-const { signupEnabled, isAuthenticated } = storeToRefs(useAuthStore())
+const { signupEnabled } = hs.session
 const { resetState } = useDataVisStore()
 const { mdAndDown } = useDisplay()
 

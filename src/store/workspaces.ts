@@ -5,7 +5,7 @@ import Storage from '@/utils/storage'
 import { useUserStore } from './user'
 
 export const selectedWorkspaceStorage = new Storage<Workspace | null>(
-  'selectedWorkspace'
+  'data-management-app:selectedWorkspace'
 )
 
 export const useWorkspaceStore = defineStore('workspace', () => {

@@ -177,11 +177,10 @@ import { vMaska } from 'maska/vue'
 import { Organization, User } from '@/types'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
-import { api } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
-import { useAuthStore } from '@/store/authentication'
 import { useVocabularyStore } from '@/composables/useVocabulary'
+import hs from '@hydroserver/client'
 
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },
@@ -189,9 +188,9 @@ const props = defineProps({
   isCompleteSignup: { type: Boolean, required: false, default: false },
 })
 
-const { login, setSession } = useAuthStore()
-const { inProviderSignupFlow, inEmailVerificationFlow, unverifiedEmail } =
-  storeToRefs(useAuthStore())
+let { inProviderSignupFlow, inEmailVerificationFlow, unverifiedEmail } =
+  hs.session
+
 const { user } = storeToRefs(useUserStore())
 const vocabularyStore = useVocabularyStore()
 
@@ -227,11 +226,10 @@ const emit = defineEmits(['close'])
 
 async function createUser() {
   try {
-    const sessionResponse = await api.signup(userForm)
-    setSession(sessionResponse)
+    await hs.user.create(userForm)
 
-    if (inEmailVerificationFlow.value) {
-      unverifiedEmail.value = userForm.email
+    if (inEmailVerificationFlow) {
+      unverifiedEmail = userForm.email
       await router.push({ name: 'VerifyEmail' })
     } else {
       Snackbar.success('Account created.')
@@ -244,9 +242,9 @@ async function createUser() {
 
 async function completeSignup() {
   try {
-    const providerResponse = await api.providerSignup(userForm)
-    setSession(providerResponse)
-    await login()
+    await hs.providerSignup(userForm)
+    Snackbar.success('You have logged in!')
+    await router.push({ name: 'Sites' })
   } catch (error) {
     console.error('Error creating user', error)
   }
@@ -254,7 +252,7 @@ async function completeSignup() {
 
 const updateUser = async () => {
   try {
-    userForm = await api.updateUser(userForm, user.value!)
+    userForm = await hs.user.update(userForm, user.value!)
     if (userForm !== undefined) user.value = userForm
   } catch (error) {
     console.error('Error updating user', error)
