@@ -76,13 +76,12 @@ import { useRouter } from 'vue-router'
 import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { rules } from '@/utils/rules'
-import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/store/authentication'
+import hs from '@hydroserver/client'
 
 const router = useRouter()
-
-const { unverifiedEmail } = storeToRefs(useAuthStore())
-const { setSession, logout } = useAuthStore()
+const { logout } = useAuthStore()
+const { unverifiedEmail } = hs.session
 
 const verifying = ref(false)
 const verified = ref(false)
@@ -98,8 +97,7 @@ const verifyCode = async () => {
 
   try {
     verifying.value = true
-    const response = await api.verifyEmailWithCode(verificationCode.value)
-    setSession(response)
+    await hs.user.verifyEmailWithCode(verificationCode.value)
     verified.value = true
     Snackbar.success('Your email has been verified.')
     router.push({ name: 'Sites' })
@@ -114,7 +112,7 @@ const verifyCode = async () => {
 async function resend() {
   try {
     resending.value = true
-    await api.sendVerificationEmail(unverifiedEmail.value)
+    await api.sendVerificationEmail(unverifiedEmail)
     Snackbar.success('Verification email resent.')
   } catch (err) {
     console.error('Error sending verification email:', err)

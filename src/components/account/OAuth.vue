@@ -34,14 +34,13 @@
 
 <script setup lang="ts">
 import { api } from '@/services/api'
-import { useAuthStore } from '@/store/authentication'
-import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import hs from '@hydroserver/client'
+import { computed, ref } from 'vue'
 
-const { oAuthProviders } = storeToRefs(useAuthStore())
+const oAuthProviders = ref(hs.session.oAuthProviders)
 
 const filteredOAuthProviders = computed(() =>
-  oAuthProviders.value.filter((provider) => provider.signupEnabled)
+  hs.session.oAuthProviders.filter((provider) => provider.signupEnabled)
 )
 
 const signupOrLoginWithOAuth = (providerId: string) => {

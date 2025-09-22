@@ -5,8 +5,7 @@ import {
   createWebHistory,
 } from 'vue-router'
 import { routes } from '@/router/routes'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/store/authentication'
+import hs from '@hydroserver/client'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -31,23 +30,23 @@ function updateDocumentTitle(matched: RouteRecordNormalized[]): void {
 
 router.beforeEach(
   async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    const { isAuthenticated, inProviderSignupFlow, inEmailVerificationFlow } =
-      storeToRefs(useAuthStore())
-    if (inEmailVerificationFlow.value && to.name !== 'VerifyEmail') {
+    const { inEmailVerificationFlow, inProviderSignupFlow, isAuthenticated } =
+      hs.session
+
+    if (inEmailVerificationFlow && to.name !== 'VerifyEmail') {
       if (to.name === 'ResetPassword') return { name: 'ResetPassword' }
       return { name: 'VerifyEmail' }
     }
-    if (!inEmailVerificationFlow.value && to.name === 'VerifyEmail')
+    if (!inEmailVerificationFlow && to.name === 'VerifyEmail')
       return { name: 'Sites' }
 
-    if (inProviderSignupFlow.value && to.name !== 'CompleteProfile')
+    if (inProviderSignupFlow && to.name !== 'CompleteProfile')
       return { name: 'CompleteProfile' }
-    if (!inProviderSignupFlow.value && to.name === 'CompleteProfile')
+    if (!inProviderSignupFlow && to.name === 'CompleteProfile')
       return { name: 'Sites' }
 
-    if (isAuthenticated.value && to.meta.requiresLoggedOut)
-      return { name: 'Sites' }
-    if (!isAuthenticated.value && to.meta.requiresAuth)
+    if (isAuthenticated && to.meta.requiresLoggedOut) return { name: 'Sites' }
+    if (!isAuthenticated && to.meta.requiresAuth)
       return { name: 'Login', query: { next: to.fullPath } }
   }
 )

@@ -44,7 +44,7 @@ import { useRoute } from 'vue-router'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 
 const { isConnectionEnabled: isHydroShareConnectionEnabled } = useHydroShare()
 const openDelete = ref(false)
@@ -59,7 +59,7 @@ onMounted(async () => {
     )
   }
   try {
-    user.value = await api.fetchUser()
+    user.value = await hs.user.get()
   } catch (err: any) {
     Snackbar.error(err.message)
     console.error('Error fetching user', err)

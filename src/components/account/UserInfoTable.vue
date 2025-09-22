@@ -25,8 +25,8 @@
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted } from 'vue'
-import { api } from '@/services/api'
 import { useHydroShare } from '@/composables/useHydroShare'
+import hs from '@hydroserver/client'
 
 const { user } = storeToRefs(useUserStore())
 const {
@@ -36,7 +36,7 @@ const {
 
 onMounted(async () => {
   try {
-    user.value = await api.fetchUser()
+    user.value = await hs.user.get()
   } catch (error) {
     console.error('Error fetching user', error)
   }
