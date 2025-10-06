@@ -130,12 +130,11 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
-import { api } from '@/services/api'
 import { PermissionResource, PermissionAction, Thing } from '@/types'
 import { addColorToMarkers } from '@/utils/maps/markers'
 import { ThingWithColor } from '@/types'
@@ -144,12 +143,13 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import hs from '@hydroserver/client'
 
 const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 const { hasPermission } = useWorkspacePermissions()
 
-const ownedThings = ref<Thing[]>([])
+const workspaceThings = ref<Thing[]>([])
 const useColors = ref(true)
 const isFiltered = ref(false)
 const isPageLoaded = ref(false)
@@ -184,11 +184,9 @@ const onClickRegisterSite = () => {
     )
 }
 
-const workspaceThings = computed(() =>
-  ownedThings.value.filter(
-    (thing) => thing.workspaceId === selectedWorkspace.value?.id
-  )
-)
+watch(selectedWorkspace, async (ws) => {
+  await loadThings()
+})
 
 const filteredThings = computed(() => {
   const { key, values } = filterCriteria.value
@@ -239,29 +237,19 @@ const onRowClick = (event: Event, item: any) => {
 }
 
 const loadThings = async () => {
-  try {
-    ownedThings.value = await api.fetchOwnedThings()
-  } catch (error) {
-    Snackbar.error('Unable to fetch site data from the API.')
-  } finally {
-    isPageLoaded.value = true
-  }
+  workspaceThings.value = await hs.things.listAllItems({
+    workspace_id: [selectedWorkspace.value!.id],
+  })
 }
 
 onMounted(async () => {
-  try {
-    const [thingsResponse, workspacesResponse] = await Promise.all([
-      api.fetchOwnedThings(),
-      api.fetchAssociatedWorkspaces(),
-    ])
-
-    setWorkspaces(workspacesResponse)
-    ownedThings.value = thingsResponse
-  } catch (error) {
-    console.error('Error fetching site data', error)
-  } finally {
-    isPageLoaded.value = true
-  }
+  const [things, workspaces] = await Promise.all([
+    hs.things.listAllItems({ workspace_id: [selectedWorkspace.value!.id] }),
+    hs.workspaces.listAllItems({ is_associated: true, expand_related: true }),
+  ])
+  setWorkspaces(workspaces)
+  workspaceThings.value = things
+  isPageLoaded.value = true
 })
 </script>
 

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import hs from '@hydroserver/client'
 import { api } from '@/services/api'
 
 export const useVocabularyStore = defineStore('vocabulary', () => {
@@ -24,7 +25,8 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   }
 
   async function fetchSiteTypes() {
-    siteTypes.value = await api.fetchSiteTypes()
+    const res = await hs.things.siteTypes()
+    siteTypes.value = res.data
   }
 
   async function fetchSamplingFeatureTypes() {

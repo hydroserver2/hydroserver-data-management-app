@@ -37,25 +37,23 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Workspace } from '@/types'
 import { Snackbar } from '@/utils/notifications'
+import hs from '@hydroserver/client'
 
 const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createWorkspace,
-  api.updateWorkspace,
-  Workspace,
-  props.workspace || undefined
+const { item, isEdit, valid, myForm, submit } = useFormLogic(
+  hs.workspaces,
+  props.workspace
 )
 
 async function onSubmit() {
   try {
-    const newItem = await uploadItem()
+    const newItem = await submit()
     if (!newItem) return
     if (isEdit.value) emit('updated', newItem)
     else emit('created', newItem)

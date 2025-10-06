@@ -235,7 +235,7 @@ const openEdit = ref(false)
 const openDelete = ref(false)
 const openAccessControl = ref(false)
 const search = ref<string>('')
-const activeItem = ref<Workspace>(new Workspace())
+const activeItem = ref<Workspace>({} as Workspace)
 const showWorkspaceHelp = ref(false)
 
 const selectedWorkspaceId = ref('')
@@ -273,8 +273,8 @@ const refreshWorkspaces = async (workspace?: Workspace) => {
   try {
     const workspacesResponse = (
       await hs.workspaces.list({
-        isAssociated: true,
-        fetchAll: true,
+        is_associated: true,
+        fetch_all: true,
       })
     ).items
     console.log('workspaces', workspaces)

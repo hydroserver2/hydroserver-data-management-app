@@ -2,12 +2,8 @@ import { computed, Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useUserStore } from '@/store/user'
-import {
-  Permission,
-  PermissionResource,
-  PermissionAction,
-  Workspace,
-} from '@/types'
+import hs, { PermissionResource, PermissionAction } from '@hydroserver/client'
+import { Workspace } from '@/types'
 
 export function useWorkspacePermissions(
   localWorkspace?: Ref<Workspace | undefined>
@@ -53,14 +49,7 @@ export function useWorkspacePermissions(
   ) => {
     const w = workspace ?? selectedWorkspace.value
     if (!w) return false
-
-    if (isOwner(w) || isAdmin()) return true
-
-    const perms = w.collaboratorRole?.permissions ?? []
-    return (
-      hasGlobalPermissions(perms) ||
-      perms.some((p) => p.action === action && p.resource === resource)
-    )
+    return hs.user.can(action, resource, workspace!)
   }
 
   function checkPermissionsByWorkspaceId(
@@ -74,80 +63,8 @@ export function useWorkspacePermissions(
     return hasPermission(permissionType, resourceType, workspace)
   }
 
-  const hasGlobalPermissions = (permissions: Permission[]) =>
-    permissions.some(
-      (p) =>
-        p.resource === PermissionResource.Global &&
-        p.action === PermissionAction.Global
-    )
-
-  const canEditWorkspace = computed(() =>
-    hasPermission(PermissionResource.Workspace, PermissionAction.Edit)
-  )
-
-  const canDeleteThings = computed(() =>
-    hasPermission(PermissionResource.Thing, PermissionAction.Delete)
-  )
-
-  const canEditThings = computed(() =>
-    hasPermission(PermissionResource.Thing, PermissionAction.Edit)
-  )
-
-  const canCreateDatastreams = computed(() =>
-    hasPermission(PermissionResource.Datastream, PermissionAction.Create)
-  )
-
-  const canEditDatastreams = computed(() =>
-    hasPermission(PermissionResource.Datastream, PermissionAction.Edit)
-  )
-
-  const canDeleteDatastreams = computed(() =>
-    hasPermission(PermissionResource.Datastream, PermissionAction.Delete)
-  )
-
-  const canViewDatastreams = computed(() =>
-    hasPermission(PermissionResource.Datastream, PermissionAction.View)
-  )
-
-  const canCreateSensors = computed(() =>
-    hasPermission(PermissionResource.Sensor, PermissionAction.Create)
-  )
-
-  const canCreateUnits = computed(() =>
-    hasPermission(PermissionResource.Unit, PermissionAction.Create)
-  )
-
-  const canCreateObservedProperties = computed(() =>
-    hasPermission(PermissionResource.ObservedProperty, PermissionAction.Create)
-  )
-
-  const canCreateProcessingLevels = computed(() =>
-    hasPermission(PermissionResource.ProcessingLevel, PermissionAction.Create)
-  )
-
-  const canViewObservations = computed(() =>
-    hasPermission(PermissionResource.Observation, PermissionAction.View)
-  )
-
-  const canDeleteObservations = computed(() =>
-    hasPermission(PermissionResource.Observation, PermissionAction.Delete)
-  )
-
   return {
     isWorkspaceOwner,
-    canEditWorkspace,
-    canDeleteThings,
-    canEditThings,
-    canCreateDatastreams,
-    canEditDatastreams,
-    canDeleteDatastreams,
-    canViewDatastreams,
-    canCreateSensors,
-    canCreateUnits,
-    canCreateProcessingLevels,
-    canCreateObservedProperties,
-    canViewObservations,
-    canDeleteObservations,
     isAdmin,
     isOwner,
     hasPermission,
