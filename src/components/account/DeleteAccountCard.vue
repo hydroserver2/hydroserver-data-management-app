@@ -46,14 +46,12 @@
 </template>
 
 <script setup lang="ts">
-import hs from '@hydroserver/client'
+import hs, { Thing } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { onMounted, ref } from 'vue'
-import { Thing } from '@/types'
 import { useAuthStore } from '@/store/authentication'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { api } from '@/services/api'
 
 const { logout } = useAuthStore()
 const { ownedWorkspaces } = storeToRefs(useWorkspaceStore())
@@ -83,5 +81,8 @@ function cancelDeletion() {
   emit('close')
 }
 
-onMounted(async () => (things.value = await api.fetchThings()))
+onMounted(
+  async () =>
+    (things.value = await hs.things.listAllItems({ orderBy: ['name'] }))
+)
 </script>

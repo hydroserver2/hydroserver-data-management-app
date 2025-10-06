@@ -134,9 +134,9 @@ import {
 } from '@/models/dataSource'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
-import { api } from '@/services/api'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { getLocalTimeZone } from '@/utils/time'
+import hs from '@hydroserver/client'
 
 const props = defineProps({
   isEdit: Boolean,
@@ -218,8 +218,8 @@ async function onSubmit() {
 
   try {
     const newItem: DataSource | null = props.isEdit
-      ? await api.updateDataSource(dataSource.value)
-      : await api.createDataSource(dataSource.value)
+      ? await hs.dataSources.update(dataSource.value.id, dataSource.value)
+      : await hs.dataSources.create(dataSource.value)
 
     if (!newItem) {
       emit('close')
@@ -250,7 +250,7 @@ onMounted(async () => {
     dataSource.value.schedule[k] = ensureIsoUtc(dataSource.value.schedule[k])
   })
 
-  orchestrationSystems.value = await api.fetchWorkspaceOrchestrationSystems(
+  orchestrationSystems.value = await hs.orchestrationSystems.get(
     selectedWorkspace.value!.id
   )
   loaded.value = true

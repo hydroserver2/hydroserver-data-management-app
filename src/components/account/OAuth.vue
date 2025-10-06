@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import hs from '@hydroserver/client'
 import { computed, ref } from 'vue'
 
@@ -45,6 +44,6 @@ const filteredOAuthProviders = computed(() =>
 
 const signupOrLoginWithOAuth = (providerId: string) => {
   const callbackUrl = '/Sites'
-  api.providerRedirect(providerId, callbackUrl, 'login')
+  hs.session.providerRedirect(providerId, callbackUrl, 'login')
 }
 </script>

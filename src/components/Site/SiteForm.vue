@@ -179,7 +179,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import { useThingStore } from '@/store/thing'
-import { Thing } from '@/types'
+import { Thing, ThingPatch, ThingPost } from '@/types'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
@@ -190,6 +190,7 @@ import { usePhotosStore } from '@/store/photos'
 import { useTagStore } from '@/store/tags'
 import countryList from 'country-list'
 import { useVocabularyStore } from '@/composables/useVocabulary'
+import hs, { ThingContract } from '@hydroserver/client'
 
 const countries = ref<{ name: string; code: string }[]>([])
 const countryTitle = (item: { name: string; code: string } | undefined) => {
@@ -211,8 +212,9 @@ const emit = defineEmits(['close', 'site-created'])
 let loaded = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
-const mapOptions = ref<any>(undefined)
-const thing = reactive<Thing>(new Thing())
+const thing = reactive<ThingContract.SummaryForm>(
+  ThingContract.makeDefaultSummaryForm()
+)
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
 
 watch(
@@ -241,8 +243,8 @@ async function uploadThing() {
   try {
     thing.workspaceId = props.workspaceId
     storedThing.value = props.thingId
-      ? await api.updateThing(thing)
-      : await api.createThing(thing)
+      ? await api.updateThing(thing as Thing)
+      : await api.createThing(thing as Thing)
 
     if (!props.thingId) emit('site-created')
 

@@ -1,4 +1,5 @@
 import { DataSource } from '@/models'
+import { ThingContract, WorkspaceContract } from '@hydroserver/client'
 
 export type DataPoint = {
   date: Date
@@ -71,50 +72,12 @@ export class PostHydroShareArchive extends HydroShareArchive {
   }
 }
 
-export class Location {
-  latitude?: number | ''
-  longitude?: number | ''
-  elevation_m?: number | ''
-  elevationDatum: string
-  state: string
-  county: string
-  country: string
+export type Workspace = WorkspaceContract.DetailResponse
 
-  constructor() {
-    this.elevationDatum = 'WGS84'
-    this.state = ''
-    this.county = ''
-    this.country = ''
-  }
-}
-
-export class Thing {
-  id: string
-  workspaceId: string
-  name: string
-  location: Location = new Location()
-  tags: Tag[]
-  hydroShareArchive?: HydroShareArchive | null
-  siteType: string
-  samplingFeatureCode: string
-  isPrivate: boolean
-  description: string
-  samplingFeatureType: string
-  dataDisclaimer: string
-
-  constructor() {
-    this.id = ''
-    this.workspaceId = ''
-    this.name = ''
-    this.tags = []
-    this.siteType = ''
-    this.samplingFeatureCode = ''
-    this.isPrivate = false
-    this.description = ''
-    this.samplingFeatureType = 'Site'
-    this.dataDisclaimer = ''
-  }
-}
+export type Thing = ThingContract.SummaryResponse
+export type ThingPost = ThingContract.PostBody
+export type ThingPatch = ThingContract.PatchBody
+export type ThingForm = ThingPost | ThingPatch
 
 export interface ThingWithColor extends Thing {
   color?: {
@@ -416,68 +379,41 @@ export class ApiKey {
   }
 }
 
-export interface WorkspaceData {
-  id: string
-  name: string
-  isPrivate: boolean
-  owner: User
-  collaboratorRole: CollaboratorRole
-  pendingTransferTo?: User | null
-}
+// export interface UserInfo {
+//   name: string
+//   email: string
+//   phone: string
+//   address: string
+//   link: string
+//   type: string
+//   organizationName: string
+// }
 
-export class Workspace {
-  id: string
-  name: string
-  isPrivate: boolean
-  owner: UserInfo | null
-  collaboratorRole: CollaboratorRole | null
-  pendingTransferTo?: UserInfo | null
+// export class Collaborator {
+//   user: UserInfo
+//   role: CollaboratorRole
 
-  constructor() {
-    this.id = ''
-    this.name = ''
-    this.isPrivate = false
-    this.owner = null
-    this.collaboratorRole = null
-    this.pendingTransferTo = null
-  }
-}
-
-export interface UserInfo {
-  name: string
-  email: string
-  phone: string
-  address: string
-  link: string
-  type: string
-  organizationName: string
-}
-
-export class Collaborator {
-  user: UserInfo
-  role: CollaboratorRole
-
-  constructor() {
-    this.user = {
-      phone: '',
-      address: '',
-      link: '',
-      type: '',
-      name: '',
-      email: '',
-      organizationName: '',
-    }
-    this.role = {
-      name: '',
-      description: '',
-      id: '',
-      isApikeyRole: false,
-      isUserRole: false,
-      workspaceId: '',
-      permissions: [],
-    }
-  }
-}
+//   constructor() {
+//     this.user = {
+//       phone: '',
+//       address: '',
+//       link: '',
+//       type: '',
+//       name: '',
+//       email: '',
+//       organizationName: '',
+//     }
+//     this.role = {
+//       name: '',
+//       description: '',
+//       id: '',
+//       isApikeyRole: false,
+//       isUserRole: false,
+//       workspaceId: '',
+//       permissions: [],
+//     }
+//   }
+// }
 
 export interface ApiError {
   status: number

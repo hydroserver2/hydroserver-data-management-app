@@ -312,16 +312,15 @@ import { computed, reactive, ref, toRef } from 'vue'
 import { useMetadata } from '@/composables/useMetadata'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
-import { api } from '@/services/api'
 import { Datastream, Workspace } from '@/types'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useTableLogic } from '@/composables/useTableLogic'
-import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import { Snackbar } from '@/utils/notifications'
 import { formatTime, getLocalTimeZone } from '@/utils/time'
 import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 import ObservationsDeleteCard from '../Observation/ObservationsDeleteCard.vue'
 import VisibilityTooltipCard from '@/components/Datastream/VisibilityTooltipCard.vue'
+import hs from '@hydroserver/client'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
@@ -364,11 +363,14 @@ const onCreated = async () => {
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
-    async (thingId: string) => await api.fetchDatastreamsForThing(thingId),
-    api.deleteDatastream,
+    async (thingId: string) =>
+      await hs.datastreams.listAllItems({ thing: thingId }),
+    hs.datastreams.delete,
     Datastream,
     thingIdRef
   )
+
+const hey = hs.datastreams.list()
 
 const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
   useMetadata(toRef(props, 'workspace'))
@@ -431,7 +433,7 @@ const onDownload = async (datastreamId: string) => {
   downloading[datastreamId] = true
 
   try {
-    await downloadDatastreamCSV(datastreamId)
+    await hs.datastreams.downloadCsv(datastreamId)
   } catch (err: any) {
     console.error('Error downloading datastream CSV', err)
     Snackbar.error(err.message)
