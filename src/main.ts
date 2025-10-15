@@ -28,7 +28,6 @@ async function initializeApp() {
       const workspacesResponse = await hs.workspaces.listAllItems({
         is_associated: true,
       })
-      console.log('workspace response', workspacesResponse)
       const { setWorkspaces } = useWorkspaceStore()
       setWorkspaces(workspacesResponse)
     } catch (error) {
