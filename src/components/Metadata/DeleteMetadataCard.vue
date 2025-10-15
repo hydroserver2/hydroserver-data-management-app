@@ -42,8 +42,8 @@
 <script setup lang="ts">
 import { Datastream } from '@/types'
 import { computed, onMounted, ref } from 'vue'
-import { api } from '@/services/api'
 import FullScreenLoader from '../base/FullScreenLoader.vue'
+import hs from '@hydroserver/client'
 
 const datastreams = ref<Datastream[]>([])
 const loaded = ref(false)
@@ -73,10 +73,10 @@ const hasDatastreams = computed(() => datastreams.value?.length > 0)
 onMounted(async () => {
   try {
     const filter = {
-      [props.parameterName]: props.itemID,
-    } as Partial<Record<DatastreamFilterKey, string>>
+      [props.parameterName]: [props.itemID],
+    } as Partial<Record<DatastreamFilterKey, string[]>>
 
-    datastreams.value = await api.fetchDatastreams(filter)
+    datastreams.value = await hs.datastreams.listAllItems(filter)
     loaded.value = true
   } catch (error) {
     console.error('Error fetching things', error)

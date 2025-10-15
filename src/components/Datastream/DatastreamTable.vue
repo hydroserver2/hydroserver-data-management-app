@@ -29,7 +29,13 @@
         >View on Data Visualization Page</v-btn
       >
       <v-btn-add
-        v-if="canCreateDatastreams"
+        v-if="
+          hasPermission(
+            PermissionResource.Datastream,
+            PermissionAction.Create,
+            workspace
+          )
+        "
         color="white"
         prependIcon="mdi-plus"
         @click="openCreate = true"
@@ -106,7 +112,16 @@
       </template>
 
       <template v-slot:item.observations="{ item }">
-        <div v-if="!canViewDatastreams && !item.isVisible" class="mt-2">
+        <div
+          v-if="
+            !hasPermission(
+              PermissionResource.Datastream,
+              PermissionAction.View,
+              workspace
+            ) && !item.isVisible
+          "
+          class="mt-2"
+        >
           Data is private for this datastream
         </div>
         <Sparkline
@@ -131,7 +146,13 @@
             bottom
             :openDelay="500"
             content-class="pa-0 ma-0 bg-transparent"
-            v-if="canEditDatastreams"
+            v-if="
+              hasPermission(
+                PermissionResource.Datastream,
+                PermissionAction.Edit,
+                workspace
+              )
+            "
           >
             <template #activator="{ props: tp }">
               <v-icon
@@ -162,7 +183,13 @@
           <v-tooltip
             bottom
             :openDelay="500"
-            v-if="canEditDatastreams"
+            v-if="
+              hasPermission(
+                PermissionResource.Datastream,
+                PermissionAction.Edit,
+                workspace
+              )
+            "
             content-class="pa-0 ma-0 bg-transparent"
           >
             <template v-slot:activator="{ props }">
@@ -190,7 +217,13 @@
           </v-tooltip>
 
           <v-tooltip
-            v-if="!canViewDatastreams && !item.isVisible"
+            v-if="
+              !hasPermission(
+                PermissionResource.Datastream,
+                PermissionAction.View,
+                workspace
+              ) && !item.isVisible
+            "
             bottom
             :openDelay="100"
           >
@@ -206,12 +239,26 @@
             </template>
             <v-list>
               <v-list-item
-                v-if="canEditDatastreams"
+                v-if="
+                  hasPermission(
+                    PermissionResource.Datastream,
+                    PermissionAction.Edit,
+                    workspace
+                  )
+                "
                 prepend-icon="mdi-pencil"
                 title="Edit datastream metadata"
                 @click="openDialog(item, 'edit')"
               />
-              <div v-if="canDeleteDatastreams">
+              <div
+                v-if="
+                  hasPermission(
+                    PermissionResource.Datastream,
+                    PermissionAction.Delete,
+                    workspace
+                  )
+                "
+              >
                 <v-list-item
                   prepend-icon="mdi-delete"
                   title="Delete datastream"
@@ -219,7 +266,13 @@
                 />
               </div>
               <v-list-item
-                v-if="canDeleteObservations"
+                v-if="
+                  hasPermission(
+                    PermissionResource.Observation,
+                    PermissionAction.Delete,
+                    workspace
+                  )
+                "
                 prepend-icon="mdi-delete-outline"
                 title="Delete data from datastream"
                 @click="openObservationDialog(item)"
@@ -320,7 +373,7 @@ import { formatTime, getLocalTimeZone } from '@/utils/time'
 import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 import ObservationsDeleteCard from '../Observation/ObservationsDeleteCard.vue'
 import VisibilityTooltipCard from '@/components/Datastream/VisibilityTooltipCard.vue'
-import hs from '@hydroserver/client'
+import hs, { PermissionAction, PermissionResource } from '@hydroserver/client'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
@@ -344,11 +397,12 @@ const openInfoCard = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
 
 const {
-  canCreateDatastreams,
-  canViewDatastreams,
-  canEditDatastreams,
-  canDeleteDatastreams,
-  canDeleteObservations,
+  // canCreateDatastreams,
+  // canViewDatastreams,
+  // canEditDatastreams,
+  // canDeleteDatastreams,
+  // canDeleteObservations,
+  hasPermission,
 } = useWorkspacePermissions(workspaceRef)
 
 const updateDatastream = async (updatedDatastream: Datastream) => {
@@ -364,7 +418,7 @@ const onCreated = async () => {
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
     async (thingId: string) =>
-      await hs.datastreams.listAllItems({ thing: thingId }),
+      await hs.datastreams.listAllItems({ thing_id: [thingId] }),
     hs.datastreams.delete,
     Datastream,
     thingIdRef
@@ -379,7 +433,15 @@ const openCharts = reactive<Record<string, boolean>>({})
 
 const visibleDatastreams = computed(() => {
   return items.value
-    .filter((d) => !d.isPrivate || canViewDatastreams.value)
+    .filter(
+      (d) =>
+        !d.isPrivate ||
+        hasPermission(
+          PermissionResource.Datastream,
+          PermissionAction.View,
+          props.workspace
+        )
+    )
     .map((d) => {
       const unit = units.value.find((u) => u.id === d.unitId)
       const sensor = sensors.value.find((s) => s.id === d.sensorId)
@@ -485,9 +547,9 @@ const onRowClick = (event: Event, item: any) => {
   } else selectedDatastream.value = null
 }
 
-const patchDatastream = async (patchBody: {}) => {
+const patchDatastream = async <T extends { id: string }>(patchBody: T) => {
   try {
-    await api.updateDatastream(patchBody as Datastream)
+    await hs.datastreams.update(patchBody)
   } catch (error) {
     console.error('Error updating datastream', error)
   }
@@ -495,7 +557,7 @@ const patchDatastream = async (patchBody: {}) => {
 
 async function onObservationsDelete() {
   try {
-    await api.deleteObservationsForDatastream(item.value.id)
+    await hs.datastreams.deleteObservations(item.value.id)
     items.value = []
     await loadDatastreams()
   } catch (error) {
@@ -529,7 +591,9 @@ const headers = [
 
 const loadDatastreams = async () => {
   try {
-    items.value = await api.fetchDatastreamsForThing(thing.value!.id)
+    items.value = await hs.datastreams.listAllItems({
+      thing_id: [thing.value!.id],
+    })
     actionKey.value += 1
   } catch (e) {
     console.error('Error fetching datastreams', e)

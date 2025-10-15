@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Tag } from '@/types'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 
 export const useTagStore = defineStore('tags', () => {
   const tags = ref<Tag[]>([])
@@ -31,14 +31,15 @@ export const useTagStore = defineStore('tags', () => {
       )
 
       const requests = [
-        ...tagsToAdd.map((tag) => api.createSiteTag(thingId, tag)),
-        ...tagsToEdit.map((tag) => api.editSiteTag(thingId, tag)),
-        ...tagsToDelete.map((tag) => api.deleteSiteTag(thingId, tag)),
+        ...tagsToAdd.map((tag) => hs.things.createTag(thingId, tag)),
+        ...tagsToEdit.map((tag) => hs.things.updateTag(thingId, tag)),
+        ...tagsToDelete.map((tag) => hs.things.deleteTag(thingId, tag)),
       ]
 
       await Promise.all(requests)
 
-      tags.value = await api.fetchSiteTags(thingId)
+      const res = await hs.things.getTags(thingId)
+      tags.value = res.data
       previewTags.value = []
     } catch (error) {
       console.error('Error updating tags', error)

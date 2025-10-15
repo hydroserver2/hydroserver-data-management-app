@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import hs from '@hydroserver/client'
-import { api } from '@/services/api'
 
 export const useVocabularyStore = defineStore('vocabulary', () => {
   const userTypes = ref<string[]>([])
@@ -17,48 +16,58 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   const sampledMediums = ref<string[]>([])
 
   async function fetchUserTypes() {
-    userTypes.value = await api.fetchUserTypes()
+    const res = await hs.user.getUserTypes()
+    userTypes.value = res.data
   }
 
   async function fetchOrganizationTypes() {
-    organizationTypes.value = await api.fetchOrganizationTypes()
+    const res = await hs.user.getOrganizationTypes()
+    organizationTypes.value = res.data
   }
 
   async function fetchSiteTypes() {
-    const res = await hs.things.siteTypes()
+    const res = await hs.things.getSiteTypes()
     siteTypes.value = res.data
   }
 
   async function fetchSamplingFeatureTypes() {
-    samplingFeatureTypes.value = await api.fetchSamplingFeatureTypes()
+    const res = await hs.things.getSamplingFeatureTypes()
+    samplingFeatureTypes.value = res.data
   }
 
   async function fetchSensorEncodingTypes() {
-    sensorEncodingTypes.value = await api.fetchSensorEncodingTypes()
+    const res = await hs.sensors.getEncodingTypes()
+    sensorEncodingTypes.value = res.data
   }
 
   async function fetchMethodTypes() {
-    methodTypes.value = await api.fetchMethodTypes()
+    const res = await hs.sensors.getMethodTypes()
+    methodTypes.value = res.data
   }
 
   async function fetchVariableTypes() {
-    variableTypes.value = await api.fetchVariableTypes()
+    const res = await hs.observedProperties.getVariableTypes()
+    variableTypes.value = res.data
   }
 
   async function fetchUnitTypes() {
-    unitTypes.value = await api.fetchUnitTypes()
+    const res = await hs.units.getTypes()
+    unitTypes.value = res.data
   }
 
   async function fetchDatastreamStatuses() {
-    datastreamStatuses.value = await api.fetchDatastreamStatuses()
+    const res = await hs.datastreams.getStatuses()
+    datastreamStatuses.value = res.data
   }
 
   async function fetchDatastreamAggregations() {
-    datastreamAggregations.value = await api.fetchDatastreamAggregations()
+    const res = await hs.datastreams.getAggregationStatistics()
+    datastreamAggregations.value = res.data
   }
 
   async function fetchSampledMediums() {
-    sampledMediums.value = await api.fetchSampledMediums()
+    const res = await hs.datastreams.getSampledMediums()
+    sampledMediums.value = res.data
   }
 
   // Fetch all vocabularies in parallel

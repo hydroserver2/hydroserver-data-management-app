@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { Workspace } from '@/types'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
@@ -86,7 +86,10 @@ const showTransferConfirmation = ref(false)
 async function onTransferOwnership() {
   if (!newOwnerEmail.value) return
   try {
-    await api.transferWorkspace(props.workspace!.id, newOwnerEmail.value)
+    await hs.workspaces.transferOwnership(
+      props.workspace!.id,
+      newOwnerEmail.value
+    )
     emits('needs-refresh')
     Snackbar.success('Workspace transfer initiated.')
   } catch (error: any) {
@@ -99,7 +102,7 @@ async function onTransferOwnership() {
 
 async function onCancelTransfer() {
   try {
-    await api.rejectWorkspaceTransfer(props.workspace!.id)
+    await hs.workspaces.rejectWorkspaceTransfer(props.workspace!.id)
     emits('needs-refresh')
     Snackbar.success('Workspace transfer cancelled.')
   } catch (error) {

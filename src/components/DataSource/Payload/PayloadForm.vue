@@ -54,14 +54,13 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { Payload } from '@/models'
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
-
 import SwimlanesForm from './SwimlanesForm.vue'
+import hs from '@hydroserver/client'
 
 const props = defineProps({
   oldPayload: { type: Object as () => Payload },
@@ -100,10 +99,10 @@ async function onSubmit() {
   }
 
   await updateLinkedDatastreams(payload.value, props.oldPayload)
-  await api.updateDataSource(dataSource.value)
-  linkedDatastreams.value = await api.fetchDatastreamsForDataSource(
-    dataSource.value.id
-  )
+  await hs.dataSources.update(dataSource.value)
+  linkedDatastreams.value = await hs.datastreams.listAllItems({
+    data_source_id: [dataSource.value.id],
+  })
   emit('close')
 }
 </script>

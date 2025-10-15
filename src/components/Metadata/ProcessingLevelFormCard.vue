@@ -45,10 +45,10 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { ProcessingLevel } from '@/types'
+import hs from '@hydroserver/client'
 
 const props = defineProps<{
   processingLevel?: ProcessingLevel
@@ -58,8 +58,8 @@ const props = defineProps<{
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createProcessingLevel,
-  api.updateProcessingLevel,
+  hs.processingLevels.create,
+  hs.processingLevels.update,
   ProcessingLevel,
   props.processingLevel || undefined
 )

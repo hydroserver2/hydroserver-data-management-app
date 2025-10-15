@@ -115,7 +115,6 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { ApiKey, CollaboratorRole } from '@/types'
 import { Snackbar } from '@/utils/notifications'
 import { onMounted, ref, toRef } from 'vue'
@@ -123,6 +122,7 @@ import { useTableLogic } from '@/composables/useTableLogic'
 import ApiKeyForm from './ApiKeyForm.vue'
 import DeleteApiKey from './DeleteApiKey.vue'
 import ApiKeyRegenerateForm from './ApiKeyRegenerateForm.vue'
+import hs from '@hydroserver/client'
 
 const props = defineProps({
   workspaceId: { type: String, required: true },
@@ -140,9 +140,12 @@ const newKey = ref<ApiKey>()
 
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
-    async (wsId: string) => await api.fetchApiKeys(wsId),
+    async (wsId: string) => {
+      const res = await hs.workspaces.getApiKeys(wsId)
+      return res.data
+    },
     async (keyId: string) => {
-      await api.deleteApiKey(props.workspaceId, keyId)
+      await hs.workspaces.deleteApiKey(props.workspaceId, keyId)
     },
     ApiKey,
     toRef(props, 'workspaceId')
@@ -171,10 +174,11 @@ function onOpenRegenerateDialog(selectedItem: ApiKey) {
 
 const onRegenerate = async () => {
   try {
-    const responseKey = await api.regenerateApiKey(
+    const res = await hs.workspaces.regenerateApiKey(
       props.workspaceId,
       item.value.id
     )
+    const responseKey = res.data
     const idx = items.value.findIndex((k) => k.id === responseKey.id)
     if (idx !== -1) {
       items.value.splice(idx, 1, responseKey)
@@ -199,10 +203,13 @@ async function copyKey(key: string) {
 
 onMounted(async () => {
   try {
-    const rolesResponse = await api.getAPIKeyRoles(props.workspaceId)
-    roles.value = rolesResponse.filter(
-      (r: CollaboratorRole) => r.isApikeyRole === true
-    )
+    const res = await hs.workspaces.getRoles({
+      workspace_id: [props.workspaceId],
+      is_apikey_role: true,
+      order_by: ['name'],
+    })
+
+    roles.value = res.data
   } catch (error) {
     console.error('Error fetching collaborators for workspace', error)
   }

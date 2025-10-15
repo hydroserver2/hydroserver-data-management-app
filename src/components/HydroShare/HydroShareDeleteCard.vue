@@ -33,9 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
+import hs from '@hydroserver/client'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
@@ -49,7 +49,7 @@ async function deleteLink() {
     return
   }
   try {
-    await api.deleteHydroShareArchive(props.thingId)
+    await hs.things.deleteHydroShareArchive(props.thingId)
     Snackbar.info('Your site has been unlinked')
     emit('delete')
     emit('close')

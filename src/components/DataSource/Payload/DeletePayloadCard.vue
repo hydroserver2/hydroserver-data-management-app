@@ -24,10 +24,9 @@
 
 <script setup lang="ts">
 import { Payload } from '@/models'
-import { api } from '@/services/api'
 import { useDataSourceStore } from '@/store/datasource'
-
 import { storeToRefs } from 'pinia'
+import hs from '@hydroserver/client'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
@@ -43,7 +42,7 @@ const { updateLinkedDatastreams } = useDataSourceStore()
 
 const onDelete = async () => {
   payloads.value.splice(props.payloadIndex, 1)
-  await api.updateDataSource(dataSource.value)
+  await hs.dataSources.update(dataSource.value)
   await updateLinkedDatastreams(undefined, props.payload)
   emit('delete')
   emit('close')

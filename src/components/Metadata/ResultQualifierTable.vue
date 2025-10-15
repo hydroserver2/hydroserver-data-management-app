@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { ResultQualifier } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
@@ -52,14 +52,15 @@ const props = defineProps<{
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   props.workspaceId
     ? useTableLogic(
-        async (wsId: string) => await api.fetchWorkspaceResultQualifiers(wsId),
-        api.deleteResultQualifier,
+        async (wsId: string) =>
+          await hs.resultQualifiers.listAllItems({ workspace_id: [wsId] }),
+        hs.resultQualifiers.delete,
         ResultQualifier,
         toRef(props, 'workspaceId')
       )
     : useSystemTableLogic(
-        api.fetchResultQualifiers,
-        api.deleteResultQualifier,
+        hs.resultQualifiers.listAllItems,
+        hs.resultQualifiers.delete,
         ResultQualifier
       )
 

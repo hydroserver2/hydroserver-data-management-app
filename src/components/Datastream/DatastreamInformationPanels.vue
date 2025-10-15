@@ -90,9 +90,9 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { formatTimeWithZone } from '@/utils/time'
 import { onMounted, ref } from 'vue'
+import hs from '@hydroserver/client'
 
 const props = defineProps({
   datastreamId: { type: String, required: true },
@@ -110,7 +110,9 @@ let unitItems: ListItemArray = []
 let processingLevelItems: ListItemArray = []
 
 onMounted(async () => {
-  datastream.value = await api.fetchDatastreamExpanded(props.datastreamId)
+  datastream.value = await hs.datastreams.get(props.datastreamId, {
+    expand_related: true,
+  })
   const d = datastream.value!
 
   generalItems = [

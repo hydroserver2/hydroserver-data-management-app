@@ -70,7 +70,6 @@ export default defineConfig(({ mode }) => {
           '**/src/store/**',
           '**/src/types/**',
           '**/src/config/**',
-          '**/src/services/api.ts',
           '**/src/services/apiMethods.ts',
           '**/src/services/handle401.ts',
           '**/src/utils/mdi-icons.ts',

@@ -27,11 +27,11 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { Datastream } from '@/types'
 import { ref, watch } from 'vue'
 import DatastreamOverviewCard from './DatastreamOverviewCard.vue'
 import DatastreamSelectorCard from './DatastreamSelectorCard.vue'
+import hs from '@hydroserver/client'
 
 const showModal = ref(false)
 const datastream = ref<Datastream>(new Datastream())
@@ -48,7 +48,9 @@ watch(
   async () => {
     if (!selectedId.value) return
     try {
-      const fetchedDS = await api.fetchDatastreamExpanded(selectedId.value)
+      const fetchedDS = await hs.datastreams.getItem(selectedId.value, {
+        expand_related: true,
+      })
       if (!fetchedDS) return
       Object.assign(datastream.value, fetchedDS)
       emit('updateSelectedId', selectedId.value)

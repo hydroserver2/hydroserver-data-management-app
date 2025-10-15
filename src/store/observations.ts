@@ -1,12 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Datastream, ObservationRecord, GraphSeries } from '@/types'
-import {
-  fetchObservations,
-  preProcessData,
-} from '@/utils/observationsUtils'
+import { fetchObservations, preProcessData } from '@/utils/observationsUtils'
 import { Snackbar } from '@/utils/notifications'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 
 export const useObservationStore = defineStore('observations', () => {
   const observations = ref<Record<string, ObservationRecord>>({})
@@ -128,12 +125,14 @@ export const useObservationStore = defineStore('observations', () => {
       console.error('Failed to fetch observations:', error)
       return null
     })
-    const fetchUnitPromise = api.getUnit(datastream.unitId).catch((error) => {
-      console.error('Failed to fetch Unit:', error)
-      return null
-    })
-    const fetchObservedPropertyPromise = api
-      .fetchObservedProperty(datastream.observedPropertyId)
+    const fetchUnitPromise = hs.units
+      .getItem(datastream.unitId)
+      .catch((error) => {
+        console.error('Failed to fetch Unit:', error)
+        return null
+      })
+    const fetchObservedPropertyPromise = hs.observedProperties
+      .getItem(datastream.observedPropertyId)
       .catch((error) => {
         console.error('Failed to fetch ObservedProperty:', error)
         return null

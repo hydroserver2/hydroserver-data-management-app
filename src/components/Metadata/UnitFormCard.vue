@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Unit } from '@/types'
@@ -62,8 +62,8 @@ const props = defineProps<{
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createUnit,
-  api.updateUnit,
+  hs.units.create,
+  hs.units.update,
   Unit,
   props.unit || undefined
 )

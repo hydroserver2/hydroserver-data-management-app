@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { Unit } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
@@ -52,12 +52,13 @@ const props = defineProps<{
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   props.workspaceId
     ? useTableLogic(
-        async (wsId: string) => await api.fetchWorkspaceUnits(wsId),
-        api.deleteUnit,
+        async (wsId: string) =>
+          await hs.units.listAllItems({ workspace_id: [wsId] }),
+        hs.units.delete,
         Unit,
         toRef(props, 'workspaceId')
       )
-    : useSystemTableLogic(api.fetchUnits, api.deleteUnit, Unit)
+    : useSystemTableLogic(hs.units.listAllItems, hs.units.delete, Unit)
 
 const UnitHeaders = [
   { title: 'Name', key: 'name' },

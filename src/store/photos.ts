@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Photo } from '@/types'
-import { api } from '@/services/api'
+import hs, { ApiResponse } from '@hydroserver/client'
 
 export const usePhotosStore = defineStore('photos', () => {
   const photos = ref<Photo[]>([])
@@ -15,17 +15,20 @@ export const usePhotosStore = defineStore('photos', () => {
     const promises = newPhotos.value.map(async (file) => {
       const data = new FormData()
       data.append('file', file)
-      return await api.uploadSitePhotos(thingId, data)
+      return await hs.things.uploadPhotos(thingId, data)
     })
 
-    const newPhotoResponses = await Promise.all(promises)
-    photos.value = [...photos.value, ...newPhotoResponses]
+    const newPhotoResponses: ApiResponse<Photo>[] = await Promise.all(promises)
+    const photoData = newPhotoResponses.map(
+      (res: ApiResponse<Photo>) => res.data
+    )
+    photos.value = [...photos.value, ...photoData]
   }
 
   const deleteSelectedPhotos = async (thingId: string) => {
     if (!photosToDelete.value.length) return
     await Promise.all(
-      photosToDelete.value.map((p) => api.deleteSitePhoto(thingId, p))
+      photosToDelete.value.map((p) => hs.things.deletePhoto(thingId, p))
     )
     photos.value = photos.value.filter(
       (p) => !photosToDelete.value.includes(p.name)

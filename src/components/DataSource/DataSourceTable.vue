@@ -160,7 +160,6 @@ import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
 import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
 import DeleteOrchestrationSystemCard from '@/components/OrchestrationSystem/DeleteOrchestrationSystemCard.vue'
 import { DataSource } from '@/models'
-import { api } from '@/services/api'
 import { computed } from 'vue'
 import router from '@/router/router'
 import {
@@ -172,6 +171,7 @@ import {
 } from '@/models/dataSource'
 import { StatusType } from '@/models/dataSource'
 import { formatTime } from '@/utils/time'
+import hs from '@hydroserver/client'
 
 const props = defineProps<{
   workspaceId: string
@@ -190,7 +190,7 @@ const fetchOrchestrationData = async (newId: string) => {
   loading.value = true
   try {
     const [orchestrationSystemResponse, dataSourceResponse] = await Promise.all(
-      [api.fetchOrchestrationSystems(), api.fetchDataSources()]
+      [hs.orchestrationSystems.listAllItems(), hs.dataSources.listAllItems()]
     )
 
     // TODO: Allow HydroShare as an option once we have archival functionality in the orchestration system
@@ -257,7 +257,7 @@ const tableData = computed(() => {
 
 async function togglePaused(ds: any) {
   ds.status.paused = !ds.status.paused
-  await api.updateDataSourcePartial({
+  await hs.dataSources.updatePartial({
     status: ds.status,
     id: ds.id,
   } as DataSource)

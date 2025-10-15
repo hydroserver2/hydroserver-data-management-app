@@ -49,11 +49,10 @@
 import hs, { Thing } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { onMounted, ref } from 'vue'
-import { useAuthStore } from '@/store/authentication'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import router from '@/router/router'
 
-const { logout } = useAuthStore()
 const { ownedWorkspaces } = storeToRefs(useWorkspaceStore())
 
 const things = ref<Thing[]>([])
@@ -69,7 +68,8 @@ async function deleteAccount() {
   try {
     emit('close')
     await hs.user.delete()
-    await logout()
+    await hs.session.logout()
+    await router.push({ name: 'Login' })
     Snackbar.info('Your account has been deleted')
   } catch (error) {
     console.error('Error deleting account', error)
@@ -83,6 +83,6 @@ function cancelDeletion() {
 
 onMounted(
   async () =>
-    (things.value = await hs.things.listAllItems({ orderBy: ['name'] }))
+    (things.value = await hs.things.listAllItems({ order_by: ['name'] }))
 )
 </script>

@@ -112,7 +112,16 @@
                 </v-tooltip>
               </template>
 
-              <template v-slot:append v-if="canCreateSensors">
+              <template
+                v-slot:append
+                v-if="
+                  hasPermission(
+                    PermissionResource.Sensor,
+                    PermissionAction.Create,
+                    workspace
+                  )
+                "
+              >
                 <v-icon
                   color="secondary-darken-2"
                   @click="showSensorModal = true"
@@ -180,7 +189,16 @@
                   />
                 </v-tooltip>
               </template>
-              <template v-slot:append v-if="canCreateObservedProperties">
+              <template
+                v-slot:append
+                v-if="
+                  hasPermission(
+                    PermissionResource.ObservedProperty,
+                    PermissionAction.Create,
+                    workspace
+                  )
+                "
+              >
                 <v-icon color="secondary-darken-2" @click="showOPModal = true"
                   >mdi-plus</v-icon
                 >
@@ -242,7 +260,16 @@
                 </v-tooltip>
               </template>
 
-              <template #append v-if="canCreateUnits">
+              <template
+                #append
+                v-if="
+                  hasPermission(
+                    PermissionResource.Unit,
+                    PermissionAction.Create,
+                    workspace
+                  )
+                "
+              >
                 <v-icon color="secondary-darken-2" @click="openUnitForm = true">
                   mdi-plus
                 </v-icon>
@@ -304,7 +331,16 @@
                 </v-tooltip>
               </template>
 
-              <template #append v-if="canCreateProcessingLevels">
+              <template
+                #append
+                v-if="
+                  hasPermission(
+                    PermissionResource.ProcessingLevel,
+                    PermissionAction.Create,
+                    workspace
+                  )
+                "
+              >
                 <v-icon color="secondary-darken-2" @click="showPLModal = true">
                   mdi-plus
                 </v-icon>
@@ -560,12 +596,12 @@ import { rules } from '@/utils/rules'
 import { Snackbar } from '@/utils/notifications'
 import { useMetadata } from '@/composables/useMetadata'
 import { Thing } from '@/types'
-import { api } from '@/services/api'
 import { Datastream, Workspace } from '@/types'
 import { VForm } from 'vuetify/components'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import InfoCard from '../Metadata/InfoCard.vue'
+import hs, { PermissionAction, PermissionResource } from '@hydroserver/client'
 
 const emit = defineEmits(['close', 'updated', 'created'])
 
@@ -596,11 +632,12 @@ const selectedDatastreamID = ref('')
 const intendedTimeSpacingRef = ref<VForm>()
 
 const {
-  canCreateObservedProperties,
-  canCreateProcessingLevels,
-  canCreateSensors,
-  canCreateUnits,
-} = useWorkspacePermissions(toRef(props, 'workspace'))
+  // canCreateObservedProperties,
+  // canCreateProcessingLevels,
+  // canCreateSensors,
+  // canCreateUnits,
+  hasPermission,
+} = useWorkspacePermissions()
 
 const {
   sensors,
@@ -648,7 +685,7 @@ const generateDefaultDescription = () => {
 
 watch(selectedDatastreamID, async () => {
   try {
-    const fetchedDS = await api.fetchDatastream(selectedDatastreamID.value)
+    const fetchedDS = await hs.datastreams.getItem(selectedDatastreamID.value)
     if (!fetchedDS) return
     Object.assign(datastream.value, {
       ...datastream.value,
@@ -683,14 +720,14 @@ async function onSubmit() {
   datastream.value.thingId = props.thing.id
   if (isEdit.value) {
     try {
-      await api.updateDatastream(datastream.value)
+      await hs.datastreams.update(datastream.value)
       emit('updated', datastream.value)
     } catch (error) {
       console.error('Error updating datastream', error)
     }
   } else {
     try {
-      await api.createDatastream(datastream.value)
+      await hs.datastreams.create(datastream.value)
       emit('created')
     } catch (error) {
       console.error('Error creating datastream', error)

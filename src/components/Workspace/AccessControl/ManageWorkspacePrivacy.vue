@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { Workspace } from '@/types'
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
@@ -48,7 +48,7 @@ const showPrivacyHelp = ref(false)
 async function togglePrivacy() {
   try {
     isUpdating.value = true
-    await api.updateWorkspace({
+    await hs.workspaces.update({
       id: props.workspace.id,
       isPrivate: isPrivate.value,
     } as Workspace)

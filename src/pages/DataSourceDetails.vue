@@ -117,7 +117,7 @@ import PayloadTable from '@/components/DataSource/Payload/PayloadTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { DataSource, getStatusText, WORKFLOW_TYPES } from '@/models/dataSource'
 import router from '@/router/router'
 import { useDataSourceStore } from '@/store/datasource'
@@ -218,7 +218,7 @@ const orchestrationSystemInformation = computed(() => {
 
 async function togglePaused(ds: any) {
   ds.status.paused = !ds.status.paused
-  await api.updateDataSourcePartial({
+  await hs.dataSources.updatePartial({
     status: ds.status,
     id: ds.id,
   } as DataSource)
@@ -226,7 +226,7 @@ async function togglePaused(ds: any) {
 
 const onDelete = async () => {
   try {
-    await api.deleteDataSource(dataSource.value.id)
+    await hs.dataSources.delete(dataSource.value.id)
     await router.push({ name: 'Orchestration' })
     Snackbar.success('Datasource deleted.')
   } catch (error: any) {
@@ -238,11 +238,14 @@ const onDelete = async () => {
 const fetchData = async () => {
   try {
     const [source, datastreams] = await Promise.all([
-      api.fetchDataSource(route.params.id.toString()),
-      api.fetchDatastreamsForDataSource(route.params.id.toString()),
+      hs.dataSources.get(route.params.id.toString()),
+      hs.datastreams.listAllItems({
+        data_source_id: [route.params.id.toString()],
+      }),
     ])
 
-    dataSource.value = source
+    if (!source.ok) return
+    dataSource.value = source.item
     linkedDatastreams.value = datastreams
   } catch (e) {
     Snackbar.error('Unable to fetch dataSources from the API.')

@@ -42,7 +42,7 @@ import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { ResultQualifier } from '@/types'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 
 const props = defineProps<{
   resultQualifier?: ResultQualifier
@@ -52,8 +52,8 @@ const props = defineProps<{
 const emit = defineEmits(['updated', 'created', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createResultQualifier,
-  api.updateResultQualifier,
+  hs.resultQualifiers.create,
+  hs.resultQualifiers.update,
   ResultQualifier,
   props.resultQualifier || undefined
 )
