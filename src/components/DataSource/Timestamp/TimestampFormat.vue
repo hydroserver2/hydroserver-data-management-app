@@ -100,8 +100,6 @@ watch(
     } else {
       target.timezoneMode = 'utc'
     }
-
-    console.log('updated format', target)
   }
 )
 
@@ -111,8 +109,6 @@ watch(
     if (newMode === 'utc') target.timezone = undefined
     else if (newMode === 'fixedOffset') target.timezone = '-0700'
     else if (newMode === 'daylightSavings') target.timezone = 'America/Denver'
-
-    console.log('updated format', target)
   }
 )
 
