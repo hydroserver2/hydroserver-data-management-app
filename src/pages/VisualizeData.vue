@@ -38,7 +38,7 @@ import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTabl
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
 import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
@@ -240,10 +240,10 @@ onMounted(async () => {
       processingLevelsResponse,
       observedPropertiesResponse,
     ] = await Promise.all([
-      api.fetchThings(),
-      api.fetchDatastreams(),
-      api.fetchProcessingLevels(),
-      api.fetchObservedProperties(),
+      hs.things.listAllItems(),
+      hs.datastreams.listAllItems(),
+      hs.processingLevels.listAllItems(),
+      hs.observedProperties.listAllItems(),
     ])
 
     things.value = thingsResponse

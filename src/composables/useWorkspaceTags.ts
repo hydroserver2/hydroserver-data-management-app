@@ -1,4 +1,4 @@
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { Workspace } from '@/types'
 import { storeToRefs } from 'pinia'
@@ -27,7 +27,10 @@ export function useWorkspaceTags(localWorkspace?: Ref<Workspace | undefined>) {
   watch(
     workspaceId,
     async (id) => {
-      if (id) tags.value = await api.fetchWorkspaceTags(id)
+      if (id) {
+        const res = await hs.things.getTagKeys({ workspace_id: id })
+        tags.value = res.data
+      }
     },
     { immediate: true }
   )

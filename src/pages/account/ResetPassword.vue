@@ -78,8 +78,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { rules } from '@/utils/rules'
-import { api } from '@/services/api'
-import { Snack, Snackbar } from '@/utils/notifications'
+import hs from '@hydroserver/client'
+import { Snackbar } from '@/utils/notifications'
 import { useRoute } from 'vue-router'
 import router from '@/router/router'
 
@@ -93,21 +93,17 @@ const password = ref('')
 const confirmPassword = ref('')
 
 const onResetRequest = async () => {
-  try {
-    resetEmailSent.value = await api.requestPasswordReset(email.value)
-  } catch (error) {
-    console.error('Error requesting password reset', error)
-    if ((error as Error).message === '404') {
-      Snackbar.warn('No account was found for the email you specified')
-    }
-  }
+  const res = await hs.user.requestPasswordReset(email.value)
+  if (res.status == 404)
+    Snackbar.warn('No account was found for the email you specified')
+  resetEmailSent.value = res.data
 }
 
 const resetPassword = async () => {
   if (!valid.value) return
 
   try {
-    await api.resetPassword(
+    await hs.user.resetPassword(
       route.params.passwordResetKey.toString(),
       password.value
     )

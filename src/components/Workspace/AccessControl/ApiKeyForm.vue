@@ -47,10 +47,10 @@
 
 <script setup lang="ts">
 import { required, rules } from '@/utils/rules'
-import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { ApiKey, CollaboratorRole } from '@/types'
+import hs from '@hydroserver/client'
 
 const props = defineProps<{
   apiKey?: ApiKey
@@ -61,8 +61,8 @@ const props = defineProps<{
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createApiKey,
-  api.updateApiKey,
+  hs.workspaces.createApiKey,
+  hs.workspaces.updateApiKey,
   ApiKey,
   props.apiKey || undefined
 )

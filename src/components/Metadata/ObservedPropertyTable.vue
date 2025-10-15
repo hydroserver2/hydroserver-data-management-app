@@ -40,11 +40,11 @@
 <script setup lang="ts">
 import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { api } from '@/services/api'
 import { ObservedProperty } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
+import hs from '@hydroserver/client'
 
 const props = defineProps<{
   search: string | undefined
@@ -56,14 +56,14 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   props.workspaceId
     ? useTableLogic(
         async (wsId: string) =>
-          await api.fetchWorkspaceObservedProperties(wsId),
-        api.deleteObservedProperty,
+          await hs.observedProperties.listAllItems({ workspace_id: [wsId] }),
+        hs.observedProperties.delete,
         ObservedProperty,
         toRef(props, 'workspaceId')
       )
     : useSystemTableLogic(
-        api.fetchObservedProperties,
-        api.deleteObservedProperty,
+        hs.observedProperties.listAllItems,
+        hs.observedProperties.delete,
         ObservedProperty
       )
 

@@ -37,11 +37,11 @@
 <script setup lang="ts">
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { api } from '@/services/api'
 import { ProcessingLevel } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
+import hs from '@hydroserver/client'
 
 const props = defineProps<{
   search: string | undefined
@@ -52,14 +52,15 @@ const props = defineProps<{
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   props.workspaceId
     ? useTableLogic(
-        async (wsId: string) => await api.fetchWorkspaceProcessingLevels(wsId),
-        api.deleteProcessingLevel,
+        async (wsId: string) =>
+          await hs.processingLevels.listAllItems({ workspace_id: [wsId] }),
+        hs.processingLevels.delete,
         ProcessingLevel,
         toRef(props, 'workspaceId')
       )
     : useSystemTableLogic(
-        api.fetchProcessingLevels,
-        api.deleteProcessingLevel,
+        hs.processingLevels.listAllItems,
+        hs.processingLevels.delete,
         ProcessingLevel
       )
 

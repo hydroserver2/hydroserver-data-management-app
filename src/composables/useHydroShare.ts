@@ -1,4 +1,3 @@
-import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import hs from '@hydroserver/client'
 import { ref, computed, onMounted } from 'vue'
@@ -35,7 +34,7 @@ export function useHydroShare() {
 
   async function connectHydroShare() {
     const callbackUrl = '/profile'
-    api.providerRedirect('hydroshare', callbackUrl, 'connect')
+    hs.session.providerRedirect('hydroshare', callbackUrl, 'connect')
   }
 
   async function disconnectHydroShare() {
@@ -45,7 +44,7 @@ export function useHydroShare() {
         return
       }
 
-      const providerResponse = await api.deleteProvider(
+      const providerResponse = await hs.session.deleteProvider(
         'hydroshare',
         hydroShareProvider.value.uid
       )
@@ -60,7 +59,8 @@ export function useHydroShare() {
 
   onMounted(async () => {
     try {
-      const connectedProvidersResponse = await api.fetchConnectedProviders()
+      const connectedProvidersResponse =
+        await hs.session.fetchConnectedProviders()
       connectedProviders.value = connectedProvidersResponse.data
       isLoaded.value = true
     } catch (error) {

@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
@@ -100,8 +100,8 @@ const props = defineProps<{
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createSensor,
-  api.updateSensor,
+  hs.sensors.create,
+  hs.sensors.update,
   Sensor,
   props.sensor || undefined
 )

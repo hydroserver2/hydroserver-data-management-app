@@ -194,13 +194,13 @@ import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 import { Datastream, PostHydroShareArchive, Frequency } from '@/types'
-import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { hydroShareUrl, rules } from '@/utils/rules'
 import { useFormLogic } from '@/composables/useFormLogic'
 import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.vue'
 import { useHydroShareStore } from '@/store/hydroShare'
 import { Snackbar } from '@/utils/notifications'
+import hs from '@hydroserver/client'
 
 const emit = defineEmits(['close', 'delete'])
 const { hydroShareArchive: archive, loading } = storeToRefs(
@@ -208,8 +208,8 @@ const { hydroShareArchive: archive, loading } = storeToRefs(
 )
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createHydroShareArchive,
-  api.updateHydroShareArchive,
+  hs.things.createHydroShareArchive,
+  hs.things.updateHydroShareArchive,
   PostHydroShareArchive,
   archive.value || undefined
 )
@@ -291,7 +291,7 @@ const archiveThing = async () => {
     loading.value = true
     emit('close')
     Snackbar.info('Uploading site data to HydroShare. This may take a minute.')
-    await api.archiveToHydroShare(thing.value!.id)
+    await hs.things.triggerHydroShareArchive(thing.value!.id)
   } catch (error) {
     Snackbar.error('Failed to upload site data to HydroShare')
     console.error('Error archiving to HydroShare', error)
@@ -301,7 +301,9 @@ const archiveThing = async () => {
 }
 
 onMounted(async () => {
-  datastreams.value = await api.fetchDatastreamsForThing(thing.value!.id)
+  datastreams.value = await hs.datastreams.listAllItems({
+    thing_id: [thing.value!.id],
+  })
   if (!isEdit.value) generateDefaultFormData()
 })
 </script>

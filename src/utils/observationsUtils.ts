@@ -1,5 +1,25 @@
 import { DataArray, DataPoint, Datastream, TimeSpacingUnit } from '@/types'
-import { api, getObservationsEndpoint } from '@/services/api'
+import hs from '@hydroserver/client'
+
+export const BASE_URL = `${
+  import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''
+}/api`
+const DS_BASE = `${BASE_URL}/data/datastreams`
+
+export const getObservationsEndpoint = (
+  id: string,
+  pageSize: number,
+  startTime: string,
+  endTime?: string,
+  page?: number
+) => {
+  let url = `${DS_BASE}/${id}/observations?format=column`
+  url += `&order_by=phenomenonTime&page_size=${pageSize}`
+  url += `&phenomenon_time_min=${encodeURIComponent(startTime)}`
+  if (endTime) url += `&phenomenon_time_max=${encodeURIComponent(endTime)}`
+  if (page) url += `&page=${page}`
+  return url
+}
 
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)
@@ -31,7 +51,9 @@ export const fetchObservations = async (
     )
 
     try {
-      const data = await api.fetchObservations(endpoint)
+      const res = await hs.datastreams.listObservations(endpoint)
+      const data = res.data
+
       if (data?.phenomenonTime?.length && data?.result?.length) {
         const dataArray = data.phenomenonTime.map(
           (time: string, index: number) => [time, data.result[index]]

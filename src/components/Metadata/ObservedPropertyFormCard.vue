@@ -63,13 +63,13 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { OPNameTypes } from '@/config/vocabularies'
 import { ObservedProperty } from '@/types'
 import { useVocabularyStore } from '@/composables/useVocabulary'
+import hs from '@hydroserver/client'
 
 const OPNames = Object.keys(OPNameTypes)
 
@@ -81,8 +81,8 @@ const props = defineProps<{
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  api.createObservedProperty,
-  api.updateObservedProperty,
+  hs.observedProperties.create,
+  hs.observedProperties.update,
   ObservedProperty,
   props.observedProperty || undefined
 )

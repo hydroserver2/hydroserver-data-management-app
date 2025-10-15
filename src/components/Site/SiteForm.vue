@@ -179,18 +179,17 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import { useThingStore } from '@/store/thing'
-import { Thing, ThingPatch, ThingPost } from '@/types'
 import { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
-import { api } from '@/services/api'
 import SitePhotoManager from '@/components/Site/SitePhotoManager.vue'
 import SiteTagManager from '@/components/Site/SiteTagManager.vue'
 import { usePhotosStore } from '@/store/photos'
 import { useTagStore } from '@/store/tags'
 import countryList from 'country-list'
 import { useVocabularyStore } from '@/composables/useVocabulary'
-import hs, { ThingContract } from '@hydroserver/client'
+import hs, { Thing } from '@hydroserver/client'
+import { Snackbar } from '@/utils/notifications'
 
 const countries = ref<{ name: string; code: string }[]>([])
 const countryTitle = (item: { name: string; code: string } | undefined) => {
@@ -212,9 +211,7 @@ const emit = defineEmits(['close', 'site-created'])
 let loaded = ref(false)
 const valid = ref(false)
 const myForm = ref<VForm>()
-const thing = reactive<ThingContract.SummaryForm>(
-  ThingContract.makeDefaultSummaryForm()
-)
+const thing = reactive<Thing>(new Thing())
 const includeDataDisclaimer = ref(thing.dataDisclaimer !== '')
 
 watch(
@@ -242,15 +239,22 @@ async function uploadThing() {
   if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
   try {
     thing.workspaceId = props.workspaceId
-    storedThing.value = props.thingId
-      ? await api.updateThing(thing as Thing)
-      : await api.createThing(thing as Thing)
+    const res = props.thingId
+      ? await hs.things.update(thing)
+      : await hs.things.create(thing)
+
+    if (!res.ok) {
+      console.error(res)
+      Snackbar.error(res.message)
+    } else storedThing.value = res.item
 
     if (!props.thingId) emit('site-created')
 
     // Set the tag context to the current site so updateTags can compare
     // against what we already have if anything.
-    tags.value = await api.fetchSiteTags(storedThing.value!.id)
+    const tagRes = await hs.things.getTags(storedThing.value!.id)
+    tags.value = tagRes.data
+
     await updateTags(storedThing.value!.id)
     await updatePhotos(storedThing.value!.id)
   } catch (error) {

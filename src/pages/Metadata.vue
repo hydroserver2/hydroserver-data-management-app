@@ -37,7 +37,7 @@ import { onMounted, ref } from 'vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import MetadataTable from '@/components/Metadata/MetadataTable.vue'
 
 const { setWorkspaces } = useWorkspaceStore()
@@ -47,7 +47,9 @@ const search = ref()
 
 onMounted(async () => {
   try {
-    const workspacesResponse = await api.fetchAssociatedWorkspaces()
+    const workspacesResponse = await hs.workspaces.listAllItems({
+      is_associated: true,
+    })
     setWorkspaces(workspacesResponse)
   } catch (error) {
     console.error('Error fetching workspaces', error)

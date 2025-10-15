@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { Sensor } from '@/types'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
@@ -52,12 +52,13 @@ const props = defineProps<{
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   props.workspaceId
     ? useTableLogic(
-        async (wsId: string) => await api.fetchWorkspaceSensors(wsId),
-        api.deleteSensor,
+        async (wsId: string) =>
+          await hs.sensors.listAllItems({ workspace_id: [wsId] }),
+        hs.sensors.delete,
         Sensor,
         toRef(props, 'workspaceId')
       )
-    : useSystemTableLogic(api.fetchSensors, api.deleteSensor, Sensor)
+    : useSystemTableLogic(hs.sensors.listAllItems, hs.sensors.delete, Sensor)
 
 const headers = [
   { title: 'Name', key: 'name' },

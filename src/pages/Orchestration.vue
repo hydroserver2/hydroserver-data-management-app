@@ -18,7 +18,7 @@ import { onMounted } from 'vue'
 import DataSourceTable from '@/components/DataSource/DataSourceTable.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { storeToRefs } from 'pinia'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
@@ -26,7 +26,9 @@ const { setWorkspaces } = useWorkspaceStore()
 
 onMounted(async () => {
   try {
-    const workspacesResponse = await api.fetchAssociatedWorkspaces()
+    const workspacesResponse = await hs.workspaces.listAllItems({
+      is_associated: true,
+    })
     setWorkspaces(workspacesResponse)
   } catch (error) {
     console.error('Error fetching workspaces', error)

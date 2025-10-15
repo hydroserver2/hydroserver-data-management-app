@@ -73,14 +73,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { rules } from '@/utils/rules'
-import { useAuthStore } from '@/store/authentication'
 import hs from '@hydroserver/client'
 
 const router = useRouter()
-const { logout } = useAuthStore()
 const { unverifiedEmail } = hs.session
 
 const verifying = ref(false)
@@ -88,6 +85,11 @@ const verified = ref(false)
 const verificationError = ref(false)
 const verificationCode = ref('')
 const resending = ref(false)
+
+async function logout() {
+  await hs.session.logout()
+  await router.push({ name: 'Login' })
+}
 
 const verifyCode = async () => {
   if (!verificationCode.value) {
@@ -112,7 +114,7 @@ const verifyCode = async () => {
 async function resend() {
   try {
     resending.value = true
-    await api.sendVerificationEmail(unverifiedEmail)
+    await hs.user.sendVerificationEmail(unverifiedEmail)
     Snackbar.success('Verification email resent.')
   } catch (err) {
     console.error('Error sending verification email:', err)

@@ -149,13 +149,13 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
 import { watch, onMounted, ref, computed } from 'vue'
 import { Datastream, DatastreamExtended, Thing, Workspace } from '@/types'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useRoute, useRouter } from 'vue-router'
 import { formatTime } from '@/utils/time'
+import hs from '@hydroserver/client'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 
@@ -216,9 +216,11 @@ watch(
       datastreamsForThing.value = []
       return
     }
-    datastreamsForThing.value = await api.fetchExpandedDatastreamsForThing(
-      newId
-    )
+
+    datastreamsForThing.value = (await hs.datastreams.listAllItems({
+      thing_id: [newId],
+      expand_related: true,
+    })) as unknown as DatastreamExtended[]
   },
   { immediate: true }
 )
@@ -298,7 +300,7 @@ onMounted(async () => {
   const workspaceId = props.workspace
     ? props.workspace.id
     : selectedWorkspace.value!.id
-  things.value = await api.fetchThingsForWorkspace(workspaceId)
+  things.value = await hs.things.listAllItems({ workspace_id: [workspaceId] })
   things.value.sort((a, b) => a.name.localeCompare(b.name))
 })
 </script>

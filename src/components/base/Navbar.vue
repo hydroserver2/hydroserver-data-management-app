@@ -138,7 +138,7 @@
         <v-list-item to="/profile" prepend-icon="mdi-account-circle"
           >Account</v-list-item
         >
-        <v-list-item prepend-icon="mdi-logout" @click.prevent="logout"
+        <v-list-item prepend-icon="mdi-logout" @click.prevent="onLogout"
           >Logout</v-list-item
         >
       </template>
@@ -162,13 +162,12 @@ import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { navbarLogo } from '@/config/navbarConfig'
-import { useAuthStore } from '@/store/authentication'
 import { useRoute } from 'vue-router'
 import { useSidebarStore } from '@/store/useSidebar'
 import hs from '@hydroserver/client'
+import router from '@/router/router'
 
 const route = useRoute()
-const { logout } = useAuthStore()
 const { signupEnabled } = hs.session
 const { resetState } = useDataVisStore()
 const { mdAndDown } = useDisplay()
@@ -221,8 +220,9 @@ const paths: {
   },
 ]
 
-function onLogout() {
-  logout()
+async function onLogout() {
+  await hs.session.logout()
+  await router.push({ name: 'Login' })
   Snackbar.info('You have logged out')
 }
 </script>

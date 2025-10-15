@@ -13,7 +13,16 @@
         <h5 class="text-h5">Site information</h5>
       </v-col>
 
-      <v-col cols="auto" v-if="canEditThings">
+      <v-col
+        cols="auto"
+        v-if="
+          hasPermission(
+            PermissionResource.Thing,
+            PermissionAction.Edit,
+            workspace
+          )
+        "
+      >
         <v-btn @click="isAccessControlModalOpen = true">Access control</v-btn>
         <v-dialog v-model="isAccessControlModalOpen" width="40rem">
           <SiteAccessControl
@@ -23,7 +32,16 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="canEditThings && !!thing">
+      <v-col
+        cols="auto"
+        v-if="
+          hasPermission(
+            PermissionResource.Thing,
+            PermissionAction.Edit,
+            workspace
+          ) && !!thing
+        "
+      >
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
           >Edit site information</v-btn
         >
@@ -36,7 +54,16 @@
         </v-dialog>
       </v-col>
 
-      <v-col cols="auto" v-if="canDeleteThings">
+      <v-col
+        cols="auto"
+        v-if="
+          hasPermission(
+            PermissionResource.Thing,
+            PermissionAction.Delete,
+            workspace
+          )
+        "
+      >
         <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete site</v-btn
         >
@@ -52,7 +79,16 @@
 
       <v-spacer />
 
-      <v-col cols="auto" v-if="canEditThings && hydroShareConnected">
+      <v-col
+        cols="auto"
+        v-if="
+          hasPermission(
+            PermissionResource.Thing,
+            PermissionAction.Edit,
+            workspace
+          ) && hydroShareConnected
+        "
+      >
         <HydroShareArchivalButton />
       </v-col>
     </v-row>
@@ -98,7 +134,7 @@ import { usePhotosStore } from '@/store/photos'
 import { useThingStore } from '@/store/thing'
 import { useTagStore } from '@/store/tags'
 import { storeToRefs } from 'pinia'
-import { api } from '@/services/api'
+import hs, { PermissionAction, PermissionResource } from '@hydroserver/client'
 import router from '@/router/router'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
@@ -120,7 +156,7 @@ const workspace = ref<Workspace>()
 const { isConnected: hydroShareConnected } = useHydroShare()
 const { hydroShareArchive } = storeToRefs(useHydroShareStore())
 
-const { canEditThings, canDeleteThings } = useWorkspacePermissions(workspace)
+const { hasPermission } = useWorkspacePermissions(workspace)
 const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
@@ -139,7 +175,7 @@ function switchToAccessControlModal() {
 
 async function onDeleteThing() {
   try {
-    await api.deleteThing(thingId)
+    await hs.things.delete(thingId)
     await router.push('/sites')
   } catch (error) {
     console.error('Error deleting thing', error)
@@ -149,7 +185,10 @@ async function onDeleteThing() {
 const mapOptions = computed(() =>
   thing.value
     ? {
-        center: { lat: thing.value.location.latitude, lng: thing.value.location.longitude },
+        center: {
+          lat: thing.value.location.latitude,
+          lng: thing.value.location.longitude,
+        },
         zoom: 16,
         mapTypeId: 'satellite',
       }
@@ -158,38 +197,38 @@ const mapOptions = computed(() =>
 
 onMounted(async () => {
   photos.value = []
-  api
-    .fetchSitePhotos(thingId)
-    .then((data) => (photos.value = data))
+  hs.things
+    .getPhotos(thingId)
+    .then((res) => (photos.value = res.data))
     .catch((error) => console.error('Error fetching photos from DB', error))
   try {
     const [thingResponse, hydroShareArchiveResponse, tagResponse] =
       await Promise.all([
-        api.fetchThing(thingId).catch((error: any) => {
+        hs.things.getItem(thingId).catch((error: any) => {
           if (parseInt(error.status) === 403) authorized.value = false
           else console.error('Error fetching thing', error)
 
           return null
         }),
-        api.fetchHydroShareArchive(thingId).catch((error) => {
+        hs.things.getHydroShareArchive(thingId).catch((error) => {
           console.error('Error fetching hydroShareArchive', error)
           return null
         }),
-        api.fetchSiteTags(thingId).catch((error) => {
+        hs.things.getTags(thingId).catch((error) => {
           console.error('Error fetching additional metadata tags', error)
           return null
         }),
       ])
 
-    tags.value = tagResponse
-    thing.value = thingResponse
+    tags.value = tagResponse?.data
+    thing.value = thingResponse ?? undefined
     try {
-      workspace.value = await api.fetchWorkspace(thing.value!.workspaceId)
+      workspace.value =
+        (await hs.workspaces.getItem(thing.value!.workspaceId)) ?? undefined
     } catch (error) {
       console.error('Error fetching workspace', error)
     }
-
-    hydroShareArchive.value = hydroShareArchiveResponse
+    hydroShareArchive.value = hydroShareArchiveResponse?.data
   } finally {
     loaded.value = true
   }

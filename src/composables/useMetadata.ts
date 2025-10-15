@@ -7,7 +7,8 @@ import {
   ResultQualifier,
   Workspace,
 } from '@/types'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
+
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 
@@ -51,36 +52,32 @@ export function useMetadata(localWorkspace?: Ref<Workspace | undefined>) {
         sensorsResponse,
         resultQualifiersResponse,
       ] = await Promise.all([
-        api.fetchUnits(),
-        api.fetchObservedProperties(),
-        api.fetchProcessingLevels(),
-        api.fetchSensors(),
-        api.fetchResultQualifiers(),
+        hs.units.listAllItems({ order_by: ['name'] }),
+        hs.observedProperties.listAllItems({ order_by: ['name'] }),
+        hs.processingLevels.listAllItems({ order_by: ['code'] }),
+        hs.sensors.listAllItems({ order_by: ['name'] }),
+        hs.resultQualifiers.listAllItems({ order_by: ['code'] }),
       ])
 
-      units.value = (unitsResponse as Unit[])
-        .filter(
-          (u) => (u.type !== 'Time' && !u.workspaceId) || u.workspaceId === id
-        )
-        .sort((a, b) => a.name.localeCompare(b.name))
-
-      sensors.value = (sensorsResponse as Sensor[])
-        .filter((s) => s.workspaceId === null || s.workspaceId === id)
-        .sort((a: Sensor, b: Sensor) => a.name.localeCompare(b.name))
-
-      observedProperties.value = (
-        observedPropertiesResponse as ObservedProperty[]
+      units.value = unitsResponse.filter(
+        (u) => (u.type !== 'Time' && !u.workspaceId) || u.workspaceId === id
       )
-        .filter((op) => op.workspaceId === null || op.workspaceId === id)
-        .sort((a, b) => a.name.localeCompare(b.name))
 
-      processingLevels.value = (processingLevelsResponse as ProcessingLevel[])
-        .filter((p) => p.workspaceId === null || p.workspaceId === id)
-        .sort((a, b) => a.code.localeCompare(b.code))
+      sensors.value = sensorsResponse.filter(
+        (s) => s.workspaceId === null || s.workspaceId === id
+      )
 
-      resultQualifiers.value = (
-        resultQualifiersResponse as ResultQualifier[]
-      ).filter((r) => r.workspaceId === null || r.workspaceId === id)
+      observedProperties.value = observedPropertiesResponse.filter(
+        (op) => op.workspaceId === null || op.workspaceId === id
+      )
+
+      processingLevels.value = processingLevelsResponse.filter(
+        (p) => p.workspaceId === null || p.workspaceId === id
+      )
+
+      resultQualifiers.value = resultQualifiersResponse.filter(
+        (r) => r.workspaceId === null || r.workspaceId === id
+      )
     } catch (error) {
       console.error('Error fetching metadata', error)
     }

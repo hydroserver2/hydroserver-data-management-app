@@ -73,7 +73,6 @@ import { ref } from 'vue'
 import { rules } from '@/utils/rules'
 import OAuth from '@/components/account/OAuth.vue'
 import { Snackbar } from '@/utils/notifications'
-import { useAuthStore } from '@/store/authentication'
 import router from '@/router/router'
 import hs from '@hydroserver/client'
 
@@ -84,8 +83,6 @@ const valid = ref(false)
 const loading = ref(false)
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
-
-const { login } = useAuthStore()
 
 const formLogin = async () => {
   if (!valid) return
@@ -98,7 +95,8 @@ const formLogin = async () => {
       hs.session.unverifiedEmail = email.value
       await router.push({ name: 'VerifyEmail' })
     } else {
-      await login()
+      Snackbar.success('You have logged in!')
+      await router.push({ name: 'Sites' })
     }
   } catch (error: any) {
     console.error('Error logging in.', error)

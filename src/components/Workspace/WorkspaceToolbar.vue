@@ -216,7 +216,6 @@ import WorkspaceAccessControl from '@/components/Workspace/AccessControl/Workspa
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { PermissionResource, PermissionAction, Workspace } from '@/types'
-import { api } from '@/services/api'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
@@ -291,7 +290,7 @@ const refreshWorkspaces = async (workspace?: Workspace) => {
 
 const refreshAccessControl = async (workspaceId: string) => {
   try {
-    activeItem.value = await api.fetchWorkspace(workspaceId)
+    activeItem.value = (await hs.workspaces.getItem(workspaceId)) as Workspace
   } catch (error) {
     console.error('Error refreshing workspaces', error)
   }
@@ -299,7 +298,7 @@ const refreshAccessControl = async (workspaceId: string) => {
 
 async function onCancelTransfer(ws: Workspace) {
   try {
-    await api.rejectWorkspaceTransfer(ws.id)
+    await hs.workspaces.rejectWorkspaceTransfer(ws.id)
     await refreshWorkspaces()
     Snackbar.success('Workspace transfer cancelled.')
     if (!pendingWorkspaces.value.length) openTransferTable.value = false
@@ -310,7 +309,7 @@ async function onCancelTransfer(ws: Workspace) {
 
 async function onAcceptTransfer(ws: Workspace) {
   try {
-    await api.acceptWorkspaceTransfer(ws.id)
+    await hs.workspaces.acceptOwnershipTransfer(ws.id)
     await refreshWorkspaces()
     Snackbar.success('Workspace transfer accepted.')
     if (!pendingWorkspaces.value.length) openTransferTable.value = false
@@ -322,7 +321,7 @@ async function onAcceptTransfer(ws: Workspace) {
 async function onDelete() {
   if (!activeItem.value) return
   try {
-    await api.deleteWorkspace(activeItem.value.id)
+    await hs.workspaces.delete(activeItem.value.id)
     refreshWorkspaces()
   } catch (error) {
     console.error('Error deleting workspace', error)

@@ -54,7 +54,7 @@
 import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 
 const emits = defineEmits(['close'])
 const props = defineProps<{
@@ -70,10 +70,11 @@ async function toggleSitePrivacy() {
   try {
     isUpdating.value = true
 
-    thing.value = await api.updateThingPrivacy(
+    const res = await hs.things.updatePrivacy(
       props.thingId,
       thing.value!.isPrivate
     )
+    thing.value = res.data
   } catch (error) {
     console.error('Error updating thing privacy', error)
   } finally {

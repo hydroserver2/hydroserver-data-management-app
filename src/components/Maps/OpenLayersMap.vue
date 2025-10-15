@@ -38,6 +38,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
+import { ThingWithColor, Thing } from '@/types'
 import { addColorToMarkers, generateMarkerContent } from '@/utils/maps/markers'
 import OlMap from 'ol/Map'
 import View from 'ol/View'
@@ -52,19 +53,9 @@ import { fetchLocationData } from '@/utils/maps/location'
 import WebGLVectorLayer from 'ol/layer/WebGLVector'
 import mapMarkerUrl from '@/assets/map-marker-64.png?url'
 import { OSM, XYZ } from 'ol/source'
-import { ThingContract } from '@hydroserver/client'
-
-export interface ThingWithColor extends ThingContract.SummaryResponse {
-  color?: {
-    borderColor: string
-    background: string
-    glyphColor: string
-  }
-  tagValue?: string
-}
 
 const props = defineProps({
-  things: { type: Array<ThingContract.SummaryResponse>, default: [] },
+  things: { type: Array<Thing>, default: [] },
   colorKey: { type: String, default: '' },
   startInSatellite: Boolean,
   singleMarkerMode: Boolean,

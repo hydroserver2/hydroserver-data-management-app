@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { DataSource, OrchestrationSystem } from '@/models/dataSource'
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
 
@@ -100,7 +100,7 @@ const onDelete = async () => {
   }
 
   try {
-    await api.deleteOrchestrationSystem(props.orchestrationSystem.id)
+    await hs.orchestrationSystems.delete(props.orchestrationSystem.id)
     emit('delete')
   } catch (err: any) {
     console.error('Error deleting orchestration system', err)

@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { api } from '@/services/api'
+import hs from '@hydroserver/client'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
@@ -149,12 +149,13 @@ const collaboratorList = ref<any[]>([])
  */
 async function onSaveRole(item: any) {
   try {
-    const roleResponse = await api.updateCollaboratorRole(
+    const roleResponse = await hs.workspaces.updateCollaboratorRole(
       props.workspace.id,
       item.email,
       item.pendingRole.id
     )
-    item.role = roleResponse.role
+    const collaborator = roleResponse.data as Collaborator
+    item.role = collaborator.role
     item.isBeingEdited = false
     Snackbar.success('Collaborator role updated.')
   } catch (error: any) {
@@ -175,12 +176,14 @@ async function onAddCollaborator() {
     return
   }
   try {
-    const collaboratorResponse = await api.addCollaborator(
+    const collaboratorResponse = await hs.workspaces.addCollaborator(
       props.workspace!.id,
       newCollaboratorEmail.value,
       selectedRole.value.id
     )
-    collaboratorList.value.push(collaboratorToFormData(collaboratorResponse))
+    collaboratorList.value.push(
+      collaboratorToFormData(collaboratorResponse.data)
+    )
     collaboratorList.value.sort((a, b) => a.name.localeCompare(b.name))
     Snackbar.success('Collaborator added to workspace.')
     showAddCollaborator.value = false
@@ -195,7 +198,7 @@ async function onAddCollaborator() {
 
 async function onRemoveCollaborator(email: string) {
   try {
-    await api.removeCollaborator(props.workspace!.id, email)
+    await hs.workspaces.removeCollaborator(props.workspace!.id, email)
     const index = collaboratorList.value.findIndex((c) => c.email === email)
     if (index !== -1) collaboratorList.value.splice(index, 1)
     Snackbar.success('Owner removed for site.')
@@ -242,14 +245,18 @@ const collaboratorToFormData = (c: Collaborator) => ({
 onMounted(async () => {
   try {
     const [collaboratorsResponse, rolesResponse] = await Promise.all([
-      api.getCollaborators(props.workspace.id),
-      api.getCollaboratorRoles(props.workspace.id),
+      hs.workspaces.getCollaborators(props.workspace.id),
+      hs.workspaces.getRoles({
+        workspace_id: [props.workspace.id],
+        order_by: ['name'],
+        is_user_role: true,
+      }),
     ])
 
-    roles.value = rolesResponse.filter(
+    roles.value = rolesResponse.data.filter(
       (r: CollaboratorRole) => r.isUserRole === true
     )
-    setCollaboratorList(collaboratorsResponse)
+    setCollaboratorList(collaboratorsResponse.data)
   } catch (error) {
     console.error('Error fetching collaborators for workspace', error)
   }
