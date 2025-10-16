@@ -8,7 +8,7 @@ export function useTableLogic<T extends WithId>(
   fetchFn: (wsId: string) => Promise<T[]>,
   deleteFn: (id: string) => Promise<any>,
   ItemClass: new () => T,
-  workspaceId: Ref<string | null | undefined>
+  idRef: Ref<string | null | undefined>
 ) {
   const openEdit = ref(false)
   const openDelete = ref(false)
@@ -42,18 +42,18 @@ export function useTableLogic<T extends WithId>(
 
   async function loadData() {
     try {
-      if (!workspaceId.value) {
+      if (!idRef.value) {
         items.value = []
         return
       }
-      items.value = await fetchFn(workspaceId.value)
+      items.value = await fetchFn(idRef.value)
     } catch (error) {
       console.error(`Error fetching table items`, error)
     }
   }
 
   watch(
-    workspaceId,
+    idRef,
     async (newVal, oldVal) => {
       if (newVal !== oldVal) await loadData()
     },
