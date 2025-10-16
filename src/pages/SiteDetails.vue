@@ -15,13 +15,7 @@
 
       <v-col
         cols="auto"
-        v-if="
-          hasPermission(
-            PermissionResource.Thing,
-            PermissionAction.Edit,
-            workspace
-          )
-        "
+        v-if="hasPermission(PermissionResource.Thing, PermissionAction.Edit)"
       >
         <v-btn @click="isAccessControlModalOpen = true">Access control</v-btn>
         <v-dialog v-model="isAccessControlModalOpen" width="40rem">
@@ -35,11 +29,8 @@
       <v-col
         cols="auto"
         v-if="
-          hasPermission(
-            PermissionResource.Thing,
-            PermissionAction.Edit,
-            workspace
-          ) && !!thing
+          hasPermission(PermissionResource.Thing, PermissionAction.Edit) &&
+          !!thing
         "
       >
         <v-btn @click="isRegisterModalOpen = true" color="secondary"
@@ -56,13 +47,7 @@
 
       <v-col
         cols="auto"
-        v-if="
-          hasPermission(
-            PermissionResource.Thing,
-            PermissionAction.Delete,
-            workspace
-          )
-        "
+        v-if="hasPermission(PermissionResource.Thing, PermissionAction.Delete)"
       >
         <v-btn color="red-darken-3" @click="isDeleteModalOpen = true"
           >Delete site</v-btn
@@ -82,11 +67,8 @@
       <v-col
         cols="auto"
         v-if="
-          hasPermission(
-            PermissionResource.Thing,
-            PermissionAction.Edit,
-            workspace
-          ) && hydroShareConnected
+          hasPermission(PermissionResource.Thing, PermissionAction.Edit) &&
+          hydroShareConnected
         "
       >
         <HydroShareArchivalButton />
@@ -182,55 +164,40 @@ async function onDeleteThing() {
   }
 }
 
-const mapOptions = computed(() =>
-  thing.value
-    ? {
-        center: {
-          lat: thing.value.location.latitude,
-          lng: thing.value.location.longitude,
-        },
-        zoom: 16,
-        mapTypeId: 'satellite',
-      }
-    : undefined
-)
-
 onMounted(async () => {
   photos.value = []
   hs.things
     .getPhotos(thingId)
     .then((res) => (photos.value = res.data))
     .catch((error) => console.error('Error fetching photos from DB', error))
+
+  const [thingResponse, hydroShareArchiveResponse, tagResponse] =
+    await Promise.all([
+      hs.things.getItem(thingId).catch((error: any) => {
+        if (parseInt(error.status) === 403) authorized.value = false
+        else console.error('Error fetching thing', error)
+
+        return null
+      }),
+      hs.things.getHydroShareArchive(thingId).catch((error) => {
+        // console.error('Error fetching hydroShareArchive', error)
+        return null
+      }),
+      hs.things.getTags(thingId).catch((error) => {
+        console.error('Error fetching additional metadata tags', error)
+        return null
+      }),
+    ])
+
+  tags.value = tagResponse?.data
+  thing.value = thingResponse ?? undefined
   try {
-    const [thingResponse, hydroShareArchiveResponse, tagResponse] =
-      await Promise.all([
-        hs.things.getItem(thingId).catch((error: any) => {
-          if (parseInt(error.status) === 403) authorized.value = false
-          else console.error('Error fetching thing', error)
-
-          return null
-        }),
-        hs.things.getHydroShareArchive(thingId).catch((error) => {
-          console.error('Error fetching hydroShareArchive', error)
-          return null
-        }),
-        hs.things.getTags(thingId).catch((error) => {
-          console.error('Error fetching additional metadata tags', error)
-          return null
-        }),
-      ])
-
-    tags.value = tagResponse?.data
-    thing.value = thingResponse ?? undefined
-    try {
-      workspace.value =
-        (await hs.workspaces.getItem(thing.value!.workspaceId)) ?? undefined
-    } catch (error) {
-      console.error('Error fetching workspace', error)
-    }
-    hydroShareArchive.value = hydroShareArchiveResponse?.data
-  } finally {
-    loaded.value = true
+    workspace.value =
+      (await hs.workspaces.getItem(thing.value!.workspaceId)) ?? undefined
+  } catch (error) {
+    console.error('Error fetching workspace', error)
   }
+  hydroShareArchive.value = hydroShareArchiveResponse?.data ?? null
+  loaded.value = true
 })
 </script>

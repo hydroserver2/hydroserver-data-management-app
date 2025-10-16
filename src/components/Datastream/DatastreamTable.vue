@@ -396,14 +396,7 @@ function openObservationDialog(selectedItem: any) {
 const openInfoCard = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
 
-const {
-  // canCreateDatastreams,
-  // canViewDatastreams,
-  // canEditDatastreams,
-  // canDeleteDatastreams,
-  // canDeleteObservations,
-  hasPermission,
-} = useWorkspacePermissions(workspaceRef)
+const { hasPermission } = useWorkspacePermissions(workspaceRef)
 
 const updateDatastream = async (updatedDatastream: Datastream) => {
   await fetchMetadata(props.workspace.id)
@@ -423,8 +416,6 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
     Datastream,
     thingIdRef
   )
-
-const hey = hs.datastreams.list()
 
 const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
   useMetadata(toRef(props, 'workspace'))
@@ -594,6 +585,7 @@ const loadDatastreams = async () => {
     items.value = await hs.datastreams.listAllItems({
       thing_id: [thing.value!.id],
     })
+    console.log('items', items.value)
     actionKey.value += 1
   } catch (e) {
     console.error('Error fetching datastreams', e)

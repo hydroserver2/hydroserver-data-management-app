@@ -2,7 +2,11 @@ import { computed, Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useUserStore } from '@/store/user'
-import hs, { PermissionResource, PermissionAction } from '@hydroserver/client'
+import hs, {
+  PermissionResource,
+  PermissionAction,
+  Permission,
+} from '@hydroserver/client'
 import { Workspace } from '@/types'
 
 export function useWorkspacePermissions(
@@ -49,8 +53,22 @@ export function useWorkspacePermissions(
   ) => {
     const w = workspace ?? selectedWorkspace.value
     if (!w) return false
-    return hs.user.can(action, resource, workspace!)
+    console.log('selected workspace', selectedWorkspace)
+    if (isOwner(w) || isAdmin()) return true
+
+    const perms = w.collaboratorRole?.permissions ?? []
+    return (
+      hasGlobalPermissions(perms) ||
+      perms.some((p) => p.action === action && p.resource === resource)
+    )
   }
+
+  const hasGlobalPermissions = (permissions: Permission[]) =>
+    permissions.some(
+      (p) =>
+        p.resource === PermissionResource.Global &&
+        p.action === PermissionAction.Global
+    )
 
   function checkPermissionsByWorkspaceId(
     workspaceId: string,

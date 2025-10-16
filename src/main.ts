@@ -8,7 +8,7 @@ import vuetify from '@/plugins/vuetify'
 import { createPinia } from 'pinia'
 import { injectClarity } from '@/plugins/clarity'
 import { settings } from '@/config/settings'
-import { createHydroServer, hs } from '@hydroserver/client'
+import hs, { createHydroServer } from '@hydroserver/client'
 import { useVocabularyStore } from './composables/useVocabulary'
 import { useWorkspaceStore } from '@/store/workspaces'
 
@@ -20,6 +20,7 @@ async function initializeApp() {
 
   // The session must be initialized before the router because some of the routes depend on the session state for access control
   await createHydroServer({ host: 'http://127.0.0.1:8000' })
+
   const vocabularyStore = useVocabularyStore()
   await Promise.all([vocabularyStore.fetchAllVocabularies()])
 
@@ -27,6 +28,7 @@ async function initializeApp() {
     try {
       const workspacesResponse = await hs.workspaces.listAllItems({
         is_associated: true,
+        expand_related: true,
       })
       const { setWorkspaces } = useWorkspaceStore()
       setWorkspaces(workspacesResponse)
