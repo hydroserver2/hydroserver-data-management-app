@@ -147,7 +147,6 @@ import hs from '@hydroserver/client'
 
 const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
-const { workspaces } = storeToRefs(useWorkspaceStore())
 const { hasPermission } = useWorkspacePermissions()
 
 const workspaceThings = ref<Thing[]>([])
@@ -244,11 +243,13 @@ const loadThings = async () => {
 }
 
 onMounted(async () => {
-  const [things, workspaces] = await Promise.all([
-    hs.things.listAllItems(),
+  const [things, workspaceRes] = await Promise.all([
+    selectedWorkspace.value?.id
+      ? hs.things.listAllItems({ workspace_id: [selectedWorkspace.value.id] })
+      : hs.things.listAllItems(),
     hs.workspaces.listAllItems({ is_associated: true, expand_related: true }),
   ])
-  setWorkspaces(workspaces)
+  setWorkspaces(workspaceRes)
   workspaceThings.value = things
   isPageLoaded.value = true
 })

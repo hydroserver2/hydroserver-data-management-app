@@ -107,8 +107,8 @@ import { Datastream, Thing } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
-import { downloadPlottedDatastreamsCSVs } from '@/utils/CSVDownloadUtils'
 import { formatTime } from '@/utils/time'
+import hs from '@hydroserver/client'
 
 const {
   things,
@@ -134,7 +134,7 @@ const copyStateToClipboard = async () => {
 const downloadSelected = async (plottedDatastreams: Datastream[]) => {
   downloading.value = true
   try {
-    await downloadPlottedDatastreamsCSVs(plottedDatastreams)
+    await hs.datastreams.downloadCsvBatchZip(plottedDatastreams)
   } catch (error) {
     console.error('Error downloading selected datastreams', error)
   }

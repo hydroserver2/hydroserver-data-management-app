@@ -58,7 +58,11 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
         Sensor,
         toRef(props, 'workspaceId')
       )
-    : useSystemTableLogic(hs.sensors.listAllItems, hs.sensors.delete, Sensor)
+    : useSystemTableLogic(
+        () => hs.sensors.listAllItems(),
+        (id: string) => hs.sensors.delete(id),
+        Sensor
+      )
 
 const headers = [
   { title: 'Name', key: 'name' },

@@ -59,8 +59,8 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
         toRef(props, 'workspaceId')
       )
     : useSystemTableLogic(
-        hs.processingLevels.listAllItems,
-        hs.processingLevels.delete,
+        () => hs.processingLevels.listAllItems(),
+        (id: string) => hs.processingLevels.delete(id),
         ProcessingLevel
       )
 
