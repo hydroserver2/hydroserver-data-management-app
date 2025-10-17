@@ -237,31 +237,24 @@ async function uploadThing() {
   await myForm.value?.validate()
   if (!valid.value) return
   if (!includeDataDisclaimer.value) thing.dataDisclaimer = ''
-  try {
-    thing.workspaceId = props.workspaceId
-    const res = props.thingId
-      ? await hs.things.update(thing)
-      : await hs.things.create(thing)
 
-    if (!res.ok) {
-      console.error(res)
-      Snackbar.error(res.message)
-    } else storedThing.value = res.item
+  thing.workspaceId = props.workspaceId
+  const thingRes = props.thingId
+    ? await hs.things.updateItem(thing)
+    : await hs.things.createItem(thing)
 
-    if (!props.thingId) emit('site-created')
+  if (thingRes) storedThing.value = thingRes
 
-    // Set the tag context to the current site so updateTags can compare
-    // against what we already have if anything.
-    const tagRes = await hs.things.getTags(storedThing.value!.id)
-    tags.value = tagRes.data
+  if (!props.thingId) emit('site-created')
 
-    await updateTags(storedThing.value!.id)
-    await updatePhotos(storedThing.value!.id)
-  } catch (error) {
-    console.error('Error updating thing', error)
-  } finally {
-    emit('close')
-  }
+  // Set the tag context to the current site so updateTags can compare
+  // against what we already have if anything.
+  const tagRes = await hs.things.getTags(storedThing.value!.id)
+  tags.value = tagRes.data
+
+  await updateTags(storedThing.value!.id)
+  await updatePhotos(storedThing.value!.id)
+  emit('close')
 }
 
 function onMapLocationClicked(locationData: Thing) {

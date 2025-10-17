@@ -110,7 +110,7 @@ let unitItems: ListItemArray = []
 let processingLevelItems: ListItemArray = []
 
 onMounted(async () => {
-  datastream.value = await hs.datastreams.get(props.datastreamId, {
+  datastream.value = await hs.datastreams.getItem(props.datastreamId, {
     expand_related: true,
   })
   const d = datastream.value!

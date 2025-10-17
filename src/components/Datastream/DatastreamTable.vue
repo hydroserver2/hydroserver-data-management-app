@@ -585,7 +585,6 @@ const loadDatastreams = async () => {
     items.value = await hs.datastreams.listAllItems({
       thing_id: [thing.value!.id],
     })
-    console.log('items', items.value)
     actionKey.value += 1
   } catch (e) {
     console.error('Error fetching datastreams', e)

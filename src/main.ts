@@ -5,12 +5,13 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router/router'
 import vuetify from '@/plugins/vuetify'
-import { createPinia } from 'pinia'
+import { createPinia, storeToRefs } from 'pinia'
 import { injectClarity } from '@/plugins/clarity'
 import { settings } from '@/config/settings'
-import hs, { createHydroServer } from '@hydroserver/client'
+import hs, { createHydroServer, User } from '@hydroserver/client'
 import { useVocabularyStore } from './composables/useVocabulary'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useUserStore } from './store/user'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -23,6 +24,11 @@ async function initializeApp() {
 
   const vocabularyStore = useVocabularyStore()
   await Promise.all([vocabularyStore.fetchAllVocabularies()])
+
+  const { user } = storeToRefs(useUserStore())
+
+  const res = await hs.user.get()
+  user.value = res.data || new User()
 
   if (hs.session.isAuthenticated) {
     try {

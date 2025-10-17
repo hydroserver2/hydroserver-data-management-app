@@ -32,8 +32,8 @@ import { useDataVisStore } from '@/store/dataVisualization'
 import { Datastream, Thing } from '@/types'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import { downloadDatastreamCSV } from '@/utils/CSVDownloadUtils'
 import DatastreamInformationPanels from '@/components/Datastream/DatastreamInformationPanels.vue'
+import hs from '@hydroserver/client'
 
 defineProps({
   datastream: { type: Object as () => Datastream, required: true },
@@ -49,7 +49,7 @@ const downloading = ref(false)
 const downloadDatastream = async (id: string) => {
   downloading.value = true
   try {
-    await downloadDatastreamCSV(id)
+    await hs.datastreams.downloadCsv(id)
   } catch (error) {
     console.error('Error downloading datastream', error)
   }

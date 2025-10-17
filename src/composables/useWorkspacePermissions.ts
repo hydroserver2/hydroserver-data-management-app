@@ -2,7 +2,7 @@ import { computed, Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useUserStore } from '@/store/user'
-import hs, {
+import {
   PermissionResource,
   PermissionAction,
   Permission,
@@ -53,7 +53,6 @@ export function useWorkspacePermissions(
   ) => {
     const w = workspace ?? selectedWorkspace.value
     if (!w) return false
-    console.log('selected workspace', selectedWorkspace)
     if (isOwner(w) || isAdmin()) return true
 
     const perms = w.collaboratorRole?.permissions ?? []

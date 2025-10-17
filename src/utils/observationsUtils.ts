@@ -1,26 +1,6 @@
 import { DataArray, DataPoint, Datastream, TimeSpacingUnit } from '@/types'
 import hs from '@hydroserver/client'
 
-export const BASE_URL = `${
-  import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''
-}/api`
-const DS_BASE = `${BASE_URL}/data/datastreams`
-
-export const getObservationsEndpoint = (
-  id: string,
-  pageSize: number,
-  startTime: string,
-  endTime?: string,
-  page?: number
-) => {
-  let url = `${DS_BASE}/${id}/observations?format=column`
-  url += `&order_by=phenomenonTime&page_size=${pageSize}`
-  url += `&phenomenon_time_min=${encodeURIComponent(startTime)}`
-  if (endTime) url += `&phenomenon_time_max=${encodeURIComponent(endTime)}`
-  if (page) url += `&page=${page}`
-  return url
-}
-
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)
   date.setHours(date.getHours() - hours)
@@ -35,44 +15,16 @@ export const fetchObservations = async (
   const { id, phenomenonBeginTime, phenomenonEndTime } = datastream
   if (!phenomenonBeginTime || !phenomenonEndTime) return []
 
-  const pageSize = 100_000
-  const observations: [string, number][] = []
+  const res = await hs.datastreams.getObservations(id, {
+    order_by: ['phenomenonTime'],
+    page_size: 100_000,
+    format: 'row',
+    phenomenon_time_min: startTime ?? phenomenonBeginTime,
+    phenomenon_time_max: endTime ?? phenomenonEndTime,
+  })
 
-  let page = 1
-  let fetchObservations = true
-
-  while (fetchObservations) {
-    const endpoint = getObservationsEndpoint(
-      id,
-      pageSize,
-      startTime ?? phenomenonBeginTime,
-      endTime ?? phenomenonEndTime,
-      page
-    )
-
-    try {
-      const res = await hs.datastreams.listObservations(endpoint)
-      const data = res.data
-
-      if (data?.phenomenonTime?.length && data?.result?.length) {
-        const dataArray = data.phenomenonTime.map(
-          (time: string, index: number) => [time, data.result[index]]
-        )
-        observations.push(...dataArray)
-        if (dataArray.length < pageSize) {
-          fetchObservations = false
-        } else {
-          page += 1
-        }
-      } else {
-        fetchObservations = false
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      return Promise.reject(error)
-    }
-  }
-  return observations
+  if (!res.ok || !Array.isArray(res.data)) return []
+  return res.data
 }
 
 export function toDataPointArray(dataArray: DataArray) {
