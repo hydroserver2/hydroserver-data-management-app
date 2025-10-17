@@ -236,20 +236,16 @@ const onDelete = async () => {
 }
 
 const fetchData = async () => {
-  try {
-    const [source, datastreams] = await Promise.all([
-      hs.dataSources.get(route.params.id.toString()),
-      hs.datastreams.listAllItems({
-        data_source_id: [route.params.id.toString()],
-      }),
-    ])
+  const [source, datastreams] = await Promise.all([
+    hs.dataSources.getItem(route.params.id.toString()),
+    hs.datastreams.listAllItems({
+      data_source_id: [route.params.id.toString()],
+    }),
+  ])
 
-    if (!source.ok) return
-    dataSource.value = source.item
+  if (source && datastreams) {
+    dataSource.value = source
     linkedDatastreams.value = datastreams
-  } catch (e) {
-    Snackbar.error('Unable to fetch dataSources from the API.')
-    console.error('error fetching dataSource', e)
   }
 }
 

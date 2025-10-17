@@ -9,9 +9,9 @@ import {
 } from '@/models/dataSource'
 import { Payload } from '@/models'
 import { Mapping } from '@/models/payload'
-import { api } from '@/services/api'
 import { Snackbar } from '@/utils/notifications'
 import { Datastream, DatastreamExtended } from '@/types'
+import hs from '@hydroserver/client'
 
 export const useDataSourceStore = defineStore('datasource', () => {
   const selectedETLStep = ref<ETLStep>('extractor')
@@ -91,8 +91,8 @@ export const useDataSourceStore = defineStore('datasource', () => {
     if (removedIds.size > 0) {
       await Promise.all(
         [...removedIds].map((id) =>
-          api
-            .unlinkDatastreamFromDataSource(dataSource.value.id, id)
+          hs.dataSources
+            .unlinkDatastream(dataSource.value.id, id)
             .catch((error) =>
               console.error(`Error unlinking datastream ${id}:`, error)
             )
@@ -103,8 +103,8 @@ export const useDataSourceStore = defineStore('datasource', () => {
     if (addedIds.size > 0) {
       await Promise.all(
         [...addedIds].map((id) =>
-          api
-            .linkDatastreamToDataSource(dataSource.value.id, id)
+          hs.dataSources
+            .linkDatastream(dataSource.value.id, id)
             .catch((error) => {
               if (error.status === 400) {
                 console.error(error.message)

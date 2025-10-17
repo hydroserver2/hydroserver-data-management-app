@@ -216,24 +216,16 @@ async function onSubmit() {
   await myForm.value?.validate()
   if (!valid.value) return false
 
-  try {
-    const newItem: DataSource | null = props.isEdit
-      ? await hs.dataSources.update(dataSource.value.id, dataSource.value)
-      : await hs.dataSources.create(dataSource.value)
+  const res = props.isEdit
+    ? await hs.dataSources.update(dataSource.value)
+    : await hs.dataSources.create(dataSource.value)
 
-    if (!newItem) {
-      emit('close')
-      return
-    }
-
-    if (props.isEdit) {
-      emit('updated', newItem)
-    } else {
-      emit('created', newItem.id)
-    }
-  } catch (error) {
-    console.error('Error uploading DataSource', error)
+  if (!res.ok) console.error(res)
+  else {
+    if (props.isEdit) emit('updated', res.data)
+    else emit('created', res.data.id)
   }
+
   emit('close')
 }
 
@@ -250,9 +242,9 @@ onMounted(async () => {
     dataSource.value.schedule[k] = ensureIsoUtc(dataSource.value.schedule[k])
   })
 
-  orchestrationSystems.value = await hs.orchestrationSystems.get(
-    selectedWorkspace.value!.id
-  )
+  orchestrationSystems.value = await hs.orchestrationSystems.listAllItems({
+    workspace_id: [selectedWorkspace.value!.id],
+  })
   loaded.value = true
 })
 </script>

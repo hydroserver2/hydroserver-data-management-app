@@ -251,13 +251,11 @@ async function completeSignup() {
 }
 
 const updateUser = async () => {
-  try {
-    userForm = await hs.user.update(userForm, user.value!)
-    if (userForm !== undefined) user.value = userForm
-  } catch (error) {
-    console.error('Error updating user', error)
-  }
-  Snackbar.success('Your changes have been saved.')
+  const res = await hs.user.update(userForm, user.value!)
+  if (res.ok) {
+    user.value = userForm = res.data
+    Snackbar.success('Your changes have been saved.')
+  } else console.error('Error updating user', res.message)
   emit('close')
 }
 

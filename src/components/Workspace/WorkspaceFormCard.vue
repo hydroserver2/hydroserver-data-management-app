@@ -46,17 +46,24 @@ import hs from '@hydroserver/client'
 const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-const { item, isEdit, valid, myForm, submit } = useFormLogic(
-  hs.workspaces,
-  props.workspace
+const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
+  hs.workspaces.create,
+  hs.workspaces.update,
+  Workspace,
+  props.workspace || undefined
 )
 
 async function onSubmit() {
   try {
-    const newItem = await submit()
+    const newItem = await uploadItem()
     if (!newItem) return
-    if (isEdit.value) emit('updated', newItem)
-    else emit('created', newItem)
+    if (isEdit.value) {
+      Snackbar.success('Workspace updated')
+      emit('updated', newItem)
+    } else {
+      Snackbar.success('Workspace created')
+      emit('created', newItem)
+    }
   } catch (error: any) {
     console.error('Error uploading workspace', error)
     Snackbar.error(error.message)

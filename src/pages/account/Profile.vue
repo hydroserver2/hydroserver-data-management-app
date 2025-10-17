@@ -58,11 +58,13 @@ onMounted(async () => {
       'This HydroShare account is already connected to a different HydroServer account.'
     )
   }
-  try {
-    user.value = await hs.user.get()
-  } catch (err: any) {
-    Snackbar.error(err.message)
-    console.error('Error fetching user', err)
+
+  const res = await hs.user.get()
+  if (res.ok) {
+    user.value = res.data
+  } else {
+    Snackbar.error(res.message)
+    console.error('Error fetching user', res)
   }
 })
 </script>
