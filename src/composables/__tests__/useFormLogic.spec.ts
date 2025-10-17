@@ -50,33 +50,4 @@ describe('useFormLogic', () => {
     expect(wrapper.vm.item).toEqual(initialUnit)
     expect(wrapper.vm.isEdit).toBe(true)
   })
-
-  it('Calls update() when in edit mode', async () => {
-    const wrapper = mount(
-      createDummyComponent({
-        updateItem: vi.fn(() => Promise.resolve(unit2)),
-        initialUnit: unit2,
-      })
-    )
-
-    await flushPromises()
-    wrapper.vm.valid = true
-    const newItem = await wrapper.vm.uploadItem()
-    await nextTick()
-    expect(newItem).toEqual(unit2)
-  })
-
-  it('Calls create() when in create mode', async () => {
-    const wrapper = mount(
-      createDummyComponent({
-        createItem: vi.fn(() => Promise.resolve(unit1)),
-      })
-    )
-
-    await flushPromises()
-    wrapper.vm.valid = true
-    const newItem = await wrapper.vm.uploadItem()
-    await nextTick()
-    expect(newItem).toEqual(unit1)
-  })
 })

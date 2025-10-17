@@ -35,11 +35,8 @@ const {
 } = useHydroShare()
 
 onMounted(async () => {
-  try {
-    user.value = await hs.user.get()
-  } catch (error) {
-    console.error('Error fetching user', error)
-  }
+  const res = await hs.user.get()
+  if (res.ok) user.value = res.data
 })
 
 const userInformation = computed(() => {

@@ -269,23 +269,17 @@ function openDialog(
  * always be the source of truth. This function syncs the table items with the db and global workspaces.
  */
 const refreshWorkspaces = async (workspace?: Workspace) => {
-  try {
-    const workspacesResponse = (
-      await hs.workspaces.list({
-        is_associated: true,
-        fetch_all: true,
-      })
-    ).items
-    console.log('workspaces', workspaces)
-    setWorkspaces(workspacesResponse)
-    if (
-      workspace &&
-      (!selectedWorkspace.value || selectedWorkspace.value.id === workspace.id)
-    )
-      selectedWorkspace.value = workspace
-  } catch (error) {
-    console.error('Error refreshing workspaces', error)
-  }
+  const res = await hs.workspaces.listItems({
+    is_associated: true,
+    fetch_all: true,
+  })
+  setWorkspaces(res)
+
+  if (
+    workspace &&
+    (!selectedWorkspace.value || selectedWorkspace.value.id === workspace.id)
+  )
+    selectedWorkspace.value = workspace
 }
 
 const refreshAccessControl = async (workspaceId: string) => {
@@ -320,12 +314,11 @@ async function onAcceptTransfer(ws: Workspace) {
 
 async function onDelete() {
   if (!activeItem.value) return
-  try {
-    await hs.workspaces.delete(activeItem.value.id)
+  const res = await hs.workspaces.delete(activeItem.value.id)
+  if (res.ok) {
+    Snackbar.success('Workspace deleted')
     refreshWorkspaces()
-  } catch (error) {
-    console.error('Error deleting workspace', error)
-  }
+  } else Snackbar.error(res.message)
 }
 
 function switchToAccessControlModal() {
