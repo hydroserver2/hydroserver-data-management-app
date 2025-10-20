@@ -593,7 +593,7 @@ const loadDatastreams = async () => {
 </script>
 
 <style scoped>
-::v-deep tbody .v-data-table__td {
+:deep(tbody .v-data-table__td) {
   vertical-align: top;
 }
 </style>

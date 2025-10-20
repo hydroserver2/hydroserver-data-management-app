@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { Payload } from '@/models'
+import { Payload } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
 import hs from '@hydroserver/client'

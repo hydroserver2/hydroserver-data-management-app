@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import MappingPathCards from './MappingPathCards.vue'
-import { Mapping, Payload } from '@/models/payload'
+import { Mapping, Payload } from '@hydroserver/client'
 
 const payload = defineModel<Payload>('payload', { required: true })
 

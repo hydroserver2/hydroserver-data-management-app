@@ -31,7 +31,7 @@
 import { useDataSourceStore } from '@/store/datasource'
 
 import { storeToRefs } from 'pinia'
-import { LOADER_OPTIONS } from '@/models/dataSource'
+import { LOADER_OPTIONS } from '@hydroserver/client'
 import { ref } from 'vue'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 

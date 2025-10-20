@@ -197,7 +197,7 @@ import type {
   Mapping,
   MappingPath,
   Payload,
-} from '@/models/payload'
+} from '@hydroserver/client'
 import DataTransformationForm from './DataTransformationForm.vue'
 import { ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'

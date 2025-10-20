@@ -76,7 +76,7 @@ import PayloadForm from '@/components/DataSource/Payload/PayloadForm.vue'
 import DeletePayloadCard from './DeletePayloadCard.vue'
 import Swimlanes from './Swimlanes.vue'
 import { useDataSourceStore } from '@/store/datasource'
-import { Payload } from '@/models'
+import { Payload } from '@hydroserver/client'
 
 const { payloads, linkedDatastreams } = storeToRefs(useDataSourceStore())
 const selectedPayload = ref<Payload>()

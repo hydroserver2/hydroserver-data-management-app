@@ -101,7 +101,7 @@ import {
   HTTPExtractor,
   PlaceholderVariable,
   RunTimePlaceholder,
-} from '@/models/dataSource'
+} from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 
 import { rules } from '@/utils/rules'

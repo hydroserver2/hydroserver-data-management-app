@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { DataTransformation } from '@/models/payload'
+import type { DataTransformation } from '@hydroserver/client'
 
 const props = defineProps<{ t: DataTransformation }>()
 

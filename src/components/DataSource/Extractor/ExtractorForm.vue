@@ -33,7 +33,7 @@ import {
   EXTRACTOR_OPTIONS,
   ExtractorConfig,
   switchExtractor,
-} from '@/models/dataSource'
+} from '@hydroserver/client'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 
 const localForm = ref<VForm>()
