@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { CSVTransformer, IdentifierType } from '@/models/dataSource'
+import { CSVTransformer, IdentifierType } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
 

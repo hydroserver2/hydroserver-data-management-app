@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { DATASOURCE_STATUS_OPTIONS, StatusType } from '@/models/dataSource'
+import { DATASOURCE_STATUS_OPTIONS, StatusType } from '@hydroserver/client'
 
 interface Props {
   status: StatusType

@@ -6,9 +6,9 @@ import {
   LoaderConfig,
   DataSource,
   ETLStep,
-} from '@/models/dataSource'
-import { Payload } from '@/models'
-import { Mapping } from '@/models/payload'
+  Payload,
+  Mapping,
+} from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { Datastream, DatastreamExtended } from '@/types'
 import hs from '@hydroserver/client'

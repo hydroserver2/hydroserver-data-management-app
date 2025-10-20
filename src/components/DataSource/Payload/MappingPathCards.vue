@@ -129,7 +129,7 @@ import {
   ExpressionDataTransformation,
   LookupTableDataTransformation,
   Mapping,
-} from '@/models/payload'
+} from '@hydroserver/client'
 
 const mapping = defineModel<Mapping>('mapping', { required: true })
 

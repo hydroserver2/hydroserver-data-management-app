@@ -77,7 +77,7 @@ import {
   CSV_DELIMITER_OPTIONS,
   CSVTransformer,
   IdentifierType,
-} from '@/models/dataSource'
+} from '@hydroserver/client'
 import { VTextField } from 'vuetify/lib/components/index.mjs'
 import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
 

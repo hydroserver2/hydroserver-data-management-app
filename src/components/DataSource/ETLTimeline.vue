@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ETLStep } from '@/models/dataSource'
+import { ETLStep } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'

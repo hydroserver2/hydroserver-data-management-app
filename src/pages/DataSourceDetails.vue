@@ -118,7 +118,7 @@ import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import hs from '@hydroserver/client'
-import { DataSource, getStatusText, WORKFLOW_TYPES } from '@/models/dataSource'
+import { DataSource, getStatusText, WORKFLOW_TYPES } from '@hydroserver/client'
 import router from '@/router/router'
 import { useDataSourceStore } from '@/store/datasource'
 
@@ -237,7 +237,9 @@ const onDelete = async () => {
 
 const fetchData = async () => {
   const [source, datastreams] = await Promise.all([
-    hs.dataSources.getItem(route.params.id.toString()),
+    hs.dataSources.getItem(route.params.id.toString(), {
+      expand_related: true,
+    }),
     hs.datastreams.listAllItems({
       data_source_id: [route.params.id.toString()],
     }),

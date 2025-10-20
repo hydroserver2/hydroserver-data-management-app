@@ -90,7 +90,7 @@
 import { ref, computed } from 'vue'
 import type { VForm } from 'vuetify/components'
 import { rules } from '@/utils/rules'
-import type { DataTransformation } from '@/models/payload'
+import type { DataTransformation } from '@hydroserver/client'
 
 const props = defineProps<{ transformation?: DataTransformation }>()
 const emit = defineEmits<{

@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import TransformChip from './TransformChip.vue'
-import type { Payload } from '@/models/payload'
+import type { Payload } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 
 const props = defineProps<{
@@ -79,7 +79,6 @@ const props = defineProps<{
 }>()
 
 const { linkedDatastreams } = storeToRefs(useDataSourceStore())
-
 defineEmits<{
   (e: 'edit', payload: Payload): void
   (e: 'delete', payload: Payload): void

@@ -120,23 +120,22 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRaw } from 'vue'
-import { DataSource } from '@/models'
 import { required, rules } from '@/utils/rules'
 import DataSourceETLFields from './DataSourceETLFields.vue'
 import { VForm } from 'vuetify/components'
-import {
+import { storeToRefs } from 'pinia'
+import { useDataSourceStore } from '@/store/datasource'
+import { useWorkspaceStore } from '@/store/workspaces'
+import { getLocalTimeZone } from '@/utils/time'
+import hs, {
   extractorDefaults,
   INTERVAL_UNIT_OPTIONS,
   loaderDefaults,
   OrchestrationSystem,
   transformerDefaults,
   WorkflowType,
-} from '@/models/dataSource'
-import { storeToRefs } from 'pinia'
-import { useDataSourceStore } from '@/store/datasource'
-import { useWorkspaceStore } from '@/store/workspaces'
-import { getLocalTimeZone } from '@/utils/time'
-import hs from '@hydroserver/client'
+  DataSource,
+} from '@hydroserver/client'
 
 const props = defineProps({
   isEdit: Boolean,

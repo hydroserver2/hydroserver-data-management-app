@@ -55,16 +55,14 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
-import { Payload } from '@/models'
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
 import SwimlanesForm from './SwimlanesForm.vue'
-import hs from '@hydroserver/client'
+import hs, { Payload } from '@hydroserver/client'
 
 const props = defineProps({
   oldPayload: { type: Object as () => Payload },
-  oldPayloadIndex: { type: Number, required: true },
 })
 
 const { dataSource, payloads, extractor } = storeToRefs(useDataSourceStore())
@@ -90,13 +88,9 @@ async function onSubmit() {
   await myForm.value?.validate()
   if (!valid.value) return
 
-  if (props.oldPayloadIndex === -1) {
-    payloads.value = payloads.value
-      ? [...payloads.value, payload.value]
-      : [payload.value]
-  } else {
-    payloads.value[props.oldPayloadIndex] = payload.value
-  }
+  const index = payloads.value.findIndex((p) => p.id === payload.value.id)
+  if (index !== -1) payloads.value[index] = payload.value
+  else payloads.value = [...payloads.value, payload.value]
 
   await updateLinkedDatastreams(payload.value, props.oldPayload)
   await hs.dataSources.update(dataSource.value)
@@ -108,7 +102,7 @@ async function onSubmit() {
 </script>
 
 <style scoped>
-::v-deep .v-expansion-panel-text__wrapper {
-  padding: 0px 0px 0px !important;
+:deep(.v-expansion-panel-text__wrapper) {
+  padding: 0 !important;
 }
 </style>

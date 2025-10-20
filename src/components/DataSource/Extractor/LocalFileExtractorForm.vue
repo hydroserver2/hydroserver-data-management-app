@@ -17,7 +17,7 @@
 import { useDataSourceStore } from '@/store/datasource'
 
 import { storeToRefs } from 'pinia'
-import { LocalFileExtractor } from '@/models/dataSource'
+import { LocalFileExtractor } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 
 const { extractor } = storeToRefs(useDataSourceStore())
