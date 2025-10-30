@@ -35,8 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import hs from '@hydroserver/client'
-import { ResultQualifier } from '@/types'
+import hs, { ResultQualifier } from '@hydroserver/client'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'

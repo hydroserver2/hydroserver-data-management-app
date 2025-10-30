@@ -4,7 +4,7 @@ import {
   ProcessingLevel,
   Thing,
   GraphSeries,
-} from '@/types'
+} from '@hydroserver/client'
 import {
   SummaryStatistics,
   calculateSummaryStatistics,

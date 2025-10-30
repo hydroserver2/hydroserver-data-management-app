@@ -29,11 +29,10 @@
 
 <script setup lang="ts">
 import { useDataVisStore } from '@/store/dataVisualization'
-import { Datastream, Thing } from '@/types'
+import hs, { Datastream, Thing } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import DatastreamInformationPanels from '@/components/Datastream/DatastreamInformationPanels.vue'
-import hs from '@hydroserver/client'
 
 defineProps({
   datastream: { type: Object as () => Datastream, required: true },

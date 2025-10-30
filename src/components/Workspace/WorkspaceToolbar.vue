@@ -215,12 +215,15 @@ import DeleteWorkspaceCard from './DeleteWorkspaceCard.vue'
 import WorkspaceAccessControl from '@/components/Workspace/AccessControl/WorkspaceAccessControl.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { PermissionResource, PermissionAction, Workspace } from '@/types'
+import hs, {
+  PermissionResource,
+  PermissionAction,
+  Workspace,
+} from '@hydroserver/client'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 import WorkspaceSelector from './WorkspaceSelector.vue'
-import hs from '@hydroserver/client'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()

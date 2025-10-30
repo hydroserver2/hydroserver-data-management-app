@@ -60,8 +60,7 @@
 
 <script setup lang="ts">
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
-import hs from '@hydroserver/client'
-import { Workspace } from '@/types'
+import hs, { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
 

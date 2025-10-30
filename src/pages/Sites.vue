@@ -135,7 +135,11 @@ import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
 import SiteFilterToolbar from '@/components/Site/SiteFilterToolbar.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
-import { PermissionResource, PermissionAction, Thing } from '@/types'
+import hs, {
+  PermissionResource,
+  PermissionAction,
+  Thing,
+} from '@hydroserver/client'
 import { addColorToMarkers } from '@/utils/maps/markers'
 import { ThingWithColor } from '@/types'
 import { Snackbar } from '@/utils/notifications'
@@ -143,7 +147,6 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
-import hs from '@hydroserver/client'
 
 const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()

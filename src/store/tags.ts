@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { Tag } from '@/types'
-import hs from '@hydroserver/client'
+import hs, { Tag } from '@hydroserver/client'
 
 export const useTagStore = defineStore('tags', () => {
   const tags = ref<Tag[]>([])

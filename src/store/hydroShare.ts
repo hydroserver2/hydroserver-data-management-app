@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { PostHydroShareArchive } from '@/types'
+import { PostHydroShareArchive } from '@hydroserver/client'
 
 export const useHydroShareStore = defineStore('hydroShare', () => {
   const hydroShareArchive = ref<PostHydroShareArchive | null>()

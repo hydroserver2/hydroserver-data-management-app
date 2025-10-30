@@ -117,8 +117,11 @@ import PayloadTable from '@/components/DataSource/Payload/PayloadTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
-import hs from '@hydroserver/client'
-import { DataSource, getStatusText, WORKFLOW_TYPES } from '@hydroserver/client'
+import hs, {
+  DataSource,
+  getStatusText,
+  WORKFLOW_TYPES,
+} from '@hydroserver/client'
 import router from '@/router/router'
 import { useDataSourceStore } from '@/store/datasource'
 

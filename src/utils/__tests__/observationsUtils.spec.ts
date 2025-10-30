@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { subtractHours, preProcessData } from '@/utils/observationsUtils'
-import { DataArray, Datastream } from '@/types'
+import { DataArray, Datastream } from '@hydroserver/client'
 
 describe('subtractHours', () => {
   it('correctly subtracts hours from a timestamp', () => {

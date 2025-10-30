@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { Workspace } from '@/types'
+import { Workspace } from '@hydroserver/client'
 import WorkspaceCollaborators from './ManageCollaborators.vue'
 import TransferWorkspaceOwnership from './TransferWorkspaceOwnership.vue'
 import ManageWorkspacePrivacy from './ManageWorkspacePrivacy.vue'

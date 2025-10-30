@@ -115,14 +115,13 @@
 </template>
 
 <script setup lang="ts">
-import { ApiKey, CollaboratorRole } from '@/types'
+import hs, { ApiKey, CollaboratorRole } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { onMounted, ref, toRef } from 'vue'
 import { useTableLogic } from '@/composables/useTableLogic'
 import ApiKeyForm from './ApiKeyForm.vue'
 import DeleteApiKey from './DeleteApiKey.vue'
 import ApiKeyRegenerateForm from './ApiKeyRegenerateForm.vue'
-import hs from '@hydroserver/client'
 
 const props = defineProps({
   workspaceId: { type: String, required: true },

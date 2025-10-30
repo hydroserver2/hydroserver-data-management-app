@@ -1,4 +1,4 @@
-import { Unit } from '@/types'
+import { Unit } from '@hydroserver/client'
 
 export default [
   {

@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream, Thing } from '@/types'
+import { Datastream, Thing } from '@hydroserver/client'
 import { ref } from 'vue'
 import DatastreamInformationPanels from '@/components/Datastream/DatastreamInformationPanels.vue'
 import hs from '@hydroserver/client'

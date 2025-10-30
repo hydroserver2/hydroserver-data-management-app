@@ -37,8 +37,7 @@
 <script setup lang="ts">
 import UnitFormCard from '@/components/Metadata/UnitFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import hs from '@hydroserver/client'
-import { Unit } from '@/types'
+import hs, { Unit } from '@hydroserver/client'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'

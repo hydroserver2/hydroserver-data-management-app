@@ -40,11 +40,10 @@
 <script setup lang="ts">
 import ObservedPropertyFormCard from '@/components/Metadata/ObservedPropertyFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { ObservedProperty } from '@/types'
+import hs, { ObservedProperty } from '@hydroserver/client'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
-import hs from '@hydroserver/client'
 
 const props = defineProps<{
   search: string | undefined

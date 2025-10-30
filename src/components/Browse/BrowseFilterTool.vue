@@ -82,7 +82,7 @@ import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useSidebarStore } from '@/store/useSidebar'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import hs, { Workspace } from '@hydroserver/client'
-import { Thing } from '@/types'
+import { Thing } from '@hydroserver/client'
 
 const { smAndDown } = useDisplay()
 const vocabularyStore = useVocabularyStore()

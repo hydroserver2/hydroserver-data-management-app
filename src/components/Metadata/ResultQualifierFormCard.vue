@@ -40,9 +40,8 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
-import { ResultQualifier } from '@/types'
+import hs, { ResultQualifier } from '@hydroserver/client'
 import { useFormLogic } from '@/composables/useFormLogic'
-import hs from '@hydroserver/client'
 
 const props = defineProps<{
   resultQualifier?: ResultQualifier

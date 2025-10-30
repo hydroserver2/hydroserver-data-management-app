@@ -4,7 +4,7 @@ import {
   SummaryStatistics,
   calculateSummaryStatistics,
 } from '@/utils/plotting/summaryStatisticUtils'
-import { DataPoint, GraphSeries } from '@/types'
+import { DataPoint, GraphSeries } from '@hydroserver/client'
 
 const createDataPoints = (values: number[]): DataPoint[] => {
   return values.map((value) => ({

@@ -67,9 +67,8 @@ import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { OPNameTypes } from '@/config/vocabularies'
-import { ObservedProperty } from '@/types'
+import hs, { ObservedProperty } from '@hydroserver/client'
 import { useVocabularyStore } from '@/composables/useVocabulary'
-import hs from '@hydroserver/client'
 
 const OPNames = Object.keys(OPNameTypes)
 

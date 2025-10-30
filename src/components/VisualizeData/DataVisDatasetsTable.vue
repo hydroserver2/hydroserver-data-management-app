@@ -103,12 +103,11 @@
 
 <script setup lang="ts">
 import { useDataVisStore } from '@/store/dataVisualization'
-import { Datastream, Thing } from '@/types'
+import hs, { Datastream, Thing } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { formatTime } from '@/utils/time'
-import hs from '@hydroserver/client'
 
 const {
   things,

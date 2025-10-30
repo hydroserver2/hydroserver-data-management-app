@@ -39,9 +39,8 @@
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { Workspace } from '@/types'
+import hs, { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
-import hs from '@hydroserver/client'
 
 const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])

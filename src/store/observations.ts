@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { Datastream, ObservationRecord, GraphSeries } from '@/types'
+import hs, {
+  Datastream,
+  ObservationRecord,
+  GraphSeries,
+} from '@hydroserver/client'
 import { fetchObservations, preProcessData } from '@/utils/observationsUtils'
 import { Snackbar } from '@/utils/notifications'
-import hs from '@hydroserver/client'
 
 export const useObservationStore = defineStore('observations', () => {
   const observations = ref<Record<string, ObservationRecord>>({})

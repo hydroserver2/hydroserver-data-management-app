@@ -49,8 +49,7 @@
 import { required, rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { ApiKey, CollaboratorRole } from '@/types'
-import hs from '@hydroserver/client'
+import hs, { ApiKey, CollaboratorRole } from '@hydroserver/client'
 
 const props = defineProps<{
   apiKey?: ApiKey

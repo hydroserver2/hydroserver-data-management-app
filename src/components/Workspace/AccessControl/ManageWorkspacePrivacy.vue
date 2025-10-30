@@ -30,8 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import hs from '@hydroserver/client'
-import { Workspace } from '@/types'
+import hs, { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
 

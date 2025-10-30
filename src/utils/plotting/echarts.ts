@@ -1,5 +1,5 @@
 import { EChartsOption, YAXisComponentOption, SeriesOption } from 'echarts'
-import { GraphSeries } from '@/types'
+import { GraphSeries } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { formatTimeWithZone } from '../time'

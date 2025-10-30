@@ -11,8 +11,7 @@ import { onMounted, ref } from 'vue'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import BrowseFilterTool from '@/components/Browse/BrowseFilterTool.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
-import hs from '@hydroserver/client'
-import { Thing } from '@/types'
+import hs, { Thing } from '@hydroserver/client'
 
 const things = ref<Thing[]>([])
 const filteredThings = ref<Thing[]>([])

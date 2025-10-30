@@ -1,5 +1,9 @@
-import { DataArray, DataPoint, Datastream, TimeSpacingUnit } from '@/types'
-import hs from '@hydroserver/client'
+import hs, {
+  DataArray,
+  DataPoint,
+  Datastream,
+  TimeSpacingUnit,
+} from '@hydroserver/client'
 
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)

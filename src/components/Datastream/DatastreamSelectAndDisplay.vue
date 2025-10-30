@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream } from '@/types'
+import { Datastream } from '@hydroserver/client'
 import { ref, watch } from 'vue'
 import DatastreamOverviewCard from './DatastreamOverviewCard.vue'
 import DatastreamSelectorCard from './DatastreamSelectorCard.vue'

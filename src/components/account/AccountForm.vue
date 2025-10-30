@@ -174,13 +174,12 @@ import { rules } from '@/utils/rules'
 import { reactive, ref, onMounted, watch } from 'vue'
 import { VForm } from 'vuetify/components'
 import { vMaska } from 'maska/vue'
-import { Organization, User } from '@/types'
+import hs, { Organization, User } from '@hydroserver/client'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import router from '@/router/router'
 import { useVocabularyStore } from '@/composables/useVocabulary'
-import hs from '@hydroserver/client'
 
 const props = defineProps({
   hasCancelButton: { type: Boolean, required: false, default: true },

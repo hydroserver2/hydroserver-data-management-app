@@ -133,7 +133,7 @@ import { computed, ref } from 'vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { Workspace } from '@/types'
+import { Workspace } from '@hydroserver/client'
 import { useMetadata } from '@/store/metadata'
 
 const { tab } = storeToRefs(useMetadata())

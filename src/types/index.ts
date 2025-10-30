@@ -1,7 +1,5 @@
 import { Thing } from '@hydroserver/client'
 
-export * from '@hydroserver/client'
-
 export interface ThingWithColor extends Thing {
   color?: {
     borderColor: string

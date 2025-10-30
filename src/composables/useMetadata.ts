@@ -1,13 +1,12 @@
 import { computed, Ref, ref, watch } from 'vue'
-import {
+import hs, {
   ProcessingLevel,
   Unit,
   ObservedProperty,
   Sensor,
   ResultQualifier,
   Workspace,
-} from '@/types'
-import hs from '@hydroserver/client'
+} from '@hydroserver/client'
 
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'

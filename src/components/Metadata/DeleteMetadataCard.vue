@@ -40,10 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import { Datastream } from '@/types'
+import hs, { Datastream } from '@hydroserver/client'
 import { computed, onMounted, ref } from 'vue'
 import FullScreenLoader from '../base/FullScreenLoader.vue'
-import hs from '@hydroserver/client'
 
 const datastreams = ref<Datastream[]>([])
 const loaded = ref(false)
