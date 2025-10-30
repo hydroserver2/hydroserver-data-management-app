@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { Photo } from '@/types'
-import hs, { ApiResponse } from '@hydroserver/client'
+import hs, { ApiResponse, Photo } from '@hydroserver/client'
 
 export const usePhotosStore = defineStore('photos', () => {
   const photos = ref<Photo[]>([])

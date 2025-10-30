@@ -595,13 +595,17 @@ import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCa
 import { rules } from '@/utils/rules'
 import { Snackbar } from '@/utils/notifications'
 import { useMetadata } from '@/composables/useMetadata'
-import { Thing } from '@/types'
-import { Datastream, Workspace } from '@/types'
 import { VForm } from 'vuetify/components'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import InfoCard from '../Metadata/InfoCard.vue'
-import hs, { PermissionAction, PermissionResource } from '@hydroserver/client'
+import hs, {
+  PermissionAction,
+  PermissionResource,
+  Thing,
+  Datastream,
+  Workspace,
+} from '@hydroserver/client'
 
 const emit = defineEmits(['close', 'updated', 'created'])
 

@@ -55,8 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { DataSource, OrchestrationSystem } from '@hydroserver/client'
-import hs from '@hydroserver/client'
+import hs, { DataSource, OrchestrationSystem } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
 

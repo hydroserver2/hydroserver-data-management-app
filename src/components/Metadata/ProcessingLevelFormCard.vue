@@ -47,8 +47,7 @@
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { ProcessingLevel } from '@/types'
-import hs from '@hydroserver/client'
+import hs, { ProcessingLevel } from '@hydroserver/client'
 
 const props = defineProps<{
   processingLevel?: ProcessingLevel

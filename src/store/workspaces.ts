@@ -1,5 +1,5 @@
 import { defineStore, storeToRefs } from 'pinia'
-import { Workspace } from '@/types'
+import { Workspace } from '@hydroserver/client'
 import { computed, ref, watch } from 'vue'
 import Storage from '@/utils/storage'
 import { useUserStore } from './user'

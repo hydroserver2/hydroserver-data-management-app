@@ -203,7 +203,7 @@ import { ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
 import { useDataSourceStore } from '@/store/datasource'
-import { DatastreamExtended } from '@/types'
+import { DatastreamExtended } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 

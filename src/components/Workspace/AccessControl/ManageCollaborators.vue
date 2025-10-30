@@ -122,13 +122,16 @@
 </template>
 
 <script setup lang="ts">
-import hs from '@hydroserver/client'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 import router from '@/router/router'
-import { Collaborator, CollaboratorRole, Workspace } from '@/types'
+import hs, {
+  Collaborator,
+  CollaboratorRole,
+  Workspace,
+} from '@hydroserver/client'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },

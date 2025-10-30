@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { Workspace } from '@/types'
+import { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
 

@@ -84,12 +84,11 @@
 </template>
 
 <script setup lang="ts">
-import hs from '@hydroserver/client'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { rules } from '@/utils/rules'
 import { computed } from 'vue'
-import { Sensor } from '@/types'
+import hs, { Sensor } from '@hydroserver/client'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 
 const props = defineProps<{

@@ -6,8 +6,8 @@ import {
   PermissionResource,
   PermissionAction,
   Permission,
+  Workspace,
 } from '@hydroserver/client'
-import { Workspace } from '@/types'
 
 export function useWorkspacePermissions(
   localWorkspace?: Ref<Workspace | undefined>

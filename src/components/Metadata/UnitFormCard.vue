@@ -49,10 +49,9 @@
 
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
-import hs from '@hydroserver/client'
 import { VForm } from 'vuetify/components'
 import { useFormLogic } from '@/composables/useFormLogic'
-import { Unit } from '@/types'
+import hs, { Unit } from '@hydroserver/client'
 
 const props = defineProps<{
   unit?: Unit

@@ -23,10 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import { Payload } from '@hydroserver/client'
+import hs, { Payload } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
-import hs from '@hydroserver/client'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({

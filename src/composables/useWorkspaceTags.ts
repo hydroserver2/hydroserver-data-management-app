@@ -1,6 +1,5 @@
-import hs from '@hydroserver/client'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { Workspace } from '@/types'
+import hs, { Workspace } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { ref, computed, Ref, watch } from 'vue'
 

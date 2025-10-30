@@ -37,8 +37,7 @@
 <script setup lang="ts">
 import SensorFormCard from '@/components/Metadata/SensorFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import hs from '@hydroserver/client'
-import { Sensor } from '@/types'
+import hs, { Sensor } from '@hydroserver/client'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'

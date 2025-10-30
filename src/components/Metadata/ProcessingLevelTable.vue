@@ -37,11 +37,10 @@
 <script setup lang="ts">
 import ProcessingLevelFormCard from '@/components/Metadata/ProcessingLevelFormCard.vue'
 import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
-import { ProcessingLevel } from '@/types'
+import hs, { ProcessingLevel } from '@hydroserver/client'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { computed, toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
-import hs from '@hydroserver/client'
 
 const props = defineProps<{
   search: string | undefined

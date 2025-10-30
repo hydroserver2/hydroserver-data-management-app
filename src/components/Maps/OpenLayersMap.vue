@@ -38,7 +38,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { ThingWithColor, Thing } from '@/types'
+import { Thing } from '@hydroserver/client'
+import { ThingWithColor } from '@/types'
 import { addColorToMarkers, generateMarkerContent } from '@/utils/maps/markers'
 import OlMap from 'ol/Map'
 import View from 'ol/View'

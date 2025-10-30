@@ -10,8 +10,7 @@ import {
   Mapping,
 } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
-import { Datastream, DatastreamExtended } from '@/types'
-import hs from '@hydroserver/client'
+import hs, { Datastream, DatastreamExtended } from '@hydroserver/client'
 
 export const useDataSourceStore = defineStore('datasource', () => {
   const selectedETLStep = ref<ETLStep>('extractor')

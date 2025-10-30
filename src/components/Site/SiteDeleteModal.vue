@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Thing } from '@/types'
+import { Thing } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 
 const emit = defineEmits(['switchToAccessControl', 'delete', 'close'])

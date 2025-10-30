@@ -150,7 +150,12 @@
 
 <script setup lang="ts">
 import { watch, onMounted, ref, computed } from 'vue'
-import { Datastream, DatastreamExtended, Thing, Workspace } from '@/types'
+import {
+  Datastream,
+  DatastreamExtended,
+  Thing,
+  Workspace,
+} from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useRoute, useRouter } from 'vue-router'

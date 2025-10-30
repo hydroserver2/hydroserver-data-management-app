@@ -1,4 +1,4 @@
-import { Thing } from '@/types'
+import { Thing } from '@hydroserver/client'
 import { mapMarkerColors } from '@/utils/materialColors'
 
 export const addColorToMarkers = (things: Thing[], key: string) => {

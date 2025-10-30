@@ -116,7 +116,11 @@ import { usePhotosStore } from '@/store/photos'
 import { useThingStore } from '@/store/thing'
 import { useTagStore } from '@/store/tags'
 import { storeToRefs } from 'pinia'
-import hs, { PermissionAction, PermissionResource } from '@hydroserver/client'
+import hs, {
+  PermissionAction,
+  PermissionResource,
+  Workspace,
+} from '@hydroserver/client'
 import router from '@/router/router'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import SiteForm from '@/components/Site/SiteForm.vue'
@@ -126,7 +130,6 @@ import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
-import { Workspace } from '@/types'
 import { useHydroShare } from '@/composables/useHydroShare'
 import { useHydroShareStore } from '@/store/hydroShare'
 import HydroShareArchivalButton from '@/components/HydroShare/HydroShareArchivalButton.vue'
