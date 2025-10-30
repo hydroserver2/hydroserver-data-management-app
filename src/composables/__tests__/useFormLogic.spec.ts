@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { useFormLogic } from '@/composables/useFormLogic'
 import { Unit } from '@hydroserver/client'
 import { flushPromises, mount } from '@vue/test-utils'
-import { defineComponent, nextTick } from 'vue'
+import { defineComponent } from 'vue'
 import unitFixtures from '@/utils/test/fixtures/unitFixtures'
 
 const [unit1, unit2] = unitFixtures
