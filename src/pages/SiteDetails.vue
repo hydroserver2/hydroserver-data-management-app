@@ -120,6 +120,7 @@ import hs, {
   PermissionAction,
   PermissionResource,
   Workspace,
+  FileAttachment
 } from '@hydroserver/client'
 import router from '@/router/router'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
@@ -170,8 +171,12 @@ async function onDeleteThing() {
 onMounted(async () => {
   photos.value = []
   hs.things
-    .getPhotos(thingId)
-    .then((res) => (photos.value = res.data))
+    .getAttachments(thingId)
+    .then((res) => {
+      photos.value = res.data.filter(
+        (attachment: FileAttachment) => attachment.fileAttachmentType === 'Photo'
+      )
+    })
     .catch((error) => console.error('Error fetching photos from DB', error))
 
   const [thingResponse, hydroShareArchiveResponse, tagResponse] =
