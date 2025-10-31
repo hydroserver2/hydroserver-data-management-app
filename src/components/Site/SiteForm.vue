@@ -189,7 +189,6 @@ import { useTagStore } from '@/store/tags'
 import countryList from 'country-list'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import hs, { Thing } from '@hydroserver/client'
-import { Snackbar } from '@/utils/notifications'
 
 const countries = ref<{ name: string; code: string }[]>([])
 const countryTitle = (item: { name: string; code: string } | undefined) => {
