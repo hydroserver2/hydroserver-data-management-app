@@ -254,7 +254,9 @@ watch(
 /** Workspaces that are pending a transfer to the current user */
 const pendingWorkspaces = computed(() =>
   workspaces.value.filter(
-    (ws) => ws.pendingTransferTo?.email === user.value.email
+    (ws) =>
+      ws.pendingTransferTo?.email &&
+      ws.pendingTransferTo?.email === user.value.email
   )
 )
 

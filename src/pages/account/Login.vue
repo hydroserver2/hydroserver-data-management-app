@@ -75,6 +75,8 @@ import OAuth from '@/components/account/OAuth.vue'
 import { Snackbar } from '@/utils/notifications'
 import router from '@/router/router'
 import hs from '@hydroserver/client'
+import { useUserStore } from '@/store/user'
+import { storeToRefs } from 'pinia'
 
 const email = ref('')
 const password = ref('')
@@ -84,19 +86,25 @@ const loading = ref(false)
 const disableAccountCreation =
   import.meta.env.VITE_APP_DISABLE_ACCOUNT_CREATION || 'false'
 
+const { user } = storeToRefs(useUserStore())
+
 const formLogin = async () => {
   if (!valid) return
   try {
     loading.value = true
-    await hs.session.login(email.value, password.value)
+    const res = await hs.session.login(email.value, password.value)
     if (hs.session.inEmailVerificationFlow) {
       console.info('Email not verified. Redirecting to verify email page.')
       Snackbar.info('Email not verified. Redirecting to verify email page.')
       hs.session.unverifiedEmail = email.value
       await router.push({ name: 'VerifyEmail' })
     } else {
-      Snackbar.success('You have logged in!')
-      await router.push({ name: 'Sites' })
+      const resUser = res.data?.account
+      if (resUser) {
+        user.value = resUser
+        Snackbar.success('You have logged in!')
+        await router.push({ name: 'Sites' })
+      }
     }
   } catch (error: any) {
     console.error('Error logging in.', error)

@@ -28,7 +28,7 @@ async function initializeApp() {
   const { user } = storeToRefs(useUserStore())
 
   const res = await hs.user.get()
-  user.value = res.data || new User()
+  user.value = res.status == 401 ? new User() : res.data
 
   if (hs.session.isAuthenticated) {
     try {
