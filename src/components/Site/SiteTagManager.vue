@@ -61,17 +61,19 @@
 
   <v-row>
     <v-col>
-      <v-chip
-        v-for="(tag, index) in previewTags"
-        rounded="true"
-        :color="materialColors[index % materialColors.length]"
-        :key="tag.key"
-        closable
-        class="mr-1 mb-1"
-        @click:close="previewTags.splice(index, 1)"
-      >
-        {{ tag.key }}: {{ tag.value }}
-      </v-chip>
+      <div class="chips-wrap">
+        <v-chip
+          v-for="(tag, i) in previewTags"
+          :key="`${tag.key}:${i}`"
+          class="multiline-chip"
+          :color="materialColors[i % materialColors.length]"
+          closable
+          rounded
+          @click:close="previewTags.splice(i, 1)"
+        >
+          <span class="chip-text">{{ tag.key }}: {{ tag.value }}</span>
+        </v-chip>
+      </div>
     </v-col>
   </v-row>
 </template>
@@ -107,3 +109,34 @@ onMounted(async () => {
   previewTags.value = props.thingId ? [...tags.value] : []
 })
 </script>
+
+<style scoped>
+.chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Allow multi-line expansion */
+.multiline-chip {
+  --v-chip-height: auto;
+  height: auto;
+  align-items: center; /* centers the close icon vertically */
+  max-width: 100%;
+  line-height: 1.3;
+}
+
+/* Let long text wrap naturally */
+:deep(.multiline-chip .v-chip__content) {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Keep close icon visible and vertically centered */
+:deep(.multiline-chip .v-chip__close) {
+  flex: 0 0 auto;
+  align-self: center; /* centers relative to content height */
+  margin-left: 4px;
+}
+</style>
