@@ -13,7 +13,7 @@
           variant="outlined"
           rounded="xl"
           @click="onClearFilters"
-          append-icon="mdi-close"
+          :append-icon="mdiClose"
           >Clear filters</v-btn
         >
       </v-list-item>
@@ -27,7 +27,7 @@
           item-title="name"
           return-object
           clearable
-          prepend-inner-icon="mdi-domain"
+          :prepend-inner-icon="mdiDomain"
           label="Workspaces"
           multiple
           hide-details
@@ -54,7 +54,7 @@
           v-model="selectedSiteTypes"
           :items="vocabularyStore.siteTypes"
           clearable
-          prepend-inner-icon="mdi-water-pump"
+          :prepend-inner-icon="mdiWaterPump"
           multiple
           hide-details
           color="primary"
@@ -83,6 +83,7 @@ import { useSidebarStore } from '@/store/useSidebar'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import hs, { Workspace } from '@hydroserver/client'
 import { Thing } from '@hydroserver/client'
+import { mdiClose, mdiDomain, mdiWaterPump } from '@mdi/js'
 
 const { smAndDown } = useDisplay()
 const vocabularyStore = useVocabularyStore()

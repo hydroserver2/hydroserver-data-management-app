@@ -2,7 +2,8 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon>mdi-alert</v-icon> Confirm unlinking HydroShare archival
+        <v-icon :icon="mdiAlert" />
+        Confirm unlinking HydroShare archival
       </v-card-title>
     </v-toolbar>
 
@@ -36,6 +37,7 @@
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
 import hs from '@hydroserver/client'
+import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({

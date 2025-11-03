@@ -6,7 +6,7 @@
         class="mx-2"
         clearable
         v-model="search"
-        prepend-inner-icon="mdi-magnify"
+        :prepend-inner-icon="mdiMagnify"
         label="Search"
         hide-details
         density="compact"
@@ -17,7 +17,7 @@
 
       <v-btn
         class="mx-2"
-        append-icon="mdi-chevron-right"
+        :append-icon="mdiChevronRight"
         color="white"
         :to="{ name: 'HydroLoader' }"
       >
@@ -37,7 +37,7 @@
     >
       <template v-slot:no-data>
         <div class="text-center pa-4" v-if="tableData.length === 0">
-          <v-icon size="48" color="grey lighten-1">mdi-desktop-classic</v-icon>
+          <v-icon :icon="mdiDesktopClassic" size="48" color="grey lighten-1" />
           <h4 class="mt-2">
             You have not registered any orchestration systems.
           </h4>
@@ -69,7 +69,7 @@
               <v-spacer />
               <v-chip
                 v-if="getBehindScheduleCountText(statusesOf(item.items as any[]))"
-                prepend-icon="mdi-clock-alert-outline"
+                :prepend-icon="mdiClockAlertOutline"
                 variant="text"
                 class="ms-4"
                 rounded="xl"
@@ -81,7 +81,7 @@
               </v-chip>
               <v-chip
                 v-if="getBadCountText(statusesOf(item.items as any[]))"
-                prepend-icon="mdi-alert"
+                :prepend-icon="mdiAlert"
                 variant="text"
                 class="ms-4"
                 rounded="xl"
@@ -102,7 +102,7 @@
               <v-btn
                 variant="text"
                 color="red-darken-2"
-                icon="mdi-trash-can-outline"
+                :icon="mdiTrashCanOutline"
                 @click.stop="
                   openDeleteDialog(item.items[0].raw.orchestrationSystem)
                 "
@@ -125,7 +125,7 @@
           v-if="!item.isPlaceholder"
           variant="text"
           color="black"
-          :icon="item.status.paused ? 'mdi-play' : 'mdi-pause'"
+          :icon="item.status.paused ? mdiPlay : mdiPause"
           @click.stop="togglePaused(item)"
         />
       </template>
@@ -171,6 +171,16 @@ import hs, {
   StatusType,
   DataSource,
 } from '@hydroserver/client'
+import {
+  mdiAlert,
+  mdiChevronRight,
+  mdiClockAlertOutline,
+  mdiDesktopClassic,
+  mdiMagnify,
+  mdiPause,
+  mdiPlay,
+  mdiTrashCanOutline,
+} from '@mdi/js'
 
 const props = defineProps<{
   workspaceId: string

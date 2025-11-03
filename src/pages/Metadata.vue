@@ -11,7 +11,7 @@
       class="my-2"
       clearable
       v-model="search"
-      prepend-inner-icon="mdi-magnify"
+      :prepend-inner-icon="mdiMagnify"
       label="Search"
       hide-details
       density="compact"
@@ -39,6 +39,7 @@ import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
 import hs from '@hydroserver/client'
 import MetadataTable from '@/components/Metadata/MetadataTable.vue'
+import { mdiMagnify } from '@mdi/js'
 
 const { setWorkspaces } = useWorkspaceStore()
 const isPageLoaded = ref(false)

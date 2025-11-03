@@ -26,6 +26,13 @@
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import {
+  mdiOfficeBuilding,
+  mdiCodeTags,
+  mdiOpenInNew,
+  mdiFactory,
+  mdiFileDocumentOutline,
+} from '@mdi/js'
 
 const { user } = storeToRefs(useUserStore())
 
@@ -34,27 +41,27 @@ const organizationInfo = computed(() => {
 
   return [
     {
-      icon: 'mdi-office-building',
+      icon: mdiOfficeBuilding,
       label: 'Name',
       value: user.value.organization.name,
     },
     {
-      icon: 'mdi-code-tags',
+      icon: mdiCodeTags,
       label: 'Code',
       value: user.value.organization.code,
     },
     {
-      icon: 'mdi-open-in-new',
+      icon: mdiOpenInNew,
       label: 'Link',
       value: user.value.organization.link,
     },
     {
-      icon: 'mdi-factory',
+      icon: mdiFactory,
       label: 'Type',
       value: user.value.organization.type,
     },
     {
-      icon: 'mdi-file-document-outline',
+      icon: mdiFileDocumentOutline,
       label: 'Description',
       value: user.value.organization.description,
     },

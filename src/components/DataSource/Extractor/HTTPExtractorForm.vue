@@ -6,9 +6,12 @@
       </v-card-item>
     </v-col>
     <v-col class="pl-0">
-      <v-icon @click="showUrlHelp = !showUrlHelp" color="grey" small>
-        mdi-help-circle-outline
-      </v-icon>
+      <v-icon
+        :icon="mdiHelpCircleOutline"
+        @click="showUrlHelp = !showUrlHelp"
+        color="grey"
+        small
+      />
     </v-col>
   </v-row>
 
@@ -40,7 +43,7 @@
           label="URL *"
           density="compact"
           rounded="lg"
-          prepend-inner-icon="mdi-code-braces"
+          :prepend-inner-icon="mdiCodeBraces"
           :rules="rules.requiredAndNoSpaces"
         />
       </v-col>
@@ -56,7 +59,7 @@
         <v-chip
           variant="text"
           density="compact"
-          prepend-icon="mdi-code-braces"
+          :prepend-icon="mdiCodeBraces"
           class="ma-0"
         >
           {{ variable.name }}
@@ -108,6 +111,7 @@ import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import TimestampFormat from '../Timestamp/TimestampFormat.vue'
+import { mdiCodeBraces, mdiHelpCircleOutline } from '@mdi/js'
 
 const { extractor } = storeToRefs(useDataSourceStore())
 const showUrlHelp = ref(false)

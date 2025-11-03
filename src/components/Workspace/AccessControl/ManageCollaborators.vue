@@ -10,16 +10,15 @@
         @click="showAddCollaboratorHelp = !showAddCollaboratorHelp"
         color="grey"
         small
-      >
-        mdi-help-circle-outline
-      </v-icon>
+        :icon="mdiHelpCircleOutline"
+      />
     </v-col>
 
     <v-spacer />
 
     <v-btn
       variant="text"
-      prepend-icon="mdi-plus"
+      :prepend-icon="mdiPlus"
       class="mr-4"
       @click="showAddCollaborator = true"
       >Add collaborator</v-btn
@@ -132,6 +131,7 @@ import hs, {
   CollaboratorRole,
   Workspace,
 } from '@hydroserver/client'
+import { mdiHelpCircleOutline, mdiPlus } from '@mdi/js'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },

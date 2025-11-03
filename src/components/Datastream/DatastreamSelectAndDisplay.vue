@@ -6,7 +6,7 @@
         variant="outlined"
         rounded="lg"
         @click="showModal = true"
-        prepend-icon="mdi-import"
+        :prepend-icon="mdiImport"
         density="comfortable"
         >{{ buttonName }}</v-btn
       >
@@ -32,6 +32,7 @@ import { ref, watch } from 'vue'
 import DatastreamOverviewCard from './DatastreamOverviewCard.vue'
 import DatastreamSelectorCard from './DatastreamSelectorCard.vue'
 import hs from '@hydroserver/client'
+import { mdiImport } from '@mdi/js'
 
 const showModal = ref(false)
 const datastream = ref<Datastream>(new Datastream())

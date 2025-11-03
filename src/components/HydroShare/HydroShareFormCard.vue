@@ -17,7 +17,7 @@
         <v-spacer />
         <v-col cols="auto" v-if="isEdit">
           <v-btn @click="archiveThing">
-            <v-icon left> mdi-upload </v-icon>
+            <v-icon :icon="mdiUpload" left />
             Archive Now
           </v-btn>
         </v-col>
@@ -43,9 +43,8 @@
               class="ml-2"
               color="grey lighten-1"
               v-bind="props"
-            >
-              mdi-help-circle-outline
-            </v-icon>
+              :icon="mdiHelpCircleOutline"
+            />
           </template>
           <template v-slot:default>
             <p>
@@ -204,6 +203,7 @@ import { useFormLogic } from '@/composables/useFormLogic'
 import HydroShareDeleteCard from '@/components/HydroShare/HydroShareDeleteCard.vue'
 import { useHydroShareStore } from '@/store/hydroShare'
 import { Snackbar } from '@/utils/notifications'
+import { mdiHelpCircleOutline, mdiUpload } from '@mdi/js'
 
 const emit = defineEmits(['close', 'delete'])
 const { hydroShareArchive: archive, loading } = storeToRefs(

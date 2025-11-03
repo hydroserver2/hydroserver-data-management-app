@@ -14,7 +14,7 @@
           label="Type"
           density="compact"
           rounded="lg"
-          prepend-inner-icon="mdi-web"
+          :prepend-inner-icon="mdiWeb"
           hide-details
           max-width="250px"
           variant="outlined"
@@ -34,6 +34,7 @@ import { storeToRefs } from 'pinia'
 import { LOADER_OPTIONS } from '@hydroserver/client'
 import { ref } from 'vue'
 import { VForm } from 'vuetify/lib/components/index.mjs'
+import { mdiWeb } from '@mdi/js'
 
 const localForm = ref<VForm>()
 

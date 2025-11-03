@@ -1,19 +1,20 @@
 <template>
   <v-chip size="small" :color="color" variant="tonal">
-    <v-icon size="14" class="mr-1">{{ icon }}</v-icon
-    >{{ label }}
+    <v-icon
+      :icon="t.type === 'expression' ? mdiFunctionVariant : mdiTableSearch"
+      size="14"
+      class="mr-1"
+    />
+    {{ label }}
   </v-chip>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DataTransformation } from '@hydroserver/client'
+import { mdiFunctionVariant, mdiTableSearch } from '@mdi/js'
 
 const props = defineProps<{ t: DataTransformation }>()
-
-const icon = computed(() =>
-  props.t.type === 'expression' ? 'mdi-function-variant' : 'mdi-table-search'
-)
 
 const color = computed(() =>
   props.t.type === 'expression' ? 'deep-purple' : 'teal'

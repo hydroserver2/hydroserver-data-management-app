@@ -26,7 +26,7 @@
       <ul>
         <li v-for="thing in uniqueColoredThings" :key="thing.tagValue">
           <v-icon
-            icon="mdi-map-marker"
+            :icon="mdiMapMarker"
             :style="{ color: thing.color?.background }"
           ></v-icon>
           {{ thing?.tagValue }}
@@ -54,6 +54,7 @@ import { fetchLocationData } from '@/utils/maps/location'
 import WebGLVectorLayer from 'ol/layer/WebGLVector'
 import mapMarkerUrl from '@/assets/map-marker-64.png?url'
 import { OSM, XYZ } from 'ol/source'
+import { mdiMapMarker } from '@mdi/js'
 
 const props = defineProps({
   things: { type: Array<Thing>, default: [] },

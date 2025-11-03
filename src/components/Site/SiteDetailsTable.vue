@@ -37,6 +37,20 @@ import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { materialColors } from '@/utils/materialColors'
 import { useTagStore } from '@/store/tags'
+import {
+  mdiBarcode,
+  mdiCarBack,
+  mdiCardAccountDetails,
+  mdiEarth,
+  mdiFileDocumentOutline,
+  mdiImageFilterHdr,
+  mdiLock,
+  mdiLockOpenVariant,
+  mdiMap,
+  mdiPineTree,
+  mdiPlaneTrain,
+  mdiTagMultipleOutline,
+} from '@mdi/js'
 
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
@@ -54,62 +68,62 @@ const thingProperties = computed(() => {
   return thing.value
     ? [
         {
-          icon: 'mdi-card-account-details',
+          icon: mdiCardAccountDetails,
           label: 'ID',
           value: thing.value.id,
         },
         {
-          icon: 'mdi-barcode',
+          icon: mdiBarcode,
           label: 'Site code',
           value: thing.value.samplingFeatureCode,
         },
         {
-          icon: 'mdi-map',
+          icon: mdiMap,
           label: 'Latitude',
           value: thing.value.location.latitude,
         },
         {
-          icon: 'mdi-map',
+          icon: mdiMap,
           label: 'Longitude',
           value: thing.value.location.longitude,
         },
         {
-          icon: 'mdi-image-filter-hdr',
+          icon: mdiImageFilterHdr,
           label: 'Elevation',
           value: thing.value.location.elevation_m,
         },
         {
-          icon: 'mdi-file-document-outline',
+          icon: mdiFileDocumentOutline,
           label: 'Description',
           value: thing.value.description,
         },
         {
-          icon: 'mdi-pine-tree',
+          icon: mdiPineTree,
           label: 'Site type',
           value: thing.value.siteType,
         },
         {
-          icon: 'mdi-car-back',
+          icon: mdiCarBack,
           label: 'County/District',
           value: thing.value.location.county,
         },
         {
-          icon: 'mdi-plane-train',
+          icon: mdiPlaneTrain,
           label: 'State/Province/Region',
           value: thing.value.location.state,
         },
         {
-          icon: 'mdi-earth',
+          icon: mdiEarth,
           label: 'Country',
           value: thing.value.location.country,
         },
         {
-          icon: thing.value.isPrivate ? 'mdi-lock' : 'mdi-lock-open-variant',
+          icon: thing.value.isPrivate ? mdiLock : mdiLockOpenVariant,
           label: 'Privacy',
           value: thing.value.isPrivate ? 'Private' : 'Public',
         },
         {
-          icon: 'mdi-tag-multiple-outline',
+          icon: mdiTagMultipleOutline,
           label: 'Additional metadata',
           value: tags.value || [],
         },
@@ -119,7 +133,7 @@ const thingProperties = computed(() => {
 
 const tagProperty = computed(() => {
   return {
-    icon: 'mdi-tag-multiple-outline',
+    icon: mdiTagMultipleOutline,
     label: 'Additional metadata',
     value: tags.value || [],
   }

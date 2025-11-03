@@ -19,7 +19,7 @@
 
       <v-btn-add
         v-if="hasCRUDPermissions"
-        prependIcon="mdi-plus"
+        :prependIcon="mdiPlus"
         color="white"
         class="mx-2"
         @click="metaMap[tab]?.openDialog()"
@@ -135,6 +135,7 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { Workspace } from '@hydroserver/client'
 import { useMetadata } from '@/store/metadata'
+import { mdiPlus } from '@mdi/js'
 
 const { tab } = storeToRefs(useMetadata())
 const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())

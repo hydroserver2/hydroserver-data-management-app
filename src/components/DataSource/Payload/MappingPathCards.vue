@@ -8,7 +8,7 @@
     <v-card-title class="py-2">
       <div class="d-flex align-center w-100">
         <div class="d-flex align-center">
-          <v-icon size="16" class="mr-2">mdi-sign-direction</v-icon>
+          <v-icon :icon="mdiSignDirection" size="16" class="mr-2" />
           <span class="text-subtitle-2">Path {{ pi + 1 }}</span>
         </div>
         <v-spacer />
@@ -16,7 +16,7 @@
           variant="text"
           size="small"
           color="error"
-          prepend-icon="mdi-trash-can-outline"
+          :prepend-icon="mdiTrashCanOutline"
           @click="removePath(pi)"
         >
           Remove path
@@ -38,13 +38,14 @@
             :color="t.type === 'expression' ? 'deep-purple' : 'teal'"
             variant="tonal"
           >
-            <v-icon size="14" class="mr-1">
-              {{
-                t.type === 'expression'
-                  ? 'mdi-function-variant'
-                  : 'mdi-table-search'
-              }}
-            </v-icon>
+            <v-icon
+              :icon="
+                t.type === 'expression' ? mdiFunctionVariant : mdiTableSearch
+              "
+              size="14"
+              class="mr-1"
+            />
+
             <span v-if="t.type === 'expression'">expression</span>
             <span v-else>lookup tbl.</span>
           </v-chip>
@@ -70,7 +71,7 @@
         <v-col cols="auto">
           <v-btn
             variant="text"
-            prepend-icon="mdi-trash-can-outline"
+            :prepend-icon="mdiTrashCanOutline"
             color="error"
             @click="removeTransform(p, ti)"
           >
@@ -86,7 +87,7 @@
               v-bind="act"
               variant="tonal"
               color="primary"
-              prepend-icon="mdi-plus"
+              :prepend-icon="mdiPlus"
               class="mx-3 my-2"
             >
               Add transform
@@ -95,13 +96,13 @@
           <v-list density="compact">
             <v-list-item @click="addExpression(p)">
               <v-list-item-title>
-                <v-icon size="16" class="mr-1">mdi-function-variant</v-icon>
+                <v-icon :icon="mdiFunctionVariant" size="16" class="mr-1" />
                 Expression
               </v-list-item-title>
             </v-list-item>
             <v-list-item @click="addLookup(p)">
               <v-list-item-title>
-                <v-icon size="16" class="mr-1">mdi-table-search</v-icon>
+                <v-icon :icon="mdiTableSearch" size="16" class="mr-1" />
                 Lookup table
               </v-list-item-title>
             </v-list-item>
@@ -130,6 +131,13 @@ import {
   LookupTableDataTransformation,
   Mapping,
 } from '@hydroserver/client'
+import {
+  mdiFunctionVariant,
+  mdiPlus,
+  mdiSignDirection,
+  mdiTableSearch,
+  mdiTrashCanOutline,
+} from '@mdi/js'
 
 const mapping = defineModel<Mapping>('mapping', { required: true })
 

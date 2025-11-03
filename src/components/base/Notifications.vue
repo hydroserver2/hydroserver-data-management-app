@@ -8,7 +8,13 @@
   >
     <v-row align="center">
       <v-col cols="auto">
-        <v-icon dark color="white" size="45">{{ snack.icon }}</v-icon>
+        <v-icon
+          v-if="snack.icon"
+          :icon="iconMap[snack.icon]"
+          dark
+          color="white"
+          size="45"
+        />
       </v-col>
       <v-col>
         <div class="text-white">
@@ -23,6 +29,20 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, ref } from 'vue'
 import { Snackbar, Snack } from '@/utils/notifications'
+import {
+  mdiCheckboxMarkedCircle,
+  mdiAlert,
+  mdiAlertCircle,
+  mdiInformation,
+} from '@mdi/js'
+
+const iconMap: Record<string, string> = {
+  'mdi-checkbox-marked-circle': mdiCheckboxMarkedCircle,
+  'mdi-alert': mdiAlert,
+  'mdi-alert-circle': mdiAlertCircle,
+  'mdi-information': mdiInformation,
+  none: '',
+}
 
 const snack = ref<Snack>(new Snack())
 

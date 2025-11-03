@@ -8,7 +8,7 @@
         class="mx-2"
         clearable
         v-model="search"
-        prepend-inner-icon="mdi-magnify"
+        :prepend-inner-icon="mdiMagnify"
         label="Search"
         hide-details
         density="compact"
@@ -77,6 +77,7 @@ import DeletePayloadCard from './DeletePayloadCard.vue'
 import Swimlanes from './Swimlanes.vue'
 import { useDataSourceStore } from '@/store/datasource'
 import { Payload } from '@hydroserver/client'
+import { mdiMagnify } from '@mdi/js'
 
 const { payloads, linkedDatastreams } = storeToRefs(useDataSourceStore())
 const selectedPayload = ref<Payload>()

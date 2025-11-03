@@ -12,7 +12,7 @@
           density="compact"
           rounded="lg"
           :type="timestampInputType"
-          prepend-inner-icon="mdi-table-column-width"
+          :prepend-inner-icon="mdiTableColumnWidth"
           :rules="timestampKeyRules"
         />
       </v-col>
@@ -31,6 +31,7 @@ import { useDataSourceStore } from '@/store/datasource'
 
 import { rules } from '@/utils/rules'
 import TimestampFormat from './TimestampFormat.vue'
+import { mdiTableColumnWidth } from '@mdi/js'
 
 const { transformer } = storeToRefs(useDataSourceStore())
 

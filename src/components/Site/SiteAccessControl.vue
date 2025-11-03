@@ -13,9 +13,8 @@
               @click="showPrivacyHelp = !showPrivacyHelp"
               color="grey"
               small
-            >
-              mdi-help-circle-outline
-            </v-icon>
+              :icon="mdiHelpCircleOutline"
+            />
           </h6>
         </v-col>
       </v-row>
@@ -55,6 +54,7 @@ import { useThingStore } from '@/store/thing'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import hs from '@hydroserver/client'
+import { mdiHelpCircleOutline } from '@mdi/js'
 
 const emits = defineEmits(['close'])
 const props = defineProps<{

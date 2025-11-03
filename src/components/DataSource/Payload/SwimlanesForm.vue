@@ -50,13 +50,13 @@
                 @click.stop="openTransformEditor(p, t)"
                 @click:close.stop="removeTransformObj(p, t)"
               >
-                <v-icon size="14" class="mr-1">
-                  {{
-                    t.type === 'expression'
-                      ? 'mdi-function-variant'
-                      : 'mdi-table-search'
-                  }}
-                </v-icon>
+                <v-icon
+                  :icon="
+                    t.type == 'expression' ? mdiFunctionVariant : mdiTableSearch
+                  "
+                  size="14"
+                  class="mr-1"
+                />
                 {{
                   t.type === 'expression'
                     ? t.expression || 'expression()'
@@ -73,7 +73,7 @@
                 class="ms-auto"
                 @click="openNewTransform(p)"
               >
-                <v-icon start>mdi-plus-circle</v-icon>
+                <v-icon :icon="mdiPlusCircle" start />
                 Add transformation
               </v-btn>
             </div>
@@ -89,7 +89,7 @@
                 :class="{ 'chip-error': hasTargetError(mi, pi) }"
                 variant="outlined"
                 @click="openTargetSelector(mi, pi)"
-                prepend-icon="mdi-import"
+                :prepend-icon="mdiImport"
                 >Select target datastream
               </v-chip>
               <v-chip v-else class="text-caption">
@@ -122,7 +122,7 @@
                 title="Remove target path"
                 @click="removeMappingRow(mi, pi)"
               >
-                <v-icon size="18">mdi-trash-can-outline</v-icon>
+                <v-icon :icon="mdiTrashCanOutline" size="18" />
               </v-btn>
             </template>
           </div>
@@ -134,14 +134,14 @@
             color="red-darken-3"
             :title="`Remove mapping`"
             @click.stop="removeMapping(mi)"
-            prepend-icon="mdi-trash-can-outline"
+            :prepend-icon="mdiTrashCanOutline"
           >
             Delete source
           </v-btn>
 
           <v-btn
             size="small"
-            prepend-icon="mdi-source-branch"
+            :prepend-icon="mdiSourceBranch"
             variant="text"
             @click="onAddMapping"
           >
@@ -162,7 +162,7 @@
     <div class="mapping-actions" v-if="payload.mappings.length === 0">
       <v-btn
         size="small"
-        prepend-icon="mdi-source-branch"
+        :prepend-icon="mdiSourceBranch"
         variant="text"
         @click="onAddMapping"
       >
@@ -206,6 +206,14 @@ import { useDataSourceStore } from '@/store/datasource'
 import { DatastreamExtended } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
+import {
+  mdiFunctionVariant,
+  mdiImport,
+  mdiPlusCircle,
+  mdiSourceBranch,
+  mdiTableSearch,
+  mdiTrashCanOutline,
+} from '@mdi/js'
 
 const payload = defineModel<Payload>('payload', { required: true })
 const { linkedDatastreams, draftDatastreams } = storeToRefs(

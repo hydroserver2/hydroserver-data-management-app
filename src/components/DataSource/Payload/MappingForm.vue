@@ -6,9 +6,12 @@
       >
     </v-col>
     <v-col class="pl-0">
-      <v-icon @click="showHelp = !showHelp" color="grey" small>
-        mdi-help-circle-outline
-      </v-icon>
+      <v-icon
+        :icon="mdiHelpCircleOutline"
+        @click="showHelp = !showHelp"
+        color="grey"
+        small
+      />
     </v-col>
 
     <v-spacer />
@@ -57,13 +60,17 @@
         class="px-2"
       >
         <template #default="{ expanded }">
-          <v-icon class="mx-2 chevron-icon">
-            {{ expanded ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-          </v-icon>
+          <v-icon
+            class="mx-2 chevron-icon"
+            :icon="expanded ? mdiChevronDown : mdiChevronRight"
+          />
           <span>{{ m.sourceIdentifier || 'New source' }}</span>
-          <v-icon size="16" class="mx-2" color="green-lighten-2"
-            >mdi-arrow-right</v-icon
-          >
+          <v-icon
+            :icon="mdiArrowRight"
+            size="16"
+            class="mx-2"
+            color="green-lighten-2"
+          />
           <span class="text-medium-emphasis">
             {{ targetsCount(m) }}
           </span>
@@ -75,7 +82,7 @@
             :title="`Remove ${m.sourceIdentifier || 'source'}`"
             @click.stop="onRemoveMapping(mi)"
           >
-            <v-icon size="18">mdi-trash-can-outline</v-icon>
+            <v-icon :icon="mdiTrashCanOutline" size="18" />
           </v-btn>
         </template>
       </v-expansion-panel-title>
@@ -96,7 +103,7 @@
           size="small"
           variant="text"
           color="secondary-darken-1"
-          prepend-icon="mdi-source-branch-plus"
+          :prepend-icon="mdiSourceBranchPlus"
           @click="addPath(m)"
         >
           Add path
@@ -110,6 +117,14 @@
 import { ref, onMounted } from 'vue'
 import MappingPathCards from './MappingPathCards.vue'
 import { Mapping, Payload } from '@hydroserver/client'
+import {
+  mdiArrowRight,
+  mdiChevronDown,
+  mdiChevronRight,
+  mdiHelpCircleOutline,
+  mdiSourceBranchPlus,
+  mdiTrashCanOutline,
+} from '@mdi/js'
 
 const payload = defineModel<Payload>('payload', { required: true })
 

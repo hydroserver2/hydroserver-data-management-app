@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon>mdi-alert</v-icon> Confirm datastream deletion
+        <v-icon :icon="mdiAlert" /> Confirm datastream deletion
       </v-card-title>
     </v-toolbar>
     <v-card-text>
@@ -30,6 +30,7 @@
 
 <script setup lang="ts">
 import { Snackbar } from '@/utils/notifications'
+import { mdiAlert } from '@mdi/js'
 import { ref } from 'vue'
 
 const emit = defineEmits(['delete', 'close'])

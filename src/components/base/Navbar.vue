@@ -3,7 +3,7 @@
     <template v-slot:prepend v-if="route.meta.hasSidebar">
       <v-app-bar-nav-icon
         v-if="sidebar.isOpen"
-        icon="mdi-menu-open"
+        :icon="mdiMenuOpen"
         @click="sidebar.toggle"
         class="mx-3"
         variant="tonal"
@@ -12,7 +12,7 @@
       />
       <v-app-bar-nav-icon
         v-else
-        icon="mdi-menu-close"
+        :icon="mdiMenuClose"
         @click="sidebar.toggle"
         class="mx-3"
         variant="tonal"
@@ -50,7 +50,7 @@
           <template v-slot:activator="{ props }">
             <v-btn v-bind="props">
               {{ path.label }}
-              <v-icon right small>mdi-menu-down</v-icon>
+              <v-icon :icon="mdiMenuDown" right small />
             </v-btn>
           </template>
 
@@ -68,13 +68,13 @@
 
       <template v-if="hs.session.isAuthenticated">
         <v-btn elevation="2" rounded>
-          <v-icon>mdi-account-circle</v-icon>
-          <v-icon>mdi-menu-down</v-icon>
+          <v-icon :icon="mdiAccountCircle" />
+          <v-icon :icon="mdiMenuDown" />
 
           <v-menu bottom left activator="parent">
             <v-list class="pa-0">
               <v-list-item
-                prepend-icon="mdi-account-circle"
+                :prepend-icon="mdiAccountCircle"
                 :to="{ path: '/profile' }"
                 title="Account"
               />
@@ -82,7 +82,7 @@
               <v-divider />
 
               <v-list-item
-                prepend-icon="mdi-logout"
+                :prepend-icon="mdiLogout"
                 @click="onLogout"
                 title="Log out"
               />
@@ -92,10 +92,10 @@
       </template>
 
       <template v-else>
-        <v-btn prepend-icon="mdi-login" to="/Login">Log in</v-btn>
+        <v-btn :prepend-icon="mdiLogin" to="/Login">Log in</v-btn>
         <v-btn
           v-if="signupEnabled"
-          prepend-icon="mdi-account-plus-outline"
+          :prepend-icon="mdiAccountPlusOutline"
           to="/sign-up"
           >Sign up</v-btn
         >
@@ -135,19 +135,19 @@
 
     <v-list density="compact" nav>
       <template v-if="hs.session.isAuthenticated">
-        <v-list-item to="/profile" prepend-icon="mdi-account-circle"
+        <v-list-item to="/profile" :prepend-icon="mdiAccountCircle"
           >Account</v-list-item
         >
-        <v-list-item prepend-icon="mdi-logout" @click.prevent="onLogout"
+        <v-list-item :prepend-icon="mdiLogout" @click.prevent="onLogout"
           >Logout</v-list-item
         >
       </template>
 
       <template v-else>
-        <v-list-item prepend-icon="mdi-login" to="/Login">Login</v-list-item>
+        <v-list-item :prepend-icon="mdiLogin" to="/Login">Login</v-list-item>
         <v-list-item
           v-if="signupEnabled"
-          prepend-icon="mdi-account-plus-outline"
+          :prepend-icon="mdiAccountPlusOutline"
           to="/sign-up"
           >Sign up</v-list-item
         >
@@ -166,6 +166,21 @@ import { useRoute } from 'vue-router'
 import { useSidebarStore } from '@/store/useSidebar'
 import hs from '@hydroserver/client'
 import router from '@/router/router'
+import {
+  mdiAccountCircle,
+  mdiAccountPlusOutline,
+  mdiChartLine,
+  mdiDatabaseCog,
+  mdiFileChart,
+  mdiInformation,
+  mdiLayersSearch,
+  mdiLogin,
+  mdiLogout,
+  mdiMapMarkerMultiple,
+  mdiMenuClose,
+  mdiMenuDown,
+  mdiMenuOpen,
+} from '@mdi/js'
 
 const route = useRoute()
 const { signupEnabled } = hs.session
@@ -185,17 +200,17 @@ const paths: {
   {
     attrs: { to: '/browse' },
     label: 'Browse monitoring sites',
-    icon: 'mdi-layers-search',
+    icon: mdiLayersSearch,
   },
   {
     attrs: { to: '/sites' },
     label: 'Your sites',
-    icon: 'mdi-map-marker-multiple',
+    icon: mdiMapMarkerMultiple,
   },
   {
     attrs: { to: '/visualize-data' },
     label: 'Visualize data',
-    icon: 'mdi-chart-line',
+    icon: mdiChartLine,
     onClick: () => resetState(),
   },
   {
@@ -204,19 +219,19 @@ const paths: {
       {
         attrs: { to: '/Metadata' },
         label: 'Manage metadata',
-        icon: 'mdi-database-cog',
+        icon: mdiDatabaseCog,
       },
       {
         attrs: { to: '/orchestration' },
         label: 'Job orchestration',
-        icon: 'mdi-file-chart',
+        icon: mdiFileChart,
       },
     ],
   },
   {
     attrs: { to: '/about' },
     label: 'About',
-    icon: 'mdi-information',
+    icon: mdiInformation,
   },
 ]
 

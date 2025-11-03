@@ -2,7 +2,8 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon>mdi-alert</v-icon> Confirm orchestration system deletion
+        <v-icon :icon="mdiAlert" />
+        Confirm orchestration system deletion
       </v-card-title>
     </v-toolbar>
 
@@ -58,6 +59,7 @@
 import hs, { DataSource, OrchestrationSystem } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
+import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({

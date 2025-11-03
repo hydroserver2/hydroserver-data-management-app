@@ -10,7 +10,7 @@
           label="JMESPath *"
           density="compact"
           rounded="lg"
-          prepend-inner-icon="mdi-file-tree"
+          :prepend-inner-icon="mdiFileTree"
           :rules="rules.required"
         />
       </v-card-text>
@@ -29,6 +29,7 @@ import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
 import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
 import { rules } from '@/utils/rules'
+import { mdiFileTree } from '@mdi/js'
 
 const { transformer } = storeToRefs(useDataSourceStore())
 </script>

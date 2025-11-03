@@ -37,7 +37,7 @@
             class="mx-2"
             clearable
             v-model="search"
-            prepend-inner-icon="mdi-magnify"
+            :prepend-inner-icon="mdiMagnify"
             label="Search"
             hide-details
             density="compact"
@@ -50,7 +50,7 @@
             :disabled="!workspaceThings?.length"
             class="mr-2"
             @click="showFilter = !showFilter"
-            :append-icon="showFilter ? 'mdi-menu-up' : 'mdi-menu-down'"
+            :append-icon="showFilter ? mdiMenuUp : mdiMenuDown"
             variant="outlined"
             rounded="xl"
             >Filter sites</v-btn
@@ -78,7 +78,7 @@
         >
           <template v-slot:no-data>
             <div class="text-center pa-4" v-if="workspaceThings.length === 0">
-              <v-icon size="48" color="grey lighten-1">mdi-radio-tower</v-icon>
+              <v-icon size="48" color="grey lighten-1" :icon="mdiRadioTower" />
               <h4 class="mt-2">You have not registered any sites</h4>
               <p class="mb-4">
                 Click the "Register a new site" button to start managing your
@@ -93,9 +93,11 @@
                 workspaceThings.length > 0 && coloredThings.length === 0
               "
             >
-              <v-icon size="48" color="grey lighten-1"
-                >mdi-filter-remove-outline</v-icon
-              >
+              <v-icon
+                size="48"
+                color="grey lighten-1"
+                :icon="mdiFilterRemoveOutline"
+              />
               <h4 class="mt-2">No sites match your filters</h4>
               <p class="mb-4">
                 Try adjusting your search keywords or filter criteria to find
@@ -147,6 +149,13 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
+import {
+  mdiFilterRemoveOutline,
+  mdiMagnify,
+  mdiMenuDown,
+  mdiMenuUp,
+  mdiRadioTower,
+} from '@mdi/js'
 
 const { selectedWorkspace, hasWorkspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()

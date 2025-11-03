@@ -3,9 +3,13 @@
     Add Additional Metadata
     <v-tooltip>
       <template v-slot:activator="{ props }">
-        <v-icon small class="ml-2" color="grey lighten-1" v-bind="props">
-          mdi-help-circle-outline
-        </v-icon>
+        <v-icon
+          :icon="mdiHelpCircleOutline"
+          small
+          class="ml-2"
+          color="grey lighten-1"
+          v-bind="props"
+        />
       </template>
       <template v-slot:default>
         <p>
@@ -84,6 +88,7 @@ import { materialColors } from '@/utils/materialColors'
 import { storeToRefs } from 'pinia'
 import { useTagStore } from '@/store/tags'
 import { useWorkspaceTags } from '@/composables/useWorkspaceTags'
+import { mdiHelpCircleOutline } from '@mdi/js'
 
 const props = defineProps({ thingId: String })
 const { tags, previewTags } = storeToRefs(useTagStore())

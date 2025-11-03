@@ -5,7 +5,7 @@
       <v-spacer />
       <v-btn
         :loading="downloading"
-        prepend-icon="mdi-download"
+        :prepend-icon="mdiDownload"
         color="blue-lighten-5"
         @click="downloadDatastream(datastream.id)"
         >Download</v-btn
@@ -26,6 +26,7 @@ import { Datastream, Thing } from '@hydroserver/client'
 import { ref } from 'vue'
 import DatastreamInformationPanels from '@/components/Datastream/DatastreamInformationPanels.vue'
 import hs from '@hydroserver/client'
+import { mdiDownload } from '@mdi/js'
 
 defineProps({
   datastream: { type: Object as () => Datastream, required: true },
