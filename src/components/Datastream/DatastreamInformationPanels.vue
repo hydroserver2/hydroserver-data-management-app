@@ -183,8 +183,8 @@ onMounted(async () => {
     { label: 'Longitude', value: l.longitude },
     { label: 'Elevation (m)', value: l.elevation_m },
     { label: 'Elevation datum', value: l.elevationDatum },
-    { label: 'State/Province/Region', value: l.state },
-    { label: 'County/District', value: l.county },
+    { label: 'State/Province/Region', value: l.adminArea1 },
+    { label: 'County/District', value: l.adminArea2 },
     { label: 'Country', value: l.country },
 
     { label: 'Sampling feature type', value: t.samplingFeatureType },

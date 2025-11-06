@@ -10,8 +10,8 @@ export const thing = {
   longitude: -80.162356,
   elevation_m: 1,
   elevationDatum: 'WGS84',
-  state: 'FL',
-  county: 'Miami-Dade County',
+  adminArea1: 'FL',
+  adminArea2: 'Miami-Dade County',
   isPrivate: false,
   tags: [
     {
