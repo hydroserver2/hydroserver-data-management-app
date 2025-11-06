@@ -34,8 +34,8 @@ export async function getGeoDataNominatim(latitude: number, longitude: number) {
 
   const { address } = await res.json()
   return {
-    state: address.state,
-    county: address.county,
+    adminArea1: address.state,
+    adminArea2: address.county,
     country: address.country_code.toUpperCase(),
   }
 }
@@ -52,15 +52,15 @@ export async function fetchLocationData(latitude: number, longitude: number) {
     getGeoData(latitude, longitude),
   ])
 
-  const { state, county, country } = geo
+  const { adminArea1, adminArea2, country } = geo
 
   return {
     location: {
       latitude: latitude.toFixed(6),
       longitude: longitude.toFixed(6),
       elevation_m: Math.round(elevation_m),
-      state: state,
-      county: county,
+      adminArea1: adminArea1,
+      adminArea2: adminArea2,
       country: country
     }
   }

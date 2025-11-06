@@ -126,15 +126,15 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="State/Province/Region"
-                  v-model="thing.location.state"
-                  :rules="thing.location.state ? rules.name : []"
+                  v-model="thing.location.adminArea1"
+                  :rules="thing.location.adminArea1 ? rules.name : []"
                 />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="County/District"
-                  v-model="thing.location.county"
-                  :rules="thing.location.county ? rules.name : []"
+                  v-model="thing.location.adminArea2"
+                  :rules="thing.location.adminArea2 ? rules.name : []"
                 />
               </v-col>
               <v-col cols="12" sm="6">
@@ -262,8 +262,8 @@ function onMapLocationClicked(locationData: Thing) {
   thing.location.latitude = locationData.location.latitude
   thing.location.longitude = locationData.location.longitude
   thing.location.elevation_m = locationData.location.elevation_m
-  thing.location.state = locationData.location.state
-  thing.location.county = locationData.location.county
+  thing.location.adminArea1 = locationData.location.adminArea1
+  thing.location.adminArea2 = locationData.location.adminArea2
   thing.location.country = locationData.location.country
 }
 

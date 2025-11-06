@@ -41,21 +41,21 @@ function parseGoogleAddress(response: GoogleGeocodeResponse) {
     throw new Error(`Google Geocoding API error: ${response.status}`)
   }
 
-  const { state, county, country } =
+  const { adminArea1, adminArea2, country } =
     response.results[0].address_components.reduce(
       (acc: any, component: any) => {
         if (component.types.includes('administrative_area_level_1'))
-          acc.state = component.short_name
+          acc.adminArea1 = component.short_name
         if (component.types.includes('administrative_area_level_2'))
-          acc.county = component.short_name
+          acc.adminArea2 = component.short_name
         if (component.types.includes('country'))
           acc.country = component.short_name
         return acc
       },
-      { state: '', county: '', country: '' }
+      { adminArea1: '', adminArea2: '', country: '' }
     )
 
-  return { state, county, country }
+  return { adminArea1, adminArea2, country }
 }
 
 export async function getGeoDataGoogle(latitude: number, longitude: number) {

@@ -25,9 +25,9 @@ export function generateMarkerContent(markerData: Thing): string {
       <div class='ma-0'>
         <h6 class="text-h6">${markerData.name}</h6>
         <p class="text-subtitle-1 mb-2 opacity-60">
-        ${markerData.location.county ? markerData.location.county : ''}
-        ${markerData.location.county && markerData.location.state ? ',' : ''}
-        ${markerData.location.state ? markerData.location.state : ''}
+        ${markerData.location.adminArea2 ? markerData.location.adminArea2 : ''}
+        ${markerData.location.adminArea2 && markerData.location.adminArea1 ? ',' : ''}
+        ${markerData.location.adminArea1 ? markerData.location.adminArea1 : ''}
         </p>
         <p class="text-body-2 mb-3">${markerData.description}</p>
         <p class="mt-6">
