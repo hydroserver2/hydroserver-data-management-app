@@ -25,6 +25,7 @@ export const fetchObservations = async (
     format: 'row',
     phenomenon_time_min: startTime ?? phenomenonBeginTime,
     phenomenon_time_max: endTime ?? phenomenonEndTime,
+    result_qualifier_code: [],
   })
 
   if (!res.ok || !Array.isArray(res.data)) return []

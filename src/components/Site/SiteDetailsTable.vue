@@ -105,12 +105,12 @@ const thingProperties = computed(() => {
         {
           icon: mdiCarBack,
           label: 'County/District',
-          value: thing.value.location.county,
+          value: thing.value.location.adminArea2,
         },
         {
           icon: mdiPlaneTrain,
           label: 'State/Province/Region',
-          value: thing.value.location.state,
+          value: thing.value.location.adminArea1,
         },
         {
           icon: mdiEarth,
