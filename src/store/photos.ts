@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import hs, { ApiResponse, Photo } from '@hydroserver/client'
+import hs, { ApiResponse, FileAttachment } from '@hydroserver/client'
 
 export const usePhotosStore = defineStore('photos', () => {
-  const photos = ref<Photo[]>([])
+  const photos = ref<FileAttachment[]>([])
   const newPhotos = ref<File[]>([])
   const photosToDelete = ref<string[]>([])
   const loading = ref(false)
@@ -14,12 +14,13 @@ export const usePhotosStore = defineStore('photos', () => {
     const promises = newPhotos.value.map(async (file) => {
       const data = new FormData()
       data.append('file', file)
-      return await hs.things.uploadPhotos(thingId, data)
+      data.append('file_attachment_type', 'Photo')
+      return await hs.things.uploadAttachments(thingId, data)
     })
 
-    const newPhotoResponses: ApiResponse<Photo>[] = await Promise.all(promises)
+    const newPhotoResponses: ApiResponse<FileAttachment>[] = await Promise.all(promises)
     const photoData = newPhotoResponses.map(
-      (res: ApiResponse<Photo>) => res.data
+      (res: ApiResponse<FileAttachment>) => res.data
     )
     photos.value = [...photos.value, ...photoData]
   }
@@ -27,7 +28,7 @@ export const usePhotosStore = defineStore('photos', () => {
   const deleteSelectedPhotos = async (thingId: string) => {
     if (!photosToDelete.value.length) return
     await Promise.all(
-      photosToDelete.value.map((p) => hs.things.deletePhoto(thingId, p))
+      photosToDelete.value.map((p) => hs.things.deleteAttachment(thingId, p))
     )
     photos.value = photos.value.filter(
       (p) => !photosToDelete.value.includes(p.name)
