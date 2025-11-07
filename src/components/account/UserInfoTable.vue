@@ -27,6 +27,15 @@ import { storeToRefs } from 'pinia'
 import { computed, onMounted } from 'vue'
 import { useHydroShare } from '@/composables/useHydroShare'
 import hs from '@hydroserver/client'
+import {
+  mdiAccount,
+  mdiCardAccountDetails,
+  mdiDatabase,
+  mdiEmail,
+  mdiLink,
+  mdiMapMarker,
+  mdiPhone,
+} from '@mdi/js'
 
 const { user } = storeToRefs(useUserStore())
 const {
@@ -44,24 +53,24 @@ const userInformation = computed(() => {
 
   return [
     {
-      icon: 'mdi-account',
+      icon: mdiAccount,
       label: 'Name',
       value: `${user.value.firstName} ${user.value.middleName || ''} ${
         user.value.lastName
       }`,
     },
-    { icon: 'mdi-email', label: 'Email', value: user.value.email },
+    { icon: mdiEmail, label: 'Email', value: user.value.email },
     {
-      icon: 'mdi-map-marker',
+      icon: mdiMapMarker,
       label: 'Address',
       value: user.value.address,
     },
-    { icon: 'mdi-phone', label: 'Phone', value: user.value.phone },
-    { icon: 'mdi-card-account-details', label: 'Type', value: user.value.type },
-    { icon: 'mdi-link', label: 'Link', value: user.value.link },
+    { icon: mdiPhone, label: 'Phone', value: user.value.phone },
+    { icon: mdiCardAccountDetails, label: 'Type', value: user.value.type },
+    { icon: mdiLink, label: 'Link', value: user.value.link },
     isHydroShareConnectionEnabled.value
       ? {
-          icon: 'mdi-database',
+          icon: mdiDatabase,
           label: 'HydroShare account',
           value:
             isHydroShareConnected.value === true

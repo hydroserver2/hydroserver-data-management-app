@@ -10,7 +10,7 @@
         <v-btn
           size="large"
           variant="elevated"
-          prepend-icon="mdi-apple"
+          :prepend-icon="mdiApple"
           :href="macosLink"
         >
           Download for MacOS
@@ -22,7 +22,7 @@
         <v-btn
           size="large"
           variant="elevated"
-          prepend-icon="mdi-microsoft-windows"
+          :prepend-icon="mdiMicrosoftWindows"
           :href="windowsLink"
         >
           Download for Windows
@@ -34,7 +34,7 @@
         <v-btn
           size="large"
           variant="elevated"
-          prepend-icon="mdi-ubuntu"
+          :prepend-icon="mdiUbuntu"
           :href="ubuntuLink"
         >
           Download for Ubuntu
@@ -45,6 +45,8 @@
 </template>
 
 <script setup lang="ts">
+import { mdiApple, mdiMicrosoftWindows, mdiUbuntu } from '@mdi/js'
+
 let version = 'v1.4.0' // TODO: Add this as an environment variable
 let macosLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.MacOS.dmg`
 let windowsLink = `https://github.com/hydroserver2/streaming-data-loader/releases/download/${version}/Streaming.Data.Loader.Windows.zip`

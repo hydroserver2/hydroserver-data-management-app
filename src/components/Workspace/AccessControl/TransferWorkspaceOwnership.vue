@@ -6,9 +6,12 @@
       </v-card-title>
     </v-col>
     <v-col class="pl-0">
-      <v-icon @click="showTransferHelp = !showTransferHelp" color="grey" small>
-        mdi-help-circle-outline
-      </v-icon>
+      <v-icon
+        :icon="mdiHelpCircleOutline"
+        @click="showTransferHelp = !showTransferHelp"
+        color="grey"
+        small
+      />
     </v-col>
   </v-row>
   <v-card-text v-if="showTransferHelp">
@@ -63,6 +66,7 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import hs, { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
+import { mdiHelpCircleOutline } from '@mdi/js'
 
 const permissionsStore = useWorkspacePermissions()
 

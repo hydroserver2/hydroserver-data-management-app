@@ -64,7 +64,7 @@
         class="d-flex flex-column align-center pa-4"
       >
         <v-card-text class="text-center">
-          <v-icon color="success" size="80">mdi-check-circle</v-icon>
+          <v-icon color="success" size="80" :icon="mdiCheckCircle" />
           <p class="mt-4 text-body-1">
             A password reset email has been sent. Please check your inbox and
             follow the instructions to reset your password.
@@ -82,6 +82,7 @@ import hs from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { useRoute } from 'vue-router'
 import router from '@/router/router'
+import { mdiCheckCircle } from '@mdi/js'
 
 const email = ref('')
 const resetEmailSent = ref(false)

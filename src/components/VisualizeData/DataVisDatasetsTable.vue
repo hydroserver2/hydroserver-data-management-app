@@ -7,7 +7,7 @@
     <v-col cols="12" sm="auto">
       <v-btn
         color="blue-lighten-3"
-        prepend-icon="mdi-content-copy"
+        :prepend-icon="mdiContentCopy"
         block
         @click="copyStateToClipboard"
         >Copy State as URL</v-btn
@@ -39,7 +39,7 @@
       class="mx-2"
       clearable
       v-model="search"
-      prepend-inner-icon="mdi-magnify"
+      :prepend-inner-icon="mdiMagnify"
       label="Search"
       hide-details
       density="compact"
@@ -55,7 +55,7 @@
 
     <v-btn
       :loading="downloading"
-      prepend-icon="mdi-download"
+      :prepend-icon="mdiDownload"
       @click="downloadSelected(plottedDatastreams)"
       >Download Selected</v-btn
     >
@@ -108,6 +108,7 @@ import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { formatTime } from '@/utils/time'
+import { mdiContentCopy, mdiDownload, mdiMagnify } from '@mdi/js'
 
 const {
   things,

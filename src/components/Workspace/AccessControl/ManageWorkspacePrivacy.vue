@@ -4,9 +4,12 @@
       <v-card-title class="text-h6"> Privacy </v-card-title>
     </v-col>
     <v-col cols="auto" class="pl-0">
-      <v-icon @click="showPrivacyHelp = !showPrivacyHelp" color="grey" small>
-        mdi-help-circle-outline
-      </v-icon>
+      <v-icon
+        :icon="mdiHelpCircleOutline"
+        @click="showPrivacyHelp = !showPrivacyHelp"
+        color="grey"
+        small
+      />
     </v-col>
   </v-row>
 
@@ -33,6 +36,7 @@
 import hs, { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
+import { mdiHelpCircleOutline } from '@mdi/js'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },

@@ -2,7 +2,7 @@
   <v-navigation-drawer v-model="drawer" width="400">
     <v-card-title class="d-flex justify-space-between align-start">
       Filters
-      <v-icon v-if="drawer" @click="drawer = !drawer">mdi-menu-open</v-icon>
+      <v-icon :icon="mdiMenuOpen" v-if="drawer" @click="drawer = !drawer" />
     </v-card-title>
 
     <v-divider />
@@ -21,7 +21,7 @@
             clearable
             @click:clear="searchThing = ''"
             v-model="searchThing"
-            prepend-inner-icon="mdi-magnify"
+            :prepend-inner-icon="mdiMagnify"
             label="Search"
             dense
             hide-details
@@ -52,7 +52,7 @@
             clearable
             @click:clear="searchObservedProperty = ''"
             v-model="searchObservedProperty"
-            prepend-inner-icon="mdi-magnify"
+            :prepend-inner-icon="mdiMagnify"
             label="Search"
             dense
             hide-details
@@ -82,7 +82,7 @@
             clearable
             @click:clear="searchProcessingLevel = ''"
             v-model="searchProcessingLevel"
-            prepend-inner-icon="mdi-magnify"
+            :prepend-inner-icon="mdiMagnify"
             label="Search"
             dense
             hide-details
@@ -108,7 +108,7 @@
   </v-navigation-drawer>
 
   <div class="mt-4 mx-4" v-if="!drawer">
-    <v-icon @click="drawer = !drawer">mdi-menu-close</v-icon>
+    <v-icon :icon="mdiMenuClose" @click="drawer = !drawer" />
   </div>
 </template>
 
@@ -117,6 +117,7 @@ import { computed, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
+import { mdiMagnify, mdiMenuClose, mdiMenuOpen } from '@mdi/js'
 
 const {
   matchesSelectedObservedProperty,

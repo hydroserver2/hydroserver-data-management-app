@@ -7,10 +7,10 @@
     fixed-header
   >
     <template v-slot:item.actions="{ item }" v-if="canEdit">
-      <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
-      <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
-    </template></v-data-table-virtual
-  >
+      <v-icon :icon="mdiPencil" @click="openDialog(item, 'edit')" />
+      <v-icon :icon="mdiDelete" @click="openDialog(item, 'delete')" />
+    </template>
+  </v-data-table-virtual>
 
   <v-dialog v-model="openEdit" width="60rem">
     <ResultQualifierFormCard
@@ -41,6 +41,7 @@ import DeleteMetadataCard from '@/components/Metadata/DeleteMetadataCard.vue'
 import ResultQualifierFormCard from '@/components/Metadata/ResultQualifierFormCard.vue'
 import { toRef } from 'vue'
 import { useSystemTableLogic } from '@/composables/useSystemTableLogic'
+import { mdiDelete, mdiPencil } from '@mdi/js'
 
 const props = defineProps<{
   search: string | undefined

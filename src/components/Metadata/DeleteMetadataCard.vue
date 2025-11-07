@@ -2,7 +2,7 @@
   <v-card v-if="loaded">
     <v-toolbar color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon>mdi-alert</v-icon>
+        <v-icon :icon="mdiAlert" />
         {{
           hasDatastreams
             ? `Cannot delete ${itemName}`
@@ -43,6 +43,7 @@
 import hs, { Datastream } from '@hydroserver/client'
 import { computed, onMounted, ref } from 'vue'
 import FullScreenLoader from '../base/FullScreenLoader.vue'
+import { mdiAlert } from '@mdi/js'
 
 const datastreams = ref<Datastream[]>([])
 const loaded = ref(false)

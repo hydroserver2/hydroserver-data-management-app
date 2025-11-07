@@ -17,7 +17,8 @@
     <v-card-text
       class="text-subtitle-2 text-medium-emphasis d-flex align-center"
     >
-      <v-icon class="mr-1">mdi-information</v-icon>Click on the map to
+      <v-icon :icon="mdiInformation" class="mr-1" />
+      Click on the map to
       {{ thingId ? 'edit' : 'populate' }}
       site location data.
     </v-card-text>
@@ -189,6 +190,7 @@ import { useTagStore } from '@/store/tags'
 import countryList from 'country-list'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import hs, { Thing } from '@hydroserver/client'
+import { mdiInformation } from '@mdi/js'
 
 const countries = ref<{ name: string; code: string }[]>([])
 const countryTitle = (item: { name: string; code: string } | undefined) => {

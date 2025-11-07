@@ -9,7 +9,7 @@
         <v-btn
           variant="text"
           color="black"
-          :prepend-icon="dataSource.status.paused ? 'mdi-play' : 'mdi-pause'"
+          :prepend-icon="dataSource.status.paused ? mdiPlay : mdiPause"
           @click.stop="togglePaused(dataSource)"
         >
           Pause/Run
@@ -52,7 +52,7 @@
       <v-col cols="auto" align-self="center">
         <v-btn
           variant="outlined"
-          prepend-icon="mdi-pencil"
+          :prepend-icon="mdiPencil"
           rounded="xl"
           color="secondary"
           class="mr-2"
@@ -63,7 +63,7 @@
         <v-btn-delete
           variant="outlined"
           rounded="xl"
-          prepend-icon="mdi-trash-can-outline"
+          :prepend-icon="mdiTrashCanOutline"
           color="red-darken-3"
           @click="openDelete = true"
         >
@@ -126,6 +126,20 @@ import router from '@/router/router'
 import { useDataSourceStore } from '@/store/datasource'
 
 import { formatTimeWithZone } from '@/utils/time'
+import {
+  mdiBroadcast,
+  mdiCalendarClock,
+  mdiCalendarSync,
+  mdiCardAccountDetails,
+  mdiHistory,
+  mdiInformationOutline,
+  mdiMessageTextOutline,
+  mdiPause,
+  mdiPencil,
+  mdiPlay,
+  mdiRenameBoxOutline,
+  mdiTrashCanOutline,
+} from '@mdi/js'
 
 const route = useRoute()
 const openEdit = ref(false)
@@ -166,32 +180,32 @@ const dataSourceInformation = computed(() => {
 
   return [
     {
-      icon: 'mdi-card-account-details',
+      icon: mdiCardAccountDetails,
       label: 'ID',
       value: dataSource.value.id,
     },
     {
-      icon: 'mdi-calendar-clock',
+      icon: mdiCalendarClock,
       label: 'Schedule',
       value: scheduleString,
     },
     {
-      icon: 'mdi-history',
+      icon: mdiHistory,
       label: 'Last run',
       value: formatTimeWithZone(dataSource.value.status.lastRun),
     },
     {
-      icon: 'mdi-calendar-sync',
+      icon: mdiCalendarSync,
       label: 'Next run',
       value: formatTimeWithZone(dataSource.value.status.nextRun),
     },
     {
-      icon: 'mdi-message-text-outline',
+      icon: mdiMessageTextOutline,
       label: 'Last run message',
       value: dataSource.value.status.lastRunMessage || '–',
     },
     {
-      icon: 'mdi-information-outline',
+      icon: mdiInformationOutline,
       label: 'Status',
       status: getStatusText(dataSource.value.status),
       paused: dataSource.value.status.paused,
@@ -204,12 +218,12 @@ const orchestrationSystemInformation = computed(() => {
 
   return [
     {
-      icon: 'mdi-rename-box-outline',
+      icon: mdiRenameBoxOutline,
       label: 'Name',
       value: dataSource.value.orchestrationSystem.name,
     },
     {
-      icon: 'mdi-broadcast',
+      icon: mdiBroadcast,
       label: 'Type',
       value:
         WORKFLOW_TYPES.find(

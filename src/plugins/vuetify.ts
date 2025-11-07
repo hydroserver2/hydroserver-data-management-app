@@ -1,10 +1,12 @@
-import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 
 import { createVuetify, ThemeDefinition } from 'vuetify'
 import { VBtn } from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { md3 } from 'vuetify/blueprints'
+import { mdiPlus } from '@mdi/js'
+// add this import
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 
 // Material theme Colors: https://vuetifyjs.com/en/styles/colors/
 const theme: ThemeDefinition = {
@@ -77,7 +79,7 @@ export default createVuetify({
     VBtnAdd: {
       ...btnAttrs,
       color: 'secondary',
-      prependIcon: 'mdi-plus',
+      prependIcon: mdiPlus,
       rounded: true,
       variant: 'elevated',
     },
@@ -92,5 +94,10 @@ export default createVuetify({
       lighten: 6,
       darken: 6,
     },
+  },
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: { mdi },
   },
 })

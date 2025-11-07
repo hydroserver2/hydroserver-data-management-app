@@ -3,7 +3,7 @@
     :placeholder="placeholder"
     v-model="inputDate"
     @blur="handleBlur"
-    append-inner-icon="mdi-calendar-blank"
+    :append-inner-icon="mdiCalendarBlank"
     @click:append-inner="toggleDatePicker"
     hide-details
     density="compact"
@@ -14,9 +14,11 @@
       <v-card-title class="d-flex pt-4">
         Select {{ placeholder }}
         <v-spacer />
-        <v-icon color="grey-darken-1" @click="showDatePicker = false">
-          mdi-close
-        </v-icon>
+        <v-icon
+          :icon="mdiClose"
+          color="grey-darken-1"
+          @click="showDatePicker = false"
+        />
       </v-card-title>
       <v-divider />
       <v-date-picker
@@ -29,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiCalendarBlank, mdiClose } from '@mdi/js'
 import { ref, watch } from 'vue'
 
 const props = defineProps({

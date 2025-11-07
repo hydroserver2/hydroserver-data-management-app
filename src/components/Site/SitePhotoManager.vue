@@ -6,7 +6,7 @@
     @drop="handleDrop"
     class="drop-area text-subtitle-2 text-medium-emphasis d-flex mb-6"
   >
-    <v-icon class="mr-1">mdi-paperclip</v-icon>
+    <v-icon :icon="mdiPaperclip" class="mr-1" />
     Drag and drop your photos here, or
     <span @click="triggerFileInput" class="ml-1 add-link">click to upload</span>
 
@@ -38,8 +38,8 @@
         color="red-darken-1"
         class="delete-icon"
         @click="photosToDelete.push(photo.name)"
-        >mdi-close-circle</v-icon
-      >
+        :icon="mdiCloseCircle"
+      />
     </div>
 
     <div
@@ -52,8 +52,8 @@
         color="red-darken-1"
         class="delete-icon"
         @click="removePhoto(index)"
-        >mdi-close-circle</v-icon
-      >
+        :icon="mdiCloseCircle"
+      />
     </div>
   </div>
 </template>
@@ -63,6 +63,7 @@ import { usePhotosStore } from '@/store/photos'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { Snackbar } from '@/utils/notifications'
+import { mdiCloseCircle, mdiPaperclip } from '@mdi/js'
 
 const { photos, newPhotos, photosToDelete } = storeToRefs(usePhotosStore())
 

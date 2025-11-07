@@ -10,7 +10,7 @@
         variant="outlined"
         rounded="lg"
         @click="showTemplateModal = true"
-        prepend-icon="mdi-import"
+        :prepend-icon="mdiImport"
         >Load template</v-btn
       >
     </v-toolbar>
@@ -37,12 +37,11 @@
           <v-card-title
             >Linked metadata
             <v-icon
+              :icon="mdiHelpCircleOutline"
               size="x-small"
               class="ml-2"
               @click="showLinkedMetadataHelp = !showLinkedMetadataHelp"
-            >
-              mdi-help-circle-outline
-            </v-icon>
+            />
           </v-card-title>
           <v-card-text
             v-if="showLinkedMetadataHelp"
@@ -68,7 +67,7 @@
               item-value="id"
               :rules="rules.required"
               no-data-text="No available sensors"
-              prepend-inner-icon="mdi-signal-variant"
+              :prepend-inner-icon="mdiSignalVariant"
               density="compact"
               rounded="lg"
             >
@@ -123,10 +122,10 @@
                 "
               >
                 <v-icon
+                  :icon="mdiPlus"
                   color="secondary-darken-2"
                   @click="showSensorModal = true"
-                  >mdi-plus</v-icon
-                >
+                />
                 <v-dialog v-model="showSensorModal" width="30rem">
                   <SensorFormCard
                     v-if="workspace"
@@ -146,7 +145,7 @@
               item-value="id"
               :rules="rules.required"
               no-data-text="No available properties"
-              prepend-inner-icon="mdi-water-thermometer"
+              :prepend-inner-icon="mdiWaterThermometer"
               density="compact"
               rounded="lg"
               class="mt-2"
@@ -199,9 +198,11 @@
                   )
                 "
               >
-                <v-icon color="secondary-darken-2" @click="showOPModal = true"
-                  >mdi-plus</v-icon
-                >
+                <v-icon
+                  :icon="mdiPlus"
+                  color="secondary-darken-2"
+                  @click="showOPModal = true"
+                />
                 <v-dialog v-model="showOPModal" width="30rem">
                   <ObservedPropertyFormCard
                     v-if="workspace"
@@ -223,7 +224,7 @@
               item-value="id"
               :rules="rules.required"
               no-data-text="No available units"
-              prepend-inner-icon="mdi-tape-measure"
+              :prepend-inner-icon="mdiTapeMeasure"
               density="compact"
               rounded="lg"
               class="mt-2"
@@ -270,9 +271,11 @@
                   )
                 "
               >
-                <v-icon color="secondary-darken-2" @click="openUnitForm = true">
-                  mdi-plus
-                </v-icon>
+                <v-icon
+                  :icon="mdiPlus"
+                  color="secondary-darken-2"
+                  @click="openUnitForm = true"
+                />
                 <v-dialog v-model="openUnitForm" width="30rem">
                   <UnitFormCard
                     v-if="workspace"
@@ -292,7 +295,7 @@
               item-value="id"
               :rules="rules.required"
               no-data-text="No available processing level"
-              prepend-inner-icon="mdi-check-circle"
+              :prepend-inner-icon="mdiCheckCircle"
               density="compact"
               rounded="lg"
               class="mt-2"
@@ -341,9 +344,11 @@
                   )
                 "
               >
-                <v-icon color="secondary-darken-2" @click="showPLModal = true">
-                  mdi-plus
-                </v-icon>
+                <v-icon
+                  :icon="mdiPlus"
+                  color="secondary-darken-2"
+                  @click="showPLModal = true"
+                />
                 <v-dialog v-model="showPLModal" width="30rem">
                   <ProcessingLevelFormCard
                     v-if="workspace"
@@ -374,7 +379,7 @@
               type="number"
               density="compact"
               rounded="lg"
-              prepend-inner-icon="mdi-clock-time-three"
+              :prepend-inner-icon="mdiClockTimeThree"
             />
 
             <v-col
@@ -413,7 +418,7 @@
               type="number"
               density="compact"
               rounded="lg"
-              prepend-inner-icon="mdi-timer"
+              :prepend-inner-icon="mdiTimer"
             />
 
             <v-col
@@ -458,7 +463,7 @@
               :rules="rules.required"
               density="compact"
               rounded="xl"
-              prepend-inner-icon="mdi-air-filter"
+              :prepend-inner-icon="mdiAirFilter"
             />
 
             <v-combobox
@@ -467,7 +472,7 @@
               label="Status"
               density="compact"
               rounded="xl"
-              prepend-inner-icon="mdi-list-status"
+              :prepend-inner-icon="mdiListStatus"
             />
 
             <v-combobox
@@ -477,7 +482,7 @@
               :rules="rules.requiredAndMaxLength255"
               density="compact"
               rounded="xl"
-              prepend-inner-icon="mdi-table-column"
+              :prepend-inner-icon="mdiTableColumn"
             />
           </v-card-text>
 
@@ -493,7 +498,7 @@
               type="number"
               density="compact"
               rounded="lg"
-              prepend-inner-icon="mdi-circle-off-outline"
+              :prepend-inner-icon="mdiCircleOffOutline"
             />
           </v-card-text>
         </v-col>
@@ -606,6 +611,21 @@ import hs, {
   Datastream,
   Workspace,
 } from '@hydroserver/client'
+import {
+  mdiAirFilter,
+  mdiCheckCircle,
+  mdiCircleOffOutline,
+  mdiClockTimeThree,
+  mdiHelpCircleOutline,
+  mdiImport,
+  mdiListStatus,
+  mdiPlus,
+  mdiSignalVariant,
+  mdiTableColumn,
+  mdiTapeMeasure,
+  mdiTimer,
+  mdiWaterThermometer,
+} from '@mdi/js'
 
 const emit = defineEmits(['close', 'updated', 'created'])
 

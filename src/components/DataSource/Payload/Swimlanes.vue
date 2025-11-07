@@ -6,13 +6,13 @@
         <v-btn
           variant="text"
           color="green"
-          icon="mdi-pencil"
+          :icon="mdiPencil"
           @click.stop="$emit('edit', payload)"
         />
         <v-btn
           variant="text"
           color="red-darken-3"
-          icon="mdi-delete"
+          :icon="mdiDelete"
           @click.stop="$emit('delete', payload)"
         />
       </div>
@@ -73,6 +73,7 @@ import { storeToRefs } from 'pinia'
 import TransformChip from './TransformChip.vue'
 import type { Payload } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
+import { mdiDelete, mdiPencil } from '@mdi/js'
 
 const props = defineProps<{
   payload: Payload

@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon>mdi-alert</v-icon> Confirm workspace deletion
+        <v-icon :icon="mdiAlert" /> Confirm workspace deletion
       </v-card-title>
     </v-toolbar>
     <v-divider />
@@ -43,6 +43,7 @@
 import { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { ref } from 'vue'
+import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['switchToAccessControl', 'delete', 'close'])
 const props = defineProps({

@@ -40,7 +40,7 @@
       @click="clear"
       rounded="xl"
       variant="outlined"
-      append-icon="mdi-close"
+      :append-icon="mdiClose"
       >Clear filters</v-btn
     >
   </v-toolbar>
@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import { useWorkspaceTags } from '@/composables/useWorkspaceTags'
+import { mdiClose } from '@mdi/js'
 import { ref, watch } from 'vue'
 
 const { tags } = useWorkspaceTags()

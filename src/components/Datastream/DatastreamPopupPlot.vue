@@ -8,7 +8,7 @@
       <h5 class="flex-grow-1 pl-4 text-center text-h5">
         {{ datastream.name }}
       </h5>
-      <v-icon @click="$emit('close')">mdi-close</v-icon>
+      <v-icon :icon="mdiClose" @click="$emit('close')" />
     </v-card-title>
 
     <v-chart :option="option" autoresize style="height: 600px" />
@@ -43,6 +43,7 @@ import { onMounted, ref } from 'vue'
 import VChart from 'vue-echarts'
 import 'echarts'
 import { useObservationStore } from '@/store/observations'
+import { mdiClose } from '@mdi/js'
 
 const { fetchGraphSeries } = useObservationStore()
 

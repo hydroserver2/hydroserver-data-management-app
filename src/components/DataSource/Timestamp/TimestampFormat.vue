@@ -24,7 +24,7 @@
           <v-btn
             size="lg"
             color="gray"
-            icon="mdi-help-circle"
+            :icon="mdiHelpCircle"
             @click="openStrftimeHelp"
           />
         </template>
@@ -85,6 +85,7 @@ import {
   TIMESTAMP_FORMATS,
 } from '@/models/timestamp'
 import { rules } from '@/utils/rules'
+import { mdiHelpCircle } from '@mdi/js'
 
 const { target, color } = defineProps<{ target: Timestamp; color: string }>()
 

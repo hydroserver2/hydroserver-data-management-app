@@ -11,7 +11,7 @@
         class="mx-4"
         clearable
         v-model="search"
-        prepend-inner-icon="mdi-magnify"
+        :prepend-inner-icon="mdiMagnify"
         label="Search"
         hide-details
         density="compact"
@@ -23,7 +23,7 @@
       <v-btn
         color="white"
         variant="outlined"
-        prependIcon="mdi-chart-line"
+        :prependIcon="mdiChartLine"
         class="mr-2"
         :to="{ name: 'VisualizeData', query: { sites: thing!.id } }"
         >View on Data Visualization Page</v-btn
@@ -37,7 +37,7 @@
           )
         "
         color="white"
-        prependIcon="mdi-plus"
+        :prependIcon="mdiPlus"
         @click="openCreate = true"
         class="mr-2"
         >Add new datastream</v-btn-add
@@ -157,9 +157,7 @@
             <template #activator="{ props: tp }">
               <v-icon
                 v-bind="tp"
-                :icon="
-                  item.isVisible ? 'mdi-file-eye-outline' : 'mdi-file-remove'
-                "
+                :icon="item.isVisible ? mdiFileEyeOutline : mdiFileRemove"
                 :color="item.isVisible ? 'green' : 'deep-orange-darken-4'"
                 small
                 @click="toggleDataVisibility(item)"
@@ -194,7 +192,7 @@
           >
             <template v-slot:activator="{ props }">
               <v-icon
-                :icon="item.isPrivate ? 'mdi-eye-off' : 'mdi-eye'"
+                :icon="item.isPrivate ? mdiEyeOff : mdiEye"
                 :color="item.isPrivate ? 'deep-orange-darken-4' : 'green'"
                 small
                 v-bind="props"
@@ -228,14 +226,14 @@
             :openDelay="100"
           >
             <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" icon="mdi-lock" />
+              <v-icon v-bind="props" :icon="mdiLock" />
             </template>
             <span>The data for this datastream is private </span>
           </v-tooltip>
 
           <v-menu v-else>
             <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" icon="mdi-dots-vertical" />
+              <v-icon v-bind="props" :icon="mdiDotsVertical" />
             </template>
             <v-list>
               <v-list-item
@@ -246,7 +244,7 @@
                     workspace
                   )
                 "
-                prepend-icon="mdi-pencil"
+                :prepend-icon="mdiPencil"
                 title="Edit datastream metadata"
                 @click="openDialog(item, 'edit')"
               />
@@ -260,7 +258,7 @@
                 "
               >
                 <v-list-item
-                  prepend-icon="mdi-delete"
+                  :prepend-icon="mdiDelete"
                   title="Delete datastream"
                   @click="openDialog(item, 'delete')"
                 />
@@ -273,12 +271,12 @@
                     workspace
                   )
                 "
-                prepend-icon="mdi-delete-outline"
+                :prepend-icon="mdiDeleteOutline"
                 title="Delete data from datastream"
                 @click="openObservationDialog(item)"
               />
               <v-list-item
-                prepend-icon="mdi-chart-line"
+                :prepend-icon="mdiChartLine"
                 title="Visualize data"
                 :to="{
                   name: 'VisualizeData',
@@ -286,7 +284,7 @@
                 }"
               />
               <v-list-item
-                prepend-icon="mdi-download"
+                :prepend-icon="mdiDownload"
                 title="Download data"
                 @click="onDownload(item.id)"
               />
@@ -374,6 +372,21 @@ import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 import ObservationsDeleteCard from '../Observation/ObservationsDeleteCard.vue'
 import VisibilityTooltipCard from '@/components/Datastream/VisibilityTooltipCard.vue'
 import hs, { PermissionAction, PermissionResource } from '@hydroserver/client'
+import {
+  mdiChartLine,
+  mdiDelete,
+  mdiDeleteOutline,
+  mdiDotsVertical,
+  mdiDownload,
+  mdiEye,
+  mdiEyeOff,
+  mdiFileEyeOutline,
+  mdiFileRemove,
+  mdiLock,
+  mdiMagnify,
+  mdiPencil,
+  mdiPlus,
+} from '@mdi/js'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },

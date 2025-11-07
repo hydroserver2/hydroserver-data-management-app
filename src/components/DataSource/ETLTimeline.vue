@@ -41,6 +41,7 @@ import { ETLStep } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import { mdiDatabaseExport, mdiDatabaseImport, mdiTablePivot } from '@mdi/js'
 
 const {
   selectedETLStep,
@@ -56,21 +57,21 @@ const steps = computed(() => [
   {
     name: 'extractor' as ETLStep,
     color: 'brown',
-    icon: 'mdi-database-export',
+    icon: mdiDatabaseExport,
     title: 'Extractor',
     valid: isExtractorValid.value,
   },
   {
     name: 'transformer' as ETLStep,
     color: 'green',
-    icon: 'mdi-table-pivot',
+    icon: mdiTablePivot,
     title: 'Transformer',
     valid: isTransformerValid.value,
   },
   {
     name: 'loader' as ETLStep,
     color: 'blue-grey-darken-2',
-    icon: 'mdi-database-import',
+    icon: mdiDatabaseImport,
     title: 'Loader',
     valid: isLoaderValid.value,
   },

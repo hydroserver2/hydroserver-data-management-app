@@ -36,7 +36,7 @@
           class="mx-4"
           clearable
           v-model="search"
-          prepend-inner-icon="mdi-magnify"
+          :prepend-inner-icon="mdiMagnify"
           label="Search"
           hide-details
           density="compact"
@@ -119,7 +119,7 @@
     <v-card>
       <v-toolbar color="yellow-darken-2">
         <v-card-title class="text-medium-emphasis">
-          <v-icon class="mr-2">mdi-alert</v-icon>Conflicting links
+          <v-icon :icon="mdiAlert" class="mr-2" /> Conflicting links
         </v-card-title>
       </v-toolbar>
       <v-card-text v-if="currentSourceId">
@@ -161,6 +161,7 @@ import { useWorkspaceStore } from '@/store/workspaces'
 import { useRoute, useRouter } from 'vue-router'
 import { formatTime } from '@/utils/time'
 import hs from '@hydroserver/client'
+import { mdiAlert, mdiMagnify } from '@mdi/js'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 

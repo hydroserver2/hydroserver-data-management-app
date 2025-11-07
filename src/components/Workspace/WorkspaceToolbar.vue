@@ -10,7 +10,7 @@
         color="secondary-darken-3"
         variant="outlined"
         density="comfortable"
-        :append-icon="openWorkspaceTable ? 'mdi-menu-up' : 'mdi-menu-down'"
+        :append-icon="openWorkspaceTable ? mdiMenuUp : mdiMenuDown"
       >
         Manage workspaces
       </v-btn>
@@ -46,7 +46,7 @@
           variant="outlined"
           color="grey-darken-2"
           @click="onCancelTransfer(item)"
-          prepend-icon="mdi-close"
+          :prepend-icon="mdiClose"
           rounded="xl"
         >
           Cancel transfer</v-btn
@@ -55,7 +55,7 @@
         <v-btn
           color="green-darken-2"
           @click="onAcceptTransfer(item)"
-          prepend-icon="mdi-check"
+          :prepend-icon="mdiCheck"
           rounded="xl"
           class="ml-2"
         >
@@ -73,7 +73,7 @@
           class="mx-4"
           clearable
           v-model="search"
-          prepend-inner-icon="mdi-magnify"
+          :prepend-inner-icon="mdiMagnify"
           label="Search"
           hide-details
           density="compact"
@@ -103,9 +103,11 @@
       >
         <template v-slot:no-data>
           <div class="text-center pa-4" v-if="workspaces.length === 0">
-            <v-icon size="48" color="grey lighten-1"
-              >mdi-briefcase-outline</v-icon
-            >
+            <v-icon
+              :icon="mdiBriefcaseOutline"
+              size="48"
+              color="grey lighten-1"
+            />
             <h4 class="mt-2">No workspaces found</h4>
             <p class="mb-4">Click the "Add workspace" button to create one.</p>
             <v-icon
@@ -113,9 +115,8 @@
               @click="showWorkspaceHelp = !showWorkspaceHelp"
               color="grey"
               small
-            >
-              mdi-help-circle-outline
-            </v-icon>
+              :icon="mdiHelpCircleOutline"
+            />
             <p v-if="showWorkspaceHelp" class="mb-4">
               A workspace is an organizational concept for access control. All
               resources in HydroServer (Sites, Datastreams, Units, ETL Systems)
@@ -136,7 +137,7 @@
             variant="text"
             color="primary-darken-2"
             @click="openDialog(item, 'accessControl')"
-            icon="mdi-lock-plus-outline"
+            :icon="mdiLockPlusOutline"
             rounded="xl"
           />
 
@@ -151,7 +152,7 @@
             variant="text"
             color="grey-darken-2"
             @click="openDialog(item, 'edit')"
-            icon="mdi-pencil"
+            :icon="mdiPencil"
             rounded="xl"
           />
 
@@ -166,7 +167,7 @@
             variant="text"
             color="red-darken-2"
             @click="openDialog(item, 'delete')"
-            icon="mdi-delete"
+            :icon="mdiDelete"
             rounded="xl"
           />
         </template>
@@ -224,6 +225,18 @@ import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
 import WorkspaceSelector from './WorkspaceSelector.vue'
+import {
+  mdiBriefcaseOutline,
+  mdiCheck,
+  mdiClose,
+  mdiDelete,
+  mdiHelpCircleOutline,
+  mdiLockPlusOutline,
+  mdiMagnify,
+  mdiMenuDown,
+  mdiMenuUp,
+  mdiPencil,
+} from '@mdi/js'
 
 const { selectedWorkspace, workspaces } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()

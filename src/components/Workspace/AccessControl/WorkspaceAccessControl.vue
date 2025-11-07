@@ -58,6 +58,12 @@ import TransferWorkspaceOwnership from './TransferWorkspaceOwnership.vue'
 import ManageWorkspacePrivacy from './ManageWorkspacePrivacy.vue'
 import ManageApiKeys from './ManageApiKeys.vue'
 import { ref } from 'vue'
+import {
+  mdiAccountCircle,
+  mdiKeyVariant,
+  mdiLock,
+  mdiTransitTransfer,
+} from '@mdi/js'
 
 const props = defineProps({
   workspace: { type: Object as () => Workspace, required: true },
@@ -69,13 +75,13 @@ const emitClose = () => emits('close')
 const selected = ref('collaborators')
 
 const items = [
-  { title: 'Collaborators', name: 'collaborators', icon: 'mdi-account-circle' },
-  { title: 'API keys', name: 'api-keys', icon: 'mdi-key-variant' },
-  { title: 'Workspace privacy', name: 'privacy', icon: 'mdi-lock' },
+  { title: 'Collaborators', name: 'collaborators', icon: mdiAccountCircle },
+  { title: 'API keys', name: 'api-keys', icon: mdiKeyVariant },
+  { title: 'Workspace privacy', name: 'privacy', icon: mdiLock },
   {
     title: 'Transfer ownership',
     name: 'transfer',
-    icon: 'mdi-transit-transfer',
+    icon: mdiTransitTransfer,
   },
 ]
 </script>

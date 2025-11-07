@@ -44,7 +44,7 @@
       <v-col cols="12" sm="6" class="mb-4">
         <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
           <div class="text-center mr-4">
-            <v-icon icon="mdi-resistor" size="4rem" />
+            <v-icon :icon="mdiResistor" size="4rem" />
           </div>
           <div>
             <p class="text-body-1 font-weight-bold mb-2">
@@ -61,7 +61,7 @@
       <v-col cols="12" sm="6" class="mb-4">
         <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
           <div class="text-center mr-4">
-            <v-icon icon="mdi-database-outline" size="4rem" />
+            <v-icon :icon="mdiDatabaseOutline" size="4rem" />
           </div>
           <div>
             <p class="text-body-1 font-weight-bold mb-2">
@@ -78,7 +78,7 @@
       <v-col cols="12" sm="6" class="mb-4">
         <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
           <div class="text-center mr-4">
-            <v-icon icon="mdi-cog-outline" size="4rem" />
+            <v-icon :icon="mdiCogOutline" size="4rem" />
           </div>
           <div>
             <p class="text-body-1 font-weight-bold mb-2">
@@ -95,7 +95,7 @@
       <v-col cols="12" sm="6" class="mb-4">
         <div class="d-flex flex-column flex-sm-row text-center text-sm-left">
           <div class="text-center mr-4">
-            <v-icon icon="mdi-lock-open-outline" size="4rem" />
+            <v-icon :icon="mdiLockOpenOutline" size="4rem" />
           </div>
           <div>
             <p class="text-body-1 font-weight-bold mb-2">
@@ -215,6 +215,12 @@ import hydroWhiteImg from '@/assets/hydroserver-white-min.png'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/user'
 import hs from '@hydroserver/client'
+import {
+  mdiCogOutline,
+  mdiDatabaseOutline,
+  mdiLockOpenOutline,
+  mdiResistor,
+} from '@mdi/js'
 
 const { user } = storeToRefs(useUserStore())
 const disableAccountCreation =

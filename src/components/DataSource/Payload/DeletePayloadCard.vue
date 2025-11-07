@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon>mdi-alert</v-icon> Confirm payload deletion
+        <v-icon :icon="mdiAlert" /> Confirm payload deletion
       </v-card-title>
     </v-toolbar>
     <v-divider />
@@ -26,6 +26,7 @@
 import hs, { Payload } from '@hydroserver/client'
 import { useDataSourceStore } from '@/store/datasource'
 import { storeToRefs } from 'pinia'
+import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({

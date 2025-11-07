@@ -6,16 +6,19 @@
       </v-card-item>
     </v-col>
     <v-col class="pl-0">
-      <v-icon @click="showApiKeyHelp = !showApiKeyHelp" color="grey" small>
-        mdi-help-circle-outline
-      </v-icon>
+      <v-icon
+        :icon="mdiHelpCircleOutline"
+        @click="showApiKeyHelp = !showApiKeyHelp"
+        color="grey"
+        small
+      />
     </v-col>
 
     <v-spacer />
 
     <v-btn
       variant="text"
-      prepend-icon="mdi-plus"
+      :prepend-icon="mdiPlus"
       class="mr-4"
       @click="openCreate = true"
       >Create API key</v-btn
@@ -46,7 +49,7 @@
     >
       <span class="text-mono text-wrap break-all">{{ newKey.key }}</span>
       <v-btn
-        icon="mdi-content-copy"
+        :icon="mdiContentCopy"
         variant="text"
         @click="copyKey(newKey.key)"
         :aria-label="`Copy API key ${newKey.key}`"
@@ -67,15 +70,15 @@
       <div class="d-flex align-center">
         {{ item.id }}
         <v-icon size="x-small" class="ml-2" @click="copyKey(item.id)">
-          <v-icon>mdi-content-copy</v-icon>
+          <v-icon :icon="mdiContentCopy" />
         </v-icon>
       </div>
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <v-icon @click="onOpenRegenerateDialog(item)"> mdi-refresh </v-icon>
-      <v-icon @click="openDialog(item, 'edit')"> mdi-pencil </v-icon>
-      <v-icon @click="openDialog(item, 'delete')"> mdi-delete </v-icon>
+      <v-icon :icon="mdiRefresh" @click="onOpenRegenerateDialog(item)" />
+      <v-icon :icon="mdiPencil" @click="openDialog(item, 'edit')" />
+      <v-icon :icon="mdiDelete" @click="openDialog(item, 'delete')" />
     </template>
   </v-data-table-virtual>
 
@@ -122,6 +125,14 @@ import { useTableLogic } from '@/composables/useTableLogic'
 import ApiKeyForm from './ApiKeyForm.vue'
 import DeleteApiKey from './DeleteApiKey.vue'
 import ApiKeyRegenerateForm from './ApiKeyRegenerateForm.vue'
+import {
+  mdiContentCopy,
+  mdiDelete,
+  mdiHelpCircleOutline,
+  mdiPencil,
+  mdiPlus,
+  mdiRefresh,
+} from '@mdi/js'
 
 const props = defineProps({
   workspaceId: { type: String, required: true },

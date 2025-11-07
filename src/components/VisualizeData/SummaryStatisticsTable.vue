@@ -3,7 +3,7 @@
     <div class="d-flex justify-space-between w-100">
       Summary Statistics
       <v-btn
-        prepend-icon="mdi-arrow-left"
+        :prepend-icon="mdiArrowLeft"
         color="blue-grey-lighten-4"
         @click="showSummaryStatistics = false"
         >Back to Plot</v-btn
@@ -29,6 +29,7 @@
 import { SummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { storeToRefs } from 'pinia'
 import { useDataVisStore } from '@/store/dataVisualization'
+import { mdiArrowLeft } from '@mdi/js'
 
 const { showSummaryStatistics, summaryStatisticsArray } = storeToRefs(
   useDataVisStore()
