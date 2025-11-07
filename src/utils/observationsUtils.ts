@@ -19,13 +19,13 @@ export const fetchObservations = async (
   const { id, phenomenonBeginTime, phenomenonEndTime } = datastream
   if (!phenomenonBeginTime || !phenomenonEndTime) return []
 
+  // @ts-expect-error TODO: quality_control_code from hs/client should be optional
   const res = await hs.datastreams.getObservations(id, {
     order_by: ['phenomenonTime'],
     page_size: 100_000,
     format: 'row',
     phenomenon_time_min: startTime ?? phenomenonBeginTime,
     phenomenon_time_max: endTime ?? phenomenonEndTime,
-    result_qualifier_code: [],
   })
 
   if (!res.ok || !Array.isArray(res.data)) return []

@@ -264,22 +264,6 @@ onMounted(async () => {
   setWorkspaces(workspaceRes)
   workspaceThings.value = things
   isPageLoaded.value = true
-
-  const result = await hs.datastreams.getObservations(
-    '019a559e-e64e-77f8-a099-94bd36f19cd5',
-    {
-      // TODO: use camelCase
-      // TODO: (bug) All query params are being overridden
-      page_size: 10,
-      // phenomenon_time_min: startTime?.toISOString() ?? phenomenonBeginTime,
-      // phenomenon_time_max: endTime?.toISOString() ?? phenomenonEndTime,
-      page: 3,
-      order_by: ['phenomenonTime'],
-      format: 'column',
-      result_qualifier_code: [],
-    }
-  )
-  console.log('res', result)
 })
 </script>
 
