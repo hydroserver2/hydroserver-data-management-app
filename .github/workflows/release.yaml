@@ -16,10 +16,10 @@ jobs:
           ref: ${{ github.event.release.tag_name }}
           path: data_mgmt
 
-      - name: Setup Node 18.x
+      - name: Setup Node 22.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: npm
           cache-dependency-path: data_mgmt/package-lock.json
 
