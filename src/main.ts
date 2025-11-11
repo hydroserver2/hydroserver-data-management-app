@@ -20,7 +20,7 @@ async function initializeApp() {
   app.use(pinia)
 
   // The session must be initialized before the router because some of the routes depend on the session state for access control
-  await createHydroServer({ host: 'http://127.0.0.1:8000' })
+  await createHydroServer({ host: import.meta.env.DEV ? 'http://127.0.0.1:8000' : '' })
 
   const vocabularyStore = useVocabularyStore()
   await Promise.all([vocabularyStore.fetchAllVocabularies()])
