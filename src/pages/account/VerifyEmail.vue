@@ -78,13 +78,13 @@ import { rules } from '@/utils/rules'
 import hs from '@hydroserver/client'
 
 const router = useRouter()
-const { unverifiedEmail } = hs.session
-
 const verifying = ref(false)
 const verified = ref(false)
 const verificationError = ref(false)
 const verificationCode = ref('')
 const resending = ref(false)
+
+const unverifiedEmail = ref(hs.session.unverifiedEmail)
 
 async function logout() {
   await hs.session.logout()
@@ -102,7 +102,7 @@ const verifyCode = async () => {
     await hs.user.verifyEmailWithCode(verificationCode.value)
     verified.value = true
     Snackbar.success('Your email has been verified.')
-    router.push({ name: 'Sites' })
+    await router.push({ name: 'Sites' })
   } catch (e) {
     console.error('Error verifying email:', e)
     verificationError.value = true
@@ -114,7 +114,7 @@ const verifyCode = async () => {
 async function resend() {
   try {
     resending.value = true
-    await hs.user.sendVerificationEmail(unverifiedEmail)
+    await hs.user.sendVerificationEmail(unverifiedEmail.value)
     Snackbar.success('Verification email resent.')
   } catch (err) {
     console.error('Error sending verification email:', err)

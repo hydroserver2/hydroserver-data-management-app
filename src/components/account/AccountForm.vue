@@ -187,8 +187,7 @@ const props = defineProps({
   isCompleteSignup: { type: Boolean, required: false, default: false },
 })
 
-let { inProviderSignupFlow, inEmailVerificationFlow, unverifiedEmail } =
-  hs.session
+let { inProviderSignupFlow, unverifiedEmail } = hs.session
 
 const { user } = storeToRefs(useUserStore())
 const vocabularyStore = useVocabularyStore()
@@ -227,7 +226,7 @@ async function createUser() {
   try {
     await hs.user.create(userForm)
 
-    if (inEmailVerificationFlow) {
+    if (hs.session.inEmailVerificationFlow) {
       unverifiedEmail = userForm.email
       await router.push({ name: 'VerifyEmail' })
     } else {

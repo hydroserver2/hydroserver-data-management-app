@@ -90,29 +90,28 @@ const { user } = storeToRefs(useUserStore())
 
 const formLogin = async () => {
   if (!valid) return
-  try {
-    loading.value = true
-    const res = await hs.session.login(email.value, password.value)
+  loading.value = true
+  const res = await hs.session.login(email.value, password.value)
+  if (res.ok) {
+    const resUser = res.data?.account
+    if (resUser) {
+      user.value = resUser
+      Snackbar.success('You have logged in!')
+      await router.push({ name: 'Sites' })
+    }
+  } else {
     if (hs.session.inEmailVerificationFlow) {
       console.info('Email not verified. Redirecting to verify email page.')
       Snackbar.info('Email not verified. Redirecting to verify email page.')
       hs.session.unverifiedEmail = email.value
       await router.push({ name: 'VerifyEmail' })
     } else {
-      const resUser = res.data?.account
-      if (resUser) {
-        user.value = resUser
-        Snackbar.success('You have logged in!')
-        await router.push({ name: 'Sites' })
+      if (res.status === 400) {
+        Snackbar.warn('No active account found with the given credentials.')
       }
+      console.error('Error logging in.', res)
     }
-  } catch (error: any) {
-    console.error('Error logging in.', error)
-    if (error.status === 400) {
-      Snackbar.warn('No active account found with the given credentials.')
-    }
-  } finally {
-    loading.value = false
   }
+  loading.value = false
 }
 </script>
