@@ -655,13 +655,7 @@ const myForm = ref<VForm>()
 const selectedDatastreamID = ref('')
 const intendedTimeSpacingRef = ref<VForm>()
 
-const {
-  // canCreateObservedProperties,
-  // canCreateProcessingLevels,
-  // canCreateSensors,
-  // canCreateUnits,
-  hasPermission,
-} = useWorkspacePermissions()
+const { hasPermission } = useWorkspacePermissions()
 
 const {
   sensors,

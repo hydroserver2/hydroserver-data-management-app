@@ -84,42 +84,22 @@
 
         <v-spacer />
 
-        <v-tooltip
-          bottom
-          v-if="!canCreateWorkspace"
-          content-class="pa-0 ma-0 bg-transparent"
+        <PermissionTooltip
+          :has-permission="canCreateWorkspace"
+          message="You don't have permissions to create a workspace. Contact your system administrator to change your permissions."
         >
-          <template #activator="{ props }">
-            <span v-bind="props" class="d-inline-block">
-              <v-btn-add
-                disabled
-                class="mr-2"
-                @click="openCreate = true"
-                color="white"
-                variant="outlined"
-              >
-                Add workspace
-              </v-btn-add>
-            </span>
+          <template #default>
+            <v-btn-add class="mr-2" color="white" @click="openCreate = true">
+              Add workspace
+            </v-btn-add>
           </template>
-          <v-card
-            elevation="2"
-            class="ma-0 pa-0"
-            style="max-width: 480px; min-width: 300px"
-          >
-            <v-card-text class="px-4 py-2">
-              <v-row>
-                <v-col>
-                  You don't have permissions to create a workspace. Contact your
-                  system administrator to change your permissions.
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-tooltip>
-        <v-btn-add v-else class="mr-2" @click="openCreate = true" color="white">
-          Add workspace
-        </v-btn-add>
+
+          <template #denied>
+            <v-btn-add disabled class="mr-2" color="white" variant="outlined">
+              Add workspace
+            </v-btn-add>
+          </template>
+        </PermissionTooltip>
       </v-toolbar>
       <v-data-table-virtual
         :headers="headers"
@@ -249,6 +229,7 @@ import DeleteWorkspaceCard from './DeleteWorkspaceCard.vue'
 import WorkspaceAccessControl from '@/components/Workspace/AccessControl/WorkspaceAccessControl.vue'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import PermissionTooltip from '../PermissionTooltip.vue'
 import hs, {
   PermissionResource,
   PermissionAction,
