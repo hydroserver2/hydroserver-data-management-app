@@ -49,20 +49,21 @@ const isUpdating = ref(false)
 const showPrivacyHelp = ref(false)
 
 async function togglePrivacy() {
-  try {
-    isUpdating.value = true
-    await hs.workspaces.update({
-      id: props.workspace.id,
-      isPrivate: isPrivate.value,
-    } as Workspace)
-    emits('privacy-updated', isPrivate.value)
-  } catch (error: any) {
+  isUpdating.value = true
+
+  const res = await hs.workspaces.update({
+    id: props.workspace.id,
+    isPrivate: isPrivate.value,
+  } as Workspace)
+
+  if (res.ok) emits('privacy-updated', isPrivate.value)
+  else {
     isPrivate.value = !isPrivate.value
-    Snackbar.error(error.message)
-    console.error('Error updating thing privacy', error)
-  } finally {
-    isUpdating.value = false
+    Snackbar.error(res.message)
+    console.error('Error updating thing privacy', res)
   }
+
+  isUpdating.value = false
   openHydroSharePrivacy.value = false
 }
 </script>
