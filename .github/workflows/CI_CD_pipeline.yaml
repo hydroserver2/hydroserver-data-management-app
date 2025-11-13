@@ -22,13 +22,6 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Show @hydroserver/client version and PermissionResource keys
-        run: |
-          node -p "require('@hydroserver/client/package.json').version"
-          node - << 'EOF'
-          const { PermissionResource } = require('@hydroserver/client')
-          console.log('PermissionResource keys:', Object.keys(PermissionResource))
-          EOF
 
       - name: Add Environment Variables
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
