@@ -30,8 +30,7 @@ function updateDocumentTitle(matched: RouteRecordNormalized[]): void {
 
 router.beforeEach(
   async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    const { inEmailVerificationFlow, inProviderSignupFlow, isAuthenticated } =
-      hs.session
+    const { inEmailVerificationFlow, inProviderSignupFlow } = hs.session
 
     if (inEmailVerificationFlow && to.name !== 'VerifyEmail') {
       if (to.name === 'ResetPassword') return { name: 'ResetPassword' }
@@ -45,8 +44,9 @@ router.beforeEach(
     if (!inProviderSignupFlow && to.name === 'CompleteProfile')
       return { name: 'Sites' }
 
-    if (isAuthenticated && to.meta.requiresLoggedOut) return { name: 'Sites' }
-    if (!isAuthenticated && to.meta.requiresAuth)
+    if (hs.session.isAuthenticated && to.meta.requiresLoggedOut)
+      return { name: 'Sites' }
+    if (!hs.session.isAuthenticated && to.meta.requiresAuth)
       return { name: 'Login', query: { next: to.fullPath } }
   }
 )
