@@ -34,12 +34,13 @@
         <v-toolbar flat color="blue-darken-2">
           <v-text-field
             :disabled="!workspaceThings?.length"
-            class="mx-2"
+            class="mx-4"
             clearable
             v-model="search"
             :prepend-inner-icon="mdiMagnify"
             label="Search"
             hide-details
+            variant="underlined"
             density="compact"
             rounded="xl"
           />
@@ -255,14 +256,19 @@ const loadThings = async () => {
 }
 
 onMounted(async () => {
-  const [things, workspaceRes] = await Promise.all([
-    selectedWorkspace.value?.id
-      ? hs.things.listAllItems({ workspace_id: [selectedWorkspace.value.id] })
-      : hs.things.listAllItems(),
-    hs.workspaces.listAllItems({ is_associated: true, expand_related: true }),
-  ])
-  setWorkspaces(workspaceRes)
-  workspaceThings.value = things
+  if (selectedWorkspace.value == null) {
+    const [workspaceRes] = await Promise.all([
+      hs.workspaces.listAllItems({ is_associated: true, expand_related: true }),
+    ])
+    setWorkspaces(workspaceRes)
+  } else {
+    const [things, workspaceRes] = await Promise.all([
+      hs.things.listAllItems({ workspace_id: [selectedWorkspace.value.id] }),
+      hs.workspaces.listAllItems({ is_associated: true, expand_related: true }),
+    ])
+    setWorkspaces(workspaceRes)
+    workspaceThings.value = things
+  }
   isPageLoaded.value = true
 })
 </script>
