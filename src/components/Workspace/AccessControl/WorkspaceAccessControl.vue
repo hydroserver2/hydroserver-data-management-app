@@ -33,7 +33,7 @@
         <ManageWorkspacePrivacy
           v-else-if="selected === 'privacy'"
           :workspace="workspace"
-          @privacy-updated="emits('privacy-updated')"
+          @privacy-updated="emits('privacy-updated', $event)"
         />
         <ManageApiKeys
           v-else-if="selected === 'api-keys'"
