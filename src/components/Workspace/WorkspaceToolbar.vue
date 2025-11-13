@@ -84,7 +84,40 @@
 
         <v-spacer />
 
-        <v-btn-add class="mr-2" @click="openCreate = true" color="white">
+        <v-tooltip
+          bottom
+          v-if="!canCreateWorkspace"
+          content-class="pa-0 ma-0 bg-transparent"
+        >
+          <template #activator="{ props }">
+            <span v-bind="props" class="d-inline-block">
+              <v-btn-add
+                disabled
+                class="mr-2"
+                @click="openCreate = true"
+                color="white"
+                variant="outlined"
+              >
+                Add workspace
+              </v-btn-add>
+            </span>
+          </template>
+          <v-card
+            elevation="2"
+            class="ma-0 pa-0"
+            style="max-width: 480px; min-width: 300px"
+          >
+            <v-card-text class="px-4 py-2">
+              <v-row>
+                <v-col>
+                  You don't have permissions to create a workspace. Contact your
+                  system administrator to change your permissions.
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-tooltip>
+        <v-btn-add v-else class="mr-2" @click="openCreate = true" color="white">
           Add workspace
         </v-btn-add>
       </v-toolbar>
@@ -252,6 +285,10 @@ const openAccessControl = ref(false)
 const search = ref<string>('')
 const activeItem = ref<Workspace>({} as Workspace)
 const showWorkspaceHelp = ref(false)
+
+const canCreateWorkspace = computed(() =>
+  hasPermission(PermissionResource.Workspace, PermissionAction.Create)
+)
 
 const selectedWorkspaceId = ref('')
 watch(
