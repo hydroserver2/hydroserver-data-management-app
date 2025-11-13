@@ -38,35 +38,35 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
-import { useFormLogic } from '@/composables/useFormLogic'
 import hs, { Workspace } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
+import { computed, ref } from 'vue'
 
 const props = defineProps({ workspace: Object as () => Workspace })
 const emit = defineEmits(['created', 'updated', 'close'])
 
-const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-  hs.workspaces.create,
-  hs.workspaces.update,
-  Workspace,
-  props.workspace || undefined
-)
+const item = ref(JSON.parse(JSON.stringify(props.workspace ?? new Workspace())))
+const isEdit = computed(() => !!props.workspace || undefined)
+const valid = ref(false)
+const myForm = ref<VForm>()
 
 async function onSubmit() {
-  try {
-    const newItem = await uploadItem()
-    if (!newItem) return
-    if (isEdit.value) {
-      Snackbar.success('Workspace updated')
-      emit('updated', newItem)
-    } else {
-      Snackbar.success('Workspace created')
-      emit('created', newItem)
-    }
-  } catch (error: any) {
-    console.error('Error uploading workspace', error)
-    Snackbar.error(error.message)
+  await myForm.value?.validate()
+  if (!valid.value) return
+
+  const res = isEdit.value
+    ? await hs.workspaces.update(item.value, props.workspace)
+    : await hs.workspaces.create(item.value)
+
+  if (!res.ok) {
+    console.error('Error uploading workspace', res)
+    Snackbar.error(res.message)
+    return
   }
+
+  const updatedOrCreated = isEdit.value ? 'updated' : 'created'
+  Snackbar.success(`Workspace ${updatedOrCreated}`)
+  emit(`${updatedOrCreated}`, res.data)
   emit('close')
 }
 </script>
