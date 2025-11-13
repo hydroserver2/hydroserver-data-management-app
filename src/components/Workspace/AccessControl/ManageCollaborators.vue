@@ -249,15 +249,16 @@ onMounted(async () => {
   try {
     const [collaboratorsResponse, rolesResponse] = await Promise.all([
       hs.workspaces.getCollaborators(props.workspace.id),
+      // @ts-ignore
       hs.workspaces.getRoles({
-        workspace_id: [props.workspace.id],
         order_by: ['name'],
         is_user_role: true,
       }),
     ])
 
     roles.value = rolesResponse.data.filter(
-      (r: CollaboratorRole) => r.isUserRole === true
+      (r: CollaboratorRole) =>
+        r.workspaceId === null || r.workspaceId == props.workspace.id
     )
     setCollaboratorList(collaboratorsResponse.data)
   } catch (error) {
