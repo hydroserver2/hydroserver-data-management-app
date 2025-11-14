@@ -240,7 +240,7 @@ async function createUser() {
 
 async function completeSignup() {
   try {
-    await hs.providerSignup(userForm)
+    await hs.session.providerSignup(userForm)
     Snackbar.success('You have logged in!')
     await router.push({ name: 'Sites' })
   } catch (error) {

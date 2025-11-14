@@ -35,11 +35,15 @@
 <script setup lang="ts">
 import hs from '@hydroserver/client'
 import { computed, ref } from 'vue'
+import { settings } from '@/config/settings'
+import type { Provider } from '@/models/settings'
 
-const oAuthProviders = ref(hs.session.oAuthProviders)
+const oAuthProviders = ref<Provider[]>(
+  settings.authenticationConfiguration.providers
+)
 
 const filteredOAuthProviders = computed(() =>
-  hs.session.oAuthProviders.filter((provider) => provider.signupEnabled)
+  oAuthProviders.value.filter((provider) => provider.signupEnabled)
 )
 
 const signupOrLoginWithOAuth = (providerId: string) => {
