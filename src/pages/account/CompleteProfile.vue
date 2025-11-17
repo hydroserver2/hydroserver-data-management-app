@@ -1,17 +1,15 @@
 <template>
   <v-container>
-    <AccountForm
-      :has-cancel-button="false"
-      :is-edit="true"
-      :is-complete-signup="true"
-    >
+    <AccountForm :has-cancel-button="false" is-edit is-complete-signup>
       <template v-slot:header>
-        <v-card-title align="center" class="mb-2 signup-title">
-          Successfully authenticated!
-        </v-card-title>
-        <v-card-text align="center" class="my-2">
-          Just a few more details and your account will be all set.
-        </v-card-text>
+        <v-toolbar color="secondary">
+          <v-card-title align="center">
+            Successfully authenticated -
+            <span class="opacity-90">
+              Just a few more details and your account will be all set.
+            </span>
+          </v-card-title>
+        </v-toolbar>
       </template>
     </AccountForm>
   </v-container>
