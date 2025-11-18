@@ -24,9 +24,8 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useHydroShare } from '@/composables/useHydroShare'
-import hs from '@hydroserver/client'
 import {
   mdiAccount,
   mdiCardAccountDetails,
@@ -42,11 +41,6 @@ const {
   isConnected: isHydroShareConnected,
   isConnectionEnabled: isHydroShareConnectionEnabled,
 } = useHydroShare()
-
-onMounted(async () => {
-  const res = await hs.user.get()
-  if (res.ok) user.value = res.data
-})
 
 const userInformation = computed(() => {
   if (!user.value) return []
