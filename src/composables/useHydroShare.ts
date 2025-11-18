@@ -15,7 +15,7 @@ export function useHydroShare() {
   const hydroShareProvider = computed<Provider | null>(
     () =>
       connectedProviders.value.find(
-        (item: any) => item.provider.id === 'hydroshare'
+        (item: any) => item.provider?.id === 'hydroshare'
       ) || null
   )
 
