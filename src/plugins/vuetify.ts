@@ -35,6 +35,11 @@ const btnAttrs = {
   rounded: 'xl',
 }
 
+const menuDefaults = {
+  menuProps: { maxHeight: 320 },
+  virtualScroll: false,
+}
+
 export default createVuetify({
   blueprint: md3,
   directives,
@@ -52,12 +57,19 @@ export default createVuetify({
     VToolbar: { density: 'default' },
     VDataTable: { density: 'default' },
     VTextField: textFieldAttrs,
-    VAutocomplete: textFieldAttrs,
-    VTextarea: textFieldAttrs,
-    VCheckbox: textFieldAttrs,
+    VAutocomplete: { ...textFieldAttrs, ...menuDefaults },
+    VSelect: menuDefaults,
     VCombobox: {
       variant: 'outlined',
+      ...menuDefaults,
     },
+    VVirtualScroll: {
+      itemHeight: 64,
+      bench: 12,
+      height: 320,
+    },
+    VTextarea: textFieldAttrs,
+    VCheckbox: textFieldAttrs,
     VBtn: btnAttrs,
     VBtnPrimary: {
       ...btnAttrs,

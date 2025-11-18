@@ -30,7 +30,6 @@
           <v-virtual-scroll
             :items="sortedThings"
             :height="sortedThings.length < 6 ? 'auto' : 250"
-            item-height="48"
           >
             <template #default="{ item, index }">
               <v-checkbox
