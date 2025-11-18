@@ -88,28 +88,30 @@ const showTransferConfirmation = ref(false)
 
 async function onTransferOwnership() {
   if (!newOwnerEmail.value) return
-  try {
-    await hs.workspaces.transferOwnership(
-      props.workspace!.id,
-      newOwnerEmail.value
-    )
+
+  const res = await hs.workspaces.transferOwnership(
+    props.workspace!.id,
+    newOwnerEmail.value
+  )
+
+  if (res.ok) {
     emits('needs-refresh')
     Snackbar.success('Workspace transfer initiated.')
-  } catch (error: any) {
-    console.error('Error transferring workspace.', error)
-    Snackbar.error(error.message)
+  } else {
+    console.error('Error transferring workspace.', res)
+    Snackbar.error(res.message)
   }
+
   newOwnerEmail.value = ''
   showTransferConfirmation.value = false
 }
 
 async function onCancelTransfer() {
-  try {
-    await hs.workspaces.rejectWorkspaceTransfer(props.workspace!.id)
+  const res = await hs.workspaces.rejectOwnershipTransfer(props.workspace!.id)
+
+  if (res.ok) {
     emits('needs-refresh')
     Snackbar.success('Workspace transfer cancelled.')
-  } catch (error) {
-    console.error('Error cancelling workspace transfer.', error)
-  }
+  } else console.error('Error cancelling workspace transfer.', res)
 }
 </script>

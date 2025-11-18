@@ -232,10 +232,10 @@ async function onRemoveCollaborator(email: string) {
   if (res.ok) {
     const index = collaboratorList.value.findIndex((c) => c.email === email)
     if (index !== -1) collaboratorList.value.splice(index, 1)
-    Snackbar.success('Owner removed for site.')
+    Snackbar.success('Collaborator removed.')
     if (email === user.value.email) await router.push({ name: 'Sites' })
   } else {
-    console.error('Error removing owner from thing', res)
+    console.error('Error removing collaborator', res)
     Snackbar.error(res.message)
   }
 }

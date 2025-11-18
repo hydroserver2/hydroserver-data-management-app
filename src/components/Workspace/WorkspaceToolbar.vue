@@ -327,25 +327,21 @@ const refreshAccessControl = async (workspaceId: string) => {
 }
 
 async function onCancelTransfer(ws: Workspace) {
-  try {
-    await hs.workspaces.rejectWorkspaceTransfer(ws.id)
+  const res = await hs.workspaces.rejectOwnershipTransfer(ws.id)
+  if (res.ok) {
     await refreshWorkspaces()
     Snackbar.success('Workspace transfer cancelled.')
     if (!pendingWorkspaces.value.length) openTransferTable.value = false
-  } catch (error) {
-    console.error('Error cancelling workspace transfer.', error)
-  }
+  } else console.error('Error cancelling workspace transfer.', res)
 }
 
 async function onAcceptTransfer(ws: Workspace) {
-  try {
-    await hs.workspaces.acceptOwnershipTransfer(ws.id)
+  const res = await hs.workspaces.acceptOwnershipTransfer(ws.id)
+  if (res.ok) {
     await refreshWorkspaces()
     Snackbar.success('Workspace transfer accepted.')
     if (!pendingWorkspaces.value.length) openTransferTable.value = false
-  } catch (error) {
-    console.error('Error accepting workspace transfer.', error)
-  }
+  } else console.error('Error accepting workspace transfer.', res)
 }
 
 async function onDelete() {
