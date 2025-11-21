@@ -46,7 +46,9 @@
       <v-card-actions class="actions">
         <v-spacer />
         <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
-        <v-btn-primary type="submit">Save</v-btn-primary>
+        <v-btn-primary :loading="submitLoading" type="submit"
+          >Save</v-btn-primary
+        >
       </v-card-actions>
     </v-form>
   </v-card>
@@ -75,6 +77,7 @@ const isEdit = computed(() => !!props.oldPayload || undefined)
 const valid = ref<boolean | null>(null)
 const myForm = ref<VForm>()
 const swimlanesRef = ref<any>(null)
+const submitLoading = ref(false)
 
 const payload = ref<Payload>(
   props.oldPayload
@@ -92,11 +95,13 @@ async function onSubmit() {
   if (index !== -1) payloads.value[index] = payload.value
   else payloads.value = [...payloads.value, payload.value]
 
+  submitLoading.value = true
   await updateLinkedDatastreams(payload.value, props.oldPayload)
   await hs.dataSources.update(dataSource.value)
   linkedDatastreams.value = await hs.datastreams.listAllItems({
     data_source_id: [dataSource.value.id],
   })
+  submitLoading.value = false
   emit('close')
 }
 </script>
