@@ -57,6 +57,8 @@
           @click:row="onRowClick"
           color="blue-darken-2"
           :row-props="getRowProps"
+          :style="{ 'max-height': `50vh` }"
+          fixed-header
           hover
           multi-sort
         >
