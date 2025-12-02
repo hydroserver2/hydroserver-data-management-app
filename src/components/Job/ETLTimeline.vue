@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ETLStep } from '@hydroserver/client'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { mdiDatabaseExport, mdiDatabaseImport, mdiTablePivot } from '@mdi/js'
@@ -51,7 +51,7 @@ const {
   isExtractorValid,
   isTransformerValid,
   isLoaderValid,
-} = storeToRefs(useDataSourceStore())
+} = storeToRefs(useJobStore())
 
 const steps = computed(() => [
   {

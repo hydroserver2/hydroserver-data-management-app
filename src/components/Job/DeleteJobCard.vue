@@ -7,8 +7,9 @@
     </v-toolbar>
 
     <v-card-text>
-      This action will permanently delete the datasource
+      This action will permanently delete the job
       <strong> {{ itemName }} </strong>
+      along with all tasks associated with it.
     </v-card-text>
 
     <v-card-actions>

@@ -72,14 +72,14 @@
 import { storeToRefs } from 'pinia'
 import TransformChip from './TransformChip.vue'
 import type { Payload } from '@hydroserver/client'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 import { mdiDelete, mdiPencil } from '@mdi/js'
 
 const props = defineProps<{
   payload: Payload
 }>()
 
-const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+const { linkedDatastreams } = storeToRefs(useJobStore())
 defineEmits<{
   (e: 'edit', payload: Payload): void
   (e: 'delete', payload: Payload): void

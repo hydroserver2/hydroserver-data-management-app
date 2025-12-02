@@ -39,7 +39,7 @@
     <v-row>
       <v-col cols="12">
         <v-text-field
-          v-model="httpExtractor.sourceUri"
+          v-model="httpExtractor.settings.sourceUri"
           label="URL *"
           density="compact"
           rounded="lg"
@@ -50,11 +50,14 @@
     </v-row>
   </v-card-text>
 
-  <v-card-item v-if="httpExtractor.placeholderVariables.length !== 0">
+  <v-card-item v-if="httpExtractor.settings.placeholderVariables.length !== 0">
     <v-card-title> Placeholder variables </v-card-title>
   </v-card-item>
   <v-card-text>
-    <v-row class="mb-2" v-for="variable in httpExtractor.placeholderVariables">
+    <v-row
+      class="mb-2"
+      v-for="variable in httpExtractor.settings.placeholderVariables"
+    >
       <v-col cols="12" md="3">
         <v-chip
           variant="text"
@@ -105,7 +108,7 @@ import {
   PlaceholderVariable,
   RunTimePlaceholder,
 } from '@hydroserver/client'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
@@ -113,7 +116,7 @@ import { computed, ref, watch } from 'vue'
 import TimestampFormat from '../Timestamp/TimestampFormat.vue'
 import { mdiCodeBraces, mdiHelpCircleOutline } from '@mdi/js'
 
-const { extractor } = storeToRefs(useDataSourceStore())
+const { extractor } = storeToRefs(useJobStore())
 const showUrlHelp = ref(false)
 
 const runTimeOptions = [
@@ -137,10 +140,10 @@ const httpExtractor = computed<HTTPExtractor>({
  * Variables not found in the URL anymore are removed.
  */
 watch(
-  () => httpExtractor.value.sourceUri,
+  () => httpExtractor.value.settings.sourceUri,
   (newTemplate) => {
     if (!newTemplate) {
-      httpExtractor.value.placeholderVariables = []
+      httpExtractor.value.settings.placeholderVariables = []
       return
     }
 
@@ -159,9 +162,10 @@ watch(
 
     // Rebuild placeholderVariables so they remain in the correct order.
     const newVariables = matchedNames.map((name) => {
-      const existingVar = httpExtractor.value.placeholderVariables.find(
-        (v) => v.name === name
-      )
+      const existingVar =
+        httpExtractor.value.settings.placeholderVariables.find(
+          (v) => v.name === name
+        )
       return existingVar
         ? existingVar
         : ({
@@ -171,7 +175,7 @@ watch(
           } as PlaceholderVariable)
     })
 
-    httpExtractor.value.placeholderVariables = newVariables
+    httpExtractor.value.settings.placeholderVariables = newVariables
   },
   { immediate: true }
 )
@@ -179,9 +183,9 @@ watch(
 // Whenever any variable flips to runTime, give it a default `timestamp`
 // and when it flips back remove those fields
 watch(
-  () => httpExtractor.value.placeholderVariables.map((v) => v.type),
+  () => httpExtractor.value.settings.placeholderVariables.map((v) => v.type),
   () => {
-    httpExtractor.value.placeholderVariables.forEach((v) => {
+    httpExtractor.value.settings.placeholderVariables.forEach((v) => {
       if (v.type === 'runTime') {
         const rt = v as RunTimePlaceholder
         if (!rt.timestamp) {

@@ -75,11 +75,11 @@ import { storeToRefs } from 'pinia'
 import PayloadForm from '@/components/DataSource/Payload/PayloadForm.vue'
 import DeletePayloadCard from './DeletePayloadCard.vue'
 import Swimlanes from './Swimlanes.vue'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 import { Payload } from '@hydroserver/client'
 import { mdiMagnify } from '@mdi/js'
 
-const { payloads, linkedDatastreams } = storeToRefs(useDataSourceStore())
+const { payloads, linkedDatastreams } = storeToRefs(useJobStore())
 const selectedPayload = ref<Payload>()
 const openCreate = ref(false)
 const openEdit = ref(false)

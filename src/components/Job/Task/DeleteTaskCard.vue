@@ -2,16 +2,14 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon :icon="mdiAlert" /> Confirm payload deletion
+        <v-icon :icon="mdiAlert" /> Confirm task deletion
       </v-card-title>
     </v-toolbar>
     <v-divider />
 
-    <v-card-text>
-      This action will permanently delete the payload:
-    </v-card-text>
+    <v-card-text> This action will permanently delete the task: </v-card-text>
     <v-card-text class="py-0">
-      <span class="opacity-80">{{ payload.name }}</span>
+      <span class="opacity-80">{{ task.name }}</span>
     </v-card-text>
 
     <v-card-actions>
@@ -23,27 +21,20 @@
 </template>
 
 <script setup lang="ts">
-import hs, { Payload } from '@hydroserver/client'
-import { useDataSourceStore } from '@/store/datasource'
-import { storeToRefs } from 'pinia'
+import hs, { Task } from '@hydroserver/client'
 import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
-  payload: {
-    type: Object as () => Payload,
+  task: {
+    type: Object as () => Task,
     required: true,
   },
   payloadIndex: { type: Number, required: true },
 })
 
-const { dataSource, payloads } = storeToRefs(useDataSourceStore())
-const { updateLinkedDatastreams } = useDataSourceStore()
-
 const onDelete = async () => {
-  payloads.value.splice(props.payloadIndex, 1)
-  await hs.dataSources.update(dataSource.value)
-  await updateLinkedDatastreams(undefined, props.payload)
+  await hs.tasks.delete(props.task.id)
   emit('delete')
   emit('close')
 }

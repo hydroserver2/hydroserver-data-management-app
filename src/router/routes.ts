@@ -83,8 +83,8 @@ export const routes: RouteRecordRaw[] = [
   },
   {
     path: '/data-sources/:id',
-    name: 'DataSource',
-    component: () => import('@/pages/DataSourceDetails.vue'),
+    name: 'Job',
+    component: () => import('@/pages/JobDetails.vue'),
     meta: { requiresAuth: true },
   },
   {

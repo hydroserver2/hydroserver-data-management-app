@@ -59,17 +59,17 @@ import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 import SwimlanesForm from './SwimlanesForm.vue'
-import hs, { Payload } from '@hydroserver/client'
+import hs, { Task } from '@hydroserver/client'
 
 const props = defineProps({
-  oldPayload: { type: Object as () => Payload },
+  oldPayload: { type: Object as () => Task },
 })
 
-const { dataSource, payloads, extractor } = storeToRefs(useDataSourceStore())
-const { updateLinkedDatastreams } = useDataSourceStore()
-const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+const { job, payloads, extractor } = storeToRefs(useJobStore())
+const { updateLinkedDatastreams } = useJobStore()
+const { linkedDatastreams } = storeToRefs(useJobStore())
 
 const emit = defineEmits(['created', 'updated', 'close'])
 
@@ -97,10 +97,8 @@ async function onSubmit() {
 
   submitLoading.value = true
   await updateLinkedDatastreams(payload.value, props.oldPayload)
-  await hs.dataSources.update(dataSource.value)
-  linkedDatastreams.value = await hs.datastreams.listAllItems({
-    data_source_id: [dataSource.value.id],
-  })
+  await hs.dataSources.update(job.value)
+  linkedDatastreams.value = await hs.datastreams.listAllItems()
   submitLoading.value = false
   emit('close')
 }

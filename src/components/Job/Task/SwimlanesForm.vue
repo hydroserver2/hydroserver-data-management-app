@@ -202,7 +202,7 @@ import DataTransformationForm from './DataTransformationForm.vue'
 import { ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 import { DatastreamExtended } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
@@ -216,9 +216,7 @@ import {
 } from '@mdi/js'
 
 const payload = defineModel<Payload>('payload', { required: true })
-const { linkedDatastreams, draftDatastreams } = storeToRefs(
-  useDataSourceStore()
-)
+const { linkedDatastreams, draftDatastreams } = storeToRefs(useJobStore())
 
 const localForm = ref<VForm>()
 const isValid = ref(true)

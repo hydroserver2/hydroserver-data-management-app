@@ -129,9 +129,9 @@
         you’ll first need to unlink it from that source.
       </v-card-text>
       <v-card-text v-else>
-        This datastream is already being linked to another datasource in the
-        payload form. Check your pending payload configurations to make sure
-        each one is mapping the sources to the correct targets.
+        This datastream is already being linked to another job in the payload
+        form. Check your pending payload configurations to make sure each one is
+        mapping the sources to the correct targets.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -141,7 +141,7 @@
         <v-btn-primary
           v-if="currentSourceId"
           color="yellow-darken-2"
-          @click="goToDataSource"
+          @click="goToJob"
         >
           View existing data source
         </v-btn-primary>
@@ -258,16 +258,19 @@ const selectAndClose = (ds: DatastreamExtended) => {
   emit('close')
 }
 
+// TODO: Use updated API to check against Task targetIdentifiers
 const isLinked = (item: DatastreamExtended) => {
   const inDraft = props.draftDatastreams?.some((d) => d.id === item.id) ?? false
-  const linkedSourceId = item.dataSource?.id ?? ''
-  return inDraft || linkedSourceId
+  return inDraft
+  // const linkedSourceId = item.dataSource?.id ?? ''
+  // return inDraft || linkedSourceId
 }
 
 function onRowClick(_: MouseEvent, { item }: { item: DatastreamExtended }) {
   if (!props.enforceUniqueSelections) return selectAndClose(item)
 
-  const linkedSourceId = item.dataSource?.id ?? ''
+  // const linkedSourceId = item.dataSource?.id ?? ''
+  const linkedSourceId = ''
 
   if (isLinked(item)) {
     openLinkConflictModal.value = true
@@ -286,19 +289,19 @@ const getRowProps = ({ item }: { item: DatastreamExtended }) => {
   else return ''
 }
 
-function goToDataSource() {
+function goToJob() {
   if (!currentSourceId.value) return
 
   openLinkConflictModal.value = false
 
   const samePage =
-    route.name === 'DataSource' && route.params.id === currentSourceId.value
+    route.name === 'Job' && route.params.id === currentSourceId.value
 
   if (samePage) {
     router.go(0)
   } else {
     router.push({
-      name: 'DataSource',
+      name: 'Job',
       params: { id: currentSourceId.value },
     })
   }

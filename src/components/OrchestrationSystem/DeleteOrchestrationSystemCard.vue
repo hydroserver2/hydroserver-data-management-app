@@ -7,7 +7,7 @@
       </v-card-title>
     </v-toolbar>
 
-    <v-card-text v-if="relatedSources.length > 0">
+    <v-card-text v-if="relatedJobs.length > 0">
       <v-alert>
         Before you remove <strong> {{ orchestrationSystem.name }} </strong> as
         an orchestration system, you must delete all of its related data
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import hs, { DataSource, OrchestrationSystem } from '@hydroserver/client'
+import hs, { Job, OrchestrationSystem } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
 import { mdiAlert } from '@mdi/js'
@@ -67,20 +67,20 @@ const props = defineProps({
     type: Object as () => OrchestrationSystem,
     required: true,
   },
-  dataSources: { type: Object as () => DataSource[], required: true },
+  Jobs: { type: Object as () => Job[], required: true },
 })
 
 const deleteInput = ref('')
 
-const relatedSources = computed(() =>
-  props.dataSources.filter(
+const relatedJobs = computed(() =>
+  props.Jobs.filter(
     (ds) => ds.orchestrationSystem.id === props.orchestrationSystem.id
   )
 )
 
 const canDelete = computed(
   () =>
-    relatedSources.value.length === 0 &&
+    relatedJobs.value.length === 0 &&
     deleteInput.value.trim().toLowerCase() ===
       props.orchestrationSystem.name.toLowerCase()
 )
@@ -93,7 +93,7 @@ const onDelete = async () => {
     Snackbar.warn('Name does not match.')
     return
   }
-  if (relatedSources.value.length > 0) {
+  if (relatedJobs.value.length > 0) {
     Snackbar.warn(
       `Before you remove ${props.orchestrationSystem.name} as an orchestration system, you must delete all of its related data sources.`
     )

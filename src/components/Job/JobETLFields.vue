@@ -18,7 +18,7 @@ import ETLTimeline from './ETLTimeline.vue'
 import ExtractorForm from './Extractor/ExtractorForm.vue'
 import TransformerForm from './Transformer/TransformerForm.vue'
 import LoaderForm from './Loader/LoaderForm.vue'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
@@ -26,7 +26,7 @@ const extractorRef = ref<any>(null)
 const transformerRef = ref<any>(null)
 const loaderRef = ref<any>(null)
 
-const { selectedETLStep } = storeToRefs(useDataSourceStore())
+const { selectedETLStep } = storeToRefs(useJobStore())
 
 async function validate() {
   const validExtractor = await extractorRef.value.validate()
