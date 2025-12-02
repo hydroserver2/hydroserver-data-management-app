@@ -58,7 +58,7 @@
           class="mr-2"
           @click="openEdit = true"
         >
-          Edit data source
+          Edit job
         </v-btn>
         <v-btn-delete
           variant="outlined"
@@ -67,7 +67,7 @@
           color="red-darken-3"
           @click="openDelete = true"
         >
-          Delete data source
+          Delete job
         </v-btn-delete>
       </v-col>
     </v-row>
@@ -90,7 +90,7 @@
       </template>
     </v-data-table>
 
-    <PayloadTable />
+    <TaskTable />
   </div>
   <v-container v-else>Loading...</v-container>
 </template>
@@ -101,7 +101,7 @@ import { useRoute } from 'vue-router'
 import JobForm from '@/components/Job/JobForm.vue'
 import JobStatus from '@/components/Job/JobStatus.vue'
 import DeleteJobCard from '@/components/Job/DeleteJobCard.vue'
-import PayloadTable from '@/components/Job/Payload/PayloadTable.vue'
+import TaskTable from '@/components/Job/Task/TaskTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
 import { storeToRefs } from 'pinia'

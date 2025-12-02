@@ -25,9 +25,9 @@
         computed when the job runs—ideal for “only fetch new data” scenarios.
       </li>
       <li>
-        <strong>Per-payload variables</strong> (e.g. <code>{fileName}</code>)
-        are supplied for each payload—great when you have many files to fetch
-        from the same URL.
+        <strong>Per-task variables</strong> (e.g. <code>{fileName}</code>) are
+        supplied for each task—great when you have many files to fetch from the
+        same URL.
       </li>
     </ul>
     Once you’ve added at least one placeholder variable in your URL, a new “URL
@@ -71,10 +71,7 @@
 
       <v-col cols="12" md="3">
         <v-radio-group v-model="variable.type" inline hide-details>
-          <v-radio
-            label="Define this variable per payload"
-            value="perPayload"
-          />
+          <v-radio label="Define this variable per task" value="perTask" />
           <v-radio label="Fetch this variable at run-time" value="runTime" />
         </v-radio-group>
       </v-col>
@@ -170,7 +167,7 @@ watch(
         ? existingVar
         : ({
             name,
-            type: 'perPayload',
+            type: 'perTask',
             runTimeValue: '',
           } as PlaceholderVariable)
     })
@@ -196,7 +193,7 @@ watch(
           }
         }
       } else {
-        // strip runtime‐only props off perPayload ones
+        // strip runtime‐only props off perTask ones
         if ('timestamp' in v) delete v.timestamp
       }
     })

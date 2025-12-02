@@ -1,6 +1,6 @@
 <template>
   <v-card-item>
-    <v-card-title>Payload timestamp</v-card-title>
+    <v-card-title>Task timestamp</v-card-title>
   </v-card-item>
   <v-card-text class="pb-0">
     <v-row>

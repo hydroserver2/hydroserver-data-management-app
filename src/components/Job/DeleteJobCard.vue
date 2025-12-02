@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon :icon="mdiAlert" /> Confirm data source deletion
+        <v-icon :icon="mdiAlert" /> Confirm job deletion
       </v-card-title>
     </v-toolbar>
 

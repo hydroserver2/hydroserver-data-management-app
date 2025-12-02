@@ -1,11 +1,11 @@
 <template>
-  <v-card>
-    <v-toolbar color="secondary-lighten-1" density="comfortable">
-      <v-card-title class="text-medium-emphasis">
-        {{ isEdit ? 'Edit' : 'Add' }} payload
-        <span v-if="isEdit" class="opacity-80">· {{ payload?.name }}</span>
-      </v-card-title>
-    </v-toolbar>
+  <StickyForm>
+    <template #header>
+      <p class="ml-6 font-weight-bold">
+        {{ isEdit ? 'Edit' : 'Add' }} task configuration
+        <span v-if="isEdit" class="opacity-80">· {{ task?.name }}</span>
+      </p>
+    </template>
 
     <v-form
       @submit.prevent="onSubmit"
@@ -13,45 +13,56 @@
       v-model="valid"
       validate-on="blur"
     >
-      <v-card-text v-if="payload">
+      <v-card-text v-if="task">
+        <p class="font-weight-bold mb-2 required-label">Name your task</p>
         <v-text-field
-          v-model="payload.name"
-          label="Payload name *"
+          v-model="task.name"
+          label="Task name"
           :rules="rules.requiredAndMaxLength255"
           density="comfortable"
         />
 
-        <template v-if="extractor?.type === 'HTTP'">
+        <p class="font-weight-bold mb-2 required-label">
+          Select job configuration
+        </p>
+        <v-select
+          v-model="task.name"
+          :items="jobs"
+          label="Task name"
+          :rules="rules.requiredAndMaxLength255"
+          density="comfortable"
+        />
+
+        <!-- <template v-if="extractor?.type === 'HTTP'">
           <div class="section-title mb-2">
-            HTTP extractor payload-level configurations
+            HTTP extractor task-level configurations
           </div>
           <template
             v-for="variable in extractor.placeholderVariables"
             :key="variable.name"
           >
             <v-text-field
-              v-if="variable.type === 'perPayload'"
-              v-model="payload.extractorVariables[variable.name]"
+              v-if="variable.type === 'perTask'"
+              v-model="task.extractorVariables[variable.name]"
               :label="`URL template variable: ${variable.name} *`"
               :rules="rules.requiredAndMaxLength255"
               density="comfortable"
             />
           </template>
-        </template>
+        </template> -->
         <v-divider class="mb-6" />
-        <SwimlanesForm v-model:payload="payload" ref="swimlanesRef" />
+        <SwimlanesForm v-model:task="task" ref="swimlanesRef" />
       </v-card-text>
-
-      <v-divider />
-      <v-card-actions class="actions">
-        <v-spacer />
-        <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
-        <v-btn-primary :loading="submitLoading" type="submit"
-          >Save</v-btn-primary
-        >
-      </v-card-actions>
     </v-form>
-  </v-card>
+
+    <template #actions>
+      <v-spacer />
+      <v-btn-cancel @click="$emit('close')">Cancel</v-btn-cancel>
+      <v-btn-primary :loading="submitLoading" type="button" @click="onSubmit">
+        Save
+      </v-btn-primary>
+    </template>
+  </StickyForm>
 </template>
 
 <script setup lang="ts">
@@ -62,27 +73,28 @@ import { storeToRefs } from 'pinia'
 import { useJobStore } from '@/store/job'
 import SwimlanesForm from './SwimlanesForm.vue'
 import hs, { Task } from '@hydroserver/client'
+import { useTaskStore } from '@/store/task'
+import StickyForm from '@/components/Forms/StickyForm.vue'
 
 const props = defineProps({
-  oldPayload: { type: Object as () => Task },
+  oldTask: { type: Object as () => Task },
 })
 
-const { job, payloads, extractor } = storeToRefs(useJobStore())
-const { updateLinkedDatastreams } = useJobStore()
+const { tasks } = storeToRefs(useTaskStore())
 const { linkedDatastreams } = storeToRefs(useJobStore())
 
 const emit = defineEmits(['created', 'updated', 'close'])
 
-const isEdit = computed(() => !!props.oldPayload || undefined)
+const isEdit = computed(() => !!props.oldTask || undefined)
 const valid = ref<boolean | null>(null)
 const myForm = ref<VForm>()
 const swimlanesRef = ref<any>(null)
 const submitLoading = ref(false)
 
-const payload = ref<Payload>(
-  props.oldPayload
-    ? new Payload(JSON.parse(JSON.stringify(props.oldPayload)))
-    : new Payload()
+const task = ref<Task>(
+  props.oldTask
+    ? new Task(JSON.parse(JSON.stringify(props.oldTask)))
+    : new Task()
 )
 
 async function onSubmit() {
@@ -91,13 +103,13 @@ async function onSubmit() {
   await myForm.value?.validate()
   if (!valid.value) return
 
-  const index = payloads.value.findIndex((p) => p.id === payload.value.id)
-  if (index !== -1) payloads.value[index] = payload.value
-  else payloads.value = [...payloads.value, payload.value]
+  const index = tasks.value.findIndex((p) => p.id === task.value.id)
+  if (index !== -1) tasks.value[index] = task.value
+  else tasks.value = [...tasks.value, task.value]
 
   submitLoading.value = true
-  await updateLinkedDatastreams(payload.value, props.oldPayload)
-  await hs.dataSources.update(job.value)
+  // await updateLinkedDatastreams(task.value, props.oldTask)
+  await hs.jobs.update(job.value)
   linkedDatastreams.value = await hs.datastreams.listAllItems()
   submitLoading.value = false
   emit('close')

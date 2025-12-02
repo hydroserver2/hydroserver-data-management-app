@@ -5,7 +5,7 @@
         <v-text-field
           v-model="(extractor as LocalFileExtractor).settings.sourceUri"
           label="Local file path *"
-          hint="Enter the absolute path to the data source file."
+          hint="Enter the absolute path to the job file."
           :rules="rules.requiredAndMaxLength255"
         />
       </v-card-text>

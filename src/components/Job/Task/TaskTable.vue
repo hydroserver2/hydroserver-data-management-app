@@ -1,10 +1,8 @@
 <template>
   <v-card>
     <v-toolbar flat color="secondary">
-      <h6 class="text-h6 ml-4">Payloads for this data source</h6>
-      <v-spacer />
       <v-text-field
-        :disabled="!payloads?.length"
+        :disabled="!tasks?.length"
         class="mx-2"
         clearable
         v-model="search"
@@ -15,14 +13,15 @@
         variant="underlined"
         rounded="xl"
       />
+      <v-spacer />
       <v-btn-add class="mx-4" @click="openCreate = true" color="white">
-        Add new payload
+        Add new task
       </v-btn-add>
     </v-toolbar>
 
     <v-data-table-virtual
-      :headers="payloadHeaders"
-      :items="filteredPayloads"
+      :headers="taskHeaders"
+      :items="filteredTasks"
       :sort-by="sortBy"
       :search="search"
       :style="{ 'max-height': '100vh' }"
@@ -31,7 +30,7 @@
     >
       <template #item.overview="{ item }">
         <Swimlanes
-          :payload="item"
+          :task="item"
           @edit="openDialog($event, 'edit')"
           @delete="openDialog($event, 'delete')"
         />
@@ -40,15 +39,15 @@
   </v-card>
 
   <v-dialog v-model="openCreate" width="95rem">
-    <PayloadForm @close="openCreate = false" :old-payload-index="-1" />
+    <TaskForm @close="openCreate = false" :old-task-index="-1" />
   </v-dialog>
 
   <v-dialog v-model="openEdit" width="95rem">
-    <PayloadForm
-      :oldPayload="selectedPayload"
-      :old-payload-index="
-        payloads.findIndex(
-          (p) => JSON.stringify(p) === JSON.stringify(selectedPayload)
+    <TaskForm
+      :oldTask="selectedTask"
+      :old-task-index="
+        tasks.findIndex(
+          (p) => JSON.stringify(p) === JSON.stringify(selectedTask)
         )
       "
       @close="openEdit = false"
@@ -56,12 +55,12 @@
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
-    <DeletePayloadCard
-      v-if="selectedPayload"
-      :payload="selectedPayload"
-      :payload-index="
-        payloads.findIndex(
-          (p) => JSON.stringify(p) === JSON.stringify(selectedPayload)
+    <DeleteTaskCard
+      v-if="selectedTask"
+      :task="selectedTask"
+      :task-index="
+        tasks.findIndex(
+          (p) => JSON.stringify(p) === JSON.stringify(selectedTask)
         )
       "
       @close="openDelete = false"
@@ -70,50 +69,54 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import PayloadForm from '@/components/DataSource/Payload/PayloadForm.vue'
-import DeletePayloadCard from './DeletePayloadCard.vue'
+import { computed, onMounted, ref } from 'vue'
+import TaskForm from '@/components/Job/Task/TaskForm.vue'
+import DeleteTaskCard from './DeleteTaskCard.vue'
 import Swimlanes from './Swimlanes.vue'
-import { useJobStore } from '@/store/job'
-import { Payload } from '@hydroserver/client'
+import hs, { Task } from '@hydroserver/client'
 import { mdiMagnify } from '@mdi/js'
+import { storeToRefs } from 'pinia'
+import { useWorkspaceStore } from '@/store/workspaces'
+import { useTaskStore } from '@/store/task'
 
-const { payloads, linkedDatastreams } = storeToRefs(useJobStore())
-const selectedPayload = ref<Payload>()
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+const { tasks } = storeToRefs(useTaskStore())
+
+const selectedTask = ref<Task>()
+
 const openCreate = ref(false)
 const openEdit = ref(false)
 const openDelete = ref(false)
 const search = ref()
 const sortBy = [{ key: 'name' as const }]
 
-const filteredPayloads = computed(() =>
-  payloads.value.map((p) => {
+const filteredTasks = computed(() =>
+  tasks.value.map((t) => {
     const mapped = {
-      ...p,
+      ...t,
       searchText: '',
     }
 
-    const sourceIds = (p.mappings ?? []).map((m) =>
+    const sourceIds = (t.mappings ?? []).map((m) =>
       String(m.sourceIdentifier ?? '')
     )
 
-    const targetIds = (p.mappings ?? []).flatMap((m) =>
+    const targetIds = (t.mappings ?? []).flatMap((m) =>
       (m.paths ?? []).map((path) => String(path.targetIdentifier ?? ''))
     )
 
-    const targetNames = targetIds.map((tid) => {
-      const ds = (linkedDatastreams.value ?? []).find(
-        (d) => String(d.id) === tid
-      )
-      return ds?.name ?? ''
-    })
+    // const targetNames = targetIds.map((tid) => {
+    //   const ds = (linkedDatastreams.value ?? []).find(
+    //     (d) => String(d.id) === tid
+    //   )
+    //   return ds?.name ?? ''
+    // })
 
     mapped.searchText = [
       mapped.name,
       ...sourceIds,
       ...targetIds,
-      ...targetNames,
+      // ...targetNames,
     ]
       .filter(Boolean)
       .join(' ')
@@ -123,7 +126,7 @@ const filteredPayloads = computed(() =>
   })
 )
 
-const payloadHeaders = [
+const taskHeaders = [
   {
     title: 'Source → Data transformations → Target',
     key: 'overview',
@@ -132,9 +135,17 @@ const payloadHeaders = [
   },
 ] as const
 
-function openDialog(selectedItem: Payload, dialog: 'edit' | 'delete') {
-  selectedPayload.value = new Payload(selectedItem)
+function openDialog(selectedItem: Task, dialog: 'edit' | 'delete') {
+  selectedTask.value = new Task(selectedItem)
   if (dialog === 'edit') openEdit.value = true
   else openDelete.value = true
 }
+
+onMounted(async () => {
+  if (selectedWorkspace.value?.id) {
+    tasks.value = await hs.tasks.listAllItems({
+      workspace_id: [selectedWorkspace.value.id],
+    })
+  }
+})
 </script>

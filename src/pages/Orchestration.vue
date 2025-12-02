@@ -22,7 +22,9 @@
     </v-window-item>
 
     <v-window-item value="tasks">
-      <div class="pa-4">Task configuration coming soon.</div>
+      <div class="pa-4">
+        <TaskTable />
+      </div>
     </v-window-item>
 
     <v-window-item value="runs">
@@ -38,6 +40,7 @@ import hs from '@hydroserver/client'
 import JobTable from '@/components/Job/JobTable.vue'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
+import TaskTable from '@/components/Job/Task/TaskTable.vue'
 
 const tabs = [
   { value: 'jobs', label: 'Job configurations' },

@@ -125,13 +125,13 @@
         </v-card-title>
       </v-toolbar>
       <v-card-text v-if="currentSourceId">
-        This datastream is already linked to a data source. To reassign it here,
-        you’ll first need to unlink it from that source.
+        This datastream is already linked to a job. To reassign it here, you’ll
+        first need to unlink it from that source.
       </v-card-text>
       <v-card-text v-else>
-        This datastream is already being linked to another job in the payload
-        form. Check your pending payload configurations to make sure each one is
-        mapping the sources to the correct targets.
+        This datastream is already being linked to another job in the Task form.
+        Check your pending task configurations to make sure each one is mapping
+        the sources to the correct targets.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -143,7 +143,7 @@
           color="yellow-darken-2"
           @click="goToJob"
         >
-          View existing data source
+          View existing job
         </v-btn-primary>
       </v-card-actions>
     </v-card>

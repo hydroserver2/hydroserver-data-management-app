@@ -30,7 +30,7 @@ const props = defineProps({
     type: Object as () => Task,
     required: true,
   },
-  payloadIndex: { type: Number, required: true },
+  taskIndex: { type: Number, required: true },
 })
 
 const onDelete = async () => {

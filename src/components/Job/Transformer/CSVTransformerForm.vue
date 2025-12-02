@@ -2,7 +2,7 @@
   <v-row>
     <v-col>
       <v-card-item>
-        <v-card-title>Payload structure</v-card-title>
+        <v-card-title>Task structure</v-card-title>
       </v-card-item>
       <v-card-text>
         <v-row>

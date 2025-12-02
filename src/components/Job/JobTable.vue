@@ -108,6 +108,7 @@ const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
       await hs.jobs.listAllItems({
         workspace_id: [wsId],
         expand_related: true,
+        order_by: ['name'],
       }),
     hs.jobs.delete,
     Job,
@@ -139,6 +140,7 @@ const refreshTable = async () => {
   items.value = await hs.jobs.listAllItems({
     workspace_id: [props.workspaceId],
     expand_related: true,
+    order_by: ['name'],
   })
   // await fetchOrchestrationData(props.workspaceId)
 }
@@ -228,10 +230,10 @@ const headers = [
     title: 'Job name',
     key: 'name',
   },
-  {
-    title: 'Workspace',
-    key: 'workspace.name',
-  },
+  // {
+  //   title: 'Workspace',
+  //   key: 'workspace.name',
+  // },
   {
     title: 'Extractor',
     key: 'extractor.type',

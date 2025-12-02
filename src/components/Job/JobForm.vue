@@ -1,14 +1,11 @@
 <template>
-  <v-card v-if="loaded" class="job-form-card d-flex flex-column">
-    <div flat color="white" class="sticky-header">
-      <div class="sticky-header-content">
-        <p class="ml-6 font-weight-bold">
-          {{ isEdit ? 'Edit' : 'Create a new' }} job
-          <span v-if="isEdit" class="opacity-80">- {{ job?.name }}</span>
-        </p>
-      </div>
-      <v-divider color="black" thickness="2" />
-    </div>
+  <StickyForm v-if="loaded">
+    <template #header>
+      <p class="ml-6 font-weight-bold">
+        {{ isEdit ? 'Edit' : 'Create a new' }} job
+        <span v-if="isEdit" class="opacity-80">- {{ formJob?.name }}</span>
+      </p>
+    </template>
 
     <v-form
       @submit.prevent="onSubmit"
@@ -30,22 +27,22 @@
         <TransformerForm ref="transformerRef" />
         <LoaderForm ref="loaderRef" />
       </div>
-
-      <v-divider color="black" thickness="2" />
-      <v-card-actions class="sticky-actions">
-        <v-spacer />
-        <v-btn-cancel @click="emit('close')"> Cancel </v-btn-cancel>
-        <v-btn-primary type="submit"> Save </v-btn-primary>
-      </v-card-actions>
     </v-form>
-  </v-card>
+
+    <template #actions>
+      <v-spacer />
+      <v-btn-cancel @click="emit('close')"> Cancel </v-btn-cancel>
+      <v-btn-primary type="button" @click="onSubmit"> Save </v-btn-primary>
+    </template>
+  </StickyForm>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { storeToRefs } from 'pinia'
+import StickyForm from '@/components/Forms/StickyForm.vue'
+import { rules } from '@/utils/rules'
 import { useJobStore } from '@/store/job'
 import { useWorkspaceStore } from '@/store/workspaces'
 import ExtractorForm from './Extractor/ExtractorForm.vue'
@@ -67,15 +64,6 @@ const isEdit = computed(() => !!props.job)
 formJob.value = !!props.job ? props.job : new Job()
 const valid = ref(false)
 const myForm = ref<VForm>()
-
-// const { item, isEdit, valid, myForm, uploadItem } = useFormLogic(
-//   hs.jobs.create,
-//   hs.jobs.update,
-//   Job,
-//   props.job || undefined
-// )
-
-// const orchestrationSystems = ref([] as OrchestrationSystem[])
 
 const extractorRef = ref<any>(null)
 const transformerRef = ref<any>(null)
@@ -191,51 +179,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-:deep(.required-label)::after {
-  content: ' *';
-  color: #f44336; /* Vuetify error color */
-}
-
-.job-form-card {
-  max-height: 90vh;
-  height: 90vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.job-form-card :deep(.v-form) {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
 .form-body {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow: visible;
   padding: 16px 24px;
   scrollbar-gutter: stable both-edges;
-}
-
-.sticky-actions {
-  position: sticky;
-  bottom: 0;
-  background: white;
-  z-index: 2;
-}
-
-.sticky-header,
-.sticky-title {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: white;
-}
-
-.sticky-header-content {
-  padding-top: 10px;
-  padding-bottom: 10px;
 }
 </style>
