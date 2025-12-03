@@ -1,8 +1,8 @@
 <template>
-  <v-card>
+  <v-card rounded="0">
     <v-toolbar flat color="secondary">
       <v-text-field
-        :disabled="!tasks?.length"
+        :disabled="!workspaceTasks?.length"
         class="mx-2"
         clearable
         v-model="search"
@@ -11,7 +11,6 @@
         hide-details
         density="compact"
         variant="underlined"
-        rounded="xl"
       />
       <v-spacer />
       <v-btn-add class="mx-4" @click="openCreate = true" color="white">
@@ -26,7 +25,6 @@
       :search="search"
       :style="{ 'max-height': '100vh' }"
       :virtual-scroll-props="{ itemHeight: 0, bench: 12 }"
-      density="compact"
     >
       <template #item.overview="{ item }">
         <Swimlanes
@@ -46,7 +44,7 @@
     <TaskForm
       :oldTask="selectedTask"
       :old-task-index="
-        tasks.findIndex(
+        workspaceTasks.findIndex(
           (p) => JSON.stringify(p) === JSON.stringify(selectedTask)
         )
       "
@@ -59,7 +57,7 @@
       v-if="selectedTask"
       :task="selectedTask"
       :task-index="
-        tasks.findIndex(
+        workspaceTasks.findIndex(
           (p) => JSON.stringify(p) === JSON.stringify(selectedTask)
         )
       "
@@ -69,29 +67,43 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import TaskForm from '@/components/Job/Task/TaskForm.vue'
 import DeleteTaskCard from './DeleteTaskCard.vue'
 import Swimlanes from './Swimlanes.vue'
-import hs, { Task } from '@hydroserver/client'
+import hs, { Job, Task } from '@hydroserver/client'
 import { mdiMagnify } from '@mdi/js'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { useTaskStore } from '@/store/task'
+import { useTableLogic } from '@/composables/useTableLogic'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
-const { tasks } = storeToRefs(useTaskStore())
-
-const selectedTask = ref<Task>()
+const selectedWorkspaceId = computed(() => selectedWorkspace.value?.id)
 
 const openCreate = ref(false)
-const openEdit = ref(false)
-const openDelete = ref(false)
 const search = ref()
 const sortBy = [{ key: 'name' as const }]
 
+const {
+  item: selectedTask,
+  items: workspaceTasks,
+  openEdit,
+  openDelete,
+  onUpdate,
+  onDelete,
+} = useTableLogic(
+  async (wsId: string) =>
+    await hs.tasks.listAllItems({
+      workspace_id: [wsId],
+      order_by: ['name'],
+    }),
+  hs.tasks.delete,
+  Task,
+  selectedWorkspaceId
+)
+
 const filteredTasks = computed(() =>
-  tasks.value.map((t) => {
+  workspaceTasks.value.map((t) => {
     const mapped = {
       ...t,
       searchText: '',
@@ -140,12 +152,4 @@ function openDialog(selectedItem: Task, dialog: 'edit' | 'delete') {
   if (dialog === 'edit') openEdit.value = true
   else openDelete.value = true
 }
-
-onMounted(async () => {
-  if (selectedWorkspace.value?.id) {
-    tasks.value = await hs.tasks.listAllItems({
-      workspace_id: [selectedWorkspace.value.id],
-    })
-  }
-})
 </script>

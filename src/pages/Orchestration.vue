@@ -22,13 +22,11 @@
     </v-window-item>
 
     <v-window-item value="tasks">
-      <div class="pa-4">
-        <TaskTable />
-      </div>
+      <TaskTable />
     </v-window-item>
 
     <v-window-item value="runs">
-      <div class="pa-4">Task runs coming soon.</div>
+      <div>Task runs coming soon.</div>
     </v-window-item>
   </v-window>
 </template>
@@ -43,7 +41,7 @@ import { useWorkspaceStore } from '@/store/workspaces'
 import TaskTable from '@/components/Job/Task/TaskTable.vue'
 
 const tabs = [
-  { value: 'jobs', label: 'Job configurations' },
+  { value: 'jobs', label: 'Task Templates' },
   { value: 'tasks', label: 'Task configurations' },
   { value: 'runs', label: 'Task runs' },
 ] as const

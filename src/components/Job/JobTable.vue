@@ -22,7 +22,7 @@
         Download Streaming Data Loader
       </v-btn>
       <v-btn-add class="mx-4" @click="openCreateDialog(null)"
-        >Add job</v-btn-add
+        >Add task template</v-btn-add
       >
     </v-toolbar>
 
@@ -31,6 +31,7 @@
       :items="items"
       :search="search"
       :loading="loading"
+      no-data-text="There's currently no templates for this workspace"
     >
       <!-- <template v-slot:no-data>
         <div class="text-center pa-4" v-if="jobs.length === 0">

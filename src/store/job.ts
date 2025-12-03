@@ -5,12 +5,10 @@ import {
   TransformerConfig,
   LoaderConfig,
   Job,
-  ETLStep,
 } from '@hydroserver/client'
 import { Datastream, DatastreamExtended } from '@hydroserver/client'
 
 export const useJobStore = defineStore('job', () => {
-  const selectedETLStep = ref<ETLStep>('extractor')
   const job = ref(new Job())
   const linkedDatastreams = ref<Datastream[]>([])
   const draftDatastreams = ref<DatastreamExtended[]>([])
@@ -51,7 +49,6 @@ export const useJobStore = defineStore('job', () => {
     extractor,
     transformer,
     loader,
-    selectedETLStep,
     isExtractorValid,
     isTransformerValid,
     isLoaderValid,

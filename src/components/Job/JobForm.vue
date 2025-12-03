@@ -110,10 +110,6 @@ const isSubmitting = ref(false)
 //   },
 // })
 
-// function ensureIsoUtc(s = ''): string {
-//   return s && !/([Zz]|[+-]\d{2}:\d{2})$/.test(s) ? s + 'Z' : s
-// }
-
 // function isoToInput(iso = '', mode: 'local' | 'utc') {
 //   if (!iso) return ''
 //   const d = new Date(ensureIsoUtc(iso))
@@ -167,10 +163,6 @@ async function onSubmit() {
 }
 
 onMounted(async () => {
-  // const timeKeys: Array<'startTime' | 'endTime'> = ['startTime', 'endTime']
-  // timeKeys.forEach((k) => {
-  //   job.value.schedule[k] = ensureIsoUtc(job.value.schedule[k])
-  // })
   // orchestrationSystems.value = await hs.orchestrationSystems.listAllItems({
   //   workspace_id: [selectedWorkspace.value!.id],
   // })
