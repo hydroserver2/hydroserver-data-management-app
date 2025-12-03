@@ -15,18 +15,18 @@
   </v-tabs>
 
   <v-window v-model="tab" class="mt-4">
-    <v-window-item value="jobs">
-      <template v-if="!!selectedWorkspace">
-        <JobTable :workspace-id="selectedWorkspace.id" />
-      </template>
-    </v-window-item>
-
     <v-window-item value="tasks">
       <TaskTable />
     </v-window-item>
 
     <v-window-item value="runs">
       <div>Task runs coming soon.</div>
+    </v-window-item>
+
+    <v-window-item value="templates">
+      <template v-if="!!selectedWorkspace">
+        <JobTable :workspace-id="selectedWorkspace.id" />
+      </template>
     </v-window-item>
   </v-window>
 </template>
@@ -41,12 +41,12 @@ import { useWorkspaceStore } from '@/store/workspaces'
 import TaskTable from '@/components/Job/Task/TaskTable.vue'
 
 const tabs = [
-  { value: 'jobs', label: 'Task Templates' },
   { value: 'tasks', label: 'Task configurations' },
   { value: 'runs', label: 'Task runs' },
+  { value: 'templates', label: 'Task Templates' },
 ] as const
 
-const tab = ref<(typeof tabs)[number]['value']>('jobs')
+const tab = ref<(typeof tabs)[number]['value']>('tasks')
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 

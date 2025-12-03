@@ -228,7 +228,7 @@ const openDeleteDialog = (selectedItem: any) => {
 
 const headers = [
   {
-    title: 'Job name',
+    title: 'Template name',
     key: 'name',
   },
   // {

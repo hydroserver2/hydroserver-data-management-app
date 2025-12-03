@@ -28,7 +28,7 @@
           :items="workspaceJobs"
           item-title="name"
           item-value="id"
-          label="Task name"
+          label="Task template"
           :rules="rules.requiredAndMaxLength255"
           density="comfortable"
         />
@@ -50,6 +50,59 @@
             />
           </template>
         </template> -->
+
+        <div class="mb-4">
+          <p class="font-weight-bold mb-2">Schedule ({{ timezoneLabel }})</p>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="startInput"
+                label="Start time"
+                type="datetime-local"
+                density="comfortable"
+              />
+            </v-col>
+          </v-row>
+
+          <v-radio-group v-model="scheduleMode" inline>
+            <v-radio label="Interval" value="interval" />
+            <v-radio label="Crontab" value="crontab" />
+          </v-radio-group>
+
+          <v-row v-if="scheduleMode === 'interval'">
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model.number="task.schedule!.interval"
+                label="Interval"
+                type="number"
+                min="1"
+                :rules="[(v) => !!v || 'Interval is required']"
+                density="comfortable"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="task.schedule!.intervalPeriod"
+                :items="intervalUnitOptions"
+                item-title="title"
+                item-value="value"
+                label="Interval Units"
+                :rules="[(v) => !!v || 'Units are required']"
+                density="comfortable"
+              />
+            </v-col>
+          </v-row>
+
+          <v-text-field
+            v-else
+            v-model="task.schedule!.crontab"
+            label="Crontab"
+            hint="Five-field crontab string"
+            persistent-hint
+            density="comfortable"
+          />
+        </div>
+
         <v-divider class="mb-6" />
         <SwimlanesForm v-model:task="task" ref="swimlanesRef" />
       </v-card-text>
@@ -70,9 +123,8 @@ import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useJobStore } from '@/store/job'
 import SwimlanesForm from './SwimlanesForm.vue'
-import hs, { Job, Task } from '@hydroserver/client'
+import hs, { Job, Task, TaskSchedule } from '@hydroserver/client'
 import { useTaskStore } from '@/store/task'
 import StickyForm from '@/components/Forms/StickyForm.vue'
 import { useTableLogic } from '@/composables/useTableLogic'
@@ -87,7 +139,6 @@ const props = defineProps({
 })
 
 const { tasks } = storeToRefs(useTaskStore())
-const { linkedDatastreams } = storeToRefs(useJobStore())
 
 const { items: workspaceJobs } = useTableLogic(
   async (wsId: string) =>
@@ -115,6 +166,67 @@ const task = ref<Task>(
     : new Task()
 )
 
+const intervalUnitOptions = [
+  { value: 'minutes', title: 'Minutes' },
+  { value: 'hours', title: 'Hours' },
+  { value: 'days', title: 'Days' },
+] as const
+
+const timezoneLabel = computed(
+  () => Intl.DateTimeFormat().resolvedOptions().timeZone
+)
+
+function defaultSchedule(): TaskSchedule {
+  const now = new Date().toISOString()
+  return {
+    paused: false,
+    startTime: now,
+    nextRunAt: null,
+    crontab: null,
+    interval: 1,
+    intervalPeriod: 'days',
+  }
+}
+
+if (!task.value.schedule) {
+  task.value.schedule = defaultSchedule()
+}
+if (!task.value.mappings) {
+  task.value.mappings = []
+}
+
+const scheduleMode = ref<'interval' | 'crontab'>(
+  task.value.schedule?.crontab ? 'crontab' : 'interval'
+)
+
+function ensureIsoUtc(s: string | null = ''): string | null {
+  return s && !/([Zz]|[+-]\d{2}:\d{2})$/.test(s) ? s + 'Z' : s
+}
+
+function isoToInput(iso: string | null = ''): string {
+  if (!iso) return ''
+  const normalized = ensureIsoUtc(iso) ?? ''
+  const d = new Date(normalized)
+  if (Number.isNaN(d.getTime())) return ''
+  const tzOffsetMs = d.getTimezoneOffset() * 60_000
+  const local = new Date(d.getTime() - tzOffsetMs)
+  return local.toISOString().slice(0, 16)
+}
+
+function inputToIso(str = ''): string {
+  if (!str) return ''
+  const parsed = new Date(str)
+  return parsed.toISOString()
+}
+
+const startInput = computed({
+  get: () => isoToInput(task.value.schedule?.startTime ?? ''),
+  set: (v: string) => {
+    if (!task.value.schedule) task.value.schedule = defaultSchedule()
+    task.value.schedule.startTime = v ? inputToIso(v) : null
+  },
+})
+
 async function onSubmit() {
   const swimlanesValid = await swimlanesRef.value.validate()
   if (!swimlanesValid) return
@@ -123,9 +235,10 @@ async function onSubmit() {
   if (!valid.value) return
 
   submitLoading.value = true
-  task.value.workspaceId = selectedWorkspace.value?.id || ''
 
-  console.log(task.value)
+  task.value.workspaceId = selectedWorkspace.value?.id || ''
+  if (!task.value.schedule) task.value.schedule = defaultSchedule()
+
   const res = isEdit.value
     ? await hs.tasks.update(task.value)
     : await hs.tasks.create(task.value)
@@ -134,25 +247,20 @@ async function onSubmit() {
     Snackbar.error(res.message)
     console.error(res)
   } else {
-    const index = tasks.value.findIndex((p) => p.id === task.value.id)
-    if (index !== -1) tasks.value[index] = task.value
-    else tasks.value = [...tasks.value, task.value]
+    const saved = res.data
+    const index = tasks.value.findIndex((p) => p.id === saved.id)
+    if (index !== -1) tasks.value[index] = saved
+    else tasks.value = [...tasks.value, saved]
   }
 
-  // await updateLinkedDatastreams(task.value, props.oldTask)
-  // linkedDatastreams.value = await hs.datastreams.listAllItems()
   submitLoading.value = false
   emit('close')
 }
 
-function ensureIsoUtc(s = ''): string {
-  return s && !/([Zz]|[+-]\d{2}:\d{2})$/.test(s) ? s + 'Z' : s
-}
-
 onMounted(() => {
-  const timeKeys: Array<'startTime' | 'endTime'> = ['startTime', 'endTime']
+  const timeKeys: Array<'startTime' | 'nextRunAt'> = ['startTime', 'nextRunAt']
   timeKeys.forEach((k) => {
-    if (task.value?.schedule)
+    if (task.value?.schedule && task.value.schedule[k])
       task.value.schedule[k] = ensureIsoUtc(task.value.schedule[k])
   })
 })
