@@ -251,6 +251,8 @@ async function onSubmit() {
     const index = tasks.value.findIndex((p) => p.id === saved.id)
     if (index !== -1) tasks.value[index] = saved
     else tasks.value = [...tasks.value, saved]
+
+    emit(isEdit.value ? 'updated' : 'created', saved)
   }
 
   submitLoading.value = false
