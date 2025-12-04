@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import hs, { Task } from '@hydroserver/client'
+import { Task } from '@hydroserver/client'
 import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['delete', 'close'])
@@ -33,9 +33,8 @@ const props = defineProps({
   taskIndex: { type: Number, required: true },
 })
 
-const onDelete = async () => {
-  await hs.tasks.delete(props.task.id)
-  emit('delete')
+const onDelete = () => {
+  emit('delete', props.task.id)
   emit('close')
 }
 </script>

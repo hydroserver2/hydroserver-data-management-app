@@ -66,6 +66,7 @@
           (p) => JSON.stringify(p) === JSON.stringify(selectedTask)
         )
       "
+      @delete="handleDelete"
       @close="openDelete = false"
     />
   </v-dialog>
@@ -82,6 +83,7 @@ import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { useJobStore } from '@/store/job'
+import { Snackbar } from '@/utils/notifications'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const selectedWorkspaceId = computed(() => selectedWorkspace.value?.id)
@@ -97,7 +99,6 @@ const {
   openEdit,
   openDelete,
   onUpdate,
-  onDelete,
 } = useTableLogic(
   async (wsId: string) =>
     await hs.tasks.listAllItems({
@@ -173,6 +174,22 @@ function handleUpdated(updated: Task) {
     workspaceTasks.value = copy
   }
   openEdit.value = false
+}
+
+async function handleDelete(taskId: string) {
+  const id = taskId || selectedTask.value?.id
+  if (!id) return
+
+  const res = await hs.tasks.delete(id)
+  if (res.ok) {
+    workspaceTasks.value = workspaceTasks.value.filter((t) => t.id !== id)
+    Snackbar.success('Task deleted successfully.')
+  } else {
+    Snackbar.error(res.message)
+    console.error('Error deleting task', res)
+  }
+  openDelete.value = false
+  selectedTask.value = new Task()
 }
 
 // Keep linked datastreams in sync for downstream components (e.g., Swimlanes)
