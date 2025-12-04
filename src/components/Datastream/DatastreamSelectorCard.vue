@@ -153,19 +153,20 @@
 <script setup lang="ts">
 import { watch, onMounted, ref, computed } from 'vue'
 import {
-  Datastream,
   DatastreamExtended,
   Thing,
   Workspace,
 } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useJobStore } from '@/store/job'
 import { useRoute, useRouter } from 'vue-router'
 import { formatTime } from '@/utils/time'
 import hs from '@hydroserver/client'
 import { mdiAlert, mdiMagnify } from '@mdi/js'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
+const { linkedDatastreams } = storeToRefs(useJobStore())
 
 const router = useRouter()
 const route = useRoute()
@@ -259,9 +260,16 @@ const selectAndClose = (ds: DatastreamExtended) => {
 }
 
 // TODO: Use updated API to check against Task targetIdentifiers
+const linkedDatastreamIds = computed(
+  () => new Set(linkedDatastreams.value.map((d) => String(d.id)))
+)
+
 const isLinked = (item: DatastreamExtended) => {
-  const inDraft = props.draftDatastreams?.some((d) => d.id === item.id) ?? false
-  return inDraft
+  const id = String(item.id)
+  const inDraft =
+    props.draftDatastreams?.some((d) => String(d.id) === id) ?? false
+  const inExistingTasks = linkedDatastreamIds.value.has(id)
+  return inDraft || inExistingTasks
   // const linkedSourceId = item.dataSource?.id ?? ''
   // return inDraft || linkedSourceId
 }
