@@ -1,6 +1,15 @@
 <template>
-  <div class="my-4 mx-6 task-details-page" v-if="task">
+  <div class="my-4 task-details-page" v-if="task">
     <v-row class="my-6" align="center">
+      <v-col cols="auto">
+        <v-btn
+          variant="text"
+          color="black"
+          :icon="mdiArrowLeft"
+          class="mr-2"
+          @click="router.push({ name: 'Orchestration' })"
+        />
+      </v-col>
       <v-col cols="auto">
         <h5 class="text-h5 font-weight-bold">{{ task.name }}</h5>
       </v-col>
@@ -172,6 +181,7 @@ import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
 import { useOrchestrationStore } from '@/store/orchestration'
 import {
   mdiBroadcast,
+  mdiArrowLeft,
   mdiCalendarClock,
   mdiCalendarSync,
   mdiCardAccountDetails,
@@ -400,7 +410,7 @@ const pipelineRows = computed(() => {
     )
 
   if (taskTemplateInformation.value.length) {
-    pushSection('General', 'template-subheading')
+    // pushSection('General', 'template-subheading')
     pushInfo(taskTemplateInformation.value, 'template-subheading')
   }
 
@@ -628,8 +638,9 @@ onMounted(async () => {
 
 <style scoped>
 .task-details-page {
-  max-width: 1100px;
-  margin: 0 auto;
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 .section-card {
   background: #f8fafc;
@@ -650,7 +661,7 @@ onMounted(async () => {
   border: 1px solid #cfd8dc;
 }
 .section-card :deep(.v-data-table__wrapper) {
-  padding: 12px 16px;
+  padding: 10px 12px;
 }
 .section-card :deep(.v-table__wrapper) {
   background: transparent;
