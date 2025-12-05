@@ -268,7 +268,7 @@ const activeItem = ref<Workspace>({} as Workspace)
 const showWorkspaceHelp = ref(false)
 
 const canCreateWorkspace = computed(() =>
-  hasPermission(PermissionResource.Workspace, PermissionAction.Create)
+  ["admin", "standard"].includes(user.value?.accountType ?? "")
 )
 
 const selectedWorkspaceId = ref('')
