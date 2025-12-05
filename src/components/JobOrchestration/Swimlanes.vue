@@ -2,7 +2,7 @@
   <div class="swimlanes">
     <div class="task-header">
       <span class="task-name">{{ task.name }}</span>
-      <div class="actions">
+      <div class="actions" v-if="showActions">
         <v-btn
           variant="text"
           color="green"
@@ -77,6 +77,7 @@ import { useOrchestrationStore } from '@/store/orchestration'
 
 const props = defineProps<{
   task: Task
+  showActions?: boolean
 }>()
 
 const { linkedDatastreams } = storeToRefs(useOrchestrationStore())

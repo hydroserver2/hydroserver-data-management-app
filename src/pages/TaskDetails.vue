@@ -5,7 +5,27 @@
         <h5 class="text-h5 font-weight-bold">{{ task.name }}</h5>
       </v-col>
       <v-spacer />
-      <v-col cols="auto">
+      <v-col cols="auto" class="d-flex ga-2">
+        <v-btn
+          variant="outlined"
+          :prepend-icon="mdiPencil"
+          rounded="xl"
+          color="secondary"
+          class="mr-1"
+          @click="openEdit = true"
+        >
+          Edit task
+        </v-btn>
+        <v-btn-delete
+          variant="outlined"
+          rounded="xl"
+          :prepend-icon="mdiTrashCanOutline"
+          color="red-darken-3"
+          class="mr-1"
+          @click="openDelete = true"
+        >
+          Delete task
+        </v-btn-delete>
         <v-btn
           variant="text"
           color="black"
@@ -67,30 +87,21 @@
       </template>
     </v-data-table>
 
-    <v-row class="my-4">
-      <v-spacer />
-      <v-col cols="auto" align-self="center">
-        <v-btn
-          variant="outlined"
-          :prepend-icon="mdiPencil"
-          rounded="xl"
-          color="secondary"
-          class="mr-2"
-          @click="openEdit = true"
-        >
-          Edit task
-        </v-btn>
-        <v-btn-delete
-          variant="outlined"
-          rounded="xl"
-          :prepend-icon="mdiTrashCanOutline"
-          color="red-darken-3"
-          @click="openDelete = true"
-        >
-          Delete task
-        </v-btn-delete>
-      </v-col>
-    </v-row>
+    <v-toolbar color="blue-grey-darken-1" rounded="t-lg" class="section-toolbar mt-6">
+      <h6 class="text-h6 ml-4">Mappings</h6>
+    </v-toolbar>
+    <div
+      v-if="task?.mappings?.length"
+      class="elevation-3 rounded-b-lg section-card swimlanes-card"
+    >
+      <Swimlanes :task="task" :show-actions="false" />
+    </div>
+    <v-sheet
+      v-else
+      class="elevation-1 rounded-b-lg pa-6 text-medium-emphasis section-card"
+    >
+      No mappings configured for this task.
+    </v-sheet>
 
     <v-toolbar color="blue-grey-darken-2" rounded="t-lg" class="section-toolbar mt-6">
       <h6 class="text-h6 ml-4">Linked orchestration system</h6>
@@ -119,7 +130,7 @@
       :old-task="task"
       :orchestration-system="task?.orchestrationSystem"
       @close="openEdit = false"
-      @updated="fetchData"
+      @updated="onTaskUpdated"
     />
   </v-dialog>
 
@@ -136,13 +147,16 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
 import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
+import Swimlanes from '@/components/JobOrchestration/Swimlanes.vue'
 import hs, { Task, WORKFLOW_TYPES } from '@hydroserver/client'
 import router from '@/router/router'
 import DeleteTaskCard from '@/components/JobOrchestration/DeleteTaskCard.vue'
 import { formatTimeWithZone } from '@/utils/time'
 import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
+import { useOrchestrationStore } from '@/store/orchestration'
 import {
   mdiBroadcast,
   mdiCalendarClock,
@@ -163,6 +177,9 @@ const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
 const task = ref<Task | null>(null)
+const { workspaceTasks, workspaceDatastreams } = storeToRefs(
+  useOrchestrationStore()
+)
 
 const scheduleString = computed(() => {
   const schedule = task.value?.schedule
@@ -300,6 +317,22 @@ async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
   await hs.tasks.update(task)
 }
 
+function upsertWorkspaceTask(t: Task | null) {
+  if (!t) return
+  const next = [...workspaceTasks.value]
+  const index = next.findIndex((p) => p.id === t.id)
+  if (index !== -1) next[index] = t
+  else next.push(t)
+  workspaceTasks.value = next
+}
+
+async function refreshDatastreams(workspaceId?: string | null) {
+  if (!workspaceId) return
+  const list =
+    (await hs.datastreams.listAllItems({ workspace_id: [workspaceId] })) ?? []
+  workspaceDatastreams.value = list
+}
+
 const onDelete = async () => {
   try {
     await hs.tasks.delete(task.value!.id)
@@ -315,6 +348,17 @@ const fetchData = async () => {
   task.value = await hs.tasks.getItem(route.params.id.toString(), {
     expand_related: true,
   })
+  upsertWorkspaceTask(task.value)
+  await refreshDatastreams(task.value?.workspaceId)
+}
+
+const onTaskUpdated = async (updated: Task) => {
+  // Keep UI responsive with the returned task, then refresh to ensure relations are expanded
+  task.value = updated
+  upsertWorkspaceTask(updated)
+  await refreshDatastreams(updated.workspaceId)
+  await fetchData()
+  openEdit.value = false
 }
 
 onMounted(async () => {
@@ -344,5 +388,11 @@ onMounted(async () => {
 }
 .section-card :deep(td) {
   padding: 10px 12px;
+}
+.swimlanes-card {
+  padding: 16px 18px;
+}
+.swimlanes-card :deep(.swimlanes) {
+  margin-bottom: 0;
 }
 </style>
