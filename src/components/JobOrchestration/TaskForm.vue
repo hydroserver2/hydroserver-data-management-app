@@ -257,9 +257,10 @@ watch(
 watch(
   () => perTaskPlaceholders.value.map((p) => p.name).join('|'),
   () => {
+    const names = perTaskPlaceholders.value.map((p) => p.name)
+    if (!names.length) return
     if (!task.value.extractorVariables)
       task.value.extractorVariables = {} as Record<string, any>
-    const names = perTaskPlaceholders.value.map((p) => p.name)
     const next: Record<string, any> = {}
     names.forEach((n) => {
       next[n] =
