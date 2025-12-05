@@ -159,8 +159,6 @@ onMounted(async () => {
     },
     { label: 'Is Private', value: d.isPrivate ? 'Yes' : 'No' },
     { label: 'Is Visible', value: d.isVisible ? 'Yes' : 'No' },
-
-    { label: 'Datasource Id', value: d.dataSourceId },
   ]
 
   const op = d.observedProperty

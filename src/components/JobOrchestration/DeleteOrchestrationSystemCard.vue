@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import hs, { DataSource, OrchestrationSystem } from '@hydroserver/client'
+import hs, { Task, OrchestrationSystem } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
 import { mdiAlert } from '@mdi/js'
@@ -67,13 +67,13 @@ const props = defineProps({
     type: Object as () => OrchestrationSystem,
     required: true,
   },
-  dataSources: { type: Object as () => DataSource[], required: true },
+  tasks: { type: Object as () => Task[], required: true },
 })
 
 const deleteInput = ref('')
 
 const relatedSources = computed(() =>
-  props.dataSources.filter(
+  props.tasks.filter(
     (ds) => ds.orchestrationSystem.id === props.orchestrationSystem.id
   )
 )

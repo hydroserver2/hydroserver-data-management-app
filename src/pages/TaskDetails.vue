@@ -1,16 +1,16 @@
 <template>
-  <div class="my-4 mx-6" v-if="dataSource">
+  <div class="my-4 mx-6" v-if="task">
     <v-row class="my-4" align="center">
       <v-col cols="auto">
-        <h5 class="text-h5">{{ dataSource.name }}</h5>
+        <h5 class="text-h5">{{ task.name }}</h5>
       </v-col>
       <v-spacer />
       <v-col cols="auto">
         <v-btn
           variant="text"
           color="black"
-          :prepend-icon="dataSource.status.paused ? mdiPlay : mdiPause"
-          @click.stop="togglePaused(dataSource)"
+          :prepend-icon="task.schedule.paused ? mdiPlay : mdiPause"
+          @click.stop="togglePaused(task)"
         >
           Pause/Run
         </v-btn>
@@ -18,11 +18,11 @@
     </v-row>
 
     <v-toolbar color="blue-grey" rounded="t-lg">
-      <h6 class="text-h6 ml-4">Data source details</h6>
+      <h6 class="text-h6 ml-4">Task details</h6>
     </v-toolbar>
     <v-data-table
-      :headers="dataSourceHeaders"
-      :items="dataSourceInformation"
+      :headers="taskHeaders"
+      :items="taskInformation"
       :items-per-page="-1"
       hide-default-header
       hide-default-footer
@@ -35,11 +35,7 @@
       </template>
       <template #item.value="{ item }">
         <template v-if="item.label === 'Status'">
-          <DataSourceStatus
-            v-if="item.status"
-            :status="item.status"
-            :paused="!!item.paused"
-          />
+          <TaskStatus :status="item.status" :paused="!!item.paused" />
         </template>
         <template v-else>
           {{ item.value }}
@@ -58,7 +54,7 @@
           class="mr-2"
           @click="openEdit = true"
         >
-          Edit data source
+          Edit task
         </v-btn>
         <v-btn-delete
           variant="outlined"
@@ -67,7 +63,7 @@
           color="red-darken-3"
           @click="openDelete = true"
         >
-          Delete data source
+          Delete task
         </v-btn-delete>
       </v-col>
     </v-row>
@@ -90,19 +86,24 @@
       </template>
     </v-data-table>
 
-    <PayloadTable />
+    <!-- <PayloadTable /> -->
   </div>
   <v-container v-else>Loading...</v-container>
 
   <v-dialog v-model="openEdit" width="80rem">
-    <DataSourceForm @close="openEdit = false" @updated="fetchData" is-edit />
+    <TaskForm
+      :old-task="task"
+      :orchestration-system="task?.orchestrationSystem"
+      @close="openEdit = false"
+      @updated="fetchData"
+    />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
-    <DeleteDataSourceCard
+    <DeleteTaskCard
+      :task="task!"
       @close="openDelete = false"
       @delete="onDelete"
-      :itemName="dataSource.name"
     />
   </v-dialog>
 </template>
@@ -110,22 +111,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
-import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
-import DeleteDataSourceCard from '@/components/DataSource/DeleteDataSourceCard.vue'
-import PayloadTable from '@/components/DataSource/Payload/PayloadTable.vue'
 import { computed } from 'vue'
 import { Snackbar } from '@/utils/notifications'
-import { storeToRefs } from 'pinia'
-import hs, {
-  DataSource,
-  getStatusText,
-  WORKFLOW_TYPES,
-} from '@hydroserver/client'
+import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
+import hs, { Task, WORKFLOW_TYPES } from '@hydroserver/client'
 import router from '@/router/router'
-import { useDataSourceStore } from '@/store/datasource'
-
+import DeleteTaskCard from '@/components/JobOrchestration/DeleteTaskCard.vue'
 import { formatTimeWithZone } from '@/utils/time'
+import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
 import {
   mdiBroadcast,
   mdiCalendarClock,
@@ -144,28 +137,28 @@ import {
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const { dataSource, linkedDatastreams } = storeToRefs(useDataSourceStore())
+const task = ref<Task | null>(null)
 
 const scheduleString = computed(() => {
-  if (!dataSource.value) return ''
-  const { interval, intervalUnits, crontab, startTime, endTime } =
-    dataSource.value.schedule
+  const schedule = task.value?.schedule
+  if (!schedule) return '–'
 
-  let schedule = interval
-    ? `Every ${interval} ${intervalUnits}`
-    : `Crontab: ${crontab}`
+  const { interval, intervalPeriod, crontab, startTime } = schedule
+  let description: string | null = null
 
-  if (startTime && endTime)
-    schedule += ` from ${formatTimeWithZone(startTime)} to ${formatTimeWithZone(
-      endTime
-    )}`
-  else if (startTime) schedule += ` beginning ${formatTimeWithZone(startTime)}`
-  else if (endTime) schedule += ` until ${formatTimeWithZone(endTime)}`
+  if (interval && intervalPeriod) {
+    description = `Every ${interval} ${intervalPeriod}`
+  } else if (crontab) {
+    description = `Crontab: ${crontab}`
+  }
 
-  return schedule
+  if (!description) return '–'
+  if (startTime) description += ` starting ${formatTimeWithZone(startTime)}`
+
+  return description
 })
 
-const dataSourceHeaders = [
+const taskHeaders = [
   { key: 'label', title: 'Label' },
   { key: 'value', title: 'Value' },
 ]
@@ -175,14 +168,14 @@ const orchestrationSystemHeaders = [
   { key: 'value', title: 'Value' },
 ]
 
-const dataSourceInformation = computed(() => {
-  if (!dataSource.value) return []
+const taskInformation = computed(() => {
+  if (!task.value) return []
 
   return [
     {
       icon: mdiCardAccountDetails,
       label: 'ID',
-      value: dataSource.value.id,
+      value: task.value.id,
     },
     {
       icon: mdiCalendarClock,
@@ -192,80 +185,68 @@ const dataSourceInformation = computed(() => {
     {
       icon: mdiHistory,
       label: 'Last run',
-      value: formatTimeWithZone(dataSource.value.status.lastRun),
+      value: formatTimeWithZone(task.value.latestRun?.finishedAt),
     },
     {
       icon: mdiCalendarSync,
       label: 'Next run',
-      value: formatTimeWithZone(dataSource.value.status.nextRun),
+      value: formatTimeWithZone(task.value.schedule?.nextRunAt),
     },
     {
       icon: mdiMessageTextOutline,
       label: 'Last run message',
-      value: dataSource.value.status.lastRunMessage || '–',
+      value: task.value.latestRun?.result || '–',
     },
     {
       icon: mdiInformationOutline,
       label: 'Status',
-      status: getStatusText(dataSource.value.status),
-      paused: dataSource.value.status.paused,
+      status: task.value.status,
+      paused: task.value.schedule.paused,
     },
   ].filter(Boolean)
 })
 
 const orchestrationSystemInformation = computed(() => {
-  if (!dataSource.value) return []
+  if (!task.value) return []
 
   return [
     {
       icon: mdiRenameBoxOutline,
       label: 'Name',
-      value: dataSource.value.orchestrationSystem.name,
+      value: task.value.orchestrationSystem.name,
     },
     {
       icon: mdiBroadcast,
       label: 'Type',
       value:
         WORKFLOW_TYPES.find(
-          (t) => t.value === dataSource.value.orchestrationSystem.type
-        )?.title ?? dataSource.value.orchestrationSystem.type,
+          (t) => t.value === task.value.orchestrationSystem.type
+        )?.title ?? task.value.orchestrationSystem.type,
     },
   ].filter(Boolean)
 })
 
-async function togglePaused(ds: any) {
-  ds.status.paused = !ds.status.paused
-  await hs.dataSources.updatePartial({
-    status: ds.status,
-    id: ds.id,
-  } as DataSource)
+async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
+  if (!task.schedule) return
+  task.schedule.paused = !task.schedule.paused
+  await hs.tasks.update(task)
 }
 
 const onDelete = async () => {
   try {
-    await hs.dataSources.delete(dataSource.value.id)
+    await hs.tasks.delete(task.value!.id)
     await router.push({ name: 'Orchestration' })
-    Snackbar.success('Datasource deleted.')
+    Snackbar.success('Task deleted.')
   } catch (error: any) {
     Snackbar.error(error.message)
-    console.error('Error deleting datasource', error)
+    console.error('Error deleting task', error)
   }
 }
 
 const fetchData = async () => {
-  const [source, datastreams] = await Promise.all([
-    hs.dataSources.getItem(route.params.id.toString(), {
-      expand_related: true,
-    }),
-    hs.datastreams.listAllItems({
-      data_source_id: [route.params.id.toString()],
-    }),
-  ])
-
-  if (source && datastreams) {
-    dataSource.value = source
-    linkedDatastreams.value = datastreams
-  }
+  task.value = await hs.tasks.getItem(route.params.id.toString(), {
+    expand_related: true,
+  })
 }
 
 onMounted(async () => {

@@ -1,19 +1,19 @@
 <template>
   <div class="swimlanes">
-    <div class="payload-header">
-      <span class="payload-name">{{ payload.name }}</span>
+    <div class="task-header">
+      <span class="task-name">{{ task.name }}</span>
       <div class="actions">
         <v-btn
           variant="text"
           color="green"
           :icon="mdiPencil"
-          @click.stop="$emit('edit', payload)"
+          @click.stop="$emit('edit', task)"
         />
         <v-btn
           variant="text"
           color="red-darken-3"
           :icon="mdiDelete"
-          @click.stop="$emit('delete', payload)"
+          @click.stop="$emit('delete', task)"
         />
       </div>
     </div>
@@ -21,7 +21,7 @@
     <div class="head">Data transformations</div>
     <div class="head">Target</div>
 
-    <template v-for="(m, mi) in payload.mappings" :key="mi">
+    <template v-for="(m, mi) in task.mappings" :key="mi">
       <template v-for="(p, pi) in m.paths" :key="pi">
         <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
           <template v-if="pi === 0">
@@ -71,30 +71,30 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import TransformChip from './TransformChip.vue'
-import type { Payload } from '@hydroserver/client'
-import { useDataSourceStore } from '@/store/datasource'
+import type { Task } from '@hydroserver/client'
 import { mdiDelete, mdiPencil } from '@mdi/js'
+import { useOrchestrationStore } from '@/store/orchestration'
 
 const props = defineProps<{
-  payload: Payload
+  task: Task
 }>()
 
-const { linkedDatastreams } = storeToRefs(useDataSourceStore())
+const { linkedDatastreams } = storeToRefs(useOrchestrationStore())
 defineEmits<{
-  (e: 'edit', payload: Payload): void
-  (e: 'delete', payload: Payload): void
+  (e: 'edit', task: Task): void
+  (e: 'delete', task: Task): void
 }>()
 </script>
 
 <style scoped>
-.payload-name {
+.task-name {
   grid-column: 1 / -1;
   font-weight: 600;
   font-size: 1rem;
   padding: 4px 0 8px;
   color: rgba(0, 0, 0, 0.8);
 }
-.payload-header {
+.task-header {
   grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;

@@ -14,7 +14,7 @@
       <div class="head">Data transformations</div>
       <div class="head">Target</div>
 
-      <template v-for="(m, mi) in payload.mappings" :key="mi">
+      <template v-for="(m, mi) in task.mappings" :key="mi">
         <template v-for="(p, pi) in m.paths" :key="pi">
           <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
             <template v-if="pi === 0" class="d-flex align-center w-100">
@@ -153,13 +153,13 @@
           </v-btn-add>
         </div>
         <v-divider
-          v-if="mi < payload.mappings.length - 1"
+          v-if="mi < task.mappings.length - 1"
           class="mapping-actions"
         />
       </template>
     </div>
 
-    <div class="mapping-actions" v-if="payload.mappings.length === 0">
+    <div class="mapping-actions" v-if="task.mappings.length === 0">
       <v-btn
         size="small"
         :prepend-icon="mdiSourceBranch"
@@ -196,13 +196,12 @@ import type {
   DataTransformation,
   Mapping,
   MappingPath,
-  Payload,
+  Task,
 } from '@hydroserver/client'
 import DataTransformationForm from './DataTransformationForm.vue'
 import { ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
-import { useDataSourceStore } from '@/store/datasource'
 import { DatastreamExtended } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
@@ -214,10 +213,11 @@ import {
   mdiTableSearch,
   mdiTrashCanOutline,
 } from '@mdi/js'
+import { useOrchestrationStore } from '@/store/orchestration'
 
-const payload = defineModel<Payload>('payload', { required: true })
+const task = defineModel<Task>('task', { required: true })
 const { linkedDatastreams, draftDatastreams } = storeToRefs(
-  useDataSourceStore()
+  useOrchestrationStore()
 )
 
 const localForm = ref<VForm>()
@@ -235,12 +235,12 @@ async function validate() {
   let ok = (vuetify?.valid ?? isValid.value) === true
 
   showErrors.value = true
-  noMappingsError.value = payload.value.mappings.length === 0
+  noMappingsError.value = task.value.mappings.length === 0
   if (noMappingsError.value) ok = false
 
   const nextMissingKeys = new Set<string>()
 
-  payload.value.mappings.forEach((m, mi) => {
+  task.value.mappings.forEach((m, mi) => {
     const hasAnyTarget =
       Array.isArray(m.paths) && m.paths.some((p) => !!p.targetIdentifier)
     if (!hasAnyTarget) ok = false
@@ -256,7 +256,7 @@ async function validate() {
 
 defineExpose({ validate })
 
-if (payload.value.mappings.length === 0) {
+if (task.value.mappings.length === 0) {
   onAddMapping()
 }
 
@@ -275,7 +275,7 @@ function openTargetSelector(mi: number, pi: number) {
 
 function referencedTargetIds(): Set<string> {
   const ids = new Set<string>()
-  for (const m of payload.value.mappings) {
+  for (const m of task.value.mappings) {
     for (const p of m.paths) {
       const id = p.targetIdentifier
       if (id !== undefined && id !== null && String(id) !== '') {
@@ -323,7 +323,7 @@ function onTargetSelected(event: DatastreamExtended) {
   const mi = activeMi.value,
     pi = activePi.value
   if (mi == null || pi == null) return
-  const m = payload.value.mappings[mi]
+  const m = task.value.mappings[mi]
   const p = m?.paths?.[pi]
 
   p.targetIdentifier = event.id
@@ -374,14 +374,14 @@ function removeTransformObj(p: MappingPath, t: DataTransformation) {
 }
 
 function removeMapping(mi: number) {
-  const mappings = payload.value.mappings
+  const mappings = task.value.mappings
   if (!Array.isArray(mappings) || mi < 0 || mi >= mappings.length) return
   mappings.splice(mi, 1)
   syncDraftDatastreams()
 }
 
 function removeMappingRow(mi: number, pi: number) {
-  const mappings = payload.value.mappings
+  const mappings = task.value.mappings
   const m = mappings[mi]
   if (!m) return
 
@@ -391,7 +391,7 @@ function removeMappingRow(mi: number, pi: number) {
 }
 
 function onAddPath(mi: number) {
-  const m = payload.value.mappings[mi]
+  const m = task.value.mappings[mi]
   if (!m) return
   if (!Array.isArray(m.paths)) (m as any).paths = []
   m.paths.push({
@@ -401,7 +401,7 @@ function onAddPath(mi: number) {
 }
 
 function onAddMapping() {
-  if (!payload.value.mappings) (payload.value as any).mappings = []
+  if (!task.value.mappings) (task.value as any).mappings = []
 
   const newMapping: Mapping = {
     sourceIdentifier: '',
@@ -413,7 +413,7 @@ function onAddMapping() {
     ],
   }
 
-  payload.value.mappings.push(newMapping)
+  task.value.mappings.push(newMapping)
 }
 </script>
 

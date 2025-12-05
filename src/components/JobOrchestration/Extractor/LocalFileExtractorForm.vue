@@ -3,9 +3,9 @@
     <v-col>
       <v-card-text>
         <v-text-field
-          v-model="(extractor as LocalFileExtractor).sourceUri"
+          v-model="(extractor as LocalFileExtractor).settings.sourceUri"
           label="Local file path *"
-          hint="Enter the absolute path to the data source file."
+          hint="Enter the absolute path to the job file."
           :rules="rules.requiredAndMaxLength255"
         />
       </v-card-text>
@@ -14,11 +14,11 @@
 </template>
 
 <script setup lang="ts">
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 
 import { storeToRefs } from 'pinia'
 import { LocalFileExtractor } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 
-const { extractor } = storeToRefs(useDataSourceStore())
+const { extractor } = storeToRefs(useJobStore())
 </script>

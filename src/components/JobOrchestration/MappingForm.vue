@@ -30,15 +30,15 @@
 
   <div v-if="showHelp" class="mb-4">
     A source to target mapping allows you to map a unique source identifier to a
-    unique target identifier. These identifiers depend on the payload type, but
-    can be column names or indexes for CSV, object keys for JSON, etc.
-    HydroServer uses the datastream's ID as its identifier.
+    unique target identifier. These identifiers depend on the task type, but can
+    be column names or indexes for CSV, object keys for JSON, etc. HydroServer
+    uses the datastream's ID as its identifier.
   </div>
   <div v-if="showHelp" class="mb-4">
     Adding a data transformation will allow you to apply a unit conversion or
     rating curve to each data point for a mapping. Optionally, you can also save
     the raw data to a separate datastream. Configuration details for this step
-    will be available on the Payload Form after creating this data source.
+    will be available on the Task Form after creating this job.
   </div>
 
   <v-expansion-panels
@@ -48,7 +48,7 @@
     variant="inset"
   >
     <v-expansion-panel
-      v-for="(m, mi) in payload.mappings ?? []"
+      v-for="(m, mi) in task.mappings ?? []"
       :key="mi"
       density="compact"
       class="bg-grey-lighten-4"
@@ -97,7 +97,7 @@
           class="mt-3 mx-2"
         />
 
-        <MappingPathCards v-model:mapping="payload.mappings[mi]" />
+        <MappingPathCards v-model:mapping="task.mappings[mi]" />
 
         <v-btn
           size="small"
@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import MappingPathCards from './MappingPathCards.vue'
-import { Mapping, Payload } from '@hydroserver/client'
+import { Mapping, Task } from '@hydroserver/client'
 import {
   mdiArrowRight,
   mdiChevronDown,
@@ -126,20 +126,20 @@ import {
   mdiTrashCanOutline,
 } from '@mdi/js'
 
-const payload = defineModel<Payload>('payload', { required: true })
+const task = defineModel<Task>('task', { required: true })
 
 const showHelp = ref(false)
 const openPanels = ref<number[]>([])
 
 function onAddMapping() {
-  payload.value.mappings.push({
+  task.value.mappings.push({
     sourceIdentifier: '',
     paths: [{ targetIdentifier: '', dataTransformations: [] }],
   })
-  openPanels.value = [payload.value.mappings.length - 1]
+  openPanels.value = [task.value.mappings.length - 1]
 }
 function onRemoveMapping(index: number) {
-  payload.value.mappings.splice(index, 1)
+  task.value.mappings.splice(index, 1)
   openPanels.value = openPanels.value
     .filter((i) => i !== index)
     .map((i) => (i > index ? i - 1 : i))

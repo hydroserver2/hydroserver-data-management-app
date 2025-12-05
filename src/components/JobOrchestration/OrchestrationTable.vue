@@ -23,6 +23,17 @@
       >
         Download Streaming Data Loader
       </v-btn>
+      <v-btn
+        @click="openJobTableDialog = !openJobTableDialog"
+        rounded="xl"
+        class="mr-4"
+        color="white"
+        variant="outlined"
+        density="comfortable"
+        :append-icon="openJobTableDialog ? mdiMenuUp : mdiMenuDown"
+      >
+        Manage task templates
+      </v-btn>
     </v-toolbar>
 
     <v-data-table-virtual
@@ -67,7 +78,7 @@
 
               <span class="ms-4">{{ item.value }}</span>
               <v-spacer />
-              <v-chip
+              <!-- <v-chip
                 v-if="getBehindScheduleCountText(statusesOf(item.items as any[]))"
                 :prepend-icon="mdiClockAlertOutline"
                 variant="text"
@@ -88,7 +99,7 @@
                 color="error"
               >
                 {{ getBadCountText(statusesOf(item.items as any[])) }}
-              </v-chip>
+              </v-chip> -->
               <v-btn-add
                 class="mx-2"
                 color="white"
@@ -96,7 +107,7 @@
                   openCreateDialog(item.items[0].raw.orchestrationSystem)
                 "
               >
-                Add data source
+                Add task
               </v-btn-add>
 
               <v-btn
@@ -113,10 +124,10 @@
       </template>
 
       <template v-slot:item.status="{ item }">
-        <DataSourceStatus
+        <TaskStatus
           v-if="!item.isPlaceholder"
           :status="item.statusName"
-          :paused="item.status.paused"
+          :paused="item.schedule?.paused"
         />
       </template>
 
@@ -125,7 +136,7 @@
           v-if="!item.isPlaceholder"
           variant="text"
           color="black"
-          :icon="item.status.paused ? mdiPlay : mdiPause"
+          :icon="item.schedule.paused ? mdiPlay : mdiPause"
           @click.stop="togglePaused(item)"
         />
       </template>
@@ -133,7 +144,7 @@
   </v-card>
 
   <v-dialog v-model="openCreate" v-if="selectedOrchestrationSystem">
-    <DataSourceForm
+    <TaskForm
       :orchestration-system="selectedOrchestrationSystem"
       @close="openCreate = false"
       @created="refreshTable"
@@ -141,13 +152,13 @@
   </v-dialog>
 
   <v-dialog
-    v-model="openDelete"
     v-if="selectedOrchestrationSystem"
+    v-model="openDelete"
     width="40rem"
   >
     <DeleteOrchestrationSystemCard
       :orchestration-system="selectedOrchestrationSystem"
-      :data-sources="dataSources"
+      :data-sources="tasks"
       @close="openDelete = false"
       @delete="refreshTable"
     />
@@ -156,20 +167,17 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import DataSourceForm from '@/components/DataSource/DataSourceForm.vue'
-import DataSourceStatus from '@/components/DataSource/DataSourceStatus.vue'
-import DeleteOrchestrationSystemCard from '@/components/OrchestrationSystem/DeleteOrchestrationSystemCard.vue'
+import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
+import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
+import DeleteOrchestrationSystemCard from '@/components/JobOrchestration/DeleteOrchestrationSystemCard.vue'
 import { computed } from 'vue'
 import router from '@/router/router'
 import { formatTime } from '@/utils/time'
 import hs, {
-  getStatusText,
   OrchestrationSystem,
   Status,
-  getBadCountText,
-  getBehindScheduleCountText,
   StatusType,
-  DataSource,
+  Task,
 } from '@hydroserver/client'
 import {
   mdiAlert,
@@ -181,16 +189,22 @@ import {
   mdiPlay,
   mdiTrashCanOutline,
 } from '@mdi/js'
+import { mdiMenuDown, mdiMenuUp } from '@mdi/js'
+import { storeToRefs } from 'pinia'
+import { useJobStore } from '@/store/job'
+import { useOrchestrationStore } from '@/store/orchestration'
 
 const props = defineProps<{
   workspaceId: string
 }>()
 
+const { openJobTableDialog } = storeToRefs(useJobStore())
+const { workspaceTasks } = storeToRefs(useOrchestrationStore())
+
 const openCreate = ref(false)
 const openDelete = ref(false)
 const search = ref()
 const orchestrationSystems = ref<OrchestrationSystem[]>([])
-const dataSources = ref<DataSource[]>([])
 const selectedOrchestrationSystem = ref<OrchestrationSystem>()
 const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 const loading = ref(false)
@@ -198,21 +212,18 @@ const loading = ref(false)
 const fetchOrchestrationData = async (newId: string) => {
   loading.value = true
   try {
-    const [orchestrationSystemResponse, dataSourceResponse] = await Promise.all(
-      [
-        hs.orchestrationSystems.listAllItems(),
-        hs.dataSources.listAllItems({ expand_related: true }),
-      ]
-    )
+    const [orchestrationSystemResponse, taskItems] = await Promise.all([
+      hs.orchestrationSystems.listAllItems(),
+      hs.tasks.listAllItems({ expand_related: true, workspace_id: [newId] }),
+    ])
+
     // TODO: Allow HydroShare as an option once we have archival functionality in the orchestration system
     orchestrationSystems.value = orchestrationSystemResponse.filter(
-      (os: OrchestrationSystem) =>
+      (os) =>
         (os.workspaceId === newId || !os.workspaceId) &&
         os.type !== 'HydroShare'
     )
-    dataSources.value = dataSourceResponse.filter(
-      (d: DataSource) => d.workspaceId === newId
-    )
+    workspaceTasks.value = taskItems
   } catch (error) {
     console.error('Error fetching orchestration data', error)
   } finally {
@@ -234,12 +245,12 @@ watch(
 )
 
 const tableData = computed(() => {
-  const dsList = dataSources.value.map((d) => ({
-    ...d,
-    statusName: getStatusText(d.status),
-    lastRun: d.status.lastRun ? formatTime(d.status.lastRun) : '',
-    nextRun: d.status.nextRun ? formatTime(d.status.nextRun) : '',
-    orchestrationSystemName: d.orchestrationSystem.name,
+  const dsList = workspaceTasks.value.map((t) => ({
+    ...t,
+    statusName: t.latestRun?.status || 'PENDING',
+    lastRun: !!t.latestRun?.startedAt ? formatTime(t.latestRun.startedAt) : '-',
+    nextRun: t.schedule?.nextRunAt ? formatTime(t.schedule?.nextRunAt) : '-',
+    orchestrationSystemName: t.orchestrationSystem.name,
     isPlaceholder: false,
   }))
 
@@ -266,12 +277,10 @@ const tableData = computed(() => {
   })
 })
 
-async function togglePaused(ds: any) {
-  ds.status.paused = !ds.status.paused
-  await hs.dataSources.updatePartial({
-    status: ds.status,
-    id: ds.id,
-  } as DataSource)
+async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
+  if (!task.schedule) return
+  task.schedule.paused = !task.schedule.paused
+  await hs.tasks.update(task)
 }
 
 function statusesOf(rows: any[]): Status[] {
@@ -293,12 +302,12 @@ const openDeleteDialog = (selectedItem: any) => {
 
 const onRowClick = async (event: Event, item: any) => {
   if (item.item.isPlaceholder) return
-  await router.push({ name: 'DataSource', params: { id: item.item.id } })
+  await router.push({ name: 'Task', params: { id: item.item.id } })
 }
 
 const headers = [
   {
-    title: 'Data source name',
+    title: 'Task name',
     key: 'name',
   },
   {
