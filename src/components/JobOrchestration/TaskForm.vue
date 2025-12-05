@@ -33,23 +33,24 @@
           density="comfortable"
         />
 
-        <!-- <template v-if="extractor?.type === 'HTTP'">
-            <div class="section-title mb-2">
-              HTTP extractor task-level configurations
-            </div>
-            <template
-              v-for="variable in extractor.placeholderVariables"
+        <div v-if="perTaskPlaceholders.length" class="mb-4">
+          <p class="font-weight-bold mb-2">Template variables</p>
+          <v-row>
+            <v-col
+              cols="12"
+              md="6"
+              v-for="variable in perTaskPlaceholders"
               :key="variable.name"
             >
               <v-text-field
-                v-if="variable.type === 'perTask'"
                 v-model="task.extractorVariables[variable.name]"
                 :label="`URL template variable: ${variable.name} *`"
                 :rules="rules.requiredAndMaxLength255"
                 density="comfortable"
               />
-            </template>
-          </template> -->
+            </v-col>
+          </v-row>
+        </div>
 
         <div class="mb-4">
           <p class="font-weight-bold mb-2">Schedule ({{ timezoneLabel }})</p>
@@ -127,6 +128,7 @@ import SwimlanesForm from './SwimlanesForm.vue'
 import hs, {
   Job,
   OrchestrationSystem,
+  PlaceholderVariable,
   Task,
   TaskSchedule,
 } from '@hydroserver/client'
@@ -169,6 +171,14 @@ const swimlanesRef = ref<any>(null)
 const submitLoading = ref(false)
 const task = ref<Task>(new Task())
 const scheduleMode = ref<'interval' | 'crontab'>('interval')
+const selectedJob = computed<Job | undefined>(() =>
+  workspaceJobs.value.find((j) => j.id === task.value.jobId)
+)
+const perTaskPlaceholders = computed<PlaceholderVariable[]>(() => {
+  const placeholders =
+    (selectedJob.value as any)?.extractor?.settings?.placeholderVariables || []
+  return placeholders.filter((v: PlaceholderVariable) => v?.type === 'perTask')
+})
 
 const intervalUnitOptions = [
   { value: 'minutes', title: 'Minutes' },
@@ -242,6 +252,24 @@ function hydrateTask(source?: Task) {
 watch(
   () => props.oldTask,
   (newTask) => hydrateTask(newTask),
+  { immediate: true }
+)
+
+watch(
+  () => perTaskPlaceholders.value.map((p) => p.name).join('|'),
+  () => {
+    if (!task.value.extractorVariables)
+      task.value.extractorVariables = {} as Record<string, any>
+    const names = perTaskPlaceholders.value.map((p) => p.name)
+    const next: Record<string, any> = {}
+    names.forEach((n) => {
+      next[n] =
+        task.value.extractorVariables[n] === undefined
+          ? ''
+          : task.value.extractorVariables[n]
+    })
+    task.value.extractorVariables = next
+  },
   { immediate: true }
 )
 

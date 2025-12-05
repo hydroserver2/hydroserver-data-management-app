@@ -85,6 +85,122 @@
         <v-icon :icon="item?.icon" class="mr-2" />
         <strong>{{ item?.label }}</strong>
       </template>
+      <template #item.value="{ item }">
+        <div v-if="item.list?.length" class="variable-list">
+          <div
+            v-for="(entry, idx) in item.list"
+            :key="idx"
+            class="text-body-2"
+          >
+            {{ entry }}
+          </div>
+        </div>
+        <template v-else>
+          {{ item.value }}
+        </template>
+      </template>
+    </v-data-table>
+
+    <v-toolbar
+      v-if="extractorInformation.length"
+      color="brown"
+      rounded="t-lg"
+      class="section-toolbar mt-6"
+    >
+      <h6 class="text-h6 ml-4">Extractor</h6>
+    </v-toolbar>
+    <v-data-table
+      v-if="extractorInformation.length"
+      :headers="taskTemplateHeaders"
+      :items="extractorInformation"
+      :items-per-page="-1"
+      hide-default-header
+      hide-default-footer
+      density="compact"
+      class="elevation-3 rounded-b-lg section-card extractor-card table-top-flush"
+    >
+      <template v-slot:item.label="{ item }">
+        <v-icon :icon="item?.icon" class="mr-2" />
+        <strong>{{ item?.label }}</strong>
+      </template>
+      <template #item.value="{ item }">
+        <div v-if="item.list?.length" class="variable-list">
+          <div
+            v-for="(entry, idx) in item.list"
+            :key="idx"
+            class="text-body-2"
+          >
+            {{ entry }}
+          </div>
+        </div>
+        <template v-else>
+          {{ item.value }}
+        </template>
+      </template>
+    </v-data-table>
+
+    <div
+      v-if="extractorVariables.length"
+      class="section-subheading extractor-subheading"
+    >
+      Extractor variables
+    </div>
+    <v-data-table
+      v-if="extractorVariables.length"
+      :headers="extractorVariableHeaders"
+      :items="extractorVariables"
+      :items-per-page="-1"
+      hide-default-footer
+      density="compact"
+      class="elevation-3 rounded-b-lg section-card extractor-card table-bottom-flush"
+    />
+
+    <v-toolbar
+      v-if="transformerInformation.length"
+      color="green"
+      rounded="t-lg"
+      class="section-toolbar mt-6"
+    >
+      <h6 class="text-h6 ml-4">Transformer</h6>
+    </v-toolbar>
+    <v-data-table
+      v-if="transformerInformation.length"
+      :headers="taskTemplateHeaders"
+      :items="transformerInformation"
+      :items-per-page="-1"
+      hide-default-header
+      hide-default-footer
+      density="compact"
+      class="elevation-3 rounded-b-lg section-card transformer-card"
+    >
+      <template v-slot:item.label="{ item }">
+        <v-icon :icon="item?.icon" class="mr-2" />
+        <strong>{{ item?.label }}</strong>
+      </template>
+    </v-data-table>
+
+    <v-toolbar
+      v-if="loaderInformation.length"
+      color="blue-grey-darken-2"
+      rounded="t-lg"
+      class="section-toolbar mt-6"
+    >
+      <h6 class="text-h6 ml-4">Loader</h6>
+    </v-toolbar>
+    <v-data-table
+      v-if="loaderInformation.length"
+      :headers="taskTemplateHeaders"
+      :items="loaderInformation"
+      :items-per-page="-1"
+      hide-default-header
+      hide-default-footer
+      density="compact"
+      class="elevation-3 rounded-b-lg section-card loader-card"
+    >
+      <template v-slot:item.label="{ item }">
+        <v-icon :icon="item?.icon" class="mr-2" />
+        <strong>{{ item?.label }}</strong>
+      </template>
     </v-data-table>
 
     <v-toolbar color="blue-grey-darken-1" rounded="t-lg" class="section-toolbar mt-6">
@@ -163,7 +279,9 @@ import {
   mdiCalendarSync,
   mdiCardAccountDetails,
   mdiHistory,
+  mdiCodeBraces,
   mdiInformationOutline,
+  mdiDatabaseSettings,
   mdiMessageTextOutline,
   mdiPause,
   mdiCogOutline,
@@ -214,6 +332,20 @@ const taskTemplateHeaders = [
   { key: 'label', title: 'Label' },
   { key: 'value', title: 'Value' },
 ]
+
+const extractorVariableHeaders = [
+  { key: 'type', title: 'Type' },
+  { key: 'name', title: 'Variable' },
+  { key: 'value', title: 'Value' },
+]
+
+function summarize(obj: any): string {
+  if (!obj || typeof obj !== 'object') return '–'
+  const keys = Object.keys(obj ?? {}).filter(
+    (k) => obj[k] !== null && obj[k] !== undefined && obj[k] !== ''
+  )
+  return keys.length ? keys.join(', ') : '–'
+}
 
 const taskInformation = computed(() => {
   if (!task.value) return []
@@ -273,20 +405,80 @@ const taskTemplateInformation = computed(() => {
       label: 'Workflow type',
       value: job.type ?? '–',
     },
+  ].filter((row) => row.value !== undefined && row.value !== null)
+})
+
+const extractorInformation = computed(() => {
+  const extractor: any = task.value?.job?.extractor
+  if (!extractor) return []
+
+  const placeholders: Array<{ name: string; type?: string }> =
+    extractor.settings?.placeholderVariables ?? []
+  const perTaskList = placeholders
+    .filter((p) => p.type === 'perTask')
+    .map((p) => `${p.name}: ${task.value?.extractorVariables?.[p.name] ?? '–'}`)
+  const runtimeList = placeholders
+    .filter((p) => p.type === 'runTime')
+    .map((p) => `${p.name}: ${p.runTimeValue ?? '–'}`)
+
+  return [
+    { icon: mdiCogOutline, label: 'Type', value: extractor.type ?? '–' },
+    { icon: mdiCodeBraces, label: 'Source URL', value: extractor.settings?.sourceUri ?? '–' },
     {
-      icon: mdiCogOutline,
-      label: 'Extractor',
-      value: job.extractor?.type ?? '–',
+      icon: mdiInformationOutline,
+      label: 'Per-task variables',
+      value: perTaskList.length ? null : '–',
+      list: perTaskList,
     },
     {
-      icon: mdiCogOutline,
-      label: 'Transformer',
-      value: job.transformer?.type ?? '–',
+      icon: mdiInformationOutline,
+      label: 'Runtime variables',
+      value: runtimeList.length ? null : '–',
+      list: runtimeList,
     },
+  ].filter((row) => row.value !== undefined && row.value !== null)
+})
+
+const extractorVariables = computed(() => {
+  const extractor: any = task.value?.job?.extractor
+  if (!extractor) return []
+  const placeholders: Array<{ name: string; type?: string; runTimeValue?: any }> =
+    extractor.settings?.placeholderVariables ?? []
+
+  return placeholders.map((p) => ({
+    type: p.type ?? '–',
+    name: p.name,
+    value:
+      p.type === 'perTask'
+        ? task.value?.extractorVariables?.[p.name] ?? '–'
+        : p.runTimeValue ?? '–',
+  }))
+})
+
+const transformerInformation = computed(() => {
+  const transformer: any = task.value?.job?.transformer
+  if (!transformer) return []
+
+  return [
+    { icon: mdiCogOutline, label: 'Type', value: transformer.type ?? '–' },
     {
-      icon: mdiCogOutline,
-      label: 'Loader',
-      value: job.loader?.type ?? '–',
+      icon: mdiDatabaseSettings,
+      label: 'Settings',
+      value: summarize(transformer.settings),
+    },
+  ].filter((row) => row.value !== undefined && row.value !== null)
+})
+
+const loaderInformation = computed(() => {
+  const loader: any = task.value?.job?.loader
+  if (!loader) return []
+
+  return [
+    { icon: mdiCogOutline, label: 'Type', value: loader.type ?? '–' },
+    {
+      icon: mdiDatabaseSettings,
+      label: 'Settings',
+      value: summarize(loader.settings),
     },
   ].filter((row) => row.value !== undefined && row.value !== null)
 })
@@ -376,6 +568,47 @@ onMounted(async () => {
 }
 .section-toolbar {
   color: white;
+}
+.extractor-card {
+  background: #fdf3e7;
+  border: 1px solid #a1887f;
+}
+.transformer-card {
+  background: #e8f5e9;
+  border: 1px solid #66bb6a;
+}
+.loader-card {
+  background: #eceff1;
+  border: 1px solid #607d8b;
+}
+.variable-list {
+  display: grid;
+  row-gap: 4px;
+}
+.section-subheading {
+  font-weight: 700;
+  padding: 6px 12px;
+  background: #f1e3d5;
+  color: #4e342e;
+  border-left: 1px solid #a1887f;
+  border-right: 1px solid #a1887f;
+}
+.extractor-subheading {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.table-top-flush {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+.table-bottom-flush {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+.section-subtoolbar {
+  min-height: 38px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 .section-card :deep(.v-data-table__wrapper) {
   padding: 12px 16px;
