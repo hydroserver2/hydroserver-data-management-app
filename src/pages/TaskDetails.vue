@@ -29,7 +29,7 @@
         <v-btn
           variant="text"
           color="black"
-          :prepend-icon="task.schedule.paused ? mdiPlay : mdiPause"
+          :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
           @click.stop="togglePaused(task)"
         >
           Pause/Run
@@ -42,24 +42,36 @@
     </v-toolbar>
     <v-data-table
       :headers="taskHeaders"
-      :items="taskInformation"
+      :items="taskTableRows"
       :items-per-page="-1"
       hide-default-header
       hide-default-footer
       density="compact"
       class="elevation-3 rounded-b-lg section-card"
     >
-      <template v-slot:item.label="{ item }">
-        <v-icon :icon="item?.icon" class="mr-2" />
-        <strong>{{ item?.label }}</strong>
-      </template>
-      <template #item.value="{ item }">
-        <template v-if="item.label === 'Status'">
-          <TaskStatus :status="item.status" :paused="!!item.paused" />
-        </template>
-        <template v-else>
-          {{ item.value }}
-        </template>
+      <template #item="{ item, columns }">
+        <tr v-if="item.section">
+          <td
+            :colspan="columns.length"
+            class="section-subheading detail-subheading"
+          >
+            {{ item.label }}
+          </td>
+        </tr>
+        <tr v-else>
+          <td class="text-body-2">
+            <v-icon v-if="item?.icon" :icon="item.icon" class="mr-2" />
+            <strong>{{ item?.label }}</strong>
+          </td>
+          <td class="text-body-2">
+            <template v-if="item.label === 'Status'">
+              <TaskStatus :status="item.status" :paused="!!item.paused" />
+            </template>
+            <template v-else>
+              {{ item.value }}
+            </template>
+          </td>
+        </tr>
       </template>
     </v-data-table>
 
@@ -67,143 +79,44 @@
       color="blue-grey-darken-1"
       rounded="t-lg"
       class="section-toolbar mt-6"
-      v-if="taskTemplateInformation.length"
+      v-if="pipelineRows.length"
     >
-      <h6 class="text-h6 ml-4">Task template</h6>
+      <h6 class="text-h6 ml-4">Task Template</h6>
     </v-toolbar>
     <v-data-table
-      v-if="taskTemplateInformation.length"
-      :headers="taskTemplateHeaders"
-      :items="taskTemplateInformation"
+      v-if="pipelineRows.length"
+      :headers="pipelineHeaders"
+      :items="pipelineRows"
       :items-per-page="-1"
       hide-default-header
       hide-default-footer
       density="compact"
-      class="elevation-3 rounded-b-lg section-card"
+      class="elevation-3 rounded-b-lg section-card pipeline-card"
     >
-      <template v-slot:item.label="{ item }">
-        <v-icon :icon="item?.icon" class="mr-2" />
-        <strong>{{ item?.label }}</strong>
-      </template>
-      <template #item.value="{ item }">
-        <div v-if="item.list?.length" class="variable-list">
-          <div
-            v-for="(entry, idx) in item.list"
-            :key="idx"
-            class="text-body-2"
-          >
-            {{ entry }}
-          </div>
-        </div>
-        <template v-else>
-          {{ item.value }}
-        </template>
+      <template #item="{ item, columns }">
+        <tr
+          v-if="item.section"
+          :class="['pipeline-section', item.sectionClass]"
+        >
+          <td :colspan="columns.length" class="section-subheading">
+            {{ item.label }}
+          </td>
+        </tr>
+        <tr v-else>
+          <td class="text-body-2">
+            <v-icon v-if="item.icon" :icon="item.icon" size="16" class="mr-1" />
+            <strong>{{ item.name || '–' }}</strong>
+          </td>
+          <td class="text-body-2">{{ item.value ?? '–' }}</td>
+        </tr>
       </template>
     </v-data-table>
 
     <v-toolbar
-      v-if="extractorInformation.length"
-      color="brown"
+      color="blue-grey-darken-1"
       rounded="t-lg"
       class="section-toolbar mt-6"
     >
-      <h6 class="text-h6 ml-4">Extractor</h6>
-    </v-toolbar>
-    <v-data-table
-      v-if="extractorInformation.length"
-      :headers="taskTemplateHeaders"
-      :items="extractorInformation"
-      :items-per-page="-1"
-      hide-default-header
-      hide-default-footer
-      density="compact"
-      class="elevation-3 rounded-b-lg section-card extractor-card table-top-flush"
-    >
-      <template v-slot:item.label="{ item }">
-        <v-icon :icon="item?.icon" class="mr-2" />
-        <strong>{{ item?.label }}</strong>
-      </template>
-      <template #item.value="{ item }">
-        <div v-if="item.list?.length" class="variable-list">
-          <div
-            v-for="(entry, idx) in item.list"
-            :key="idx"
-            class="text-body-2"
-          >
-            {{ entry }}
-          </div>
-        </div>
-        <template v-else>
-          {{ item.value }}
-        </template>
-      </template>
-    </v-data-table>
-
-    <div
-      v-if="extractorVariables.length"
-      class="section-subheading extractor-subheading"
-    >
-      Extractor variables
-    </div>
-    <v-data-table
-      v-if="extractorVariables.length"
-      :headers="extractorVariableHeaders"
-      :items="extractorVariables"
-      :items-per-page="-1"
-      hide-default-footer
-      density="compact"
-      class="elevation-3 rounded-b-lg section-card extractor-card table-bottom-flush"
-    />
-
-    <v-toolbar
-      v-if="transformerInformation.length"
-      color="green"
-      rounded="t-lg"
-      class="section-toolbar mt-6"
-    >
-      <h6 class="text-h6 ml-4">Transformer</h6>
-    </v-toolbar>
-    <v-data-table
-      v-if="transformerInformation.length"
-      :headers="taskTemplateHeaders"
-      :items="transformerInformation"
-      :items-per-page="-1"
-      hide-default-header
-      hide-default-footer
-      density="compact"
-      class="elevation-3 rounded-b-lg section-card transformer-card"
-    >
-      <template v-slot:item.label="{ item }">
-        <v-icon :icon="item?.icon" class="mr-2" />
-        <strong>{{ item?.label }}</strong>
-      </template>
-    </v-data-table>
-
-    <v-toolbar
-      v-if="loaderInformation.length"
-      color="blue-grey-darken-2"
-      rounded="t-lg"
-      class="section-toolbar mt-6"
-    >
-      <h6 class="text-h6 ml-4">Loader</h6>
-    </v-toolbar>
-    <v-data-table
-      v-if="loaderInformation.length"
-      :headers="taskTemplateHeaders"
-      :items="loaderInformation"
-      :items-per-page="-1"
-      hide-default-header
-      hide-default-footer
-      density="compact"
-      class="elevation-3 rounded-b-lg section-card loader-card"
-    >
-      <template v-slot:item.label="{ item }">
-        <v-icon :icon="item?.icon" class="mr-2" />
-        <strong>{{ item?.label }}</strong>
-      </template>
-    </v-data-table>
-
-    <v-toolbar color="blue-grey-darken-1" rounded="t-lg" class="section-toolbar mt-6">
       <h6 class="text-h6 ml-4">Mappings</h6>
     </v-toolbar>
     <div
@@ -219,23 +132,7 @@
       No mappings configured for this task.
     </v-sheet>
 
-    <v-toolbar color="blue-grey-darken-2" rounded="t-lg" class="section-toolbar mt-6">
-      <h6 class="text-h6 ml-4">Linked orchestration system</h6>
-    </v-toolbar>
-    <v-data-table
-      :headers="orchestrationSystemHeaders"
-      :items="orchestrationSystemInformation"
-      :items-per-page="-1"
-      hide-default-header
-      hide-default-footer
-      density="compact"
-      class="elevation-3 mb-8 rounded-b-lg section-card"
-    >
-      <template v-slot:item.label="{ item }">
-        <v-icon :icon="item?.icon" class="mr-2" />
-        <strong>{{ item?.label }}</strong>
-      </template>
-    </v-data-table>
+    <div class="mb-8" />
 
     <!-- <PayloadTable /> -->
   </div>
@@ -282,11 +179,16 @@ import {
   mdiCodeBraces,
   mdiInformationOutline,
   mdiDatabaseSettings,
+  mdiClockOutline,
+  mdiCogTransfer,
+  mdiFormatListNumbered,
   mdiMessageTextOutline,
   mdiPause,
   mdiCogOutline,
   mdiPencil,
   mdiPlay,
+  mdiTable,
+  mdiDotsHorizontal,
   mdiRenameBoxOutline,
   mdiTrashCanOutline,
 } from '@mdi/js'
@@ -323,19 +225,8 @@ const taskHeaders = [
   { key: 'value', title: 'Value' },
 ]
 
-const orchestrationSystemHeaders = [
-  { key: 'label', title: 'Label' },
-  { key: 'value', title: 'Value' },
-]
-
-const taskTemplateHeaders = [
-  { key: 'label', title: 'Label' },
-  { key: 'value', title: 'Value' },
-]
-
-const extractorVariableHeaders = [
-  { key: 'type', title: 'Type' },
-  { key: 'name', title: 'Variable' },
+const pipelineHeaders = [
+  { key: 'name', title: 'Field' },
   { key: 'value', title: 'Value' },
 ]
 
@@ -392,17 +283,20 @@ const taskTemplateInformation = computed(() => {
   return [
     {
       icon: mdiCardAccountDetails,
-      label: 'Template ID',
+      label: 'Template',
+      name: 'Template ID',
       value: job.id,
     },
     {
       icon: mdiRenameBoxOutline,
-      label: 'Template name',
+      label: 'Template',
+      name: 'Template name',
       value: job.name,
     },
     {
       icon: mdiInformationOutline,
-      label: 'Workflow type',
+      label: 'Template',
+      name: 'Workflow type',
       value: job.type ?? '–',
     },
   ].filter((row) => row.value !== undefined && row.value !== null)
@@ -422,17 +316,29 @@ const extractorInformation = computed(() => {
     .map((p) => `${p.name}: ${p.runTimeValue ?? '–'}`)
 
   return [
-    { icon: mdiCogOutline, label: 'Type', value: extractor.type ?? '–' },
-    { icon: mdiCodeBraces, label: 'Source URL', value: extractor.settings?.sourceUri ?? '–' },
+    {
+      icon: mdiCogOutline,
+      label: 'Extractor',
+      name: 'Type',
+      value: extractor.type ?? '–',
+    },
+    {
+      icon: mdiCodeBraces,
+      label: 'Extractor',
+      name: 'Source URL',
+      value: extractor.settings?.sourceUri ?? '–',
+    },
     {
       icon: mdiInformationOutline,
-      label: 'Per-task variables',
+      label: 'Extractor',
+      name: 'Per-task variables',
       value: perTaskList.length ? null : '–',
       list: perTaskList,
     },
     {
       icon: mdiInformationOutline,
-      label: 'Runtime variables',
+      label: 'Extractor',
+      name: 'Runtime variables',
       value: runtimeList.length ? null : '–',
       list: runtimeList,
     },
@@ -442,8 +348,11 @@ const extractorInformation = computed(() => {
 const extractorVariables = computed(() => {
   const extractor: any = task.value?.job?.extractor
   if (!extractor) return []
-  const placeholders: Array<{ name: string; type?: string; runTimeValue?: any }> =
-    extractor.settings?.placeholderVariables ?? []
+  const placeholders: Array<{
+    name: string
+    type?: string
+    runTimeValue?: any
+  }> = extractor.settings?.placeholderVariables ?? []
 
   return placeholders.map((p) => ({
     type: p.type ?? '–',
@@ -455,18 +364,171 @@ const extractorVariables = computed(() => {
   }))
 })
 
+const taskTableRows = computed(() => {
+  const baseRows = taskInformation.value
+  const rows: any[] = [...baseRows]
+
+  if (orchestrationSystemInformation.value.length) {
+    rows.push({
+      section: true,
+      label: 'Linked orchestration system',
+    })
+    rows.push(
+      ...orchestrationSystemInformation.value.map((r) => ({
+        ...r,
+        label: r.label,
+      }))
+    )
+  }
+
+  return rows
+})
+
+const pipelineRows = computed(() => {
+  const rows: any[] = []
+  const pushSection = (label: string, sectionClass: string) =>
+    rows.push({ section: true, label, sectionClass })
+  const pushInfo = (items: any[], sectionClass: string) =>
+    items.forEach((i) =>
+      rows.push({
+        label: i.label,
+        name: i.name ?? '–',
+        value: i.value ?? '–',
+        icon: i.icon,
+        sectionClass,
+      })
+    )
+
+  if (taskTemplateInformation.value.length) {
+    pushSection('General', 'template-subheading')
+    pushInfo(taskTemplateInformation.value, 'template-subheading')
+  }
+
+  if (extractorInformation.value.length) {
+    pushSection('Extractor', 'extractor-subheading')
+    pushInfo(extractorInformation.value, 'extractor-subheading')
+  }
+  if (extractorVariables.value.length) {
+    pushSection('Extractor variables', 'extractor-subheading')
+    extractorVariables.value.forEach((v) =>
+      rows.push({
+        label: v.type,
+        name: v.name,
+        value: v.value,
+        sectionClass: 'extractor-subheading',
+      })
+    )
+  }
+
+  if (transformerInformation.value.length) {
+    pushSection('Transformer', 'transformer-subheading')
+    pushInfo(transformerInformation.value, 'transformer-subheading')
+  }
+
+  if (loaderInformation.value.length) {
+    pushSection('Loader', 'loader-subheading')
+    pushInfo(loaderInformation.value, 'loader-subheading')
+  }
+
+  return rows
+})
+
 const transformerInformation = computed(() => {
   const transformer: any = task.value?.job?.transformer
   if (!transformer) return []
 
-  return [
-    { icon: mdiCogOutline, label: 'Type', value: transformer.type ?? '–' },
+  const rows: any[] = [
     {
-      icon: mdiDatabaseSettings,
-      label: 'Settings',
-      value: summarize(transformer.settings),
+      icon: mdiCogOutline,
+      label: 'Transformer',
+      name: 'Type',
+      value: transformer.type ?? '–',
     },
-  ].filter((row) => row.value !== undefined && row.value !== null)
+  ]
+
+  const settings: any = transformer.settings ?? {}
+  if (transformer.type === 'JSON') {
+    rows.push(
+      {
+        icon: mdiCodeBraces,
+        label: 'Transformer',
+        name: 'JMESPath',
+        value: settings.JMESPath ?? '–',
+      },
+      {
+        icon: mdiClockOutline,
+        label: 'Transformer',
+        name: 'Timestamp key',
+        value: settings.timestamp?.key ?? '–',
+      },
+      {
+        icon: mdiCalendarClock,
+        label: 'Transformer',
+        name: 'Timestamp format',
+        value: settings.timestamp?.format ?? '–',
+      },
+      {
+        icon: mdiClockOutline,
+        label: 'Transformer',
+        name: 'Timezone mode',
+        value: settings.timestamp?.timezoneMode ?? '–',
+      }
+    )
+  } else if (transformer.type === 'CSV') {
+    rows.push(
+      {
+        icon: mdiFormatListNumbered,
+        label: 'Transformer',
+        name: 'Identifier type',
+        value: settings.identifierType ?? '–',
+      },
+      {
+        icon: mdiTable,
+        label: 'Transformer',
+        name: 'Header row',
+        value: settings.headerRow ?? '–',
+      },
+      {
+        icon: mdiTable,
+        label: 'Transformer',
+        name: 'Data start row',
+        value: settings.dataStartRow ?? '–',
+      },
+      {
+        icon: mdiDotsHorizontal,
+        label: 'Transformer',
+        name: 'Delimiter',
+        value: settings.delimiter ?? '–',
+      },
+      {
+        icon: mdiClockOutline,
+        label: 'Transformer',
+        name: 'Timestamp key',
+        value: settings.timestamp?.key ?? '–',
+      },
+      {
+        icon: mdiCalendarClock,
+        label: 'Transformer',
+        name: 'Timestamp format',
+        value: settings.timestamp?.format ?? '–',
+      },
+      {
+        icon: mdiClockOutline,
+        label: 'Transformer',
+        name: 'Timezone mode',
+        value: settings.timestamp?.timezoneMode ?? '–',
+      }
+    )
+  } else {
+    rows.push({
+      icon: mdiDatabaseSettings,
+      label: 'Transformer',
+      name: 'Settings',
+      value: summarize(settings),
+    })
+  }
+
+  return rows.filter((row) => row.value !== undefined && row.value !== null)
 })
 
 const loaderInformation = computed(() => {
@@ -474,12 +536,18 @@ const loaderInformation = computed(() => {
   if (!loader) return []
 
   return [
-    { icon: mdiCogOutline, label: 'Type', value: loader.type ?? '–' },
     {
-      icon: mdiDatabaseSettings,
-      label: 'Settings',
-      value: summarize(loader.settings),
+      icon: mdiCogOutline,
+      label: 'Loader',
+      name: 'Type',
+      value: loader.type ?? '–',
     },
+    // {
+    //   icon: mdiDatabaseSettings,
+    //   label: 'Loader',
+    //   name: 'Settings',
+    //   value: summarize(loader.settings),
+    // },
   ].filter((row) => row.value !== undefined && row.value !== null)
 })
 
@@ -590,25 +658,32 @@ onMounted(async () => {
   padding: 6px 12px;
   background: #f1e3d5;
   color: #4e342e;
-  border-left: 1px solid #a1887f;
-  border-right: 1px solid #a1887f;
+  border: 1px solid #a1887f;
+}
+.template-subheading {
+  background: #eceff1;
+  color: #37474f;
+  border-color: #90a4ae;
+}
+.detail-subheading {
+  background: #eceff1;
+  color: #263238;
+  border-color: #90a4ae;
 }
 .extractor-subheading {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  background: #f1e3d5;
+  color: #4e342e;
+  border-color: #a1887f;
 }
-.table-top-flush {
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
+.transformer-subheading {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #66bb6a;
 }
-.table-bottom-flush {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-.section-subtoolbar {
-  min-height: 38px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+.loader-subheading {
+  background: #eceff1;
+  color: #37474f;
+  border-color: #607d8b;
 }
 .section-card :deep(.v-data-table__wrapper) {
   padding: 12px 16px;

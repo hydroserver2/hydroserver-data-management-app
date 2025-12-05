@@ -239,7 +239,6 @@ function hydrateTask(source?: Task) {
   if (!base.mappings) base.mappings = []
   if (!base.jobId && (base as any).job?.id)
     base.jobId = String((base as any).job.id)
-
   ;(['startTime', 'nextRunAt'] as const).forEach((k) => {
     if (base.schedule && base.schedule[k])
       base.schedule[k] = ensureIsoUtc(base.schedule[k])
