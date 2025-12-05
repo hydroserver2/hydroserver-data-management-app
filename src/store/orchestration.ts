@@ -1,8 +1,11 @@
 import { defineStore, storeToRefs } from 'pinia'
-import hs, { Datastream, DatastreamExtended, Task } from '@hydroserver/client'
+import hs, {
+  Datastream,
+  DatastreamExtended,
+  TaskExpanded,
+} from '@hydroserver/client'
 import { computed, ref, watch } from 'vue'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { useTableLogic } from '@/composables/useTableLogic'
 
 export const useOrchestrationStore = defineStore('orchestration', () => {
   const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
@@ -11,7 +14,7 @@ export const useOrchestrationStore = defineStore('orchestration', () => {
   const workspaceDatastreams = ref<Datastream[]>([])
   const linkedDatastreams = ref<Datastream[]>([])
   const draftDatastreams = ref<DatastreamExtended[]>([])
-  const workspaceTasks = ref<Task[]>([])
+  const workspaceTasks = ref<TaskExpanded[]>([])
 
   // Fetch all datastreams for the workspace once, then derive linked datastreams from task mappings
   watch(
@@ -49,5 +52,6 @@ export const useOrchestrationStore = defineStore('orchestration', () => {
     workspaceTasks,
     linkedDatastreams,
     draftDatastreams,
+    workspaceDatastreams,
   }
 })

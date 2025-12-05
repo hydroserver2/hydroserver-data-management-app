@@ -147,7 +147,7 @@
   </div>
   <v-container v-else>Loading...</v-container>
 
-  <v-dialog v-model="openEdit" width="80rem">
+  <v-dialog v-model="openEdit" width="80rem" v-if="task">
     <TaskForm
       :old-task="task"
       :orchestration-system="task?.orchestrationSystem"
@@ -173,7 +173,7 @@ import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
 import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
 import Swimlanes from '@/components/JobOrchestration/Swimlanes.vue'
-import hs, { Task, WORKFLOW_TYPES } from '@hydroserver/client'
+import hs, { TaskExpanded, WORKFLOW_TYPES } from '@hydroserver/client'
 import router from '@/router/router'
 import DeleteTaskCard from '@/components/JobOrchestration/DeleteTaskCard.vue'
 import { formatTimeWithZone } from '@/utils/time'
@@ -206,7 +206,7 @@ import {
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const task = ref<Task | null>(null)
+const task = ref<TaskExpanded | null>(null)
 const { workspaceTasks, workspaceDatastreams } = storeToRefs(
   useOrchestrationStore()
 )
@@ -280,8 +280,8 @@ const taskInformation = computed(() => {
     {
       icon: mdiInformationOutline,
       label: 'Status',
-      status: task.value.status,
-      paused: task.value.schedule.paused,
+      status: task.value.latestRun?.status,
+      paused: task.value.schedule?.paused,
     },
   ].filter(Boolean)
 })
@@ -316,8 +316,11 @@ const extractorInformation = computed(() => {
   const extractor: any = task.value?.job?.extractor
   if (!extractor) return []
 
-  const placeholders: Array<{ name: string; type?: string }> =
-    extractor.settings?.placeholderVariables ?? []
+  const placeholders: Array<{
+    name: string
+    type?: string
+    runTimeValue?: string
+  }> = extractor.settings?.placeholderVariables ?? []
   const perTaskList = placeholders
     .filter((p) => p.type === 'perTask')
     .map((p) => `${p.name}: ${task.value?.extractorVariables?.[p.name] ?? '–'}`)
@@ -575,19 +578,21 @@ const orchestrationSystemInformation = computed(() => {
       label: 'Type',
       value:
         WORKFLOW_TYPES.find(
-          (t) => t.value === task.value.orchestrationSystem.type
+          (t) => t.value === task.value?.orchestrationSystem.type
         )?.title ?? task.value.orchestrationSystem.type,
     },
   ].filter(Boolean)
 })
 
-async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
+async function togglePaused(
+  task: Partial<TaskExpanded> & Pick<TaskExpanded, 'id'>
+) {
   if (!task.schedule) return
   task.schedule.paused = !task.schedule.paused
   await hs.tasks.update(task)
 }
 
-function upsertWorkspaceTask(t: Task | null) {
+function upsertWorkspaceTask(t: TaskExpanded | null) {
   if (!t) return
   const next = [...workspaceTasks.value]
   const index = next.findIndex((p) => p.id === t.id)
@@ -615,18 +620,21 @@ const onDelete = async () => {
 }
 
 const fetchData = async () => {
-  task.value = await hs.tasks.getItem(route.params.id.toString(), {
+  task.value = (await hs.tasks.getItem(route.params.id.toString(), {
     expand_related: true,
-  })
+  })) as unknown as TaskExpanded
+
+  console.log('task.value', task.value)
+
   upsertWorkspaceTask(task.value)
-  await refreshDatastreams(task.value?.workspaceId)
+  await refreshDatastreams(task.value?.workspace.id)
 }
 
-const onTaskUpdated = async (updated: Task) => {
+const onTaskUpdated = async (updated: TaskExpanded) => {
   // Keep UI responsive with the returned task, then refresh to ensure relations are expanded
   task.value = updated
   upsertWorkspaceTask(updated)
-  await refreshDatastreams(updated.workspaceId)
+  await refreshDatastreams(updated.workspace.id)
   await fetchData()
   openEdit.value = false
 }

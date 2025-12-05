@@ -21,13 +21,13 @@
 </template>
 
 <script setup lang="ts">
-import { Task } from '@hydroserver/client'
+import { TaskExpanded } from '@hydroserver/client'
 import { mdiAlert } from '@mdi/js'
 
 const emit = defineEmits(['delete', 'close'])
 const props = defineProps({
   task: {
-    type: Object as () => Task,
+    type: Object as () => TaskExpanded,
     required: true,
   },
 })

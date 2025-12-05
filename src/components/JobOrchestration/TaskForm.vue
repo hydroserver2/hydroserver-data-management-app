@@ -43,7 +43,7 @@
               :key="variable.name"
             >
               <v-text-field
-                v-model="task.extractorVariables[variable.name]"
+                v-model="(task as any).extractorVariables[variable.name]"
                 :label="`URL template variable: ${variable.name} *`"
                 :rules="rules.requiredAndMaxLength255"
                 density="comfortable"
@@ -122,7 +122,7 @@
 <script setup lang="ts">
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
-import { computed, ref, watch } from 'vue'
+import { computed, Ref, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import SwimlanesForm from './SwimlanesForm.vue'
 import hs, {
@@ -130,6 +130,7 @@ import hs, {
   OrchestrationSystem,
   PlaceholderVariable,
   Task,
+  TaskExpanded,
   TaskSchedule,
 } from '@hydroserver/client'
 import { useTaskStore } from '@/store/task'
@@ -142,10 +143,10 @@ import { Snackbar } from '@/utils/notifications'
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const selectedWorkspaceId = computed(() => selectedWorkspace.value?.id)
 
-const props = defineProps({
-  oldTask: { type: Object as () => Task },
-  orchestrationSystem: { type: Object as () => OrchestrationSystem },
-})
+const props = defineProps<{
+  oldTask?: TaskExpanded
+  orchestrationSystem: OrchestrationSystem
+}>()
 
 const { tasks } = storeToRefs(useTaskStore())
 const { workspaceTasks } = storeToRefs(useOrchestrationStore())
@@ -230,7 +231,7 @@ const startInput = computed({
   },
 })
 
-function hydrateTask(source?: Task) {
+function hydrateTask(source?: TaskExpanded) {
   const base = source
     ? new Task(JSON.parse(JSON.stringify(source)))
     : new Task()
@@ -264,9 +265,9 @@ watch(
     const next: Record<string, any> = {}
     names.forEach((n) => {
       next[n] =
-        task.value.extractorVariables[n] === undefined
+        (task.value as any).extractorVariables[n] === undefined
           ? ''
-          : task.value.extractorVariables[n]
+          : (task.value as any).extractorVariables[n]
     })
     task.value.extractorVariables = next
   },
@@ -303,7 +304,7 @@ async function onSubmit() {
   } else {
     const saved = res.data
     upsertTaskList(tasks, saved)
-    upsertTaskList(workspaceTasks, saved)
+    upsertTaskList(workspaceTasks as unknown as Ref<Task[]>, saved)
     hydrateTask(saved)
 
     emit(isEdit.value ? 'updated' : 'created', saved)

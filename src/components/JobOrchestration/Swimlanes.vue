@@ -71,12 +71,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import TransformChip from './TransformChip.vue'
-import type { Task } from '@hydroserver/client'
+import type { Task, TaskExpanded } from '@hydroserver/client'
 import { mdiDelete, mdiPencil } from '@mdi/js'
 import { useOrchestrationStore } from '@/store/orchestration'
 
 const props = defineProps<{
-  task: Task
+  task: TaskExpanded
   showActions?: boolean
 }>()
 
