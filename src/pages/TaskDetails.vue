@@ -1,8 +1,8 @@
 <template>
-  <div class="my-4 mx-6" v-if="task">
-    <v-row class="my-4" align="center">
+  <div class="my-4 mx-6 task-details-page" v-if="task">
+    <v-row class="my-6" align="center">
       <v-col cols="auto">
-        <h5 class="text-h5">{{ task.name }}</h5>
+        <h5 class="text-h5 font-weight-bold">{{ task.name }}</h5>
       </v-col>
       <v-spacer />
       <v-col cols="auto">
@@ -17,7 +17,7 @@
       </v-col>
     </v-row>
 
-    <v-toolbar color="blue-grey" rounded="t-lg">
+    <v-toolbar color="blue-grey" rounded="t-lg" class="section-toolbar">
       <h6 class="text-h6 ml-4">Task details</h6>
     </v-toolbar>
     <v-data-table
@@ -27,7 +27,7 @@
       hide-default-header
       hide-default-footer
       density="compact"
-      class="elevation-3 rounded-b-lg"
+      class="elevation-3 rounded-b-lg section-card"
     >
       <template v-slot:item.label="{ item }">
         <v-icon :icon="item?.icon" class="mr-2" />
@@ -40,6 +40,30 @@
         <template v-else>
           {{ item.value }}
         </template>
+      </template>
+    </v-data-table>
+
+    <v-toolbar
+      color="blue-grey-darken-1"
+      rounded="t-lg"
+      class="section-toolbar mt-6"
+      v-if="taskTemplateInformation.length"
+    >
+      <h6 class="text-h6 ml-4">Task template</h6>
+    </v-toolbar>
+    <v-data-table
+      v-if="taskTemplateInformation.length"
+      :headers="taskTemplateHeaders"
+      :items="taskTemplateInformation"
+      :items-per-page="-1"
+      hide-default-header
+      hide-default-footer
+      density="compact"
+      class="elevation-3 rounded-b-lg section-card"
+    >
+      <template v-slot:item.label="{ item }">
+        <v-icon :icon="item?.icon" class="mr-2" />
+        <strong>{{ item?.label }}</strong>
       </template>
     </v-data-table>
 
@@ -68,7 +92,7 @@
       </v-col>
     </v-row>
 
-    <v-toolbar color="blue-grey-darken-2" rounded="t-lg">
+    <v-toolbar color="blue-grey-darken-2" rounded="t-lg" class="section-toolbar mt-6">
       <h6 class="text-h6 ml-4">Linked orchestration system</h6>
     </v-toolbar>
     <v-data-table
@@ -78,7 +102,7 @@
       hide-default-header
       hide-default-footer
       density="compact"
-      class="elevation-3 mb-6 rounded-b-lg"
+      class="elevation-3 mb-8 rounded-b-lg section-card"
     >
       <template v-slot:item.label="{ item }">
         <v-icon :icon="item?.icon" class="mr-2" />
@@ -128,6 +152,7 @@ import {
   mdiInformationOutline,
   mdiMessageTextOutline,
   mdiPause,
+  mdiCogOutline,
   mdiPencil,
   mdiPlay,
   mdiRenameBoxOutline,
@@ -168,6 +193,11 @@ const orchestrationSystemHeaders = [
   { key: 'value', title: 'Value' },
 ]
 
+const taskTemplateHeaders = [
+  { key: 'label', title: 'Label' },
+  { key: 'value', title: 'Value' },
+]
+
 const taskInformation = computed(() => {
   if (!task.value) return []
 
@@ -204,6 +234,44 @@ const taskInformation = computed(() => {
       paused: task.value.schedule.paused,
     },
   ].filter(Boolean)
+})
+
+const taskTemplateInformation = computed(() => {
+  const job: any = task.value?.job
+  if (!job) return []
+
+  return [
+    {
+      icon: mdiCardAccountDetails,
+      label: 'Template ID',
+      value: job.id,
+    },
+    {
+      icon: mdiRenameBoxOutline,
+      label: 'Template name',
+      value: job.name,
+    },
+    {
+      icon: mdiInformationOutline,
+      label: 'Workflow type',
+      value: job.type ?? '–',
+    },
+    {
+      icon: mdiCogOutline,
+      label: 'Extractor',
+      value: job.extractor?.type ?? '–',
+    },
+    {
+      icon: mdiCogOutline,
+      label: 'Transformer',
+      value: job.transformer?.type ?? '–',
+    },
+    {
+      icon: mdiCogOutline,
+      label: 'Loader',
+      value: job.loader?.type ?? '–',
+    },
+  ].filter((row) => row.value !== undefined && row.value !== null)
 })
 
 const orchestrationSystemInformation = computed(() => {
@@ -253,3 +321,28 @@ onMounted(async () => {
   await fetchData()
 })
 </script>
+
+<style scoped>
+.task-details-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-card {
+  background: #f8fafc;
+}
+.section-toolbar {
+  color: white;
+}
+.section-card :deep(.v-data-table__wrapper) {
+  padding: 12px 16px;
+}
+.section-card :deep(.v-table__wrapper) {
+  background: transparent;
+}
+.section-card :deep(tr) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+.section-card :deep(td) {
+  padding: 10px 12px;
+}
+</style>
