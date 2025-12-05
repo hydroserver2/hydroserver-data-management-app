@@ -81,7 +81,7 @@
       class="section-toolbar mt-6"
       v-if="pipelineRows.length"
     >
-      <h6 class="text-h6 ml-4">Task Template</h6>
+      <h6 class="text-h6 ml-4">Task template</h6>
     </v-toolbar>
     <v-data-table
       v-if="pipelineRows.length"
@@ -633,21 +633,10 @@ onMounted(async () => {
 }
 .section-card {
   background: #f8fafc;
+  border: 1px solid #e0e0e0;
 }
 .section-toolbar {
   color: white;
-}
-.extractor-card {
-  background: #fdf3e7;
-  border: 1px solid #a1887f;
-}
-.transformer-card {
-  background: #e8f5e9;
-  border: 1px solid #66bb6a;
-}
-.loader-card {
-  background: #eceff1;
-  border: 1px solid #607d8b;
 }
 .variable-list {
   display: grid;
@@ -656,34 +645,9 @@ onMounted(async () => {
 .section-subheading {
   font-weight: 700;
   padding: 6px 12px;
-  background: #f1e3d5;
-  color: #4e342e;
-  border: 1px solid #a1887f;
-}
-.template-subheading {
-  background: #eceff1;
-  color: #37474f;
-  border-color: #90a4ae;
-}
-.detail-subheading {
   background: #eceff1;
   color: #263238;
-  border-color: #90a4ae;
-}
-.extractor-subheading {
-  background: #f1e3d5;
-  color: #4e342e;
-  border-color: #a1887f;
-}
-.transformer-subheading {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border-color: #66bb6a;
-}
-.loader-subheading {
-  background: #eceff1;
-  color: #37474f;
-  border-color: #607d8b;
+  border: 1px solid #cfd8dc;
 }
 .section-card :deep(.v-data-table__wrapper) {
   padding: 12px 16px;
