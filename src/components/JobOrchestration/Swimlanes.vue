@@ -82,8 +82,8 @@ const props = defineProps<{
 
 const { linkedDatastreams } = storeToRefs(useOrchestrationStore())
 defineEmits<{
-  (e: 'edit', task: Task): void
-  (e: 'delete', task: Task): void
+  (e: 'edit', task: TaskExpanded): void
+  (e: 'delete', task: TaskExpanded): void
 }>()
 </script>
 

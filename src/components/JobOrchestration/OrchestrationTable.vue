@@ -127,7 +127,7 @@
         <TaskStatus
           v-if="!item.isPlaceholder"
           :status="item.statusName"
-          :paused="item.schedule?.paused"
+          :paused="(item as any).schedule?.paused"
         />
       </template>
 
@@ -136,7 +136,7 @@
           v-if="!item.isPlaceholder"
           variant="text"
           color="black"
-          :icon="item.schedule.paused ? mdiPlay : mdiPause"
+          :icon="(item as any).schedule?.paused ? mdiPlay : mdiPause"
           @click.stop="togglePaused(item)"
         />
       </template>
@@ -158,7 +158,7 @@
   >
     <DeleteOrchestrationSystemCard
       :orchestration-system="selectedOrchestrationSystem"
-      :data-sources="tasks"
+      :tasks="workspaceTasks"
       @close="openDelete = false"
       @delete="refreshTable"
     />
@@ -223,7 +223,7 @@ const fetchOrchestrationData = async (newId: string) => {
         (os.workspaceId === newId || !os.workspaceId) &&
         os.type !== 'HydroShare'
     )
-    workspaceTasks.value = taskItems
+    workspaceTasks.value = taskItems as any
   } catch (error) {
     console.error('Error fetching orchestration data', error)
   } finally {
@@ -247,10 +247,11 @@ watch(
 const tableData = computed(() => {
   const dsList = workspaceTasks.value.map((t) => ({
     ...t,
+    schedule: t.schedule ?? null,
     statusName: t.latestRun?.status || 'PENDING',
     lastRun: !!t.latestRun?.startedAt ? formatTime(t.latestRun.startedAt) : '-',
     nextRun: t.schedule?.nextRunAt ? formatTime(t.schedule?.nextRunAt) : '-',
-    orchestrationSystemName: t.orchestrationSystem.name,
+    orchestrationSystemName: (t as any).orchestrationSystem?.name ?? 'Unknown',
     isPlaceholder: false,
   }))
 
@@ -265,6 +266,7 @@ const tableData = computed(() => {
       status: {} as Status,
       orchestrationSystemName: os.name,
       orchestrationSystem: JSON.parse(JSON.stringify(os)),
+      schedule: { paused: false, nextRunAt: null } as any,
       isPlaceholder: true,
     }))
 

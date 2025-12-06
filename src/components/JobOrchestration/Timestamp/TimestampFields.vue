@@ -6,7 +6,7 @@
     <v-row>
       <v-col>
         <v-text-field
-          v-model="transformer.settings.timestamp.key"
+          v-model="transformerWithTimestamp.settings.timestamp.key"
           placeholder="timestamp"
           :label="timestampKeyLabel"
           density="compact"
@@ -20,7 +20,7 @@
   </v-card-text>
   <v-card-text>
     <TimestampFormat
-      :target="transformer.settings.timestamp"
+      :target="transformerWithTimestamp.settings.timestamp"
       color="green-darken-4"
     />
   </v-card-text>
@@ -38,10 +38,21 @@ import { mdiTableColumnWidth } from '@mdi/js'
 
 const { transformer } = storeToRefs(useJobStore())
 
+const transformerWithTimestamp = computed(() => {
+  const t: any = transformer.value ?? {}
+  t.settings ??= {}
+  t.settings.timestamp ??= {
+    key: '',
+    format: 'ISO8601',
+    timezoneMode: 'embeddedOffset',
+  }
+  return t
+})
+
 const isCSV = (t?: any | null) => !!t && t.type === 'CSV'
 
 const timestampKeyLabel = computed(() => {
-  const t = transformer.value
+  const t = transformerWithTimestamp.value
   if (isCSV(t)) {
     return `Timestamp column ${
       (t as CSVTransformer).settings.identifierType === IdentifierType.Name
@@ -53,8 +64,8 @@ const timestampKeyLabel = computed(() => {
 })
 
 const timestampInputType = computed(() => {
-  if (isCSV(transformer.value)) {
-    return (transformer.value as CSVTransformer).settings.identifierType ===
+  if (isCSV(transformerWithTimestamp.value)) {
+    return (transformerWithTimestamp.value as CSVTransformer).settings.identifierType ===
       IdentifierType.Index
       ? 'number'
       : 'text'
@@ -63,7 +74,7 @@ const timestampInputType = computed(() => {
 })
 
 const timestampKeyRules = computed(() => {
-  const t = transformer.value
+  const t = transformerWithTimestamp.value
   if (isCSV(t)) {
     return (t as CSVTransformer).settings.identifierType === IdentifierType.Name
       ? rules.requiredAndMaxLength150

@@ -124,12 +124,20 @@ const runTimeOptions = [
   { title: 'Job execution time', value: 'jobExecutionTime' },
 ]
 
-const httpExtractor = computed<HTTPExtractor>({
-  get: () => extractor.value as HTTPExtractor,
-  set: (val: HTTPExtractor) => {
-    extractor.value = val
-  },
-})
+type HTTPSettings = {
+  sourceUri: string
+  placeholderVariables: PlaceholderVariable[]
+}
+
+const httpExtractor = computed<HTTPExtractor & { settings: HTTPSettings }>(
+  () => {
+    const val = extractor.value as any
+    val.settings ??= { sourceUri: '', placeholderVariables: [] }
+    if (!Array.isArray(val.settings.placeholderVariables))
+      val.settings.placeholderVariables = []
+    return val
+  }
+)
 
 /**
  * Watch the sourceUri for any new or removed {variables}.
@@ -180,23 +188,28 @@ watch(
 // Whenever any variable flips to runTime, give it a default `timestamp`
 // and when it flips back remove those fields
 watch(
-  () => httpExtractor.value.settings.placeholderVariables.map((v) => v.type),
+  () =>
+    httpExtractor.value.settings.placeholderVariables.map(
+      (v: PlaceholderVariable) => v.type
+    ),
   () => {
-    httpExtractor.value.settings.placeholderVariables.forEach((v) => {
-      if (v.type === 'runTime') {
-        const rt = v as RunTimePlaceholder
-        if (!rt.timestamp) {
-          rt.runTimeValue = rt.runTimeValue || runTimeOptions[0].value
-          rt.timestamp = {
-            format: 'naive',
-            timezoneMode: 'utc',
+    httpExtractor.value.settings.placeholderVariables.forEach(
+      (v: PlaceholderVariable) => {
+        if (v.type === 'runTime') {
+          const rt = v as RunTimePlaceholder
+          if (!rt.timestamp) {
+            rt.runTimeValue = rt.runTimeValue || runTimeOptions[0].value
+            rt.timestamp = {
+              format: 'naive',
+              timezoneMode: 'utc',
+            }
           }
+        } else {
+          // strip runtime‐only props off perTask ones
+          if ('timestamp' in v) delete (v as any).timestamp
         }
-      } else {
-        // strip runtime‐only props off perTask ones
-        if ('timestamp' in v) delete v.timestamp
       }
-    })
+    )
   },
   { deep: true }
 )
