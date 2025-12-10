@@ -280,7 +280,7 @@ const taskInformation = computed(() => {
     {
       icon: mdiInformationOutline,
       label: 'Status',
-      status: task.value.latestRun?.status,
+      status: hs.tasks.getStatusText(task.value),
       paused: task.value.schedule?.paused,
     },
   ].filter(Boolean)

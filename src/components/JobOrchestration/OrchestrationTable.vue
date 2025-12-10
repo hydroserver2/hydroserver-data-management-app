@@ -248,7 +248,7 @@ const tableData = computed(() => {
   const dsList = workspaceTasks.value.map((t) => ({
     ...t,
     schedule: t.schedule ?? null,
-    statusName: t.latestRun?.status || 'PENDING',
+    statusName: hs.tasks.getStatusText(t),
     lastRun: !!t.latestRun?.startedAt ? formatTime(t.latestRun.startedAt) : '-',
     nextRun: t.schedule?.nextRunAt ? formatTime(t.schedule?.nextRunAt) : '-',
     orchestrationSystemName: (t as any).orchestrationSystem?.name ?? 'Unknown',
@@ -311,6 +311,10 @@ const headers = [
   {
     title: 'Task name',
     key: 'name',
+  },
+  {
+    title: 'Task template',
+    key: 'job.name',
   },
   {
     title: 'Status',
