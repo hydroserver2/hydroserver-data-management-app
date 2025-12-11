@@ -10,12 +10,11 @@
     <v-card-text v-if="relatedSources.length > 0">
       <v-alert>
         Before you remove <strong> {{ orchestrationSystem.name }} </strong> as
-        an orchestration system, you must delete all of its related data
-        sources.
+        an orchestration system, you must delete all of its related tasks.
       </v-alert>
     </v-card-text>
 
-    <v-card-text>
+    <v-card-text v-if="orchestrationSystem.type === 'SDL'">
       <v-card
         variant="outlined"
         class="pa-4 rounded-lg"
@@ -99,17 +98,16 @@ const onDelete = async () => {
   }
   if (relatedSources.value.length > 0) {
     Snackbar.warn(
-      `Before you remove ${props.orchestrationSystem.name} as an orchestration system, you must delete all of its related data sources.`
+      `Before you remove ${props.orchestrationSystem.name} as an orchestration system, you must delete all of its related tasks.`
     )
     return
   }
 
-  try {
-    await hs.orchestrationSystems.delete(props.orchestrationSystem.id)
-    emit('delete')
-  } catch (err: any) {
-    console.error('Error deleting orchestration system', err)
-    Snackbar.error(err.message)
+  const res = await hs.orchestrationSystems.delete(props.orchestrationSystem.id)
+  if (res.ok) emit('delete')
+  else {
+    console.error('Error deleting orchestration system', res)
+    Snackbar.error(res.message)
   }
   emit('close')
 }
