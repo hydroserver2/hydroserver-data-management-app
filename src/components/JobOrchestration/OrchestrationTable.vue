@@ -140,13 +140,18 @@
           @click.stop="togglePaused(item)"
         />
         <v-btn
-          v-if="!item.isPlaceholder"
+          v-if="!item.isPlaceholder && !item.userClickedRunNow"
           class="ml-2"
           variant="outlined"
           color="green-darken-3"
           :append-icon="mdiPlay"
-          @click.stop="hs.tasks.runTask(item.id)"
+          @click.stop="runTaskNow(item)"
           >Run now</v-btn
+        >
+        <span
+          v-else-if="!item.isPlaceholder && item.userClickedRunNow"
+          class="ml-2"
+          >Run requested</span
         >
       </template>
     </v-data-table-virtual>
@@ -175,11 +180,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
 import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
 import DeleteOrchestrationSystemCard from '@/components/JobOrchestration/DeleteOrchestrationSystemCard.vue'
-import { computed } from 'vue'
 import router from '@/router/router'
 import { formatTime } from '@/utils/time'
 import hs, {
@@ -217,6 +221,7 @@ const orchestrationSystems = ref<OrchestrationSystem[]>([])
 const selectedOrchestrationSystem = ref<OrchestrationSystem>()
 const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 const loading = ref(false)
+const runNowTriggeredByTaskId = reactive<Record<string, boolean>>({})
 
 const fetchOrchestrationData = async (newId: string) => {
   loading.value = true
@@ -262,6 +267,7 @@ const tableData = computed(() => {
     nextRun: t.schedule?.nextRunAt ? formatTime(t.schedule?.nextRunAt) : '-',
     orchestrationSystemName: (t as any).orchestrationSystem?.name ?? 'Unknown',
     isPlaceholder: false,
+    userClickedRunNow: !!runNowTriggeredByTaskId[t.id],
   }))
 
   const existingNames = new Set(dsList.map((ds) => ds.orchestrationSystemName))
@@ -277,6 +283,7 @@ const tableData = computed(() => {
       orchestrationSystem: JSON.parse(JSON.stringify(os)),
       schedule: { paused: false, nextRunAt: null } as any,
       isPlaceholder: true,
+      userClickedRunNow: false,
     }))
 
   const combined = [...dsList, ...placeholders]
@@ -288,10 +295,20 @@ const tableData = computed(() => {
   })
 })
 
+async function runTaskNow(task: Partial<Task> & Pick<Task, 'id'>) {
+  runNowTriggeredByTaskId[task.id] = true
+  try {
+    await hs.tasks.runTask(task.id)
+  } finally {
+    await refreshTable()
+  }
+}
+
 async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
   if (!task.schedule) return
   task.schedule.paused = !task.schedule.paused
   await hs.tasks.update(task)
+  await refreshTable()
 }
 
 function statusesOf(rows: any[]): Status[] {
