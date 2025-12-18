@@ -139,6 +139,15 @@
           :icon="(item as any).schedule?.paused ? mdiPlay : mdiPause"
           @click.stop="togglePaused(item)"
         />
+        <v-btn
+          v-if="!item.isPlaceholder"
+          class="ml-2"
+          variant="outlined"
+          color="green-darken-3"
+          :append-icon="mdiPlay"
+          @click.stop="hs.tasks.runTask(item.id)"
+          >Run now</v-btn
+        >
       </template>
     </v-data-table-virtual>
   </v-card>
