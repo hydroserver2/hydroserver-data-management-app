@@ -25,9 +25,9 @@
         computed when the job runs—ideal for “only fetch new data” scenarios.
       </li>
       <li>
-        <strong>Per-payload variables</strong> (e.g. <code>{fileName}</code>)
-        are supplied for each payload—great when you have many files to fetch
-        from the same URL.
+        <strong>Per-task variables</strong> (e.g. <code>{fileName}</code>) are
+        supplied for each task—great when you have many files to fetch from the
+        same URL.
       </li>
     </ul>
     Once you’ve added at least one placeholder variable in your URL, a new “URL
@@ -39,7 +39,7 @@
     <v-row>
       <v-col cols="12">
         <v-text-field
-          v-model="httpExtractor.sourceUri"
+          v-model="httpExtractor.settings.sourceUri"
           label="URL *"
           density="compact"
           rounded="lg"
@@ -50,11 +50,14 @@
     </v-row>
   </v-card-text>
 
-  <v-card-item v-if="httpExtractor.placeholderVariables.length !== 0">
+  <v-card-item v-if="httpExtractor.settings.placeholderVariables.length !== 0">
     <v-card-title> Placeholder variables </v-card-title>
   </v-card-item>
   <v-card-text>
-    <v-row class="mb-2" v-for="variable in httpExtractor.placeholderVariables">
+    <v-row
+      class="mb-2"
+      v-for="variable in httpExtractor.settings.placeholderVariables"
+    >
       <v-col cols="12" md="3">
         <v-chip
           variant="text"
@@ -68,10 +71,7 @@
 
       <v-col cols="12" md="3">
         <v-radio-group v-model="variable.type" inline hide-details>
-          <v-radio
-            label="Define this variable per payload"
-            value="perPayload"
-          />
+          <v-radio label="Define this variable per task" value="perTask" />
           <v-radio label="Fetch this variable at run-time" value="runTime" />
         </v-radio-group>
       </v-col>
@@ -105,7 +105,7 @@ import {
   PlaceholderVariable,
   RunTimePlaceholder,
 } from '@hydroserver/client'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
@@ -113,7 +113,7 @@ import { computed, ref, watch } from 'vue'
 import TimestampFormat from '../Timestamp/TimestampFormat.vue'
 import { mdiCodeBraces, mdiHelpCircleOutline } from '@mdi/js'
 
-const { extractor } = storeToRefs(useDataSourceStore())
+const { extractor } = storeToRefs(useJobStore())
 const showUrlHelp = ref(false)
 
 const runTimeOptions = [
@@ -124,12 +124,20 @@ const runTimeOptions = [
   { title: 'Job execution time', value: 'jobExecutionTime' },
 ]
 
-const httpExtractor = computed<HTTPExtractor>({
-  get: () => extractor.value as HTTPExtractor,
-  set: (val: HTTPExtractor) => {
-    extractor.value = val
-  },
-})
+type HTTPSettings = {
+  sourceUri: string
+  placeholderVariables: PlaceholderVariable[]
+}
+
+const httpExtractor = computed<HTTPExtractor & { settings: HTTPSettings }>(
+  () => {
+    const val = extractor.value as any
+    val.settings ??= { sourceUri: '', placeholderVariables: [] }
+    if (!Array.isArray(val.settings.placeholderVariables))
+      val.settings.placeholderVariables = []
+    return val
+  }
+)
 
 /**
  * Watch the sourceUri for any new or removed {variables}.
@@ -137,10 +145,10 @@ const httpExtractor = computed<HTTPExtractor>({
  * Variables not found in the URL anymore are removed.
  */
 watch(
-  () => httpExtractor.value.sourceUri,
+  () => httpExtractor.value.settings.sourceUri,
   (newTemplate) => {
     if (!newTemplate) {
-      httpExtractor.value.placeholderVariables = []
+      httpExtractor.value.settings.placeholderVariables = []
       return
     }
 
@@ -159,19 +167,20 @@ watch(
 
     // Rebuild placeholderVariables so they remain in the correct order.
     const newVariables = matchedNames.map((name) => {
-      const existingVar = httpExtractor.value.placeholderVariables.find(
-        (v) => v.name === name
-      )
+      const existingVar =
+        httpExtractor.value.settings.placeholderVariables.find(
+          (v) => v.name === name
+        )
       return existingVar
         ? existingVar
         : ({
             name,
-            type: 'perPayload',
+            type: 'perTask',
             runTimeValue: '',
           } as PlaceholderVariable)
     })
 
-    httpExtractor.value.placeholderVariables = newVariables
+    httpExtractor.value.settings.placeholderVariables = newVariables
   },
   { immediate: true }
 )
@@ -179,23 +188,28 @@ watch(
 // Whenever any variable flips to runTime, give it a default `timestamp`
 // and when it flips back remove those fields
 watch(
-  () => httpExtractor.value.placeholderVariables.map((v) => v.type),
+  () =>
+    httpExtractor.value.settings.placeholderVariables.map(
+      (v: PlaceholderVariable) => v.type
+    ),
   () => {
-    httpExtractor.value.placeholderVariables.forEach((v) => {
-      if (v.type === 'runTime') {
-        const rt = v as RunTimePlaceholder
-        if (!rt.timestamp) {
-          rt.runTimeValue = rt.runTimeValue || runTimeOptions[0].value
-          rt.timestamp = {
-            format: 'naive',
-            timezoneMode: 'utc',
+    httpExtractor.value.settings.placeholderVariables.forEach(
+      (v: PlaceholderVariable) => {
+        if (v.type === 'runTime') {
+          const rt = v as RunTimePlaceholder
+          if (!rt.timestamp) {
+            rt.runTimeValue = rt.runTimeValue || runTimeOptions[0].value
+            rt.timestamp = {
+              format: 'naive',
+              timezoneMode: 'utc',
+            }
           }
+        } else {
+          // strip runtime‐only props off perTask ones
+          if ('timestamp' in v) delete (v as any).timestamp
         }
-      } else {
-        // strip runtime‐only props off perPayload ones
-        if ('timestamp' in v) delete v.timestamp
       }
-    })
+    )
   },
   { deep: true }
 )

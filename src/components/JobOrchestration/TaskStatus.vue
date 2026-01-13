@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { DATASOURCE_STATUS_OPTIONS, StatusType } from '@hydroserver/client'
+import { TASK_STATUS_OPTIONS, StatusType } from '@hydroserver/client'
 
 interface Props {
   status: StatusType
@@ -19,8 +19,7 @@ const chipColor = computed(() => {
     return 'gray'
   }
   return (
-    DATASOURCE_STATUS_OPTIONS.find((s) => s.title === props.status)?.color ??
-    'gray'
+    TASK_STATUS_OPTIONS.find((s) => s.title === props.status)?.color ?? 'gray'
   )
 })
 

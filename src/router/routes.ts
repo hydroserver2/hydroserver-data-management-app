@@ -82,9 +82,9 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/data-sources/:id',
-    name: 'DataSource',
-    component: () => import('@/pages/DataSourceDetails.vue'),
+    path: '/etl-task/:id',
+    name: 'Task',
+    component: () => import('@/pages/TaskDetails.vue'),
     meta: { requiresAuth: true },
   },
   {

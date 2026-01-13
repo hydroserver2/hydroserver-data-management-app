@@ -6,7 +6,7 @@
       </v-card-item>
       <v-card-text>
         <v-text-field
-          v-model="transformer.JMESPath"
+          v-model="transformer.settings.JMESPath"
           label="JMESPath *"
           density="compact"
           rounded="lg"
@@ -24,12 +24,11 @@
 </template>
 
 <script setup lang="ts">
-import { useDataSourceStore } from '@/store/datasource'
-
+import { useJobStore } from '@/store/job'
 import { storeToRefs } from 'pinia'
-import TimestampFields from '@/components/DataSource/Timestamp/TimestampFields.vue'
+import TimestampFields from '@/components/JobOrchestration/Timestamp/TimestampFields.vue'
 import { rules } from '@/utils/rules'
 import { mdiFileTree } from '@mdi/js'
 
-const { transformer } = storeToRefs(useDataSourceStore())
+const { transformer } = storeToRefs(useJobStore())
 </script>

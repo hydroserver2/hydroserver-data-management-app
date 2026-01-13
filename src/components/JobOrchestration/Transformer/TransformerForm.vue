@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import JSONTransformerForm from './JSONTransformerForm.vue'
 import { ref, watch } from 'vue'
-import { useDataSourceStore } from '@/store/datasource'
+import { useJobStore } from '@/store/job'
 
 import { storeToRefs } from 'pinia'
 import CSVTransformerForm from './CSVTransformerForm.vue'
@@ -50,9 +50,9 @@ defineExpose({ validate })
 
 const {
   transformer,
-  dataSource,
+  job,
   isTransformerValid: isValid,
-} = storeToRefs(useDataSourceStore())
+} = storeToRefs(useJobStore())
 
 const savedTransformer: TransformerConfig = JSON.parse(
   JSON.stringify(transformer.value)
@@ -63,7 +63,7 @@ watch(
   (newType) => {
     if (savedTransformer.type === newType)
       transformer.value = JSON.parse(JSON.stringify(savedTransformer))
-    else switchTransformer(dataSource.value, newType)
+    else switchTransformer(job.value, newType)
   }
 )
 </script>

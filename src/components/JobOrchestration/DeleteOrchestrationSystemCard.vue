@@ -10,12 +10,11 @@
     <v-card-text v-if="relatedSources.length > 0">
       <v-alert>
         Before you remove <strong> {{ orchestrationSystem.name }} </strong> as
-        an orchestration system, you must delete all of its related data
-        sources.
+        an orchestration system, you must delete all of its related tasks.
       </v-alert>
     </v-card-text>
 
-    <v-card-text>
+    <v-card-text v-if="orchestrationSystem.type === 'SDL'">
       <v-card
         variant="outlined"
         class="pa-4 rounded-lg"
@@ -56,7 +55,11 @@
 </template>
 
 <script setup lang="ts">
-import hs, { DataSource, OrchestrationSystem } from '@hydroserver/client'
+import hs, {
+  Task,
+  OrchestrationSystem,
+  TaskExpanded,
+} from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 import { computed, ref } from 'vue'
 import { mdiAlert } from '@mdi/js'
@@ -67,14 +70,14 @@ const props = defineProps({
     type: Object as () => OrchestrationSystem,
     required: true,
   },
-  dataSources: { type: Object as () => DataSource[], required: true },
+  tasks: { type: Object as () => TaskExpanded[], required: true },
 })
 
 const deleteInput = ref('')
 
 const relatedSources = computed(() =>
-  props.dataSources.filter(
-    (ds) => ds.orchestrationSystem.id === props.orchestrationSystem.id
+  props.tasks.filter(
+    (ds) => ds.orchestrationSystem?.id === props.orchestrationSystem.id
   )
 )
 
@@ -95,17 +98,16 @@ const onDelete = async () => {
   }
   if (relatedSources.value.length > 0) {
     Snackbar.warn(
-      `Before you remove ${props.orchestrationSystem.name} as an orchestration system, you must delete all of its related data sources.`
+      `Before you remove ${props.orchestrationSystem.name} as an orchestration system, you must delete all of its related tasks.`
     )
     return
   }
 
-  try {
-    await hs.orchestrationSystems.delete(props.orchestrationSystem.id)
-    emit('delete')
-  } catch (err: any) {
-    console.error('Error deleting orchestration system', err)
-    Snackbar.error(err.message)
+  const res = await hs.orchestrationSystems.delete(props.orchestrationSystem.id)
+  if (res.ok) emit('delete')
+  else {
+    console.error('Error deleting orchestration system', res)
+    Snackbar.error(res.message)
   }
   emit('close')
 }
