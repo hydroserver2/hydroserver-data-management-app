@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar title="Task Templates" flat color="blue-grey">
+    <v-toolbar title="Data connections" flat color="blue-grey">
       <v-spacer />
       <v-text-field
         label="Search"
@@ -15,7 +15,7 @@
       />
 
       <v-btn-add class="mx-4" @click="openCreateDialog(null)"
-        >Add task template</v-btn-add
+        >Add data connection</v-btn-add
       >
     </v-toolbar>
 

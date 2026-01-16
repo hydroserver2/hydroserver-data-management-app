@@ -90,7 +90,7 @@
       class="section-toolbar mt-6"
       v-if="pipelineRows.length"
     >
-      <h6 class="text-h6 ml-4">Task template</h6>
+      <h6 class="text-h6 ml-4">Data connection</h6>
     </v-toolbar>
     <v-data-table
       v-if="pipelineRows.length"

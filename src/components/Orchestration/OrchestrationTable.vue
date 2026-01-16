@@ -32,7 +32,7 @@
         density="comfortable"
         :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
       >
-        Manage task templates
+        Manage data connections
       </v-btn>
     </v-toolbar>
 
@@ -339,7 +339,7 @@ const headers = [
     key: 'name',
   },
   {
-    title: 'Task template',
+    title: 'Data connection',
     key: 'dataConnection.name',
   },
   {

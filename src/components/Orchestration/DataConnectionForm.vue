@@ -2,7 +2,7 @@
   <StickyForm v-if="loaded">
     <template #header>
       <p class="ml-6 font-weight-bold">
-        {{ isEdit ? 'Edit' : 'Create a new' }} task template
+        {{ isEdit ? 'Edit' : 'Create a new' }} data connection
         <span v-if="isEdit" class="opacity-80"
           >- {{ formDataConnection?.name }}</span
         >

@@ -22,13 +22,15 @@
           density="comfortable"
         />
 
-        <p class="font-weight-bold mb-2 required-label">Select task template</p>
+        <p class="font-weight-bold mb-2 required-label">
+          Select data connection
+        </p>
         <v-select
           v-model="task.dataConnectionId"
           :items="workspaceDataConnections"
           item-title="name"
           item-value="id"
-          label="Task template"
+          label="Data connection"
           :rules="rules.requiredAndMaxLength255"
           density="comfortable"
         />
