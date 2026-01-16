@@ -140,7 +140,11 @@
           @click.stop="togglePaused(item)"
         />
         <v-btn
-          v-if="!item.isPlaceholder && !item.userClickedRunNow"
+          v-if="
+            !item.isPlaceholder &&
+            isInternalSystem(item) &&
+            !item.userClickedRunNow
+          "
           class="ml-2"
           variant="outlined"
           color="green-darken-3"
@@ -149,7 +153,11 @@
           >Run now</v-btn
         >
         <span
-          v-else-if="!item.isPlaceholder && item.userClickedRunNow"
+          v-else-if="
+            !item.isPlaceholder &&
+            isInternalSystem(item) &&
+            item.userClickedRunNow
+          "
           class="ml-2"
           >Run requested</span
         >
@@ -316,6 +324,15 @@ function statusesOf(rows: any[]): Status[] {
     .filter((r) => !r.isPlaceholder)
     .map((r) => (r.status ?? r.raw?.status) as Status)
     .filter(Boolean)
+}
+
+const isInternalSystem = (item: any) => {
+  const directType = item.orchestrationSystem?.type
+  if (directType) return directType === 'INTERNAL'
+  const matched = orchestrationSystems.value.find(
+    (os) => os.id === item.orchestrationSystemId
+  )
+  return matched?.type === 'INTERNAL'
 }
 
 const openCreateDialog = (selectedItem: any) => {
