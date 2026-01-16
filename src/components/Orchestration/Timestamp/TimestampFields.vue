@@ -30,13 +30,13 @@
 import { computed } from 'vue'
 import { CSVTransformer, IdentifierType } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 
 import { rules } from '@/utils/rules'
 import TimestampFormat from './TimestampFormat.vue'
 import { mdiTableColumnWidth } from '@mdi/js'
 
-const { transformer } = storeToRefs(useJobStore())
+const { transformer } = storeToRefs(useDataConnectionStore())
 
 const transformerWithTimestamp = computed(() => {
   const t: any = transformer.value ?? {}
@@ -65,8 +65,8 @@ const timestampKeyLabel = computed(() => {
 
 const timestampInputType = computed(() => {
   if (isCSV(transformerWithTimestamp.value)) {
-    return (transformerWithTimestamp.value as CSVTransformer).settings.identifierType ===
-      IdentifierType.Index
+    return (transformerWithTimestamp.value as CSVTransformer).settings
+      .identifierType === IdentifierType.Index
       ? 'number'
       : 'text'
   }

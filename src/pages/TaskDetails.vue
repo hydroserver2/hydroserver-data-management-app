@@ -171,13 +171,13 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
-import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
-import Swimlanes from '@/components/JobOrchestration/Swimlanes.vue'
+import TaskForm from '@/components/Orchestration/TaskForm.vue'
+import Swimlanes from '@/components/Orchestration/Swimlanes.vue'
 import hs, { TaskExpanded, WORKFLOW_TYPES } from '@hydroserver/client'
 import router from '@/router/router'
-import DeleteTaskCard from '@/components/JobOrchestration/DeleteTaskCard.vue'
+import DeleteTaskCard from '@/components/Orchestration/DeleteTaskCard.vue'
 import { formatTimeWithZone } from '@/utils/time'
-import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
+import TaskStatus from '@/components/Orchestration/TaskStatus.vue'
 import { useOrchestrationStore } from '@/store/orchestration'
 import {
   mdiBroadcast,
@@ -287,33 +287,33 @@ const taskInformation = computed(() => {
 })
 
 const taskTemplateInformation = computed(() => {
-  const job: any = task.value?.job
-  if (!job) return []
+  const dataConnection: any = task.value?.dataConnection
+  if (!dataConnection) return []
 
   return [
     {
       icon: mdiCardAccountDetails,
       label: 'Template',
       name: 'Template ID',
-      value: job.id,
+      value: dataConnection.id,
     },
     {
       icon: mdiRenameBoxOutline,
       label: 'Template',
       name: 'Template name',
-      value: job.name,
+      value: dataConnection.name,
     },
     {
       icon: mdiInformationOutline,
       label: 'Template',
       name: 'Workflow type',
-      value: job.type ?? '–',
+      value: dataConnection.type ?? '–',
     },
   ].filter((row) => row.value !== undefined && row.value !== null)
 })
 
 const extractorInformation = computed(() => {
-  const extractor: any = task.value?.job?.extractor
+  const extractor: any = task.value?.dataConnection?.extractor
   if (!extractor) return []
 
   const placeholders: Array<{
@@ -359,7 +359,7 @@ const extractorInformation = computed(() => {
 })
 
 const extractorVariables = computed(() => {
-  const extractor: any = task.value?.job?.extractor
+  const extractor: any = task.value?.dataConnection?.extractor
   if (!extractor) return []
   const placeholders: Array<{
     name: string
@@ -447,7 +447,7 @@ const pipelineRows = computed(() => {
 })
 
 const transformerInformation = computed(() => {
-  const transformer: any = task.value?.job?.transformer
+  const transformer: any = task.value?.dataConnection?.transformer
   if (!transformer) return []
 
   const rows: any[] = [
@@ -545,7 +545,7 @@ const transformerInformation = computed(() => {
 })
 
 const loaderInformation = computed(() => {
-  const loader: any = task.value?.job?.loader
+  const loader: any = task.value?.dataConnection?.loader
   if (!loader) return []
 
   return [

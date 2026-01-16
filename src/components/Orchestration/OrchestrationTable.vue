@@ -24,13 +24,13 @@
         Download Streaming Data Loader
       </v-btn>
       <v-btn
-        @click="openJobTableDialog = !openJobTableDialog"
+        @click="openDataConnectionTableDialog = !openDataConnectionTableDialog"
         rounded="xl"
         class="mr-4"
         color="white"
         variant="outlined"
         density="comfortable"
-        :append-icon="openJobTableDialog ? mdiMenuUp : mdiMenuDown"
+        :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
       >
         Manage task templates
       </v-btn>
@@ -181,9 +181,9 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import TaskForm from '@/components/JobOrchestration/TaskForm.vue'
-import TaskStatus from '@/components/JobOrchestration/TaskStatus.vue'
-import DeleteOrchestrationSystemCard from '@/components/JobOrchestration/DeleteOrchestrationSystemCard.vue'
+import TaskForm from '@/components/Orchestration/TaskForm.vue'
+import TaskStatus from '@/components/Orchestration/TaskStatus.vue'
+import DeleteOrchestrationSystemCard from '@/components/Orchestration/DeleteOrchestrationSystemCard.vue'
 import router from '@/router/router'
 import { formatTime } from '@/utils/time'
 import hs, {
@@ -204,14 +204,14 @@ import {
 } from '@mdi/js'
 import { mdiMenuDown, mdiMenuUp } from '@mdi/js'
 import { storeToRefs } from 'pinia'
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 import { useOrchestrationStore } from '@/store/orchestration'
 
 const props = defineProps<{
   workspaceId: string
 }>()
 
-const { openJobTableDialog } = storeToRefs(useJobStore())
+const { openDataConnectionTableDialog } = storeToRefs(useDataConnectionStore())
 const { workspaceTasks } = storeToRefs(useOrchestrationStore())
 
 const openCreate = ref(false)
@@ -340,7 +340,7 @@ const headers = [
   },
   {
     title: 'Task template',
-    key: 'job.name',
+    key: 'dataConnection.name',
   },
   {
     title: 'Status',

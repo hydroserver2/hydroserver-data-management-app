@@ -3,7 +3,9 @@
     <template #header>
       <p class="ml-6 font-weight-bold">
         {{ isEdit ? 'Edit' : 'Create a new' }} task template
-        <span v-if="isEdit" class="opacity-80">- {{ formJob?.name }}</span>
+        <span v-if="isEdit" class="opacity-80"
+          >- {{ formDataConnection?.name }}</span
+        >
       </p>
     </template>
 
@@ -17,8 +19,8 @@
       <div class="form-body">
         <p class="font-weight-bold mb-2 required-label">Name your template</p>
         <v-text-field
-          v-model="formJob.name"
-          label="Job name"
+          v-model="formDataConnection.name"
+          label="Data connection name"
           :rules="rules.requiredAndMaxLength255"
           density="compact"
         />
@@ -43,25 +45,29 @@ import { VForm } from 'vuetify/components'
 import { storeToRefs } from 'pinia'
 import StickyForm from '@/components/Forms/StickyForm.vue'
 import { rules } from '@/utils/rules'
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 import { useWorkspaceStore } from '@/store/workspaces'
 import ExtractorForm from './Extractor/ExtractorForm.vue'
 import TransformerForm from './Transformer/TransformerForm.vue'
 import LoaderForm from './Loader/LoaderForm.vue'
-import hs, { OrchestrationSystem, Job } from '@hydroserver/client'
+import hs, { OrchestrationSystem, DataConnection } from '@hydroserver/client'
 import { Snackbar } from '@/utils/notifications'
 
 const props = defineProps<{
-  job?: Job
+  dataConnection?: DataConnection
 }>()
 
 const emit = defineEmits(['created', 'updated', 'close'])
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
-const { job: formJob } = storeToRefs(useJobStore())
+const { dataConnection: formDataConnection } = storeToRefs(
+  useDataConnectionStore()
+)
 
-const isEdit = computed(() => !!props.job)
-formJob.value = !!props.job ? props.job : new Job()
+const isEdit = computed(() => !!props.dataConnection)
+formDataConnection.value = !!props.dataConnection
+  ? props.dataConnection
+  : new DataConnection()
 const valid = ref(false)
 const myForm = ref<VForm>()
 
@@ -73,14 +79,14 @@ const loaded = ref(false)
 const isSubmitting = ref(false)
 // const scheduleType = ref('interval')
 
-// let prevJob = undefined
-// if (props.isEdit) prevJob = JSON.parse(JSON.stringify(toRaw(job.value)))
+// let prevDataConnection = undefined
+// if (props.isEdit) prevDataConnection = JSON.parse(JSON.stringify(toRaw(dataConnection.value)))
 // else {
 //   // let workflowType = 'SDL'
 //   // if (props.orchestrationSystem?.type === 'airflow') {
 //   const workflowType: WorkflowType = 'ETL'
 //   // }
-//   job.value = new Job({
+//   dataConnection.value = new DataConnection({
 //     extractor: JSON.parse(JSON.stringify(extractorDefaults['local'])),
 //     transformer: JSON.parse(JSON.stringify(transformerDefaults['CSV'])),
 //     loader: JSON.parse(JSON.stringify(loaderDefaults['HydroServer'])),
@@ -97,16 +103,16 @@ const isSubmitting = ref(false)
 // ])
 
 // const startInput = computed<string>({
-//   get: () => isoToInput(job.value.schedule.startTime, 'local'),
+//   get: () => isoToInput(dataConnection.value.schedule.startTime, 'local'),
 //   set: (v) => {
-//     job.value.schedule.startTime = inputToIso(v, 'local')
+//     dataConnection.value.schedule.startTime = inputToIso(v, 'local')
 //   },
 // })
 
 // const endInput = computed<string>({
-//   get: () => isoToInput(job.value.schedule.endTime, 'local'),
+//   get: () => isoToInput(dataConnection.value.schedule.endTime, 'local'),
 //   set: (v) => {
-//     job.value.schedule.endTime = inputToIso(v, 'local')
+//     dataConnection.value.schedule.endTime = inputToIso(v, 'local')
 //   },
 // })
 
@@ -140,18 +146,18 @@ async function onSubmit() {
   await myForm.value?.validate()
   if (!valid.value) return false
 
-  formJob.value.workspace = selectedWorkspace.value
+  formDataConnection.value.workspace = selectedWorkspace.value
   const res = isEdit.value
-    ? await hs.jobs.update(formJob.value)
-    : await hs.jobs.create(formJob.value)
+    ? await hs.dataConnections.update(formDataConnection.value)
+    : await hs.dataConnections.create(formDataConnection.value)
 
   if (res.ok) {
     if (isEdit.value) {
       emit('updated', res.data)
-      Snackbar.success('Updated job')
+      Snackbar.success('Updated data connection')
     } else {
       emit('created', res.data.id)
-      Snackbar.success('Created job')
+      Snackbar.success('Created data connection')
     }
   } else {
     Snackbar.error(res.message)

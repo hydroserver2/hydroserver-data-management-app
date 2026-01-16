@@ -22,7 +22,7 @@
     <ul class="ma-4">
       <li>
         <strong>Run-time variables</strong> (e.g. <code>{startTime}</code>) are
-        computed when the job runs—ideal for “only fetch new data” scenarios.
+        computed when the task runs—ideal for “only fetch new data” scenarios.
       </li>
       <li>
         <strong>Per-task variables</strong> (e.g. <code>{fileName}</code>) are
@@ -105,7 +105,7 @@ import {
   PlaceholderVariable,
   RunTimePlaceholder,
 } from '@hydroserver/client'
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 
 import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
@@ -113,7 +113,7 @@ import { computed, ref, watch } from 'vue'
 import TimestampFormat from '../Timestamp/TimestampFormat.vue'
 import { mdiCodeBraces, mdiHelpCircleOutline } from '@mdi/js'
 
-const { extractor } = storeToRefs(useJobStore())
+const { extractor } = storeToRefs(useDataConnectionStore())
 const showUrlHelp = ref(false)
 
 const runTimeOptions = [
@@ -121,7 +121,7 @@ const runTimeOptions = [
     title: 'Latest observation timestamp',
     value: 'latestObservationTimestamp',
   },
-  { title: 'Job execution time', value: 'jobExecutionTime' },
+  { title: 'Job execution time', value: 'dExecutionTime' },
 ]
 
 type HTTPSettings = {

@@ -9,8 +9,8 @@
           </v-col>
         </v-row>
 
-        <template v-if="!!selectedWorkspace && openJobTableDialog">
-          <JobTable :workspace-id="selectedWorkspace.id" />
+        <template v-if="!!selectedWorkspace && openDataConnectionTableDialog">
+          <DataConnectionTable :workspace-id="selectedWorkspace.id" />
         </template>
       </v-col>
     </v-row>
@@ -22,19 +22,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import OrchestrationTable from '@/components/JobOrchestration/OrchestrationTable.vue'
+import { onMounted } from 'vue'
+import OrchestrationTable from '@/components/Orchestration/OrchestrationTable.vue'
 import { useWorkspaceStore } from '@/store/workspaces'
 import { storeToRefs } from 'pinia'
 import hs from '@hydroserver/client'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
-import JobTable from '@/components/JobOrchestration/JobTable.vue'
-import { useJobStore } from '@/store/job'
+import DataConnectionTable from '@/components/Orchestration/DataConnectionTable.vue'
+import { useDataConnectionStore } from '@/store/dataConnection'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()
 
-const { openJobTableDialog } = storeToRefs(useJobStore())
+const { openDataConnectionTableDialog } = storeToRefs(useDataConnectionStore())
 
 onMounted(async () => {
   try {

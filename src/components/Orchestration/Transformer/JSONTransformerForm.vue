@@ -24,11 +24,11 @@
 </template>
 
 <script setup lang="ts">
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 import { storeToRefs } from 'pinia'
-import TimestampFields from '@/components/JobOrchestration/Timestamp/TimestampFields.vue'
+import TimestampFields from '@/components/Orchestration/Timestamp/TimestampFields.vue'
 import { rules } from '@/utils/rules'
 import { mdiFileTree } from '@mdi/js'
 
-const { transformer } = storeToRefs(useJobStore())
+const { transformer } = storeToRefs(useDataConnectionStore())
 </script>

@@ -125,13 +125,13 @@
         </v-card-title>
       </v-toolbar>
       <v-card-text v-if="currentSourceId">
-        This datastream is already linked to a job. To reassign it here, you’ll
-        first need to unlink it from that source.
+        This datastream is already linked to a data connection. To reassign it
+        here, you’ll first need to unlink it from that source.
       </v-card-text>
       <v-card-text v-else>
-        This datastream is already being linked to another job in the Task form.
-        Check your pending task configurations to make sure each one is mapping
-        the sources to the correct targets.
+        This datastream is already being linked to another data connection in
+        the Task form. Check your pending task configurations to make sure each
+        one is mapping the sources to the correct targets.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -141,9 +141,9 @@
         <v-btn-primary
           v-if="currentSourceId"
           color="yellow-darken-2"
-          @click="goToJob"
+          @click="goToDataConnection"
         >
-          View existing job
+          View existing data connection
         </v-btn-primary>
       </v-card-actions>
     </v-card>
@@ -293,19 +293,19 @@ const getRowProps = ({ item }: { item: DatastreamExtended }) => {
   else return ''
 }
 
-function goToJob() {
+function goToDataConnection() {
   if (!currentSourceId.value) return
 
   openLinkConflictModal.value = false
 
   const samePage =
-    route.name === 'Job' && route.params.id === currentSourceId.value
+    route.name === 'DataConnection' && route.params.id === currentSourceId.value
 
   if (samePage) {
     router.go(0)
   } else {
     router.push({
-      name: 'Job',
+      name: 'DataConnection',
       params: { id: currentSourceId.value },
     })
   }

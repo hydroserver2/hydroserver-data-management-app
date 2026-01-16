@@ -38,7 +38,7 @@
     Adding a data transformation will allow you to apply a unit conversion or
     rating curve to each data point for a mapping. Optionally, you can also save
     the raw data to a separate datastream. Configuration details for this step
-    will be available on the Task Form after creating this job.
+    will be available on the Task Form after creating this data connection.
   </div>
 
   <v-expansion-panels

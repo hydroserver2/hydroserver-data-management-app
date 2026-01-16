@@ -4,38 +4,37 @@ import {
   ExtractorConfig,
   TransformerConfig,
   LoaderConfig,
-  Job,
+  DataConnection,
 } from '@hydroserver/client'
-import { Datastream, DatastreamExtended } from '@hydroserver/client'
 
-export const useJobStore = defineStore('job', () => {
-  const job = ref(new Job())
-  const openJobTableDialog = ref(false)
+export const useDataConnectionStore = defineStore('dataConnection', () => {
+  const dataConnection = ref(new DataConnection())
+  const openDataConnectionTableDialog = ref(false)
 
   const extractor = computed<ExtractorConfig>({
     get() {
-      return job.value.extractor
+      return dataConnection.value.extractor
     },
     set(newVal) {
-      job.value.extractor = newVal
+      dataConnection.value.extractor = newVal
     },
   })
 
   const transformer = computed<TransformerConfig>({
     get() {
-      return job.value.transformer
+      return dataConnection.value.transformer
     },
     set(newVal) {
-      job.value.transformer = newVal
+      dataConnection.value.transformer = newVal
     },
   })
 
   const loader = computed<LoaderConfig>({
     get() {
-      return job.value.loader
+      return dataConnection.value.loader
     },
     set(newVal) {
-      job.value.loader = newVal
+      dataConnection.value.loader = newVal
     },
   })
 
@@ -44,8 +43,8 @@ export const useJobStore = defineStore('job', () => {
   const isLoaderValid = ref(true)
 
   return {
-    job,
-    openJobTableDialog,
+    dataConnection,
+    openDataConnectionTableDialog,
     extractor,
     transformer,
     loader,

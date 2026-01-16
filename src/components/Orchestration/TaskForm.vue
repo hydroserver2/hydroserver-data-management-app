@@ -24,8 +24,8 @@
 
         <p class="font-weight-bold mb-2 required-label">Select task template</p>
         <v-select
-          v-model="task.jobId"
-          :items="workspaceJobs"
+          v-model="task.dataConnectionId"
+          :items="workspaceDataConnections"
           item-title="name"
           item-value="id"
           label="Task template"
@@ -126,7 +126,7 @@ import { computed, Ref, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import SwimlanesForm from './SwimlanesForm.vue'
 import hs, {
-  Job,
+  DataConnection,
   OrchestrationSystem,
   PlaceholderVariable,
   Task,
@@ -151,15 +151,15 @@ const props = defineProps<{
 const { tasks } = storeToRefs(useTaskStore())
 const { workspaceTasks } = storeToRefs(useOrchestrationStore())
 
-const { items: workspaceJobs } = useTableLogic(
+const { items: workspaceDataConnections } = useTableLogic(
   async (wsId: string) =>
-    await hs.jobs.listAllItems({
+    await hs.dataConnections.listAllItems({
       workspace_id: [wsId],
       expand_related: true,
       order_by: ['name'],
     }),
-  hs.jobs.delete,
-  Job,
+  hs.dataConnections.delete,
+  DataConnection,
   selectedWorkspaceId
 )
 
@@ -172,12 +172,15 @@ const swimlanesRef = ref<any>(null)
 const submitLoading = ref(false)
 const task = ref<Task>(new Task())
 const scheduleMode = ref<'interval' | 'crontab'>('interval')
-const selectedJob = computed<Job | undefined>(() =>
-  workspaceJobs.value.find((j) => j.id === task.value.jobId)
+const selectedDataConnection = computed<DataConnection | undefined>(() =>
+  workspaceDataConnections.value.find(
+    (j) => j.id === task.value.dataConnectionId
+  )
 )
 const perTaskPlaceholders = computed<PlaceholderVariable[]>(() => {
   const placeholders =
-    (selectedJob.value as any)?.extractor?.settings?.placeholderVariables || []
+    (selectedDataConnection.value as any)?.extractor?.settings
+      ?.placeholderVariables || []
   return placeholders.filter((v: PlaceholderVariable) => v?.type === 'perTask')
 })
 
@@ -238,8 +241,8 @@ function hydrateTask(source?: TaskExpanded) {
 
   if (!base.schedule) base.schedule = defaultSchedule()
   if (!base.mappings) base.mappings = []
-  if (!base.jobId && (base as any).job?.id)
-    base.jobId = String((base as any).job.id)
+  if (!base.dataConnectionId && (base as any).dataConnection?.id)
+    base.dataConnectionId = String((base as any).dataConnection.id)
   ;(['startTime', 'nextRunAt'] as const).forEach((k) => {
     if (base.schedule && base.schedule[k])
       base.schedule[k] = ensureIsoUtc(base.schedule[k])

@@ -2,12 +2,12 @@
   <v-card>
     <v-toolbar flat color="red-darken-4">
       <v-card-title class="text-h5">
-        <v-icon :icon="mdiAlert" /> Confirm job deletion
+        <v-icon :icon="mdiAlert" /> Confirm data connection deletion
       </v-card-title>
     </v-toolbar>
 
     <v-card-text>
-      This action will permanently delete the job
+      This action will permanently delete the data connection
       <strong> {{ itemName }} </strong>
       along with all tasks associated with it.
     </v-card-text>

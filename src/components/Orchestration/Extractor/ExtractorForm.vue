@@ -26,7 +26,7 @@
 import HTTPExtractorForm from './HTTPExtractorForm.vue'
 import LocalFileExtractorForm from './LocalFileExtractorForm.vue'
 import { ref, watch } from 'vue'
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 
 import { storeToRefs } from 'pinia'
 import {
@@ -46,7 +46,11 @@ async function validate() {
 
 defineExpose({ validate })
 
-const { extractor, isExtractorValid: isValid, job } = storeToRefs(useJobStore())
+const {
+  extractor,
+  isExtractorValid: isValid,
+  dataConnection,
+} = storeToRefs(useDataConnectionStore())
 
 const savedExtractor: ExtractorConfig = JSON.parse(
   JSON.stringify(extractor.value)
@@ -57,7 +61,7 @@ watch(
   (newType) => {
     if (savedExtractor.type === newType)
       extractor.value = JSON.parse(JSON.stringify(savedExtractor))
-    else switchExtractor(job.value, newType)
+    else switchExtractor(dataConnection.value, newType)
   }
 )
 </script>

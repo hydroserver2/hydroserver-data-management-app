@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 
 import { rules } from '@/utils/rules'
 import {
@@ -80,9 +80,9 @@ import {
   IdentifierType,
 } from '@hydroserver/client'
 import { VTextField } from 'vuetify/lib/components/index.mjs'
-import TimestampFields from '@/components/JobOrchestration/Timestamp/TimestampFields.vue'
+import TimestampFields from '@/components/Orchestration/Timestamp/TimestampFields.vue'
 
-const { transformer } = storeToRefs(useJobStore())
+const { transformer } = storeToRefs(useDataConnectionStore())
 
 const transformerWithTimestamp = computed(() => {
   const t: any = transformer.value ?? {}

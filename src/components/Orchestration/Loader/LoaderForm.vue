@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { useJobStore } from '@/store/job'
+import { useDataConnectionStore } from '@/store/dataConnection'
 
 import { storeToRefs } from 'pinia'
 import { LOADER_OPTIONS } from '@hydroserver/client'
@@ -45,5 +45,5 @@ async function validate() {
 
 defineExpose({ validate })
 
-const { loader, isLoaderValid: isValid } = storeToRefs(useJobStore())
+const { loader, isLoaderValid: isValid } = storeToRefs(useDataConnectionStore())
 </script>

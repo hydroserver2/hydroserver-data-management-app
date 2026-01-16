@@ -46,15 +46,19 @@
     transition="dialog-bottom-transition"
     width="60rem"
   >
-    <JobForm @close="openCreate = false" @created="refreshTable" />
+    <DataConnectionForm @close="openCreate = false" @created="refreshTable" />
   </v-dialog>
 
   <v-dialog v-model="openEdit" width="80rem">
-    <JobForm :job="item" @close="openEdit = false" @updated="onUpdate" />
+    <DataConnectionForm
+      :dataConnection="item"
+      @close="openEdit = false"
+      @updated="onUpdate"
+    />
   </v-dialog>
 
   <v-dialog v-model="openDelete" width="40rem">
-    <DeleteJobCard
+    <DeleteDataConnectionCard
       @close="openDelete = false"
       @delete="onDelete"
       :itemName="item.name"
@@ -64,11 +68,11 @@
 
 <script setup lang="ts">
 import { ref, toRef } from 'vue'
-import JobForm from '@/components/JobOrchestration/JobForm.vue'
-import hs, { OrchestrationSystem, Job } from '@hydroserver/client'
+import DataConnectionForm from '@/components/Orchestration/DataConnectionForm.vue'
+import hs, { OrchestrationSystem, DataConnection } from '@hydroserver/client'
 import { mdiMagnify, mdiPencil, mdiDelete } from '@mdi/js'
 import { useTableLogic } from '@/composables/useTableLogic'
-import DeleteJobCard from './DeleteJobCard.vue'
+import DeleteDataConnectionCard from './DeleteDataConnectionCard.vue'
 
 const props = defineProps<{
   workspaceId: string
@@ -82,18 +86,18 @@ const loading = ref(false)
 const { item, items, openEdit, openDelete, openDialog, onUpdate, onDelete } =
   useTableLogic(
     async (wsId: string) =>
-      await hs.jobs.listAllItems({
+      await hs.dataConnections.listAllItems({
         workspace_id: [wsId],
         expand_related: true,
         order_by: ['name'],
       }),
-    hs.jobs.delete,
-    Job,
+    hs.dataConnections.delete,
+    DataConnection,
     toRef(props, 'workspaceId')
   )
 
 const refreshTable = async () => {
-  items.value = await hs.jobs.listAllItems({
+  items.value = await hs.dataConnections.listAllItems({
     workspace_id: [props.workspaceId],
     expand_related: true,
     order_by: ['name'],
