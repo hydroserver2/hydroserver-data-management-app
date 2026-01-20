@@ -1,11 +1,15 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
-  <div v-else-if="!loading && sparklineObservations.length" @click="handleEmit">
-    <div style="width: 300px">
+  <div
+    v-else-if="!loading && sparklineObservations.length"
+    class="sparkline-wrapper"
+    @click="handleEmit"
+  >
+    <div class="sparkline-container">
       <v-chart
         :option="chartOption"
         autoresize
-        style="height: 100px; width: 100%"
+        class="sparkline-chart"
       />
       <div class="mt-1" style="width: 100%">
         <span class="text-subtitle-2 font-weight-medium">
@@ -201,3 +205,25 @@ onMounted(async () => {
   loading.value = false
 })
 </script>
+
+<style scoped>
+.sparkline-wrapper {
+  cursor: pointer;
+}
+
+.sparkline-container {
+  width: 100%;
+  max-width: 320px;
+}
+
+.sparkline-chart {
+  height: 100px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .sparkline-container {
+    max-width: 100%;
+  }
+}
+</style>
