@@ -293,14 +293,14 @@ const taskTemplateInformation = computed(() => {
   return [
     {
       icon: mdiCardAccountDetails,
-      label: 'Template',
-      name: 'Template ID',
+      label: 'Data connection ID',
+      name: 'Data connection ID',
       value: dataConnection.id,
     },
     {
       icon: mdiRenameBoxOutline,
-      label: 'Template',
-      name: 'Template name',
+      label: 'Data connection',
+      name: 'Data connection name',
       value: dataConnection.name,
     },
     {

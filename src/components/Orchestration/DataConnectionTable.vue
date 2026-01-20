@@ -111,7 +111,7 @@ const openCreateDialog = (selectedItem: any) => {
 
 const headers = [
   {
-    title: 'Template name',
+    title: 'Data connection name',
     key: 'name',
   },
   {

@@ -17,7 +17,9 @@
       class="d-flex flex-column flex-grow-1"
     >
       <div class="form-body">
-        <p class="font-weight-bold mb-2 required-label">Name your template</p>
+        <p class="font-weight-bold mb-2 required-label">
+          Name your data connection
+        </p>
         <v-text-field
           v-model="formDataConnection.name"
           label="Data connection name"
