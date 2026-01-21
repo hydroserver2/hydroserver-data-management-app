@@ -18,7 +18,7 @@
           density="compact"
           variant="underlined"
           rounded="xl"
-          class="datastream-search"
+          class="datastream-search ml-2"
         />
       </div>
       <div class="datastream-toolbar__actions">
@@ -1041,6 +1041,8 @@ const loadDatastreams = async () => {
 .datastream-title {
   font-weight: 600;
   font-size: 1rem;
+  max-width: 360px;
+  overflow-wrap: anywhere;
 }
 
 .datastream-info-list,
