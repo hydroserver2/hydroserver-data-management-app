@@ -261,10 +261,6 @@
             </div>
             <div class="datastream-info-list">
               <p class="datastream-line">
-                <strong class="mr-2">Observed property:</strong>
-                <span>{{ item.OPName }}</span>
-              </p>
-              <p class="datastream-line">
                 <strong class="mr-2">Identifier:</strong>
                 <span class="datastream-id">
                   {{ item.id }}
@@ -273,20 +269,15 @@
                       <v-btn
                         v-bind="props"
                         icon
-                        size="x-small"
+                        size="default"
                         variant="text"
+                        class="datastream-copy-btn"
                         @click.stop="copyDatastreamId(item.id)"
                       >
-                        <v-icon :icon="mdiContentCopy" size="x-small" />
+                        <v-icon :icon="mdiContentCopy" size="small" />
                       </v-btn>
                     </template>
                   </v-tooltip>
-                </span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Processing level:</strong>
-                <span>
-                  {{ item.processingLevelName || item.processingLevelCode }}
                 </span>
               </p>
               <p class="datastream-line">
@@ -302,15 +293,6 @@
                 <span>{{ item.noDataValue }}</span>
               </p>
               <p class="datastream-line">
-                <strong class="mr-2">Aggregation statistic:</strong>
-                <span>{{ item.aggregationStatistic }}</span>
-              </p>
-            </div>
-          </div>
-          <div class="datastream-mobile-pane datastream-mobile-pane--time">
-            <div class="datastream-mobile-pane__title">Time information</div>
-            <div class="datastream-time-list">
-              <p class="datastream-line">
                 <strong class="mr-2">Begin date:</strong>
                 <span>{{ item.beginDate }}</span>
               </p>
@@ -319,19 +301,7 @@
                 <span>{{ item.endDate }}</span>
               </p>
               <p class="datastream-line">
-                <strong class="mr-2">Time aggregation interval:</strong>
-                <span>{{ item.aggregationInterval }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Intended time spacing:</strong>
-                <span>{{ item.spacingInterval }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Status:</strong>
-                <span>{{ item.status }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Value count:</strong>
+                <strong class="mr-2">Number of observations:</strong>
                 <span>{{ item.valueCount }}</span>
               </p>
             </div>
@@ -342,6 +312,7 @@
 
     <v-data-table-virtual
       v-else
+      class="datastream-table"
       :headers="headers"
       :items="visibleDatastreams"
       :search="search"
@@ -389,10 +360,6 @@
       <template v-slot:item.info="{ item }">
         <div class="datastream-info-list">
           <p class="datastream-line">
-            <strong class="mr-2">Observed property:</strong>
-            <span>{{ item.OPName }}</span>
-          </p>
-          <p class="datastream-line">
             <strong class="mr-2">Identifier:</strong>
             <span class="datastream-id">
               {{ item.id }}
@@ -401,19 +368,15 @@
                   <v-btn
                     v-bind="props"
                     icon
-                    size="x-small"
+                    size="small"
                     variant="text"
                     @click.stop="copyDatastreamId(item.id)"
                   >
-                    <v-icon :icon="mdiContentCopy" size="x-small" />
+                    <v-icon :icon="mdiContentCopy" size="small" />
                   </v-btn>
                 </template>
               </v-tooltip>
             </span>
-          </p>
-          <p class="datastream-line">
-            <strong class="mr-2">Processing level:</strong>
-            <span>{{ item.processingLevelName || item.processingLevelCode }}</span>
           </p>
           <p class="datastream-line">
             <strong class="mr-2">Sampled medium:</strong>
@@ -428,15 +391,6 @@
             <span>{{ item.noDataValue }}</span>
           </p>
           <p class="datastream-line">
-            <strong class="mr-2">Aggregation statistic:</strong>
-            <span>{{ item.aggregationStatistic }}</span>
-          </p>
-        </div>
-      </template>
-
-      <template v-slot:item.time="{ item }">
-        <div class="datastream-time-list">
-          <p class="datastream-line">
             <strong class="mr-2">Begin date:</strong>
             <span>{{ item.beginDate }}</span>
           </p>
@@ -445,19 +399,7 @@
             <span>{{ item.endDate }}</span>
           </p>
           <p class="datastream-line">
-            <strong class="mr-2">Time aggregation interval:</strong>
-            <span>{{ item.aggregationInterval }}</span>
-          </p>
-          <p class="datastream-line">
-            <strong class="mr-2">Intended time spacing:</strong>
-            <span>{{ item.spacingInterval }}</span>
-          </p>
-          <p class="datastream-line">
-            <strong class="mr-2">Status:</strong>
-            <span>{{ item.status }}</span>
-          </p>
-          <p class="datastream-line">
-            <strong class="mr-2">Value count:</strong>
+            <strong class="mr-2">Number of observations:</strong>
             <span>{{ item.valueCount }}</span>
           </p>
         </div>
@@ -698,7 +640,7 @@ import { Datastream, Workspace } from '@hydroserver/client'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useTableLogic } from '@/composables/useTableLogic'
 import { Snackbar } from '@/utils/notifications'
-import { formatTime, getLocalTimeZone } from '@/utils/time'
+import { formatTime } from '@/utils/time'
 import DatastreamTableInfoCard from './DatastreamTableInfoCard.vue'
 import ObservationsDeleteCard from '../Observation/ObservationsDeleteCard.vue'
 import VisibilityTooltipCard from '@/components/Datastream/VisibilityTooltipCard.vue'
@@ -931,11 +873,6 @@ const headers = [
     value: 'searchText',
     sortable: false,
   },
-  {
-    title: `Time information (${getLocalTimeZone()})`,
-    key: 'time',
-    sortable: false,
-  },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -951,9 +888,11 @@ const loadDatastreams = async () => {
 </script>
 
 <style scoped>
-:deep(tbody .v-data-table__td) {
+.datastream-table :deep(.v-data-table__td) {
   vertical-align: top;
   white-space: normal;
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
 }
 
 .datastream-toolbar {
@@ -1036,7 +975,7 @@ const loadDatastreams = async () => {
 .datastream-latest {
   display: flex;
   flex-direction: column;
-  padding-top: 0.5rem;
+  padding-top: 0;
 }
 
 .datastream-mobile-list {
@@ -1109,7 +1048,7 @@ const loadDatastreams = async () => {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  padding-top: 0.5rem;
+  padding-top: 0;
 }
 
 .datastream-line {
@@ -1123,7 +1062,6 @@ const loadDatastreams = async () => {
   gap: 0.25rem;
   flex-wrap: wrap;
 }
-
 
 .datastream-actions {
   display: flex;
@@ -1192,6 +1130,11 @@ const loadDatastreams = async () => {
   .datastream-info-list,
   .datastream-time-list {
     gap: 0.35rem;
+  }
+
+  .datastream-copy-btn {
+    min-width: 40px;
+    min-height: 40px;
   }
 }
 

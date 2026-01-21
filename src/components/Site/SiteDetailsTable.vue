@@ -73,11 +73,12 @@
             <v-btn
               v-bind="props"
               icon
-              size="x-small"
+              size="small"
               variant="text"
+              class="site-copy-btn"
               @click.stop="copyValue(String(item.value))"
             >
-              <v-icon :icon="mdiContentCopy" size="x-small" />
+              <v-icon :icon="mdiContentCopy" size="small" />
             </v-btn>
           </template>
         </v-tooltip>
@@ -219,7 +220,7 @@ const tagProperty = computed(() => {
 }
 
 .site-details-mobile__value {
-  margin-top: 0.35rem;
+  margin-top: 0;
   padding-left: 1.75rem;
   display: flex;
   flex-direction: column;
@@ -234,5 +235,12 @@ const tagProperty = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.5rem;
+}
+
+@media (max-width: 700px) {
+  .site-copy-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
 }
 </style>

@@ -2,7 +2,7 @@
   <div v-if="loaded && authorized" class="my-3 mx-4 site-details">
     <v-row v-if="thing" class="align-center site-header">
       <v-col cols="12" class="d-flex align-center flex-wrap site-header-row">
-        <h5 class="text-h5 my-2">{{ thing.name }}</h5>
+        <h5 class="text-h5 mt-2 mb-0">{{ thing.name }}</h5>
         <div class="site-header-actions">
           <v-btn
             v-if="
@@ -101,7 +101,7 @@
       </v-col>
     </v-row>
 
-    <v-row class="mb-3">
+    <v-row class="mb-0">
       <v-col cols="12" md="8">
         <SiteDetailsTable />
       </v-col>
@@ -418,7 +418,7 @@ onMounted(async () => {
   position: absolute;
   bottom: 0.75rem;
   left: 0.75rem;
-  padding: 0.65rem;
+  padding: 0.5rem;
   max-width: 18rem;
   background: rgba(255, 255, 255, 0.95);
   z-index: 2;
@@ -426,7 +426,7 @@ onMounted(async () => {
 
 .location-grid {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.25rem;
 }
 
 .location-item {
