@@ -207,7 +207,6 @@
             </v-menu>
           </div>
           <v-btn
-            size="small"
             variant="outlined"
             class="datastream-card__meta-btn"
             @click="openInfoCardFor(item)"
@@ -565,7 +564,6 @@
             </v-menu>
           </div>
           <v-btn
-            size="small"
             variant="outlined"
             class="mt-2 datastream-meta-btn"
             @click="openInfoCardFor(item)"
@@ -1043,11 +1041,6 @@ const loadDatastreams = async () => {
 
 .datastream-card__meta-btn {
   align-self: flex-start;
-}
-
-.datastream-card__meta-btn,
-.datastream-meta-btn {
-  min-height: 36px;
 }
 
 .datastream-title {
