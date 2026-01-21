@@ -52,10 +52,96 @@
         class="datastream-card"
         variant="outlined"
       >
-        <div class="datastream-card__controls">
+        <div class="datastream-card__content">
           <div class="datastream-card__title">
             {{ item.name || item.OPName }}
           </div>
+          <div
+            v-if="
+              !hasPermission(
+                PermissionResource.Datastream,
+                PermissionAction.View,
+                workspace
+              ) && !item.isVisible
+            "
+            class="text-body-2"
+          >
+            Data is private for this datastream
+          </div>
+          <div v-else>
+            <Sparkline
+              class="mt-1"
+              :datastream="item"
+              @openChart="openCharts[item.id] = true"
+              :unitName="item.unitName"
+            >
+              <template #after-chart>
+                <div
+                  v-if="Number(item.valueCount) > 0"
+                  class="datastream-latest-observation"
+                >
+                  <strong class="mr-2">Latest observation:</strong>
+                  <span>{{ item.endDate }}</span>
+                </div>
+              </template>
+            </Sparkline>
+          </div>
+
+          <v-dialog v-model="openCharts[item.id]" width="80rem">
+            <DatastreamPopupPlot
+              :datastream="item"
+              @close="openCharts[item.id] = false"
+            />
+          </v-dialog>
+
+          <div class="datastream-info-list">
+            <p class="datastream-line">
+              <strong class="mr-2">Identifier:</strong>
+              <span class="datastream-id">
+                {{ item.id }}
+                <v-tooltip text="Copy ID">
+                  <template #activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      icon
+                      size="default"
+                      variant="text"
+                      class="datastream-copy-btn"
+                      @click.stop="copyDatastreamId(item.id)"
+                    >
+                      <v-icon :icon="mdiContentCopy" size="small" />
+                    </v-btn>
+                  </template>
+                </v-tooltip>
+              </span>
+            </p>
+            <p class="datastream-line">
+              <strong class="mr-2">Sampled medium:</strong>
+              <span>{{ item.sampledMedium }}</span>
+            </p>
+            <p class="datastream-line">
+              <strong class="mr-2">Sensor:</strong>
+              <span>{{ item.sensorName }}</span>
+            </p>
+            <p class="datastream-line">
+              <strong class="mr-2">No data value:</strong>
+              <span>{{ item.noDataValue }}</span>
+            </p>
+            <p class="datastream-line">
+              <strong class="mr-2">Begin date:</strong>
+              <span>{{ item.beginDate }}</span>
+            </p>
+            <p class="datastream-line">
+              <strong class="mr-2">End date:</strong>
+              <span>{{ item.endDate }}</span>
+            </p>
+            <p class="datastream-line">
+              <strong class="mr-2">Number of observations:</strong>
+              <span>{{ item.valueCount }}</span>
+            </p>
+          </div>
+        </div>
+        <div class="datastream-card__actions">
           <div class="datastream-card__icons">
             <v-tooltip
               bottom
@@ -223,89 +309,6 @@
             preparing file...
           </div>
         </div>
-
-        <div class="datastream-mobile-scroll">
-          <div class="datastream-mobile-pane datastream-mobile-pane--sparkline">
-            <div
-              v-if="
-                !hasPermission(
-                  PermissionResource.Datastream,
-                  PermissionAction.View,
-                  workspace
-                ) && !item.isVisible
-              "
-              class="text-body-2"
-            >
-              Data is private for this datastream
-            </div>
-            <div v-else>
-              <Sparkline
-                class="mt-1"
-                :datastream="item"
-                @openChart="openCharts[item.id] = true"
-                :unitName="item.unitName"
-              />
-            </div>
-
-            <v-dialog v-model="openCharts[item.id]" width="80rem">
-              <DatastreamPopupPlot
-                :datastream="item"
-                @close="openCharts[item.id] = false"
-              />
-            </v-dialog>
-          </div>
-          <div class="datastream-mobile-pane datastream-mobile-pane--info">
-            <div class="datastream-mobile-pane__title">
-              Datastream information
-            </div>
-            <div class="datastream-info-list">
-              <p class="datastream-line">
-                <strong class="mr-2">Identifier:</strong>
-                <span class="datastream-id">
-                  {{ item.id }}
-                  <v-tooltip text="Copy ID">
-                    <template #activator="{ props }">
-                      <v-btn
-                        v-bind="props"
-                        icon
-                        size="default"
-                        variant="text"
-                        class="datastream-copy-btn"
-                        @click.stop="copyDatastreamId(item.id)"
-                      >
-                        <v-icon :icon="mdiContentCopy" size="small" />
-                      </v-btn>
-                    </template>
-                  </v-tooltip>
-                </span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Sampled medium:</strong>
-                <span>{{ item.sampledMedium }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Sensor:</strong>
-                <span>{{ item.sensorName }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">No data value:</strong>
-                <span>{{ item.noDataValue }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Begin date:</strong>
-                <span>{{ item.beginDate }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">End date:</strong>
-                <span>{{ item.endDate }}</span>
-              </p>
-              <p class="datastream-line">
-                <strong class="mr-2">Number of observations:</strong>
-                <span>{{ item.valueCount }}</span>
-              </p>
-            </div>
-          </div>
-        </div>
       </v-card>
     </div>
 
@@ -343,14 +346,17 @@
                 :datastream="item"
                 @openChart="openCharts[item.id] = true"
                 :unitName="item.unitName"
-              />
-              <div
-                v-if="Number(item.valueCount) > 0"
-                class="datastream-latest-observation"
               >
-                <strong class="mr-2">Latest observation:</strong>
-                <span>{{ item.endDate }}</span>
-              </div>
+                <template #after-chart>
+                  <div
+                    v-if="Number(item.valueCount) > 0"
+                    class="datastream-latest-observation"
+                  >
+                    <strong class="mr-2">Latest observation:</strong>
+                    <span>{{ item.endDate }}</span>
+                  </div>
+                </template>
+              </Sparkline>
             </div>
           </div>
 
@@ -997,10 +1003,10 @@ const loadDatastreams = async () => {
   gap: 0.5rem;
 }
 
-.datastream-card__controls {
+.datastream-card__content {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
 .datastream-card__title {
@@ -1008,35 +1014,17 @@ const loadDatastreams = async () => {
   font-size: 1rem;
 }
 
-.datastream-mobile-scroll {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.35rem;
-  scroll-snap-type: x proximity;
-}
-
-.datastream-mobile-pane {
-  min-width: 260px;
-  scroll-snap-align: start;
-}
-
-.datastream-mobile-pane--sparkline {
-  min-width: 240px;
-}
-
-.datastream-mobile-pane__title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.7);
-  margin-bottom: 0.35rem;
-}
-
 .datastream-card__icons {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.datastream-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .datastream-card__meta-btn {
@@ -1051,9 +1039,10 @@ const loadDatastreams = async () => {
 }
 
 .datastream-latest-observation {
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   font-size: 0.85rem;
   color: rgba(0, 0, 0, 0.75);
+  line-height: 1.3;
 }
 
 .datastream-info-list,

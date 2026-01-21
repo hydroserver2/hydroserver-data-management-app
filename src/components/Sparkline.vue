@@ -6,21 +6,22 @@
     @click="handleEmit"
   >
     <div class="sparkline-container">
+      <div class="sparkline-note">
+        <span class="text-body-3 font-weight-low opacity-70">
+          Sparkline is showing most recent
+          {{ sparklineObservations.length }} values
+        </span>
+      </div>
       <v-chart
         :option="chartOption"
         autoresize
         class="sparkline-chart"
       />
-      <div class="mt-1" style="width: 100%">
-        <span class="text-subtitle-2 font-weight-medium">
+      <slot name="after-chart" />
+      <div class="sparkline-meta" style="width: 100%">
+        <span>
           <strong>Latest Value:</strong>
           {{ mostRecentDataValue }} {{ unitName }}
-        </span>
-      </div>
-      <div style="width: 100%">
-        <span class="text-body-3 font-weight-low opacity-70">
-          Sparkline is showing most recent
-          {{ sparklineObservations.length }} values
         </span>
       </div>
     </div>
@@ -219,6 +220,17 @@ onMounted(async () => {
 .sparkline-chart {
   height: 100px;
   width: 100%;
+}
+
+.sparkline-note {
+  margin-bottom: 0.25rem;
+}
+
+.sparkline-meta {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.75);
 }
 
 @media (max-width: 600px) {
