@@ -345,6 +345,13 @@
                 @openChart="openCharts[item.id] = true"
                 :unitName="item.unitName"
               />
+              <div
+                v-if="Number(item.valueCount) > 0"
+                class="datastream-latest-observation"
+              >
+                <strong class="mr-2">Latest observation:</strong>
+                <span>{{ item.endDate }}</span>
+              </div>
             </div>
           </div>
 
@@ -560,7 +567,7 @@
           <v-btn
             size="small"
             variant="outlined"
-            class="mt-2"
+            class="mt-2 datastream-meta-btn"
             @click="openInfoCardFor(item)"
           >
             View Full Metadata
@@ -1038,11 +1045,22 @@ const loadDatastreams = async () => {
   align-self: flex-start;
 }
 
+.datastream-card__meta-btn,
+.datastream-meta-btn {
+  min-height: 36px;
+}
+
 .datastream-title {
   font-weight: 600;
   font-size: 1rem;
   max-width: 360px;
   overflow-wrap: anywhere;
+}
+
+.datastream-latest-observation {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .datastream-info-list,
