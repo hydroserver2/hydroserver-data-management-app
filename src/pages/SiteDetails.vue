@@ -172,9 +172,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="isPhotoViewerOpen = false"
-            >Close</v-btn
-          >
+          <v-btn variant="text" @click="isPhotoViewerOpen = false">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -290,8 +288,7 @@ function openPhoto(photo: FileAttachment) {
 function showPrevPhoto() {
   if (!photos.value?.length || selectedPhotoIndex.value === null) return
   const total = photos.value.length
-  selectedPhotoIndex.value =
-    (selectedPhotoIndex.value - 1 + total) % total
+  selectedPhotoIndex.value = (selectedPhotoIndex.value - 1 + total) % total
 }
 
 function showNextPhoto() {
@@ -493,6 +490,15 @@ onMounted(async () => {
 
 .photo-nav-btn--right {
   right: 0.5rem;
+}
+
+@media (min-width: 961px) {
+  .photo-grid {
+    grid-template-columns: repeat(auto-fit, 85px);
+    justify-content: flex-start;
+    max-height: 12rem;
+    overflow: hidden;
+  }
 }
 
 @media (max-width: 960px) {
