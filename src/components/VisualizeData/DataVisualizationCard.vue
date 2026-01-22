@@ -116,7 +116,7 @@
 import SummaryStatisticsTable from './SummaryStatisticsTable.vue'
 import DataVisTimeFilters from './DataVisTimeFilters.vue'
 import { useDataVisStore } from '@/store/dataVisualization'
-import { ref, watch, computed, nextTick, onBeforeUnmount } from 'vue'
+import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { debounce } from 'lodash-es'
 import { getXRangeBounds } from '@/utils/plotting/plotly'
@@ -160,9 +160,7 @@ const viewMode = computed<'plot' | 'summary'>({
   },
 })
 
-const showPlot = computed(
-  () => canPlot.value && viewMode.value === 'plot'
-)
+const showPlot = computed(() => canPlot.value && viewMode.value === 'plot')
 
 const clampPercent = (value: number) => Math.min(100, Math.max(0, value))
 
@@ -254,6 +252,12 @@ const cleanupPlot = () => {
   }
 }
 
+const handleLayoutResize = () => {
+  if (plotlyRef.value) {
+    Plotly.Plots.resize(plotlyRef.value)
+  }
+}
+
 watch([() => props.cardHeight], ([newHeight], [oldHeight]) => {
   if (Math.abs(newHeight - oldHeight) < 0.2) return
   nextTick(() => {
@@ -299,7 +303,12 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  window.removeEventListener('datavis-layout', handleLayoutResize)
   cleanupPlot()
+})
+
+onMounted(() => {
+  window.addEventListener('datavis-layout', handleLayoutResize)
 })
 </script>
 

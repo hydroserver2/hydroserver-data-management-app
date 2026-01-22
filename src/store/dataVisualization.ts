@@ -38,6 +38,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
 
   const cardHeight = ref(40)
   const tableHeight = ref(30)
+  const showPlot = ref(true)
+  const showTable = ref(true)
 
   const endDate = ref<Date>(new Date())
   const oneMonth = 30 * 24 * 60 * 60 * 1000
@@ -58,6 +60,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     selectedDateBtnId.value = 0
     dataZoomStart.value = 0
     dataZoomEnd.value = 100
+    showPlot.value = true
+    showTable.value = true
   }
 
   function matchesSelectedObservedProperty(datastream: Datastream) {
@@ -343,6 +347,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     summaryStatisticsArray,
     cardHeight,
     tableHeight,
+    showPlot,
+    showTable,
     matchesSelectedObservedProperty,
     matchesSelectedProcessingLevel,
     matchesSelectedThing,

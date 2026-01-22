@@ -203,17 +203,19 @@ export const createPlotlyOption = (
   const xDomainStart = leftCount ? AXIS_SPACING * leftCount : AXIS_SPACING
   const xDomainEnd = rightCount ? 1 - AXIS_SPACING * rightCount : 1 - AXIS_SPACING
 
-  const titleText = title || seriesArray[0]?.name
+  const titleText = title
   const titleColor = seriesArray[0]?.lineColor
 
   const layout: any = {
-    margin: { l: 70, r: 40, t: 45, b: 70 },
+    margin: { l: 60, r: 30, t: 70, b: 70 },
     showlegend: addLegend,
     legend: addLegend
       ? {
-          orientation: 'v',
-          y: 1,
-          yanchor: 'top',
+          orientation: 'h',
+          x: 0,
+          xanchor: 'left',
+          y: 1.08,
+          yanchor: 'bottom',
         }
       : undefined,
     hovermode: 'x',
@@ -237,8 +239,11 @@ export const createPlotlyOption = (
     },
     title: titleText
       ? {
-          text: wrapTitle(titleText, 36),
+          text: wrapTitle(titleText, 48),
           font: titleColor ? { color: titleColor } : undefined,
+          x: 0,
+          xanchor: 'left',
+          y: 0.98,
         }
       : undefined,
   }
@@ -250,7 +255,7 @@ export const createPlotlyOption = (
 
     return {
       id: series.id,
-      name: series.name,
+      name: wrapTitle(series.name, 28),
       x: series.data.map((dp) => dp.date.getTime()),
       y: series.data.map((dp) => dp.value),
       yaxis: axisId,

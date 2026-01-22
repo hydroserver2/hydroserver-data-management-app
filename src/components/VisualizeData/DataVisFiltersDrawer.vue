@@ -13,10 +13,44 @@
 
     <v-divider />
 
+    <v-list class="pb-2">
+      <v-list-subheader class="text-uppercase">Layout</v-list-subheader>
+      <div class="layout-toggle-item">
+        <v-switch
+          v-model="showPlot"
+          class="layout-toggle-switch"
+          color="primary"
+          density="compact"
+          label="Show plot"
+          hide-details
+          @update:model-value="(value) => handleToggle('plot', value)"
+        />
+      </div>
+      <div class="layout-toggle-item">
+        <v-switch
+          v-model="showTable"
+          class="layout-toggle-switch"
+          color="primary"
+          density="compact"
+          label="Show table"
+          hide-details
+          @update:model-value="(value) => handleToggle('table', value)"
+        />
+      </div>
+    </v-list>
+
+    <v-divider />
+
     <div class="d-flex justify-end my-4 mx-2">
-      <v-btn color="blue-grey-lighten-4" elevation="3" @click="clearFilters"
-        >Clear filters</v-btn
+      <v-btn
+        variant="outlined"
+        color="blue-grey-lighten-2"
+        class="clear-filters-btn"
+        :prepend-icon="mdiClose"
+        @click="clearFilters"
       >
+        Clear filters
+      </v-btn>
     </div>
 
     <v-expansion-panels multiple v-model="panels">
@@ -123,7 +157,7 @@ import { computed, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
-import { mdiMagnify, mdiMenuClose, mdiMenuOpen } from '@mdi/js'
+import { mdiClose, mdiMagnify, mdiMenuClose, mdiMenuOpen } from '@mdi/js'
 
 const {
   matchesSelectedObservedProperty,
@@ -138,6 +172,8 @@ const {
   selectedThings,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
+  showPlot,
+  showTable,
 } = storeToRefs(useDataVisStore())
 
 const searchThing = ref('')
@@ -222,6 +258,10 @@ watch(sortedProcessingLevelNames, (newVal, oldVal) => {
   }
 })
 
+const emit = defineEmits<{
+  (e: 'drawer-change', value: boolean): void
+}>()
+
 const clearFilters = () => {
   selectedThings.value = []
   selectedObservedPropertyNames.value = []
@@ -232,14 +272,54 @@ const clearFilters = () => {
   searchProcessingLevel.value = ''
 }
 
+const handleToggle = (toggled: 'plot' | 'table', value: boolean) => {
+  if (value) return
+
+  if (toggled === 'plot') {
+    showTable.value = true
+  } else {
+    showPlot.value = true
+  }
+}
+
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2])
 const drawer = ref(!!smAndDown)
+
+watch(drawer, (value) => {
+  emit('drawer-change', value)
+})
 </script>
 
 <style scoped>
 :deep(.v-selection-control),
 :deep(.v-label) {
   align-items: start;
+}
+
+.data-vis-drawer :deep(.v-list-item),
+.data-vis-drawer :deep(.v-list-subheader) {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+}
+
+.layout-toggle-item {
+  padding: 4px 20px;
+}
+
+.layout-toggle-switch {
+  width: 100%;
+}
+
+.layout-toggle-switch :deep(.v-input__control) {
+  width: 100%;
+}
+
+.layout-toggle-switch :deep(.v-label) {
+  white-space: nowrap;
+}
+
+.clear-filters-btn {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 </style>
