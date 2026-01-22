@@ -1,15 +1,11 @@
 <template>
-  <v-card class="elevation-0" :loading="updating">
+  <v-card class="elevation-0 plot-card" :loading="updating">
     <template v-slot:loader="{ isActive }">
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
 
     <keep-alive>
-      <v-card-text
-        v-if="canPlot"
-        :style="{ height: `${cardHeight}vh` }"
-        class="plot-shell"
-      >
+      <v-card-text v-if="canPlot" :style="{ height: '100%' }" class="plot-shell">
         <div class="plot-body">
           <div class="plot-rail">
             <v-tooltip bottom :openDelay="0">
@@ -62,10 +58,7 @@
       </v-card-text>
     </keep-alive>
 
-    <div
-      v-if="!isDataAvailable && viewMode === 'plot'"
-      :style="{ 'min-height': `${cardHeight}vh` }"
-    >
+    <div v-if="!isDataAvailable && viewMode === 'plot'" class="plot-empty">
       <v-card-text>
         <v-timeline align="start" density="compact">
           <v-timeline-item size="x-small" dot-color="primary">
@@ -408,8 +401,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.v-card-text {
+.plot-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.plot-card :deep(.v-card-text) {
   padding: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.plot-empty {
+  min-height: 100%;
 }
 
 .plotly-chart {

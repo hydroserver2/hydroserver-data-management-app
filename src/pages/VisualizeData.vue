@@ -4,11 +4,19 @@
     <DataVisFiltersDrawer @drawer-change="handleDrawerChange" />
 
     <div class="my-4 mx-4 visualize-layout">
-      <div v-if="showPlot" class="plot-section">
+      <div
+        v-if="showPlot"
+        class="plot-section"
+        :style="{ flex: `${cardHeight} 1 0%` }"
+      >
         <DataVisualizationCard :cardHeight="cardHeight" />
       </div>
 
-      <div v-if="showTable" class="table-section">
+      <div
+        v-if="showTable"
+        class="table-section"
+        :style="{ flex: `${tableHeight} 1 0%` }"
+      >
         <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
       </div>
     </div>
@@ -51,7 +59,7 @@ const {
   showSummaryStatistics,
 } = storeToRefs(useDataVisStore())
 
-const fullHeight = 80
+const fullHeight = 90
 const defaultPlotHeight = 45
 const defaultTableHeight = 35
 
@@ -258,5 +266,21 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  height: calc(
+    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px) - 32px
+  );
+}
+
+.plot-section,
+.table-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.plot-section > *,
+.table-section > * {
+  flex: 1;
+  min-height: 0;
 }
 </style>

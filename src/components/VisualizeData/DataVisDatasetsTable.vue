@@ -1,105 +1,108 @@
 <template>
-  <v-row class="my-2" align="center">
-    <v-col>
-      <h5 class="text-h5">Datastreams</h5>
-    </v-col>
+  <div class="datasets-table">
+    <v-row class="my-2 table-header" align="center">
+      <v-col cols="auto" class="table-header__title">
+        <h5 class="text-h5">Datastreams</h5>
+      </v-col>
 
-    <v-col cols="12" sm="auto">
-      <v-btn
-        color="primary"
-        :append-icon="mdiContentCopy"
-        block
-        @click="copyStateToClipboard"
-        >Copy State as URL</v-btn
-      >
-    </v-col>
+      <v-col cols="12" sm="auto" class="table-header__action">
+        <v-btn
+          color="primary"
+          :append-icon="mdiContentCopy"
+          block
+          @click="copyStateToClipboard"
+          >Copy State as URL</v-btn
+        >
+      </v-col>
 
-    <v-col cols="12" sm="3" class="ml-auto">
-      <v-select
-        label="Show/Hide Columns"
-        v-model="selectedHeaders"
-        :items="selectableHeaders"
-        item-text="title"
-        item-value="key"
-        multiple
-        item-color="green"
+      <v-col cols="12" sm="3" class="ml-auto table-header__select">
+        <v-select
+          label="Show/Hide Columns"
+          v-model="selectedHeaders"
+          :items="selectableHeaders"
+          item-text="title"
+          item-value="key"
+          multiple
+          item-color="green"
+          density="compact"
+          variant="solo"
+          hide-details
+        >
+          <template v-slot:selection="{ item, index }">
+            <!-- Leave blank so nothing appears in the v-select box -->
+          </template>
+        </v-select>
+      </v-col>
+    </v-row>
+
+    <v-card class="datasets-table__card">
+      <v-toolbar flat color="secondary">
+        <v-text-field
+          class="ml-4"
+          clearable
+          v-model="search"
+          :prepend-inner-icon="mdiMagnify"
+          label="Search"
+          hide-details
+          density="compact"
+          variant="underlined"
+        />
+
+        <v-spacer />
+
+        <v-btn @click="clearSelected"> Clear Selected </v-btn>
+
+        <v-btn variant="outlined" @click="showOnlySelected = !showOnlySelected">
+          {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
+        </v-btn>
+
+        <v-btn
+          :loading="downloading"
+          :prepend-icon="mdiDownload"
+          @click="downloadSelected(plottedDatastreams)"
+          >Download Selected</v-btn
+        >
+      </v-toolbar>
+      <v-data-table-virtual
+        :headers="headers.filter((header) => header.visible)"
+        :items="tableItems"
+        :sort-by="sortBy"
+        multi-sort
+        :search="search"
+        fixed-header
+        class="elevation-2 datasets-table__table"
+        color="green"
         density="compact"
-        variant="solo"
-        hide-details
+        @click:row="onRowClick"
+        hover
       >
-        <template v-slot:selection="{ item, index }">
-          <!-- Leave blank so nothing appears in the v-select box -->
+        <template v-slot:item.plot="{ item }">
+          <v-checkbox
+            :model-value="isChecked(item)"
+            :disabled="plottedDatastreams.length >= 5 && !isChecked(item)"
+            class="d-flex align-self-center"
+            density="compact"
+            @change="() => updatePlottedDatastreams(item)"
+          />
         </template>
-      </v-select>
-    </v-col>
-  </v-row>
+        <template v-slot:item.phenomenonEndTime="{ item }">
+          {{ formatTime(item.phenomenonEndTime) }}
+        </template>
+      </v-data-table-virtual>
+    </v-card>
 
-  <v-toolbar flat color="secondary">
-    <v-text-field
-      class="ml-4"
-      clearable
-      v-model="search"
-      :prepend-inner-icon="mdiMagnify"
-      label="Search"
-      hide-details
-      density="compact"
-      variant="underlined"
-    />
-
-    <v-spacer />
-
-    <v-btn @click="clearSelected"> Clear Selected </v-btn>
-
-    <v-btn variant="outlined" @click="showOnlySelected = !showOnlySelected">
-      {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
-    </v-btn>
-
-    <v-btn
-      :loading="downloading"
-      :prepend-icon="mdiDownload"
-      @click="downloadSelected(plottedDatastreams)"
-      >Download Selected</v-btn
+    <v-dialog
+      v-model="openInfoCard"
+      width="50rem"
+      v-if="selectedDatastream && selectedThing"
     >
-  </v-toolbar>
-  <v-data-table-virtual
-    :headers="headers.filter((header) => header.visible)"
-    :items="tableItems"
-    :sort-by="sortBy"
-    multi-sort
-    :search="search"
-    :style="{ 'max-height': `${tableHeight}vh` }"
-    fixed-header
-    class="elevation-2"
-    color="green"
-    density="compact"
-    @click:row="onRowClick"
-    hover
-  >
-    <template v-slot:item.plot="{ item }">
-      <v-checkbox
-        :model-value="isChecked(item)"
-        :disabled="plottedDatastreams.length >= 5 && !isChecked(item)"
-        class="d-flex align-self-center"
-        density="compact"
-        @change="() => updatePlottedDatastreams(item)"
+      <DatastreamInformationCard
+        :datastream="selectedDatastream"
+        :thing="selectedThing"
+        @close="openInfoCard = false"
       />
-    </template>
-    <template v-slot:item.phenomenonEndTime="{ item }">
-      {{ formatTime(item.phenomenonEndTime) }}
-    </template>
-  </v-data-table-virtual>
-
-  <v-dialog
-    v-model="openInfoCard"
-    width="50rem"
-    v-if="selectedDatastream && selectedThing"
-  >
-    <DatastreamInformationCard
-      :datastream="selectedDatastream"
-      :thing="selectedThing"
-      @close="openInfoCard = false"
-    />
-  </v-dialog>
+    </v-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -117,7 +120,6 @@ const {
   plottedDatastreams,
   observedProperties,
   processingLevels,
-  tableHeight,
 } = storeToRefs(useDataVisStore())
 
 const emit = defineEmits(['copyState'])
@@ -256,3 +258,42 @@ function updatePlottedDatastreams(datastream: Datastream) {
   else plottedDatastreams.value.splice(index, 1)
 }
 </script>
+
+<style scoped>
+.datasets-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.datasets-table__card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.datasets-table__table {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+}
+
+.table-header {
+  flex: 0 0 auto;
+}
+
+.table-header__title {
+  flex: 0 0 auto;
+  padding-right: 8px;
+}
+
+.table-header__action {
+  flex: 0 0 auto;
+}
+
+.table-header__select {
+  max-width: 260px;
+}
+</style>
