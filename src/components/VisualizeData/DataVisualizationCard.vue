@@ -128,6 +128,7 @@ const props = defineProps({
   cardHeight: { type: Number, required: true },
 })
 
+const { onDateBtnClick } = useDataVisStore()
 const {
   showSummaryStatistics,
   dataZoomStart,
@@ -136,6 +137,8 @@ const {
   plotlyOptions,
   loadingStates,
   plottedDatastreams,
+  beginDate,
+  endDate,
 } = storeToRefs(useDataVisStore())
 
 const plotContainer = ref<HTMLDivElement | null>(null)
@@ -163,40 +166,109 @@ const viewMode = computed<'plot' | 'summary'>({
 const showPlot = computed(() => canPlot.value && viewMode.value === 'plot')
 
 const clampPercent = (value: number) => Math.min(100, Math.max(0, value))
+const RANGE_MATCH_TOLERANCE_MS = 5 * 60 * 1000
+const PRESET_MATCH_TOLERANCE_MS = 36 * 60 * 60 * 1000
 
-const updateTooltipState = async () => {
-  if (!plotlyRef.value) return
+const isWithinTolerance = (value: number, target: number, tolerance: number) =>
+  Math.abs(value - target) <= tolerance
 
-  const nextHoverState = 'x+y'
-  const nextHoverTemplate = '<b>%{y}</b><br>%{x}<extra></extra>'
-  const currentHoverState = plotlyRef.value?.data?.[0]?.hoverinfo
-  if (currentHoverState !== nextHoverState) {
-    await Plotly.restyle(plotlyRef.value, {
-      hoverinfo: nextHoverState,
-      hovertemplate: nextHoverTemplate,
-    })
-  }
+const getMostRecentEndTime = () =>
+  plottedDatastreams.value.reduce((latest, ds) => {
+    if (!ds.phenomenonEndTime) return latest
+    const dsEndDate = new Date(ds.phenomenonEndTime)
+    return dsEndDate > latest ? dsEndDate : latest
+  }, new Date(0))
+
+const getOldestBeginTime = () =>
+  plottedDatastreams.value.reduce((oldest, ds) => {
+    if (!ds.phenomenonBeginTime) return oldest
+    const dsBeginDate = new Date(ds.phenomenonBeginTime)
+    return dsBeginDate < oldest ? dsBeginDate : oldest
+  }, endDate.value)
+
+const getPhenomenonRange = () => {
+  let min = Infinity
+  let max = -Infinity
+
+  plottedDatastreams.value.forEach((ds) => {
+    if (ds.phenomenonBeginTime) {
+      const begin = new Date(ds.phenomenonBeginTime).getTime()
+      if (Number.isFinite(begin)) min = Math.min(min, begin)
+    }
+    if (ds.phenomenonEndTime) {
+      const end = new Date(ds.phenomenonEndTime).getTime()
+      if (Number.isFinite(end)) max = Math.max(max, end)
+    }
+  })
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null
+  return { min, max }
+}
+
+const matchPresetRange = (rangeStart: number, rangeEnd: number) => {
+  if (!plottedDatastreams.value.length) return null
+
+  const mostRecentEnd = getMostRecentEndTime().getTime()
+  if (!Number.isFinite(mostRecentEnd)) return null
+  if (!isWithinTolerance(rangeEnd, mostRecentEnd, PRESET_MATCH_TOLERANCE_MS))
+    return null
+
+  const end = new Date(mostRecentEnd)
+  const candidates = [
+    {
+      id: 0,
+      begin: new Date(end.getFullYear(), end.getMonth() - 1, end.getDate()),
+    },
+    {
+      id: 1,
+      begin: new Date(end.getFullYear(), end.getMonth() - 6, end.getDate()),
+    },
+    {
+      id: 2,
+      begin: new Date(end.getFullYear(), 0, 1),
+    },
+    {
+      id: 3,
+      begin: new Date(end.getFullYear() - 1, end.getMonth(), end.getDate()),
+    },
+    {
+      id: 4,
+      begin: getOldestBeginTime(),
+    },
+  ]
+
+  const match = candidates.find((candidate) =>
+    isWithinTolerance(
+      rangeStart,
+      candidate.begin.getTime(),
+      PRESET_MATCH_TOLERANCE_MS
+    )
+  )
+  return match ? match.id : null
 }
 
 const handleRelayout = async (eventData: any) => {
   if (!plotlyRef.value) return
 
-  if (
-    !eventData ||
-    (eventData['xaxis.range[0]'] === undefined &&
-      eventData['xaxis.range[1]'] === undefined &&
-      !eventData['xaxis.autorange'])
-  ) {
-    return
-  }
+  if (!eventData) return
 
-  const xRange = plotlyRef.value.layout?.xaxis?.range
-  if (!xRange || xRange.length < 2) return
+  const eventKeys = Object.keys(eventData)
+  const hasYRangeChange = eventKeys.some(
+    (key) => key.startsWith('yaxis') && key.includes('range[')
+  )
+  if (hasYRangeChange) return
+
+  const eventRangeStart = eventData['xaxis.range[0]']
+  const eventRangeEnd = eventData['xaxis.range[1]']
+  if (eventRangeStart === undefined || eventRangeEnd === undefined) return
 
   const rangeStart =
-    typeof xRange[0] === 'string' ? Date.parse(xRange[0]) : xRange[0]
+    typeof eventRangeStart === 'string'
+      ? Date.parse(eventRangeStart)
+      : eventRangeStart
   const rangeEnd =
-    typeof xRange[1] === 'string' ? Date.parse(xRange[1]) : xRange[1]
+    typeof eventRangeEnd === 'string' ? Date.parse(eventRangeEnd) : eventRangeEnd
+  if (!Number.isFinite(rangeStart) || !Number.isFinite(rangeEnd)) return
 
   const bounds =
     plotlyOptions.value?.xRange || getXRangeBounds(graphSeriesArray.value)
@@ -212,7 +284,32 @@ const handleRelayout = async (eventData: any) => {
     clampPercent(((rangeEnd - bounds.min) / span) * 100)
   )
 
-  await updateTooltipState()
+  const currentStart = beginDate.value?.getTime()
+  const currentEnd = endDate.value?.getTime()
+  const rangeMatchesCurrent =
+    currentStart !== undefined &&
+    currentEnd !== undefined &&
+    isWithinTolerance(rangeStart, currentStart, RANGE_MATCH_TOLERANCE_MS) &&
+    isWithinTolerance(rangeEnd, currentEnd, RANGE_MATCH_TOLERANCE_MS)
+
+  if (!rangeMatchesCurrent) {
+    const phenomenonRange = getPhenomenonRange()
+    const rangeMatchesDataBounds =
+      isWithinTolerance(rangeStart, bounds.min, RANGE_MATCH_TOLERANCE_MS) &&
+      isWithinTolerance(rangeEnd, bounds.max, RANGE_MATCH_TOLERANCE_MS)
+    const needsFullRange =
+      phenomenonRange &&
+      (bounds.min > phenomenonRange.min + RANGE_MATCH_TOLERANCE_MS ||
+        bounds.max < phenomenonRange.max - RANGE_MATCH_TOLERANCE_MS)
+    const matchedPresetId =
+      rangeMatchesDataBounds && needsFullRange
+        ? 4
+        : matchPresetRange(rangeStart, rangeEnd)
+    if (matchedPresetId !== null) {
+      onDateBtnClick(matchedPresetId)
+    }
+  }
+
 }
 
 const debouncedRelayout = debounce(handleRelayout, 250)
@@ -240,8 +337,6 @@ const renderPlot = async () => {
   } else {
     await Plotly.react(plotlyRef.value, traces, layout, config)
   }
-
-  await updateTooltipState()
 }
 
 const cleanupPlot = () => {

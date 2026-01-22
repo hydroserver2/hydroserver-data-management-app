@@ -27,6 +27,8 @@ type PlotlyBuildOptions = {
   addScreenshotButton?: boolean
   showRangeSlider?: boolean
   showRangeSelector?: boolean
+  activeRangeSelector?: number
+  uirevision?: string | number
   title?: string
 }
 
@@ -68,6 +70,7 @@ const rangeSelectorOptions = {
     },
   ],
 }
+
 
 export function createYAxisConfigurations(
   data: GraphSeries[]
@@ -183,6 +186,8 @@ export const createPlotlyOption = (
     addScreenshotButton = true,
     showRangeSlider = false,
     showRangeSelector = true,
+    activeRangeSelector,
+    uirevision,
     title,
   } = opts
 
@@ -234,7 +239,12 @@ export const createPlotlyOption = (
           ? [rangeStart, rangeEnd]
           : undefined,
       autorange: rangeStart === undefined || rangeEnd === undefined,
-      rangeselector: showRangeSelector ? rangeSelectorOptions : undefined,
+      rangeselector: showRangeSelector
+        ? {
+            ...rangeSelectorOptions,
+            active: activeRangeSelector,
+          }
+        : undefined,
       rangeslider: showRangeSlider ? { visible: true } : { visible: false },
     },
     title: titleText
@@ -246,6 +256,9 @@ export const createPlotlyOption = (
           y: 0.98,
         }
       : undefined,
+  }
+  if (uirevision !== undefined) {
+    layout.uirevision = uirevision
   }
 
   const traces = seriesArray.map((series) => {
@@ -263,8 +276,8 @@ export const createPlotlyOption = (
       mode: 'lines+markers',
       line: { color: series.lineColor, width: 2 },
       marker: { color: series.lineColor, size: 6 },
-      hoverinfo: 'skip',
-      hovertemplate: '',
+      hoverinfo: 'x+y',
+      hovertemplate: '<b>%{y}</b><br>%{x}<extra></extra>',
     }
   })
 
@@ -304,7 +317,7 @@ export const createPlotlyOption = (
     scrollZoom: true,
     responsive: true,
     doubleClick: false,
-    modeBarButtonsToRemove: ['toImage', 'autoScale'],
+    modeBarButtonsToRemove: ['toImage', 'autoScale', 'lasso2d', 'select2d'],
   }
 
   const extraButtons = []

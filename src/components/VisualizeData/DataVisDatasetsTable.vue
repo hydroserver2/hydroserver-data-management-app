@@ -6,8 +6,8 @@
 
     <v-col cols="12" sm="auto">
       <v-btn
-        color="blue-lighten-3"
-        :prepend-icon="mdiContentCopy"
+        color="primary"
+        :append-icon="mdiContentCopy"
         block
         @click="copyStateToClipboard"
         >Copy State as URL</v-btn

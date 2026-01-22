@@ -217,10 +217,17 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     summaryStatisticsArray.value = calculateSummaryStatistics(
       graphSeriesArray.value
     )
+    const uirevision = graphSeriesArray.value
+      .map((series) => series.id)
+      .sort()
+      .join('|')
     plotlyOptions.value = createPlotlyOption(graphSeriesArray.value, {
       dataZoomStart: dataZoomStart.value,
       dataZoomEnd: dataZoomEnd.value,
       addSummaryButton: false,
+      activeRangeSelector:
+        selectedDateBtnId.value >= 0 ? selectedDateBtnId.value : -1,
+      uirevision,
     })
     prevIds.value = graphSeriesArray.value.map((series) => series.id)
   }
