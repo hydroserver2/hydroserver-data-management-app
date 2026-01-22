@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => {
           '**/src/services/handle401.ts',
           '**/src/utils/materialColors.ts',
           '**/src/utils/CSVDownloadUtils.ts',
-          '**/src/utils/plotting/echarts.ts',
+          '**/src/utils/plotting/plotly.ts',
           '**/src/utils/plotting/graphSeriesUtils.ts',
           '**/src/utils/test/**',
           '**/src/utils/time.ts',

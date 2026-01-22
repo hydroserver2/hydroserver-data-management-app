@@ -1,5 +1,11 @@
 <template>
-  <v-navigation-drawer v-model="drawer" width="400">
+  <v-navigation-drawer
+    v-model="drawer"
+    width="400"
+    color="navbar"
+    theme="dark"
+    class="data-vis-drawer"
+  >
     <v-card-title class="d-flex justify-space-between align-start">
       Filters
       <v-icon :icon="mdiMenuOpen" v-if="drawer" @click="drawer = !drawer" />

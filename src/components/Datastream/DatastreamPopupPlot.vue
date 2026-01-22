@@ -11,7 +11,7 @@
       <v-icon :icon="mdiClose" @click="$emit('close')" />
     </v-card-title>
 
-    <v-chart :option="option" autoresize style="height: 600px" />
+    <div ref="plotContainer" class="plotly-popup" />
 
     <v-card-actions class="my-3 d-flex justify-center">
       <v-btn
@@ -37,13 +37,12 @@
 <script setup lang="ts">
 import { Datastream, GraphSeries } from '@hydroserver/client'
 import { subtractHours } from '@/utils/observationsUtils'
-import { createEChartsOption } from '@/utils/plotting/echarts'
-import { EChartsOption } from 'echarts'
-import { onMounted, ref } from 'vue'
-import VChart from 'vue-echarts'
-import 'echarts'
+import { createPlotlyOption, PlotlyOptions } from '@/utils/plotting/plotly'
+import { onMounted, ref, nextTick, onBeforeUnmount } from 'vue'
 import { useObservationStore } from '@/store/observations'
 import { mdiClose } from '@mdi/js'
+// @ts-ignore no type definitions
+import Plotly from 'plotly.js-dist'
 
 const { fetchGraphSeries } = useObservationStore()
 
@@ -53,14 +52,16 @@ const props = defineProps({
     required: true,
   },
 })
-const emit = defineEmits(['close'])
+defineEmits(['close'])
 
-const option = ref<EChartsOption | undefined>()
+const plotlyOptions = ref<PlotlyOptions | undefined>()
 const graphSeries = ref<GraphSeries | undefined>()
 const updating = ref(false)
 const selectedTime = ref(72)
 const endTime = ref(props.datastream.phenomenonEndTime!)
 let beginTime = ref(subtractHours(endTime.value, selectedTime.value))
+const plotContainer = ref<HTMLDivElement | null>(null)
+const plotlyRef = ref<(HTMLDivElement & { [key: string]: any }) | null>(null)
 
 const timeSelections = [
   { label: 'Last 72 Hours', value: 72 },
@@ -105,10 +106,19 @@ const updateState = async (hours?: number) => {
     endTime.value
   )
 
-  option.value = createEChartsOption([graphSeries.value], {
+  if (!graphSeries.value) {
+    updating.value = false
+    return
+  }
+
+  plotlyOptions.value = createPlotlyOption([graphSeries.value], {
     addLegend: false,
-    addToolbox: false,
-    initializeZoomed: false,
+    addSummaryButton: false,
+    showRangeSlider: true,
+    title: props.datastream.name,
+  })
+  nextTick(() => {
+    renderPlot()
   })
   updating.value = false
 }
@@ -116,4 +126,34 @@ const updateState = async (hours?: number) => {
 onMounted(async () => {
   await updateState()
 })
+
+const renderPlot = async () => {
+  if (!plotlyOptions.value || !plotContainer.value) return
+
+  const { traces, layout, config } = plotlyOptions.value
+
+  if (!plotlyRef.value) {
+    plotlyRef.value = await Plotly.newPlot(
+      plotContainer.value,
+      traces,
+      layout,
+      config
+    )
+  } else {
+    await Plotly.react(plotlyRef.value, traces, layout, config)
+  }
+}
+
+onBeforeUnmount(() => {
+  if (plotlyRef.value) {
+    Plotly.purge(plotlyRef.value)
+  }
+})
 </script>
+
+<style scoped>
+.plotly-popup {
+  height: 600px;
+  width: 100%;
+}
+</style>

@@ -12,8 +12,6 @@
         </v-expansion-panel>
       </v-expansion-panels>
 
-      <DataVisTimeFilters />
-
       <v-sheet
         v-if="panels === 0"
         class="resize-handle"
@@ -36,7 +34,6 @@
 import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawer.vue'
 import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
-import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import hs from '@hydroserver/client'
 import { useDataVisStore } from '@/store/dataVisualization'
@@ -267,5 +264,9 @@ onUnmounted(() => {
 <style scoped>
 .resize-handle {
   cursor: ns-resize;
+}
+
+:deep(.v-expansion-panel-text__wrapper) {
+  padding: 0;
 }
 </style>

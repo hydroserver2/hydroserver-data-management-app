@@ -42,12 +42,17 @@ export const materialColorsHex = [
   '#9E9E9E', // grey
 ]
 
-export const EChartsColors = [
-  '#5571c7', // blue
-  '#91cc75', // green
-  '#ee6464', // red
-  '#795548', // brown
-  '#80d4f4', // light blue
+export const PlotlyColors = [
+  '#1f77b4', // muted blue
+  '#ff7f0e', // safety orange
+  '#2ca02c', // cooked asparagus green
+  '#d62728', // brick red
+  '#9467bd', // muted purple
+  '#8c564b', // chestnut brown
+  '#e377c2', // raspberry yogurt pink
+  '#7f7f7f', // middle gray
+  '#bcbd22', // curry yellow-green
+  '#17becf', // blue-teal
 ]
 
 export const mapMarkerColors = [

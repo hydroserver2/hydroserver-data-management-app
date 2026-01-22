@@ -2,38 +2,31 @@
   <v-card-title>
     <div class="d-flex justify-space-between w-100">
       Summary Statistics
-      <v-btn
-        :prepend-icon="mdiArrowLeft"
-        color="blue-grey-lighten-4"
-        @click="showSummaryStatistics = false"
-        >Back to Plot</v-btn
-      >
     </div>
   </v-card-title>
   <v-divider />
 
-  <v-data-table density="compact" class="elevation-1">
-    <tbody>
-      <tr v-for="header in summaryStatsHeaders" :key="header.key">
-        <td>{{ header.title }}</td>
-        <td v-for="stats in summaryStatisticsArray">
-          {{ formatNumber(stats[header.key as keyof SummaryStatistics]) }}
-        </td>
-      </tr>
-    </tbody>
-    <template v-slot:bottom></template>
-  </v-data-table>
+  <div class="summary-table-wrapper">
+    <v-data-table density="compact" class="elevation-1">
+      <tbody>
+        <tr v-for="header in summaryStatsHeaders" :key="header.key">
+          <td>{{ header.title }}</td>
+          <td v-for="stats in summaryStatisticsArray">
+            {{ formatNumber(stats[header.key as keyof SummaryStatistics]) }}
+          </td>
+        </tr>
+      </tbody>
+      <template v-slot:bottom></template>
+    </v-data-table>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { SummaryStatistics } from '@/utils/plotting/summaryStatisticUtils'
 import { storeToRefs } from 'pinia'
 import { useDataVisStore } from '@/store/dataVisualization'
-import { mdiArrowLeft } from '@mdi/js'
 
-const { showSummaryStatistics, summaryStatisticsArray } = storeToRefs(
-  useDataVisStore()
-)
+const { summaryStatisticsArray } = storeToRefs(useDataVisStore())
 
 const formatNumber = (value: string | number): string => {
   if (typeof value === 'number') {
@@ -64,6 +57,11 @@ const summaryStatsHeaders = [
 </script>
 
 <style scoped>
+.summary-table-wrapper {
+  max-height: 100%;
+  overflow: auto;
+}
+
 table th + th {
   border-left: 1px solid #dddddd;
 }

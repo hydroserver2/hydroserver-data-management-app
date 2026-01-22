@@ -36,13 +36,14 @@
 
   <v-toolbar flat color="secondary">
     <v-text-field
-      class="mx-2"
+      class="ml-4"
       clearable
       v-model="search"
       :prepend-inner-icon="mdiMagnify"
       label="Search"
       hide-details
       density="compact"
+      variant="underlined"
     />
 
     <v-spacer />

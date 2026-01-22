@@ -22,6 +22,24 @@ const theme: ThemeDefinition = {
     info: '#03A9F4', // light-blue
     success: '#4CAF50', // green
     warning: '#FF9800', // orange
+    navbar: '#272e3d',
+  },
+}
+
+const darkTheme: ThemeDefinition = {
+  dark: true,
+  colors: {
+    background: '#18212a',
+    surface: '#18212a',
+    primary: '#2196F3',
+    secondary: '#4CAF50',
+    default: '#cfd8dc',
+    delete: '#F44336',
+    error: '#F44336',
+    info: '#03A9F4',
+    success: '#4CAF50',
+    warning: '#FF9800',
+    navbar: '#272e3d',
   },
 }
 
@@ -100,6 +118,7 @@ export default createVuetify({
     defaultTheme: 'theme',
     themes: {
       theme,
+      dark: darkTheme,
     },
     variations: {
       colors: ['primary', 'secondary', 'surface'],
