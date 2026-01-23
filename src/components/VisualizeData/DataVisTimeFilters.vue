@@ -32,6 +32,7 @@ const { beginDate, endDate } = storeToRefs(useDataVisStore())
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  padding: 0 8px 8px 0;
 }
 
 .date-fields {
