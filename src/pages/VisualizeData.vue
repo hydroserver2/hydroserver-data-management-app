@@ -1,6 +1,6 @@
 <template>
   <FullScreenLoader v-if="loading" />
-  <div v-else>
+  <div v-else class="visualize-page">
     <DataVisFiltersDrawer @drawer-change="handleDrawerChange" />
 
     <div class="visualize-layout">
@@ -275,6 +275,11 @@ onUnmounted(() => {
     100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px) -
       (var(--visualize-margin) * 2)
   );
+}
+
+.visualize-page {
+  min-height: 100dvh;
+  background-color: #eef2f6;
 }
 
 .plot-section,

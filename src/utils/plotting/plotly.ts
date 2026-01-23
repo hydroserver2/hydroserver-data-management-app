@@ -262,10 +262,19 @@ export const createPlotlyOption = (
     layout.uirevision = uirevision
   }
 
-  const traces = seriesArray.map((series) => {
+  const markerSymbols = [
+    'circle',
+    'square',
+    'diamond',
+    'triangle-up',
+    'x',
+  ]
+
+  const traces = seriesArray.map((series, index) => {
     const axisConfig = yAxisConfigurations.get(series.yAxisLabel)
     const axisIndex = axisConfig?.index ?? 0
     const axisId = axisIndex === 0 ? 'y' : `y${axisIndex + 1}`
+    const symbol = markerSymbols[index % markerSymbols.length]
 
     return {
       id: series.id,
@@ -276,9 +285,9 @@ export const createPlotlyOption = (
       type: 'scattergl',
       mode: 'lines+markers',
       line: { color: series.lineColor, width: 2 },
-      marker: { color: series.lineColor, size: 6 },
-      hoverinfo: 'x+y',
-      hovertemplate: '<b>%{y}</b><br>%{x}<extra></extra>',
+      marker: { color: series.lineColor, size: 6, symbol },
+      hoverinfo: 'y',
+      hovertemplate: '<b>%{y}</b><extra></extra>',
     }
   })
 

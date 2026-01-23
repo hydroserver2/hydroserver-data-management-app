@@ -1,6 +1,6 @@
 <template>
   <div class="datasets-table">
-    <v-card class="datasets-table__card">
+    <v-card class="datasets-table__card elevation-2">
       <v-sheet class="datasets-table__toolbar" color="secondary">
         <v-defaults-provider :defaults="{ VBtn: { variant: 'text' } }">
           <div class="datasets-table__toolbar-inner">

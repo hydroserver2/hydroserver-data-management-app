@@ -1,5 +1,5 @@
 <template>
-  <v-card class="elevation-0 plot-card" :loading="updating">
+  <v-card class="elevation-2 plot-card" :loading="updating">
     <template v-slot:loader="{ isActive }">
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
