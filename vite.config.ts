@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import vuetify from 'vite-plugin-vuetify'
 
 export default defineConfig(({ mode }) => {
@@ -17,6 +18,7 @@ export default defineConfig(({ mode }) => {
     base: mode === 'django' ? '/static/web/' : '',
     plugins: [
       vue(),
+      tailwindcss(),
       vuetify({
         autoImport: true,
         styles: { configFile: 'src/styles/settings.scss' },
