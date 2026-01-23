@@ -4,6 +4,7 @@ import {
   ProcessingLevel,
   Thing,
   GraphSeries,
+  Workspace,
 } from '@hydroserver/client'
 import {
   SummaryStatistics,
@@ -25,6 +26,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
 
   const selectedThings = ref<Thing[]>([])
   const plottedDatastreams = ref<Datastream[]>([])
+  const selectedWorkspaces = ref<Workspace[]>([])
   const selectedObservedPropertyNames = ref<string[]>([])
   const selectedProcessingLevelNames = ref<string[]>([])
 
@@ -51,6 +53,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   function resetState() {
     selectedThings.value = []
     plottedDatastreams.value = []
+    selectedWorkspaces.value = []
     selectedObservedPropertyNames.value = []
     selectedProcessingLevelNames.value = []
     showSummaryStatistics.value = false
@@ -97,10 +100,25 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     )
   }
 
+  function matchesSelectedWorkspace(datastream: Datastream) {
+    if (selectedWorkspaces.value.length === 0) return true
+
+    const thingWorkspaceId = things.value.find(
+      (thing) => thing.id === datastream.thingId
+    )?.workspaceId
+
+    if (!thingWorkspaceId) return false
+
+    return selectedWorkspaces.value.some(
+      (workspace) => workspace.id === thingWorkspaceId
+    )
+  }
+
   const filteredDatastreams = computed(() => {
     return datastreams.value.filter(
       (datastream) =>
         matchesSelectedThing(datastream) &&
+        matchesSelectedWorkspace(datastream) &&
         matchesSelectedObservedProperty(datastream) &&
         matchesSelectedProcessingLevel(datastream)
     )
@@ -337,6 +355,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     processingLevels,
     observedProperties,
     selectedThings,
+    selectedWorkspaces,
     selectedObservedPropertyNames,
     selectedProcessingLevelNames,
     filteredDatastreams,
@@ -360,6 +379,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     matchesSelectedObservedProperty,
     matchesSelectedProcessingLevel,
     matchesSelectedThing,
+    matchesSelectedWorkspace,
     setDateRange,
     onDateBtnClick,
     resetState,

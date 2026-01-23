@@ -50,6 +50,43 @@
       <div class="flex flex-1 flex-col gap-3 overflow-auto pr-1">
         <div>
           <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Workspaces</span>
+            <span>{{ sortedWorkspaces.length }}/{{ totalWorkspacesCount }}</span>
+          </div>
+          <div class="pt-2">
+            <v-autocomplete
+              v-model="selectedWorkspaces"
+              v-model:search="searchWorkspace"
+              :items="sortedWorkspaces"
+              item-title="name"
+              return-object
+              multiple
+              clearable
+              :prepend-inner-icon="mdiDomain"
+              label="Search workspaces"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mt-2 [&_.v-field]:rounded-md [&_.v-field]:border [&_.v-field]:border-slate-200 [&_.v-field]:bg-white [&_.v-field]:text-slate-700 [&_.v-field-label]:text-slate-500"
+            >
+              <template #selection="{ item, index }">
+                <v-chip
+                  size="small"
+                  closable
+                  class="mr-1 mb-1 max-w-full"
+                  @click:close="selectedWorkspaces.splice(index, 1)"
+                >
+                  <span class="whitespace-normal break-words">
+                    {{ item.title }}
+                  </span>
+                </v-chip>
+              </template>
+            </v-autocomplete>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between text-xs text-slate-400">
             <span>Sites</span>
             <span>{{ sortedThings.length }}/{{ totalThingsCount }}</span>
           </div>
@@ -173,12 +210,14 @@ import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 import { useSidebarStore } from '@/store/useSidebar'
-import { mdiMagnify, mdiClose } from '@mdi/js'
+import { useWorkspaceStore } from '@/store/workspaces'
+import { mdiMagnify, mdiClose, mdiDomain } from '@mdi/js'
 
 const {
   matchesSelectedObservedProperty,
   matchesSelectedProcessingLevel,
   matchesSelectedThing,
+  matchesSelectedWorkspace,
 } = useDataVisStore()
 const {
   things,
@@ -186,15 +225,37 @@ const {
   processingLevels,
   observedProperties,
   selectedThings,
+  selectedWorkspaces,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
   showPlot,
   showTable,
 } = storeToRefs(useDataVisStore())
 
+const { workspaces } = storeToRefs(useWorkspaceStore())
+
+const searchWorkspace = ref('')
 const searchThing = ref('')
 const searchObservedProperty = ref('')
 const searchProcessingLevel = ref('')
+const totalWorkspacesCount = computed(() => {
+  const thingIds = new Set<string>()
+  datastreams.value.forEach((ds) => {
+    if (ds.thingId) thingIds.add(ds.thingId)
+  })
+
+  const workspaceIds = new Set<string>()
+  things.value.forEach((thing) => {
+    if (thingIds.has(thing.id) && thing.workspaceId) {
+      workspaceIds.add(thing.workspaceId)
+    }
+  })
+
+  return workspaces.value.filter((workspace) =>
+    workspaceIds.has(workspace.id)
+  ).length
+})
+
 const totalThingsCount = computed(() => {
   const ids = new Set<string>()
   datastreams.value.forEach((ds) => {
@@ -229,6 +290,28 @@ const totalProcessingLevelNamesCount = computed(() => {
 
 // Only show list items that are referenced by at least one datastream
 // Then mutually filter the lists by selected filters.
+const sortedWorkspaces = computed(() => {
+  const thingById = new Map(things.value.map((thing) => [thing.id, thing]))
+  const workspaceIds = new Set<string>()
+
+  datastreams.value.forEach((ds) => {
+    if (
+      !matchesSelectedThing(ds) ||
+      !matchesSelectedObservedProperty(ds) ||
+      !matchesSelectedProcessingLevel(ds)
+    ) {
+      return
+    }
+
+    const workspaceId = thingById.get(ds.thingId)?.workspaceId
+    if (workspaceId) workspaceIds.add(workspaceId)
+  })
+
+  return workspaces.value
+    .filter((workspace) => workspaceIds.has(workspace.id))
+    .sort((a, b) => a.name.localeCompare(b.name))
+})
+
 const sortedProcessingLevelNames = computed(() => {
   const filteredPLs = processingLevels.value.filter((pl) => {
     const definition = pl.definition ?? ''
@@ -236,7 +319,8 @@ const sortedProcessingLevelNames = computed(() => {
       (ds) =>
         ds.processingLevelId === pl.id &&
         matchesSelectedThing(ds) &&
-        matchesSelectedObservedProperty(ds)
+        matchesSelectedObservedProperty(ds) &&
+        matchesSelectedWorkspace(ds)
     )
   })
   const names = filteredPLs.map((pl) => pl.definition)
@@ -250,7 +334,8 @@ const sortedThings = computed(() => {
         (ds) =>
           ds.thingId === thing.id &&
           matchesSelectedObservedProperty(ds) &&
-          matchesSelectedProcessingLevel(ds)
+          matchesSelectedProcessingLevel(ds) &&
+          matchesSelectedWorkspace(ds)
       )
     )
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -262,7 +347,8 @@ const sortedObservedPropertyNames = computed(() => {
       (ds) =>
         ds.observedPropertyId === op.id &&
         matchesSelectedThing(ds) &&
-        matchesSelectedProcessingLevel(ds)
+        matchesSelectedProcessingLevel(ds) &&
+        matchesSelectedWorkspace(ds)
     )
   )
 
@@ -276,9 +362,11 @@ const emit = defineEmits<{
 
 const clearFilters = () => {
   selectedThings.value = []
+  selectedWorkspaces.value = []
   selectedObservedPropertyNames.value = []
   selectedProcessingLevelNames.value = []
 
+  searchWorkspace.value = ''
   searchThing.value = ''
   searchObservedProperty.value = ''
   searchProcessingLevel.value = ''
