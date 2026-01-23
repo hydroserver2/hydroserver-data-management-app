@@ -1,67 +1,62 @@
 <template>
   <div class="datasets-table">
-    <v-row class="my-2 table-header" align="center">
-      <v-col cols="auto" class="table-header__title">
-        <h5 class="text-h5">Datastreams</h5>
-      </v-col>
-
-      <v-col cols="12" sm="3" class="ml-auto table-header__select">
-        <v-select
-          label="Show/Hide Columns"
-          v-model="selectedHeaders"
-          :items="selectableHeaders"
-          item-text="title"
-          item-value="key"
-          multiple
-          item-color="green"
-          density="compact"
-          variant="solo"
-          hide-details
-        >
-          <template v-slot:selection="{ item, index }">
-            <!-- Leave blank so nothing appears in the v-select box -->
-          </template>
-        </v-select>
-      </v-col>
-    </v-row>
-
     <v-card class="datasets-table__card">
       <v-sheet class="datasets-table__toolbar" color="secondary">
         <v-defaults-provider :defaults="{ VBtn: { variant: 'text' } }">
           <div class="datasets-table__toolbar-inner">
-          <v-text-field
-            class="datasets-table__search"
-            clearable
-            v-model="search"
-            :prepend-inner-icon="mdiMagnify"
-            label="Search"
-            hide-details
-            density="compact"
-            variant="underlined"
-          />
+            <div class="datasets-table__meta">
+              <h5 class="text-h5 datasets-table__title">Datastreams</h5>
+              <v-text-field
+                class="datasets-table__search"
+                clearable
+                v-model="search"
+                :prepend-inner-icon="mdiMagnify"
+                label="Search"
+                hide-details
+                density="compact"
+                variant="underlined"
+              />
+              <v-select
+                class="datasets-table__columns"
+                label="Show/Hide Columns"
+                v-model="selectedHeaders"
+                :items="selectableHeaders"
+                item-text="title"
+                item-value="key"
+                multiple
+                item-color="green"
+                density="compact"
+                variant="solo"
+                hide-details
+              >
+                <template v-slot:selection="{ item, index }">
+                  <!-- Leave blank so nothing appears in the v-select box -->
+                </template>
+              </v-select>
+            </div>
 
-          <div class="datasets-table__actions">
-            <v-btn color="white" @click="clearSelected">
-              Clear Selected
-            </v-btn>
+            <div class="datasets-table__actions">
+              <v-btn color="white" @click="clearSelected">
+                Clear Selected
+              </v-btn>
 
-            <v-btn
-              color="white"
-              variant="outlined"
-              @click="showOnlySelected = !showOnlySelected"
-            >
-              {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
-            </v-btn>
+              <v-btn
+                color="white"
+                variant="outlined"
+                @click="showOnlySelected = !showOnlySelected"
+              >
+                {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
+              </v-btn>
 
-            <v-btn
-              color="white"
-              :loading="downloading"
-              :prepend-icon="mdiDownload"
-              @click="downloadSelected(plottedDatastreams)"
-              >Download Selected</v-btn
-            >
+              <v-btn
+                color="white"
+                :loading="downloading"
+                :prepend-icon="mdiDownload"
+                @click="downloadSelected(plottedDatastreams)"
+                >Download Selected</v-btn
+              >
+            </div>
           </div>
-        </div>
         </v-defaults-provider>
       </v-sheet>
       <v-data-table-virtual
@@ -353,22 +348,40 @@ function updatePlottedDatastreams(datastream: Datastream) {
 
 .datasets-table__toolbar-inner {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.datasets-table__meta {
+  display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
+.datasets-table__title {
+  margin: 0;
+  white-space: nowrap;
+}
+
 .datasets-table__search {
-  flex: 1 1 220px;
-  min-width: 180px;
-  max-width: 320px;
+  flex: 1 1 240px;
+  min-width: 200px;
+  max-width: 360px;
+}
+
+.datasets-table__columns {
+  min-width: 220px;
+  max-width: 260px;
+  margin-left: auto;
 }
 
 .datasets-table__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-left: auto;
+  justify-content: flex-end;
 }
 
 .datasets-table__table {
@@ -419,38 +432,7 @@ function updatePlottedDatastreams(datastream: Datastream) {
   margin-bottom: 6px;
 }
 
-.table-header {
-  flex: 0 0 auto;
-}
-
-.table-header__title {
-  flex: 0 0 auto;
-  padding-right: 8px;
-}
-
-.table-header__select {
-  max-width: 260px;
-}
-
 @media (max-width: 600px) {
-  .table-header {
-    margin-top: 4px;
-    margin-bottom: 4px;
-  }
-
-  .table-header :deep(.v-col) {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-
-  .table-header__title {
-    padding-right: 0;
-  }
-
-  .table-header__select {
-    max-width: 100%;
-  }
-
   .datasets-table__card {
     min-height: 520px;
   }
@@ -463,17 +445,28 @@ function updatePlottedDatastreams(datastream: Datastream) {
     padding: 8px;
   }
 
-  .datasets-table__toolbar-inner {
+  .datasets-table__meta {
+    flex-direction: column;
     align-items: stretch;
+  }
+
+  .datasets-table__title {
+    text-align: center;
+    width: 100%;
   }
 
   .datasets-table__search {
     max-width: 100%;
+    min-width: 0;
+  }
+
+  .datasets-table__columns {
+    max-width: 100%;
+    width: 100%;
   }
 
   .datasets-table__actions {
     width: 100%;
-    margin-left: 0;
   }
 
   .datasets-table__actions :deep(.v-btn) {

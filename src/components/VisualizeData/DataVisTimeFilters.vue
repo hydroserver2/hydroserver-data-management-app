@@ -2,11 +2,12 @@
   <div class="time-filters">
     <div class="time-filters__controls">
       <div class="preset-filters">
-        <v-chip-group
-          class="preset-chips"
-          :model-value="selectedDateBtnId"
-          @update:model-value="handlePresetChange"
-        >
+      <v-chip-group
+        class="preset-chips"
+        :model-value="selectedDateBtnId"
+        selected-class="bg-primary text-white"
+        @update:model-value="handlePresetChange"
+      >
           <v-chip
             v-for="option in dateOptions"
             :key="option.id"
@@ -20,16 +21,18 @@
         </v-chip-group>
       </div>
       <div class="date-fields">
-        <DatePickerField
-          :model-value="beginDate"
-          placeholder="Begin Date"
-          @update:model-value="setDateRange({ begin: $event })"
-        />
-        <DatePickerField
-          :model-value="endDate"
-          placeholder="End Date"
-          @update:model-value="setDateRange({ end: $event })"
-        />
+      <DatePickerField
+        :active="isCustomRangeActive"
+        :model-value="beginDate"
+        placeholder="Begin Date"
+        @update:model-value="setDateRange({ begin: $event })"
+      />
+      <DatePickerField
+        :active="isCustomRangeActive"
+        :model-value="endDate"
+        placeholder="End Date"
+        @update:model-value="setDateRange({ end: $event })"
+      />
       </div>
     </div>
     <div class="time-filters__actions">
@@ -49,6 +52,7 @@
 import DatePickerField from '@/components/VisualizeData/DatePickerField.vue'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { mdiContentCopy } from '@mdi/js'
 
 const { setDateRange, onDateBtnClick } = useDataVisStore()
@@ -57,6 +61,8 @@ const emit = defineEmits(['copy-state'])
 const { beginDate, endDate, dateOptions, selectedDateBtnId } = storeToRefs(
   useDataVisStore()
 )
+
+const isCustomRangeActive = computed(() => selectedDateBtnId.value < 0)
 
 const handlePresetChange = (value: number | null) => {
   if (typeof value === 'number') {
