@@ -3,13 +3,16 @@
   <div v-else>
     <DataVisFiltersDrawer @drawer-change="handleDrawerChange" />
 
-    <div class="my-4 mx-4 visualize-layout">
+    <div class="visualize-layout">
       <div
         v-if="showPlot"
         class="plot-section"
         :style="{ flex: `${cardHeight} 1 0%` }"
       >
-        <DataVisualizationCard :cardHeight="cardHeight" />
+        <DataVisualizationCard
+          :cardHeight="cardHeight"
+          @copy-state="copyStateToClipboard"
+        />
       </div>
 
       <div
@@ -17,7 +20,7 @@
         class="table-section"
         :style="{ flex: `${tableHeight} 1 0%` }"
       >
-        <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
+        <DataVisDatasetsTable />
       </div>
     </div>
   </div>
@@ -266,8 +269,11 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  --visualize-margin: 16px;
+  margin: var(--visualize-margin);
   height: calc(
-    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px) - 32px
+    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px) -
+      (var(--visualize-margin) * 2)
   );
 }
 
@@ -282,5 +288,12 @@ onUnmounted(() => {
 .table-section > * {
   flex: 1;
   min-height: 0;
+}
+
+@media (max-width: 600px) {
+  .visualize-layout {
+    --visualize-margin: 8px;
+    gap: 8px;
+  }
 }
 </style>

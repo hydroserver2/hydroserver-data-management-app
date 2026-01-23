@@ -284,7 +284,11 @@ const handleToggle = (toggled: 'plot' | 'table', value: boolean) => {
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2])
-const drawer = ref(!!smAndDown)
+const drawer = ref(!smAndDown.value)
+
+watch(smAndDown, (isMobile) => {
+  if (isMobile) drawer.value = false
+})
 
 watch(drawer, (value) => {
   emit('drawer-change', value)

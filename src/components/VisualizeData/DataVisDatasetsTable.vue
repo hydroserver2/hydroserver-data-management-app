@@ -5,16 +5,6 @@
         <h5 class="text-h5">Datastreams</h5>
       </v-col>
 
-      <v-col cols="12" sm="auto" class="table-header__action">
-        <v-btn
-          color="primary"
-          :append-icon="mdiContentCopy"
-          block
-          @click="copyStateToClipboard"
-          >Copy State as URL</v-btn
-        >
-      </v-col>
-
       <v-col cols="12" sm="3" class="ml-auto table-header__select">
         <v-select
           label="Show/Hide Columns"
@@ -36,34 +26,107 @@
     </v-row>
 
     <v-card class="datasets-table__card">
-      <v-toolbar flat color="secondary">
-        <v-text-field
-          class="ml-4"
-          clearable
-          v-model="search"
-          :prepend-inner-icon="mdiMagnify"
-          label="Search"
-          hide-details
-          density="compact"
-          variant="underlined"
-        />
+      <v-sheet class="datasets-table__toolbar" color="secondary">
+        <v-defaults-provider :defaults="{ VBtn: { variant: 'text' } }">
+          <div class="datasets-table__toolbar-inner">
+          <v-text-field
+            class="datasets-table__search"
+            clearable
+            v-model="search"
+            :prepend-inner-icon="mdiMagnify"
+            label="Search"
+            hide-details
+            density="compact"
+            variant="underlined"
+          />
 
-        <v-spacer />
+          <div class="datasets-table__actions">
+            <v-btn color="white" @click="clearSelected">
+              Clear Selected
+            </v-btn>
 
-        <v-btn @click="clearSelected"> Clear Selected </v-btn>
+            <v-btn
+              color="white"
+              variant="outlined"
+              @click="showOnlySelected = !showOnlySelected"
+            >
+              {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
+            </v-btn>
 
-        <v-btn variant="outlined" @click="showOnlySelected = !showOnlySelected">
-          {{ showOnlySelected ? 'Show All' : 'Show Selected' }}
-        </v-btn>
-
-        <v-btn
-          :loading="downloading"
-          :prepend-icon="mdiDownload"
-          @click="downloadSelected(plottedDatastreams)"
-          >Download Selected</v-btn
-        >
-      </v-toolbar>
+            <v-btn
+              color="white"
+              :loading="downloading"
+              :prepend-icon="mdiDownload"
+              @click="downloadSelected(plottedDatastreams)"
+              >Download Selected</v-btn
+            >
+          </div>
+        </div>
+        </v-defaults-provider>
+      </v-sheet>
       <v-data-table-virtual
+        v-if="isMobile"
+        :headers="headers.filter((header) => header.visible)"
+        :items="tableItems"
+        :search="search"
+        fixed-header
+        hide-default-header
+        class="elevation-2 datasets-table__table datasets-table__table--mobile"
+        color="green"
+        density="compact"
+        hover
+      >
+        <template v-slot:item="{ item }">
+          <tr class="mobile-row">
+            <td class="mobile-row__cell" :colspan="headers.length">
+              <div class="mobile-row__header">
+                <div class="mobile-row__title">
+                  {{ item.name }}
+                </div>
+                <v-checkbox
+                  :model-value="isChecked(item)"
+                  :disabled="plottedDatastreams.length >= 5 && !isChecked(item)"
+                  density="compact"
+                  label="Plot"
+                  hide-details
+                  @click.stop
+                  @change="() => updatePlottedDatastreams(item)"
+                />
+              </div>
+              <div class="mobile-row__line">
+                <span class="mobile-row__label">Site</span>
+                <span>{{ item.siteCodeName || '—' }}</span>
+              </div>
+              <div class="mobile-row__line">
+                <span class="mobile-row__label">Observed property</span>
+                <span>{{ item.observedPropertyName || '—' }}</span>
+              </div>
+              <div class="mobile-row__line">
+                <span class="mobile-row__label">Processing level</span>
+                <span>{{ item.qualityControlLevelDefinition || '—' }}</span>
+              </div>
+              <div class="mobile-row__line">
+                <span class="mobile-row__label">Observations</span>
+                <span>{{ item.valueCount ?? '—' }}</span>
+              </div>
+              <div class="mobile-row__line">
+                <span class="mobile-row__label">Last updated</span>
+                <span>{{ formatTime(item.phenomenonEndTime) }}</span>
+              </div>
+              <v-btn
+                class="mobile-row__meta-btn"
+                variant="outlined"
+                color="primary"
+                @click="openMetadata(item)"
+              >
+                Show Full Metadata
+              </v-btn>
+            </td>
+          </tr>
+        </template>
+      </v-data-table-virtual>
+      <v-data-table-virtual
+        v-else
         :headers="headers.filter((header) => header.visible)"
         :items="tableItems"
         :sort-by="sortBy"
@@ -110,9 +173,10 @@ import { useDataVisStore } from '@/store/dataVisualization'
 import hs, { Datastream, Thing } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { computed, reactive, ref } from 'vue'
+import { useDisplay } from 'vuetify'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { formatTime } from '@/utils/time'
-import { mdiContentCopy, mdiDownload, mdiMagnify } from '@mdi/js'
+import { mdiDownload, mdiMagnify } from '@mdi/js'
 
 const {
   things,
@@ -122,17 +186,13 @@ const {
   processingLevels,
 } = storeToRefs(useDataVisStore())
 
-const emit = defineEmits(['copyState'])
-
 const showOnlySelected = ref(false)
 const openInfoCard = ref(false)
 const downloading = ref(false)
 const selectedDatastream = ref<Datastream | null>(null)
 const selectedThing = ref<Thing | null>(null)
-
-const copyStateToClipboard = async () => {
-  emit('copyState')
-}
+const { smAndDown } = useDisplay()
+const isMobile = computed(() => smAndDown.value)
 
 const downloadSelected = async (plottedDatastreams: Datastream[]) => {
   downloading.value = true
@@ -155,6 +215,19 @@ const onRowClick = (event: Event, item: any) => {
   const selectedDatastreamId = item.item.id
   const foundDatastream = filteredDatastreams.value.find(
     (d) => d.id === selectedDatastreamId
+  )
+  if (foundDatastream) {
+    selectedDatastream.value = foundDatastream
+    openInfoCard.value = true
+  } else selectedDatastream.value = null
+}
+
+const openMetadata = (item: Datastream) => {
+  const foundThing = things.value.find((t) => t.id === item.thingId)
+  if (foundThing) selectedThing.value = foundThing
+
+  const foundDatastream = filteredDatastreams.value.find(
+    (d) => d.id === item.id
   )
   if (foundDatastream) {
     selectedDatastream.value = foundDatastream
@@ -274,10 +347,76 @@ function updatePlottedDatastreams(datastream: Datastream) {
   min-height: 0;
 }
 
+.datasets-table__toolbar {
+  padding: 8px 12px;
+}
+
+.datasets-table__toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.datasets-table__search {
+  flex: 1 1 220px;
+  min-width: 180px;
+  max-width: 320px;
+}
+
+.datasets-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .datasets-table__table {
   flex: 1;
   min-height: 0;
-  height: 0;
+  height: 100%;
+}
+
+.datasets-table__table--mobile :deep(.v-table__wrapper) {
+  overflow-x: hidden;
+}
+
+.mobile-row__cell {
+  padding: 12px 16px;
+}
+
+.mobile-row__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.mobile-row__title {
+  font-weight: 600;
+  line-height: 1.3;
+  padding-top: 4px;
+}
+
+.mobile-row__line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+}
+
+.mobile-row__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.mobile-row__meta-btn {
+  margin-top: 12px;
+  min-height: 36px;
+  width: 100%;
+  margin-bottom: 6px;
 }
 
 .table-header {
@@ -289,11 +428,56 @@ function updatePlottedDatastreams(datastream: Datastream) {
   padding-right: 8px;
 }
 
-.table-header__action {
-  flex: 0 0 auto;
-}
-
 .table-header__select {
   max-width: 260px;
+}
+
+@media (max-width: 600px) {
+  .table-header {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
+  .table-header :deep(.v-col) {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .table-header__title {
+    padding-right: 0;
+  }
+
+  .table-header__select {
+    max-width: 100%;
+  }
+
+  .datasets-table__card {
+    min-height: 520px;
+  }
+
+  .datasets-table__table {
+    min-height: 440px;
+  }
+
+  .datasets-table__toolbar {
+    padding: 8px;
+  }
+
+  .datasets-table__toolbar-inner {
+    align-items: stretch;
+  }
+
+  .datasets-table__search {
+    max-width: 100%;
+  }
+
+  .datasets-table__actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .datasets-table__actions :deep(.v-btn) {
+    flex: 1 1 100%;
+  }
 }
 </style>

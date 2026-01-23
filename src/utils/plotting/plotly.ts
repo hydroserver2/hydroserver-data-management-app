@@ -245,7 +245,7 @@ export const createPlotlyOption = (
             ...rangeSelectorOptions,
             active: activeRangeSelector,
           }
-        : undefined,
+        : null,
       rangeslider: showRangeSlider ? { visible: true } : { visible: false },
     },
     title: titleText

@@ -46,7 +46,7 @@
               <v-window-item value="plot" class="plot-window-item">
                 <div ref="plotContainer" class="plotly-chart" />
                 <div class="plot-toolbar">
-                  <DataVisTimeFilters />
+                  <DataVisTimeFilters @copy-state="emit('copy-state')" />
                 </div>
               </v-window-item>
               <v-window-item value="summary" class="plot-window-item">
@@ -116,6 +116,8 @@ import { getXRangeBounds } from '@/utils/plotting/plotly'
 // @ts-ignore no type definitions
 import Plotly from 'plotly.js-dist'
 import { mdiChartLine, mdiTable } from '@mdi/js'
+
+const emit = defineEmits(['copy-state'])
 
 const props = defineProps({
   cardHeight: { type: Number, required: true },
@@ -330,6 +332,8 @@ const renderPlot = async () => {
   } else {
     await Plotly.react(plotlyRef.value, traces, layout, config)
   }
+
+  queueResize()
 }
 
 const cleanupPlot = () => {
@@ -340,16 +344,26 @@ const cleanupPlot = () => {
   }
 }
 
+const queueResize = () => {
+  if (!plotlyRef.value) return
+  requestAnimationFrame(() => {
+    if (plotlyRef.value) Plotly.Plots.resize(plotlyRef.value)
+  })
+  setTimeout(() => {
+    if (plotlyRef.value) Plotly.Plots.resize(plotlyRef.value)
+  }, 200)
+}
+
 const handleLayoutResize = () => {
   if (plotlyRef.value) {
-    Plotly.Plots.resize(plotlyRef.value)
+    queueResize()
   }
 }
 
 watch([() => props.cardHeight], ([newHeight], [oldHeight]) => {
   if (Math.abs(newHeight - oldHeight) < 0.2) return
   nextTick(() => {
-    if (plotlyRef.value) Plotly.Plots.resize(plotlyRef.value)
+    queueResize()
   })
 })
 
@@ -384,7 +398,7 @@ watch(
     if (isVisible) {
       nextTick(() => {
         renderPlot()
-        if (plotlyRef.value) Plotly.Plots.resize(plotlyRef.value)
+        queueResize()
       })
     }
   }
@@ -392,11 +406,16 @@ watch(
 
 onBeforeUnmount(() => {
   window.removeEventListener('datavis-layout', handleLayoutResize)
+  window.removeEventListener('resize', handleLayoutResize)
   cleanupPlot()
 })
 
 onMounted(() => {
   window.addEventListener('datavis-layout', handleLayoutResize)
+  window.addEventListener('resize', handleLayoutResize)
+  setTimeout(() => {
+    queueResize()
+  }, 200)
 })
 </script>
 
@@ -422,6 +441,7 @@ onMounted(() => {
   flex: 1;
   min-height: 0;
   width: 100%;
+  height: 100%;
 }
 
 .plot-toolbar {
@@ -432,6 +452,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
 }
 
 .plot-shell :deep(.js-plotly-plot .plotly) {
@@ -461,6 +484,7 @@ onMounted(() => {
   min-height: 0;
   flex: 1;
   align-items: stretch;
+  height: 100%;
 }
 
 .plot-rail {
@@ -503,11 +527,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
 }
 
 .plot-window {
   flex: 1;
   min-height: 0;
+  height: 100%;
 }
 
 .plot-window :deep(.v-window__container) {
@@ -519,5 +545,36 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+@media (max-width: 600px) {
+  .plot-body {
+    flex-direction: column;
+  }
+
+  .plot-rail {
+    width: 100%;
+    height: 36px;
+    min-height: 0;
+    flex: 0 0 36px;
+    flex-direction: row;
+    border-right: 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .plot-rail-btn {
+    min-height: 36px;
+    min-width: 36px;
+    flex: 1;
+  }
+
+  .plot-rail-btn--active::before {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    height: 3px;
+  }
 }
 </style>

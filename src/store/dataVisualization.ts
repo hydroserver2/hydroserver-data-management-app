@@ -227,6 +227,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       addSummaryButton: false,
       activeRangeSelector:
         selectedDateBtnId.value >= 0 ? selectedDateBtnId.value : -1,
+      showRangeSelector: false,
       uirevision,
     })
     prevIds.value = graphSeriesArray.value.map((series) => series.id)
