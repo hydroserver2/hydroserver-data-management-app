@@ -169,6 +169,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/VisualizeData.vue'),
     meta: {
       title: 'VisualizeData',
+      hasSidebar: true,
       hideFooter: true,
       metaTags: [
         {

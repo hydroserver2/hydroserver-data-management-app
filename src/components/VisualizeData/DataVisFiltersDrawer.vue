@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer
-    v-model="drawer"
+    v-model="sidebar.isOpen"
     width="400"
     color="navbar"
     theme="dark"
@@ -8,7 +8,6 @@
   >
     <v-card-title class="d-flex justify-space-between align-start">
       Filters
-      <v-icon :icon="mdiMenuOpen" v-if="drawer" @click="drawer = !drawer" />
     </v-card-title>
 
     <v-divider />
@@ -41,29 +40,30 @@
 
     <v-divider />
 
-    <div class="d-flex justify-end my-4 mx-2">
+    <div class="mx-4">
       <v-btn
+        color="primary-lighten-2"
         variant="outlined"
-        color="blue-grey-lighten-2"
-        class="clear-filters-btn"
-        :prepend-icon="mdiClose"
+        rounded
+        :append-icon="mdiClose"
+        class="mb-4"
         @click="clearFilters"
       >
         Clear filters
       </v-btn>
     </div>
 
-    <v-expansion-panels multiple v-model="panels">
+    <v-expansion-panels color="blue-grey-darken-2" multiple v-model="panels">
       <v-expansion-panel title="Sites">
-        <v-expansion-panel-text>
+        <v-expansion-panel-text class="bg-blue-grey-darken-4">
           <v-text-field
-            class="pb-1"
+            class="my-4"
             clearable
             @click:clear="searchThing = ''"
             v-model="searchThing"
             :prepend-inner-icon="mdiMagnify"
             label="Search"
-            dense
+            density="compact"
             hide-details
           />
 
@@ -86,15 +86,15 @@
       </v-expansion-panel>
 
       <v-expansion-panel title="Observed Properties">
-        <v-expansion-panel-text>
+        <v-expansion-panel-text class="bg-blue-grey-darken-4">
           <v-text-field
-            class="pb-1"
+            class="my-4"
             clearable
             @click:clear="searchObservedProperty = ''"
             v-model="searchObservedProperty"
             :prepend-inner-icon="mdiMagnify"
             label="Search"
-            dense
+            density="compact"
             hide-details
           />
 
@@ -116,15 +116,15 @@
       </v-expansion-panel>
 
       <v-expansion-panel title="Processing Levels">
-        <v-expansion-panel-text>
+        <v-expansion-panel-text class="bg-blue-grey-darken-4">
           <v-text-field
-            class="pb-1"
+            class="my-4"
             clearable
             @click:clear="searchProcessingLevel = ''"
             v-model="searchProcessingLevel"
             :prepend-inner-icon="mdiMagnify"
             label="Search"
-            dense
+            density="compact"
             hide-details
           />
 
@@ -146,18 +146,15 @@
       </v-expansion-panel>
     </v-expansion-panels>
   </v-navigation-drawer>
-
-  <div class="mt-4 mx-4" v-if="!drawer">
-    <v-icon :icon="mdiMenuClose" @click="drawer = !drawer" />
-  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
-import { mdiClose, mdiMagnify, mdiMenuClose, mdiMenuOpen } from '@mdi/js'
+import { useSidebarStore } from '@/store/useSidebar'
+import { mdiMagnify, mdiClose } from '@mdi/js'
 
 const {
   matchesSelectedObservedProperty,
@@ -284,15 +281,22 @@ const handleToggle = (toggled: 'plot' | 'table', value: boolean) => {
 
 const { smAndDown } = useDisplay()
 const panels = ref([0, 1, 2])
-const drawer = ref(!smAndDown.value)
+const sidebar = useSidebarStore()
+
+onMounted(() => {
+  sidebar.isOpen = !smAndDown.value
+})
 
 watch(smAndDown, (isMobile) => {
-  if (isMobile) drawer.value = false
+  if (isMobile) sidebar.isOpen = false
 })
 
-watch(drawer, (value) => {
-  emit('drawer-change', value)
-})
+watch(
+  () => sidebar.isOpen,
+  (value) => {
+    emit('drawer-change', value)
+  }
+)
 </script>
 
 <style scoped>
@@ -321,9 +325,5 @@ watch(drawer, (value) => {
 
 .layout-toggle-switch :deep(.v-label) {
   white-space: nowrap;
-}
-
-.clear-filters-btn {
-  background-color: rgba(255, 255, 255, 0.08);
 }
 </style>
