@@ -2,147 +2,168 @@
   <v-navigation-drawer
     v-model="sidebar.isOpen"
     width="400"
-    color="navbar"
-    theme="dark"
-    class="data-vis-drawer"
+    class="border-r border-slate-200 bg-slate-50 text-slate-900"
   >
-    <v-list class="pb-2">
-      <v-list-subheader class="text-uppercase">Layout</v-list-subheader>
-      <div class="layout-toggle-item">
-        <v-switch
-          v-model="showPlot"
-          class="layout-toggle-switch"
-          color="primary"
-          density="compact"
-          label="Show plot"
-          hide-details
-          @update:model-value="(value) => handleToggle('plot', value)"
-        />
+    <div class="flex h-full flex-col gap-4 px-4 py-4">
+      <div>
+        <div class="text-[11px] uppercase tracking-[0.25em] text-slate-500">
+          Layout
+        </div>
+        <div class="mt-2 space-y-1">
+          <v-switch
+            v-model="showPlot"
+            class="w-full [&_.v-input__control]:w-full [&_.v-label]:whitespace-nowrap [&_.v-label]:text-slate-700"
+            color="primary"
+            density="compact"
+            label="Show plot"
+            hide-details
+            @update:model-value="(value) => handleToggle('plot', value)"
+          />
+          <v-switch
+            v-model="showTable"
+            class="w-full [&_.v-input__control]:w-full [&_.v-label]:whitespace-nowrap [&_.v-label]:text-slate-700"
+            color="primary"
+            density="compact"
+            label="Show table"
+            hide-details
+            @update:model-value="(value) => handleToggle('table', value)"
+          />
+        </div>
       </div>
-      <div class="layout-toggle-item">
-        <v-switch
-          v-model="showTable"
-          class="layout-toggle-switch"
+
+      <div class="flex items-center justify-between px-1">
+        <div class="text-[11px] uppercase tracking-[0.25em] text-slate-500">
+          Datastream Filters
+        </div>
+        <v-btn
           color="primary"
-          density="compact"
-          label="Show table"
-          hide-details
-          @update:model-value="(value) => handleToggle('table', value)"
-        />
+          variant="outlined"
+          rounded
+          :append-icon="mdiClose"
+          class="text-xs"
+          @click="clearFilters"
+        >
+          Clear filters
+        </v-btn>
       </div>
-    </v-list>
 
-    <v-divider class="drawer-divider" />
+      <div class="flex flex-1 flex-col gap-3 overflow-auto pr-1">
+        <div>
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Sites</span>
+            <span>{{ sortedThings.length }}/{{ totalThingsCount }}</span>
+          </div>
+          <div class="pt-2">
+            <v-autocomplete
+              v-model="selectedThings"
+              v-model:search="searchThing"
+              :items="sortedThings"
+              item-title="name"
+              return-object
+              multiple
+              clearable
+              :prepend-inner-icon="mdiMagnify"
+              label="Search sites"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mt-2 [&_.v-field]:rounded-md [&_.v-field]:border [&_.v-field]:border-slate-200 [&_.v-field]:bg-white [&_.v-field]:text-slate-700 [&_.v-field-label]:text-slate-500"
+            >
+              <template #selection="{ item, index }">
+                <v-chip
+                  size="small"
+                  closable
+                  class="mr-1 mb-1 max-w-full"
+                  @click:close="selectedThings.splice(index, 1)"
+                >
+                  <span class="whitespace-normal break-words">
+                    {{ item.title }}
+                  </span>
+                </v-chip>
+              </template>
+            </v-autocomplete>
+          </div>
+        </div>
 
-    <v-list-subheader class="text-uppercase"
-      >Datastream Filters</v-list-subheader
-    >
+        <div>
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Observed Properties</span>
+            <span>
+              {{ sortedObservedPropertyNames.length }}/{{
+                totalObservedPropertyNamesCount
+              }}
+            </span>
+          </div>
+          <div class="pt-2">
+            <v-autocomplete
+              v-model="selectedObservedPropertyNames"
+              v-model:search="searchObservedProperty"
+              :items="sortedObservedPropertyNames"
+              multiple
+              clearable
+              :prepend-inner-icon="mdiMagnify"
+              label="Search observed properties"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mt-2 [&_.v-field]:rounded-md [&_.v-field]:border [&_.v-field]:border-slate-200 [&_.v-field]:bg-white [&_.v-field]:text-slate-700 [&_.v-field-label]:text-slate-500"
+            >
+              <template #selection="{ item, index }">
+                <v-chip
+                  size="small"
+                  closable
+                  class="mr-1 mb-1 max-w-full"
+                  @click:close="selectedObservedPropertyNames.splice(index, 1)"
+                >
+                  <span class="whitespace-normal break-words">
+                    {{ item.title }}
+                  </span>
+                </v-chip>
+              </template>
+            </v-autocomplete>
+          </div>
+        </div>
 
-    <div class="mx-4 d-flex justify-end">
-      <v-btn
-        color="primary-lighten-2"
-        variant="outlined"
-        rounded
-        :append-icon="mdiClose"
-        class="mb-4"
-        @click="clearFilters"
-      >
-        Clear filters
-      </v-btn>
+        <div>
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Processing Levels</span>
+            <span>
+              {{ sortedProcessingLevelNames.length }}/{{
+                totalProcessingLevelNamesCount
+              }}
+            </span>
+          </div>
+          <div class="pt-2">
+            <v-autocomplete
+              v-model="selectedProcessingLevelNames"
+              v-model:search="searchProcessingLevel"
+              :items="sortedProcessingLevelNames"
+              multiple
+              clearable
+              :prepend-inner-icon="mdiMagnify"
+              label="Search processing levels"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mt-2 [&_.v-field]:rounded-md [&_.v-field]:border [&_.v-field]:border-slate-200 [&_.v-field]:bg-white [&_.v-field]:text-slate-700 [&_.v-field-label]:text-slate-500"
+            >
+              <template #selection="{ item, index }">
+                <v-chip
+                  size="small"
+                  closable
+                  class="mr-1 mb-1 max-w-full"
+                  @click:close="selectedProcessingLevelNames.splice(index, 1)"
+                >
+                  <span class="whitespace-normal break-words">
+                    {{ item.title }}
+                  </span>
+                </v-chip>
+              </template>
+            </v-autocomplete>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <v-expansion-panels color="blue-grey-darken-2" multiple v-model="panels">
-      <v-expansion-panel title="Sites">
-        <v-expansion-panel-text class="bg-blue-grey-darken-4">
-          <v-text-field
-            class="my-4"
-            clearable
-            @click:clear="searchThing = ''"
-            v-model="searchThing"
-            :prepend-inner-icon="mdiMagnify"
-            label="Search"
-            density="compact"
-            hide-details
-          />
-
-          <v-virtual-scroll
-            :items="sortedThings"
-            :height="sortedThings.length < 6 ? 'auto' : 250"
-          >
-            <template #default="{ item, index }">
-              <v-checkbox
-                :key="item.id"
-                v-model="selectedThings"
-                :label="item.name"
-                :value="item"
-                hide-details
-                density="compact"
-              />
-            </template>
-          </v-virtual-scroll>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-
-      <v-expansion-panel title="Observed Properties">
-        <v-expansion-panel-text class="bg-blue-grey-darken-4">
-          <v-text-field
-            class="my-4"
-            clearable
-            @click:clear="searchObservedProperty = ''"
-            v-model="searchObservedProperty"
-            :prepend-inner-icon="mdiMagnify"
-            label="Search"
-            density="compact"
-            hide-details
-          />
-
-          <v-virtual-scroll
-            :items="sortedObservedPropertyNames"
-            :height="sortedObservedPropertyNames.length < 6 ? 'auto' : 250"
-          >
-            <template #default="{ item }">
-              <v-checkbox
-                v-model="selectedObservedPropertyNames"
-                :label="item"
-                :value="item"
-                hide-details
-                density="compact"
-              />
-            </template>
-          </v-virtual-scroll>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-
-      <v-expansion-panel title="Processing Levels">
-        <v-expansion-panel-text class="bg-blue-grey-darken-4">
-          <v-text-field
-            class="my-4"
-            clearable
-            @click:clear="searchProcessingLevel = ''"
-            v-model="searchProcessingLevel"
-            :prepend-inner-icon="mdiMagnify"
-            label="Search"
-            density="compact"
-            hide-details
-          />
-
-          <v-virtual-scroll
-            :items="sortedProcessingLevelNames"
-            :height="sortedProcessingLevelNames.length < 6 ? 'auto' : 250"
-          >
-            <template #default="{ item }">
-              <v-checkbox
-                v-model="selectedProcessingLevelNames"
-                :label="item"
-                :value="item"
-                hide-details
-                density="compact"
-              />
-            </template>
-          </v-virtual-scroll>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
   </v-navigation-drawer>
 </template>
 
@@ -174,21 +195,48 @@ const {
 const searchThing = ref('')
 const searchObservedProperty = ref('')
 const searchProcessingLevel = ref('')
+const totalThingsCount = computed(() => {
+  const ids = new Set<string>()
+  datastreams.value.forEach((ds) => {
+    if (ds.thingId) ids.add(ds.thingId)
+  })
+  return things.value.filter((thing) => ids.has(thing.id)).length
+})
+
+const totalObservedPropertyNamesCount = computed(() => {
+  const ids = new Set<string>()
+  datastreams.value.forEach((ds) => {
+    if (ds.observedPropertyId) ids.add(ds.observedPropertyId)
+  })
+  const names = new Set<string>()
+  observedProperties.value.forEach((op) => {
+    if (ids.has(op.id) && op.name) names.add(op.name)
+  })
+  return names.size
+})
+
+const totalProcessingLevelNamesCount = computed(() => {
+  const ids = new Set<string>()
+  datastreams.value.forEach((ds) => {
+    if (ds.processingLevelId) ids.add(ds.processingLevelId)
+  })
+  const names = new Set<string>()
+  processingLevels.value.forEach((pl) => {
+    if (ids.has(pl.id) && pl.definition) names.add(pl.definition)
+  })
+  return names.size
+})
 
 // Only show list items that are referenced by at least one datastream
 // Then mutually filter the lists by selected filters.
 const sortedProcessingLevelNames = computed(() => {
-  const searchQuery = (searchProcessingLevel.value ?? '').toLowerCase()
   const filteredPLs = processingLevels.value.filter((pl) => {
     const definition = pl.definition ?? ''
-    return (
-      definition.toLowerCase().includes(searchQuery) &&
-      datastreams.value.some(
-        (ds) =>
-          ds.processingLevelId === pl.id &&
-          matchesSelectedThing(ds) &&
-          matchesSelectedObservedProperty(ds)
-      )
+    return datastreams.value.some(
+      (ds) =>
+        ds.processingLevelId === pl.id &&
+        matchesSelectedThing(ds) &&
+        matchesSelectedObservedProperty(ds)
     )
   })
   const names = filteredPLs.map((pl) => pl.definition)
@@ -197,60 +245,29 @@ const sortedProcessingLevelNames = computed(() => {
 
 const sortedThings = computed(() => {
   return things.value
-    .filter(
-      (thing) =>
-        thing.name.toLowerCase().includes(searchThing.value.toLowerCase()) &&
-        datastreams.value.some(
-          (ds) =>
-            ds.thingId === thing.id &&
-            matchesSelectedObservedProperty(ds) &&
-            matchesSelectedProcessingLevel(ds)
-        )
+    .filter((thing) =>
+      datastreams.value.some(
+        (ds) =>
+          ds.thingId === thing.id &&
+          matchesSelectedObservedProperty(ds) &&
+          matchesSelectedProcessingLevel(ds)
+      )
     )
     .sort((a, b) => a.name.localeCompare(b.name))
 })
 
 const sortedObservedPropertyNames = computed(() => {
-  const filteredProperties = observedProperties.value.filter(
-    (op) =>
-      op.name
-        .toLowerCase()
-        .includes(searchObservedProperty.value.toLowerCase()) &&
-      datastreams.value.some(
-        (ds) =>
-          ds.observedPropertyId === op.id &&
-          matchesSelectedThing(ds) &&
-          matchesSelectedProcessingLevel(ds)
-      )
+  const filteredProperties = observedProperties.value.filter((op) =>
+    datastreams.value.some(
+      (ds) =>
+        ds.observedPropertyId === op.id &&
+        matchesSelectedThing(ds) &&
+        matchesSelectedProcessingLevel(ds)
+    )
   )
 
   const names = filteredProperties.map((pl) => pl.name)
   return [...new Set(names)].sort()
-})
-
-// Watchers to handle deselection of hidden items
-watch(sortedThings, (newVal, oldVal) => {
-  if (newVal.length < oldVal.length) {
-    selectedThings.value = selectedThings.value.filter((selectedThing) =>
-      newVal.some((thing) => thing.id === selectedThing.id)
-    )
-  }
-})
-
-watch(sortedObservedPropertyNames, (newVal, oldVal) => {
-  if (newVal.length < oldVal.length) {
-    selectedObservedPropertyNames.value =
-      selectedObservedPropertyNames.value.filter((name) =>
-        newVal.includes(name)
-      )
-  }
-})
-
-watch(sortedProcessingLevelNames, (newVal, oldVal) => {
-  if (newVal.length < oldVal.length) {
-    selectedProcessingLevelNames.value =
-      selectedProcessingLevelNames.value.filter((name) => newVal.includes(name))
-  }
 })
 
 const emit = defineEmits<{
@@ -278,7 +295,6 @@ const handleToggle = (toggled: 'plot' | 'table', value: boolean) => {
 }
 
 const { smAndDown } = useDisplay()
-const panels = ref([0, 1, 2])
 const sidebar = useSidebarStore()
 
 onMounted(() => {
@@ -296,36 +312,3 @@ watch(
   }
 )
 </script>
-
-<style scoped>
-:deep(.v-selection-control),
-:deep(.v-label) {
-  align-items: start;
-}
-
-.data-vis-drawer :deep(.v-list-item),
-.data-vis-drawer :deep(.v-list-subheader) {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
-}
-
-.layout-toggle-item {
-  padding: 4px 20px;
-}
-
-.layout-toggle-switch {
-  width: 100%;
-}
-
-.layout-toggle-switch :deep(.v-input__control) {
-  width: 100%;
-}
-
-.layout-toggle-switch :deep(.v-label) {
-  white-space: nowrap;
-}
-
-.drawer-divider {
-  border-top-width: 2px;
-}
-</style>
