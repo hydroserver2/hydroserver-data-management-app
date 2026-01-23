@@ -60,6 +60,7 @@
 
     <div v-if="!isDataAvailable && viewMode === 'plot'" class="plot-empty">
       <v-card-text>
+        <div class="plot-empty__title">Visualize data</div>
         <v-timeline align="start" density="compact">
           <v-timeline-item size="x-small" dot-color="primary">
             <div>
@@ -435,6 +436,17 @@ onMounted(() => {
 
 .plot-empty {
   min-height: 100%;
+}
+
+.plot-empty :deep(.v-card-text) {
+  margin-top: 12px;
+  margin-left: 12px;
+}
+
+.plot-empty__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 8px 8px 12px;
 }
 
 .plotly-chart {

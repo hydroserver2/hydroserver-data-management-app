@@ -6,12 +6,6 @@
     theme="dark"
     class="data-vis-drawer"
   >
-    <v-card-title class="d-flex justify-space-between align-start">
-      Filters
-    </v-card-title>
-
-    <v-divider />
-
     <v-list class="pb-2">
       <v-list-subheader class="text-uppercase">Layout</v-list-subheader>
       <div class="layout-toggle-item">
@@ -38,9 +32,13 @@
       </div>
     </v-list>
 
-    <v-divider />
+    <v-divider class="drawer-divider" />
 
-    <div class="mx-4">
+    <v-list-subheader class="text-uppercase"
+      >Datastream Filters</v-list-subheader
+    >
+
+    <div class="mx-4 d-flex justify-end">
       <v-btn
         color="primary-lighten-2"
         variant="outlined"
@@ -325,5 +323,9 @@ watch(
 
 .layout-toggle-switch :deep(.v-label) {
   white-space: nowrap;
+}
+
+.drawer-divider {
+  border-top-width: 2px;
 }
 </style>
