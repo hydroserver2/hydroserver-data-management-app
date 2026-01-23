@@ -278,7 +278,10 @@ onUnmounted(() => {
 }
 
 .visualize-page {
-  min-height: 100dvh;
+  height: calc(
+    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px)
+  );
+  overflow: hidden;
   background-color: #eef2f6;
 }
 
