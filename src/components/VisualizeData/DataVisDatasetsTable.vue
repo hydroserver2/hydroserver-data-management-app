@@ -1,13 +1,21 @@
 <template>
-  <div class="datasets-table">
-    <v-card class="datasets-table__card elevation-2">
-      <v-sheet class="datasets-table__toolbar" color="secondary">
+  <div class="flex h-full min-h-0 flex-col">
+    <v-card
+      class="flex min-h-0 flex-1 flex-col elevation-2 max-[600px]:min-h-[520px]"
+    >
+      <v-sheet class="px-3 py-2 max-[600px]:px-2" color="secondary">
         <v-defaults-provider :defaults="{ VBtn: { variant: 'text' } }">
-          <div class="datasets-table__toolbar-inner">
-            <div class="datasets-table__meta">
-              <h5 class="text-h5 datasets-table__title">Datastreams</h5>
+          <div class="flex flex-col items-stretch gap-3">
+            <div
+              class="flex flex-wrap items-center gap-3 max-[600px]:flex-col max-[600px]:items-stretch"
+            >
+              <h5
+                class="m-0 px-1 whitespace-nowrap text-h5 max-[600px]:w-full max-[600px]:text-center"
+              >
+                Datastreams
+              </h5>
               <v-text-field
-                class="datasets-table__search"
+                class="flex-1 basis-[240px] min-w-[200px] max-w-[360px] max-[600px]:min-w-0 max-[600px]:max-w-none"
                 clearable
                 v-model="search"
                 :prepend-inner-icon="mdiMagnify"
@@ -17,7 +25,7 @@
                 variant="underlined"
               />
               <v-select
-                class="datasets-table__columns"
+                class="ml-auto pl-1 min-w-[220px] max-w-[260px] max-[600px]:ml-0 max-[600px]:w-full max-[600px]:max-w-none"
                 label="Show/Hide Columns"
                 v-model="selectedHeaders"
                 :items="selectableHeaders"
@@ -35,12 +43,19 @@
               </v-select>
             </div>
 
-            <div class="datasets-table__actions">
-              <v-btn color="white" @click="clearSelected">
+            <div
+              class="flex flex-wrap justify-end gap-2 max-[600px]:w-full max-[600px]:flex-col"
+            >
+              <v-btn
+                class="max-[600px]:w-full"
+                color="white"
+                @click="clearSelected"
+              >
                 Clear Selected
               </v-btn>
 
               <v-btn
+                class="max-[600px]:w-full"
                 color="white"
                 variant="outlined"
                 @click="showOnlySelected = !showOnlySelected"
@@ -49,6 +64,7 @@
               </v-btn>
 
               <v-btn
+                class="max-[600px]:w-full pr-0"
                 color="white"
                 :loading="downloading"
                 :prepend-icon="mdiDownload"
@@ -66,16 +82,16 @@
         :search="search"
         fixed-header
         hide-default-header
-        class="elevation-2 datasets-table__table datasets-table__table--mobile"
+        class="h-full min-h-0 flex-1 elevation-2 max-[600px]:min-h-[440px] [&_.v-table__wrapper]:overflow-x-hidden"
         color="green"
         density="compact"
         hover
       >
         <template v-slot:item="{ item }">
-          <tr class="mobile-row">
-            <td class="mobile-row__cell" :colspan="headers.length">
-              <div class="mobile-row__header">
-                <div class="mobile-row__title">
+          <tr class="align-top">
+            <td class="px-4 py-3" :colspan="headers.length">
+              <div class="flex flex-col items-start gap-1.5">
+                <div class="pt-1 text-base font-semibold leading-snug">
                   {{ item.name }}
                 </div>
                 <v-checkbox
@@ -88,28 +104,38 @@
                   @change="() => updatePlottedDatastreams(item)"
                 />
               </div>
-              <div class="mobile-row__line">
-                <span class="mobile-row__label">Site</span>
+              <div class="flex flex-col gap-0.5 pt-1.5">
+                <span class="text-xs uppercase tracking-[0.04em] text-black/55"
+                  >Site</span
+                >
                 <span>{{ item.siteCodeName || '—' }}</span>
               </div>
-              <div class="mobile-row__line">
-                <span class="mobile-row__label">Observed property</span>
+              <div class="flex flex-col gap-0.5 pt-1.5">
+                <span class="text-xs uppercase tracking-[0.04em] text-black/55"
+                  >Observed property</span
+                >
                 <span>{{ item.observedPropertyName || '—' }}</span>
               </div>
-              <div class="mobile-row__line">
-                <span class="mobile-row__label">Processing level</span>
+              <div class="flex flex-col gap-0.5 pt-1.5">
+                <span class="text-xs uppercase tracking-[0.04em] text-black/55"
+                  >Processing level</span
+                >
                 <span>{{ item.qualityControlLevelDefinition || '—' }}</span>
               </div>
-              <div class="mobile-row__line">
-                <span class="mobile-row__label">Observations</span>
+              <div class="flex flex-col gap-0.5 pt-1.5">
+                <span class="text-xs uppercase tracking-[0.04em] text-black/55"
+                  >Observations</span
+                >
                 <span>{{ item.valueCount ?? '—' }}</span>
               </div>
-              <div class="mobile-row__line">
-                <span class="mobile-row__label">Last updated</span>
+              <div class="flex flex-col gap-0.5 pt-1.5">
+                <span class="text-xs uppercase tracking-[0.04em] text-black/55"
+                  >Last updated</span
+                >
                 <span>{{ formatTime(item.phenomenonEndTime) }}</span>
               </div>
               <v-btn
-                class="mobile-row__meta-btn"
+                class="mt-3 mb-1 min-h-[36px] w-full"
                 variant="outlined"
                 color="primary"
                 @click="openMetadata(item)"
@@ -128,7 +154,7 @@
         multi-sort
         :search="search"
         fixed-header
-        class="elevation-2 datasets-table__table"
+        class="h-full min-h-0 flex-1 elevation-2 max-[600px]:min-h-[440px]"
         color="green"
         density="compact"
         @click:row="onRowClick"
@@ -326,151 +352,3 @@ function updatePlottedDatastreams(datastream: Datastream) {
   else plottedDatastreams.value.splice(index, 1)
 }
 </script>
-
-<style scoped>
-.datasets-table {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
-.datasets-table__card {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.datasets-table__toolbar {
-  padding: 8px 12px;
-}
-
-.datasets-table__toolbar-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
-
-.datasets-table__meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.datasets-table__title {
-  margin: 0;
-  white-space: nowrap;
-}
-
-.datasets-table__search {
-  flex: 1 1 240px;
-  min-width: 200px;
-  max-width: 360px;
-}
-
-.datasets-table__columns {
-  min-width: 220px;
-  max-width: 260px;
-  margin-left: auto;
-}
-
-.datasets-table__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.datasets-table__table {
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-}
-
-.datasets-table__table--mobile :deep(.v-table__wrapper) {
-  overflow-x: hidden;
-}
-
-.mobile-row__cell {
-  padding: 12px 16px;
-}
-
-.mobile-row__header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-}
-
-.mobile-row__title {
-  font-weight: 600;
-  line-height: 1.3;
-  padding-top: 4px;
-}
-
-.mobile-row__line {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-top: 6px;
-}
-
-.mobile-row__label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: rgba(0, 0, 0, 0.54);
-}
-
-.mobile-row__meta-btn {
-  margin-top: 12px;
-  min-height: 36px;
-  width: 100%;
-  margin-bottom: 6px;
-}
-
-@media (max-width: 600px) {
-  .datasets-table__card {
-    min-height: 520px;
-  }
-
-  .datasets-table__table {
-    min-height: 440px;
-  }
-
-  .datasets-table__toolbar {
-    padding: 8px;
-  }
-
-  .datasets-table__meta {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .datasets-table__title {
-    text-align: center;
-    width: 100%;
-  }
-
-  .datasets-table__search {
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .datasets-table__columns {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .datasets-table__actions {
-    width: 100%;
-  }
-
-  .datasets-table__actions :deep(.v-btn) {
-    flex: 1 1 100%;
-  }
-}
-</style>

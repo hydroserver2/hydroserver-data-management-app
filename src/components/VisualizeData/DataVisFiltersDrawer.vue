@@ -49,9 +49,10 @@
 
       <div class="flex flex-1 flex-col gap-3 overflow-auto pr-1">
         <div>
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Workspaces</span>
-            <span>{{ sortedWorkspaces.length }}/{{ totalWorkspacesCount }}</span>
+          <div class="flex items-center justify-end text-xs text-slate-400">
+            <span
+              >{{ sortedWorkspaces.length }}/{{ totalWorkspacesCount }}</span
+            >
           </div>
           <div class="pt-2">
             <v-autocomplete
@@ -63,7 +64,7 @@
               multiple
               clearable
               :prepend-inner-icon="mdiDomain"
-              label="Search workspaces"
+              label="Workspaces"
               density="compact"
               variant="outlined"
               hide-details
@@ -86,8 +87,7 @@
         </div>
 
         <div>
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Sites</span>
+          <div class="flex items-center justify-end text-xs text-slate-400">
             <span>{{ sortedThings.length }}/{{ totalThingsCount }}</span>
           </div>
           <div class="pt-2">
@@ -99,8 +99,8 @@
               return-object
               multiple
               clearable
-              :prepend-inner-icon="mdiMagnify"
-              label="Search sites"
+              :prepend-inner-icon="mdiMapMarker"
+              label="Sites"
               density="compact"
               variant="outlined"
               hide-details
@@ -123,8 +123,7 @@
         </div>
 
         <div>
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Observed Properties</span>
+          <div class="flex items-center justify-end text-xs text-slate-400">
             <span>
               {{ sortedObservedPropertyNames.length }}/{{
                 totalObservedPropertyNamesCount
@@ -138,8 +137,8 @@
               :items="sortedObservedPropertyNames"
               multiple
               clearable
-              :prepend-inner-icon="mdiMagnify"
-              label="Search observed properties"
+              :prepend-inner-icon="mdiChartLine"
+              label="Observed properties"
               density="compact"
               variant="outlined"
               hide-details
@@ -162,8 +161,7 @@
         </div>
 
         <div>
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Processing Levels</span>
+          <div class="flex items-center justify-end text-xs text-slate-400">
             <span>
               {{ sortedProcessingLevelNames.length }}/{{
                 totalProcessingLevelNamesCount
@@ -177,8 +175,8 @@
               :items="sortedProcessingLevelNames"
               multiple
               clearable
-              :prepend-inner-icon="mdiMagnify"
-              label="Search processing levels"
+              :prepend-inner-icon="mdiLayersOutline"
+              label="Processing levels"
               density="compact"
               variant="outlined"
               hide-details
@@ -211,7 +209,13 @@ import { useDataVisStore } from '@/store/dataVisualization'
 import { storeToRefs } from 'pinia'
 import { useSidebarStore } from '@/store/useSidebar'
 import { useWorkspaceStore } from '@/store/workspaces'
-import { mdiMagnify, mdiClose, mdiDomain } from '@mdi/js'
+import {
+  mdiChartLine,
+  mdiClose,
+  mdiDomain,
+  mdiLayersOutline,
+  mdiMapMarker,
+} from '@mdi/js'
 
 const {
   matchesSelectedObservedProperty,
@@ -251,9 +255,8 @@ const totalWorkspacesCount = computed(() => {
     }
   })
 
-  return workspaces.value.filter((workspace) =>
-    workspaceIds.has(workspace.id)
-  ).length
+  return workspaces.value.filter((workspace) => workspaceIds.has(workspace.id))
+    .length
 })
 
 const totalThingsCount = computed(() => {
