@@ -30,6 +30,7 @@ type PlotlyBuildOptions = {
   activeRangeSelector?: number
   uirevision?: string | number
   title?: string
+  titleWrapLength?: number
 }
 
 const AXIS_SPACING = 0.06
@@ -236,6 +237,7 @@ export const createPlotlyOption = (
     activeRangeSelector,
     uirevision,
     title,
+    titleWrapLength = 48,
   } = opts
 
   const yAxisConfigurations = createYAxisConfigurations(seriesArray)
@@ -360,7 +362,7 @@ export const createPlotlyOption = (
     },
     title: titleText
       ? {
-          text: wrapTitle(titleText, 48),
+          text: wrapTitle(titleText, titleWrapLength),
           font: titleColor ? { color: titleColor } : undefined,
           x: 0,
           xanchor: 'left',
