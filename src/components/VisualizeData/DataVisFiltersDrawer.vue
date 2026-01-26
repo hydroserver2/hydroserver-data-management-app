@@ -24,7 +24,7 @@
             class="w-full [&_.v-input__control]:w-full [&_.v-label]:whitespace-nowrap [&_.v-label]:text-slate-700"
             color="primary"
             density="compact"
-            label="Show table"
+            label="Show datastreams"
             hide-details
             @update:model-value="(value) => handleToggle('table', value)"
           />
