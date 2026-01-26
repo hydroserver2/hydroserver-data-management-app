@@ -33,6 +33,8 @@ type PlotlyBuildOptions = {
 }
 
 const AXIS_SPACING = 0.06
+const MIN_EXPORT_WIDTH = 3840
+const MIN_EXPORT_HEIGHT = 2160
 
 const rangeSelectorOptions = {
   xanchor: 'left',
@@ -136,7 +138,46 @@ const buildSummaryButton = () => {
   }
 }
 
-const buildScreenshotButton = () => {
+const sanitizeFilename = (value: string) => {
+  const withoutTags = value.replace(/<[^>]*>/g, ' ')
+  const withoutIllegalChars = withoutTags.replace(/[\\/:*?"<>|]+/g, '-')
+  const collapsedWhitespace = withoutIllegalChars.replace(/\s+/g, ' ').trim()
+  return collapsedWhitespace.replace(/\s+/g, '_')
+}
+
+const getPlotFilename = (seriesArray: GraphSeries[], title?: string) => {
+  const rawTitle = title ?? seriesArray[0]?.name ?? 'plot'
+  const sanitized = sanitizeFilename(rawTitle)
+  return sanitized || 'plot'
+}
+
+const getExportConfig = (gd: any) => {
+  const width = gd?._fullLayout?.width ?? gd?.clientWidth ?? 0
+  const height = gd?._fullLayout?.height ?? gd?.clientHeight ?? 0
+
+  if (!Number.isFinite(width) || !Number.isFinite(height) || !width || !height) {
+    return { width: MIN_EXPORT_WIDTH, height: MIN_EXPORT_HEIGHT, scale: 1 }
+  }
+
+  const scale = Math.max(
+    MIN_EXPORT_WIDTH / width,
+    MIN_EXPORT_HEIGHT / height,
+    1
+  )
+
+  return {
+    width: Math.round(width),
+    height: Math.round(height),
+    scale,
+  }
+}
+
+const buildScreenshotButton = (
+  seriesArray: GraphSeries[],
+  title?: string
+) => {
+  const filename = getPlotFilename(seriesArray, title)
+
   return {
     name: 'Download plot',
     icon: {
@@ -145,10 +186,13 @@ const buildScreenshotButton = () => {
       path: 'M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2m8 2a5 5 0 0 0-5 5a5 5 0 0 0 5 5a5 5 0 0 0 5-5a5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3Z',
     },
     click: (gd: any) => {
+      const { width, height, scale } = getExportConfig(gd)
       Plotly.downloadImage(gd, {
         format: 'png',
-        filename: 'plot',
-        scale: 4,
+        filename,
+        width,
+        height,
+        scale,
       })
     },
   }
@@ -331,7 +375,8 @@ export const createPlotlyOption = (
   }
 
   const extraButtons = []
-  if (addScreenshotButton) extraButtons.push(buildScreenshotButton())
+  if (addScreenshotButton)
+    extraButtons.push(buildScreenshotButton(seriesArray, titleText))
   if (addSummaryButton) extraButtons.push(buildSummaryButton())
   if (extraButtons.length) config.modeBarButtonsToAdd = extraButtons
 
