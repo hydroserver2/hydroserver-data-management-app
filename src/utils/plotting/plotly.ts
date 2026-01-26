@@ -157,7 +157,12 @@ const getExportConfig = (gd: any) => {
   const width = gd?._fullLayout?.width ?? gd?.clientWidth ?? 0
   const height = gd?._fullLayout?.height ?? gd?.clientHeight ?? 0
 
-  if (!Number.isFinite(width) || !Number.isFinite(height) || !width || !height) {
+  if (
+    !Number.isFinite(width) ||
+    !Number.isFinite(height) ||
+    !width ||
+    !height
+  ) {
     return { width: MIN_EXPORT_WIDTH, height: MIN_EXPORT_HEIGHT, scale: 1 }
   }
 
@@ -174,10 +179,7 @@ const getExportConfig = (gd: any) => {
   }
 }
 
-const buildScreenshotButton = (
-  seriesArray: GraphSeries[],
-  title?: string
-) => {
+const buildScreenshotButton = (seriesArray: GraphSeries[], title?: string) => {
   const filename = getPlotFilename(seriesArray, title)
 
   return {
@@ -240,14 +242,15 @@ export const createPlotlyOption = (
   const yAxisEntries = Array.from(yAxisConfigurations.values())
   const leftCount = Math.ceil(yAxisEntries.length / 2)
   const rightCount = yAxisEntries.length - leftCount
+  const legendRows = seriesArray.length > 8 ? 3 : seriesArray.length > 4 ? 2 : 1
+  const legendTopMargin = 70 + legendRows * 18
+  const legendYOffset = 1 + legendRows * 0.02
 
   const estimateTickLabelLength = (value: number) => {
     if (!Number.isFinite(value)) return 0
     return new Intl.NumberFormat('en-US', {
       maximumFractionDigits: 4,
-    })
-      .format(value)
-      .length
+    }).format(value).length
   }
 
   const axisValueRanges = new Map<string, { min: number; max: number }>()
@@ -320,14 +323,14 @@ export const createPlotlyOption = (
   const titleColor = seriesArray[0]?.lineColor
 
   const layout: any = {
-    margin: { l: 60, r: 30, t: 70, b: 70 },
+    margin: { l: 4, r: 0, t: legendTopMargin, b: 70, pad: 0 },
     showlegend: addLegend,
     legend: addLegend
       ? {
           orientation: 'h',
           x: 0,
           xanchor: 'left',
-          y: 1.08,
+          y: legendYOffset,
           yanchor: 'bottom',
         }
       : undefined,
@@ -369,13 +372,7 @@ export const createPlotlyOption = (
     layout.uirevision = uirevision
   }
 
-  const markerSymbols = [
-    'circle',
-    'square',
-    'diamond',
-    'triangle-up',
-    'x',
-  ]
+  const markerSymbols = ['circle', 'square', 'triangle-up', 'x', 'diamond']
 
   const traces = seriesArray.map((series, index) => {
     const axisConfig = yAxisConfigurations.get(series.yAxisLabel)
@@ -425,7 +422,7 @@ export const createPlotlyOption = (
       gridwidth: 1,
       overlaying: index === 0 ? undefined : 'y',
       autorange: true,
-      automargin: true,
+      automargin: false,
     }
   })
 
