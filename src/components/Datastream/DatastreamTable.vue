@@ -79,9 +79,19 @@
                 <div
                   v-if="Number(item.valueCount) > 0"
                   class="datastream-latest-observation"
+                  :class="{
+                    'datastream-latest-observation--fresh':
+                      !isDatastreamStale(item),
+                    'datastream-latest-observation--stale':
+                      isDatastreamStale(item),
+                  }"
                 >
-                  <strong class="mr-2">Latest observation:</strong>
-                  <span>{{ item.endDate }}</span>
+                  <strong class="mr-2 datastream-latest-observation__label"
+                    >Latest observation:</strong
+                  >
+                  <span class="datastream-latest-observation__value">{{
+                    item.endDate
+                  }}</span>
                 </div>
               </template>
             </Sparkline>
@@ -351,9 +361,19 @@
                   <div
                     v-if="Number(item.valueCount) > 0"
                     class="datastream-latest-observation"
+                    :class="{
+                      'datastream-latest-observation--fresh':
+                        !isDatastreamStale(item),
+                      'datastream-latest-observation--stale':
+                        isDatastreamStale(item),
+                    }"
                   >
-                    <strong class="mr-2">Latest observation:</strong>
-                    <span>{{ item.endDate }}</span>
+                    <strong class="mr-2 datastream-latest-observation__label"
+                      >Latest observation:</strong
+                    >
+                    <span class="datastream-latest-observation__value">{{
+                      item.endDate
+                    }}</span>
                   </div>
                 </template>
               </Sparkline>
@@ -789,6 +809,13 @@ const normalizedSearch = computed(() =>
   (search.value ?? '').toString().trim().toLowerCase()
 )
 
+const isDatastreamStale = (datastream: Datastream) => {
+  if (!datastream.phenomenonEndTime) return true
+  const endTime = new Date(datastream.phenomenonEndTime)
+  const seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000)
+  return endTime < seventyTwoHoursAgo
+}
+
 const mobileDatastreams = computed(() => {
   const sorted = [...visibleDatastreams.value].sort((a, b) =>
     (a.name || a.OPName || '').localeCompare(b.name || b.OPName || '')
@@ -1040,9 +1067,24 @@ const loadDatastreams = async () => {
 
 .datastream-latest-observation {
   margin-top: 0.25rem;
-  font-size: 0.85rem;
-  color: rgba(0, 0, 0, 0.75);
+  font-size: 1rem;
   line-height: 1.3;
+}
+
+.datastream-latest-observation__label {
+  font-weight: 800;
+}
+
+.datastream-latest-observation--fresh {
+  color: #2e7d32;
+}
+
+.datastream-latest-observation--stale {
+  color: #9e9e9e;
+}
+
+.datastream-latest-observation__value {
+  font-weight: 700;
 }
 
 .datastream-info-list,

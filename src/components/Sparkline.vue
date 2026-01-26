@@ -12,15 +12,11 @@
           {{ sparklineObservations.length }} values
         </span>
       </div>
-      <v-chart
-        :option="chartOption"
-        autoresize
-        class="sparkline-chart"
-      />
+      <v-chart :option="chartOption" autoresize class="sparkline-chart" />
       <slot name="after-chart" />
       <div class="sparkline-meta" style="width: 100%">
         <span>
-          <strong>Latest Value:</strong>
+          <strong class="mr-2">Latest value:</strong>
           {{ mostRecentDataValue }} {{ unitName }}
         </span>
       </div>
@@ -228,9 +224,7 @@ onMounted(async () => {
 
 .sparkline-meta {
   margin-top: 0.25rem;
-  font-size: 0.85rem;
   line-height: 1.3;
-  color: rgba(0, 0, 0, 0.75);
 }
 
 @media (max-width: 600px) {
