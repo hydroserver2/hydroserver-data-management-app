@@ -33,6 +33,8 @@ type PlotlyBuildOptions = {
 }
 
 const AXIS_SPACING = 0.06
+const AXIS_CHAR_SPACING = 0.006
+const AXIS_MAX_SPACING = 0.14
 const MIN_EXPORT_WIDTH = 3840
 const MIN_EXPORT_HEIGHT = 2160
 
@@ -239,6 +241,69 @@ export const createPlotlyOption = (
   const leftCount = Math.ceil(yAxisEntries.length / 2)
   const rightCount = yAxisEntries.length - leftCount
 
+  const estimateTickLabelLength = (value: number) => {
+    if (!Number.isFinite(value)) return 0
+    return new Intl.NumberFormat('en-US', {
+      maximumFractionDigits: 4,
+    })
+      .format(value)
+      .length
+  }
+
+  const axisValueRanges = new Map<string, { min: number; max: number }>()
+  seriesArray.forEach((series) => {
+    if (!series.data.length) return
+    const label = series.yAxisLabel
+    series.data.forEach((point) => {
+      const value = point.value
+      if (!Number.isFinite(value)) return
+      const existing = axisValueRanges.get(label)
+      if (!existing) {
+        axisValueRanges.set(label, { min: value, max: value })
+      } else {
+        existing.min = Math.min(existing.min, value)
+        existing.max = Math.max(existing.max, value)
+      }
+    })
+  })
+
+  const estimateAxisSpacing = (label: string) => {
+    const range = axisValueRanges.get(label)
+    const tickLabelLength = range
+      ? Math.max(
+          estimateTickLabelLength(range.min),
+          estimateTickLabelLength(range.max)
+        )
+      : 0
+    const spacing = AXIS_SPACING + (tickLabelLength + 2) * AXIS_CHAR_SPACING
+    return Math.min(AXIS_MAX_SPACING, Math.max(AXIS_SPACING, spacing))
+  }
+
+  const leftAxisEntries = yAxisEntries.slice(0, leftCount)
+  const rightAxisEntries = yAxisEntries.slice(leftCount)
+
+  const leftAxisSpacings = leftAxisEntries.map((entry) =>
+    estimateAxisSpacing(entry.yAxisLabel)
+  )
+  const rightAxisSpacings = rightAxisEntries.map((entry) =>
+    estimateAxisSpacing(entry.yAxisLabel)
+  )
+
+  const leftPad = leftAxisSpacings.reduce((sum, spacing) => sum + spacing, 0)
+  const rightPad = rightAxisSpacings.reduce((sum, spacing) => sum + spacing, 0)
+
+  const buildOffsets = (spacings: number[]) => {
+    let total = 0
+    return spacings.map((spacing) => {
+      const offset = total
+      total += spacing
+      return offset
+    })
+  }
+
+  const leftOffsets = buildOffsets(leftAxisSpacings)
+  const rightOffsets = buildOffsets(rightAxisSpacings)
+
   const xRange = getXRangeBounds(seriesArray)
   const span = xRange ? xRange.max - xRange.min : 0
   const rangeStart = xRange
@@ -248,10 +313,8 @@ export const createPlotlyOption = (
     ? xRange.min + (span * clampPercent(dataZoomEnd)) / 100
     : undefined
 
-  const xDomainStart = leftCount ? AXIS_SPACING * leftCount : AXIS_SPACING
-  const xDomainEnd = rightCount
-    ? 1 - AXIS_SPACING * rightCount
-    : 1 - AXIS_SPACING
+  const xDomainStart = leftCount ? leftPad : AXIS_SPACING
+  const xDomainEnd = rightCount ? 1 - rightPad : 1 - AXIS_SPACING
 
   const titleText = title
   const titleColor = seriesArray[0]?.lineColor
@@ -338,10 +401,11 @@ export const createPlotlyOption = (
   yAxisEntries.forEach((axisConfig, index) => {
     const axisKey = index === 0 ? 'yaxis' : `yaxis${index + 1}`
     const side = index < leftCount ? 'left' : 'right'
+    const sideIndex = side === 'left' ? index : index - leftCount
     const position =
       side === 'left'
-        ? xDomainStart - AXIS_SPACING * (leftCount - 1 - index)
-        : xDomainEnd + AXIS_SPACING * (index - leftCount)
+        ? xDomainStart - leftOffsets[sideIndex]
+        : xDomainEnd + rightOffsets[sideIndex]
 
     layout[axisKey] = {
       title: {

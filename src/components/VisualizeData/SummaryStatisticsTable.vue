@@ -1,8 +1,6 @@
 <template>
   <v-card-title>
-    <div class="d-flex justify-space-between w-100">
-      Summary Statistics
-    </div>
+    <div class="d-flex justify-space-between w-100">Summary Statistics</div>
   </v-card-title>
   <v-divider />
 
@@ -67,5 +65,8 @@ table th + th {
 }
 table td + td {
   border-left: 1px solid #dddddd;
+}
+table tr:last-child td {
+  border-bottom: 1px solid #dddddd;
 }
 </style>
