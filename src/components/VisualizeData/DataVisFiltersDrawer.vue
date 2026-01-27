@@ -375,8 +375,9 @@ const clearFilters = () => {
   searchProcessingLevel.value = ''
 }
 
-const handleToggle = (toggled: 'plot' | 'table', value: boolean) => {
-  if (value) return
+const handleToggle = (toggled: 'plot' | 'table', value: boolean | null) => {
+  // Only react when the user explicitly turns one side off.
+  if (value !== false) return
 
   if (toggled === 'plot') {
     showTable.value = true

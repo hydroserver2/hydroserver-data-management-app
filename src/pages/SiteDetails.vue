@@ -41,7 +41,7 @@
     <v-row v-if="thing">
       <v-col>
         <div class="w-full">
-          <div class="h-[22rem] w-full max-[960px]:h-[18rem]">
+          <div class="h-88 w-full max-[960px]:h-72">
             <OpenLayersMap
               :things="[thing]"
               startInSatellite
