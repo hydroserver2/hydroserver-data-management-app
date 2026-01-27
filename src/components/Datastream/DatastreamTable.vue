@@ -1072,7 +1072,7 @@ const loadDatastreams = async () => {
 }
 
 .datastream-latest-observation__label {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .datastream-latest-observation--fresh {

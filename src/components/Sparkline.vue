@@ -1,31 +1,24 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
   <div v-else-if="!loading && sparklineObservations.length" @click="handleEmit">
-    <div style="width: 300px">
+    <div class="sparkline-container">
+      <div class="sparkline-note text-body-3 font-weight-light opacity-70">
+        Sparkline is showing most recent {{ sparklineObservations.length }}
+        values
+      </div>
       <div
         ref="sparklineRef"
         class="sparkline-chart"
         :style="sparklineContainerStyle"
       />
-      <div class="mt-1" style="width: 100%">
-        <span class="text-subtitle-2 font-weight-medium">
-          <strong>Latest Value:</strong>
-          {{ mostRecentDataValue }} {{ unitName }}
-        </span>
-      </div>
-      <div style="width: 100%">
-        <span class="text-body-3 font-weight-low opacity-70">
-          Sparkline is showing most recent
-          {{ sparklineObservations.length }} values
-        </span>
-      </div>
-      <v-chart :option="chartOption" autoresize class="sparkline-chart" />
       <slot name="after-chart" />
-      <div class="sparkline-meta" style="width: 100%">
-        <span>
-          <strong class="mr-2">Latest value:</strong>
-          {{ mostRecentDataValue }} {{ unitName }}
-        </span>
+      <div class="sparkline-meta">
+        <div class="sparkline-latest-value">
+          <strong class="mr-2 sparkline-latest-value__label">Latest value:</strong>
+          <span class="sparkline-latest-value__value">
+            {{ mostRecentDataValue }} {{ unitName }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -73,12 +66,21 @@ const processedObs = computed(() =>
   preProcessData(sparklineObservations.value, props.datastream)
 )
 
-const mostRecentDataValue = computed(() => {
+const latestRealObservation = computed(() => {
   const arr = processedObs.value
-  if (!arr.length) return ''
-  const latest = arr[arr.length - 1].value
-  return formatNumber(latest)
+  for (let i = arr.length - 1; i >= 0; i -= 1) {
+    const value = arr[i].value
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    if (Number.isFinite(numericValue)) {
+      return arr[i]
+    }
+  }
+  return null
 })
+
+const mostRecentDataValue = computed(() =>
+  latestRealObservation.value ? formatNumber(latestRealObservation.value.value) : ''
+)
 
 const sparklineColors = computed(() =>
   isStale(props.datastream.phenomenonEndTime)
@@ -91,6 +93,7 @@ const sparklineContainerStyle = computed(() => ({
   width: '100%',
   border: `2px solid ${sparklineColors.value.border}`,
   borderRadius: '4px',
+  overflow: 'hidden',
 }))
 
 const renderSparkline = async () => {
@@ -100,10 +103,15 @@ const renderSparkline = async () => {
   if (!observations.length) return
 
   const colors = sparklineColors.value
+  const xValues = observations.map((dp) => dp.date.getTime())
+  const minX = xValues[0]
+  const maxX = xValues[xValues.length - 1]
+  const xRange =
+    minX === maxX ? [minX - 1, maxX + 1] : [minX, maxX]
   const trace = {
     type: 'scattergl',
     mode: 'lines',
-    x: observations.map((dp) => dp.date.getTime()),
+    x: xValues,
     y: observations.map((dp) => dp.value),
     line: { color: colors.line, width: 1 },
     fill: 'tozeroy',
@@ -112,8 +120,16 @@ const renderSparkline = async () => {
   }
 
   const layout = {
-    margin: { l: 4, r: 4, t: 4, b: 4 },
-    xaxis: { visible: false, showgrid: false, zeroline: false },
+    margin: { l: 0, r: 0, t: 0, b: 0, pad: 0 },
+    xaxis: {
+      type: 'date',
+      visible: false,
+      showgrid: false,
+      zeroline: false,
+      autorange: false,
+      range: xRange,
+      fixedrange: true,
+    },
     yaxis: { visible: false, showgrid: false, zeroline: false },
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
@@ -206,6 +222,7 @@ const formatNumber = (value: string | number): string => {
   return value?.toString()
 }
 
+
 onMounted(async () => {
   sparklineObservations.value =
     (await fetchSparklineObservations(props.datastream)) || []
@@ -250,6 +267,19 @@ onBeforeUnmount(() => {
 .sparkline-meta {
   margin-top: 0.25rem;
   line-height: 1.3;
+}
+
+.sparkline-latest-value {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.sparkline-latest-value__label {
+  font-weight: 700;
+}
+
+.sparkline-latest-value__value {
+  font-weight: 700;
 }
 
 @media (max-width: 600px) {
