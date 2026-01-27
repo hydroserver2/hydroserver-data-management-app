@@ -2,35 +2,9 @@
   <v-navigation-drawer
     v-model="sidebar.isOpen"
     width="400"
-    class="border-r border-slate-200 bg-slate-50 text-slate-900"
+    class="datavis-filters-drawer border-r border-slate-200 bg-slate-50 text-slate-900"
   >
     <div class="flex h-full flex-col gap-4 px-4 py-4">
-      <div>
-        <div class="text-[11px] uppercase tracking-[0.25em] text-slate-500">
-          Layout
-        </div>
-        <div class="mt-2 space-y-1">
-          <v-switch
-            v-model="showPlot"
-            class="w-full [&_.v-input__control]:w-full [&_.v-label]:whitespace-nowrap [&_.v-label]:text-slate-700"
-            color="primary"
-            density="compact"
-            label="Show plot"
-            hide-details
-            @update:model-value="(value) => handleToggle('plot', value)"
-          />
-          <v-switch
-            v-model="showTable"
-            class="w-full [&_.v-input__control]:w-full [&_.v-label]:whitespace-nowrap [&_.v-label]:text-slate-700"
-            color="primary"
-            density="compact"
-            label="Show datastreams"
-            hide-details
-            @update:model-value="(value) => handleToggle('table', value)"
-          />
-        </div>
-      </div>
-
       <div class="flex items-center justify-between px-1">
         <div class="text-[11px] uppercase tracking-[0.25em] text-slate-500">
           Datastream Filters
@@ -232,8 +206,6 @@ const {
   selectedWorkspaces,
   selectedObservedPropertyNames,
   selectedProcessingLevelNames,
-  showPlot,
-  showTable,
 } = storeToRefs(useDataVisStore())
 
 const { workspaces } = storeToRefs(useWorkspaceStore())
@@ -375,17 +347,6 @@ const clearFilters = () => {
   searchProcessingLevel.value = ''
 }
 
-const handleToggle = (toggled: 'plot' | 'table', value: boolean | null) => {
-  // Only react when the user explicitly turns one side off.
-  if (value !== false) return
-
-  if (toggled === 'plot') {
-    showTable.value = true
-  } else {
-    showPlot.value = true
-  }
-}
-
 const { smAndDown } = useDisplay()
 const sidebar = useSidebarStore()
 
@@ -421,4 +382,9 @@ watch(
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.datavis-filters-drawer {
+  z-index: 1;
+}
+
 </style>

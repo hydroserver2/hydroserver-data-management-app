@@ -1,26 +1,29 @@
 <template>
   <FullScreenLoader v-if="loading" />
   <div v-else class="visualize-page">
-    <DataVisFiltersDrawer @drawer-change="handleDrawerChange" />
+    <DataVisNavRail />
+    <div class="visualize-content">
+      <DataVisFiltersDrawer @drawer-change="handleDrawerChange" />
 
-    <div class="visualize-layout">
-      <div
-        v-if="showPlot"
-        class="plot-section"
-        :style="{ flex: `${cardHeight} 1 0%` }"
-      >
-        <DataVisualizationCard
-          :cardHeight="cardHeight"
-          @copy-state="copyStateToClipboard"
-        />
-      </div>
+      <div class="visualize-layout">
+        <div
+          v-if="showPlot"
+          class="plot-section"
+          :style="{ flex: `${cardHeight} 1 0%` }"
+        >
+          <DataVisualizationCard
+            :cardHeight="cardHeight"
+            @copy-state="copyStateToClipboard"
+          />
+        </div>
 
-      <div
-        v-if="showTable"
-        class="table-section"
-        :style="{ flex: `${tableHeight} 1 0%` }"
-      >
-        <DataVisDatasetsTable />
+        <div
+          v-if="showTable"
+          class="table-section"
+          :style="{ flex: `${tableHeight} 1 0%` }"
+        >
+          <DataVisDatasetsTable />
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +31,7 @@
 
 <script setup lang="ts">
 import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawer.vue'
+import DataVisNavRail from '@/components/VisualizeData/DataVisNavRail.vue'
 import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
@@ -268,6 +272,8 @@ onUnmounted(() => {
 .visualize-layout {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
   gap: 12px;
   --visualize-margin: 16px;
   margin: var(--visualize-margin);
@@ -278,11 +284,19 @@ onUnmounted(() => {
 }
 
 .visualize-page {
+  --datavis-rail-width: 64px;
+  display: flex;
   height: calc(
     100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px)
   );
   overflow: hidden;
   background-color: #eef2f6;
+}
+
+.visualize-content {
+  flex: 1;
+  min-width: 0;
+  position: relative;
 }
 
 .plot-section,
@@ -302,6 +316,9 @@ onUnmounted(() => {
   .visualize-layout {
     --visualize-margin: 8px;
     gap: 8px;
+  }
+  .visualize-page {
+    --datavis-rail-width: 56px;
   }
 }
 </style>
