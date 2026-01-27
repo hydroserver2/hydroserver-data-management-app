@@ -312,13 +312,24 @@ const tableItems = computed(() => {
     const observedProperty = observedProperties.value.find(
       (p) => p.id === ds.observedPropertyId
     )
+    const observedPropertyCode =
+      typeof observedProperty?.code === 'string'
+        ? observedProperty.code.trim()
+        : ''
+    const observedPropertyName =
+      typeof observedProperty?.name === 'string'
+        ? observedProperty.name.trim()
+        : ''
+    const observedPropertyDisplay = observedPropertyCode
+      ? `${observedPropertyName} (${observedPropertyCode})`
+      : observedPropertyName
     const processingLevel = processingLevels.value.find(
       (p) => p.id === ds.processingLevelId
     )
     return {
       ...ds,
       siteCodeName: thing?.samplingFeatureCode,
-      observedPropertyName: observedProperty?.name,
+      observedPropertyName: observedPropertyDisplay,
       qualityControlLevelDefinition: processingLevel?.definition,
     }
   })
