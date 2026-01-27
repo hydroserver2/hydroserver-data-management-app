@@ -1,8 +1,6 @@
 import { GraphSeries } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
 import { useDataVisStore } from '@/store/dataVisualization'
-// @ts-ignore no type definitions
-import Plotly from 'plotly.js-dist'
 
 type YAxisConfiguration = {
   index: number
@@ -192,8 +190,10 @@ const buildScreenshotButton = (seriesArray: GraphSeries[], title?: string) => {
       height: 24,
       path: 'M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2m8 2a5 5 0 0 0-5 5a5 5 0 0 0 5 5a5 5 0 0 0 5-5a5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3Z',
     },
-    click: (gd: any) => {
+    click: async (gd: any) => {
       const { width, height, scale } = getExportConfig(gd)
+      const PlotlyModule = await import('plotly.js-dist')
+      const Plotly = (PlotlyModule as any).default ?? PlotlyModule
       Plotly.downloadImage(gd, {
         format: 'png',
         filename,

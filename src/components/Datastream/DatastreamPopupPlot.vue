@@ -92,8 +92,6 @@ import { createPlotlyOption, PlotlyOptions } from '@/utils/plotting/plotly'
 import { onMounted, ref, nextTick, onBeforeUnmount, computed } from 'vue'
 import { useObservationStore } from '@/store/observations'
 import { mdiArrowRight } from '@mdi/js'
-// @ts-ignore no type definitions
-import Plotly from 'plotly.js-dist'
 
 const { fetchGraphSeries } = useObservationStore()
 
@@ -119,6 +117,14 @@ const beginDate = ref<Date>(oneMonthBack(endDate.value))
 const selectedDateBtnId = ref(0)
 const plotContainer = ref<HTMLDivElement | null>(null)
 const plotlyRef = ref<(HTMLDivElement & { [key: string]: any }) | null>(null)
+let plotlyApi: any | null = null
+
+const ensurePlotly = async () => {
+  if (plotlyApi) return plotlyApi
+  const PlotlyModule = await import('plotly.js-dist')
+  plotlyApi = (PlotlyModule as any).default ?? PlotlyModule
+  return plotlyApi
+}
 
 const dateOptions = [
   {
@@ -260,6 +266,7 @@ const renderPlot = async () => {
   if (!plotlyOptions.value || !plotContainer.value) return
 
   const { traces, layout, config } = plotlyOptions.value
+  const Plotly = await ensurePlotly()
 
   if (!plotlyRef.value) {
     plotlyRef.value = await Plotly.newPlot(
@@ -315,7 +322,9 @@ const applyDragHandleStyling = () => {
 
 onBeforeUnmount(() => {
   if (plotlyRef.value) {
-    Plotly.purge(plotlyRef.value)
+    if (plotlyApi) {
+      plotlyApi.purge(plotlyRef.value)
+    }
   }
 })
 </script>

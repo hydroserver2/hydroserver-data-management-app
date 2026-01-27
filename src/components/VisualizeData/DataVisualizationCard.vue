@@ -114,8 +114,6 @@ import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { debounce } from 'lodash-es'
 import { getXRangeBounds } from '@/utils/plotting/plotly'
-// @ts-ignore no type definitions
-import Plotly from 'plotly.js-dist'
 import { mdiChartLine, mdiSigma } from '@mdi/js'
 
 const emit = defineEmits(['copy-state'])
@@ -142,6 +140,14 @@ const {
 const plotContainer = ref<HTMLDivElement | null>(null)
 const plotlyRef = ref<(HTMLDivElement & { [key: string]: any }) | null>(null)
 const handlersAttached = ref(false)
+let plotlyApi: any | null = null
+
+const ensurePlotly = async () => {
+  if (plotlyApi) return plotlyApi
+  const PlotlyModule = await import('plotly.js-dist')
+  plotlyApi = (PlotlyModule as any).default ?? PlotlyModule
+  return plotlyApi
+}
 
 const parseNumericAxisValue = (value: unknown) => {
   const parsed = typeof value === 'string' ? Number(value) : value
@@ -476,6 +482,7 @@ const attachHandlers = () => {
 const renderPlot = async () => {
   if (!plotlyOptions.value || !plotContainer.value) return
 
+  const Plotly = await ensurePlotly()
   const { traces, layout, config } = plotlyOptions.value
   if (!plotlyRef.value) {
     plotlyRef.value = await Plotly.newPlot(
@@ -494,19 +501,21 @@ const renderPlot = async () => {
 
 const cleanupPlot = () => {
   if (plotlyRef.value) {
-    Plotly.purge(plotlyRef.value)
+    if (plotlyApi) {
+      plotlyApi.purge(plotlyRef.value)
+    }
     plotlyRef.value = null
     handlersAttached.value = false
   }
 }
 
 const queueResize = () => {
-  if (!plotlyRef.value) return
+  if (!plotlyRef.value || !plotlyApi) return
   requestAnimationFrame(() => {
-    if (plotlyRef.value) Plotly.Plots.resize(plotlyRef.value)
+    if (plotlyRef.value) plotlyApi.Plots.resize(plotlyRef.value)
   })
   setTimeout(() => {
-    if (plotlyRef.value) Plotly.Plots.resize(plotlyRef.value)
+    if (plotlyRef.value) plotlyApi.Plots.resize(plotlyRef.value)
   }, 200)
 }
 

@@ -34,8 +34,6 @@ import { PropType } from 'vue'
 import { DataArray, Datastream, TimeSpacingUnit } from '@hydroserver/client'
 import { preProcessData, subtractHours } from '@/utils/observationsUtils'
 import { useObservationStore } from '@/store/observations'
-// @ts-ignore no type definitions
-import Plotly from 'plotly.js-dist'
 
 const { fetchObservationsInRange } = useObservationStore()
 
@@ -58,6 +56,14 @@ const handleEmit = () => {
 const sparklineObservations = ref<DataArray>([])
 const loading = ref(true)
 const sparklineRef = ref<HTMLDivElement | null>(null)
+let plotlyApi: any | null = null
+
+const ensurePlotly = async () => {
+  if (plotlyApi) return plotlyApi
+  const PlotlyModule = await import('plotly.js-dist')
+  plotlyApi = (PlotlyModule as any).default ?? PlotlyModule
+  return plotlyApi
+}
 
 const processedObs = computed(() =>
   preProcessData(sparklineObservations.value, props.datastream)
@@ -98,6 +104,7 @@ const renderSparkline = async () => {
 
   const observations = processedObs.value
   if (!observations.length) return
+  const Plotly = await ensurePlotly()
 
   const colors = sparklineColors.value
   const xValues = observations.map((dp) => dp.date.getTime())
@@ -245,7 +252,9 @@ watch(
 
 onBeforeUnmount(() => {
   if (sparklineRef.value) {
-    Plotly.purge(sparklineRef.value)
+    if (plotlyApi) {
+      plotlyApi.purge(sparklineRef.value)
+    }
   }
 })
 </script>
