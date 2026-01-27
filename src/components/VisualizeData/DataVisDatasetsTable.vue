@@ -5,52 +5,30 @@
     >
       <v-sheet class="px-3 py-2 max-[600px]:px-2" color="secondary">
         <v-defaults-provider :defaults="{ VBtn: { variant: 'text' } }">
-          <div class="flex flex-col items-stretch gap-3">
-            <div
-              class="flex flex-wrap items-center gap-3 max-[600px]:flex-col max-[600px]:items-stretch"
+          <div
+            class="flex items-center gap-3 max-[960px]:flex-wrap max-[600px]:flex-col max-[600px]:items-stretch"
+          >
+            <h5
+              class="m-0 px-1 whitespace-nowrap text-h5 max-[600px]:w-full max-[600px]:text-center"
             >
-              <h5
-                class="m-0 px-1 whitespace-nowrap text-h5 max-[600px]:w-full max-[600px]:text-center"
-              >
-                Datastreams
-              </h5>
-              <v-text-field
-                class="flex-1 basis-[240px] min-w-[200px] max-w-[360px] max-[600px]:min-w-0 max-[600px]:max-w-none"
-                clearable
-                v-model="search"
-                :prepend-inner-icon="mdiMagnify"
-                label="Search"
-                hide-details
-                density="compact"
-                variant="underlined"
-              />
-              <v-select
-                class="ml-auto pl-1 min-w-[220px] max-w-[260px] max-[600px]:ml-0 max-[600px]:w-full max-[600px]:max-w-none"
-                label="Show/Hide Columns"
-                v-model="selectedHeaders"
-                :items="selectableHeaders"
-                item-text="title"
-                item-value="key"
-                multiple
-                item-color="green"
-                density="compact"
-                variant="solo"
-                hide-details
-              >
-                <template v-slot:selection="{ item, index }">
-                  <!-- Leave blank so nothing appears in the v-select box -->
-                </template>
-              </v-select>
-            </div>
+              Datastreams
+            </h5>
+
+            <v-text-field
+              class="w-[220px] max-w-full flex-none max-[600px]:w-full"
+              clearable
+              v-model="search"
+              :prepend-inner-icon="mdiMagnify"
+              label="Search"
+              hide-details
+              density="compact"
+              variant="underlined"
+            />
 
             <div
-              class="flex flex-wrap justify-end gap-2 max-[600px]:w-full max-[600px]:flex-col"
+              class="ml-auto flex flex-wrap items-center justify-end gap-2 max-[960px]:ml-0 max-[960px]:w-full max-[600px]:flex-col max-[600px]:items-stretch"
             >
-              <v-btn
-                class="max-[600px]:w-full"
-                color="white"
-                @click="clearSelected"
-              >
+              <v-btn class="max-[600px]:w-full" color="white" @click="clearSelected">
                 Clear Selected
               </v-btn>
 
@@ -71,6 +49,63 @@
                 @click="downloadSelected(plottedDatastreams)"
                 >Download Selected</v-btn
               >
+
+              <v-menu :close-on-content-click="false" location="bottom end">
+                <template #activator="{ props: menuProps }">
+                  <template v-if="isMobile">
+                    <v-btn
+                      v-bind="menuProps"
+                      color="white"
+                      variant="text"
+                      :prepend-icon="mdiTableColumn"
+                      class="max-[600px]:w-full"
+                    >
+                      Show/Hide Columns
+                    </v-btn>
+                  </template>
+                  <template v-else>
+                    <v-tooltip
+                      text="Show/Hide Columns"
+                      location="top"
+                      :open-delay="0"
+                      :close-delay="0"
+                    >
+                      <template #activator="{ props: tooltipProps }">
+                        <v-btn
+                          v-bind="{ ...menuProps, ...tooltipProps }"
+                          :icon="mdiTableColumn"
+                          color="white"
+                          variant="text"
+                          class="shrink-0"
+                          aria-label="Show or hide columns"
+                        />
+                      </template>
+                    </v-tooltip>
+                  </template>
+                </template>
+
+                <v-card class="min-w-[260px] py-1">
+                  <v-list density="compact" class="py-1">
+                    <v-list-item
+                      v-for="header in selectableHeaders"
+                      :key="header.key"
+                      class="cursor-pointer"
+                      @click="toggleHeader(header.key)"
+                    >
+                      <template #prepend>
+                        <v-checkbox-btn
+                          :model-value="selectedHeaders.includes(header.key)"
+                          @update:model-value="toggleHeader(header.key)"
+                          @click.stop
+                          :aria-label="`Toggle ${header.title}`"
+                          color="green"
+                        />
+                      </template>
+                      <v-list-item-title>{{ header.title }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-card>
+              </v-menu>
             </div>
           </div>
         </v-defaults-provider>
@@ -197,7 +232,7 @@ import { computed, reactive, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { formatTime } from '@/utils/time'
-import { mdiDownload, mdiMagnify } from '@mdi/js'
+import { mdiDownload, mdiMagnify, mdiTableColumn } from '@mdi/js'
 
 const {
   things,
@@ -343,6 +378,17 @@ const selectedHeaders = computed({
     })
   },
 })
+
+const toggleHeader = (key: string) => {
+  const keys = [...selectedHeaders.value]
+  const index = keys.indexOf(key)
+  if (index >= 0) {
+    keys.splice(index, 1)
+  } else {
+    keys.push(key)
+  }
+  selectedHeaders.value = keys
+}
 
 function updatePlottedDatastreams(datastream: Datastream) {
   const index = plottedDatastreams.value.findIndex(
