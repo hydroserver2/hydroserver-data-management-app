@@ -1,20 +1,25 @@
 <template>
-  <div v-if="loaded && authorized" class="my-3 mx-4 site-details">
-    <v-row v-if="thing" class="align-center site-header">
-      <v-col cols="12" class="d-flex align-center flex-wrap site-header-row">
+  <div v-if="loaded && authorized" class="my-3 mx-4 flex flex-col gap-2">
+    <v-row v-if="thing" class="align-center gap-y-[0.35rem]">
+      <v-col
+        cols="12"
+        class="d-flex align-center flex-wrap justify-between gap-2 max-[600px]:flex-col max-[600px]:items-start"
+      >
         <h5 class="text-h5 mt-2 mb-0">{{ thing.name }}</h5>
-        <div class="site-header-actions">
+        <div
+          class="flex items-center gap-2 ml-auto max-[600px]:w-full max-[600px]:ml-0"
+        >
           <v-btn
             v-if="
               hasPermission(PermissionResource.Thing, PermissionAction.Delete)
             "
-            class="site-delete-btn"
+            class="max-[600px]:self-start"
             color="red-darken-3"
             @click="isDeleteModalOpen = true"
           >
             Delete site
           </v-btn>
-          <div class="site-header-actions__spacer" />
+          <div class="flex-1" />
           <HydroShareArchivalButton
             v-if="
               hasPermission(PermissionResource.Thing, PermissionAction.Edit) &&
@@ -33,19 +38,47 @@
       </v-col>
     </v-row>
 
-    <v-row v-if="thing" class="site-map-row">
+    <v-row v-if="thing">
       <v-col>
-        <div class="map-wrapper">
-          <div class="map-canvas">
-            <OpenLayersMap :things="[thing]" startInSatellite />
+        <div class="w-full">
+          <div class="h-[22rem] w-full max-[960px]:h-[18rem]">
+            <OpenLayersMap :things="[thing]" startInSatellite class="h-full w-full">
+              <template #overlay>
+                <v-card
+                  v-if="!isMobile"
+                  class="max-w-[18rem] bg-white/95 px-3 py-2"
+                  elevation="4"
+                >
+                  <div class="text-subtitle-2 font-weight-medium mb-2">
+                    Location
+                  </div>
+                  <div class="grid gap-1">
+                    <div
+                      v-for="detail in locationDetails"
+                      :key="detail.label"
+                      class="flex flex-col"
+                    >
+                      <span class="text-caption text-medium-emphasis">
+                        {{ detail.label }}
+                      </span>
+                      <span class="text-body-2">{{ detail.value }}</span>
+                    </div>
+                  </div>
+                </v-card>
+              </template>
+            </OpenLayersMap>
           </div>
-          <v-card class="map-location-card" elevation="4">
+          <v-card
+            v-if="isMobile"
+            class="mt-3 w-full bg-white/95 px-3 py-2"
+            elevation="4"
+          >
             <div class="text-subtitle-2 font-weight-medium mb-2">Location</div>
-            <div class="location-grid">
+            <div class="grid gap-1">
               <div
                 v-for="detail in locationDetails"
                 :key="detail.label"
-                class="location-item"
+                class="flex flex-col"
               >
                 <span class="text-caption text-medium-emphasis">
                   {{ detail.label }}
@@ -62,13 +95,13 @@
       <v-col
         cols="12"
         md="8"
-        class="d-flex align-center flex-wrap site-info-actions"
+        class="d-flex align-center flex-wrap gap-2 max-[600px]:flex-col max-[600px]:items-start"
       >
-        <h5 class="text-h6 mb-0 site-info-title">Site information</h5>
+        <h5 class="text-h6 mb-0 max-[600px]:w-full">Site information</h5>
 
         <v-btn
           v-if="hasPermission(PermissionResource.Thing, PermissionAction.Edit)"
-          class="site-info-btn"
+          class="max-[600px]:self-start"
           @click="isAccessControlModalOpen = true"
         >
           Access control
@@ -85,7 +118,7 @@
             hasPermission(PermissionResource.Thing, PermissionAction.Edit) &&
             !!thing
           "
-          class="site-info-btn"
+          class="max-[600px]:self-start"
           @click="isRegisterModalOpen = true"
           color="secondary"
         >
@@ -113,18 +146,21 @@
             {{ photos?.length }} photos
           </span>
         </div>
-        <div v-if="hasPhotos" class="photo-grid">
+        <div
+          v-if="hasPhotos"
+          class="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-2 min-[961px]:grid-cols-[repeat(auto-fit,85px)] min-[961px]:justify-start min-[961px]:max-h-48 min-[961px]:overflow-hidden"
+        >
           <button
             v-for="(photo, index) in visiblePhotos"
             :key="photo.name"
-            class="photo-thumb"
+            class="relative block aspect-square cursor-pointer appearance-none overflow-hidden rounded-lg border border-black/10 bg-transparent p-0"
             type="button"
             @click="openPhoto(photo)"
           >
-            <v-img :src="photo.link" cover class="photo-thumb__image" />
+            <v-img :src="photo.link" cover class="h-full w-full" />
             <div
               v-if="index === visiblePhotos.length - 1 && extraPhotoCount > 0"
-              class="photo-more"
+              class="absolute inset-0 flex items-center justify-center bg-black/55 text-base font-semibold text-white"
             >
               +{{ extraPhotoCount }}
             </div>
@@ -147,17 +183,17 @@
 
     <v-dialog v-model="isPhotoViewerOpen" width="60rem">
       <v-card v-if="selectedPhoto">
-        <div class="photo-viewer">
+        <div class="relative">
           <v-img :src="selectedPhoto.link" height="32rem" cover />
           <v-btn
-            class="photo-nav-btn photo-nav-btn--left"
+            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 text-slate-800 shadow-[0_4px_10px_rgba(15,23,42,0.15)]"
             variant="text"
             :icon="mdiChevronLeft"
             :disabled="!hasMultiplePhotos"
             @click="showPrevPhoto"
           />
           <v-btn
-            class="photo-nav-btn photo-nav-btn--right"
+            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 text-slate-800 shadow-[0_4px_10px_rgba(15,23,42,0.15)]"
             variant="text"
             :icon="mdiChevronRight"
             :disabled="!hasMultiplePhotos"
@@ -211,6 +247,7 @@ import { useHydroShare } from '@/composables/useHydroShare'
 import { useHydroShareStore } from '@/store/hydroShare'
 import HydroShareArchivalButton from '@/components/HydroShare/HydroShareArchivalButton.vue'
 import { mdiChevronLeft, mdiChevronRight } from '@mdi/js'
+import { useDisplay } from 'vuetify/lib/framework.mjs'
 
 const thingId = useRoute().params.id.toString()
 const { photos, loading } = storeToRefs(usePhotosStore())
@@ -224,6 +261,8 @@ const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
+const { smAndDown } = useDisplay()
+const isMobile = computed(() => smAndDown.value)
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 const maxPhotoThumbnails = 6
@@ -359,182 +398,3 @@ onMounted(async () => {
   loaded.value = true
 })
 </script>
-
-<style scoped>
-.site-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.site-header {
-  row-gap: 0.35rem;
-}
-
-.site-header-row {
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.site-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: auto;
-}
-
-.site-header-actions__spacer {
-  flex: 1;
-}
-
-.site-info-actions {
-  gap: 0.5rem;
-}
-
-.site-info-title {
-  text-align: left;
-}
-
-@media (max-width: 600px) {
-  .site-info-title {
-    width: 100%;
-  }
-}
-
-.map-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.map-canvas {
-  height: 22rem;
-}
-
-.map-location-card {
-  position: absolute;
-  bottom: 0.75rem;
-  left: 0.75rem;
-  padding: 0.5rem;
-  max-width: 18rem;
-  background: rgba(255, 255, 255, 0.95);
-  z-index: 2;
-}
-
-.location-grid {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.location-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 0.5rem;
-}
-
-.photo-thumb {
-  position: relative;
-  display: block;
-  border-radius: 8px;
-  overflow: hidden;
-  padding: 0;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: transparent;
-  cursor: pointer;
-  aspect-ratio: 1 / 1;
-  appearance: none;
-}
-
-.photo-thumb :deep(.v-img__img) {
-  object-fit: cover;
-}
-
-.photo-thumb__image {
-  height: 100%;
-  width: 100%;
-}
-
-.photo-more {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.photo-viewer {
-  position: relative;
-}
-
-.photo-nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  color: #1f2937;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
-}
-
-.photo-nav-btn--left {
-  left: 0.5rem;
-}
-
-.photo-nav-btn--right {
-  right: 0.5rem;
-}
-
-@media (min-width: 961px) {
-  .photo-grid {
-    grid-template-columns: repeat(auto-fit, 85px);
-    justify-content: flex-start;
-    max-height: 12rem;
-    overflow: hidden;
-  }
-}
-
-@media (max-width: 960px) {
-  .map-location-card {
-    position: static;
-    margin-top: 0.75rem;
-    max-width: none;
-  }
-
-  .map-canvas {
-    height: 18rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .site-header-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .site-header-actions {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .site-delete-btn {
-    align-self: flex-start;
-  }
-
-  .site-info-actions {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .site-info-btn {
-    align-self: flex-start;
-  }
-}
-</style>
