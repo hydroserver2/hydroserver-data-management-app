@@ -15,7 +15,7 @@
             </h5>
 
             <v-text-field
-              class="w-[220px] max-w-full flex-none max-[600px]:w-full"
+              class="w-[135px] max-w-full flex-none max-[600px]:w-full"
               clearable
               v-model="search"
               :prepend-inner-icon="mdiMagnify"
@@ -28,7 +28,11 @@
             <div
               class="ml-auto flex flex-wrap items-center justify-end gap-2 max-[960px]:ml-0 max-[960px]:w-full max-[600px]:flex-col max-[600px]:items-stretch"
             >
-              <v-btn class="max-[600px]:w-full" color="white" @click="clearSelected">
+              <v-btn
+                class="max-[600px]:w-full"
+                color="white"
+                @click="clearSelected"
+              >
                 Clear Selected
               </v-btn>
 
@@ -57,7 +61,7 @@
                       v-bind="menuProps"
                       color="white"
                       variant="text"
-                      :prepend-icon="mdiTableColumn"
+                      :prepend-icon="mdiTableColumnWidth"
                       class="max-[600px]:w-full"
                     >
                       Show/Hide Columns
@@ -73,7 +77,7 @@
                       <template #activator="{ props: tooltipProps }">
                         <v-btn
                           v-bind="{ ...menuProps, ...tooltipProps }"
-                          :icon="mdiTableColumn"
+                          :icon="mdiTableColumnWidth"
                           color="white"
                           variant="text"
                           class="shrink-0"
@@ -232,7 +236,7 @@ import { computed, reactive, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { formatTime } from '@/utils/time'
-import { mdiDownload, mdiMagnify, mdiTableColumn } from '@mdi/js'
+import { mdiDownload, mdiMagnify, mdiTableColumnWidth } from '@mdi/js'
 
 const {
   things,
