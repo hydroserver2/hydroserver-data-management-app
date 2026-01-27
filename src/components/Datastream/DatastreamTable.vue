@@ -73,28 +73,25 @@
               class="mt-1"
               :datastream="item"
               @openChart="openCharts[item.id] = true"
+              @latest-value="(value) => handleLatestValueUpdate(item.id, value)"
               :unitName="item.unitName"
+            />
+            <div
+              v-if="Number(item.valueCount) > 0"
+              class="mt-1 text-base leading-[1.3]"
+              :class="
+                isDatastreamStale(item)
+                  ? 'text-[#9e9e9e]'
+                  : 'text-[#2e7d32]'
+              "
             >
-              <template #after-chart>
-                <div
-                  v-if="Number(item.valueCount) > 0"
-                  class="datastream-latest-observation"
-                  :class="{
-                    'datastream-latest-observation--fresh':
-                      !isDatastreamStale(item),
-                    'datastream-latest-observation--stale':
-                      isDatastreamStale(item),
-                  }"
-                >
-                  <strong class="mr-2 datastream-latest-observation__label"
-                    >Latest observation:</strong
-                  >
-                  <span class="datastream-latest-observation__value">{{
-                    item.endDate
-                  }}</span>
-                </div>
-              </template>
-            </Sparkline>
+              <strong class="mr-2 font-semibold">Latest observation:</strong>
+              <span class="font-semibold">{{ item.endDate }}</span>
+            </div>
+            <div class="mt-1 text-base leading-[1.3]">
+              <strong class="mr-2 font-semibold">Latest value:</strong>
+              <span class="font-semibold">{{ latestValueDisplay(item) }}</span>
+            </div>
           </div>
 
           <v-dialog v-model="openCharts[item.id]" width="80rem">
@@ -355,28 +352,25 @@
                 class="mt-1"
                 :datastream="item"
                 @openChart="openCharts[item.id] = true"
+                @latest-value="(value) => handleLatestValueUpdate(item.id, value)"
                 :unitName="item.unitName"
+              />
+              <div
+                v-if="Number(item.valueCount) > 0"
+                class="mt-1 text-base leading-[1.3]"
+                :class="
+                  isDatastreamStale(item)
+                    ? 'text-[#9e9e9e]'
+                    : 'text-[#2e7d32]'
+                "
               >
-                <template #after-chart>
-                  <div
-                    v-if="Number(item.valueCount) > 0"
-                    class="datastream-latest-observation"
-                    :class="{
-                      'datastream-latest-observation--fresh':
-                        !isDatastreamStale(item),
-                      'datastream-latest-observation--stale':
-                        isDatastreamStale(item),
-                    }"
-                  >
-                    <strong class="mr-2 datastream-latest-observation__label"
-                      >Latest observation:</strong
-                    >
-                    <span class="datastream-latest-observation__value">{{
-                      item.endDate
-                    }}</span>
-                  </div>
-                </template>
-              </Sparkline>
+                <strong class="mr-2 font-semibold">Latest observation:</strong>
+                <span class="font-semibold">{{ item.endDate }}</span>
+              </div>
+              <div class="mt-1 text-base leading-[1.3]">
+                <strong class="mr-2 font-semibold">Latest value:</strong>
+                <span class="font-semibold">{{ latestValueDisplay(item) }}</span>
+              </div>
             </div>
           </div>
 
@@ -744,6 +738,19 @@ const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
   useMetadata(toRef(props, 'workspace'))
 
 const openCharts = reactive<Record<string, boolean>>({})
+const latestValues = reactive<Record<string, string>>({})
+
+const handleLatestValueUpdate = (datastreamId: string, value: string) => {
+  latestValues[datastreamId] = value
+}
+
+const latestValueFor = (datastreamId: string) => latestValues[datastreamId] || '—'
+
+const latestValueDisplay = (datastream: { id: string; unitName?: string }) => {
+  const value = latestValueFor(datastream.id)
+  if (value === '—') return value
+  return `${value} ${datastream.unitName ?? ''}`.trim()
+}
 
 const visibleDatastreams = computed(() => {
   return items.value
@@ -1063,28 +1070,6 @@ const loadDatastreams = async () => {
   font-size: 1rem;
   max-width: 360px;
   overflow-wrap: anywhere;
-}
-
-.datastream-latest-observation {
-  margin-top: 0.25rem;
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.datastream-latest-observation__label {
-  font-weight: 700;
-}
-
-.datastream-latest-observation--fresh {
-  color: #2e7d32;
-}
-
-.datastream-latest-observation--stale {
-  color: #9e9e9e;
-}
-
-.datastream-latest-observation__value {
-  font-weight: 700;
 }
 
 .datastream-info-list,

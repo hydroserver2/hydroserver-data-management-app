@@ -1,25 +1,19 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
-  <div v-else-if="!loading && sparklineObservations.length" @click="handleEmit">
-    <div class="sparkline-container">
-      <div class="sparkline-note text-body-3 font-weight-light opacity-70">
+  <div
+    v-else-if="!loading && sparklineObservations.length"
+  >
+    <div class="w-[300px] max-w-full max-[600px]:w-full">
+      <div class="mb-1 text-body-3 font-weight-light opacity-70">
         Sparkline is showing most recent {{ sparklineObservations.length }}
         values
       </div>
       <div
         ref="sparklineRef"
-        class="sparkline-chart"
+        class="h-[100px] w-full cursor-pointer"
         :style="sparklineContainerStyle"
+        @click="handleEmit"
       />
-      <slot name="after-chart" />
-      <div class="sparkline-meta">
-        <div class="sparkline-latest-value">
-          <strong class="mr-2 sparkline-latest-value__label">Latest value:</strong>
-          <span class="sparkline-latest-value__value">
-            {{ mostRecentDataValue }} {{ unitName }}
-          </span>
-        </div>
-      </div>
     </div>
   </div>
   <div v-else-if="!sparklineObservations.length">
@@ -53,7 +47,10 @@ const props = defineProps({
   unitName: String,
 })
 
-const emit = defineEmits(['openChart'])
+const emit = defineEmits<{
+  (e: 'openChart'): void
+  (e: 'latest-value', value: string): void
+}>()
 const handleEmit = () => {
   emit('openChart')
 }
@@ -238,53 +235,17 @@ watch(processedObs, () => {
   })
 })
 
+watch(
+  mostRecentDataValue,
+  (value) => {
+    emit('latest-value', value)
+  },
+  { immediate: true }
+)
+
 onBeforeUnmount(() => {
   if (sparklineRef.value) {
     Plotly.purge(sparklineRef.value)
   }
 })
 </script>
-
-<style scoped>
-.sparkline-wrapper {
-  cursor: pointer;
-}
-
-.sparkline-container {
-  width: 100%;
-  max-width: 320px;
-}
-
-.sparkline-chart {
-  height: 100px;
-  width: 100%;
-}
-
-.sparkline-note {
-  margin-bottom: 0.25rem;
-}
-
-.sparkline-meta {
-  margin-top: 0.25rem;
-  line-height: 1.3;
-}
-
-.sparkline-latest-value {
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.sparkline-latest-value__label {
-  font-weight: 700;
-}
-
-.sparkline-latest-value__value {
-  font-weight: 700;
-}
-
-@media (max-width: 600px) {
-  .sparkline-container {
-    max-width: 100%;
-  }
-}
-</style>

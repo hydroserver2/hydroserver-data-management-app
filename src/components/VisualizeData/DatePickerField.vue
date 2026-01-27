@@ -1,41 +1,46 @@
 <template>
-  <v-text-field
-    :placeholder="placeholder"
-    v-model="inputDate"
-    @blur="handleBlur"
-    :append-inner-icon="mdiCalendarBlank"
-    @click:append-inner="toggleDatePicker"
-    hide-details
-    density="compact"
-    :color="resolvedColor"
-    :base-color="resolvedColor"
-    :bg-color="resolvedBgColor"
-  />
+  <div>
+    <v-text-field
+      v-bind="$attrs"
+      :placeholder="placeholder"
+      v-model="inputDate"
+      @blur="handleBlur"
+      :append-inner-icon="mdiCalendarBlank"
+      @click:append-inner="toggleDatePicker"
+      hide-details
+      density="compact"
+      :color="resolvedColor"
+      :base-color="resolvedColor"
+      :bg-color="resolvedBgColor"
+    />
 
-  <v-dialog v-model="showDatePicker" max-width="22rem">
-    <v-card>
-      <v-card-title class="d-flex pt-4">
-        Select {{ placeholder }}
-        <v-spacer />
-        <v-icon
-          :icon="mdiClose"
-          color="grey-darken-1"
-          @click="showDatePicker = false"
+    <v-dialog v-model="showDatePicker" max-width="22rem">
+      <v-card>
+        <v-card-title class="d-flex pt-4">
+          Select {{ placeholder }}
+          <v-spacer />
+          <v-icon
+            :icon="mdiClose"
+            color="grey-darken-1"
+            @click="showDatePicker = false"
+          />
+        </v-card-title>
+        <v-divider />
+        <v-date-picker
+          hide-header
+          v-model="localDate"
+          @update:modelValue="dateSelected"
         />
-      </v-card-title>
-      <v-divider />
-      <v-date-picker
-        hide-header
-        v-model="localDate"
-        @update:modelValue="dateSelected"
-      />
-    </v-card>
-  </v-dialog>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { mdiCalendarBlank, mdiClose } from '@mdi/js'
 import { computed, ref, watch } from 'vue'
+
+defineOptions({ inheritAttrs: false })
 
 const props = defineProps({
   modelValue: { type: Date, required: true },
