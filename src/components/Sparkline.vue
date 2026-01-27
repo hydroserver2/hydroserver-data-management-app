@@ -19,6 +19,14 @@
           {{ sparklineObservations.length }} values
         </span>
       </div>
+      <v-chart :option="chartOption" autoresize class="sparkline-chart" />
+      <slot name="after-chart" />
+      <div class="sparkline-meta" style="width: 100%">
+        <span>
+          <strong class="mr-2">Latest value:</strong>
+          {{ mostRecentDataValue }} {{ unitName }}
+        </span>
+      </div>
     </div>
   </div>
   <div v-else-if="!sparklineObservations.length">
@@ -219,3 +227,34 @@ onBeforeUnmount(() => {
   }
 })
 </script>
+
+<style scoped>
+.sparkline-wrapper {
+  cursor: pointer;
+}
+
+.sparkline-container {
+  width: 100%;
+  max-width: 320px;
+}
+
+.sparkline-chart {
+  height: 100px;
+  width: 100%;
+}
+
+.sparkline-note {
+  margin-bottom: 0.25rem;
+}
+
+.sparkline-meta {
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 600px) {
+  .sparkline-container {
+    max-width: 100%;
+  }
+}
+</style>
