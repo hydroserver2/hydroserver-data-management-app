@@ -232,7 +232,7 @@
 import { useDataVisStore } from '@/store/dataVisualization'
 import hs, { Datastream, Thing } from '@hydroserver/client'
 import { storeToRefs } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 import DatastreamInformationCard from './DatastreamInformationCard.vue'
 import { formatTime } from '@/utils/time'
@@ -244,6 +244,7 @@ const {
   plottedDatastreams,
   observedProperties,
   processingLevels,
+  tableHeaders: headers,
 } = storeToRefs(useDataVisStore())
 
 const showOnlySelected = ref(false)
@@ -335,37 +336,8 @@ const isChecked = (item: Datastream) => {
 }
 
 const search = ref()
-const headers = reactive([
-  { title: 'Plot', key: 'plot', visible: true },
-  {
-    title: 'Site Code',
-    key: 'siteCodeName',
-    visible: true,
-  },
-  {
-    title: 'Observed Property',
-    key: 'observedPropertyName',
-    visible: true,
-  },
-  {
-    title: 'Processing Level',
-    key: 'qualityControlLevelDefinition',
-    visible: true,
-  },
-  {
-    title: 'Number Observations',
-    key: 'valueCount',
-    visible: true,
-  },
-  {
-    title: 'Date Last Updated',
-    key: 'phenomenonEndTime',
-    visible: true,
-  },
-])
-
 const selectableHeaders = computed(() => {
-  return headers.filter((header) => header.key !== 'plot')
+  return headers.value.filter((header) => header.key !== 'plot')
 })
 
 const sortBy = [
@@ -375,9 +347,11 @@ const sortBy = [
 ]
 const selectedHeaders = computed({
   get: () =>
-    headers.filter((header) => header.visible).map((header) => header.key),
+    headers.value
+      .filter((header) => header.visible)
+      .map((header) => header.key),
   set: (keys) => {
-    headers.forEach((header) => {
+    headers.value.forEach((header) => {
       header.visible = keys.includes(header.key)
     })
   },

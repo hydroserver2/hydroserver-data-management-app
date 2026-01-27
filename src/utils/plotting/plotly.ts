@@ -22,6 +22,8 @@ export type PlotlyOptions = {
 type PlotlyBuildOptions = {
   dataZoomStart?: number
   dataZoomEnd?: number
+  xAxisRange?: { start: number; end: number } | null
+  yAxisRanges?: Record<string, [number, number]>
   addLegend?: boolean
   addSummaryButton?: boolean
   addScreenshotButton?: boolean
@@ -229,6 +231,8 @@ export const createPlotlyOption = (
   const {
     dataZoomStart = 0,
     dataZoomEnd = 100,
+    xAxisRange,
+    yAxisRanges,
     addLegend = true,
     addSummaryButton = true,
     addScreenshotButton = true,
@@ -317,6 +321,12 @@ export const createPlotlyOption = (
   const rangeEnd = xRange
     ? xRange.min + (span * clampPercent(dataZoomEnd)) / 100
     : undefined
+  const resolvedRangeStart =
+    xAxisRange && Number.isFinite(xAxisRange.start)
+      ? xAxisRange.start
+      : rangeStart
+  const resolvedRangeEnd =
+    xAxisRange && Number.isFinite(xAxisRange.end) ? xAxisRange.end : rangeEnd
 
   const xDomainStart = leftCount ? leftPad : AXIS_SPACING
   const xDomainEnd = rightCount ? 1 - rightPad : 1 - AXIS_SPACING
@@ -348,10 +358,11 @@ export const createPlotlyOption = (
       title: { text: 'Datetime', standoff: 24 },
       automargin: true,
       range:
-        rangeStart !== undefined && rangeEnd !== undefined
-          ? [rangeStart, rangeEnd]
+        resolvedRangeStart !== undefined && resolvedRangeEnd !== undefined
+          ? [resolvedRangeStart, resolvedRangeEnd]
           : undefined,
-      autorange: rangeStart === undefined || rangeEnd === undefined,
+      autorange:
+        resolvedRangeStart === undefined || resolvedRangeEnd === undefined,
       rangeselector: showRangeSelector
         ? {
             ...rangeSelectorOptions,
@@ -425,6 +436,16 @@ export const createPlotlyOption = (
       overlaying: index === 0 ? undefined : 'y',
       autorange: true,
       automargin: false,
+    }
+
+    const axisRange = yAxisRanges?.[axisKey]
+    if (
+      axisRange &&
+      Number.isFinite(axisRange[0]) &&
+      Number.isFinite(axisRange[1])
+    ) {
+      layout[axisKey].range = axisRange
+      layout[axisKey].autorange = false
     }
   })
 

@@ -351,11 +351,15 @@ const { smAndDown } = useDisplay()
 const sidebar = useSidebarStore()
 
 onMounted(() => {
-  sidebar.isOpen = !smAndDown.value
+  if (!sidebar.isExplicit) {
+    sidebar.setOpen(!smAndDown.value)
+  }
 })
 
 watch(smAndDown, (isMobile) => {
-  if (isMobile) sidebar.isOpen = false
+  if (!sidebar.isExplicit) {
+    sidebar.setOpen(!isMobile)
+  }
 })
 
 watch(

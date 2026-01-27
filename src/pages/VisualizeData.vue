@@ -37,6 +37,7 @@ import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationC
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import hs from '@hydroserver/client'
 import { useDataVisStore } from '@/store/dataVisualization'
+import { useSidebarStore } from '@/store/useSidebar'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { Snackbar } from '@/utils/notifications'
@@ -44,7 +45,8 @@ import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 
 const route = useRoute()
 
-const { onDateBtnClick, resetState } = useDataVisStore()
+const dataVisStore = useDataVisStore()
+const { onDateBtnClick, resetState } = dataVisStore
 const {
   things,
   selectedThings,
@@ -64,7 +66,11 @@ const {
   showPlot,
   showTable,
   showSummaryStatistics,
-} = storeToRefs(useDataVisStore())
+  tableHeaders,
+  xAxisRange,
+  yAxisRanges,
+} = storeToRefs(dataVisStore)
+const sidebar = useSidebarStore()
 
 const fullHeight = 90
 const defaultPlotHeight = 45
@@ -136,6 +142,32 @@ const generateStateUrl = () => {
   if (dataZoomEnd.value !== 0 && dataZoomEnd.value !== 100)
     queryParams.append('dataZoomEnd', dataZoomEnd.value.toString())
 
+  if (xAxisRange.value) {
+    queryParams.append('xStart', xAxisRange.value.start.toString())
+    queryParams.append('xEnd', xAxisRange.value.end.toString())
+  }
+
+  const yRangeKeys = Object.keys(yAxisRanges.value)
+  if (yRangeKeys.length) {
+    queryParams.append('yRanges', JSON.stringify(yAxisRanges.value))
+  }
+
+  queryParams.append('plot', showPlot.value ? '1' : '0')
+  queryParams.append('table', showTable.value ? '1' : '0')
+  queryParams.append('summary', showSummaryStatistics.value ? '1' : '0')
+  queryParams.append('drawer', sidebar.isOpen ? '1' : '0')
+
+  const visibleColumns = tableHeaders.value
+    .filter((header) => header.visible && header.key !== 'plot')
+    .map((header) => header.key)
+  const allColumns = tableHeaders.value
+    .filter((header) => header.key !== 'plot')
+    .map((header) => header.key)
+
+  if (visibleColumns.length !== allColumns.length) {
+    queryParams.append('columns', visibleColumns.join(','))
+  }
+
   return `${BASE_URL}?${queryParams.toString()}`
 }
 
@@ -150,6 +182,13 @@ const copyStateToClipboard = async () => {
 }
 
 const parseUrlAndSetState = () => {
+  const parseBoolean = (value: string | string[] | null | undefined) => {
+    if (value === undefined || value === null) return null
+    const raw = Array.isArray(value) ? value[0] : value
+    const normalized = raw.toLowerCase()
+    return normalized === '1' || normalized === 'true' || normalized === 'yes'
+  }
+
   const selectedDateBtnIdParam = (route.query.selectedDateBtnId as string) || ''
   if (selectedDateBtnIdParam !== '') {
     const btnId = +selectedDateBtnIdParam
@@ -232,6 +271,65 @@ const parseUrlAndSetState = () => {
 
   const end = (route.query.dataZoomEnd as string) || ''
   if (end) dataZoomEnd.value = +end
+
+  const xStartParam = route.query.xStart
+  const xEndParam = route.query.xEnd
+  const xStartRaw = Array.isArray(xStartParam) ? xStartParam[0] : xStartParam
+  const xEndRaw = Array.isArray(xEndParam) ? xEndParam[0] : xEndParam
+  const xStart = xStartRaw ? Number(xStartRaw) : null
+  const xEnd = xEndRaw ? Number(xEndRaw) : null
+  if (Number.isFinite(xStart) && Number.isFinite(xEnd)) {
+    xAxisRange.value = { start: xStart as number, end: xEnd as number }
+  } else {
+    xAxisRange.value = null
+  }
+
+  const yRangesParam = route.query.yRanges
+  const yRangesRaw = Array.isArray(yRangesParam)
+    ? yRangesParam[0]
+    : yRangesParam
+  if (yRangesRaw) {
+    try {
+      const parsed = JSON.parse(yRangesRaw)
+      if (parsed && typeof parsed === 'object') {
+        yAxisRanges.value = parsed
+      } else {
+        yAxisRanges.value = {}
+      }
+    } catch (error) {
+      yAxisRanges.value = {}
+      console.warn('Unable to parse yRanges from URL', error)
+    }
+  } else {
+    yAxisRanges.value = {}
+  }
+
+  const plotParam = parseBoolean(route.query.plot)
+  const tableParam = parseBoolean(route.query.table)
+  if (plotParam !== null) showPlot.value = plotParam
+  if (tableParam !== null) showTable.value = tableParam
+
+  if (!showPlot.value && !showTable.value) {
+    showPlot.value = true
+  }
+
+  const summaryParam = parseBoolean(route.query.summary)
+  if (summaryParam !== null) showSummaryStatistics.value = summaryParam
+
+  const drawerParam = parseBoolean(route.query.drawer)
+  if (drawerParam !== null) {
+    sidebar.setOpen(drawerParam, true)
+  }
+
+  const columnsParam = route.query.columns
+  if (columnsParam) {
+    const raw = Array.isArray(columnsParam) ? columnsParam[0] : columnsParam
+    const keys = raw
+      .split(',')
+      .map((key) => key.trim())
+      .filter(Boolean)
+    dataVisStore.setTableVisibleColumns(keys)
+  }
 }
 
 const loading = ref(true)

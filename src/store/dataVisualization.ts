@@ -11,7 +11,7 @@ import {
   calculateSummaryStatistics,
 } from '@/utils/plotting/summaryStatisticUtils'
 import { defineStore } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { PlotlyColors } from '@/utils/materialColors'
 import { createPlotlyOption, PlotlyOptions } from '@/utils/plotting/plotly'
 import { useObservationStore } from '@/store/observations'
@@ -42,6 +42,34 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   const tableHeight = ref(30)
   const showPlot = ref(true)
   const showTable = ref(true)
+  const tableHeaders = reactive([
+    { title: 'Plot', key: 'plot', visible: true },
+    {
+      title: 'Site Code',
+      key: 'siteCodeName',
+      visible: true,
+    },
+    {
+      title: 'Observed Property',
+      key: 'observedPropertyName',
+      visible: true,
+    },
+    {
+      title: 'Processing Level',
+      key: 'qualityControlLevelDefinition',
+      visible: true,
+    },
+    {
+      title: 'Number Observations',
+      key: 'valueCount',
+      visible: true,
+    },
+    {
+      title: 'Date Last Updated',
+      key: 'phenomenonEndTime',
+      visible: true,
+    },
+  ])
 
   const endDate = ref<Date>(new Date())
   const oneMonth = 30 * 24 * 60 * 60 * 1000
@@ -49,6 +77,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   const selectedDateBtnId = ref(0)
   const dataZoomStart = ref(0)
   const dataZoomEnd = ref(100)
+  const xAxisRange = ref<{ start: number; end: number } | null>(null)
+  const yAxisRanges = ref<Record<string, [number, number]>>({})
 
   function resetState() {
     selectedThings.value = []
@@ -65,6 +95,11 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     dataZoomEnd.value = 100
     showPlot.value = true
     showTable.value = true
+    tableHeaders.forEach((header) => {
+      header.visible = true
+    })
+    xAxisRange.value = null
+    yAxisRanges.value = {}
   }
 
   function matchesSelectedObservedProperty(datastream: Datastream) {
@@ -197,6 +232,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   }: SetDateRangeParams) => {
     dataZoomStart.value = 0
     dataZoomEnd.value = 100
+    xAxisRange.value = null
+    yAxisRanges.value = {}
     if (begin) beginDate.value = begin
     if (end) endDate.value = end
     if (custom) selectedDateBtnId.value = -1
@@ -242,6 +279,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     plotlyOptions.value = createPlotlyOption(graphSeriesArray.value, {
       dataZoomStart: dataZoomStart.value,
       dataZoomEnd: dataZoomEnd.value,
+      xAxisRange: xAxisRange.value,
+      yAxisRanges: yAxisRanges.value,
       addSummaryButton: false,
       activeRangeSelector:
         selectedDateBtnId.value >= 0 ? selectedDateBtnId.value : -1,
@@ -314,6 +353,31 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     prevIds.value = []
     showSummaryStatistics.value = false
     plotlyOptions.value = undefined
+    xAxisRange.value = null
+    yAxisRanges.value = {}
+  }
+
+  const setAxisRanges = (
+    xRange: { start: number; end: number } | null,
+    ranges?: Record<string, [number, number]>
+  ) => {
+    xAxisRange.value = xRange
+    if (ranges) yAxisRanges.value = ranges
+  }
+
+  const setYAxisRanges = (ranges: Record<string, [number, number]>) => {
+    yAxisRanges.value = ranges
+  }
+
+  const setTableVisibleColumns = (keys: string[]) => {
+    const keySet = new Set(keys)
+    tableHeaders.forEach((header) => {
+      if (header.key === 'plot') {
+        header.visible = true
+        return
+      }
+      header.visible = keySet.has(header.key)
+    })
   }
 
   // Update the time range to the most recent phenomenon end time
@@ -364,6 +428,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     endDate,
     dataZoomStart,
     dataZoomEnd,
+    xAxisRange,
+    yAxisRanges,
     dateOptions,
     graphSeriesArray,
     plotlyOptions,
@@ -376,12 +442,16 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     tableHeight,
     showPlot,
     showTable,
+    tableHeaders,
     matchesSelectedObservedProperty,
     matchesSelectedProcessingLevel,
     matchesSelectedThing,
     matchesSelectedWorkspace,
     setDateRange,
     onDateBtnClick,
+    setAxisRanges,
+    setYAxisRanges,
+    setTableVisibleColumns,
     resetState,
   }
 })

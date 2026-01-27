@@ -135,6 +135,8 @@ const {
   plottedDatastreams,
   beginDate,
   endDate,
+  xAxisRange,
+  yAxisRanges,
 } = storeToRefs(useDataVisStore())
 
 const plotContainer = ref<HTMLDivElement | null>(null)
@@ -249,13 +251,68 @@ const handleRelayout = async (eventData: any) => {
   if (!eventData) return
 
   const eventKeys = Object.keys(eventData)
-  const hasYRangeChange = eventKeys.some(
-    (key) => key.startsWith('yaxis') && key.includes('range[')
-  )
-  if (hasYRangeChange) return
+  const nextYRanges: Record<string, [number, number]> = {
+    ...yAxisRanges.value,
+  }
+  const pendingYRanges: Record<string, { start?: number; end?: number }> = {}
+  let yRangesUpdated = false
 
-  const eventRangeStart = eventData['xaxis.range[0]']
-  const eventRangeEnd = eventData['xaxis.range[1]']
+  const parseAxisValue = (value: unknown) => {
+    const parsed = typeof value === 'string' ? Number(value) : value
+    return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : null
+  }
+
+  eventKeys.forEach((key) => {
+    const autorangeMatch = key.match(/^(yaxis\\d*)\\.autorange$/)
+    if (autorangeMatch && eventData[key] === true) {
+      delete nextYRanges[autorangeMatch[1]]
+      yRangesUpdated = true
+      return
+    }
+
+    const rangeMatch = key.match(/^(yaxis\\d*)\\.range\\[(0|1)\\]$/)
+    if (!rangeMatch) return
+    const axisKey = rangeMatch[1]
+    const index = Number(rangeMatch[2])
+    const parsedValue = parseAxisValue(eventData[key])
+    if (parsedValue === null) return
+    pendingYRanges[axisKey] = pendingYRanges[axisKey] || {}
+    if (index === 0) pendingYRanges[axisKey].start = parsedValue
+    if (index === 1) pendingYRanges[axisKey].end = parsedValue
+  })
+
+  Object.entries(pendingYRanges).forEach(([axisKey, range]) => {
+    if (
+      range.start !== undefined &&
+      range.end !== undefined &&
+      Number.isFinite(range.start) &&
+      Number.isFinite(range.end)
+    ) {
+      nextYRanges[axisKey] = [range.start, range.end]
+      yRangesUpdated = true
+    }
+  })
+
+  if (yRangesUpdated) {
+    yAxisRanges.value = nextYRanges
+  }
+
+  if (eventData['xaxis.autorange'] === true) {
+    xAxisRange.value = null
+    dataZoomStart.value = 0
+    dataZoomEnd.value = 100
+    return
+  }
+
+  let eventRangeStart = eventData['xaxis.range[0]']
+  let eventRangeEnd = eventData['xaxis.range[1]']
+  const eventRange = eventData['xaxis.range']
+  if (
+    (eventRangeStart === undefined || eventRangeEnd === undefined) &&
+    Array.isArray(eventRange)
+  ) {
+    ;[eventRangeStart, eventRangeEnd] = eventRange
+  }
   if (eventRangeStart === undefined || eventRangeEnd === undefined) return
 
   const rangeStart =
@@ -279,6 +336,7 @@ const handleRelayout = async (eventData: any) => {
   dataZoomEnd.value = Math.round(
     clampPercent(((rangeEnd - bounds.min) / span) * 100)
   )
+  xAxisRange.value = { start: rangeStart, end: rangeEnd }
 
   const currentStart = beginDate.value?.getTime()
   const currentEnd = endDate.value?.getTime()
