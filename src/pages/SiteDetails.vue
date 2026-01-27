@@ -42,11 +42,15 @@
       <v-col>
         <div class="w-full">
           <div class="h-[22rem] w-full max-[960px]:h-[18rem]">
-            <OpenLayersMap :things="[thing]" startInSatellite class="h-full w-full">
+            <OpenLayersMap
+              :things="[thing]"
+              startInSatellite
+              class="h-full w-full"
+            >
               <template #overlay>
                 <v-card
                   v-if="!isMobile"
-                  class="max-w-[18rem] bg-white/95 px-3 py-2"
+                  class="mb-2 ml-2 max-w-[18rem] bg-white/95 px-3 py-2"
                   elevation="4"
                 >
                   <div class="text-subtitle-2 font-weight-medium mb-2">
@@ -261,8 +265,8 @@ const loaded = ref(false)
 const authorized = ref(true)
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
-const { smAndDown } = useDisplay()
-const isMobile = computed(() => smAndDown.value)
+const { xs } = useDisplay()
+const isMobile = computed(() => xs.value)
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 const maxPhotoThumbnails = 6
