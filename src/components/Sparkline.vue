@@ -1,12 +1,19 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
-  <div
-    v-else-if="!loading && sparklineObservations.length"
-    class="sparkline-wrapper"
-    @click="handleEmit"
-  >
-    <div class="sparkline-container">
-      <div class="sparkline-note">
+  <div v-else-if="!loading && sparklineObservations.length" @click="handleEmit">
+    <div style="width: 300px">
+      <div
+        ref="sparklineRef"
+        class="sparkline-chart"
+        :style="sparklineContainerStyle"
+      />
+      <div class="mt-1" style="width: 100%">
+        <span class="text-subtitle-2 font-weight-medium">
+          <strong>Latest Value:</strong>
+          {{ mostRecentDataValue }} {{ unitName }}
+        </span>
+      </div>
+      <div style="width: 100%">
         <span class="text-body-3 font-weight-low opacity-70">
           Sparkline is showing most recent
           {{ sparklineObservations.length }} values
@@ -28,28 +35,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import {
+  ref,
+  onMounted,
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  watch,
+} from 'vue'
 import { PropType } from 'vue'
-import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart } from 'echarts/charts'
 import { DataArray, Datastream, TimeSpacingUnit } from '@hydroserver/client'
 import { preProcessData, subtractHours } from '@/utils/observationsUtils'
 import { useObservationStore } from '@/store/observations'
-import {
-  GridComponent,
-  TooltipComponent,
-  DataZoomComponent,
-} from 'echarts/components'
-
-use([
-  CanvasRenderer,
-  LineChart,
-  GridComponent,
-  TooltipComponent,
-  DataZoomComponent,
-])
+// @ts-ignore no type definitions
+import Plotly from 'plotly.js-dist'
 
 const { fetchObservationsInRange } = useObservationStore()
 
@@ -68,6 +67,7 @@ const handleEmit = () => {
 
 const sparklineObservations = ref<DataArray>([])
 const loading = ref(true)
+const sparklineRef = ref<HTMLDivElement | null>(null)
 
 const processedObs = computed(() =>
   preProcessData(sparklineObservations.value, props.datastream)
@@ -80,48 +80,58 @@ const mostRecentDataValue = computed(() => {
   return formatNumber(latest)
 })
 
-const chartOption = computed(() => {
+const sparklineColors = computed(() =>
+  isStale(props.datastream.phenomenonEndTime)
+    ? { line: '#9E9E9E', fill: '#EEEEEE', border: '#BDBDBD' }
+    : { line: '#4CAF50', fill: '#E8F5E9', border: '#BDBDBD' }
+)
+
+const sparklineContainerStyle = computed(() => ({
+  height: '100px',
+  width: '100%',
+  border: `2px solid ${sparklineColors.value.border}`,
+  borderRadius: '4px',
+}))
+
+const renderSparkline = async () => {
+  if (!sparklineRef.value) return
+
   const observations = processedObs.value
-  if (!observations.length) return {}
+  if (!observations.length) return
 
-  let colors = isStale(props.datastream.phenomenonEndTime)
-    ? { line: '#9E9E9E', fill: '#EEEEEE', border: '#BDBDBD' } // Grey, GL4, GL1
-    : { line: '#4CAF50', fill: '#E8F5E9', border: '#BDBDBD' } // Green, GrL5, GL1
-
-  return {
-    color: [colors.line],
-    grid: {
-      bottom: 3,
-      right: 1,
-      top: 3,
-      left: 1,
-      borderColor: colors.border,
-      borderWidth: 2,
-      show: true,
-    },
-    xAxis: {
-      type: 'time',
-      show: false,
-    },
-    yAxis: {
-      type: 'value',
-      min: 'dataMin',
-      max: 'dataMax',
-      show: false,
-    },
-    series: [
-      {
-        type: 'line',
-        data: observations.map((dp) => [dp.date.getTime(), dp.value]),
-        showSymbol: false,
-        areaStyle: {
-          color: colors.fill,
-          origin: 'start',
-        },
-      },
-    ],
+  const colors = sparklineColors.value
+  const trace = {
+    type: 'scattergl',
+    mode: 'lines',
+    x: observations.map((dp) => dp.date.getTime()),
+    y: observations.map((dp) => dp.value),
+    line: { color: colors.line, width: 1 },
+    fill: 'tozeroy',
+    fillcolor: colors.fill,
+    hoverinfo: 'skip',
   }
-})
+
+  const layout = {
+    margin: { l: 4, r: 4, t: 4, b: 4 },
+    xaxis: { visible: false, showgrid: false, zeroline: false },
+    yaxis: { visible: false, showgrid: false, zeroline: false },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+  }
+
+  const config = {
+    displayModeBar: false,
+    staticPlot: true,
+    responsive: true,
+  }
+
+  const hasPlot = Boolean((sparklineRef.value as any)?._fullLayout)
+  if (hasPlot) {
+    await Plotly.react(sparklineRef.value, [trace], layout, config)
+  } else {
+    await Plotly.newPlot(sparklineRef.value, [trace], layout, config)
+  }
+}
 
 function isStale(timestamp: string | null | undefined) {
   if (!timestamp) return true
@@ -200,6 +210,21 @@ onMounted(async () => {
   sparklineObservations.value =
     (await fetchSparklineObservations(props.datastream)) || []
   loading.value = false
+  nextTick(() => {
+    renderSparkline()
+  })
+})
+
+watch(processedObs, () => {
+  nextTick(() => {
+    renderSparkline()
+  })
+})
+
+onBeforeUnmount(() => {
+  if (sparklineRef.value) {
+    Plotly.purge(sparklineRef.value)
+  }
 })
 </script>
 

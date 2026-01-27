@@ -1,32 +1,26 @@
 <template>
   <FullScreenLoader v-if="loading" />
-  <div v-else>
-    <DataVisFiltersDrawer />
+  <div v-else class="visualize-page">
+    <DataVisFiltersDrawer @drawer-change="handleDrawerChange" />
 
-    <div class="my-4 mx-4">
-      <v-expansion-panels v-model="panels">
-        <v-expansion-panel title="Data Visualization" v-if="cardHeight">
-          <v-expansion-panel-text>
-            <DataVisualizationCard :cardHeight="cardHeight" />
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+    <div class="visualize-layout">
+      <div
+        v-if="showPlot"
+        class="plot-section"
+        :style="{ flex: `${cardHeight} 1 0%` }"
+      >
+        <DataVisualizationCard
+          :cardHeight="cardHeight"
+          @copy-state="copyStateToClipboard"
+        />
+      </div>
 
-      <DataVisTimeFilters />
-
-      <v-sheet
-        v-if="panels === 0"
-        class="resize-handle"
-        @mousedown="handleMouseDown"
-        color="blue-grey-lighten-2"
-        :height="4"
-        :elevation="2"
-        rounded="xl"
-        outlined
-      />
-      <v-divider v-else />
-      <div class="mt-1">
-        <DataVisDatasetsTable @copy-state="copyStateToClipboard" />
+      <div
+        v-if="showTable"
+        class="table-section"
+        :style="{ flex: `${tableHeight} 1 0%` }"
+      >
+        <DataVisDatasetsTable />
       </div>
     </div>
   </div>
@@ -36,7 +30,6 @@
 import DataVisFiltersDrawer from '@/components/VisualizeData/DataVisFiltersDrawer.vue'
 import DataVisDatasetsTable from '@/components/VisualizeData/DataVisDatasetsTable.vue'
 import DataVisualizationCard from '@/components/VisualizeData/DataVisualizationCard.vue'
-import DataVisTimeFilters from '@/components/VisualizeData/DataVisTimeFilters.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import hs from '@hydroserver/client'
 import { useDataVisStore } from '@/store/dataVisualization'
@@ -64,36 +57,43 @@ const {
   selectedDateBtnId,
   cardHeight,
   tableHeight,
+  showPlot,
+  showTable,
+  showSummaryStatistics,
 } = storeToRefs(useDataVisStore())
 
-const panels = ref(0)
+const fullHeight = 90
+const defaultPlotHeight = 45
+const defaultTableHeight = 35
 
-watch(panels, () => {
-  if (panels.value === 0)
-    tableHeight.value = Math.max(70 - cardHeight.value, 16)
-  else if (panels.value === undefined) tableHeight.value = Math.max(70, 16)
+const updateLayoutHeights = () => {
+  if (showPlot.value && showTable.value) {
+    cardHeight.value = defaultPlotHeight
+    tableHeight.value = defaultTableHeight
+  } else if (showPlot.value) {
+    cardHeight.value = fullHeight
+    tableHeight.value = 0
+  } else if (showTable.value) {
+    cardHeight.value = 0
+    tableHeight.value = fullHeight
+  } else {
+    cardHeight.value = defaultPlotHeight
+    tableHeight.value = defaultTableHeight
+    showPlot.value = true
+  }
+}
+
+watch([showPlot, showTable], updateLayoutHeights, { immediate: true })
+
+watch(showPlot, (isVisible) => {
+  if (!isVisible) showSummaryStatistics.value = false
 })
 
-let startY = 0
-let startHeight = 0
-
-function handleMouseDown(e: MouseEvent) {
-  startY = e.clientY
-  startHeight = cardHeight.value
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('mouseup', handleMouseUp)
-}
-
-function handleMouseMove(e: MouseEvent) {
-  const diffY = e.clientY - startY
-  const diffVh = diffY * (100 / window.innerHeight)
-  cardHeight.value = Math.max(startHeight + diffVh, 16) // Minimum height of 16vh
-  tableHeight.value = Math.max(70 - cardHeight.value, 16)
-}
-
-function handleMouseUp() {
-  document.removeEventListener('mousemove', handleMouseMove)
-  document.removeEventListener('mouseup', handleMouseUp)
+const handleDrawerChange = () => {
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+    window.dispatchEvent(new Event('datavis-layout'))
+  }, 250)
 }
 
 const generateStateUrl = () => {
@@ -119,8 +119,8 @@ const generateStateUrl = () => {
     queryParams.append('beginDate', beginDate.value.toISOString())
     queryParams.append('endDate', endDate.value.toISOString())
   } else {
-    // 2 is the default so no need to put it in the URL
-    if (selectedDateBtnId.value !== 2)
+    // 0 is the default so no need to put it in the URL
+    if (selectedDateBtnId.value !== 0)
       queryParams.append(
         'selectedDateBtnId',
         selectedDateBtnId.value.toString()
@@ -265,7 +265,43 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.resize-handle {
-  cursor: ns-resize;
+.visualize-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  --visualize-margin: 16px;
+  margin: var(--visualize-margin);
+  height: calc(
+    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px) -
+      (var(--visualize-margin) * 2)
+  );
+}
+
+.visualize-page {
+  height: calc(
+    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px)
+  );
+  overflow: hidden;
+  background-color: #eef2f6;
+}
+
+.plot-section,
+.table-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.plot-section > *,
+.table-section > * {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 600px) {
+  .visualize-layout {
+    --visualize-margin: 8px;
+    gap: 8px;
+  }
 }
 </style>

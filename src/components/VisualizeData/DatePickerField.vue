@@ -7,6 +7,9 @@
     @click:append-inner="toggleDatePicker"
     hide-details
     density="compact"
+    :color="resolvedColor"
+    :base-color="resolvedColor"
+    :bg-color="resolvedBgColor"
   />
 
   <v-dialog v-model="showDatePicker" max-width="22rem">
@@ -32,11 +35,13 @@
 
 <script setup lang="ts">
 import { mdiCalendarBlank, mdiClose } from '@mdi/js'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Date, required: true },
   placeholder: String,
+  color: String,
+  active: Boolean,
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -80,4 +85,11 @@ const handleBlur = () => {
 const toggleDatePicker = () => {
   showDatePicker.value = !showDatePicker.value
 }
+
+const resolvedColor = computed(() =>
+  props.active ? props.color || 'primary' : undefined
+)
+const resolvedBgColor = computed(() =>
+  props.active ? 'blue-lighten-5' : undefined
+)
 </script>
