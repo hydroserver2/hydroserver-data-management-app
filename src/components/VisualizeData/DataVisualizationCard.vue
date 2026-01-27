@@ -46,7 +46,7 @@
               <v-window-item value="plot" class="plot-window-item">
                 <div ref="plotContainer" class="plotly-chart" />
                 <div class="plot-toolbar">
-                  <DataVisTimeFilters @copy-state="emit('copy-state')" />
+                  <DataVisTimeFilters @copy-state="handleCopyState" />
                 </div>
               </v-window-item>
               <v-window-item value="summary" class="plot-window-item">
@@ -142,6 +142,86 @@ const {
 const plotContainer = ref<HTMLDivElement | null>(null)
 const plotlyRef = ref<(HTMLDivElement & { [key: string]: any }) | null>(null)
 const handlersAttached = ref(false)
+
+const parseNumericAxisValue = (value: unknown) => {
+  const parsed = typeof value === 'string' ? Number(value) : value
+  return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : null
+}
+
+const parseDateAxisValue = (value: unknown) => {
+  if (value === null || value === undefined) return null
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
+const captureAxisRangesFromPlotly = () => {
+  if (!plotlyRef.value) return
+  const layout = plotlyRef.value._fullLayout || plotlyRef.value.layout
+  if (!layout) return
+
+  const xRange = layout.xaxis?.range
+  if (Array.isArray(xRange) && xRange.length === 2) {
+    const start = parseDateAxisValue(xRange[0])
+    const end = parseDateAxisValue(xRange[1])
+    if (start !== null && end !== null) {
+      xAxisRange.value = { start, end }
+    }
+  }
+
+  const nextYRanges: Record<string, [number, number]> = {}
+  const axisKeys = new Set<string>()
+  const axisList = layout._axisList as any[] | undefined
+  if (Array.isArray(axisList) && axisList.length) {
+    axisList.forEach((axis) => {
+      const axisName = axis?._name
+      if (typeof axisName === 'string' && axisName.startsWith('yaxis')) {
+        axisKeys.add(axisName)
+      }
+    })
+  }
+
+  if (!axisKeys.size) {
+    Object.getOwnPropertyNames(layout).forEach((key) => {
+      if (/^yaxis\\d*$/.test(key)) axisKeys.add(key)
+    })
+  }
+
+  if (!axisKeys.size) {
+    for (let index = 1; index <= 8; index += 1) {
+      const key = index === 1 ? 'yaxis' : `yaxis${index}`
+      if (layout[key]) axisKeys.add(key)
+    }
+  }
+
+  axisKeys.forEach((axisKey) => {
+    const axis = layout[axisKey]
+    if (!axis || axis.autorange === true) return
+    const range = axis.range
+    if (!Array.isArray(range) || range.length !== 2) return
+    const start = parseNumericAxisValue(range[0])
+    const end = parseNumericAxisValue(range[1])
+    if (start !== null && end !== null) {
+      const normalizedKey = axisKey === 'yaxis1' ? 'yaxis' : axisKey
+      nextYRanges[normalizedKey] = [start, end]
+    }
+  })
+
+  if (Object.keys(nextYRanges).length) {
+    yAxisRanges.value = nextYRanges
+  } else if (yAxisRanges.value && Object.keys(yAxisRanges.value).length) {
+    yAxisRanges.value = {}
+  }
+
+}
+
+const handleCopyState = () => {
+  captureAxisRangesFromPlotly()
+  emit('copy-state')
+}
 
 const updating = computed(() =>
   Array.from(loadingStates.value.values()).some((isLoading) => isLoading)
@@ -251,30 +331,48 @@ const handleRelayout = async (eventData: any) => {
   if (!eventData) return
 
   const eventKeys = Object.keys(eventData)
+  const isResizeEvent =
+    eventData.autosize === true ||
+    eventData.width !== undefined ||
+    eventData.height !== undefined
   const nextYRanges: Record<string, [number, number]> = {
     ...yAxisRanges.value,
   }
   const pendingYRanges: Record<string, { start?: number; end?: number }> = {}
   let yRangesUpdated = false
 
-  const parseAxisValue = (value: unknown) => {
-    const parsed = typeof value === 'string' ? Number(value) : value
-    return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : null
-  }
+  const normalizeAxisKey = (key: string) => (key === 'yaxis1' ? 'yaxis' : key)
 
   eventKeys.forEach((key) => {
     const autorangeMatch = key.match(/^(yaxis\\d*)\\.autorange$/)
     if (autorangeMatch && eventData[key] === true) {
-      delete nextYRanges[autorangeMatch[1]]
-      yRangesUpdated = true
+      if (!isResizeEvent) {
+        delete nextYRanges[normalizeAxisKey(autorangeMatch[1])]
+        yRangesUpdated = true
+      }
+      return
+    }
+
+    const rangeArrayMatch = key.match(/^(yaxis\\d*)\\.range$/)
+    if (rangeArrayMatch && Array.isArray(eventData[key])) {
+      const [start, end] = eventData[key]
+      const parsedStart = parseNumericAxisValue(start)
+      const parsedEnd = parseNumericAxisValue(end)
+      if (parsedStart !== null && parsedEnd !== null) {
+        nextYRanges[normalizeAxisKey(rangeArrayMatch[1])] = [
+          parsedStart,
+          parsedEnd,
+        ]
+        yRangesUpdated = true
+      }
       return
     }
 
     const rangeMatch = key.match(/^(yaxis\\d*)\\.range\\[(0|1)\\]$/)
     if (!rangeMatch) return
-    const axisKey = rangeMatch[1]
+    const axisKey = normalizeAxisKey(rangeMatch[1])
     const index = Number(rangeMatch[2])
-    const parsedValue = parseAxisValue(eventData[key])
+    const parsedValue = parseNumericAxisValue(eventData[key])
     if (parsedValue === null) return
     pendingYRanges[axisKey] = pendingYRanges[axisKey] || {}
     if (index === 0) pendingYRanges[axisKey].start = parsedValue
@@ -297,7 +395,7 @@ const handleRelayout = async (eventData: any) => {
     yAxisRanges.value = nextYRanges
   }
 
-  if (eventData['xaxis.autorange'] === true) {
+  if (eventData['xaxis.autorange'] === true && !isResizeEvent) {
     xAxisRange.value = null
     dataZoomStart.value = 0
     dataZoomEnd.value = 100
@@ -379,7 +477,6 @@ const renderPlot = async () => {
   if (!plotlyOptions.value || !plotContainer.value) return
 
   const { traces, layout, config } = plotlyOptions.value
-
   if (!plotlyRef.value) {
     plotlyRef.value = await Plotly.newPlot(
       plotContainer.value,

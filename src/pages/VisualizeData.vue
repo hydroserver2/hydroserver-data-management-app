@@ -182,9 +182,17 @@ const copyStateToClipboard = async () => {
 }
 
 const parseUrlAndSetState = () => {
-  const parseBoolean = (value: string | string[] | null | undefined) => {
+  const parseBoolean = (
+    value:
+      | import('vue-router').LocationQueryValue
+      | import('vue-router').LocationQueryValue[]
+      | undefined
+  ) => {
     if (value === undefined || value === null) return null
-    const raw = Array.isArray(value) ? value[0] : value
+    const raw = Array.isArray(value)
+      ? value.find((item): item is string => typeof item === 'string') ?? null
+      : value
+    if (!raw) return null
     const normalized = raw.toLowerCase()
     return normalized === '1' || normalized === 'true' || normalized === 'yes'
   }
@@ -292,7 +300,19 @@ const parseUrlAndSetState = () => {
     try {
       const parsed = JSON.parse(yRangesRaw)
       if (parsed && typeof parsed === 'object') {
-        yAxisRanges.value = parsed
+        const normalized: Record<string, [number, number]> = {}
+        Object.entries(parsed).forEach(([key, value]) => {
+          const normalizedKey = key === 'yaxis1' ? 'yaxis' : key
+          if (
+            Array.isArray(value) &&
+            value.length === 2 &&
+            Number.isFinite(Number(value[0])) &&
+            Number.isFinite(Number(value[1]))
+          ) {
+            normalized[normalizedKey] = [Number(value[0]), Number(value[1])]
+          }
+        })
+        yAxisRanges.value = normalized
       } else {
         yAxisRanges.value = {}
       }
@@ -323,13 +343,18 @@ const parseUrlAndSetState = () => {
 
   const columnsParam = route.query.columns
   if (columnsParam) {
-    const raw = Array.isArray(columnsParam) ? columnsParam[0] : columnsParam
-    const keys = raw
-      .split(',')
-      .map((key) => key.trim())
-      .filter(Boolean)
-    dataVisStore.setTableVisibleColumns(keys)
+    const raw = Array.isArray(columnsParam)
+      ? columnsParam.find((item): item is string => typeof item === 'string')
+      : columnsParam
+    if (raw) {
+      const keys = raw
+        .split(',')
+        .map((key) => key.trim())
+        .filter(Boolean)
+      dataVisStore.setTableVisibleColumns(keys)
+    }
   }
+
 }
 
 const loading = ref(true)
