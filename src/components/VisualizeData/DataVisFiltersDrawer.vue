@@ -77,7 +77,7 @@
                   class="mr-1 mb-1 max-w-full"
                   @click:close="selectedWorkspaces.splice(index, 1)"
                 >
-                  <span class="whitespace-normal break-words">
+                  <span class="truncate">
                     {{ item.title }}
                   </span>
                 </v-chip>
@@ -113,7 +113,7 @@
                   class="mr-1 mb-1 max-w-full"
                   @click:close="selectedThings.splice(index, 1)"
                 >
-                  <span class="whitespace-normal break-words">
+                  <span class="truncate">
                     {{ item.title }}
                   </span>
                 </v-chip>
@@ -151,7 +151,7 @@
                   class="mr-1 mb-1 max-w-full"
                   @click:close="selectedObservedPropertyNames.splice(index, 1)"
                 >
-                  <span class="whitespace-normal break-words">
+                  <span class="truncate">
                     {{ item.title }}
                   </span>
                 </v-chip>
@@ -189,7 +189,7 @@
                   class="mr-1 mb-1 max-w-full"
                   @click:close="selectedProcessingLevelNames.splice(index, 1)"
                 >
-                  <span class="whitespace-normal break-words">
+                  <span class="truncate">
                     {{ item.title }}
                   </span>
                 </v-chip>
@@ -403,3 +403,21 @@ watch(
   }
 )
 </script>
+
+<style scoped>
+:deep(.datastream-filter-autocomplete .v-field__input) {
+  flex-wrap: wrap;
+}
+
+:deep(.datastream-filter-autocomplete .v-chip) {
+  max-width: 100%;
+}
+
+:deep(.datastream-filter-autocomplete .v-chip__content) {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
