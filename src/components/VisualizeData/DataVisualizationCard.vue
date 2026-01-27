@@ -28,7 +28,7 @@
               <template v-slot:activator="{ props }">
                 <v-btn
                   v-bind="props"
-                  :icon="mdiTable"
+                  :icon="mdiSigma"
                   class="plot-rail-btn"
                   :class="{ 'plot-rail-btn--active': viewMode === 'summary' }"
                   variant="text"
@@ -116,7 +116,7 @@ import { debounce } from 'lodash-es'
 import { getXRangeBounds } from '@/utils/plotting/plotly'
 // @ts-ignore no type definitions
 import Plotly from 'plotly.js-dist'
-import { mdiChartLine, mdiTable } from '@mdi/js'
+import { mdiChartLine, mdiSigma } from '@mdi/js'
 
 const emit = defineEmits(['copy-state'])
 
