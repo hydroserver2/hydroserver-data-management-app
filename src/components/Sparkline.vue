@@ -78,17 +78,6 @@ const validObservations = computed(() =>
   processedObs.value.filter((point) => getNumericValue(point.value) !== null)
 )
 
-const latestRealObservationValue = computed(() => {
-  const arr = processedObs.value
-  for (let i = arr.length - 1; i >= 0; i -= 1) {
-    const numericValue = getNumericValue(arr[i].value)
-    if (numericValue !== null) {
-      return numericValue
-    }
-  }
-  return null
-})
-
 const normalizeNoDataValue = (value: unknown) => {
   if (value === null || value === undefined) return null
   if (typeof value === 'number') return value
@@ -118,20 +107,6 @@ const latestRawObservationValue = computed<unknown>(() => {
     }
   }
   return null
-})
-
-const latestDisplayValue = computed(() => {
-  const rawValue = latestRawObservationValue.value
-  if (rawValue === null || rawValue === undefined) return '—'
-  if (isNoDataValue(rawValue)) {
-    const noDataValue = props.datastream.noDataValue
-    return noDataValue === null || noDataValue === undefined
-      ? '—'
-      : String(noDataValue)
-  }
-  const numericValue = getNumericValue(rawValue)
-  if (numericValue !== null) return formatNumber(numericValue)
-  return '—'
 })
 
 const mostRecentDataValue = computed<LatestValuePayload>(() => {
