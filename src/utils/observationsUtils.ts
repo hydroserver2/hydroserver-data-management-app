@@ -5,6 +5,8 @@ import hs, {
   TimeSpacingUnit,
 } from '@hydroserver/client'
 
+export type ObservationArray = Array<[string | number, number]>
+
 export function subtractHours(timestamp: string, hours: number): string {
   const date = new Date(timestamp)
   date.setHours(date.getHours() - hours)
@@ -50,9 +52,9 @@ export const fetchObservations = async (
   return toObservationRows(res.data as Record<string, unknown>)
 }
 
-export function toDataPointArray(dataArray: DataArray) {
-  return dataArray.map(([dateString, value]) => ({
-    date: new Date(dateString),
+export function toDataPointArray(dataArray: DataArray | ObservationArray) {
+  return (dataArray as ObservationArray).map(([dateValue, value]) => ({
+    date: new Date(dateValue),
     value,
   }))
 }
@@ -122,7 +124,10 @@ export function addNaNForGaps(data: DataPoint[], maxGap: number): DataPoint[] {
   return modifiedData
 }
 
-export function preProcessData(dataArray: DataArray, datastream: Datastream) {
+export function preProcessData(
+  dataArray: DataArray | ObservationArray,
+  datastream: Datastream
+) {
   const { noDataValue, intendedTimeSpacing, intendedTimeSpacingUnit } =
     datastream
 

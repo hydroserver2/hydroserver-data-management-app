@@ -29,8 +29,12 @@ import {
   watch,
 } from 'vue'
 import { PropType } from 'vue'
-import { DataArray, Datastream, TimeSpacingUnit } from '@hydroserver/client'
-import { preProcessData, subtractHours } from '@/utils/observationsUtils'
+import { Datastream, TimeSpacingUnit } from '@hydroserver/client'
+import {
+  preProcessData,
+  subtractHours,
+  ObservationArray,
+} from '@/utils/observationsUtils'
 import { useObservationStore } from '@/store/observations'
 
 const { fetchObservationsInRange } = useObservationStore()
@@ -53,7 +57,7 @@ const handleEmit = () => {
   emit('openChart')
 }
 
-const sparklineObservations = ref<DataArray>([])
+const sparklineObservations = ref<ObservationArray>([])
 const loading = ref(true)
 const sparklineRef = ref<HTMLDivElement | null>(null)
 let plotlyApi: any | null = null

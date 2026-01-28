@@ -328,7 +328,6 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     graphSeriesArray.value = graphSeriesArray.value.filter((s) =>
       currentIds.has(s.id)
     )
-
     const begin = beginDate.value.toISOString()
     const end = endDate.value.toISOString()
     datastreams.forEach((ds) => {

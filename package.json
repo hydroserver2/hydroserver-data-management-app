@@ -22,7 +22,7 @@
     "maska": "^3.2.0",
     "ol": "^10.5.0",
     "pinia": "^2.1.6",
-    "plotly.js-dist": "^3.3.0",
+    "plotly.js-dist": "^3.3.1",
     "tslib": "^2.5.0",
     "vue": "^3.4.38",
     "vue-router": "^4.2.4",
