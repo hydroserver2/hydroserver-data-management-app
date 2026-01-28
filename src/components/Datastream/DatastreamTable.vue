@@ -88,7 +88,10 @@
               <strong class="mr-2 font-semibold">Latest observation:</strong>
               <span class="font-semibold">{{ item.endDate }}</span>
             </div>
-            <div class="mt-1 text-base leading-[1.3]">
+            <div
+              v-if="shouldShowLatestValue(item.id)"
+              class="mt-1 text-base leading-[1.3]"
+            >
               <strong class="mr-2 font-semibold">Latest value:</strong>
               <span class="font-semibold">{{ latestValueDisplay(item) }}</span>
             </div>
@@ -367,7 +370,10 @@
                 <strong class="mr-2 font-semibold">Latest observation:</strong>
                 <span class="font-semibold">{{ item.endDate }}</span>
               </div>
-              <div class="mt-1 text-base leading-[1.3]">
+              <div
+                v-if="shouldShowLatestValue(item.id)"
+                class="mt-1 text-base leading-[1.3]"
+              >
                 <strong class="mr-2 font-semibold">Latest value:</strong>
                 <span class="font-semibold">{{ latestValueDisplay(item) }}</span>
               </div>
@@ -738,18 +744,27 @@ const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
   useMetadata(toRef(props, 'workspace'))
 
 const openCharts = reactive<Record<string, boolean>>({})
-const latestValues = reactive<Record<string, string>>({})
+const latestValues = reactive<Record<string, { text: string; showUnit: boolean }>>({})
 
-const handleLatestValueUpdate = (datastreamId: string, value: string) => {
+const handleLatestValueUpdate = (
+  datastreamId: string,
+  value: { text: string; showUnit: boolean }
+) => {
   latestValues[datastreamId] = value
 }
 
-const latestValueFor = (datastreamId: string) => latestValues[datastreamId] || '—'
+const latestValueFor = (datastreamId: string) =>
+  latestValues[datastreamId] || { text: '—', showUnit: false }
+
+const shouldShowLatestValue = (datastreamId: string) => {
+  const value = latestValueFor(datastreamId)
+  return value.text !== 'No observations'
+}
 
 const latestValueDisplay = (datastream: { id: string; unitName?: string }) => {
   const value = latestValueFor(datastream.id)
-  if (value === '—') return value
-  return `${value} ${datastream.unitName ?? ''}`.trim()
+  if (!value.showUnit) return value.text
+  return `${value.text} ${datastream.unitName ?? ''}`.trim()
 }
 
 const visibleDatastreams = computed(() => {

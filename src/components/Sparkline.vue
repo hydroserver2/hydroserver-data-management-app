@@ -1,11 +1,9 @@
 <template>
   <v-progress-linear v-if="loading" color="secondary" indeterminate />
-  <div
-    v-else-if="!loading && sparklineObservations.length"
-  >
+  <div v-else-if="!loading && canShowSparkline">
     <div class="w-[300px] max-w-full max-[600px]:w-full">
       <div class="mb-1 text-body-3 font-weight-light opacity-70">
-        Sparkline is showing most recent {{ sparklineObservations.length }}
+        Sparkline is showing most recent {{ validObservations.length }}
         values
       </div>
       <div
@@ -16,8 +14,8 @@
       />
     </div>
   </div>
-  <div v-else-if="!sparklineObservations.length">
-    No data for this datastream
+  <div v-else>
+    No observations
   </div>
 </template>
 
@@ -45,9 +43,11 @@ const props = defineProps({
   unitName: String,
 })
 
+type LatestValuePayload = { text: string; showUnit: boolean }
+
 const emit = defineEmits<{
   (e: 'openChart'): void
-  (e: 'latest-value', value: string): void
+  (e: 'latest-value', value: LatestValuePayload): void
 }>()
 const handleEmit = () => {
   emit('openChart')
@@ -69,21 +69,110 @@ const processedObs = computed(() =>
   preProcessData(sparklineObservations.value, props.datastream)
 )
 
-const latestRealObservation = computed(() => {
+const getNumericValue = (value: unknown) => {
+  const numericValue = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(numericValue) ? numericValue : null
+}
+
+const validObservations = computed(() =>
+  processedObs.value.filter((point) => getNumericValue(point.value) !== null)
+)
+
+const latestRealObservationValue = computed(() => {
   const arr = processedObs.value
   for (let i = arr.length - 1; i >= 0; i -= 1) {
-    const value = arr[i].value
-    const numericValue = typeof value === 'number' ? value : Number(value)
-    if (Number.isFinite(numericValue)) {
-      return arr[i]
+    const numericValue = getNumericValue(arr[i].value)
+    if (numericValue !== null) {
+      return numericValue
     }
   }
   return null
 })
 
-const mostRecentDataValue = computed(() =>
-  latestRealObservation.value ? formatNumber(latestRealObservation.value.value) : ''
-)
+const normalizeNoDataValue = (value: unknown) => {
+  if (value === null || value === undefined) return null
+  if (typeof value === 'number') return value
+  if (typeof value === 'string' && value.trim() !== '') {
+    const numeric = Number(value)
+    return Number.isFinite(numeric) ? numeric : value
+  }
+  return value
+}
+
+const isNoDataValue = (value: unknown) => {
+  const noDataValue = normalizeNoDataValue(props.datastream.noDataValue)
+  if (noDataValue === null || noDataValue === undefined) return false
+  if (typeof noDataValue === 'number') {
+    const numericValue = getNumericValue(value)
+    return numericValue !== null && numericValue === noDataValue
+  }
+  return String(value) === String(noDataValue)
+}
+
+const latestRawObservationValue = computed<unknown>(() => {
+  const arr = sparklineObservations.value
+  for (let i = arr.length - 1; i >= 0; i -= 1) {
+    const rawValue = arr[i]?.[1] as unknown
+    if (rawValue !== undefined) {
+      return rawValue
+    }
+  }
+  return null
+})
+
+const latestDisplayValue = computed(() => {
+  const rawValue = latestRawObservationValue.value
+  if (rawValue === null || rawValue === undefined) return '—'
+  if (isNoDataValue(rawValue)) {
+    const noDataValue = props.datastream.noDataValue
+    return noDataValue === null || noDataValue === undefined
+      ? '—'
+      : String(noDataValue)
+  }
+  const numericValue = getNumericValue(rawValue)
+  if (numericValue !== null) return formatNumber(numericValue)
+  return '—'
+})
+
+const mostRecentDataValue = computed<LatestValuePayload>(() => {
+  if (!sparklineObservations.value.length) {
+    return { text: 'No observations', showUnit: false }
+  }
+  const rawValue = latestRawObservationValue.value
+  if (rawValue === undefined) {
+    return { text: 'No observations', showUnit: false }
+  }
+  if (rawValue === null) {
+    return { text: 'null', showUnit: false }
+  }
+  if (typeof rawValue === 'string') {
+    const trimmed = rawValue.trim()
+    if (trimmed === '') {
+      return { text: 'empty', showUnit: false }
+    }
+    if (trimmed.toLowerCase() === 'nan') {
+      return { text: 'NaN', showUnit: false }
+    }
+  }
+  if (typeof rawValue === 'number' && Number.isNaN(rawValue)) {
+    return { text: 'NaN', showUnit: false }
+  }
+  if (isNoDataValue(rawValue)) {
+    const noDataValue = props.datastream.noDataValue
+    return {
+      text:
+        noDataValue === null || noDataValue === undefined
+          ? 'No data'
+          : String(noDataValue),
+      showUnit: false,
+    }
+  }
+  const numericValue = getNumericValue(rawValue)
+  if (numericValue !== null) {
+    return { text: formatNumber(numericValue), showUnit: true }
+  }
+  return { text: 'No observations', showUnit: false }
+})
 
 const sparklineColors = computed(() =>
   isStale(props.datastream.phenomenonEndTime)
@@ -99,11 +188,24 @@ const sparklineContainerStyle = computed(() => ({
   overflow: 'hidden',
 }))
 
+const hasValidSparklineData = computed(() => validObservations.value.length > 0)
+const canShowSparkline = computed(
+  () =>
+    Boolean(props.datastream.phenomenonEndTime) &&
+    sparklineObservations.value.length > 0 &&
+    hasValidSparklineData.value
+)
+
 const renderSparkline = async () => {
   if (!sparklineRef.value) return
 
   const observations = processedObs.value
-  if (!observations.length) return
+  if (!observations.length || !validObservations.value.length) {
+    if ((sparklineRef.value as any)?._fullLayout && plotlyApi) {
+      plotlyApi.purge(sparklineRef.value)
+    }
+    return
+  }
   const Plotly = await ensurePlotly()
 
   const colors = sparklineColors.value
@@ -215,15 +317,16 @@ const fetchSparklineObservations = async (ds: Datastream) => {
 }
 
 const formatNumber = (value: string | number): string => {
-  if (typeof value === 'number') {
+  const numericValue = typeof value === 'number' ? value : Number(value)
+  if (Number.isFinite(numericValue)) {
     const formatter = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     })
-    return formatter.format(value)
+    return formatter.format(numericValue)
   }
 
-  return value?.toString()
+  return ''
 }
 
 

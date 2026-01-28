@@ -40,11 +40,30 @@ export function toDataPointArray(dataArray: DataArray) {
 }
 
 // Function to replace 'no data' values with NaN
-export function replaceNoDataValues(data: DataPoint[], noDataValue: number) {
-  return data.map((d) => ({
-    ...d,
-    value: d.value === noDataValue ? NaN : d.value,
-  }))
+export function replaceNoDataValues(
+  data: DataPoint[],
+  noDataValue: number | null | undefined
+) {
+  if (noDataValue === null || noDataValue === undefined) return data
+  const noDataNumeric =
+    typeof noDataValue === 'number' ? noDataValue : Number(noDataValue)
+
+  return data.map((d) => {
+    const rawValue = d.value as unknown
+    if (rawValue === null || rawValue === undefined) {
+      return { ...d, value: NaN }
+    }
+    if (typeof rawValue === 'string' && rawValue.trim().toLowerCase() === 'nan') {
+      return { ...d, value: NaN }
+    }
+    const numericValue =
+      typeof rawValue === 'number' ? rawValue : Number(rawValue)
+    const isNoData =
+      Number.isFinite(noDataNumeric) &&
+      Number.isFinite(numericValue) &&
+      numericValue === noDataNumeric
+    return { ...d, value: isNoData ? NaN : d.value }
+  })
 }
 
 export function convertTimeSpacingToMilliseconds(
