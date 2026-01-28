@@ -5,7 +5,11 @@
     </template>
 
     <keep-alive>
-      <v-card-text v-if="canPlot" :style="{ height: '100%' }" class="plot-shell">
+      <v-card-text
+        v-if="canPlot"
+        :style="{ height: '100%' }"
+        class="plot-shell"
+      >
         <div class="plot-body">
           <div class="plot-rail">
             <v-tooltip bottom :openDelay="0">
@@ -44,7 +48,38 @@
           <div class="plot-panel">
             <v-window v-model="viewMode" class="plot-window" :touch="false">
               <v-window-item value="plot" class="plot-window-item">
-                <div ref="plotContainer" class="plotly-chart" />
+                <div class="plot-plot-area">
+                  <div v-if="showLargeSeriesDisclaimer" class="plot-disclaimer">
+                    <v-tooltip
+                      location="bottom"
+                      :open-delay="0"
+                      content-class="pa-0 ma-0 bg-transparent"
+                    >
+                      <template v-slot:activator="{ props }">
+                        <div class="plot-disclaimer-text" v-bind="props">
+                          *Large data mode
+                        </div>
+                      </template>
+                      <v-card
+                        elevation="2"
+                        rounded="lg"
+                        class="plot-disclaimer-card"
+                      >
+                        <v-card-title class="px-4 py-2 text-subtitle-1">
+                          Large data mode
+                        </v-card-title>
+                        <v-divider />
+                        <v-card-text class="px-4 py-2 text-body-2">
+                          Tooltips and markers are disabled to keep the plot
+                          responsive. This happens when visible points exceed
+                          {{ largeSeriesVisibleThreshold }} or total points
+                          exceed {{ largeSeriesTotalThreshold }}.
+                        </v-card-text>
+                      </v-card>
+                    </v-tooltip>
+                  </div>
+                  <div ref="plotContainer" class="plotly-chart" />
+                </div>
                 <div class="plot-toolbar">
                   <DataVisTimeFilters @copy-state="handleCopyState" />
                 </div>
@@ -165,13 +200,20 @@ const parseDateAxisValue = (value: unknown) => {
 }
 
 const LARGE_SERIES_VISIBLE_THRESHOLD = 50_000
-const LARGE_SERIES_TOTAL_THRESHOLD = 200_000
+const LARGE_SERIES_TOTAL_THRESHOLD = 150_000
 const DEFAULT_HOVER_TEMPLATE = '<b>%{y}</b><extra></extra>'
 const currentHoverInfo = ref<'y' | 'skip'>('y')
 const isLargeSeriesMode = ref(false)
 const defaultTraceModes = ref<string[]>([])
 const defaultMarkerSizes = ref<number[]>([])
 const defaultHoverMode = ref<'x' | false>('x')
+const showLargeSeriesDisclaimer = computed(() => isLargeSeriesMode.value)
+const largeSeriesVisibleThreshold = computed(() =>
+  LARGE_SERIES_VISIBLE_THRESHOLD.toLocaleString()
+)
+const largeSeriesTotalThreshold = computed(() =>
+  LARGE_SERIES_TOTAL_THRESHOLD.toLocaleString()
+)
 
 const toNumeric = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -242,11 +284,7 @@ const syncDefaultTraceStyles = () => {
   defaultHoverMode.value = hoverMode === false ? false : 'x'
 }
 
-const normalizeTraceArray = <T,>(
-  values: T[],
-  length: number,
-  fallback: T
-) => {
+const normalizeTraceArray = <T>(values: T[], length: number, fallback: T) => {
   if (values.length === length) return values
   const next = new Array(length).fill(fallback) as T[]
   for (let i = 0; i < Math.min(values.length, length); i += 1) {
@@ -288,7 +326,11 @@ const applyLargeSeriesMode = async (visiblePoints: number) => {
     currentHoverInfo.value = nextHoverInfo
   }
 
-  if (plotlyRef.value && plotlyApi && plotlyRef.value.layout?.hovermode !== nextHoverMode) {
+  if (
+    plotlyRef.value &&
+    plotlyApi &&
+    plotlyRef.value.layout?.hovermode !== nextHoverMode
+  ) {
     await plotlyApi.relayout(plotlyRef.value, { hovermode: nextHoverMode })
   }
 }
@@ -362,7 +404,6 @@ const captureAxisRangesFromPlotly = () => {
   } else if (yAxisRanges.value && Object.keys(yAxisRanges.value).length) {
     yAxisRanges.value = {}
   }
-
 }
 
 const handleCopyState = () => {
@@ -377,7 +418,6 @@ const updating = computed(() =>
 const isDataAvailable = computed(() =>
   graphSeriesArray.value.some((series) => series.data && series.data.length > 0)
 )
-
 
 const canPlot = computed(() =>
   Boolean(plotlyOptions.value && isDataAvailable.value)
@@ -566,7 +606,9 @@ const handleRelayout = async (eventData: any) => {
       ? Date.parse(eventRangeStart)
       : eventRangeStart
   const rangeEnd =
-    typeof eventRangeEnd === 'string' ? Date.parse(eventRangeEnd) : eventRangeEnd
+    typeof eventRangeEnd === 'string'
+      ? Date.parse(eventRangeEnd)
+      : eventRangeEnd
   if (!Number.isFinite(rangeStart) || !Number.isFinite(rangeEnd)) return
 
   const bounds =
@@ -612,7 +654,6 @@ const handleRelayout = async (eventData: any) => {
       onDateBtnClick(matchedPresetId)
     }
   }
-
 }
 
 const debouncedRelayout = debounce(handleRelayout, 250)
@@ -765,6 +806,39 @@ onMounted(() => {
   min-height: 0;
   width: 100%;
   height: 100%;
+}
+
+.plot-plot-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.plot-disclaimer {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.plot-disclaimer-text {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 4px;
+  padding: 2px 6px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: default;
+}
+
+.plot-disclaimer-card {
+  max-width: 320px;
+  min-width: 240px;
 }
 
 .plot-toolbar {
