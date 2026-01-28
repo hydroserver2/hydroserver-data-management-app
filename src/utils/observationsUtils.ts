@@ -11,6 +11,24 @@ export function subtractHours(timestamp: string, hours: number): string {
   return date.toISOString()
 }
 
+const toObservationRows = (
+  columnar: Record<string, unknown>
+): DataArray => {
+  const times =
+    (columnar as any).phenomenonTime ??
+    (columnar as any).phenomenon_time ??
+    []
+  const results = (columnar as any).result ?? []
+
+  if (!Array.isArray(times) || !Array.isArray(results)) return []
+  const length = Math.min(times.length, results.length)
+  const rows: DataArray = []
+  for (let i = 0; i < length; i += 1) {
+    rows.push([times[i] as string, results[i] as number])
+  }
+  return rows
+}
+
 export const fetchObservations = async (
   datastream: Datastream,
   startTime: string | null = null,
@@ -22,14 +40,14 @@ export const fetchObservations = async (
   // @ts-expect-error TODO: quality_control_code from hs/client should be optional
   const res = await hs.datastreams.getObservations(id, {
     order_by: ['phenomenonTime'],
-    page_size: 100_000,
-    format: 'row',
+    page_size: 50_000,
+    format: 'column',
     phenomenon_time_min: startTime ?? phenomenonBeginTime,
     phenomenon_time_max: endTime ?? phenomenonEndTime,
   })
 
-  if (!res.ok || !Array.isArray(res.data)) return []
-  return res.data
+  if (!res.ok || !res.data || typeof res.data !== 'object') return []
+  return toObservationRows(res.data as Record<string, unknown>)
 }
 
 export function toDataPointArray(dataArray: DataArray) {
