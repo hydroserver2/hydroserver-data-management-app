@@ -197,17 +197,21 @@ const findFirstGreaterOrEqual = (arr: ArrayLike<unknown>, value: number) => {
   return low
 }
 
+const asArrayLike = (value: unknown): ArrayLike<unknown> | null => {
+  if (Array.isArray(value)) return value
+  if (ArrayBuffer.isView(value)) return value as unknown as ArrayLike<unknown>
+  return null
+}
+
 const getVisiblePointCount = (rangeStart: number, rangeEnd: number) => {
   if (!plotlyRef.value) return 0
   let visiblePoints = 0
   const traces = plotlyRef.value.data || []
   traces.forEach((trace: any) => {
-    const x = trace?.x
-    if (!x) return
-    const isArrayLike = Array.isArray(x) || ArrayBuffer.isView(x)
-    if (!isArrayLike) return
-    const startIdx = findFirstGreaterOrEqual(x, rangeStart)
-    const endIdx = findFirstGreaterOrEqual(x, rangeEnd)
+    const xArray = asArrayLike(trace?.x)
+    if (!xArray) return
+    const startIdx = findFirstGreaterOrEqual(xArray, rangeStart)
+    const endIdx = findFirstGreaterOrEqual(xArray, rangeEnd)
     visiblePoints += Math.max(0, endIdx - startIdx)
   })
   return visiblePoints
@@ -218,11 +222,9 @@ const getTotalPointCount = () => {
   let totalPoints = 0
   const traces = plotlyRef.value.data || []
   traces.forEach((trace: any) => {
-    const x = trace?.x
-    if (!x) return
-    if (Array.isArray(x) || ArrayBuffer.isView(x)) {
-      totalPoints += x.length
-    }
+    const xArray = asArrayLike(trace?.x)
+    if (!xArray) return
+    totalPoints += xArray.length
   })
   return totalPoints
 }

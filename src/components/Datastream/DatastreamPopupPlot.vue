@@ -118,12 +118,159 @@ const selectedDateBtnId = ref(0)
 const plotContainer = ref<HTMLDivElement | null>(null)
 const plotlyRef = ref<(HTMLDivElement & { [key: string]: any }) | null>(null)
 let plotlyApi: any | null = null
+let handlersAttached = false
 
 const ensurePlotly = async () => {
   if (plotlyApi) return plotlyApi
   const PlotlyModule = await import('plotly.js-dist')
   plotlyApi = (PlotlyModule as any).default ?? PlotlyModule
   return plotlyApi
+}
+
+const LARGE_SERIES_VISIBLE_THRESHOLD = 50_000
+const LARGE_SERIES_TOTAL_THRESHOLD = 200_000
+const DEFAULT_HOVER_TEMPLATE = '<b>%{y}</b><extra></extra>'
+const isLargeSeriesMode = ref(false)
+const currentHoverInfo = ref<'y' | 'skip'>('y')
+const defaultTraceModes = ref<string[]>([])
+const defaultMarkerSizes = ref<number[]>([])
+const defaultHoverMode = ref<'x' | false>('x')
+
+const toNumeric = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
+const findFirstGreaterOrEqual = (arr: ArrayLike<unknown>, value: number) => {
+  let low = 0
+  let high = arr.length
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2)
+    const midValue = toNumeric(arr[mid])
+    if (midValue === null || midValue < value) {
+      low = mid + 1
+    } else {
+      high = mid
+    }
+  }
+  return low
+}
+
+const asArrayLike = (value: unknown): ArrayLike<unknown> | null => {
+  if (Array.isArray(value)) return value
+  if (ArrayBuffer.isView(value)) return value as unknown as ArrayLike<unknown>
+  return null
+}
+
+const getVisiblePointCount = (rangeStart: number, rangeEnd: number) => {
+  if (!plotlyRef.value) return 0
+  let visiblePoints = 0
+  const traces = plotlyRef.value.data || []
+  traces.forEach((trace: any) => {
+    const xArray = asArrayLike(trace?.x)
+    if (!xArray) return
+    const startIdx = findFirstGreaterOrEqual(xArray, rangeStart)
+    const endIdx = findFirstGreaterOrEqual(xArray, rangeEnd)
+    visiblePoints += Math.max(0, endIdx - startIdx)
+  })
+  return visiblePoints
+}
+
+const getTotalPointCount = () => {
+  if (!plotlyRef.value) return 0
+  let totalPoints = 0
+  const traces = plotlyRef.value.data || []
+  traces.forEach((trace: any) => {
+    const xArray = asArrayLike(trace?.x)
+    if (!xArray) return
+    totalPoints += xArray.length
+  })
+  return totalPoints
+}
+
+const syncDefaultTraceStyles = () => {
+  const traces = plotlyOptions.value?.traces ?? []
+  defaultTraceModes.value = traces.map(
+    (trace: any) => trace?.mode ?? 'lines+markers'
+  )
+  defaultMarkerSizes.value = traces.map((trace: any) => {
+    const size = trace?.marker?.size
+    return typeof size === 'number' ? size : 6
+  })
+  const hoverMode = plotlyOptions.value?.layout?.hovermode
+  defaultHoverMode.value = hoverMode === false ? false : 'x'
+}
+
+const normalizeTraceArray = <T,>(
+  values: T[],
+  length: number,
+  fallback: T
+) => {
+  if (values.length === length) return values
+  const next = new Array(length).fill(fallback) as T[]
+  for (let i = 0; i < Math.min(values.length, length); i += 1) {
+    next[i] = values[i]
+  }
+  return next
+}
+
+const applyLargeSeriesMode = async (visiblePoints: number) => {
+  if (!plotlyRef.value || !plotlyApi) return
+  const totalPoints = getTotalPointCount()
+  const forceLargeMode = totalPoints > LARGE_SERIES_TOTAL_THRESHOLD
+  const shouldEnable =
+    visiblePoints > LARGE_SERIES_VISIBLE_THRESHOLD || forceLargeMode
+
+  const traceCount = plotlyRef.value.data?.length ?? 0
+  if (!traceCount) return
+
+  const nextModes = shouldEnable
+    ? new Array(traceCount).fill('lines')
+    : normalizeTraceArray(defaultTraceModes.value, traceCount, 'lines+markers')
+  const nextMarkerSizes = shouldEnable
+    ? new Array(traceCount).fill(0)
+    : normalizeTraceArray(defaultMarkerSizes.value, traceCount, 6)
+  const nextHoverInfo: 'y' | 'skip' = shouldEnable ? 'skip' : 'y'
+  const nextHoverMode = forceLargeMode ? false : defaultHoverMode.value
+
+  if (
+    shouldEnable !== isLargeSeriesMode.value ||
+    nextHoverInfo !== currentHoverInfo.value
+  ) {
+    const nextTemplate = nextHoverInfo === 'skip' ? '' : DEFAULT_HOVER_TEMPLATE
+    await plotlyApi.restyle(plotlyRef.value, {
+      mode: nextModes,
+      'marker.size': nextMarkerSizes,
+      hoverinfo: nextHoverInfo,
+      hovertemplate: nextTemplate,
+    })
+    isLargeSeriesMode.value = shouldEnable
+    currentHoverInfo.value = nextHoverInfo
+  }
+
+  if (
+    plotlyRef.value &&
+    plotlyApi &&
+    plotlyRef.value.layout?.hovermode !== nextHoverMode
+  ) {
+    await plotlyApi.relayout(plotlyRef.value, { hovermode: nextHoverMode })
+  }
+}
+
+const applyLargeSeriesModeForCurrentRange = () => {
+  if (!plotlyRef.value) return
+  const layout = plotlyRef.value._fullLayout || plotlyRef.value.layout
+  const range = layout?.xaxis?.range
+  if (!Array.isArray(range) || range.length !== 2) return
+  const start = toNumeric(range[0])
+  const end = toNumeric(range[1])
+  if (start === null || end === null) return
+  const visiblePoints = getVisiblePointCount(start, end)
+  applyLargeSeriesMode(visiblePoints)
 }
 
 const dateOptions = [
@@ -218,6 +365,7 @@ const updateState = async () => {
     title: props.datastream.name,
     titleWrapLength: 80,
   })
+  syncDefaultTraceStyles()
   if (plotlyOptions.value?.layout?.title) {
     plotlyOptions.value.layout.title.x = 0.5
     plotlyOptions.value.layout.title.xanchor = 'center'
@@ -275,9 +423,38 @@ const renderPlot = async () => {
       layout,
       config
     )
+    if (!handlersAttached) {
+      const plot = plotlyRef.value
+      if (!plot) return
+      plot.on('plotly_relayout', (eventData: any) => {
+        if (!eventData) return
+        let eventRangeStart = eventData['xaxis.range[0]']
+        let eventRangeEnd = eventData['xaxis.range[1]']
+        const eventRange = eventData['xaxis.range']
+        if (
+          (eventRangeStart === undefined || eventRangeEnd === undefined) &&
+          Array.isArray(eventRange)
+        ) {
+          ;[eventRangeStart, eventRangeEnd] = eventRange
+        }
+        if (eventRangeStart === undefined || eventRangeEnd === undefined) return
+        const rangeStart =
+          typeof eventRangeStart === 'string'
+            ? Date.parse(eventRangeStart)
+            : eventRangeStart
+        const rangeEnd =
+          typeof eventRangeEnd === 'string'
+            ? Date.parse(eventRangeEnd)
+            : eventRangeEnd
+        if (!Number.isFinite(rangeStart) || !Number.isFinite(rangeEnd)) return
+        applyLargeSeriesMode(getVisiblePointCount(rangeStart, rangeEnd))
+      })
+      handlersAttached = true
+    }
   } else {
     await Plotly.react(plotlyRef.value, traces, layout, config)
   }
+  applyLargeSeriesModeForCurrentRange()
   scheduleDragHandleStyling()
 }
 
@@ -326,6 +503,7 @@ onBeforeUnmount(() => {
       plotlyApi.purge(plotlyRef.value)
     }
   }
+  handlersAttached = false
 })
 </script>
 
