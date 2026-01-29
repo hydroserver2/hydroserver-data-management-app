@@ -223,10 +223,15 @@ const parseUrlAndSetState = () => {
     (id): id is string => typeof id === 'string'
   )
 
-  if (datastreamIdsStrings.length)
+  if (datastreamIdsStrings.length) {
+    const limitedIds = datastreamIdsStrings.slice(0, 5)
+    if (datastreamIdsStrings.length > 5) {
+      Snackbar.info('Only the first 5 datastreams were loaded from the URL.')
+    }
     plottedDatastreams.value = datastreams.value.filter((ds) =>
-      datastreamIdsStrings.includes(ds.id)
+      limitedIds.includes(ds.id)
     )
+  }
 
   // Site IDs
   const siteIds = route.query.sites

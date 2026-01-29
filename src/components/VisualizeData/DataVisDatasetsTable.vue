@@ -139,6 +139,7 @@
                   density="compact"
                   label="Plot"
                   hide-details
+                  class="plot-checkbox"
                   @click.stop
                   @change="() => updatePlottedDatastreams(item)"
                 />
@@ -200,13 +201,14 @@
         hover
       >
         <template v-slot:item.plot="{ item }">
-          <v-checkbox
-            :model-value="isChecked(item)"
-            :disabled="plottedDatastreams.length >= 5 && !isChecked(item)"
-            class="d-flex align-self-center"
-            density="compact"
-            @change="() => updatePlottedDatastreams(item)"
-          />
+            <v-checkbox
+              :model-value="isChecked(item)"
+              :disabled="plottedDatastreams.length >= 5 && !isChecked(item)"
+              class="d-flex align-self-center plot-checkbox"
+              density="compact"
+              @click.stop
+              @change="() => updatePlottedDatastreams(item)"
+            />
         </template>
         <template v-slot:item.phenomenonEndTime="{ item }">
           {{ formatTime(item.phenomenonEndTime) }}
@@ -383,7 +385,38 @@ function updatePlottedDatastreams(datastream: Datastream) {
   const index = plottedDatastreams.value.findIndex(
     (ds) => ds.id === datastream.id
   )
-  if (index === -1) plottedDatastreams.value.push(datastream)
+  if (index === -1) {
+    if (plottedDatastreams.value.length >= 5) return
+    plottedDatastreams.value.push(datastream)
+  }
   else plottedDatastreams.value.splice(index, 1)
 }
 </script>
+
+<style scoped>
+:deep(.plot-checkbox.v-input--disabled .v-selection-control__input) {
+  position: relative;
+}
+
+:deep(.plot-checkbox.v-input--disabled .v-selection-control__input::after) {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background:
+    linear-gradient(
+      45deg,
+      transparent 46%,
+      #94a3b8 46%,
+      #94a3b8 54%,
+      transparent 54%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 46%,
+      #94a3b8 46%,
+      #94a3b8 54%,
+      transparent 54%
+    );
+  pointer-events: none;
+}
+</style>

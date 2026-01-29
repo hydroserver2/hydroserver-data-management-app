@@ -13,13 +13,9 @@ export function subtractHours(timestamp: string, hours: number): string {
   return date.toISOString()
 }
 
-const toObservationRows = (
-  columnar: Record<string, unknown>
-): DataArray => {
+const toObservationRows = (columnar: Record<string, unknown>): DataArray => {
   const times =
-    (columnar as any).phenomenonTime ??
-    (columnar as any).phenomenon_time ??
-    []
+    (columnar as any).phenomenonTime ?? (columnar as any).phenomenon_time ?? []
   const results = (columnar as any).result ?? []
 
   if (!Array.isArray(times) || !Array.isArray(results)) return []
@@ -34,19 +30,22 @@ const toObservationRows = (
 export const fetchObservations = async (
   datastream: Datastream,
   startTime: string | null = null,
-  endTime: string | null = null
+  endTime: string | null = null,
+  signal?: AbortSignal
 ) => {
   const { id, phenomenonBeginTime, phenomenonEndTime } = datastream
   if (!phenomenonBeginTime || !phenomenonEndTime) return []
 
-  // @ts-expect-error TODO: quality_control_code from hs/client should be optional
-  const res = await hs.datastreams.getObservations(id, {
+  const options: any = {
     order_by: ['phenomenonTime'],
     page_size: 50_000,
     format: 'column',
     phenomenon_time_min: startTime ?? phenomenonBeginTime,
     phenomenon_time_max: endTime ?? phenomenonEndTime,
-  })
+  }
+  if (signal) options.signal = signal
+
+  const res = await hs.datastreams.getObservations(id, options)
 
   if (!res.ok || !res.data || typeof res.data !== 'object') return []
   return toObservationRows(res.data as Record<string, unknown>)
@@ -73,7 +72,10 @@ export function replaceNoDataValues(
     if (rawValue === null || rawValue === undefined) {
       return { ...d, value: NaN }
     }
-    if (typeof rawValue === 'string' && rawValue.trim().toLowerCase() === 'nan') {
+    if (
+      typeof rawValue === 'string' &&
+      rawValue.trim().toLowerCase() === 'nan'
+    ) {
       return { ...d, value: NaN }
     }
     const numericValue =

@@ -99,6 +99,7 @@ const copyStateToClipboard = () => {
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
+  gap: 8px;
 }
 
 .preset-filters {
@@ -149,6 +150,7 @@ const copyStateToClipboard = () => {
     width: 100%;
     max-width: 260px;
   }
+
 
   .preset-filters {
     width: 100%;

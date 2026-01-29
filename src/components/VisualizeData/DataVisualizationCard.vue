@@ -129,7 +129,7 @@
       </v-card-text>
 
       <v-card-text
-        v-if="plottedDatastreams.length && !updating"
+        v-if="plottedDatastreams.length && !updating && hasLoadedSelectedSeries"
         class="text-center"
       >
         <v-alert type="warning" dense>
@@ -443,6 +443,17 @@ const updating = computed(() =>
 const isDataAvailable = computed(() =>
   graphSeriesArray.value.some((series) => series.data && series.data.length > 0)
 )
+
+const hasLoadedSelectedSeries = computed(() => {
+  if (!plottedDatastreams.value.length) return false
+  const selectedIds = new Set(plottedDatastreams.value.map((ds) => ds.id))
+  const loadedIds = new Set(graphSeriesArray.value.map((series) => series.id))
+  if (selectedIds.size !== loadedIds.size) return false
+  for (const id of selectedIds) {
+    if (!loadedIds.has(id)) return false
+  }
+  return true
+})
 
 const canPlot = computed(() =>
   Boolean(plotlyOptions.value && isDataAvailable.value)

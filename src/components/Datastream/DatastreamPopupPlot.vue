@@ -104,7 +104,7 @@ const props = defineProps({
 defineEmits(['close'])
 
 const plotlyOptions = ref<PlotlyOptions | undefined>()
-const graphSeries = ref<GraphSeries | undefined>()
+const graphSeries = ref<GraphSeries | null>(null)
 const updating = ref(false)
 const endDate = ref<Date>(
   props.datastream.phenomenonEndTime

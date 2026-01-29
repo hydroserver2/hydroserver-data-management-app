@@ -23,6 +23,22 @@ export const useObservationStore = defineStore('observations', () => {
 
   const observations = ref<Record<string, ObservationRecordLocal>>({})
   const observationsRaw = ref<Record<string, ObservationRaw>>({})
+  const activeControllers = ref<Record<string, AbortController>>({})
+  const requestCounters = ref<Record<string, number>>({})
+
+  const isAbortError = (error: unknown) =>
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as { name?: string }).name === 'AbortError'
+
+  const createAbortError = () => {
+    try {
+      return new DOMException('Aborted', 'AbortError')
+    } catch {
+      return { name: 'AbortError' }
+    }
+  }
 
   const parseObservationRows = (rows: ObservationArray) => {
     const length = rows.length
@@ -80,27 +96,50 @@ export const useObservationStore = defineStore('observations', () => {
     const id = datastream.id
     const newBeginTime = Date.parse(beginTime)
     const newEndTime = Date.parse(endTime)
+    const requestId = (requestCounters.value[id] ?? 0) + 1
+    requestCounters.value[id] = requestId
 
-    // If nothing is stored yet, create a new record and fetch the data in range
-    if (!observations.value[id]?.dataArray) {
+    if (activeControllers.value[id]) {
+      activeControllers.value[id].abort()
+    }
+    const controller = new AbortController()
+    activeControllers.value[id] = controller
+    const { signal } = controller
+
+    const ensureLatest = () => {
+      if (signal.aborted || requestCounters.value[id] !== requestId) {
+        throw createAbortError()
+      }
+    }
+
+    if (!observations.value[id]) {
       observations.value[id] = {
         dataArray: [],
         beginTime,
         endTime,
         loading: true,
       }
-
-      const fetchedData = (await fetchObservations(
-        datastream,
-        beginTime,
-        endTime
-      )) as ObservationArray
-      observationsRaw.value[id] = parseObservationRows(fetchedData)
-      observations.value[id].dataArray = []
-      observations.value[id].loading = false
-
-      return fetchedData
     } else {
+      observations.value[id].loading = true
+    }
+
+    try {
+      // If nothing is stored yet, create a new record and fetch the data in range
+      if (!observationsRaw.value[id]) {
+        const fetchedData = (await fetchObservations(
+          datastream,
+          beginTime,
+          endTime,
+          signal
+        )) as ObservationArray
+        ensureLatest()
+        observationsRaw.value[id] = parseObservationRows(fetchedData)
+        observations.value[id].dataArray = []
+
+        ensureLatest()
+        return fetchedData
+      }
+
       const existingRecord = observations.value[id]
       const storedBeginTime = new Date(existingRecord.beginTime).getTime()
       const storedEndTime = new Date(existingRecord.endTime).getTime()
@@ -114,7 +153,8 @@ export const useObservationStore = defineStore('observations', () => {
         beginDataPromise = fetchObservations(
           datastream,
           beginTime,
-          new Date(storedStart).toISOString()
+          new Date(storedStart).toISOString(),
+          signal
         ) as Promise<ObservationArray>
       }
 
@@ -124,7 +164,8 @@ export const useObservationStore = defineStore('observations', () => {
         endDataPromise = fetchObservations(
           datastream,
           new Date(storedEnd).toISOString(),
-          endTime
+          endTime,
+          signal
         ) as Promise<ObservationArray>
       }
 
@@ -133,6 +174,7 @@ export const useObservationStore = defineStore('observations', () => {
         beginDataPromise,
         endDataPromise,
       ])
+      ensureLatest()
 
       const hasBegin = beginData.length > 0
       const hasEnd = endData.length > 0
@@ -180,14 +222,14 @@ export const useObservationStore = defineStore('observations', () => {
         existingRecord.endTime = endTime
       }
 
-      existingRecord.loading = false
-
       const raw = observationsRaw.value[id]
       if (raw) {
+        ensureLatest()
         return sliceRawToRows(raw, newBeginTime, newEndTime)
       }
 
       // Return only the data within the requested range
+      ensureLatest()
       return observations.value[id].dataArray.filter(([dateString, _]) => {
         const observationTimestamp =
           typeof dateString === 'number'
@@ -198,6 +240,16 @@ export const useObservationStore = defineStore('observations', () => {
           observationTimestamp <= newEndTime
         )
       })
+    } finally {
+      if (
+        observations.value[id] &&
+        requestCounters.value[id] === requestId
+      ) {
+        observations.value[id].loading = false
+      }
+      if (activeControllers.value[id] === controller) {
+        delete activeControllers.value[id]
+      }
     }
   }
 
@@ -205,32 +257,36 @@ export const useObservationStore = defineStore('observations', () => {
     datastream: Datastream,
     start: string,
     end: string
-  ): Promise<DataPoint[]> => {
-    const observations = await fetchObservationsInRange(
-      datastream,
-      start,
-      end
-    ).catch((error) => {
+  ): Promise<DataPoint[] | null> => {
+    try {
+      const observations = await fetchObservationsInRange(
+        datastream,
+        start,
+        end
+      )
+      return preProcessData(observations, datastream)
+    } catch (error) {
+      if (isAbortError(error)) return null
       Snackbar.error('Failed to fetch observations')
       console.error('Failed to fetch observations:', error)
-      return []
-    })
-
-    return preProcessData(observations, datastream)
+      return null
+    }
   }
 
   const fetchGraphSeries = async (
     datastream: Datastream,
     start: string,
     end: string
-  ): Promise<GraphSeries> => {
+  ): Promise<GraphSeries | null> => {
     const observationsPromise = fetchObservationsInRange(
       datastream,
       start,
       end
     ).catch((error) => {
-      Snackbar.error('Failed to fetch observations')
-      console.error('Failed to fetch observations:', error)
+      if (!isAbortError(error)) {
+        Snackbar.error('Failed to fetch observations')
+        console.error('Failed to fetch observations:', error)
+      }
       return null
     })
     const fetchUnitPromise = hs.units
@@ -251,6 +307,10 @@ export const useObservationStore = defineStore('observations', () => {
       fetchUnitPromise,
       fetchObservedPropertyPromise,
     ])
+
+    if (observations === null) {
+      return null
+    }
 
     const processedData = preProcessData(observations ?? [], datastream)
 

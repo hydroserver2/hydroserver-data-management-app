@@ -37,6 +37,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   const plotlyOptions = ref<PlotlyOptions | undefined>()
   const loadingStates = ref(new Map<string, boolean>()) // State to track loading status of individual datasets
   const prevIds = ref<string[]>([])
+  const requestCounters = ref<Record<string, number>>({})
 
   const cardHeight = ref(40)
   const tableHeight = ref(30)
@@ -295,6 +296,15 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     start: string,
     end: string
   ) => {
+    const requestId = (requestCounters.value[datastream.id] ?? 0) + 1
+    requestCounters.value[datastream.id] = requestId
+    loadingStates.value.set(datastream.id, true)
+
+    const isLatest = () =>
+      requestCounters.value[datastream.id] === requestId
+    const isStillSelected = () =>
+      plottedDatastreams.value.some((ds) => ds.id === datastream.id)
+
     try {
       const seriesIndex = graphSeriesArray.value.findIndex(
         (series) => series.id === datastream.id
@@ -303,13 +313,16 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       if (seriesIndex >= 0) {
         // Update the existing graph series with new data
         const data = await fetchGraphSeriesData(datastream, start, end)
+        if (!data || !isLatest() || !isStillSelected()) return
         graphSeriesArray.value[seriesIndex].data = data
       } else {
         // Add new graph series
         const newSeries = await fetchGraphSeries(datastream, start, end)
+        if (!newSeries || !isLatest() || !isStillSelected()) return
         graphSeriesArray.value.push(newSeries)
       }
 
+      if (!isLatest() || !isStillSelected()) return
       updateVisualization()
     } catch (error) {
       console.error(
@@ -317,7 +330,9 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
         error
       )
     } finally {
-      loadingStates.value.set(datastream.id, false)
+      if (isLatest()) {
+        loadingStates.value.set(datastream.id, false)
+      }
     }
   }
 
@@ -331,7 +346,6 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     const begin = beginDate.value.toISOString()
     const end = endDate.value.toISOString()
     datastreams.forEach((ds) => {
-      loadingStates.value.set(ds.id, true)
       updateOrFetchGraphSeries(ds, begin, end)
     })
   }
