@@ -131,7 +131,7 @@ const toggleTable = () => {
 <style scoped>
 .datavis-rail {
   z-index: 20;
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   border-right: 1px solid #e2e8f0;
 }
 </style>
