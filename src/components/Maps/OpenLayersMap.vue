@@ -16,6 +16,10 @@
     </div>
     <div ref="mapContainer" class="fill-width fill-height"></div>
 
+    <div class="map-overlay">
+      <slot name="overlay" />
+    </div>
+
     <div ref="popupContainer" class="ol-popup">
       <a href="#" ref="popupCloser" class="ol-popup-closer" />
       <div ref="popupContent" />
@@ -314,6 +318,14 @@ watch(
 .fill-width {
   width: 100%;
 }
+
+.map-overlay {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 5;
+}
+
 .legend {
   position: absolute;
   bottom: 10px;

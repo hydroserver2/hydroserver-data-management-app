@@ -4,16 +4,16 @@ import {
   ProcessingLevel,
   Thing,
   GraphSeries,
+  Workspace,
 } from '@hydroserver/client'
 import {
   SummaryStatistics,
   calculateSummaryStatistics,
 } from '@/utils/plotting/summaryStatisticUtils'
 import { defineStore } from 'pinia'
-import { computed, ref, watch } from 'vue'
-import { EChartsOption } from 'echarts'
-import { EChartsColors } from '@/utils/materialColors'
-import { createEChartsOption } from '@/utils/plotting/echarts'
+import { computed, reactive, ref, watch } from 'vue'
+import { PlotlyColors } from '@/utils/materialColors'
+import { createPlotlyOption, PlotlyOptions } from '@/utils/plotting/plotly'
 import { useObservationStore } from '@/store/observations'
 
 export const useDataVisStore = defineStore('dataVisualization', () => {
@@ -26,6 +26,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
 
   const selectedThings = ref<Thing[]>([])
   const plottedDatastreams = ref<Datastream[]>([])
+  const selectedWorkspaces = ref<Workspace[]>([])
   const selectedObservedPropertyNames = ref<string[]>([])
   const selectedProcessingLevelNames = ref<string[]>([])
 
@@ -33,32 +34,73 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   const summaryStatisticsArray = ref<SummaryStatistics[]>([])
 
   const graphSeriesArray = ref<GraphSeries[]>([])
-  const echartsOption = ref<EChartsOption | undefined>()
+  const plotlyOptions = ref<PlotlyOptions | undefined>()
   const loadingStates = ref(new Map<string, boolean>()) // State to track loading status of individual datasets
   const prevIds = ref<string[]>([])
+  const requestCounters = ref<Record<string, number>>({})
 
   const cardHeight = ref(40)
   const tableHeight = ref(30)
+  const showPlot = ref(true)
+  const showTable = ref(true)
+  const tableHeaders = reactive([
+    { title: 'Plot', key: 'plot', visible: true },
+    {
+      title: 'Site Code',
+      key: 'siteCodeName',
+      visible: true,
+    },
+    {
+      title: 'Observed Property',
+      key: 'observedPropertyName',
+      visible: true,
+    },
+    {
+      title: 'Processing Level',
+      key: 'qualityControlLevelDefinition',
+      visible: true,
+    },
+    {
+      title: 'Number Observations',
+      key: 'valueCount',
+      visible: true,
+    },
+    {
+      title: 'Date Last Updated',
+      key: 'phenomenonEndTime',
+      visible: true,
+    },
+  ])
 
   const endDate = ref<Date>(new Date())
-  const oneWeek = 7 * 24 * 60 * 60 * 1000
-  const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneWeek))
-  const selectedDateBtnId = ref(2)
+  const oneMonth = 30 * 24 * 60 * 60 * 1000
+  const beginDate = ref<Date>(new Date(endDate.value.getTime() - oneMonth))
+  const selectedDateBtnId = ref(0)
   const dataZoomStart = ref(0)
   const dataZoomEnd = ref(100)
+  const xAxisRange = ref<{ start: number; end: number } | null>(null)
+  const yAxisRanges = ref<Record<string, [number, number]>>({})
 
   function resetState() {
     selectedThings.value = []
     plottedDatastreams.value = []
+    selectedWorkspaces.value = []
     selectedObservedPropertyNames.value = []
     selectedProcessingLevelNames.value = []
     showSummaryStatistics.value = false
     summaryStatisticsArray.value = []
     endDate.value = new Date()
-    beginDate.value = new Date(new Date().getTime() - oneWeek)
-    selectedDateBtnId.value = 2
+    beginDate.value = new Date(new Date().getTime() - oneMonth)
+    selectedDateBtnId.value = 0
     dataZoomStart.value = 0
     dataZoomEnd.value = 100
+    showPlot.value = true
+    showTable.value = true
+    tableHeaders.forEach((header) => {
+      header.visible = true
+    })
+    xAxisRange.value = null
+    yAxisRanges.value = {}
   }
 
   function matchesSelectedObservedProperty(datastream: Datastream) {
@@ -94,38 +136,78 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     )
   }
 
+  function matchesSelectedWorkspace(datastream: Datastream) {
+    if (selectedWorkspaces.value.length === 0) return true
+
+    const thingWorkspaceId = things.value.find(
+      (thing) => thing.id === datastream.thingId
+    )?.workspaceId
+
+    if (!thingWorkspaceId) return false
+
+    return selectedWorkspaces.value.some(
+      (workspace) => workspace.id === thingWorkspaceId
+    )
+  }
+
   const filteredDatastreams = computed(() => {
     return datastreams.value.filter(
       (datastream) =>
         matchesSelectedThing(datastream) &&
+        matchesSelectedWorkspace(datastream) &&
         matchesSelectedObservedProperty(datastream) &&
         matchesSelectedProcessingLevel(datastream)
     )
   })
 
+  const getOldestBeginTime = () => {
+    const earliest = plottedDatastreams.value.reduce((oldest, ds) => {
+      if (!ds.phenomenonBeginTime) return oldest
+      const dsBeginDate = new Date(ds.phenomenonBeginTime)
+      return dsBeginDate < oldest ? dsBeginDate : oldest
+    }, endDate.value)
+
+    return earliest
+  }
+
   const dateOptions = ref([
     {
       id: 0,
-      label: 'Last Year',
-      calculateBeginDate: () => {
-        const now = endDate.value
-        return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
-      },
-    },
-    {
-      id: 1,
-      label: 'Last Month',
+      label: '1m',
       calculateBeginDate: () => {
         const now = endDate.value
         return new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
       },
     },
     {
-      id: 2,
-      label: 'Last Week',
+      id: 1,
+      label: '6m',
       calculateBeginDate: () => {
         const now = endDate.value
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+        return new Date(now.getFullYear(), now.getMonth() - 6, now.getDate())
+      },
+    },
+    {
+      id: 2,
+      label: 'YTD',
+      calculateBeginDate: () => {
+        const now = endDate.value
+        return new Date(now.getFullYear(), 0, 1)
+      },
+    },
+    {
+      id: 3,
+      label: '1y',
+      calculateBeginDate: () => {
+        const now = endDate.value
+        return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+      },
+    },
+    {
+      id: 4,
+      label: 'all',
+      calculateBeginDate: () => {
+        return getOldestBeginTime()
       },
     },
   ])
@@ -151,6 +233,8 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
   }: SetDateRangeParams) => {
     dataZoomStart.value = 0
     dataZoomEnd.value = 100
+    xAxisRange.value = null
+    yAxisRanges.value = {}
     if (begin) beginDate.value = begin
     if (end) endDate.value = end
     if (custom) selectedDateBtnId.value = -1
@@ -184,12 +268,26 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
 
   function updateVisualization() {
     graphSeriesArray.value.forEach((series, index) => {
-      series.lineColor = EChartsColors[index % EChartsColors.length]
+      series.lineColor = PlotlyColors[index % PlotlyColors.length]
     })
     summaryStatisticsArray.value = calculateSummaryStatistics(
       graphSeriesArray.value
     )
-    echartsOption.value = createEChartsOption(graphSeriesArray.value)
+    const uirevision = graphSeriesArray.value
+      .map((series) => series.id)
+      .sort()
+      .join('|')
+    plotlyOptions.value = createPlotlyOption(graphSeriesArray.value, {
+      dataZoomStart: dataZoomStart.value,
+      dataZoomEnd: dataZoomEnd.value,
+      xAxisRange: xAxisRange.value,
+      yAxisRanges: yAxisRanges.value,
+      addSummaryButton: false,
+      activeRangeSelector:
+        selectedDateBtnId.value >= 0 ? selectedDateBtnId.value : -1,
+      showRangeSelector: false,
+      uirevision,
+    })
     prevIds.value = graphSeriesArray.value.map((series) => series.id)
   }
 
@@ -198,6 +296,15 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     start: string,
     end: string
   ) => {
+    const requestId = (requestCounters.value[datastream.id] ?? 0) + 1
+    requestCounters.value[datastream.id] = requestId
+    loadingStates.value.set(datastream.id, true)
+
+    const isLatest = () =>
+      requestCounters.value[datastream.id] === requestId
+    const isStillSelected = () =>
+      plottedDatastreams.value.some((ds) => ds.id === datastream.id)
+
     try {
       const seriesIndex = graphSeriesArray.value.findIndex(
         (series) => series.id === datastream.id
@@ -206,13 +313,16 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
       if (seriesIndex >= 0) {
         // Update the existing graph series with new data
         const data = await fetchGraphSeriesData(datastream, start, end)
+        if (!data || !isLatest() || !isStillSelected()) return
         graphSeriesArray.value[seriesIndex].data = data
       } else {
         // Add new graph series
         const newSeries = await fetchGraphSeries(datastream, start, end)
+        if (!newSeries || !isLatest() || !isStillSelected()) return
         graphSeriesArray.value.push(newSeries)
       }
 
+      if (!isLatest() || !isStillSelected()) return
       updateVisualization()
     } catch (error) {
       console.error(
@@ -220,7 +330,9 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
         error
       )
     } finally {
-      loadingStates.value.set(datastream.id, false)
+      if (isLatest()) {
+        loadingStates.value.set(datastream.id, false)
+      }
     }
   }
 
@@ -231,11 +343,9 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     graphSeriesArray.value = graphSeriesArray.value.filter((s) =>
       currentIds.has(s.id)
     )
-
     const begin = beginDate.value.toISOString()
     const end = endDate.value.toISOString()
     datastreams.forEach((ds) => {
-      loadingStates.value.set(ds.id, true)
       updateOrFetchGraphSeries(ds, begin, end)
     })
   }
@@ -255,7 +365,32 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     graphSeriesArray.value = []
     prevIds.value = []
     showSummaryStatistics.value = false
-    echartsOption.value = undefined
+    plotlyOptions.value = undefined
+    xAxisRange.value = null
+    yAxisRanges.value = {}
+  }
+
+  const setAxisRanges = (
+    xRange: { start: number; end: number } | null,
+    ranges?: Record<string, [number, number]>
+  ) => {
+    xAxisRange.value = xRange
+    if (ranges) yAxisRanges.value = ranges
+  }
+
+  const setYAxisRanges = (ranges: Record<string, [number, number]>) => {
+    yAxisRanges.value = ranges
+  }
+
+  const setTableVisibleColumns = (keys: string[]) => {
+    const keySet = new Set(keys)
+    tableHeaders.forEach((header) => {
+      if (header.key === 'plot') {
+        header.visible = true
+        return
+      }
+      header.visible = keySet.has(header.key)
+    })
   }
 
   // Update the time range to the most recent phenomenon end time
@@ -297,6 +432,7 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     processingLevels,
     observedProperties,
     selectedThings,
+    selectedWorkspaces,
     selectedObservedPropertyNames,
     selectedProcessingLevelNames,
     filteredDatastreams,
@@ -305,9 +441,11 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     endDate,
     dataZoomStart,
     dataZoomEnd,
+    xAxisRange,
+    yAxisRanges,
     dateOptions,
     graphSeriesArray,
-    echartsOption,
+    plotlyOptions,
     prevIds,
     loadingStates,
     selectedDateBtnId,
@@ -315,11 +453,18 @@ export const useDataVisStore = defineStore('dataVisualization', () => {
     summaryStatisticsArray,
     cardHeight,
     tableHeight,
+    showPlot,
+    showTable,
+    tableHeaders,
     matchesSelectedObservedProperty,
     matchesSelectedProcessingLevel,
     matchesSelectedThing,
+    matchesSelectedWorkspace,
     setDateRange,
     onDateBtnClick,
+    setAxisRanges,
+    setYAxisRanges,
+    setTableVisibleColumns,
     resetState,
   }
 })

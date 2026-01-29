@@ -1,6 +1,9 @@
 <template>
   <v-app-bar app elevation="2" density="default">
-    <template v-slot:prepend v-if="route.meta.hasSidebar">
+    <template
+      v-slot:prepend
+      v-if="route.meta.hasSidebar && route.name !== 'VisualizeData'"
+    >
       <v-app-bar-nav-icon
         v-if="sidebar.isOpen"
         :icon="mdiMenuOpen"
