@@ -47,7 +47,7 @@ const props = defineProps({
   unitName: String,
 })
 
-type LatestValuePayload = { text: string; showUnit: boolean }
+type LatestValuePayload = { text: string; showUnit: boolean; isBad: boolean }
 
 const emit = defineEmits<{
   (e: 'openChart'): void
@@ -115,26 +115,26 @@ const latestRawObservationValue = computed<unknown>(() => {
 
 const mostRecentDataValue = computed<LatestValuePayload>(() => {
   if (!sparklineObservations.value.length) {
-    return { text: 'No observations', showUnit: false }
+    return { text: 'No observations', showUnit: false, isBad: false }
   }
   const rawValue = latestRawObservationValue.value
   if (rawValue === undefined) {
-    return { text: 'No observations', showUnit: false }
+    return { text: 'No observations', showUnit: false, isBad: false }
   }
   if (rawValue === null) {
-    return { text: 'null', showUnit: false }
+    return { text: 'null', showUnit: false, isBad: true }
   }
   if (typeof rawValue === 'string') {
     const trimmed = rawValue.trim()
     if (trimmed === '') {
-      return { text: 'empty', showUnit: false }
+      return { text: 'empty', showUnit: false, isBad: true }
     }
     if (trimmed.toLowerCase() === 'nan') {
-      return { text: 'NaN', showUnit: false }
+      return { text: 'NaN', showUnit: false, isBad: true }
     }
   }
   if (typeof rawValue === 'number' && Number.isNaN(rawValue)) {
-    return { text: 'NaN', showUnit: false }
+    return { text: 'NaN', showUnit: false, isBad: true }
   }
   if (isNoDataValue(rawValue)) {
     const noDataValue = props.datastream.noDataValue
@@ -144,13 +144,14 @@ const mostRecentDataValue = computed<LatestValuePayload>(() => {
           ? 'No data'
           : String(noDataValue),
       showUnit: false,
+      isBad: true,
     }
   }
   const numericValue = getNumericValue(rawValue)
   if (numericValue !== null) {
-    return { text: formatNumber(numericValue), showUnit: true }
+    return { text: formatNumber(numericValue), showUnit: true, isBad: false }
   }
-  return { text: 'No observations', showUnit: false }
+  return { text: 'No observations', showUnit: false, isBad: false }
 })
 
 const sparklineColors = computed(() =>

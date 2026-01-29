@@ -207,6 +207,7 @@ const isLargeSeriesMode = ref(false)
 const defaultTraceModes = ref<string[]>([])
 const defaultMarkerSizes = ref<number[]>([])
 const defaultHoverMode = ref<'x' | false>('x')
+const lastStyledTraceCount = ref(0)
 const showLargeSeriesDisclaimer = computed(() => isLargeSeriesMode.value)
 const largeSeriesVisibleThreshold = computed(() =>
   LARGE_SERIES_VISIBLE_THRESHOLD.toLocaleString()
@@ -302,6 +303,13 @@ const applyLargeSeriesMode = async (visiblePoints: number) => {
 
   const traceCount = plotlyRef.value.data?.length ?? 0
   if (!traceCount) return
+  const needsEnforcement =
+    shouldEnable &&
+    plotlyRef.value.data?.some((trace: any) => {
+      if (trace?.mode !== 'lines') return true
+      const size = trace?.marker?.size
+      return typeof size === 'number' ? size !== 0 : false
+    })
   const nextModes = shouldEnable
     ? new Array(traceCount).fill('lines')
     : normalizeTraceArray(defaultTraceModes.value, traceCount, 'lines+markers')
@@ -310,8 +318,11 @@ const applyLargeSeriesMode = async (visiblePoints: number) => {
     : normalizeTraceArray(defaultMarkerSizes.value, traceCount, 6)
   const nextHoverInfo: 'y' | 'skip' = shouldEnable ? 'skip' : 'y'
   const nextHoverMode = forceLargeMode ? false : defaultHoverMode.value
+  const traceCountChanged = traceCount !== lastStyledTraceCount.value
 
   if (
+    traceCountChanged ||
+    needsEnforcement ||
     shouldEnable !== isLargeSeriesMode.value ||
     nextHoverInfo !== currentHoverInfo.value
   ) {
@@ -324,6 +335,7 @@ const applyLargeSeriesMode = async (visiblePoints: number) => {
     })
     isLargeSeriesMode.value = shouldEnable
     currentHoverInfo.value = nextHoverInfo
+    lastStyledTraceCount.value = traceCount
   }
 
   if (
@@ -339,12 +351,25 @@ const applyLargeSeriesModeForCurrentRange = () => {
   if (!plotlyRef.value) return
   const layout = plotlyRef.value._fullLayout || plotlyRef.value.layout
   const range = layout?.xaxis?.range
-  if (!Array.isArray(range) || range.length !== 2) return
-  const start = parseDateAxisValue(range[0])
-  const end = parseDateAxisValue(range[1])
-  if (start === null || end === null) return
-  const visiblePoints = getVisiblePointCount(start, end)
-  applyLargeSeriesMode(visiblePoints)
+  if (Array.isArray(range) && range.length === 2) {
+    const start = parseDateAxisValue(range[0])
+    const end = parseDateAxisValue(range[1])
+    if (start === null || end === null) return
+    const visiblePoints = getVisiblePointCount(start, end)
+    applyLargeSeriesMode(visiblePoints)
+    return
+  }
+  const bounds =
+    plotlyOptions.value?.xRange || getXRangeBounds(graphSeriesArray.value)
+  if (bounds) {
+    const visiblePoints = getVisiblePointCount(bounds.min, bounds.max)
+    applyLargeSeriesMode(visiblePoints)
+    return
+  }
+  const totalPoints = getTotalPointCount()
+  if (totalPoints) {
+    applyLargeSeriesMode(totalPoints)
+  }
 }
 
 const captureAxisRangesFromPlotly = () => {
@@ -662,6 +687,7 @@ const attachHandlers = () => {
   if (!plotlyRef.value || handlersAttached.value) return
   plotlyRef.value.on('plotly_redraw', debouncedRelayout)
   plotlyRef.value.on('plotly_relayout', debouncedRelayout)
+  plotlyRef.value.on('plotly_afterplot', applyLargeSeriesModeForCurrentRange)
   handlersAttached.value = true
 }
 

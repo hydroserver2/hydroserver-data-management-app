@@ -79,11 +79,7 @@
             <div
               v-if="Number(item.valueCount) > 0"
               class="mt-1 text-base leading-[1.3]"
-              :class="
-                isDatastreamStale(item)
-                  ? 'text-[#9e9e9e]'
-                  : 'text-[#2e7d32]'
-              "
+              :class="latestStatusClass(item)"
             >
               <strong class="mr-2 font-semibold">Latest observation:</strong>
               <span class="font-semibold">{{ item.endDate }}</span>
@@ -91,6 +87,7 @@
             <div
               v-if="shouldShowLatestValue(item.id)"
               class="mt-1 text-base leading-[1.3]"
+              :class="latestStatusClass(item)"
             >
               <strong class="mr-2 font-semibold">Latest value:</strong>
               <span class="font-semibold">{{ latestValueDisplay(item) }}</span>
@@ -361,11 +358,7 @@
               <div
                 v-if="Number(item.valueCount) > 0"
                 class="mt-1 text-base leading-[1.3]"
-                :class="
-                  isDatastreamStale(item)
-                    ? 'text-[#9e9e9e]'
-                    : 'text-[#2e7d32]'
-                "
+                :class="latestStatusClass(item)"
               >
                 <strong class="mr-2 font-semibold">Latest observation:</strong>
                 <span class="font-semibold">{{ item.endDate }}</span>
@@ -373,6 +366,7 @@
               <div
                 v-if="shouldShowLatestValue(item.id)"
                 class="mt-1 text-base leading-[1.3]"
+                :class="latestStatusClass(item)"
               >
                 <strong class="mr-2 font-semibold">Latest value:</strong>
                 <span class="font-semibold">{{ latestValueDisplay(item) }}</span>
@@ -744,17 +738,19 @@ const { sensors, units, observedProperties, processingLevels, fetchMetadata } =
   useMetadata(toRef(props, 'workspace'))
 
 const openCharts = reactive<Record<string, boolean>>({})
-const latestValues = reactive<Record<string, { text: string; showUnit: boolean }>>({})
+const latestValues = reactive<
+  Record<string, { text: string; showUnit: boolean; isBad: boolean }>
+>({})
 
 const handleLatestValueUpdate = (
   datastreamId: string,
-  value: { text: string; showUnit: boolean }
+  value: { text: string; showUnit: boolean; isBad: boolean }
 ) => {
   latestValues[datastreamId] = value
 }
 
 const latestValueFor = (datastreamId: string) =>
-  latestValues[datastreamId] || { text: '—', showUnit: false }
+  latestValues[datastreamId] || { text: '—', showUnit: false, isBad: false }
 
 const shouldShowLatestValue = (datastreamId: string) => {
   const value = latestValueFor(datastreamId)
@@ -765,6 +761,13 @@ const latestValueDisplay = (datastream: { id: string; unitName?: string }) => {
   const value = latestValueFor(datastream.id)
   if (!value.showUnit) return value.text
   return `${value.text} ${datastream.unitName ?? ''}`.trim()
+}
+
+const latestStatusClass = (datastream: Datastream) => {
+  if (isDatastreamStale(datastream)) return 'text-[#9e9e9e]'
+  const latestValue = latestValueFor(datastream.id)
+  if (latestValue.isBad) return 'text-[#c86060]'
+  return 'text-[#2e7d32]'
 }
 
 const visibleDatastreams = computed(() => {
