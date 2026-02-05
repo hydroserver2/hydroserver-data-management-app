@@ -60,6 +60,7 @@
       :search="search"
       :hover="true"
       class="elevation-2 orchestration-table"
+      style="--group-summary-row-height: 64px; --group-sticky-seam-fix: 1px"
       @click:row="onRowClick"
       :loading="loading"
       fixed-header
@@ -100,9 +101,16 @@
       <template
         v-slot:group-header="{ item, columns, toggleGroup, isGroupOpen }"
       >
-        <tr class="bg-blue-grey-lighten-5 group-summary-row">
-          <th :colspan="columns.length" scope="colgroup">
-            <div class="d-flex align-center group-summary-content" @click="toggleGroup(item)">
+        <tr class="bg-blue-grey-lighten-5 sticky top-0 z-[5]">
+          <th
+            :colspan="columns.length"
+            scope="colgroup"
+            class="sticky top-0 z-[5] border-b border-[#cfd8dc] bg-[#eceff1] p-0 text-left"
+          >
+            <div
+              class="flex min-h-[var(--group-summary-row-height)] flex-nowrap items-center px-3 py-2"
+              @click="toggleGroup(item)"
+            >
               <v-btn
                 :icon="isGroupOpen(item) ? '$expand' : '$next'"
                 color="medium-emphasis"
@@ -114,7 +122,7 @@
 
               <span class="ms-4">{{ item.value }}</span>
               <v-spacer />
-              <div class="d-flex ga-2 align-center mr-2">
+              <div class="mr-2 flex items-center gap-2">
                 <v-chip size="small" variant="tonal" color="blue-grey-darken-2">
                   Total tasks: {{ groupHealthSummary(item.items).total }}
                 </v-chip>
@@ -158,15 +166,18 @@
             </div>
           </th>
         </tr>
-        <tr v-if="isGroupOpen(item)" class="group-column-header">
+        <tr v-if="isGroupOpen(item)">
           <th
             v-for="column in columns"
             :key="`${item.value}-${column.key}`"
             scope="col"
             :class="[
-              'text-caption font-weight-bold text-grey-darken-2',
+              'text-caption font-weight-bold text-grey-darken-2 sticky z-[3] border-b border-[#cfd8dc] bg-[#eceff1] px-3 py-2',
               (column as any).key === 'actions' ? 'text-right' : '',
             ]"
+            :style="{
+              top: 'calc(var(--group-summary-row-height) - var(--group-sticky-seam-fix))',
+            }"
           >
             {{ (column as any).title === 'Group' ? '' : (column as any).title }}
           </th>
@@ -498,37 +509,5 @@ const headers = [
   overflow-y: auto;
   overflow-x: auto;
   position: relative;
-}
-.orchestration-table {
-  --group-summary-row-height: 64px;
-  --group-sticky-seam-fix: 1px;
-}
-.group-summary-row {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-.group-summary-row th {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: #eceff1;
-  border-bottom: 1px solid #cfd8dc;
-  padding: 0;
-  text-align: left;
-}
-.group-summary-content {
-  min-height: var(--group-summary-row-height);
-  padding: 8px 12px;
-  flex-wrap: nowrap;
-}
-.group-column-header th {
-  font-weight: 600;
-  background: #eceff1;
-  border-bottom: 1px solid #cfd8dc;
-  padding: 8px 12px;
-  position: sticky;
-  top: calc(var(--group-summary-row-height) - var(--group-sticky-seam-fix));
-  z-index: 3;
 }
 </style>
