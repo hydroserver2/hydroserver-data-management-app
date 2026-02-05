@@ -36,23 +36,56 @@
       </v-btn>
     </v-toolbar>
 
+    <div class="px-4 py-3 border-b">
+      <v-btn-toggle
+        v-model="statusFilter"
+        mandatory
+        variant="outlined"
+        density="compact"
+        divided
+      >
+        <v-btn value="all">All</v-btn>
+        <v-btn value="failed">Failed</v-btn>
+        <v-btn value="behind">Behind</v-btn>
+        <v-btn value="paused">Paused</v-btn>
+        <v-btn value="success">Success</v-btn>
+        <v-btn value="pending">Pending</v-btn>
+      </v-btn-toggle>
+    </div>
+
     <v-data-table-virtual
       :group-by="groupBy"
       :headers="headers"
       :items="tableData"
       :search="search"
       :hover="true"
-      class="elevation-2"
+      class="elevation-2 orchestration-table"
       @click:row="onRowClick"
       :loading="loading"
+      fixed-header
     >
       <template v-slot:no-data>
-        <div class="text-center pa-4" v-if="tableData.length === 0">
+        <div class="text-center pa-4">
           <v-icon :icon="mdiDesktopClassic" size="48" color="grey lighten-1" />
-          <h4 class="mt-2">
+          <h4
+            class="mt-2"
+            v-if="
+              statusFilter === 'all' &&
+              tableData.length === 0 &&
+              !`${search || ''}`.trim()
+            "
+          >
             You have not registered any orchestration systems.
           </h4>
-          <p class="mb-4">
+          <h4 class="mt-2" v-else>No tasks match your search/filter.</h4>
+          <p
+            class="mb-4"
+            v-if="
+              statusFilter === 'all' &&
+              tableData.length === 0 &&
+              !`${search || ''}`.trim()
+            "
+          >
             Click the 'download Streaming Data Loader' button to get started or
             <a href="https://hydroserver.org" target="_blank"
               >read the documentation</a
@@ -78,28 +111,29 @@
 
               <span class="ms-4">{{ item.value }}</span>
               <v-spacer />
-              <!-- <v-chip
-                v-if="getBehindScheduleCountText(statusesOf(item.items as any[]))"
-                :prepend-icon="mdiClockAlertOutline"
-                variant="text"
-                class="ms-4"
-                rounded="xl"
-                color="orange-darken-4"
-              >
-                {{
-                  getBehindScheduleCountText(statusesOf(item.items as any[]))
-                }}
-              </v-chip>
-              <v-chip
-                v-if="getBadCountText(statusesOf(item.items as any[]))"
-                :prepend-icon="mdiAlert"
-                variant="text"
-                class="ms-4"
-                rounded="xl"
-                color="error"
-              >
-                {{ getBadCountText(statusesOf(item.items as any[])) }}
-              </v-chip> -->
+              <div class="d-flex ga-2 align-center mr-2">
+                <v-chip size="small" variant="tonal" color="blue-grey-darken-2">
+                  Total tasks: {{ groupHealthSummary(item.items).total }}
+                </v-chip>
+                <v-chip size="small" variant="tonal" color="green-darken-2">
+                  OK: {{ groupHealthSummary(item.items).ok }}
+                </v-chip>
+                <v-chip size="small" variant="tonal" color="error">
+                  Needs attention: {{ groupHealthSummary(item.items).needsAttention }}
+                </v-chip>
+                <v-chip size="small" variant="tonal" color="blue-grey">
+                  Loading paused: {{ groupHealthSummary(item.items).loadingPaused }}
+                </v-chip>
+                <v-chip size="small" variant="tonal" color="orange-darken-3">
+                  Behind schedule: {{ groupHealthSummary(item.items).behindSchedule }}
+                </v-chip>
+                <v-chip size="small" variant="tonal" color="blue">
+                  Pending: {{ groupHealthSummary(item.items).pending }}
+                </v-chip>
+                <v-chip size="small" variant="tonal" color="grey-darken-1">
+                  Unknown: {{ groupHealthSummary(item.items).unknown }}
+                </v-chip>
+              </div>
               <v-btn-add
                 class="mx-2"
                 color="white"
@@ -196,14 +230,11 @@ import router from '@/router/router'
 import { formatTime } from '@/utils/time'
 import hs, {
   OrchestrationSystem,
-  Status,
   StatusType,
   Task,
 } from '@hydroserver/client'
 import {
-  mdiAlert,
   mdiChevronRight,
-  mdiClockAlertOutline,
   mdiDesktopClassic,
   mdiMagnify,
   mdiPause,
@@ -220,16 +251,81 @@ const props = defineProps<{
 }>()
 
 const { openDataConnectionTableDialog } = storeToRefs(useDataConnectionStore())
-const { workspaceTasks } = storeToRefs(useOrchestrationStore())
+const { workspaceTasks, orchestrationSearch, orchestrationStatusFilter } =
+  storeToRefs(useOrchestrationStore())
 
 const openCreate = ref(false)
 const openDelete = ref(false)
-const search = ref()
+const search = orchestrationSearch
 const orchestrationSystems = ref<OrchestrationSystem[]>([])
 const selectedOrchestrationSystem = ref<OrchestrationSystem>()
 const groupBy = [{ key: 'orchestrationSystemName', order: 'asc' }] as const
 const loading = ref(false)
 const runNowTriggeredByTaskId = reactive<Record<string, boolean>>({})
+const statusFilter = orchestrationStatusFilter
+
+type TaskHealthFilter =
+  | 'all'
+  | 'failed'
+  | 'behind'
+  | 'paused'
+  | 'success'
+  | 'pending'
+
+const classifyTask = (task: {
+  statusName: StatusType
+  schedule?: { paused?: boolean } | null
+}) => {
+  const displayedStatus = getDisplayedStatus(task)
+  if (displayedStatus === 'Loading paused') return 'paused'
+  if (displayedStatus === 'Needs attention') return 'failed'
+  if (displayedStatus === 'Behind schedule') return 'behind'
+  if (displayedStatus === 'OK') return 'success'
+  return 'pending'
+}
+
+const getDisplayedStatus = (task: {
+  statusName: StatusType
+  schedule?: { paused?: boolean } | null
+}) => {
+  if (task.schedule?.paused && task.statusName !== 'Needs attention') {
+    return 'Loading paused' as StatusType
+  }
+  return task.statusName
+}
+
+const groupHealthSummary = (rows: readonly any[]) => {
+  return rows.reduce(
+    (summary, row) => {
+      const task = row?.raw ?? row
+      if (!task || task.isPlaceholder) return summary
+
+      const displayedStatus = getDisplayedStatus({
+        statusName: task.statusName ?? hs.tasks.getStatusText(task),
+        schedule: task.schedule,
+      })
+
+      if (displayedStatus === 'OK') summary.ok += 1
+      else if (displayedStatus === 'Needs attention') summary.needsAttention += 1
+      else if (displayedStatus === 'Loading paused') summary.loadingPaused += 1
+      else if (displayedStatus === 'Behind schedule') summary.behindSchedule += 1
+      else if (displayedStatus === 'Pending') summary.pending += 1
+      else summary.unknown += 1
+
+      summary.total += 1
+      return summary
+    },
+    {
+      ok: 0,
+      needsAttention: 0,
+      loadingPaused: 0,
+      behindSchedule: 0,
+      pending: 0,
+      unknown: 0,
+      total: 0,
+    }
+  )
+}
 
 const fetchOrchestrationData = async (newId: string) => {
   loading.value = true
@@ -267,7 +363,8 @@ watch(
 )
 
 const tableData = computed(() => {
-  const dsList = workspaceTasks.value.map((t) => ({
+  const statusFilterValue = (statusFilter.value || 'all') as TaskHealthFilter
+  const taskRows = workspaceTasks.value.map((t) => ({
     ...t,
     schedule: t.schedule ?? null,
     statusName: hs.tasks.getStatusText(t),
@@ -278,23 +375,30 @@ const tableData = computed(() => {
     userClickedRunNow: !!runNowTriggeredByTaskId[t.id],
   }))
 
-  const existingNames = new Set(dsList.map((ds) => ds.orchestrationSystemName))
+  const filteredTaskRows =
+    statusFilterValue === 'all'
+      ? taskRows
+      : taskRows.filter((task) => classifyTask(task) === statusFilterValue)
 
-  const placeholders = orchestrationSystems.value
-    .filter((os) => !existingNames.has(os.name))
-    .map((os) => ({
-      id: `placeholder-${os.id}`,
-      name: '',
-      statusName: 'Unknown' as StatusType,
-      status: {} as Status,
-      orchestrationSystemName: os.name,
-      orchestrationSystem: JSON.parse(JSON.stringify(os)),
-      schedule: { paused: false, nextRunAt: null } as any,
-      isPlaceholder: true,
-      userClickedRunNow: false,
-    }))
+  const existingNames = new Set(taskRows.map((task) => task.orchestrationSystemName))
 
-  const combined = [...dsList, ...placeholders]
+  const placeholders =
+    statusFilterValue === 'all'
+      ? orchestrationSystems.value
+          .filter((os) => !existingNames.has(os.name))
+          .map((os) => ({
+            id: `placeholder-${os.id}`,
+            name: '',
+            statusName: 'Unknown' as StatusType,
+            orchestrationSystemName: os.name,
+            orchestrationSystem: JSON.parse(JSON.stringify(os)),
+            schedule: { paused: false, nextRunAt: null } as any,
+            isPlaceholder: true,
+            userClickedRunNow: false,
+          }))
+      : []
+
+  const combined = [...filteredTaskRows, ...placeholders]
   return combined.sort((a, b) => {
     if (a.orchestrationSystemName === b.orchestrationSystemName) {
       return a.name.localeCompare(b.name)
@@ -317,13 +421,6 @@ async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
   task.schedule.paused = !task.schedule.paused
   await hs.tasks.update(task)
   await refreshTable()
-}
-
-function statusesOf(rows: any[]): Status[] {
-  return rows
-    .filter((r) => !r.isPlaceholder)
-    .map((r) => (r.status ?? r.raw?.status) as Status)
-    .filter(Boolean)
 }
 
 const isInternalSystem = (item: any) => {
@@ -378,3 +475,9 @@ const headers = [
   },
 ] as const
 </script>
+
+<style scoped>
+.orchestration-table :deep(.v-table__wrapper) {
+  max-height: 62vh;
+}
+</style>

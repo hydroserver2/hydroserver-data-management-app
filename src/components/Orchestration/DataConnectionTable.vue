@@ -24,6 +24,8 @@
       :items="items"
       :search="search"
       :loading="loading"
+      class="data-connection-table"
+      fixed-header
       no-data-text="There's currently no templates for this workspace"
     >
       <template v-slot:item.actions="{ item }">
@@ -125,3 +127,9 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ] as const
 </script>
+
+<style scoped>
+.data-connection-table :deep(.v-table__wrapper) {
+  max-height: 56vh;
+}
+</style>
