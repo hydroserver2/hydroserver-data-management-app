@@ -37,20 +37,33 @@
     </v-toolbar>
 
     <div class="px-4 py-3 border-b">
-      <v-btn-toggle
+      <v-autocomplete
         v-model="statusFilter"
-        mandatory
-        variant="outlined"
+        :items="statusOptions"
+        item-title="title"
+        item-value="value"
+        label="Status filters"
+        multiple
+        clearable
+        hide-details
         density="compact"
-        divided
+        variant="outlined"
+        :prepend-inner-icon="mdiFilterVariant"
+        class="max-w-[420px]"
       >
-        <v-btn value="all">All</v-btn>
-        <v-btn value="failed">Failed</v-btn>
-        <v-btn value="behind">Behind</v-btn>
-        <v-btn value="paused">Paused</v-btn>
-        <v-btn value="success">Success</v-btn>
-        <v-btn value="pending">Pending</v-btn>
-      </v-btn-toggle>
+        <template #selection="{ item, index }">
+          <v-chip
+            color="primary-darken-2"
+            rounded
+            density="comfortable"
+            closable
+            class="mr-1"
+            @click:close="statusFilter.splice(index, 1)"
+          >
+            <span>{{ item.title }}</span>
+          </v-chip>
+        </template>
+      </v-autocomplete>
     </div>
 
     <v-data-table
@@ -74,7 +87,7 @@
           <h4
             class="mt-2"
             v-if="
-              statusFilter === 'all' &&
+              statusFilter.length === 0 &&
               tableData.length === 0 &&
               !`${search || ''}`.trim()
             "
@@ -85,7 +98,7 @@
           <p
             class="mb-4"
             v-if="
-              statusFilter === 'all' &&
+              statusFilter.length === 0 &&
               tableData.length === 0 &&
               !`${search || ''}`.trim()
             "
@@ -263,6 +276,7 @@ import hs, {
 import {
   mdiChevronRight,
   mdiDesktopClassic,
+  mdiFilterVariant,
   mdiMagnify,
   mdiPause,
   mdiPlay,
@@ -291,13 +305,34 @@ const loading = ref(false)
 const runNowTriggeredByTaskId = reactive<Record<string, boolean>>({})
 const statusFilter = orchestrationStatusFilter
 
+watch(
+  statusFilter,
+  (value) => {
+    if (!Array.isArray(value)) {
+      statusFilter.value = []
+      return
+    }
+    if (value.includes('all')) {
+      statusFilter.value = value.filter((entry) => entry !== 'all')
+    }
+  },
+  { immediate: true }
+)
+
 type TaskHealthFilter =
-  | 'all'
   | 'failed'
   | 'behind'
   | 'paused'
   | 'success'
   | 'pending'
+
+const statusOptions = [
+  { title: 'Failed', value: 'failed' },
+  { title: 'Behind schedule', value: 'behind' },
+  { title: 'Paused', value: 'paused' },
+  { title: 'Success', value: 'success' },
+  { title: 'Pending', value: 'pending' },
+] as const
 
 const classifyTask = (task: {
   statusName: StatusType
@@ -390,7 +425,7 @@ watch(
 )
 
 const tableData = computed(() => {
-  const statusFilterValue = (statusFilter.value || 'all') as TaskHealthFilter
+  const activeFilters = new Set(statusFilter.value as TaskHealthFilter[])
   const taskRows = workspaceTasks.value.map((t) => ({
     ...t,
     schedule: t.schedule ?? null,
@@ -403,14 +438,14 @@ const tableData = computed(() => {
   }))
 
   const filteredTaskRows =
-    statusFilterValue === 'all'
+    activeFilters.size === 0
       ? taskRows
-      : taskRows.filter((task) => classifyTask(task) === statusFilterValue)
+      : taskRows.filter((task) => activeFilters.has(classifyTask(task)))
 
   const existingNames = new Set(taskRows.map((task) => task.orchestrationSystemName))
 
   const placeholders =
-    statusFilterValue === 'all'
+    activeFilters.size === 0
       ? orchestrationSystems.value
           .filter((os) => !existingNames.has(os.name))
           .map((os) => ({

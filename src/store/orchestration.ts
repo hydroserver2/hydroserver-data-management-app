@@ -16,7 +16,7 @@ export const useOrchestrationStore = defineStore('orchestration', () => {
   const draftDatastreams = ref<DatastreamExtended[]>([])
   const workspaceTasks = ref<TaskExpanded[]>([])
   const orchestrationSearch = ref('')
-  const orchestrationStatusFilter = ref('all')
+  const orchestrationStatusFilter = ref<string[]>([])
 
   // Fetch all datastreams for the workspace once, then derive linked datastreams from task mappings
   watch(
