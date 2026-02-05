@@ -102,7 +102,7 @@
         class="mr-2"
         @click="openRunHistoryDialog"
       >
-        View full run history
+        {{ openRunHistory ? 'Hide full run history' : 'View full run history' }}
       </v-btn>
     </v-toolbar>
     <v-card class="elevation-3 rounded-b-lg section-card pa-4 last-run-card">
@@ -160,6 +160,82 @@
       <template v-else>
         No runs have been recorded for this task yet.
       </template>
+      <v-expand-transition>
+        <div v-if="openRunHistory" class="mt-4 pt-4 border-t border-[#cfd8dc]">
+          <div class="d-flex align-center mb-3">
+            <h6 class="text-h6">Full run history</h6>
+            <v-spacer />
+            <v-btn
+              variant="text"
+              color="blue-grey-darken-2"
+              :prepend-icon="mdiRefresh"
+              @click="fetchTaskRuns"
+              >Refresh</v-btn
+            >
+          </div>
+
+          <template v-if="runHistoryRows.length">
+            <div
+              v-for="run in runHistoryRows"
+              :key="run.id"
+              class="mb-4"
+            >
+              <div class="d-flex flex-wrap align-center ga-2 mb-4">
+                <TaskStatus :status="run.statusText" :paused="false" />
+                <v-chip size="small" variant="outlined" color="blue-grey-darken-1">
+                  Run ID: {{ run.id }}
+                </v-chip>
+                <v-chip
+                  v-if="run.logReference"
+                  size="small"
+                  variant="outlined"
+                  color="blue-grey-darken-1"
+                >
+                  Log reference: {{ run.logReference }}
+                </v-chip>
+              </div>
+
+              <v-row dense>
+                <v-col cols="12" md="4">
+                  <strong>Workspace</strong>
+                  <div>{{ task?.workspace?.name || '–' }}</div>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <strong>Data connection</strong>
+                  <div>{{ task?.dataConnection?.name || '–' }}</div>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <strong>Task</strong>
+                  <div>{{ task?.name || '–' }}</div>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <strong>Started</strong>
+                  <div>{{ run.startedAt }}</div>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <strong>Finished</strong>
+                  <div>{{ run.finishedAt }}</div>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <strong>Failure reason</strong>
+                  <div>{{ run.failureReason }}</div>
+                </v-col>
+                <v-col cols="12" md="12" v-if="run.runtimeUrl">
+                  <strong>Runtime URL</strong>
+                  <div>
+                    <a :href="run.runtimeUrl" target="_blank">
+                      {{ run.runtimeUrl }}
+                    </a>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
+          </template>
+          <div v-else class="text-medium-emphasis">
+            No run history available yet.
+          </div>
+        </div>
+      </v-expand-transition>
     </v-card>
 
     <v-toolbar
@@ -242,87 +318,6 @@
     />
   </v-dialog>
 
-  <v-dialog v-model="openRunHistory" width="90rem">
-    <v-card>
-      <v-toolbar color="blue-grey" class="section-toolbar">
-        <h6 class="text-h6 ml-4">Task run history</h6>
-        <v-spacer />
-        <v-btn
-          variant="text"
-          color="white"
-          :prepend-icon="mdiRefresh"
-          @click="fetchTaskRuns"
-          >Refresh</v-btn
-        >
-      </v-toolbar>
-      <v-card-text>
-        <v-data-table
-          :headers="runHistoryHeaders"
-          :items="runHistoryRows"
-          :loading="loadingTaskRuns"
-          density="compact"
-        >
-          <template #item.status="{ item }">
-            <TaskStatus :status="item.statusText" :paused="false" />
-          </template>
-          <template #item.runtimeUrl="{ item }">
-            <a v-if="item.runtimeUrl" :href="item.runtimeUrl" target="_blank">
-              {{ item.runtimeUrl }}
-            </a>
-            <span v-else>–</span>
-          </template>
-          <template #item.actions="{ item }">
-            <v-btn
-              size="small"
-              variant="outlined"
-              color="secondary"
-              @click="selectedRunId = item.id"
-            >
-              Inspect
-            </v-btn>
-          </template>
-        </v-data-table>
-
-        <v-sheet
-          v-if="selectedRunDetails"
-          class="mt-4 pa-4 rounded border"
-          color="grey-lighten-4"
-        >
-          <h6 class="text-h6 mb-2">Run details</h6>
-          <v-row dense>
-            <v-col cols="12" md="3">
-              <strong>Status</strong>
-              <div>{{ selectedRunDetails.statusText }}</div>
-            </v-col>
-            <v-col cols="12" md="3">
-              <strong>Started</strong>
-              <div>{{ selectedRunDetails.startedAt }}</div>
-            </v-col>
-            <v-col cols="12" md="3">
-              <strong>Finished</strong>
-              <div>{{ selectedRunDetails.finishedAt }}</div>
-            </v-col>
-            <v-col cols="12" md="3">
-              <strong>Log reference</strong>
-              <div>{{ selectedRunDetails.logReference || '–' }}</div>
-            </v-col>
-            <v-col cols="12" md="12">
-              <strong>Failure reason</strong>
-              <div>{{ selectedRunDetails.failureReason }}</div>
-            </v-col>
-            <v-col cols="12" md="12" v-if="selectedRunDetails.runtimeUrl">
-              <strong>Runtime URL</strong>
-              <div>
-                <a :href="selectedRunDetails.runtimeUrl" target="_blank">
-                  {{ selectedRunDetails.runtimeUrl }}
-                </a>
-              </div>
-            </v-col>
-          </v-row>
-        </v-sheet>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -373,7 +368,6 @@ const openRunHistory = ref(false)
 const task = ref<TaskExpanded | null>(null)
 const taskRuns = ref<TaskRun[]>([])
 const loadingTaskRuns = ref(false)
-const selectedRunId = ref<string | null>(null)
 const { workspaceTasks, workspaceDatastreams } = storeToRefs(
   useOrchestrationStore()
 )
@@ -832,16 +826,6 @@ const latestRunRuntimeUrl = computed(
 )
 const latestRunLogReference = computed(() => getLogReference(task.value?.latestRun))
 
-const runHistoryHeaders = [
-  { key: 'startedAt', title: 'Started' },
-  { key: 'finishedAt', title: 'Finished' },
-  { key: 'status', title: 'Status' },
-  { key: 'failureReason', title: 'Failure reason' },
-  { key: 'runtimeUrl', title: 'Runtime URL' },
-  { key: 'logReference', title: 'Log reference' },
-  { key: 'actions', title: 'Actions', sortable: false },
-]
-
 const runHistoryRows = computed(() => {
   return taskRuns.value.map((run) => ({
     id: run.id,
@@ -854,13 +838,6 @@ const runHistoryRows = computed(() => {
     logReference: getLogReference(run),
     raw: run,
   }))
-})
-
-const selectedRunDetails = computed(() => {
-  if (!selectedRunId.value) return null
-  const row = runHistoryRows.value.find((run) => run.id === selectedRunId.value)
-  if (!row) return null
-  return row
 })
 
 async function togglePaused(
@@ -916,9 +893,9 @@ const fetchTaskRuns = async () => {
 }
 
 const openRunHistoryDialog = async () => {
-  openRunHistory.value = true
+  openRunHistory.value = !openRunHistory.value
+  if (!openRunHistory.value) return
   await fetchTaskRuns()
-  selectedRunId.value = taskRuns.value[0]?.id ?? null
 }
 
 const fetchData = async () => {
