@@ -7,27 +7,43 @@
         values
       </div>
       <div
-        ref="sparklineRef"
         class="h-[100px] w-full cursor-pointer"
         :style="sparklineContainerStyle"
         @click="handleEmit"
-      />
+      >
+        <svg
+          v-if="sparklinePaths.line.length"
+          class="h-full w-full"
+          :viewBox="`0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`"
+          preserveAspectRatio="none"
+        >
+          <path
+            v-for="(d, index) in sparklinePaths.area"
+            :key="`area-${index}`"
+            :d="d"
+            :fill="sparklineColors.fill"
+            stroke="none"
+          />
+          <path
+            v-for="(d, index) in sparklinePaths.line"
+            :key="`line-${index}`"
+            :d="d"
+            :stroke="sparklineColors.line"
+            stroke-width="1"
+            fill="none"
+            vector-effect="non-scaling-stroke"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
     </div>
   </div>
-  <div v-else>
-    No observations
-  </div>
+  <div v-else>No observations</div>
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  watch,
-} from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount, watch } from 'vue'
 import { PropType } from 'vue'
 import { Datastream, TimeSpacingUnit } from '@hydroserver/client'
 import {
@@ -59,15 +75,12 @@ const handleEmit = () => {
 
 const sparklineObservations = ref<ObservationArray>([])
 const loading = ref(true)
-const sparklineRef = ref<HTMLDivElement | null>(null)
-let plotlyApi: any | null = null
 
-const ensurePlotly = async () => {
-  if (plotlyApi) return plotlyApi
-  const PlotlyModule = await import('plotly.js-dist')
-  plotlyApi = (PlotlyModule as any).default ?? PlotlyModule
-  return plotlyApi
-}
+const SPARKLINE_WIDTH = 300
+const SPARKLINE_HEIGHT = 100
+
+type SparklinePoint = { x: number; y: number }
+type SparklineSegment = SparklinePoint[]
 
 const processedObs = computed(() =>
   preProcessData(sparklineObservations.value, props.datastream)
@@ -80,6 +93,101 @@ const getNumericValue = (value: unknown) => {
 
 const validObservations = computed(() =>
   processedObs.value.filter((point) => getNumericValue(point.value) !== null)
+)
+
+const sparklineSegments = computed<SparklineSegment[]>(() => {
+  const segments: SparklineSegment[] = []
+  let current: SparklineSegment = []
+
+  processedObs.value.forEach((point) => {
+    const numericValue = getNumericValue(point.value)
+    if (numericValue === null) {
+      if (current.length) {
+        segments.push(current)
+        current = []
+      }
+      return
+    }
+
+    current.push({
+      x: point.date.getTime(),
+      y: numericValue,
+    })
+  })
+
+  if (current.length) {
+    segments.push(current)
+  }
+
+  return segments
+})
+
+const buildSparklinePaths = (
+  segments: SparklineSegment[]
+): { line: string[]; area: string[] } => {
+  const points = segments.flat()
+  if (!points.length) {
+    return { line: [], area: [] }
+  }
+
+  let xMin = points[0].x
+  let xMax = points[0].x
+  let yMinData = points[0].y
+  let yMaxData = points[0].y
+
+  points.forEach((point) => {
+    if (point.x < xMin) xMin = point.x
+    if (point.x > xMax) xMax = point.x
+    if (point.y < yMinData) yMinData = point.y
+    if (point.y > yMaxData) yMaxData = point.y
+  })
+
+  if (xMin === xMax) {
+    xMin -= 1
+    xMax += 1
+  }
+
+  let yMin = Math.min(yMinData, 0)
+  let yMax = Math.max(yMaxData, 0)
+  if (yMin === yMax) {
+    yMin -= 1
+    yMax += 1
+  }
+
+  const scaleX = (value: number) =>
+    ((value - xMin) / (xMax - xMin)) * SPARKLINE_WIDTH
+  const scaleY = (value: number) =>
+    SPARKLINE_HEIGHT - ((value - yMin) / (yMax - yMin)) * SPARKLINE_HEIGHT
+  const zeroY = scaleY(0)
+
+  const linePaths: string[] = []
+  const areaPaths: string[] = []
+
+  segments.forEach((segment) => {
+    if (!segment.length) return
+    const line = segment
+      .map((point, index) => {
+        const x = scaleX(point.x)
+        const y = scaleY(point.y)
+        return `${index === 0 ? 'M' : 'L'}${x} ${y}`
+      })
+      .join(' ')
+
+    linePaths.push(line)
+
+    if (segment.length < 2) return
+
+    const firstX = scaleX(segment[0].x)
+    const lastX = scaleX(segment[segment.length - 1].x)
+    const area = line + ` L${lastX} ${zeroY}` + ` L${firstX} ${zeroY}` + ' Z'
+    areaPaths.push(area)
+  })
+
+  return { line: linePaths, area: areaPaths }
+}
+
+const sparklinePaths = computed(() =>
+  buildSparklinePaths(sparklineSegments.value)
 )
 
 const normalizeNoDataValue = (value: unknown) => {
@@ -176,65 +284,6 @@ const canShowSparkline = computed(
     hasValidSparklineData.value
 )
 
-const renderSparkline = async () => {
-  if (!sparklineRef.value) return
-
-  const observations = processedObs.value
-  if (!observations.length || !validObservations.value.length) {
-    if ((sparklineRef.value as any)?._fullLayout && plotlyApi) {
-      plotlyApi.purge(sparklineRef.value)
-    }
-    return
-  }
-  const Plotly = await ensurePlotly()
-
-  const colors = sparklineColors.value
-  const xValues = observations.map((dp) => dp.date.getTime())
-  const minX = xValues[0]
-  const maxX = xValues[xValues.length - 1]
-  const xRange =
-    minX === maxX ? [minX - 1, maxX + 1] : [minX, maxX]
-  const trace = {
-    type: 'scattergl',
-    mode: 'lines',
-    x: xValues,
-    y: observations.map((dp) => dp.value),
-    line: { color: colors.line, width: 1 },
-    fill: 'tozeroy',
-    fillcolor: colors.fill,
-    hoverinfo: 'skip',
-  }
-
-  const layout = {
-    margin: { l: 0, r: 0, t: 0, b: 0, pad: 0 },
-    xaxis: {
-      type: 'date',
-      visible: false,
-      showgrid: false,
-      zeroline: false,
-      autorange: false,
-      range: xRange,
-      fixedrange: true,
-    },
-    yaxis: { visible: false, showgrid: false, zeroline: false },
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(0,0,0,0)',
-  }
-
-  const config = {
-    displayModeBar: false,
-    staticPlot: true,
-    responsive: true,
-  }
-
-  const hasPlot = Boolean((sparklineRef.value as any)?._fullLayout)
-  if (hasPlot) {
-    await Plotly.react(sparklineRef.value, [trace], layout, config)
-  } else {
-    await Plotly.newPlot(sparklineRef.value, [trace], layout, config)
-  }
-}
-
 function isStale(timestamp: string | null | undefined) {
   if (!timestamp) return true
   let endTime = new Date(timestamp)
@@ -309,20 +358,10 @@ const formatNumber = (value: string | number): string => {
   return ''
 }
 
-
 onMounted(async () => {
   sparklineObservations.value =
     (await fetchSparklineObservations(props.datastream)) || []
   loading.value = false
-  nextTick(() => {
-    renderSparkline()
-  })
-})
-
-watch(processedObs, () => {
-  nextTick(() => {
-    renderSparkline()
-  })
 })
 
 watch(
@@ -334,10 +373,6 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  if (sparklineRef.value) {
-    if (plotlyApi) {
-      plotlyApi.purge(sparklineRef.value)
-    }
-  }
+  // No cleanup required for SVG-based sparklines.
 })
 </script>
