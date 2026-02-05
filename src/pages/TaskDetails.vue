@@ -43,6 +43,14 @@
         >
           Pause/Run
         </v-btn>
+        <v-btn
+          variant="outlined"
+          color="secondary"
+          :prepend-icon="mdiHistory"
+          @click="openRunHistoryDialog"
+        >
+          Run history
+        </v-btn>
       </v-col>
     </v-row>
 
@@ -83,6 +91,76 @@
         </tr>
       </template>
     </v-data-table>
+
+    <v-toolbar color="blue-grey-darken-1" rounded="t-lg" class="section-toolbar mt-6">
+      <h6 class="text-h6 ml-4">Last run</h6>
+      <v-spacer />
+      <v-btn
+        variant="text"
+        color="white"
+        :prepend-icon="mdiHistory"
+        class="mr-2"
+        @click="openRunHistoryDialog"
+      >
+        View full run history
+      </v-btn>
+    </v-toolbar>
+    <v-card class="elevation-3 rounded-b-lg section-card pa-4 last-run-card">
+      <template v-if="task?.latestRun">
+        <div class="d-flex flex-wrap align-center ga-2 mb-4">
+          <TaskStatus :status="latestRunStatusText" :paused="false" />
+          <v-chip size="small" variant="outlined" color="blue-grey-darken-1">
+            Run ID: {{ task.latestRun.id }}
+          </v-chip>
+          <v-chip
+            size="small"
+            variant="outlined"
+            color="blue-grey-darken-1"
+            v-if="latestRunLogReference"
+          >
+            Log reference: {{ latestRunLogReference }}
+          </v-chip>
+        </div>
+
+        <v-row dense>
+          <v-col cols="12" md="4">
+            <strong>Workspace</strong>
+            <div>{{ task.workspace.name }}</div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <strong>Data connection</strong>
+            <div>{{ task.dataConnection.name }}</div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <strong>Task</strong>
+            <div>{{ task.name }}</div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <strong>Started</strong>
+            <div>{{ formatTimeWithZone(task.latestRun.startedAt) }}</div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <strong>Finished</strong>
+            <div>{{ formatTimeWithZone(task.latestRun.finishedAt) }}</div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <strong>Failure reason</strong>
+            <div>{{ latestRunFailureReason }}</div>
+          </v-col>
+          <v-col cols="12" md="12" v-if="latestRunRuntimeUrl">
+            <strong>Runtime URL</strong>
+            <div>
+              <a :href="latestRunRuntimeUrl" target="_blank">
+                {{ latestRunRuntimeUrl }}
+              </a>
+            </div>
+          </v-col>
+        </v-row>
+      </template>
+      <template v-else>
+        No runs have been recorded for this task yet.
+      </template>
+    </v-card>
 
     <v-toolbar
       color="blue-grey-darken-1"
@@ -163,17 +241,103 @@
       @delete="onDelete"
     />
   </v-dialog>
+
+  <v-dialog v-model="openRunHistory" width="90rem">
+    <v-card>
+      <v-toolbar color="blue-grey" class="section-toolbar">
+        <h6 class="text-h6 ml-4">Task run history</h6>
+        <v-spacer />
+        <v-btn
+          variant="text"
+          color="white"
+          :prepend-icon="mdiRefresh"
+          @click="fetchTaskRuns"
+          >Refresh</v-btn
+        >
+      </v-toolbar>
+      <v-card-text>
+        <v-data-table
+          :headers="runHistoryHeaders"
+          :items="runHistoryRows"
+          :loading="loadingTaskRuns"
+          density="compact"
+        >
+          <template #item.status="{ item }">
+            <TaskStatus :status="item.statusText" :paused="false" />
+          </template>
+          <template #item.runtimeUrl="{ item }">
+            <a v-if="item.runtimeUrl" :href="item.runtimeUrl" target="_blank">
+              {{ item.runtimeUrl }}
+            </a>
+            <span v-else>–</span>
+          </template>
+          <template #item.actions="{ item }">
+            <v-btn
+              size="small"
+              variant="outlined"
+              color="secondary"
+              @click="selectedRunId = item.id"
+            >
+              Inspect
+            </v-btn>
+          </template>
+        </v-data-table>
+
+        <v-sheet
+          v-if="selectedRunDetails"
+          class="mt-4 pa-4 rounded border"
+          color="grey-lighten-4"
+        >
+          <h6 class="text-h6 mb-2">Run details</h6>
+          <v-row dense>
+            <v-col cols="12" md="3">
+              <strong>Status</strong>
+              <div>{{ selectedRunDetails.statusText }}</div>
+            </v-col>
+            <v-col cols="12" md="3">
+              <strong>Started</strong>
+              <div>{{ selectedRunDetails.startedAt }}</div>
+            </v-col>
+            <v-col cols="12" md="3">
+              <strong>Finished</strong>
+              <div>{{ selectedRunDetails.finishedAt }}</div>
+            </v-col>
+            <v-col cols="12" md="3">
+              <strong>Log reference</strong>
+              <div>{{ selectedRunDetails.logReference || '–' }}</div>
+            </v-col>
+            <v-col cols="12" md="12">
+              <strong>Failure reason</strong>
+              <div>{{ selectedRunDetails.failureReason }}</div>
+            </v-col>
+            <v-col cols="12" md="12" v-if="selectedRunDetails.runtimeUrl">
+              <strong>Runtime URL</strong>
+              <div>
+                <a :href="selectedRunDetails.runtimeUrl" target="_blank">
+                  {{ selectedRunDetails.runtimeUrl }}
+                </a>
+              </div>
+            </v-col>
+          </v-row>
+        </v-sheet>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
 import TaskForm from '@/components/Orchestration/TaskForm.vue'
 import Swimlanes from '@/components/Orchestration/Swimlanes.vue'
-import hs, { TaskExpanded, WORKFLOW_TYPES } from '@hydroserver/client'
+import hs, {
+  StatusType,
+  TaskExpanded,
+  TaskRun,
+  WORKFLOW_TYPES,
+} from '@hydroserver/client'
 import router from '@/router/router'
 import DeleteTaskCard from '@/components/Orchestration/DeleteTaskCard.vue'
 import { formatTimeWithZone } from '@/utils/time'
@@ -190,13 +354,12 @@ import {
   mdiInformationOutline,
   mdiDatabaseSettings,
   mdiClockOutline,
-  mdiCogTransfer,
   mdiFormatListNumbered,
-  mdiMessageTextOutline,
   mdiPause,
   mdiCogOutline,
   mdiPencil,
   mdiPlay,
+  mdiRefresh,
   mdiTable,
   mdiDotsHorizontal,
   mdiRenameBoxOutline,
@@ -206,10 +369,91 @@ import {
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
+const openRunHistory = ref(false)
 const task = ref<TaskExpanded | null>(null)
+const taskRuns = ref<TaskRun[]>([])
+const loadingTaskRuns = ref(false)
+const selectedRunId = ref<string | null>(null)
 const { workspaceTasks, workspaceDatastreams } = storeToRefs(
   useOrchestrationStore()
 )
+
+const asResult = (run?: TaskRun | null) => {
+  const value = run?.result as any
+  return value && typeof value === 'object' ? value : {}
+}
+
+const getFailureReason = (run?: TaskRun | null) => {
+  if (!run) return '–'
+  const result = asResult(run)
+  return (
+    (run as any).failureReason ||
+    result.failure_reason ||
+    result.failureReason ||
+    result.error ||
+    result.message ||
+    '–'
+  )
+}
+
+const getRuntimeUrl = (run?: TaskRun | null) => {
+  if (!run) return null
+  const result = asResult(run)
+  return (run as any).runtimeUrl || result.runtime_url || result.runtimeUrl || null
+}
+
+const resolveRuntimeUrlFromTask = (run?: TaskRun | null) => {
+  const sourceUri = (task.value as any)?.dataConnection?.extractor?.settings?.sourceUri
+  if (!sourceUri || typeof sourceUri !== 'string') return null
+
+  const placeholders =
+    ((task.value as any)?.dataConnection?.extractor?.settings
+      ?.placeholderVariables as any[]) || []
+
+  const values: Record<string, string> = {}
+  for (const placeholder of placeholders) {
+    const name = placeholder?.name
+    if (!name) continue
+
+    if (placeholder?.type === 'perTask') {
+      const value = (task.value as any)?.extractorVariables?.[name]
+      if (value !== undefined && value !== null && value !== '') {
+        values[name] = String(value)
+      }
+      continue
+    }
+
+    if (placeholder?.type !== 'runTime') continue
+
+    const runTimeValue = placeholder?.runTimeValue ?? placeholder?.run_time_value
+    if (runTimeValue === 'jobExecutionTime') {
+      const startedAt = run?.startedAt ?? task.value?.latestRun?.startedAt
+      if (startedAt) values[name] = String(startedAt)
+      continue
+    }
+  }
+
+  return sourceUri.replace(/\{([^}]+)\}/g, (_, key) => values[key] ?? `{${key}}`)
+}
+
+const getLogReference = (run?: TaskRun | null) => {
+  if (!run) return null
+  const result = asResult(run)
+  return (
+    (run as any).logReference ||
+    result.log_reference ||
+    result.logReference ||
+    `task-run:${run.id}`
+  )
+}
+
+const getRunStatusText = (run?: TaskRun | null): StatusType => {
+  if (!run) return 'Unknown'
+  if (run.status === 'FAILURE') return 'Needs attention'
+  if (run.status === 'SUCCESS') return 'OK'
+  if (run.status === 'RUNNING') return 'Pending'
+  return 'Unknown'
+}
 
 const scheduleString = computed(() => {
   const schedule = task.value?.schedule
@@ -271,11 +515,6 @@ const taskInformation = computed(() => {
       icon: mdiCalendarSync,
       label: 'Next run',
       value: formatTimeWithZone(task.value.schedule?.nextRunAt),
-    },
-    {
-      icon: mdiMessageTextOutline,
-      label: 'Last run message',
-      value: task.value.latestRun?.result || '–',
     },
     {
       icon: mdiInformationOutline,
@@ -584,6 +823,46 @@ const orchestrationSystemInformation = computed(() => {
   ].filter(Boolean)
 })
 
+const latestRunStatusText = computed(() => getRunStatusText(task.value?.latestRun))
+const latestRunFailureReason = computed(() => getFailureReason(task.value?.latestRun))
+const latestRunRuntimeUrl = computed(
+  () =>
+    getRuntimeUrl(task.value?.latestRun) ??
+    resolveRuntimeUrlFromTask(task.value?.latestRun)
+)
+const latestRunLogReference = computed(() => getLogReference(task.value?.latestRun))
+
+const runHistoryHeaders = [
+  { key: 'startedAt', title: 'Started' },
+  { key: 'finishedAt', title: 'Finished' },
+  { key: 'status', title: 'Status' },
+  { key: 'failureReason', title: 'Failure reason' },
+  { key: 'runtimeUrl', title: 'Runtime URL' },
+  { key: 'logReference', title: 'Log reference' },
+  { key: 'actions', title: 'Actions', sortable: false },
+]
+
+const runHistoryRows = computed(() => {
+  return taskRuns.value.map((run) => ({
+    id: run.id,
+    startedAt: formatTimeWithZone(run.startedAt),
+    finishedAt: formatTimeWithZone(run.finishedAt),
+    status: run.status,
+    statusText: getRunStatusText(run),
+    failureReason: getFailureReason(run),
+    runtimeUrl: getRuntimeUrl(run) ?? resolveRuntimeUrlFromTask(run),
+    logReference: getLogReference(run),
+    raw: run,
+  }))
+})
+
+const selectedRunDetails = computed(() => {
+  if (!selectedRunId.value) return null
+  const row = runHistoryRows.value.find((run) => run.id === selectedRunId.value)
+  if (!row) return null
+  return row
+})
+
 async function togglePaused(
   task: Partial<TaskExpanded> & Pick<TaskExpanded, 'id'>
 ) {
@@ -619,15 +898,39 @@ const onDelete = async () => {
   }
 }
 
+const fetchTaskRuns = async () => {
+  if (!task.value) return
+
+  loadingTaskRuns.value = true
+  try {
+    const response = await hs.tasks.getTaskRuns(task.value.id, {
+      order_by: ['-startedAt'],
+    })
+    taskRuns.value = (response.data as TaskRun[]) || []
+  } catch (error: any) {
+    Snackbar.error(error.message || 'Unable to fetch run history.')
+    console.error('Error fetching task runs', error)
+  } finally {
+    loadingTaskRuns.value = false
+  }
+}
+
+const openRunHistoryDialog = async () => {
+  openRunHistory.value = true
+  await fetchTaskRuns()
+  selectedRunId.value = taskRuns.value[0]?.id ?? null
+}
+
 const fetchData = async () => {
   task.value = (await hs.tasks.getItem(route.params.id.toString(), {
     expand_related: true,
   })) as unknown as TaskExpanded
 
-  console.log('task.value', task.value)
-
   upsertWorkspaceTask(task.value)
   await refreshDatastreams(task.value?.workspace.id)
+  if (openRunHistory.value) {
+    await fetchTaskRuns()
+  }
 }
 
 const onTaskUpdated = async (updated: TaskExpanded) => {
