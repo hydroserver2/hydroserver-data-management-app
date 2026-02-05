@@ -2,7 +2,19 @@
   <div class="my-4 mx-6">
     <v-row class="my-2">
       <v-col cols="12">
-        <WorkspaceToolbar layout="orchestration" title="Job Orchestration" />
+        <WorkspaceToolbar layout="orchestration" title="Job Orchestration">
+          <template #actions>
+            <v-btn
+              :append-icon="mdiChevronRight"
+              color="blue-grey-darken-4"
+              :to="{ name: 'HydroLoader' }"
+              density="comfortable"
+              variant="tonal"
+            >
+              Download Streaming Data Loader
+            </v-btn>
+          </template>
+        </WorkspaceToolbar>
 
         <template v-if="!!selectedWorkspace && openDataConnectionTableDialog">
           <DataConnectionTable :workspace-id="selectedWorkspace.id" />
@@ -25,6 +37,7 @@ import hs from '@hydroserver/client'
 import WorkspaceToolbar from '@/components/Workspace/WorkspaceToolbar.vue'
 import DataConnectionTable from '@/components/Orchestration/DataConnectionTable.vue'
 import { useDataConnectionStore } from '@/store/dataConnection'
+import { mdiChevronRight } from '@mdi/js'
 
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
 const { setWorkspaces } = useWorkspaceStore()

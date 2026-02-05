@@ -15,6 +15,7 @@
       >
         Manage workspaces
       </v-btn>
+      <slot name="actions" />
       <v-btn
         v-if="pendingWorkspaces.length"
         @click="openTransferTable = !openTransferTable"

@@ -60,16 +60,6 @@
       </div>
     </v-toolbar>
 
-    <div class="px-4 py-3 border-b">
-      <v-btn
-        :append-icon="mdiChevronRight"
-        color="white"
-        :to="{ name: 'HydroLoader' }"
-      >
-        Download Streaming Data Loader
-      </v-btn>
-    </div>
-
     <v-data-table
       :group-by="groupBy"
       :headers="headers"
@@ -277,7 +267,6 @@ import router from '@/router/router'
 import { formatTime } from '@/utils/time'
 import hs, { OrchestrationSystem, StatusType, Task } from '@hydroserver/client'
 import {
-  mdiChevronRight,
   mdiDesktopClassic,
   mdiFilterVariant,
   mdiMagnify,
