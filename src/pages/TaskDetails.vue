@@ -107,55 +107,45 @@
     </v-toolbar>
     <v-card class="elevation-3 rounded-b-lg section-card pa-4 last-run-card">
       <template v-if="task?.latestRun">
-        <div class="d-flex flex-wrap align-center ga-2 mb-4">
-          <TaskStatus :status="latestRunStatusText" :paused="false" />
-          <v-chip size="small" variant="outlined" color="blue-grey-darken-1">
-            Run ID: {{ task.latestRun.id }}
-          </v-chip>
-          <v-chip
-            size="small"
-            variant="outlined"
-            color="blue-grey-darken-1"
-            v-if="latestRunLogReference"
-          >
-            Log reference: {{ latestRunLogReference }}
-          </v-chip>
-        </div>
-
         <v-row dense>
-          <v-col cols="12" md="4">
-            <strong>Workspace</strong>
-            <div>{{ task.workspace.name }}</div>
+          <v-col cols="12" md="3">
+            <strong>Status</strong>
+            <div class="mt-1">
+              <TaskStatus :status="latestRunStatusText" :paused="false" />
+            </div>
           </v-col>
-          <v-col cols="12" md="4">
-            <strong>Data connection</strong>
-            <div>{{ task.dataConnection.name }}</div>
-          </v-col>
-          <v-col cols="12" md="4">
-            <strong>Task</strong>
-            <div>{{ task.name }}</div>
-          </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="3">
             <strong>Started</strong>
             <div>{{ formatTimeWithZone(task.latestRun.startedAt) }}</div>
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="3">
             <strong>Finished</strong>
             <div>{{ formatTimeWithZone(task.latestRun.finishedAt) }}</div>
           </v-col>
-          <v-col cols="12" md="4">
-            <strong>Failure reason</strong>
-            <div>{{ latestRunFailureReason }}</div>
-          </v-col>
-          <v-col cols="12" md="12" v-if="latestRunRuntimeUrl">
-            <strong>Runtime URL</strong>
-            <div>
-              <a :href="latestRunRuntimeUrl" target="_blank">
-                {{ latestRunRuntimeUrl }}
-              </a>
-            </div>
+          <v-col cols="12">
+            <strong>Run message</strong>
+            <div>{{ latestRunMessage }}</div>
           </v-col>
         </v-row>
+        <div class="mt-2">
+          <v-btn
+            variant="text"
+            color="blue-grey-darken-2"
+            :prepend-icon="mdiCodeBraces"
+            @click="openLatestLogs = !openLatestLogs"
+          >
+            {{ openLatestLogs ? 'Hide full logs' : 'See full logs' }}
+          </v-btn>
+        </div>
+        <v-expand-transition>
+          <div v-if="openLatestLogs" class="mt-3">
+            <pre
+              class="m-0 rounded-lg border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
+            >
+              {{ formatLogPayload(task.latestRun) }}
+            </pre>
+          </div>
+        </v-expand-transition>
       </template>
       <template v-else>
         No runs have been recorded for this task yet.
@@ -164,14 +154,6 @@
         <div v-if="openRunHistory" class="mt-4 pt-4 border-t border-[#cfd8dc]">
           <div class="d-flex align-center mb-3">
             <h6 class="text-h6">Full run history</h6>
-            <v-spacer />
-            <v-btn
-              variant="text"
-              color="blue-grey-darken-2"
-              :prepend-icon="mdiRefresh"
-              @click="fetchTaskRuns"
-              >Refresh</v-btn
-            >
           </div>
 
           <template v-if="runHistoryRows.length">
@@ -180,55 +162,45 @@
               :key="run.id"
               class="mb-4"
             >
-              <div class="d-flex flex-wrap align-center ga-2 mb-4">
-                <TaskStatus :status="run.statusText" :paused="false" />
-                <v-chip size="small" variant="outlined" color="blue-grey-darken-1">
-                  Run ID: {{ run.id }}
-                </v-chip>
-                <v-chip
-                  v-if="run.logReference"
-                  size="small"
-                  variant="outlined"
-                  color="blue-grey-darken-1"
-                >
-                  Log reference: {{ run.logReference }}
-                </v-chip>
-              </div>
-
               <v-row dense>
-                <v-col cols="12" md="4">
-                  <strong>Workspace</strong>
-                  <div>{{ task?.workspace?.name || '–' }}</div>
+                <v-col cols="12" md="3">
+                  <strong>Status</strong>
+                  <div class="mt-1">
+                    <TaskStatus :status="getRunStatusText(run.raw)" :paused="false" />
+                  </div>
                 </v-col>
-                <v-col cols="12" md="4">
-                  <strong>Data connection</strong>
-                  <div>{{ task?.dataConnection?.name || '–' }}</div>
-                </v-col>
-                <v-col cols="12" md="4">
-                  <strong>Task</strong>
-                  <div>{{ task?.name || '–' }}</div>
-                </v-col>
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="3">
                   <strong>Started</strong>
                   <div>{{ run.startedAt }}</div>
                 </v-col>
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="3">
                   <strong>Finished</strong>
                   <div>{{ run.finishedAt }}</div>
                 </v-col>
-                <v-col cols="12" md="4">
-                  <strong>Failure reason</strong>
-                  <div>{{ run.failureReason }}</div>
-                </v-col>
-                <v-col cols="12" md="12" v-if="run.runtimeUrl">
-                  <strong>Runtime URL</strong>
-                  <div>
-                    <a :href="run.runtimeUrl" target="_blank">
-                      {{ run.runtimeUrl }}
-                    </a>
-                  </div>
+                <v-col cols="12">
+                  <strong>Run message</strong>
+                  <div>{{ run.message }}</div>
                 </v-col>
               </v-row>
+              <div class="mt-2">
+                <v-btn
+                  variant="text"
+                  color="blue-grey-darken-2"
+                  :prepend-icon="mdiCodeBraces"
+                  @click="toggleRunLogs(run.id)"
+                >
+                  {{ openRunLogs[run.id] ? 'Hide full logs' : 'See full logs' }}
+                </v-btn>
+              </div>
+              <v-expand-transition>
+                <div v-if="openRunLogs[run.id]" class="mt-3">
+                  <pre
+                    class="m-0 rounded-lg border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
+                  >
+                    {{ formatLogPayload(run.raw) }}
+                  </pre>
+                </div>
+              </v-expand-transition>
             </div>
           </template>
           <div v-else class="text-medium-emphasis">
@@ -342,7 +314,6 @@ import {
   mdiBroadcast,
   mdiArrowLeft,
   mdiCalendarClock,
-  mdiCalendarSync,
   mdiCardAccountDetails,
   mdiHistory,
   mdiCodeBraces,
@@ -354,7 +325,6 @@ import {
   mdiCogOutline,
   mdiPencil,
   mdiPlay,
-  mdiRefresh,
   mdiTable,
   mdiDotsHorizontal,
   mdiRenameBoxOutline,
@@ -365,6 +335,8 @@ const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
 const openRunHistory = ref(false)
+const openLatestLogs = ref(false)
+const openRunLogs = ref<Record<string, boolean>>({})
 const task = ref<TaskExpanded | null>(null)
 const taskRuns = ref<TaskRun[]>([])
 const loadingTaskRuns = ref(false)
@@ -377,7 +349,7 @@ const asResult = (run?: TaskRun | null) => {
   return value && typeof value === 'object' ? value : {}
 }
 
-const getFailureReason = (run?: TaskRun | null) => {
+const getRunMessage = (run?: TaskRun | null) => {
   if (!run) return '–'
   const result = asResult(run)
   return (
@@ -390,63 +362,25 @@ const getFailureReason = (run?: TaskRun | null) => {
   )
 }
 
-const getRuntimeUrl = (run?: TaskRun | null) => {
-  if (!run) return null
-  const result = asResult(run)
-  return (run as any).runtimeUrl || result.runtime_url || result.runtimeUrl || null
-}
-
-const resolveRuntimeUrlFromTask = (run?: TaskRun | null) => {
-  const sourceUri = (task.value as any)?.dataConnection?.extractor?.settings?.sourceUri
-  if (!sourceUri || typeof sourceUri !== 'string') return null
-
-  const placeholders =
-    ((task.value as any)?.dataConnection?.extractor?.settings
-      ?.placeholderVariables as any[]) || []
-
-  const values: Record<string, string> = {}
-  for (const placeholder of placeholders) {
-    const name = placeholder?.name
-    if (!name) continue
-
-    if (placeholder?.type === 'perTask') {
-      const value = (task.value as any)?.extractorVariables?.[name]
-      if (value !== undefined && value !== null && value !== '') {
-        values[name] = String(value)
-      }
-      continue
-    }
-
-    if (placeholder?.type !== 'runTime') continue
-
-    const runTimeValue = placeholder?.runTimeValue ?? placeholder?.run_time_value
-    if (runTimeValue === 'jobExecutionTime') {
-      const startedAt = run?.startedAt ?? task.value?.latestRun?.startedAt
-      if (startedAt) values[name] = String(startedAt)
-      continue
-    }
-  }
-
-  return sourceUri.replace(/\{([^}]+)\}/g, (_, key) => values[key] ?? `{${key}}`)
-}
-
-const getLogReference = (run?: TaskRun | null) => {
-  if (!run) return null
-  const result = asResult(run)
-  return (
-    (run as any).logReference ||
-    result.log_reference ||
-    result.logReference ||
-    `task-run:${run.id}`
-  )
-}
-
 const getRunStatusText = (run?: TaskRun | null): StatusType => {
   if (!run) return 'Unknown'
   if (run.status === 'FAILURE') return 'Needs attention'
   if (run.status === 'SUCCESS') return 'OK'
   if (run.status === 'RUNNING') return 'Pending'
   return 'Unknown'
+}
+
+const formatLogPayload = (run?: TaskRun | null) => {
+  if (!run) return '–'
+  try {
+    return JSON.stringify(run, null, 2)
+  } catch (error) {
+    return String(run)
+  }
+}
+
+const toggleRunLogs = (runId: string) => {
+  openRunLogs.value[runId] = !openRunLogs.value[runId]
 }
 
 const scheduleString = computed(() => {
@@ -500,22 +434,7 @@ const taskInformation = computed(() => {
       label: 'Schedule',
       value: scheduleString,
     },
-    {
-      icon: mdiHistory,
-      label: 'Last run',
-      value: formatTimeWithZone(task.value.latestRun?.finishedAt),
-    },
-    {
-      icon: mdiCalendarSync,
-      label: 'Next run',
-      value: formatTimeWithZone(task.value.schedule?.nextRunAt),
-    },
-    {
-      icon: mdiInformationOutline,
-      label: 'Status',
-      status: hs.tasks.getStatusText(task.value),
-      paused: task.value.schedule?.paused,
-    },
+    // Removed duplicate Last run / Next run / Status from this summary card.
   ].filter(Boolean)
 })
 
@@ -818,24 +737,14 @@ const orchestrationSystemInformation = computed(() => {
 })
 
 const latestRunStatusText = computed(() => getRunStatusText(task.value?.latestRun))
-const latestRunFailureReason = computed(() => getFailureReason(task.value?.latestRun))
-const latestRunRuntimeUrl = computed(
-  () =>
-    getRuntimeUrl(task.value?.latestRun) ??
-    resolveRuntimeUrlFromTask(task.value?.latestRun)
-)
-const latestRunLogReference = computed(() => getLogReference(task.value?.latestRun))
+const latestRunMessage = computed(() => getRunMessage(task.value?.latestRun))
 
 const runHistoryRows = computed(() => {
   return taskRuns.value.map((run) => ({
     id: run.id,
     startedAt: formatTimeWithZone(run.startedAt),
     finishedAt: formatTimeWithZone(run.finishedAt),
-    status: run.status,
-    statusText: getRunStatusText(run),
-    failureReason: getFailureReason(run),
-    runtimeUrl: getRuntimeUrl(run) ?? resolveRuntimeUrlFromTask(run),
-    logReference: getLogReference(run),
+    message: getRunMessage(run),
     raw: run,
   }))
 })
