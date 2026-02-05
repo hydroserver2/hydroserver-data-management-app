@@ -53,7 +53,7 @@
       </v-btn-toggle>
     </div>
 
-    <v-data-table-virtual
+    <v-data-table
       :group-by="groupBy"
       :headers="headers"
       :items="tableData"
@@ -63,6 +63,9 @@
       @click:row="onRowClick"
       :loading="loading"
       fixed-header
+      hide-default-header
+      hide-default-footer
+      :items-per-page="-1"
     >
       <template v-slot:no-data>
         <div class="text-center pa-4">
@@ -97,9 +100,9 @@
       <template
         v-slot:group-header="{ item, columns, toggleGroup, isGroupOpen }"
       >
-        <tr class="bg-blue-grey-lighten-5" @click="toggleGroup(item)">
-          <td :colspan="columns.length">
-            <div class="d-flex align-center">
+        <tr class="bg-blue-grey-lighten-5 group-summary-row">
+          <th :colspan="columns.length" scope="colgroup">
+            <div class="d-flex align-center group-summary-content" @click="toggleGroup(item)">
               <v-btn
                 :icon="isGroupOpen(item) ? '$expand' : '$next'"
                 color="medium-emphasis"
@@ -153,7 +156,20 @@
                 "
               />
             </div>
-          </td>
+          </th>
+        </tr>
+        <tr v-if="isGroupOpen(item)" class="group-column-header">
+          <th
+            v-for="column in columns"
+            :key="`${item.value}-${column.key}`"
+            scope="col"
+            :class="[
+              'text-caption font-weight-bold text-grey-darken-2',
+              (column as any).key === 'actions' ? 'text-right' : '',
+            ]"
+          >
+            {{ (column as any).title === 'Group' ? '' : (column as any).title }}
+          </th>
         </tr>
       </template>
 
@@ -196,7 +212,7 @@
           >Run requested</span
         >
       </template>
-    </v-data-table-virtual>
+    </v-data-table>
   </v-card>
 
   <v-dialog v-model="openCreate" v-if="selectedOrchestrationSystem">
@@ -469,7 +485,7 @@ const headers = [
     key: 'nextRun',
   },
   {
-    title: 'Pause',
+    title: 'Actions',
     key: 'actions',
     align: 'end',
   },
@@ -479,5 +495,40 @@ const headers = [
 <style scoped>
 .orchestration-table :deep(.v-table__wrapper) {
   max-height: 62vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+}
+.orchestration-table {
+  --group-summary-row-height: 64px;
+  --group-sticky-seam-fix: 1px;
+}
+.group-summary-row {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.group-summary-row th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #eceff1;
+  border-bottom: 1px solid #cfd8dc;
+  padding: 0;
+  text-align: left;
+}
+.group-summary-content {
+  min-height: var(--group-summary-row-height);
+  padding: 8px 12px;
+  flex-wrap: nowrap;
+}
+.group-column-header th {
+  font-weight: 600;
+  background: #eceff1;
+  border-bottom: 1px solid #cfd8dc;
+  padding: 8px 12px;
+  position: sticky;
+  top: calc(var(--group-summary-row-height) - var(--group-sticky-seam-fix));
+  z-index: 3;
 }
 </style>
