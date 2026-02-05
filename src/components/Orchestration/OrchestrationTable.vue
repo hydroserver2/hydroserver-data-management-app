@@ -1,58 +1,63 @@
 <template>
   <v-card>
-    <v-toolbar title="Orchestration systems" flat color="blue-grey">
-      <v-spacer />
-      <v-text-field
-        class="mx-2"
-        clearable
-        v-model="search"
-        :prepend-inner-icon="mdiMagnify"
-        label="Search"
-        hide-details
-        density="compact"
-        variant="underlined"
-        rounded="xl"
-        maxWidth="300"
-      />
+    <v-toolbar flat color="blue-grey" class="gap-2">
+      <v-toolbar-title class="flex-shrink-0">
+        Orchestration systems
+      </v-toolbar-title>
+      <div class="ml-auto flex min-w-0 items-center gap-2">
+        <v-text-field
+          class="w-[200px] max-w-[200px]"
+          clearable
+          v-model="search"
+          :prepend-inner-icon="mdiMagnify"
+          label="Search"
+          hide-details
+          density="compact"
+          variant="underlined"
+          rounded="xl"
+        />
 
-      <v-autocomplete
-        v-model="statusFilter"
-        :items="statusOptions"
-        item-title="title"
-        item-value="value"
-        label="Status filters"
-        multiple
-        clearable
-        hide-details
-        density="compact"
-        variant="outlined"
-        :prepend-inner-icon="mdiFilterVariant"
-        class="mx-2 max-w-[420px]"
-      >
-        <template #selection="{ item, index }">
-          <v-chip
-            color="primary-darken-2"
-            rounded
-            density="comfortable"
-            closable
-            class="mr-1"
-            @click:close="statusFilter.splice(index, 1)"
-          >
-            <span>{{ item.title }}</span>
-          </v-chip>
-        </template>
-      </v-autocomplete>
-      <v-btn
-        @click="openDataConnectionTableDialog = !openDataConnectionTableDialog"
-        rounded="xl"
-        class="mr-4"
-        color="white"
-        variant="outlined"
-        density="comfortable"
-        :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
-      >
-        Manage data connections
-      </v-btn>
+        <v-autocomplete
+          v-model="statusFilter"
+          :items="statusOptions"
+          item-title="title"
+          item-value="value"
+          label="Status filters"
+          multiple
+          clearable
+          hide-details
+          density="compact"
+          variant="outlined"
+          :prepend-inner-icon="mdiFilterVariant"
+          class="w-[260px] max-w-[260px]"
+        >
+          <template #selection="{ item, index }">
+            <v-chip
+              color="primary-darken-2"
+              rounded
+              density="comfortable"
+              closable
+              class="mr-1"
+              @click:close="statusFilter.splice(index, 1)"
+            >
+              <span>{{ item.title }}</span>
+            </v-chip>
+          </template>
+        </v-autocomplete>
+        <v-btn
+          @click="
+            openDataConnectionTableDialog = !openDataConnectionTableDialog
+          "
+          rounded="xl"
+          color="white"
+          variant="outlined"
+          density="comfortable"
+          class="mr-2"
+          :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
+        >
+          Manage data connections
+        </v-btn>
+      </div>
     </v-toolbar>
 
     <div class="px-4 py-3 border-b">
@@ -142,13 +147,16 @@
                   OK: {{ groupHealthSummary(item.items).ok }}
                 </v-chip>
                 <v-chip size="small" variant="tonal" color="error">
-                  Needs attention: {{ groupHealthSummary(item.items).needsAttention }}
+                  Needs attention:
+                  {{ groupHealthSummary(item.items).needsAttention }}
                 </v-chip>
                 <v-chip size="small" variant="tonal" color="blue-grey">
-                  Loading paused: {{ groupHealthSummary(item.items).loadingPaused }}
+                  Loading paused:
+                  {{ groupHealthSummary(item.items).loadingPaused }}
                 </v-chip>
                 <v-chip size="small" variant="tonal" color="orange-darken-3">
-                  Behind schedule: {{ groupHealthSummary(item.items).behindSchedule }}
+                  Behind schedule:
+                  {{ groupHealthSummary(item.items).behindSchedule }}
                 </v-chip>
                 <v-chip size="small" variant="tonal" color="blue">
                   Pending: {{ groupHealthSummary(item.items).pending }}
@@ -267,11 +275,7 @@ import TaskStatus from '@/components/Orchestration/TaskStatus.vue'
 import DeleteOrchestrationSystemCard from '@/components/Orchestration/DeleteOrchestrationSystemCard.vue'
 import router from '@/router/router'
 import { formatTime } from '@/utils/time'
-import hs, {
-  OrchestrationSystem,
-  StatusType,
-  Task,
-} from '@hydroserver/client'
+import hs, { OrchestrationSystem, StatusType, Task } from '@hydroserver/client'
 import {
   mdiChevronRight,
   mdiDesktopClassic,
@@ -318,12 +322,7 @@ watch(
   { immediate: true }
 )
 
-type TaskHealthFilter =
-  | 'failed'
-  | 'behind'
-  | 'paused'
-  | 'success'
-  | 'pending'
+type TaskHealthFilter = 'failed' | 'behind' | 'paused' | 'success' | 'pending'
 
 const statusOptions = [
   { title: 'Failed', value: 'failed' },
@@ -367,9 +366,11 @@ const groupHealthSummary = (rows: readonly any[]) => {
       })
 
       if (displayedStatus === 'OK') summary.ok += 1
-      else if (displayedStatus === 'Needs attention') summary.needsAttention += 1
+      else if (displayedStatus === 'Needs attention')
+        summary.needsAttention += 1
       else if (displayedStatus === 'Loading paused') summary.loadingPaused += 1
-      else if (displayedStatus === 'Behind schedule') summary.behindSchedule += 1
+      else if (displayedStatus === 'Behind schedule')
+        summary.behindSchedule += 1
       else if (displayedStatus === 'Pending') summary.pending += 1
       else summary.unknown += 1
 
@@ -441,7 +442,9 @@ const tableData = computed(() => {
       ? taskRows
       : taskRows.filter((task) => activeFilters.has(classifyTask(task)))
 
-  const existingNames = new Set(taskRows.map((task) => task.orchestrationSystemName))
+  const existingNames = new Set(
+    taskRows.map((task) => task.orchestrationSystemName)
+  )
 
   const placeholders =
     activeFilters.size === 0
