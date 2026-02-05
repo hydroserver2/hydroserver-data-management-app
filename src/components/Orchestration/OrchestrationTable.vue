@@ -29,11 +29,11 @@
           density="compact"
           variant="outlined"
           :prepend-inner-icon="mdiFilterVariant"
-          class="w-[260px] max-w-[260px]"
+          class="w-[280px] max-w-[280px]"
         >
           <template #selection="{ item, index }">
             <v-chip
-              color="primary-darken-2"
+              color="primary-lighten-2"
               rounded
               density="comfortable"
               closable
@@ -311,14 +311,21 @@ watch(
   { immediate: true }
 )
 
-type TaskHealthFilter = 'failed' | 'behind' | 'paused' | 'success' | 'pending'
+type TaskHealthFilter =
+  | 'OK'
+  | 'Needs attention'
+  | 'Loading paused'
+  | 'Behind schedule'
+  | 'Pending'
+  | 'Unknown'
 
 const statusOptions = [
-  { title: 'Failed', value: 'failed' },
-  { title: 'Behind schedule', value: 'behind' },
-  { title: 'Paused', value: 'paused' },
-  { title: 'Success', value: 'success' },
-  { title: 'Pending', value: 'pending' },
+  { title: 'OK', value: 'OK' },
+  { title: 'Needs attention', value: 'Needs attention' },
+  { title: 'Loading paused', value: 'Loading paused' },
+  { title: 'Behind schedule', value: 'Behind schedule' },
+  { title: 'Pending', value: 'Pending' },
+  { title: 'Unknown', value: 'Unknown' },
 ] as const
 
 const classifyTask = (task: {
@@ -326,11 +333,16 @@ const classifyTask = (task: {
   schedule?: { paused?: boolean } | null
 }) => {
   const displayedStatus = getDisplayedStatus(task)
-  if (displayedStatus === 'Loading paused') return 'paused'
-  if (displayedStatus === 'Needs attention') return 'failed'
-  if (displayedStatus === 'Behind schedule') return 'behind'
-  if (displayedStatus === 'OK') return 'success'
-  return 'pending'
+  if (
+    displayedStatus === 'OK' ||
+    displayedStatus === 'Needs attention' ||
+    displayedStatus === 'Loading paused' ||
+    displayedStatus === 'Behind schedule' ||
+    displayedStatus === 'Pending'
+  ) {
+    return displayedStatus
+  }
+  return 'Unknown'
 }
 
 const getDisplayedStatus = (task: {
