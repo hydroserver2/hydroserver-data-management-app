@@ -147,8 +147,8 @@ const buildSparklinePaths = (
     xMax += 1
   }
 
-  let yMin = Math.min(yMinData, 0)
-  let yMax = Math.max(yMaxData, 0)
+  let yMin = yMinData
+  let yMax = yMaxData
   if (yMin === yMax) {
     yMin -= 1
     yMax += 1
@@ -158,7 +158,9 @@ const buildSparklinePaths = (
     ((value - xMin) / (xMax - xMin)) * SPARKLINE_WIDTH
   const scaleY = (value: number) =>
     SPARKLINE_HEIGHT - ((value - yMin) / (yMax - yMin)) * SPARKLINE_HEIGHT
-  const zeroY = scaleY(0)
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max)
+  const zeroY = scaleY(clamp(0, yMin, yMax))
 
   const linePaths: string[] = []
   const areaPaths: string[] = []
