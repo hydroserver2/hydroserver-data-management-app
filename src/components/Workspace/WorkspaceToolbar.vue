@@ -1,5 +1,59 @@
 <template>
-  <v-row class="mt-0 mb-2" align="center">
+  <div v-if="layout === 'orchestration'" class="flex w-full items-center justify-between gap-3">
+    <h5 class="text-h5">{{ title || 'Job orchestration' }}</h5>
+    <div class="flex items-center gap-2">
+      <div class="min-w-0 w-[360px] max-w-[420px]">
+        <WorkspaceSelector class="w-full min-w-0" />
+      </div>
+      <v-btn
+        @click="openWorkspaceTable = !openWorkspaceTable"
+        rounded="xl"
+        color="secondary-darken-3"
+        variant="outlined"
+        density="comfortable"
+        :append-icon="openWorkspaceTable ? mdiMenuUp : mdiMenuDown"
+      >
+        Manage workspaces
+      </v-btn>
+      <v-btn
+        v-if="pendingWorkspaces.length"
+        @click="openTransferTable = !openTransferTable"
+        rounded="xl"
+        color="blue-darken-4"
+      >
+        Pending workspace transfer
+      </v-btn>
+    </div>
+  </div>
+
+  <div
+    v-else-if="compactControls"
+    class="flex items-center gap-2 min-w-0 flex-nowrap"
+  >
+    <div class="min-w-0 w-[360px] max-w-[420px]">
+      <WorkspaceSelector class="w-full min-w-0" />
+    </div>
+    <v-btn
+      @click="openWorkspaceTable = !openWorkspaceTable"
+      rounded="xl"
+      color="secondary-darken-3"
+      variant="outlined"
+      density="comfortable"
+      :append-icon="openWorkspaceTable ? mdiMenuUp : mdiMenuDown"
+    >
+      Manage workspaces
+    </v-btn>
+    <v-btn
+      v-if="pendingWorkspaces.length"
+      @click="openTransferTable = !openTransferTable"
+      rounded="xl"
+      color="blue-darken-4"
+    >
+      Pending workspace transfer
+    </v-btn>
+  </div>
+
+  <v-row v-else class="mt-0 mb-2" align="center">
     <v-col cols="auto">
       <WorkspaceSelector />
     </v-col>
@@ -26,167 +80,169 @@
     </v-col>
   </v-row>
 
-  <v-card v-if="openTransferTable" class="mb-8">
-    <v-toolbar flat color="blue-darken-4">
-      <v-card-title>Pending transfers</v-card-title>
-    </v-toolbar>
-    <v-data-table-virtual
-      :headers="transferHeaders"
-      :items="pendingWorkspaces"
-      :sort-by="[{ key: 'name' }]"
-      item-value="id"
-      class="elevation-3 owned-sites-table"
-      color="secondary-darken-2"
-      :style="{ 'max-height': `200vh` }"
-      fixed-header
-      loading-text="Loading sites..."
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-btn
-          variant="outlined"
-          color="grey-darken-2"
-          @click="onCancelTransfer(item)"
-          :prepend-icon="mdiClose"
-          rounded="xl"
-        >
-          Cancel transfer</v-btn
-        >
-
-        <v-btn
-          color="green-darken-2"
-          @click="onAcceptTransfer(item)"
-          :prepend-icon="mdiCheck"
-          rounded="xl"
-          class="ml-2"
-        >
-          Accept transfer</v-btn
-        >
-      </template>
-    </v-data-table-virtual>
-  </v-card>
-
-  <v-expand-transition>
-    <v-card v-if="openWorkspaceTable" class="mb-8">
-      <v-toolbar flat color="secondary-darken-2">
-        <v-text-field
-          :disabled="!workspaces?.length"
-          class="mx-4"
-          clearable
-          v-model="search"
-          :prepend-inner-icon="mdiMagnify"
-          label="Search"
-          hide-details
-          density="compact"
-          variant="underlined"
-          rounded="xl"
-          maxWidth="300"
-        />
-
-        <v-spacer />
-
-        <PermissionTooltip
-          :has-permission="canCreateWorkspace"
-          message="You don't have permissions to create a workspace. Contact your system administrator to change your permissions."
-        >
-          <template #default>
-            <v-btn-add class="mr-2" color="white" @click="openCreate = true">
-              Add workspace
-            </v-btn-add>
-          </template>
-
-          <template #denied>
-            <v-btn-add disabled class="mr-2" color="white" variant="outlined">
-              Add workspace
-            </v-btn-add>
-          </template>
-        </PermissionTooltip>
+  <div :class="layout === 'orchestration' ? 'mt-3 w-full' : ''">
+    <v-card v-if="openTransferTable" class="mb-8">
+      <v-toolbar flat color="blue-darken-4">
+        <v-card-title>Pending transfers</v-card-title>
       </v-toolbar>
       <v-data-table-virtual
-        :headers="headers"
-        :items="workspaces"
+        :headers="transferHeaders"
+        :items="pendingWorkspaces"
         :sort-by="[{ key: 'name' }]"
-        :search="search"
-        multi-sort
         item-value="id"
         class="elevation-3 owned-sites-table"
         color="secondary-darken-2"
-        :style="{ 'max-height': `400px` }"
+        :style="{ 'max-height': `200vh` }"
         fixed-header
         loading-text="Loading sites..."
       >
-        <template v-slot:no-data>
-          <div class="text-center pa-4" v-if="workspaces.length === 0">
-            <v-icon
-              :icon="mdiBriefcaseOutline"
-              size="48"
-              color="grey lighten-1"
-            />
-            <h4 class="mt-2">No workspaces found</h4>
-            <p class="mb-4">Click the "Add workspace" button to create one.</p>
-            <v-icon
-              class="mb-4"
-              @click="showWorkspaceHelp = !showWorkspaceHelp"
-              color="grey"
-              small
-              :icon="mdiHelpCircleOutline"
-            />
-            <p v-if="showWorkspaceHelp" class="mb-4">
-              A workspace is an organizational concept for access control. All
-              resources in HydroServer (Sites, Datastreams, Units, ETL Systems)
-              belong to a workspace. After creating one, you can assign roles
-              (e.g. Editor, Viewer) to users who need different permission
-              levels.
-            </p>
-          </div>
-        </template>
-        <template #item.isPrivate="{ item }">
-          {{ item.isPrivate ? 'Private' : 'Public' }}
-        </template>
-        <template #item.collaboratorRole="{ item }">
-          {{ getUserRoleName(item) }}
-        </template>
         <template v-slot:item.actions="{ item }">
           <v-btn
-            variant="text"
-            color="primary-darken-2"
-            @click="openDialog(item, 'accessControl')"
-            :icon="mdiLockPlusOutline"
-            rounded="xl"
-          />
-
-          <v-btn
-            :disabled="
-              !hasPermission(
-                PermissionResource.Workspace,
-                PermissionAction.Edit,
-                item
-              )
-            "
-            variant="text"
+            variant="outlined"
             color="grey-darken-2"
-            @click="openDialog(item, 'edit')"
-            :icon="mdiPencil"
+            @click="onCancelTransfer(item)"
+            :prepend-icon="mdiClose"
             rounded="xl"
-          />
+          >
+            Cancel transfer</v-btn
+          >
 
           <v-btn
-            :disabled="
-              !hasPermission(
-                PermissionResource.Workspace,
-                PermissionAction.Delete,
-                item
-              )
-            "
-            variant="text"
-            color="red-darken-2"
-            @click="openDialog(item, 'delete')"
-            :icon="mdiDelete"
+            color="green-darken-2"
+            @click="onAcceptTransfer(item)"
+            :prepend-icon="mdiCheck"
             rounded="xl"
-          />
+            class="ml-2"
+          >
+            Accept transfer</v-btn
+          >
         </template>
       </v-data-table-virtual>
     </v-card>
-  </v-expand-transition>
+
+    <v-expand-transition>
+      <v-card v-if="openWorkspaceTable" class="mb-8">
+        <v-toolbar flat color="secondary-darken-2">
+          <v-text-field
+            :disabled="!workspaces?.length"
+            class="mx-4"
+            clearable
+            v-model="search"
+            :prepend-inner-icon="mdiMagnify"
+            label="Search"
+            hide-details
+            density="compact"
+            variant="underlined"
+            rounded="xl"
+            maxWidth="300"
+          />
+
+          <v-spacer />
+
+          <PermissionTooltip
+            :has-permission="canCreateWorkspace"
+            message="You don't have permissions to create a workspace. Contact your system administrator to change your permissions."
+          >
+            <template #default>
+              <v-btn-add class="mr-2" color="white" @click="openCreate = true">
+                Add workspace
+              </v-btn-add>
+            </template>
+
+            <template #denied>
+              <v-btn-add disabled class="mr-2" color="white" variant="outlined">
+                Add workspace
+              </v-btn-add>
+            </template>
+          </PermissionTooltip>
+        </v-toolbar>
+        <v-data-table-virtual
+          :headers="headers"
+          :items="workspaces"
+          :sort-by="[{ key: 'name' }]"
+          :search="search"
+          multi-sort
+          item-value="id"
+          class="elevation-3 owned-sites-table"
+          color="secondary-darken-2"
+          :style="{ 'max-height': `400px` }"
+          fixed-header
+          loading-text="Loading sites..."
+        >
+          <template v-slot:no-data>
+            <div class="text-center pa-4" v-if="workspaces.length === 0">
+              <v-icon
+                :icon="mdiBriefcaseOutline"
+                size="48"
+                color="grey lighten-1"
+              />
+              <h4 class="mt-2">No workspaces found</h4>
+              <p class="mb-4">Click the "Add workspace" button to create one.</p>
+              <v-icon
+                class="mb-4"
+                @click="showWorkspaceHelp = !showWorkspaceHelp"
+                color="grey"
+                small
+                :icon="mdiHelpCircleOutline"
+              />
+              <p v-if="showWorkspaceHelp" class="mb-4">
+                A workspace is an organizational concept for access control. All
+                resources in HydroServer (Sites, Datastreams, Units, ETL Systems)
+                belong to a workspace. After creating one, you can assign roles
+                (e.g. Editor, Viewer) to users who need different permission
+                levels.
+              </p>
+            </div>
+          </template>
+          <template #item.isPrivate="{ item }">
+            {{ item.isPrivate ? 'Private' : 'Public' }}
+          </template>
+          <template #item.collaboratorRole="{ item }">
+            {{ getUserRoleName(item) }}
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn
+              variant="text"
+              color="primary-darken-2"
+              @click="openDialog(item, 'accessControl')"
+              :icon="mdiLockPlusOutline"
+              rounded="xl"
+            />
+
+            <v-btn
+              :disabled="
+                !hasPermission(
+                  PermissionResource.Workspace,
+                  PermissionAction.Edit,
+                  item
+                )
+              "
+              variant="text"
+              color="grey-darken-2"
+              @click="openDialog(item, 'edit')"
+              :icon="mdiPencil"
+              rounded="xl"
+            />
+
+            <v-btn
+              :disabled="
+                !hasPermission(
+                  PermissionResource.Workspace,
+                  PermissionAction.Delete,
+                  item
+                )
+              "
+              variant="text"
+              color="red-darken-2"
+              @click="openDialog(item, 'delete')"
+              :icon="mdiDelete"
+              rounded="xl"
+            />
+          </template>
+        </v-data-table-virtual>
+      </v-card>
+    </v-expand-transition>
+  </div>
 
   <v-dialog v-model="openCreate" width="30rem">
     <WorkspaceFormCard
@@ -238,6 +294,12 @@ import hs, {
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useUserStore } from '@/store/user'
 import { Snackbar } from '@/utils/notifications'
+
+const { compactControls, layout, title } = defineProps<{
+  compactControls?: boolean
+  layout?: 'default' | 'orchestration'
+  title?: string
+}>()
 import WorkspaceSelector from './WorkspaceSelector.vue'
 import {
   mdiBriefcaseOutline,

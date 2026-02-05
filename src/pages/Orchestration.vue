@@ -2,12 +2,7 @@
   <div class="my-4 mx-6">
     <v-row class="my-2">
       <v-col cols="12">
-        <h5 class="text-h5">Job orchestration</h5>
-        <v-row>
-          <v-col>
-            <WorkspaceToolbar />
-          </v-col>
-        </v-row>
+        <WorkspaceToolbar layout="orchestration" title="Job Orchestration" />
 
         <template v-if="!!selectedWorkspace && openDataConnectionTableDialog">
           <DataConnectionTable :workspace-id="selectedWorkspace.id" />

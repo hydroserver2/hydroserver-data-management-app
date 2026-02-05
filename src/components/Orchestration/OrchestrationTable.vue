@@ -15,28 +15,6 @@
         maxWidth="300"
       />
 
-      <v-btn
-        class="mx-2"
-        :append-icon="mdiChevronRight"
-        color="white"
-        :to="{ name: 'HydroLoader' }"
-      >
-        Download Streaming Data Loader
-      </v-btn>
-      <v-btn
-        @click="openDataConnectionTableDialog = !openDataConnectionTableDialog"
-        rounded="xl"
-        class="mr-4"
-        color="white"
-        variant="outlined"
-        density="comfortable"
-        :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
-      >
-        Manage data connections
-      </v-btn>
-    </v-toolbar>
-
-    <div class="px-4 py-3 border-b">
       <v-autocomplete
         v-model="statusFilter"
         :items="statusOptions"
@@ -49,7 +27,7 @@
         density="compact"
         variant="outlined"
         :prepend-inner-icon="mdiFilterVariant"
-        class="max-w-[420px]"
+        class="mx-2 max-w-[420px]"
       >
         <template #selection="{ item, index }">
           <v-chip
@@ -64,6 +42,27 @@
           </v-chip>
         </template>
       </v-autocomplete>
+      <v-btn
+        @click="openDataConnectionTableDialog = !openDataConnectionTableDialog"
+        rounded="xl"
+        class="mr-4"
+        color="white"
+        variant="outlined"
+        density="comfortable"
+        :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
+      >
+        Manage data connections
+      </v-btn>
+    </v-toolbar>
+
+    <div class="px-4 py-3 border-b">
+      <v-btn
+        :append-icon="mdiChevronRight"
+        color="white"
+        :to="{ name: 'HydroLoader' }"
+      >
+        Download Streaming Data Loader
+      </v-btn>
     </div>
 
     <v-data-table

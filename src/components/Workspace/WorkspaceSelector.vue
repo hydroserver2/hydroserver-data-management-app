@@ -7,6 +7,7 @@
     :return-object="true"
     variant="plain"
     hide-details
+    class="w-full min-w-0"
   >
     <template v-slot:item="{ props, item }">
       <v-list-item
@@ -17,11 +18,11 @@
     </template>
 
     <template #selection="{ item }">
-      <span v-if="item">
+      <span v-if="item" class="block min-w-0 truncate" :title="item.raw.name">
         <span class="opacity-60"> Selected workspace: </span>
         {{ item.raw.name }}
       </span>
-      <span v-else>Select a workspace</span>
+      <span v-else class="block min-w-0 truncate">Select a workspace</span>
     </template>
   </v-select>
 </template>
