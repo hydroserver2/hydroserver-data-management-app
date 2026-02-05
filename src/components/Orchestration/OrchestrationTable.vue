@@ -133,25 +133,55 @@
                 <v-chip size="small" variant="tonal" color="blue-grey-darken-2">
                   Total tasks: {{ groupHealthSummary(item.items).total }}
                 </v-chip>
-                <v-chip size="small" variant="tonal" color="green-darken-2">
+                <v-chip
+                  v-if="groupHealthSummary(item.items).ok > 0"
+                  size="small"
+                  variant="tonal"
+                  color="green-darken-2"
+                >
                   OK: {{ groupHealthSummary(item.items).ok }}
                 </v-chip>
-                <v-chip size="small" variant="tonal" color="error">
+                <v-chip
+                  v-if="groupHealthSummary(item.items).needsAttention > 0"
+                  size="small"
+                  variant="tonal"
+                  color="error"
+                >
                   Needs attention:
                   {{ groupHealthSummary(item.items).needsAttention }}
                 </v-chip>
-                <v-chip size="small" variant="tonal" color="blue-grey">
+                <v-chip
+                  v-if="groupHealthSummary(item.items).loadingPaused > 0"
+                  size="small"
+                  variant="tonal"
+                  color="blue-grey"
+                >
                   Loading paused:
                   {{ groupHealthSummary(item.items).loadingPaused }}
                 </v-chip>
-                <v-chip size="small" variant="tonal" color="orange-darken-3">
+                <v-chip
+                  v-if="groupHealthSummary(item.items).behindSchedule > 0"
+                  size="small"
+                  variant="tonal"
+                  color="orange-darken-3"
+                >
                   Behind schedule:
                   {{ groupHealthSummary(item.items).behindSchedule }}
                 </v-chip>
-                <v-chip size="small" variant="tonal" color="blue">
+                <v-chip
+                  v-if="groupHealthSummary(item.items).pending > 0"
+                  size="small"
+                  variant="tonal"
+                  color="blue"
+                >
                   Pending: {{ groupHealthSummary(item.items).pending }}
                 </v-chip>
-                <v-chip size="small" variant="tonal" color="grey-darken-1">
+                <v-chip
+                  v-if="groupHealthSummary(item.items).unknown > 0"
+                  size="small"
+                  variant="tonal"
+                  color="grey-darken-1"
+                >
                   Unknown: {{ groupHealthSummary(item.items).unknown }}
                 </v-chip>
               </div>
