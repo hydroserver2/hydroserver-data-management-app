@@ -6,7 +6,7 @@
       </v-toolbar-title>
       <div class="ml-auto flex min-w-0 items-center gap-2">
         <v-text-field
-          class="w-[200px] max-w-[200px]"
+          class="w-[250px] max-w-[250px]"
           clearable
           v-model="search"
           :prepend-inner-icon="mdiMagnify"
@@ -66,9 +66,20 @@
     <div class="orchestration-table">
       <div
         v-if="loading"
-        class="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500"
+        class="rounded-lg border border-slate-200 bg-white p-6"
       >
-        Loading orchestration tasks...
+        <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
+          <div class="flex items-center gap-3 text-sm text-slate-600">
+            <v-progress-circular
+              indeterminate
+              size="20"
+              width="2"
+              color="blue-grey-darken-1"
+            />
+            <span class="font-medium">Loading orchestration tasks...</span>
+          </div>
+        </div>
+        <v-skeleton-loader type="table" class="rounded-md" />
       </div>
 
       <div
