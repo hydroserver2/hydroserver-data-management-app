@@ -63,8 +63,11 @@
       </div>
     </v-toolbar>
 
-    <div class="orchestration-table mt-2">
-      <div v-if="loading" class="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500">
+    <div class="orchestration-table">
+      <div
+        v-if="loading"
+        class="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500"
+      >
         Loading orchestration tasks...
       </div>
 
@@ -74,10 +77,7 @@
       >
         <h4
           class="mt-2 text-base font-semibold text-slate-700"
-          v-if="
-            statusFilter.length === 0 &&
-            !`${search || ''}`.trim()
-          "
+          v-if="statusFilter.length === 0 && !`${search || ''}`.trim()"
         >
           You have not registered any orchestration systems.
         </h4>
@@ -86,13 +86,13 @@
         </h4>
         <p
           class="mt-2"
-          v-if="
-            statusFilter.length === 0 &&
-            !`${search || ''}`.trim()
-          "
+          v-if="statusFilter.length === 0 && !`${search || ''}`.trim()"
         >
           Click the 'download Streaming Data Loader' button to get started or
-          <a href="https://hydroserver.org" target="_blank" class="text-blue-600 underline"
+          <a
+            href="https://hydroserver.org"
+            target="_blank"
+            class="text-blue-600 underline"
             >read the documentation</a
           >
           to learn more.
@@ -103,7 +103,7 @@
         <section
           v-for="group in groupList"
           :key="group.name"
-          class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+          class="overflow-hidden rounded-b-lg border border-slate-200 bg-white shadow-sm"
         >
           <div
             role="button"
@@ -198,37 +198,52 @@
           </div>
 
           <div v-if="isGroupOpen(group.name)" class="border-t border-slate-200">
-            <div class="max-h-[62vh] overflow-auto" ref="bodyScrollRef" @scroll.passive="onBodyScroll">
+            <div
+              class="max-h-[62vh] overflow-auto"
+              ref="bodyScrollRef"
+              @scroll.passive="onBodyScroll"
+            >
               <table class="w-full table-fixed text-sm whitespace-nowrap">
-                <thead class="sticky top-0 z-10 bg-slate-50 text-xs font-semibold text-slate-600">
+                <thead
+                  class="sticky top-0 z-10 bg-slate-50 text-xs font-semibold text-slate-600"
+                >
                   <tr>
                     <th class="px-3 py-2 text-left">Task name</th>
                     <th class="px-3 py-2 text-left">Data connection</th>
                     <th class="px-3 py-2 text-left">Status</th>
-                    <th class="px-3 py-2 text-left">Last run</th>
-                    <th class="px-3 py-2 text-left">Next run</th>
+                    <th class="px-3 py-2 text-left">Last / Next run</th>
                     <th class="px-3 py-2 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody v-if="openGroupRows.length === 0">
                   <tr>
-                    <td colspan="6" class="px-3 py-6 text-center text-sm text-slate-500">
+                    <td
+                      colspan="5"
+                      class="px-3 py-6 text-center text-sm text-slate-500"
+                    >
                       No tasks registered for this orchestration system.
                     </td>
                   </tr>
                 </tbody>
                 <tbody v-else>
-                  <tr class="border-0" :style="{ height: `${virtualPaddingTop}px` }">
-                    <td colspan="6"></td>
+                  <tr
+                    class="border-0"
+                    :style="{ height: `${virtualPaddingTop}px` }"
+                  >
+                    <td colspan="5"></td>
                   </tr>
                   <tr
                     v-for="row in virtualRows"
                     :key="row.id"
-                    class="h-14 border-b border-slate-100 hover:bg-slate-50"
-                    :class="row.isPlaceholder ? 'text-slate-400' : 'cursor-pointer'"
+                    class="h-20 border-b border-slate-100 hover:bg-slate-50"
+                    :class="
+                      row.isPlaceholder ? 'text-slate-400' : 'cursor-pointer'
+                    "
                     @click="onRowClick(row)"
                   >
-                    <td class="px-3 py-2 font-medium text-slate-800 truncate">
+                    <td
+                      class="px-3 py-2 font-medium text-slate-800 whitespace-normal break-words"
+                    >
                       {{ row.name || '—' }}
                     </td>
                     <td class="px-3 py-2 text-slate-600 truncate">
@@ -243,10 +258,24 @@
                       <span v-else class="text-slate-400">—</span>
                     </td>
                     <td class="px-3 py-2 text-slate-600">
-                      {{ row.lastRun }}
-                    </td>
-                    <td class="px-3 py-2 text-slate-600">
-                      {{ row.nextRun }}
+                      <div class="flex flex-col gap-1">
+                        <div
+                          class="text-xs uppercase tracking-wide text-slate-400"
+                        >
+                          Last run
+                        </div>
+                        <div class="text-sm text-slate-700">
+                          {{ row.lastRun }}
+                        </div>
+                        <div
+                          class="text-xs uppercase tracking-wide text-slate-400"
+                        >
+                          Next run
+                        </div>
+                        <div class="text-sm text-slate-700">
+                          {{ row.nextRun }}
+                        </div>
+                      </div>
                     </td>
                     <td class="px-3 py-2 text-right">
                       <div class="flex items-center justify-end gap-2">
@@ -258,7 +287,11 @@
                           @click.stop="togglePaused(row)"
                         />
                         <v-btn
-                          v-if="!row.isPlaceholder && isInternalSystem(row) && !row.userClickedRunNow"
+                          v-if="
+                            !row.isPlaceholder &&
+                            isInternalSystem(row) &&
+                            !row.userClickedRunNow
+                          "
                           class="ml-2"
                           variant="outlined"
                           color="green-darken-3"
@@ -268,7 +301,11 @@
                           Run now
                         </v-btn>
                         <span
-                          v-else-if="!row.isPlaceholder && isInternalSystem(row) && row.userClickedRunNow"
+                          v-else-if="
+                            !row.isPlaceholder &&
+                            isInternalSystem(row) &&
+                            row.userClickedRunNow
+                          "
                           class="text-xs font-semibold text-slate-500"
                         >
                           Run requested
@@ -276,8 +313,11 @@
                       </div>
                     </td>
                   </tr>
-                  <tr class="border-0" :style="{ height: `${virtualPaddingBottom}px` }">
-                    <td colspan="6"></td>
+                  <tr
+                    class="border-0"
+                    :style="{ height: `${virtualPaddingBottom}px` }"
+                  >
+                    <td colspan="5"></td>
                   </tr>
                 </tbody>
               </table>
@@ -365,7 +405,7 @@ const bodyScrollTop = ref(0)
 const bodyHeight = ref(0)
 let resizeObserver: ResizeObserver | null = null
 
-const ROW_HEIGHT = 56
+const ROW_HEIGHT = 80
 const OVERSCAN = 6
 
 watch(
@@ -496,9 +536,7 @@ watch(
   { immediate: true }
 )
 
-const searchText = computed(() =>
-  `${search.value || ''}`.trim().toLowerCase()
-)
+const searchText = computed(() => `${search.value || ''}`.trim().toLowerCase())
 
 const resolveGroupName = (task: any) => {
   const directName = task?.orchestrationSystem?.name
@@ -559,6 +597,14 @@ const filteredTaskRows = computed(() => {
   })
 })
 
+const sortTaskRowsByName = (rows: any[]) =>
+  rows.sort((a, b) =>
+    `${a?.name ?? ''}`.localeCompare(`${b?.name ?? ''}`, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  )
+
 const includeEmptyGroups = computed(
   () =>
     searchText.value.length === 0 &&
@@ -609,6 +655,7 @@ const groupList = computed(() => {
 
   const groups = Array.from(map.values()).map((group) => ({
     ...group,
+    items: sortTaskRowsByName(group.items),
     summary: groupHealthSummary(group.items),
   }))
 
@@ -645,7 +692,10 @@ const virtualRows = computed(() =>
 const virtualPaddingTop = computed(() => virtualStart.value * ROW_HEIGHT)
 const virtualPaddingBottom = computed(() => {
   const rendered = virtualRows.value.length * ROW_HEIGHT
-  return Math.max(0, totalRows.value * ROW_HEIGHT - virtualPaddingTop.value - rendered)
+  return Math.max(
+    0,
+    totalRows.value * ROW_HEIGHT - virtualPaddingTop.value - rendered
+  )
 })
 
 const isGroupOpen = (groupName: string) => openGroupName.value === groupName
