@@ -376,7 +376,12 @@ import TaskStatus from '@/components/Orchestration/TaskStatus.vue'
 import DeleteOrchestrationSystemCard from '@/components/Orchestration/DeleteOrchestrationSystemCard.vue'
 import router from '@/router/router'
 import { formatTime } from '@/utils/time'
-import hs, { OrchestrationSystem, StatusType, Task } from '@hydroserver/client'
+import hs, {
+  OrchestrationSystem,
+  StatusType,
+  Task,
+  TaskExpanded,
+} from '@hydroserver/client'
 import {
   mdiFilterVariant,
   mdiMagnify,
@@ -418,6 +423,10 @@ let resizeObserver: ResizeObserver | null = null
 
 const ROW_HEIGHT = 80
 const OVERSCAN = 6
+const POLL_INTERVAL_MS = 4000
+const POLL_MAX_ATTEMPTS = 20
+
+const taskPollTimeouts = new Map<string, number>()
 
 watch(
   statusFilter,
@@ -739,12 +748,61 @@ const observeBody = () => {
   resizeObserver.observe(el)
 }
 
+const upsertWorkspaceTask = (t: TaskExpanded | null) => {
+  if (!t) return
+  const next = [...workspaceTasks.value]
+  const index = next.findIndex((p) => p.id === t.id)
+  if (index !== -1) next[index] = t as any
+  else next.push(t as any)
+  workspaceTasks.value = next as any
+}
+
+const stopTaskPolling = (taskId: string) => {
+  const timeoutId = taskPollTimeouts.get(taskId)
+  if (timeoutId) {
+    window.clearTimeout(timeoutId)
+  }
+  taskPollTimeouts.delete(taskId)
+}
+
+const scheduleTaskPoll = (taskId: string, attempt = 0) => {
+  stopTaskPolling(taskId)
+  if (attempt > POLL_MAX_ATTEMPTS) {
+    runNowTriggeredByTaskId[taskId] = false
+    return
+  }
+
+  const timeoutId = window.setTimeout(async () => {
+    try {
+      const updated = await hs.tasks.getItem(taskId, {
+        expand_related: true,
+      })
+      if (updated) {
+        upsertWorkspaceTask(updated as any)
+        const status = updated.latestRun?.status
+        if (status && status !== 'RUNNING') {
+          runNowTriggeredByTaskId[taskId] = false
+          stopTaskPolling(taskId)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error polling task status', error)
+    }
+    scheduleTaskPoll(taskId, attempt + 1)
+  }, POLL_INTERVAL_MS)
+
+  taskPollTimeouts.set(taskId, timeoutId)
+}
+
 async function runTaskNow(task: Partial<Task> & Pick<Task, 'id'>) {
   runNowTriggeredByTaskId[task.id] = true
   try {
     await hs.tasks.runTask(task.id)
-  } finally {
-    await refreshTable()
+    scheduleTaskPoll(task.id, 0)
+  } catch (error) {
+    runNowTriggeredByTaskId[task.id] = false
+    console.error('Error running task now', error)
   }
 }
 
@@ -793,6 +851,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (resizeObserver) resizeObserver.disconnect()
+  taskPollTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId))
+  taskPollTimeouts.clear()
 })
 
 const isInternalSystem = (item: any) => {
