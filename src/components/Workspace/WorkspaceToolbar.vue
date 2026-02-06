@@ -1,37 +1,45 @@
 <template>
-  <div v-if="layout === 'orchestration'" class="flex w-full items-center justify-between gap-3">
-    <h5 class="text-h5">{{ title || 'Job orchestration' }}</h5>
-    <div class="flex items-center gap-2">
-      <div class="min-w-0 w-[360px] max-w-[420px]">
-        <WorkspaceSelector class="w-full min-w-0" />
-      </div>
-      <v-btn
-        @click="openWorkspaceTable = !openWorkspaceTable"
-        rounded="xl"
-        color="secondary-darken-3"
-        variant="outlined"
-        density="comfortable"
-        :append-icon="openWorkspaceTable ? mdiMenuUp : mdiMenuDown"
-      >
-        Manage workspaces
-      </v-btn>
-      <slot name="actions" />
-      <v-btn
-        v-if="pendingWorkspaces.length"
-        @click="openTransferTable = !openTransferTable"
-        rounded="xl"
-        color="blue-darken-4"
-      >
-        Pending workspace transfer
-      </v-btn>
-    </div>
+  <div v-if="layout === 'orchestration'" class="w-full">
+    <v-row class="mt-0 mb-2" align="center">
+      <v-col cols="auto">
+        <h5 class="text-h5">{{ title || 'Job orchestration' }}</h5>
+      </v-col>
+      <v-spacer />
+      <v-col cols="auto">
+        <WorkspaceSelector />
+      </v-col>
+      <v-col cols="12" sm="auto">
+        <v-btn
+          @click="openWorkspaceTable = !openWorkspaceTable"
+          rounded="xl"
+          color="secondary-darken-3"
+          variant="outlined"
+          density="comfortable"
+          :append-icon="openWorkspaceTable ? mdiMenuUp : mdiMenuDown"
+        >
+          Manage workspaces
+        </v-btn>
+      </v-col>
+      <v-col v-if="$slots.actions" cols="auto">
+        <slot name="actions" />
+      </v-col>
+      <v-col cols="12" sm="auto" v-if="pendingWorkspaces.length">
+        <v-btn
+          @click="openTransferTable = !openTransferTable"
+          rounded="xl"
+          color="blue-darken-4"
+        >
+          Pending workspace transfer
+        </v-btn>
+      </v-col>
+    </v-row>
   </div>
 
   <div
     v-else-if="compactControls"
     class="flex items-center gap-2 min-w-0 flex-nowrap"
   >
-    <div class="min-w-0 w-[360px] max-w-[420px]">
+    <div class="min-w-0 w-[390px] max-w-[450px]">
       <WorkspaceSelector class="w-full min-w-0" />
     </div>
     <v-btn

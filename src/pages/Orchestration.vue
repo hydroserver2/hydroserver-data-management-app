@@ -1,6 +1,6 @@
 <template>
   <div class="my-4 mx-6">
-    <v-row class="my-2">
+    <v-row class="my-1">
       <v-col cols="12">
         <WorkspaceToolbar layout="orchestration" title="Job Orchestration">
           <template #actions>
