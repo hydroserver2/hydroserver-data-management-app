@@ -416,7 +416,7 @@ const statusFilter = orchestrationStatusFilter
 const openGroupName = ref<string | null>(null)
 const hasAutoOpened = ref(false)
 
-const bodyScrollRef = ref<HTMLElement | null>(null)
+const bodyScrollRef = ref<HTMLElement | HTMLElement[] | null>(null)
 const bodyScrollTop = ref(0)
 const bodyHeight = ref(0)
 let resizeObserver: ResizeObserver | null = null
@@ -729,16 +729,23 @@ const onBodyScroll = (event: Event) => {
   bodyScrollTop.value = target.scrollTop
 }
 
+const getBodyScrollEl = () => {
+  const value = bodyScrollRef.value
+  if (Array.isArray(value)) return value[0] ?? null
+  return value ?? null
+}
+
 const resetVirtualScroll = () => {
   bodyScrollTop.value = 0
-  if (bodyScrollRef.value) {
-    bodyScrollRef.value.scrollTop = 0
+  const el = getBodyScrollEl()
+  if (el) {
+    el.scrollTop = 0
   }
 }
 
 const observeBody = () => {
-  const el = bodyScrollRef.value
-  if (!el) return
+  const el = getBodyScrollEl()
+  if (!el || !(el instanceof Element)) return
   const updateHeight = () => {
     bodyHeight.value = el.clientHeight
   }
