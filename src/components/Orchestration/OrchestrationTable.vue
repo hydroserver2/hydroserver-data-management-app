@@ -29,6 +29,9 @@
           density="compact"
           variant="outlined"
           :prepend-inner-icon="mdiFilterVariant"
+          autocomplete="off"
+          name="orchestration-status-filter"
+          spellcheck="false"
           class="w-[280px] max-w-[280px]"
         >
           <template #selection="{ item, index }">
