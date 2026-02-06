@@ -125,7 +125,7 @@
             <div>{{ latestRunMessage }}</div>
           </v-col>
           <v-col cols="12" v-if="latestRunRuntimeUrl">
-            <strong>Runtime source URL</strong>
+            <strong>Runtime source URI</strong>
             <div>
               <div class="d-flex align-center ga-2">
                 <span class="break-all">{{ latestRunRuntimeUrl }}</span>
@@ -154,11 +154,50 @@
         </div>
         <v-expand-transition>
           <div v-if="openLatestLogs" class="mt-3">
-            <pre
-              class="m-0 rounded-lg border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
-            >
-              {{ formatLogPayload(task.latestRun) }}
-            </pre>
+            <div class="grid gap-3">
+              <div
+                v-for="(section, idx) in buildLogSections(task.latestRun)"
+                :key="`${section.title}-${idx}`"
+                class="grid gap-2"
+              >
+                <div
+                  class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
+                >
+                  {{ section.title }}
+                </div>
+                <div v-if="section.type === 'lines'" class="grid gap-1.5">
+                  <div
+                    v-for="(entry, entryIdx) in section.entries"
+                    :key="entryIdx"
+                    class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
+                  >
+                    <span
+                      v-if="entry.timestamp"
+                      class="tabular-nums text-slate-600"
+                    >
+                      {{ entry.timestamp }}
+                    </span>
+                    <span
+                      v-if="entry.level"
+                      :class="[
+                        'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
+                        logLevelClass(entry.level),
+                      ]"
+                    >
+                      {{ entry.level }}
+                    </span>
+                    <span class="whitespace-pre-wrap break-words">{{
+                      entry.message
+                    }}</span>
+                  </div>
+                </div>
+                <pre
+                  v-else
+                  class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
+                  >{{ section.text }}</pre
+                >
+              </div>
+            </div>
           </div>
         </v-expand-transition>
       </template>
@@ -193,7 +232,7 @@
                     <div>{{ run.message }}</div>
                   </v-col>
                   <v-col cols="12" v-if="run.runtimeUrl">
-                    <strong>Runtime source URL</strong>
+                    <strong>Runtime source URI</strong>
                     <div>
                       <div class="d-flex align-center ga-2">
                         <span class="break-all">{{ run.runtimeUrl }}</span>
@@ -224,12 +263,53 @@
                 </div>
                 <v-expand-transition>
                   <div v-if="openRunLogs[run.id]" class="mt-3">
-                    <pre
-                      class="m-0 rounded-lg border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
-                    >
-                    {{ formatLogPayload(run.raw) }}
-                  </pre
-                    >
+                    <div class="grid gap-3">
+                      <div
+                        v-for="(section, idx) in buildLogSections(run.raw)"
+                        :key="`${section.title}-${idx}`"
+                        class="grid gap-2"
+                      >
+                        <div
+                          class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
+                        >
+                          {{ section.title }}
+                        </div>
+                        <div
+                          v-if="section.type === 'lines'"
+                          class="grid gap-1.5"
+                        >
+                          <div
+                            v-for="(entry, entryIdx) in section.entries"
+                            :key="entryIdx"
+                            class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
+                          >
+                            <span
+                              v-if="entry.timestamp"
+                              class="tabular-nums text-slate-600"
+                            >
+                              {{ entry.timestamp }}
+                            </span>
+                            <span
+                              v-if="entry.level"
+                              :class="[
+                                'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
+                                logLevelClass(entry.level),
+                              ]"
+                            >
+                              {{ entry.level }}
+                            </span>
+                            <span class="whitespace-pre-wrap break-words">{{
+                              entry.message
+                            }}</span>
+                          </div>
+                        </div>
+                        <pre
+                          v-else
+                          class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
+                          >{{ section.text }}</pre
+                        >
+                      </div>
+                    </div>
                   </div>
                 </v-expand-transition>
               </div>
@@ -497,6 +577,159 @@ const formatLogPayload = (run?: TaskRun | null) => {
   } catch (error) {
     return String(result)
   }
+}
+
+type LogEntry = {
+  timestamp?: string
+  level?: string
+  message: string
+}
+
+type LogSection =
+  | {
+      title: string
+      type: 'lines'
+      entries: LogEntry[]
+    }
+  | {
+      title: string
+      type: 'text'
+      text: string
+    }
+
+const logLevelClass = (level?: string) => {
+  const value = (level || '').toLowerCase()
+  if (value.includes('error') || value.includes('critical')) {
+    return 'bg-rose-50 text-rose-700 border-rose-200'
+  }
+  if (value.includes('warn')) {
+    return 'bg-amber-50 text-amber-700 border-amber-200'
+  }
+  if (value.includes('debug')) {
+    return 'bg-slate-100 text-slate-600 border-slate-200'
+  }
+  return 'bg-sky-50 text-sky-700 border-sky-200'
+}
+
+const prettyJson = (value: any) => {
+  try {
+    return JSON.stringify(value, null, 2)
+  } catch (error) {
+    return String(value)
+  }
+}
+
+const normalizeLogEntries = (result: any): LogEntry[] => {
+  if (Array.isArray(result?.log_entries) || Array.isArray(result?.logEntries)) {
+    const entries = (result.log_entries || result.logEntries) as any[]
+    return entries.map((entry) => ({
+      timestamp: entry.timestamp || entry.time || '',
+      level: entry.level || entry.levelname || '',
+      message: entry.message || entry.msg || String(entry),
+    }))
+  }
+
+  if (typeof result?.logs === 'string') {
+    return result.logs
+      .split('\n')
+      .map((line: string) => line.trim())
+      .filter(Boolean)
+      .map((line: string) => {
+        const match = line.match(/^(\S+)\s+([A-Z]+)\s+(.*)$/)
+        if (match) {
+          return {
+            timestamp: match[1],
+            level: match[2],
+            message: match[3],
+          }
+        }
+        return { message: line }
+      })
+  }
+
+  return []
+}
+
+const stageFromMessage = (message: string) => {
+  const lower = message.toLowerCase()
+  if (lower.includes('starting extract')) return 'Extract'
+  if (lower.includes('starting transform')) return 'Transform'
+  if (lower.includes('starting load')) return 'Load'
+  if (lower.includes('resolving runtime var')) return 'Extract'
+  if (lower.includes('requesting data from')) return 'Extract'
+  if (lower.includes('standardized dataframe')) return 'Transform'
+  if (lower.includes('uploading')) return 'Load'
+  return null
+}
+
+const buildLogSections = (run?: TaskRun | null): LogSection[] => {
+  if (!run) return [{ title: 'Logs', type: 'text', text: '–' }]
+  const result = asResult(run)
+  const sections: LogSection[] = []
+
+  const entries = normalizeLogEntries(result)
+  if (entries.length) {
+    const grouped: LogSection[] = []
+    let currentTitle = 'Logs'
+    let currentEntries: LogEntry[] = []
+
+    const pushSection = () => {
+      if (currentEntries.length) {
+        grouped.push({
+          title: currentTitle,
+          type: 'lines',
+          entries: currentEntries,
+        })
+      }
+    }
+
+    entries.forEach((entry) => {
+      const nextStage = stageFromMessage(entry.message || '')
+      if (nextStage && nextStage !== currentTitle) {
+        pushSection()
+        currentTitle = nextStage
+        currentEntries = []
+      }
+      currentEntries.push(entry)
+    })
+    pushSection()
+
+    sections.push(...grouped)
+  }
+
+  if (result?.traceback) {
+    sections.push({
+      title: 'Traceback',
+      type: 'text',
+      text: String(result.traceback),
+    })
+  }
+
+  if (result?.stats) {
+    sections.push({
+      title: 'Stats',
+      type: 'text',
+      text: prettyJson(result.stats),
+    })
+  }
+
+  if (!sections.length && result) {
+    const detail = { ...result }
+    delete detail.logs
+    delete detail.log_entries
+    delete detail.logEntries
+    if (Object.keys(detail).length) {
+      sections.push({
+        title: 'Details',
+        type: 'text',
+        text: prettyJson(detail),
+      })
+    }
+  }
+
+  return sections.length
+    ? sections
+    : [{ title: 'Logs', type: 'text', text: '–' }]
 }
 
 const toggleRunLogs = (runId: string) => {
