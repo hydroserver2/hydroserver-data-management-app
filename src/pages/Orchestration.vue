@@ -16,9 +16,11 @@
           </template>
         </WorkspaceToolbar>
 
-        <template v-if="!!selectedWorkspace && openDataConnectionTableDialog">
-          <DataConnectionTable :workspace-id="selectedWorkspace.id" />
-        </template>
+        <v-expand-transition>
+          <div v-if="!!selectedWorkspace && openDataConnectionTableDialog">
+            <DataConnectionTable :workspace-id="selectedWorkspace.id" />
+          </div>
+        </v-expand-transition>
       </v-col>
     </v-row>
 
