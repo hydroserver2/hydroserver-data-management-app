@@ -390,6 +390,9 @@ const getRunMessage = (run?: TaskRun | null) => {
   const result = asResult(run)
   return (
     (run as any).failureReason ||
+    result.summary ||
+    result.status_message ||
+    result.statusMessage ||
     result.failure_reason ||
     result.failureReason ||
     result.error ||
@@ -402,7 +405,12 @@ const getRuntimeUrl = (run?: TaskRun | null) => {
   if (!run) return null
   const result = asResult(run)
   return (
-    (run as any).runtimeUrl || result.runtime_url || result.runtimeUrl || null
+    (run as any).runtimeUrl ||
+    result.runtime_source_uri ||
+    result.runtimeSourceUri ||
+    result.runtime_url ||
+    result.runtimeUrl ||
+    null
   )
 }
 
@@ -455,10 +463,39 @@ const getRunStatusText = (run?: TaskRun | null): StatusType => {
 
 const formatLogPayload = (run?: TaskRun | null) => {
   if (!run) return '–'
+  const result = asResult(run)
+  const sections: string[] = []
+
+  if (typeof result.logs === 'string' && result.logs.trim()) {
+    sections.push(result.logs.trim())
+  }
+
+  const entries = result.log_entries || result.logEntries
+  if (Array.isArray(entries) && entries.length) {
+    const formatted = entries
+      .map((entry: any) => {
+        const timestamp = entry.timestamp || entry.time || ''
+        const level = entry.level || entry.levelname || ''
+        const message = entry.message || entry.msg || ''
+        return [timestamp, level, message].filter(Boolean).join(' ')
+      })
+      .join('\n')
+    if (formatted.trim()) sections.push(formatted)
+  }
+
+  if (result.error) {
+    sections.push(`Error: ${result.error}`)
+  }
+  if (result.traceback) {
+    sections.push(`Traceback:\n${result.traceback}`)
+  }
+
+  if (sections.length) return sections.join('\n\n')
+
   try {
-    return JSON.stringify(run, null, 2)
+    return JSON.stringify(result, null, 2)
   } catch (error) {
-    return String(run)
+    return String(result)
   }
 }
 
