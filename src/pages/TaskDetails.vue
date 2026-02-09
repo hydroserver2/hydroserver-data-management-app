@@ -71,6 +71,17 @@
         class="section-toolbar"
       >
         <h6 class="text-h6 ml-4">Task details</h6>
+        <v-spacer />
+        <v-btn
+          variant="text"
+          color="white"
+          :prepend-icon="mdiDownload"
+          class="mr-2"
+          :disabled="!task"
+          @click="downloadTaskJsonConfiguration"
+        >
+          Download task configuration
+        </v-btn>
       </v-toolbar>
       <v-data-table
         v-show="activePanel === 'details'"
@@ -128,32 +139,8 @@
       </v-toolbar>
       <v-card
         v-show="activePanel === 'runs'"
-        class="elevation-3 rounded-b-lg section-card pa-4 run-history-card"
+        class="elevation-3 rounded-t-0 rounded-b-lg section-card pa-4 run-history-card"
       >
-        <div
-          v-if="effectiveRunId"
-          class="mb-4 rounded-md border border-slate-200 bg-slate-50 px-4 py-3"
-        >
-          <div class="text-sm font-semibold text-slate-700">Linked run</div>
-          <div class="d-flex align-center ga-2 mt-1">
-            <a
-              class="text-blue-600 underline break-all"
-              :href="runLinkUrl(effectiveRunId!)"
-            >
-              {{ runLinkUrl(effectiveRunId!) }}
-            </a>
-            <v-btn
-              icon
-              variant="text"
-              size="small"
-              color="blue"
-              @click="copyToClipboard(runLinkUrl(effectiveRunId!))"
-            >
-              <v-icon :icon="mdiContentCopy" />
-            </v-btn>
-          </div>
-        </div>
-
         <template v-if="showRunHistoryLoading">
           <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
             <div class="flex items-center gap-3 text-sm text-slate-600">
@@ -170,91 +157,103 @@
         </template>
 
         <template v-else-if="runHistoryRows.length">
-          <template v-for="(run, index) in runHistoryRows" :key="run.id">
-            <div
-              class="mb-4 run-entry"
+          <template v-for="run in runHistoryRows" :key="run.id">
+            <v-card
               :id="runDomId(run.id)"
+              class="mb-4 run-entry"
+              variant="outlined"
               :class="{
                 'run-highlight': highlightedRunId === run.id,
               }"
             >
-              <v-row dense>
-                <v-col cols="12" md="3">
-                  <strong>Status</strong>
-                  <div class="mt-1">
-                    <TaskStatus
-                      :status="getRunStatusText(run.raw)"
-                      :paused="false"
-                    />
+              <div class="run-entry-top">
+                <div class="run-entry-top-left">
+                  <TaskStatus
+                    :status="getRunStatusText(run.raw)"
+                    :paused="false"
+                    class="run-entry-status"
+                  />
+                  <div class="run-entry-title">
+                    <div class="run-entry-title-row">
+                      <div class="run-entry-runid">
+                        Run {{ shortId(run.id) }}
+                      </div>
+                      <div class="run-entry-duration">
+                        {{ runDurationText(run.raw) }}
+                      </div>
+                    </div>
+                    <div class="run-entry-times">
+                      <span class="run-entry-time">
+                        <strong>Started</strong> {{ run.startedAt }}
+                      </span>
+                      <span class="run-entry-sep">•</span>
+                      <span class="run-entry-time">
+                        <strong>Finished</strong> {{ run.finishedAt }}
+                      </span>
+                    </div>
                   </div>
-                </v-col>
-                <v-col cols="12" md="3">
-                  <strong>Started</strong>
-                  <div>{{ run.startedAt }}</div>
-                </v-col>
-                <v-col cols="12" md="3">
-                  <strong>Finished</strong>
-                  <div>{{ run.finishedAt }}</div>
-                </v-col>
-                <v-col cols="12">
-                  <strong>Run message</strong>
-                  <div>{{ run.message }}</div>
-                </v-col>
-                <v-col cols="12">
-                  <strong>Run link</strong>
-                  <div class="d-flex align-center ga-2">
+                </div>
+                <div class="run-entry-top-right">
+                  <div class="run-entry-top-right-label">Run link</div>
+                  <v-btn
+                    icon
+                    variant="text"
+                    size="small"
+                    color="blue"
+                    @click="copyToClipboard(runLinkUrl(run.id))"
+                    title="Copy run link"
+                  >
+                    <v-icon :icon="mdiContentCopy" />
+                  </v-btn>
+                </div>
+              </div>
+
+              <div class="run-entry-message">
+                <div class="run-entry-label">Message</div>
+                <div class="run-entry-message-text">
+                  {{ run.message }}
+                </div>
+              </div>
+
+              <div class="run-entry-links">
+                <div v-if="run.runtimeUrl" class="run-entry-link-row">
+                  <div class="run-entry-label">Runtime source URI</div>
+                  <div class="run-entry-link-value">
                     <a
                       class="text-blue-600 underline break-all"
-                      :href="runLinkUrl(run.id)"
+                      :href="run.runtimeUrl"
+                      target="_blank"
+                      rel="noopener"
                     >
-                      {{ runLinkUrl(run.id) }}
+                      {{ run.runtimeUrl }}
                     </a>
                     <v-btn
                       icon
                       variant="text"
                       size="small"
                       color="blue"
-                      @click="copyToClipboard(runLinkUrl(run.id))"
+                      @click="copyToClipboard(run.runtimeUrl)"
+                      title="Copy runtime URI"
                     >
                       <v-icon :icon="mdiContentCopy" />
                     </v-btn>
                   </div>
-                </v-col>
-                <v-col cols="12" v-if="run.runtimeUrl">
-                  <strong>Runtime source URI</strong>
-                  <div>
-                    <div class="d-flex align-center ga-2">
-                      <a
-                        class="text-blue-600 underline break-all"
-                        :href="run.runtimeUrl"
-                      >
-                        {{ run.runtimeUrl }}
-                      </a>
-                      <v-btn
-                        icon
-                        variant="text"
-                        size="small"
-                        color="blue"
-                        @click="copyToClipboard(run.runtimeUrl)"
-                      >
-                        <v-icon :icon="mdiContentCopy" />
-                      </v-btn>
-                    </div>
-                  </div>
-                </v-col>
-              </v-row>
-              <div class="mt-2">
+                </div>
+              </div>
+
+              <div class="run-entry-footer">
                 <v-btn
                   variant="text"
                   color="blue-grey-darken-2"
                   :prepend-icon="mdiCodeBraces"
                   @click="toggleRunLogs(run.id)"
                 >
-                  {{ openRunLogs[run.id] ? 'Hide full logs' : 'See full logs' }}
+                  {{ openRunLogs[run.id] ? 'Hide logs' : 'View logs' }}
                 </v-btn>
               </div>
+
               <v-expand-transition>
-                <div v-if="openRunLogs[run.id]" class="mt-3">
+                <div v-if="openRunLogs[run.id]" class="px-4 pb-4">
                   <div class="grid gap-3">
                     <div
                       v-for="(section, idx) in buildLogSections(run.raw)"
@@ -301,8 +300,7 @@
                   </div>
                 </div>
               </v-expand-transition>
-            </div>
-            <v-divider v-if="index < runHistoryRows.length - 1" class="my-3" />
+            </v-card>
           </template>
         </template>
 
@@ -409,7 +407,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
@@ -450,6 +448,7 @@ import {
   mdiDotsHorizontal,
   mdiRenameBoxOutline,
   mdiTrashCanOutline,
+  mdiDownload,
 } from '@mdi/js'
 
 const props = withDefaults(
@@ -522,6 +521,76 @@ const onBack = () => {
 }
 
 const runDomId = (runId: string) => `task-run-${runId}`
+
+const shortId = (id: string) => {
+  const value = `${id || ''}`
+  if (!value) return '–'
+  return value.split('-')[0] || value.slice(0, 8)
+}
+
+const formatDurationMs = (ms: number) => {
+  if (!Number.isFinite(ms) || ms < 0) return '–'
+  // Show sub-second precision for short runs (e.g., 0.3s).
+  if (ms < 60_000) {
+    return `${(ms / 1000).toFixed(2)}s`
+  }
+  const totalSeconds = Math.floor(ms / 1000)
+  const seconds = totalSeconds % 60
+  const totalMinutes = Math.floor(totalSeconds / 60)
+  const minutes = totalMinutes % 60
+  const totalHours = Math.floor(totalMinutes / 60)
+  const hours = totalHours % 24
+  const days = Math.floor(totalHours / 24)
+
+  if (days > 0) return `${days}d ${hours}h`
+  if (hours > 0) return `${hours}h ${minutes}m`
+  if (minutes > 0) return `${minutes}m ${seconds}s`
+  return `${seconds}s`
+}
+
+const runDurationText = (run?: TaskRun | null) => {
+  if (!run) return 'Duration –'
+  if (run.status === 'RUNNING') return 'Running'
+  const start = run.startedAt ? new Date(run.startedAt as any).getTime() : NaN
+  const end = run.finishedAt ? new Date(run.finishedAt as any).getTime() : NaN
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return 'Duration –'
+  return `Duration ${formatDurationMs(end - start)}`
+}
+
+const sanitizeFilename = (value: string) =>
+  (value || 'task')
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+const downloadTextFile = (filename: string, text: string, mime: string) => {
+  if (typeof window === 'undefined') return
+  const blob = new Blob([text], { type: mime })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+const downloadTaskJsonConfiguration = () => {
+  if (!task.value) return
+  // Export exactly what the app receives for the task (no reshaping), but pretty-printed.
+  // `toRaw` avoids Vue proxy serialization edge cases.
+  const payload = toRaw(task.value) as any
+  const plain = JSON.parse(JSON.stringify(payload))
+
+  const base =
+    sanitizeFilename(task.value.name || 'task') ||
+    `task-${shortId(task.value.id)}`
+  const filename = `${base}-configuration.json`
+  downloadTextFile(filename, JSON.stringify(plain, null, 2), 'application/json')
+  Snackbar.success('Downloaded JSON configuration.')
+}
 
 const runLinkHref = (runId: string) =>
   router.resolve({
@@ -1493,17 +1562,157 @@ onBeforeUnmount(() => {
 }
 
 .run-entry {
-  border-radius: 10px;
-  padding: 10px 12px;
-  overflow: hidden; /* prevent v-row negative margins from visually bleeding into neighbors */
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 0 rgba(2, 6, 23, 0.04);
 }
 
-.run-entry :deep(.v-row) {
-  margin: 0;
+.run-entry-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px;
+}
+
+.run-entry-top-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.run-entry-status {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.run-entry-title {
+  min-width: 0;
+}
+
+.run-entry-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.run-entry-runid {
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}
+
+.run-entry-duration {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.run-entry-times {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.run-entry-sep {
+  color: #cbd5e1;
+}
+
+.run-entry-top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.run-entry-top-right-label {
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.run-entry-message {
+  padding: 0 16px 12px;
+}
+
+.run-entry-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.run-entry-message-text {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #0f172a;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.run-entry-links {
+  padding: 0 16px 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.run-entry-link-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.run-entry-link-row .run-entry-label {
+  margin-bottom: 0;
+}
+
+.run-entry-link-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.run-entry-footer {
+  border-top: 1px solid #eef2f7;
+  padding: 8px 8px 10px;
+}
+
+@media (max-width: 768px) {
+  .run-entry-link-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .run-entry-link-row .run-entry-label {
+    margin-bottom: 4px;
+  }
 }
 
 .run-highlight {
-  border-radius: 10px;
+  border-radius: 14px;
   animation: runHighlightPulse 2.5s ease-out;
 }
 
@@ -1512,7 +1721,7 @@ onBeforeUnmount(() => {
     background: rgba(255, 235, 59, 0.35);
   }
   100% {
-    background: transparent;
+    background: #ffffff;
   }
 }
 </style>

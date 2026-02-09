@@ -168,7 +168,8 @@ onMounted(async () => {
   left: var(--v-layout-left, 0px);
   right: var(--v-layout-right, 0px);
   bottom: 0;
-  z-index: 1500;
+  /* Ensure the app bar elevation shadow isn't clipped/covered by the slide-over. */
+  z-index: 1000;
   display: flex;
   justify-content: flex-end;
   overflow: hidden;
