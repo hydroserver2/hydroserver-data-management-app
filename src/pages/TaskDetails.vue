@@ -1,72 +1,93 @@
 <template>
   <div
     v-if="task"
-    :class="['task-details-shell', props.embedded ? 'mt-0 mb-0' : 'my-4']"
+    :class="[
+      'task-details-shell bg-[#eef2f6]',
+      props.embedded ? 'mt-0 mb-0' : 'my-4',
+    ]"
   >
     <TaskDetailsNavRail v-model="activePanel" />
 
     <div class="task-details-content">
-      <v-row :class="props.embedded ? 'mt-0 mb-6' : 'my-6'" align="center">
-        <v-col cols="auto">
-          <v-btn
-            variant="text"
-            color="black"
-            :icon="mdiArrowLeft"
-            class="mr-2"
-            @click="onBack"
-          />
-        </v-col>
-        <v-col cols="auto">
-          <h5 class="text-h5 font-weight-bold">{{ task.name }}</h5>
-        </v-col>
-        <v-spacer />
-        <v-col cols="auto" class="d-flex ga-2">
-          <v-btn
-            variant="outlined"
-            :prepend-icon="mdiPencil"
-            rounded="xl"
-            color="secondary"
-            class="mr-1"
-            @click="openEdit = true"
-          >
-            Edit task
-          </v-btn>
-          <v-btn-delete
-            variant="outlined"
-            rounded="xl"
-            :prepend-icon="mdiTrashCanOutline"
-            color="red-darken-3"
-            class="mr-1"
-            @click="openDelete = true"
-          >
-            Delete task
-          </v-btn-delete>
-          <v-btn
-            v-if="canRunNow"
-            variant="outlined"
-            rounded="xl"
-            color="green-darken-3"
-            class="mr-1"
-            :append-icon="mdiPlay"
-            :disabled="runNowRequested"
-            @click="runTaskNow"
-          >
-            {{ runNowRequested ? 'Run requested' : 'Run now' }}
-          </v-btn>
-          <v-btn
-            variant="text"
-            color="black"
-            :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
-            @click.stop="togglePaused(task)"
-          >
-            Pause/Run
-          </v-btn>
-        </v-col>
-      </v-row>
+      <div
+        :class="[
+          'mb-4 rounded-lg border border-slate-200 bg-white px-4 py-2 shadow-sm',
+          props.embedded ? 'mt-4' : 'mt-2',
+        ]"
+      >
+        <v-row class="ma-0" align="center">
+          <v-col cols="auto">
+            <v-btn
+              variant="text"
+              color="black"
+              :icon="mdiArrowLeft"
+              class="mr-2"
+              @click="onBack"
+            />
+          </v-col>
+          <v-col cols="auto">
+            <div class="leading-tight">
+              <div
+                class="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate-500"
+              >
+                Task
+              </div>
+              <div
+                class="text-2xl font-extrabold tracking-tight text-slate-900"
+              >
+                {{ task.name }}
+              </div>
+            </div>
+          </v-col>
+          <v-spacer />
+          <v-col cols="auto" class="d-flex ga-2">
+            <v-btn
+              variant="outlined"
+              :prepend-icon="mdiPencil"
+              rounded="xl"
+              color="secondary"
+              class="mr-1"
+              @click="openEdit = true"
+            >
+              Edit task
+            </v-btn>
+            <v-btn-delete
+              variant="outlined"
+              rounded="xl"
+              :prepend-icon="mdiTrashCanOutline"
+              color="red-darken-3"
+              class="mr-1"
+              @click="openDelete = true"
+            >
+              Delete task
+            </v-btn-delete>
+            <v-btn
+              v-if="canRunNow"
+              variant="outlined"
+              rounded="xl"
+              color="green-darken-3"
+              class="mr-1"
+              :append-icon="mdiPlay"
+              :disabled="runNowRequested"
+              @click="runTaskNow"
+            >
+              {{ runNowRequested ? 'Run requested' : 'Run now' }}
+            </v-btn>
+            <v-btn
+              variant="text"
+              color="black"
+              :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
+              @click.stop="togglePaused(task)"
+            >
+              Pause/Run
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
 
       <v-toolbar
         v-show="activePanel === 'details'"
-        color="blue-grey"
+        color="blue-grey-darken-1"
         rounded="t-lg"
         class="section-toolbar"
       >
@@ -241,7 +262,9 @@
                 </div>
               </div>
 
-              <div class="run-entry-footer border-t border-slate-100 px-2 pt-2 pb-2.5">
+              <div
+                class="run-entry-footer border-t border-slate-100 px-2 pt-2 pb-2.5"
+              >
                 <v-btn
                   variant="tonal"
                   color="blue-grey-darken-2"
@@ -358,7 +381,7 @@
         v-show="activePanel === 'mappings'"
         color="blue-grey-darken-1"
         rounded="t-lg"
-        class="section-toolbar mt-6"
+        class="section-toolbar mt-4"
       >
         <h6 class="text-h6 ml-4">Mappings</h6>
       </v-toolbar>
@@ -843,19 +866,12 @@ const buildLogSections = (run?: TaskRun | null): LogSection[] => {
     })
   }
 
-  if (result?.stats) {
-    sections.push({
-      title: 'Stats',
-      type: 'text',
-      text: prettyJson(result.stats),
-    })
-  }
-
   if (!sections.length && result) {
     const detail = { ...result }
     delete detail.logs
     delete detail.log_entries
     delete detail.logEntries
+    delete detail.stats
     if (Object.keys(detail).length) {
       sections.push({
         title: 'Details',
@@ -1526,8 +1542,8 @@ onBeforeUnmount(() => {
   overflow-y: auto;
 }
 .section-card {
-  background: #f8fafc;
-  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 .section-toolbar {
   color: white;
