@@ -241,11 +241,12 @@
                 </div>
               </div>
 
-              <div class="run-entry-footer">
+              <div class="run-entry-footer border-t border-slate-100 px-2 pt-2 pb-2.5">
                 <v-btn
-                  variant="text"
+                  variant="tonal"
                   color="blue-grey-darken-2"
                   :prepend-icon="mdiCodeBraces"
+                  class="text-none"
                   @click="toggleRunLogs(run.id)"
                 >
                   {{ openRunLogs[run.id] ? 'Hide logs' : 'View logs' }}
@@ -269,11 +270,11 @@
                         <div
                           v-for="(entry, entryIdx) in section.entries"
                           :key="entryIdx"
-                          class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
+                          class="grid grid-cols-[minmax(240px,260px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
                         >
                           <span
                             v-if="entry.timestamp"
-                            class="tabular-nums text-slate-600"
+                            class="tabular-nums text-slate-600 whitespace-nowrap"
                           >
                             {{ entry.timestamp }}
                           </span>
