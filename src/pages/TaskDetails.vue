@@ -1,468 +1,392 @@
 <template>
-  <div class="my-4 task-details-page" v-if="task">
-    <v-row class="my-6" align="center">
-      <v-col cols="auto">
-        <v-btn
-          variant="text"
-          color="black"
-          :icon="mdiArrowLeft"
-          class="mr-2"
-          @click="onBack"
-        />
-      </v-col>
-      <v-col cols="auto">
-        <h5 class="text-h5 font-weight-bold">{{ task.name }}</h5>
-      </v-col>
-      <v-spacer />
-      <v-col cols="auto" class="d-flex ga-2">
-        <v-btn
-          variant="outlined"
-          :prepend-icon="mdiPencil"
-          rounded="xl"
-          color="secondary"
-          class="mr-1"
-          @click="openEdit = true"
-        >
-          Edit task
-        </v-btn>
-        <v-btn-delete
-          variant="outlined"
-          rounded="xl"
-          :prepend-icon="mdiTrashCanOutline"
-          color="red-darken-3"
-          class="mr-1"
-          @click="openDelete = true"
-        >
-          Delete task
-        </v-btn-delete>
-        <v-btn
-          variant="text"
-          color="black"
-          :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
-          @click.stop="togglePaused(task)"
-        >
-          Pause/Run
-        </v-btn>
-      </v-col>
-    </v-row>
+  <div
+    v-if="task"
+    :class="['task-details-shell', props.embedded ? 'mt-0 mb-0' : 'my-4']"
+  >
+    <TaskDetailsNavRail v-model="activePanel" />
 
-    <v-toolbar color="blue-grey" rounded="t-lg" class="section-toolbar">
-      <h6 class="text-h6 ml-4">Task details</h6>
-    </v-toolbar>
-    <v-data-table
-      :headers="taskHeaders"
-      :items="taskTableRows"
-      :items-per-page="-1"
-      hide-default-header
-      hide-default-footer
-      density="compact"
-      class="elevation-3 rounded-b-lg section-card"
-    >
-      <template #item="{ item, columns }">
-        <tr v-if="item.section">
-          <td
-            :colspan="columns.length"
-            class="section-subheading detail-subheading"
-          >
-            {{ item.label }}
-          </td>
-        </tr>
-        <tr v-else>
-          <td class="text-body-2">
-            <v-icon v-if="item?.icon" :icon="item.icon" class="mr-2" />
-            <strong>{{ item?.label }}</strong>
-          </td>
-          <td class="text-body-2">
-            <template v-if="item.label === 'Status'">
-              <TaskStatus :status="item.status" :paused="!!item.paused" />
-            </template>
-            <template v-else>
-              {{ item.value }}
-            </template>
-          </td>
-        </tr>
-      </template>
-    </v-data-table>
-
-    <v-toolbar
-      color="blue-grey-darken-1"
-      rounded="t-lg"
-      class="section-toolbar mt-6"
-    >
-      <h6 class="text-h6 ml-4">
-        {{ openRunHistory ? 'Run history' : 'Last run' }}
-      </h6>
-      <v-spacer />
-      <v-btn
-        variant="text"
-        color="white"
-        :prepend-icon="mdiHistory"
-        class="mr-2"
-        @click="openRunHistoryDialog"
-      >
-        {{ openRunHistory ? 'Hide full run history' : 'View full run history' }}
-      </v-btn>
-    </v-toolbar>
-    <v-card
-      class="elevation-3 rounded-b-lg section-card pa-4 last-run-card"
-      :id="task?.latestRun?.id ? runDomId(task.latestRun.id) : undefined"
-      :class="{
-        'run-highlight':
-          !!task?.latestRun?.id && highlightedRunId === task.latestRun.id,
-      }"
-    >
-      <template v-if="task?.latestRun">
-        <v-row dense>
-          <v-col cols="12" md="3">
-            <strong>Status</strong>
-            <div class="mt-1">
-              <TaskStatus :status="latestRunStatusText" :paused="false" />
-            </div>
-          </v-col>
-          <v-col cols="12" md="3">
-            <strong>Started</strong>
-            <div>{{ formatTimeWithZone(task.latestRun.startedAt) }}</div>
-          </v-col>
-          <v-col cols="12" md="3">
-            <strong>Finished</strong>
-            <div>{{ formatTimeWithZone(task.latestRun.finishedAt) }}</div>
-          </v-col>
-	          <v-col cols="12">
-	            <strong>Run message</strong>
-	            <div>{{ latestRunMessage }}</div>
-	          </v-col>
-	          <v-col cols="12" v-if="task.latestRun?.id">
-	            <strong>Run link</strong>
-	            <div class="d-flex align-center ga-2">
-	              <a
-	                class="text-blue-600 underline break-all"
-	                :href="runLinkUrl(task.latestRun.id)"
-	              >
-	                {{ runLinkUrl(task.latestRun.id) }}
-	              </a>
-	              <v-btn
-	                icon
-	                variant="text"
-	                size="small"
-	                color="blue"
-	                @click="copyToClipboard(runLinkUrl(task.latestRun.id))"
-	              >
-	                <v-icon :icon="mdiContentCopy" />
-	              </v-btn>
-	            </div>
-	          </v-col>
-		          <v-col cols="12" v-if="latestRunRuntimeUrl">
-		            <strong>Runtime source URI</strong>
-		            <div>
-	              <div class="d-flex align-center ga-2">
-	                <a
-	                  class="text-blue-600 underline break-all"
-	                  :href="latestRunRuntimeUrl"
-	                >
-	                  {{ latestRunRuntimeUrl }}
-	                </a>
-	                <v-btn
-	                  icon
-	                  variant="text"
-	                  size="small"
-                  color="blue"
-                  @click="copyToClipboard(latestRunRuntimeUrl)"
-                >
-                  <v-icon :icon="mdiContentCopy" />
-                </v-btn>
-              </div>
-            </div>
-          </v-col>
-        </v-row>
-        <div class="mt-2">
+    <div class="task-details-content">
+      <v-row :class="props.embedded ? 'mt-0 mb-6' : 'my-6'" align="center">
+        <v-col cols="auto">
           <v-btn
             variant="text"
-            color="blue-grey-darken-2"
-            :prepend-icon="mdiCodeBraces"
-            @click="openLatestLogs = !openLatestLogs"
+            color="black"
+            :icon="mdiArrowLeft"
+            class="mr-2"
+            @click="onBack"
+          />
+        </v-col>
+        <v-col cols="auto">
+          <h5 class="text-h5 font-weight-bold">{{ task.name }}</h5>
+        </v-col>
+        <v-spacer />
+        <v-col cols="auto" class="d-flex ga-2">
+          <v-btn
+            variant="outlined"
+            :prepend-icon="mdiPencil"
+            rounded="xl"
+            color="secondary"
+            class="mr-1"
+            @click="openEdit = true"
           >
-            {{ openLatestLogs ? 'Hide full logs' : 'See full logs' }}
+            Edit task
           </v-btn>
+          <v-btn-delete
+            variant="outlined"
+            rounded="xl"
+            :prepend-icon="mdiTrashCanOutline"
+            color="red-darken-3"
+            class="mr-1"
+            @click="openDelete = true"
+          >
+            Delete task
+          </v-btn-delete>
+          <v-btn
+            v-if="canRunNow"
+            variant="outlined"
+            rounded="xl"
+            color="green-darken-3"
+            class="mr-1"
+            :append-icon="mdiPlay"
+            :disabled="runNowRequested"
+            @click="runTaskNow"
+          >
+            {{ runNowRequested ? 'Run requested' : 'Run now' }}
+          </v-btn>
+          <v-btn
+            variant="text"
+            color="black"
+            :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
+            @click.stop="togglePaused(task)"
+          >
+            Pause/Run
+          </v-btn>
+        </v-col>
+      </v-row>
+
+      <v-toolbar
+        v-show="activePanel === 'details'"
+        color="blue-grey"
+        rounded="t-lg"
+        class="section-toolbar"
+      >
+        <h6 class="text-h6 ml-4">Task details</h6>
+      </v-toolbar>
+      <v-data-table
+        v-show="activePanel === 'details'"
+        :headers="taskHeaders"
+        :items="taskTableRows"
+        :items-per-page="-1"
+        hide-default-header
+        hide-default-footer
+        density="compact"
+        class="elevation-3 rounded-b-lg section-card"
+      >
+        <template #item="{ item, columns }">
+          <tr v-if="item.section">
+            <td
+              :colspan="columns.length"
+              class="section-subheading detail-subheading"
+            >
+              {{ item.label }}
+            </td>
+          </tr>
+          <tr v-else>
+            <td class="text-body-2">
+              <v-icon v-if="item?.icon" :icon="item.icon" class="mr-2" />
+              <strong>{{ item?.label }}</strong>
+            </td>
+            <td class="text-body-2">
+              <template v-if="item.label === 'Status'">
+                <TaskStatus :status="item.status" :paused="!!item.paused" />
+              </template>
+              <template v-else>
+                {{ item.value }}
+              </template>
+            </td>
+          </tr>
+        </template>
+      </v-data-table>
+
+      <v-toolbar
+        v-show="activePanel === 'runs'"
+        color="blue-grey-darken-1"
+        rounded="t-lg"
+        class="section-toolbar mt-0"
+      >
+        <h6 class="text-h6 ml-4">Run history</h6>
+        <v-spacer />
+        <v-btn
+          variant="text"
+          color="white"
+          :prepend-icon="mdiHistory"
+          class="mr-2"
+          @click="refreshRunHistory"
+        >
+          Refresh history
+        </v-btn>
+      </v-toolbar>
+      <v-card
+        v-show="activePanel === 'runs'"
+        class="elevation-3 rounded-b-lg section-card pa-4 run-history-card"
+      >
+        <div
+          v-if="effectiveRunId"
+          class="mb-4 rounded-md border border-slate-200 bg-slate-50 px-4 py-3"
+        >
+          <div class="text-sm font-semibold text-slate-700">Linked run</div>
+          <div class="d-flex align-center ga-2 mt-1">
+            <a
+              class="text-blue-600 underline break-all"
+              :href="runLinkUrl(effectiveRunId!)"
+            >
+              {{ runLinkUrl(effectiveRunId!) }}
+            </a>
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              color="blue"
+              @click="copyToClipboard(runLinkUrl(effectiveRunId!))"
+            >
+              <v-icon :icon="mdiContentCopy" />
+            </v-btn>
+          </div>
         </div>
-        <v-expand-transition>
-          <div v-if="openLatestLogs" class="mt-3">
-            <div class="grid gap-3">
-              <div
-                v-for="(section, idx) in buildLogSections(task.latestRun)"
-                :key="`${section.title}-${idx}`"
-                class="grid gap-2"
-              >
-                <div
-                  class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
-                >
-                  {{ section.title }}
-                </div>
-                <div v-if="section.type === 'lines'" class="grid gap-1.5">
-                  <div
-                    v-for="(entry, entryIdx) in section.entries"
-                    :key="entryIdx"
-                    class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
-                  >
-                    <span
-                      v-if="entry.timestamp"
-                      class="tabular-nums text-slate-600"
-                    >
-                      {{ entry.timestamp }}
-                    </span>
-                    <span
-                      v-if="entry.level"
-                      :class="[
-                        'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
-                        logLevelClass(entry.level),
-                      ]"
-                    >
-                      {{ entry.level }}
-                    </span>
-                    <span class="whitespace-pre-wrap break-words">{{
-                      entry.message
-                    }}</span>
-                  </div>
-                </div>
-                <pre
-                  v-else
-                  class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
-                  >{{ section.text }}</pre
-                >
-              </div>
+
+        <template v-if="showRunHistoryLoading">
+          <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
+            <div class="flex items-center gap-3 text-sm text-slate-600">
+              <v-progress-circular
+                indeterminate
+                size="20"
+                width="2"
+                color="blue-grey-darken-1"
+              />
+              <span class="font-medium">Loading run history...</span>
             </div>
           </div>
-        </v-expand-transition>
-      </template>
-      <template v-else>
-        No runs have been recorded for this task yet.
-      </template>
-	      <v-expand-transition>
-	        <div v-if="openRunHistory" class="mt-4 pt-4 border-t border-[#cfd8dc]">
-	          <template v-if="showRunHistoryLoading">
-	            <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
-	              <div class="flex items-center gap-3 text-sm text-slate-600">
-	                <v-progress-circular
-	                  indeterminate
-	                  size="20"
-	                  width="2"
-	                  color="blue-grey-darken-1"
-	                />
-	                <span class="font-medium">Loading run history...</span>
-	              </div>
-	            </div>
-	            <v-skeleton-loader type="paragraph, paragraph, paragraph" />
-	          </template>
-	          <template v-else-if="runHistoryRows.length">
-	            <template v-for="(run, index) in runHistoryRows" :key="run.id">
-	              <div
-	                class="mb-4"
-	                :id="runDomId(run.id)"
-	                :class="{
-	                  'run-highlight': highlightedRunId === run.id,
-	                }"
-	              >
-	                <v-row dense>
-	                  <v-col cols="12" md="3">
-	                    <strong>Status</strong>
-	                    <div class="mt-1">
-	                      <TaskStatus
-	                        :status="getRunStatusText(run.raw)"
-	                        :paused="false"
-	                      />
-	                    </div>
-	                  </v-col>
-	                  <v-col cols="12" md="3">
-	                    <strong>Started</strong>
-	                    <div>{{ run.startedAt }}</div>
-	                  </v-col>
-	                  <v-col cols="12" md="3">
-	                    <strong>Finished</strong>
-	                    <div>{{ run.finishedAt }}</div>
-	                  </v-col>
-	                  <v-col cols="12">
-	                    <strong>Run message</strong>
-	                    <div>{{ run.message }}</div>
-	                  </v-col>
-	                  <v-col cols="12">
-	                    <strong>Run link</strong>
-	                    <div class="d-flex align-center ga-2">
-	                      <a
-	                        class="text-blue-600 underline break-all"
-	                        :href="runLinkUrl(run.id)"
-	                      >
-	                        {{ runLinkUrl(run.id) }}
-	                      </a>
-	                      <v-btn
-	                        icon
-	                        variant="text"
-	                        size="small"
-	                        color="blue"
-	                        @click="copyToClipboard(runLinkUrl(run.id))"
-	                      >
-	                        <v-icon :icon="mdiContentCopy" />
-	                      </v-btn>
-	                    </div>
-	                  </v-col>
-		                  <v-col cols="12" v-if="run.runtimeUrl">
-		                    <strong>Runtime source URI</strong>
-		                    <div>
-		                      <div class="d-flex align-center ga-2">
-		                        <a
-		                          class="text-blue-600 underline break-all"
-		                          :href="run.runtimeUrl"
-		                        >
-		                          {{ run.runtimeUrl }}
-		                        </a>
-		                        <v-btn
-		                          icon
-		                          variant="text"
-		                          size="small"
-	                          color="blue"
-	                          @click="copyToClipboard(run.runtimeUrl)"
-	                        >
-	                          <v-icon :icon="mdiContentCopy" />
-	                        </v-btn>
-	                      </div>
-	                    </div>
-	                  </v-col>
-	                </v-row>
-	                <div class="mt-2">
-	                  <v-btn
-	                    variant="text"
-	                    color="blue-grey-darken-2"
-	                    :prepend-icon="mdiCodeBraces"
-	                    @click="toggleRunLogs(run.id)"
-	                  >
-	                    {{
-	                      openRunLogs[run.id] ? 'Hide full logs' : 'See full logs'
-	                    }}
-	                  </v-btn>
-	                </div>
-	                <v-expand-transition>
-	                  <div v-if="openRunLogs[run.id]" class="mt-3">
-	                    <div class="grid gap-3">
-	                      <div
-	                        v-for="(section, idx) in buildLogSections(run.raw)"
-	                        :key="`${section.title}-${idx}`"
-	                        class="grid gap-2"
-	                      >
-	                        <div
-	                          class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
-	                        >
-	                          {{ section.title }}
-	                        </div>
-	                        <div
-	                          v-if="section.type === 'lines'"
-	                          class="grid gap-1.5"
-	                        >
-	                          <div
-	                            v-for="(entry, entryIdx) in section.entries"
-	                            :key="entryIdx"
-	                            class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
-	                          >
-	                            <span
-	                              v-if="entry.timestamp"
-	                              class="tabular-nums text-slate-600"
-	                            >
-	                              {{ entry.timestamp }}
-	                            </span>
-	                            <span
-	                              v-if="entry.level"
-	                              :class="[
-	                                'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
-	                                logLevelClass(entry.level),
-	                              ]"
-	                            >
-	                              {{ entry.level }}
-	                            </span>
-	                            <span class="whitespace-pre-wrap break-words">{{
-	                              entry.message
-	                            }}</span>
-	                          </div>
-	                        </div>
-	                        <pre
-	                          v-else
-	                          class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
-	                          >{{ section.text }}</pre
-	                        >
-	                      </div>
-	                    </div>
-	                  </div>
-	                </v-expand-transition>
-	              </div>
-	              <v-divider
-	                v-if="index < runHistoryRows.length - 1"
-	                class="my-3"
-	              />
-	            </template>
-	          </template>
-	          <div v-else class="text-medium-emphasis">
-	            No run history available yet.
-	          </div>
-	        </div>
-	      </v-expand-transition>
-    </v-card>
+          <v-skeleton-loader type="paragraph, paragraph, paragraph" />
+        </template>
 
-    <v-toolbar
-      color="blue-grey-darken-1"
-      rounded="t-lg"
-      class="section-toolbar mt-6"
-      v-if="pipelineRows.length"
-    >
-      <h6 class="text-h6 ml-4">Data connection</h6>
-    </v-toolbar>
-    <v-data-table
-      v-if="pipelineRows.length"
-      :headers="pipelineHeaders"
-      :items="pipelineRows"
-      :items-per-page="-1"
-      hide-default-header
-      hide-default-footer
-      density="compact"
-      class="elevation-3 rounded-b-lg section-card pipeline-card"
-    >
-      <template #item="{ item, columns }">
-        <tr
-          v-if="item.section"
-          :class="['pipeline-section', item.sectionClass]"
-        >
-          <td :colspan="columns.length" class="section-subheading">
-            {{ item.label }}
-          </td>
-        </tr>
-        <tr v-else>
-          <td class="text-body-2">
-            <v-icon v-if="item.icon" :icon="item.icon" size="16" class="mr-1" />
-            <strong>{{ item.name || '–' }}</strong>
-          </td>
-          <td class="text-body-2">{{ item.value ?? '–' }}</td>
-        </tr>
-      </template>
-    </v-data-table>
+        <template v-else-if="runHistoryRows.length">
+          <template v-for="(run, index) in runHistoryRows" :key="run.id">
+            <div
+              class="mb-4 run-entry"
+              :id="runDomId(run.id)"
+              :class="{
+                'run-highlight': highlightedRunId === run.id,
+              }"
+            >
+              <v-row dense>
+                <v-col cols="12" md="3">
+                  <strong>Status</strong>
+                  <div class="mt-1">
+                    <TaskStatus
+                      :status="getRunStatusText(run.raw)"
+                      :paused="false"
+                    />
+                  </div>
+                </v-col>
+                <v-col cols="12" md="3">
+                  <strong>Started</strong>
+                  <div>{{ run.startedAt }}</div>
+                </v-col>
+                <v-col cols="12" md="3">
+                  <strong>Finished</strong>
+                  <div>{{ run.finishedAt }}</div>
+                </v-col>
+                <v-col cols="12">
+                  <strong>Run message</strong>
+                  <div>{{ run.message }}</div>
+                </v-col>
+                <v-col cols="12">
+                  <strong>Run link</strong>
+                  <div class="d-flex align-center ga-2">
+                    <a
+                      class="text-blue-600 underline break-all"
+                      :href="runLinkUrl(run.id)"
+                    >
+                      {{ runLinkUrl(run.id) }}
+                    </a>
+                    <v-btn
+                      icon
+                      variant="text"
+                      size="small"
+                      color="blue"
+                      @click="copyToClipboard(runLinkUrl(run.id))"
+                    >
+                      <v-icon :icon="mdiContentCopy" />
+                    </v-btn>
+                  </div>
+                </v-col>
+                <v-col cols="12" v-if="run.runtimeUrl">
+                  <strong>Runtime source URI</strong>
+                  <div>
+                    <div class="d-flex align-center ga-2">
+                      <a
+                        class="text-blue-600 underline break-all"
+                        :href="run.runtimeUrl"
+                      >
+                        {{ run.runtimeUrl }}
+                      </a>
+                      <v-btn
+                        icon
+                        variant="text"
+                        size="small"
+                        color="blue"
+                        @click="copyToClipboard(run.runtimeUrl)"
+                      >
+                        <v-icon :icon="mdiContentCopy" />
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-col>
+              </v-row>
+              <div class="mt-2">
+                <v-btn
+                  variant="text"
+                  color="blue-grey-darken-2"
+                  :prepend-icon="mdiCodeBraces"
+                  @click="toggleRunLogs(run.id)"
+                >
+                  {{ openRunLogs[run.id] ? 'Hide full logs' : 'See full logs' }}
+                </v-btn>
+              </div>
+              <v-expand-transition>
+                <div v-if="openRunLogs[run.id]" class="mt-3">
+                  <div class="grid gap-3">
+                    <div
+                      v-for="(section, idx) in buildLogSections(run.raw)"
+                      :key="`${section.title}-${idx}`"
+                      class="grid gap-2"
+                    >
+                      <div
+                        class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
+                      >
+                        {{ section.title }}
+                      </div>
+                      <div v-if="section.type === 'lines'" class="grid gap-1.5">
+                        <div
+                          v-for="(entry, entryIdx) in section.entries"
+                          :key="entryIdx"
+                          class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
+                        >
+                          <span
+                            v-if="entry.timestamp"
+                            class="tabular-nums text-slate-600"
+                          >
+                            {{ entry.timestamp }}
+                          </span>
+                          <span
+                            v-if="entry.level"
+                            :class="[
+                              'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
+                              logLevelClass(entry.level),
+                            ]"
+                          >
+                            {{ entry.level }}
+                          </span>
+                          <span class="whitespace-pre-wrap break-words">{{
+                            entry.message
+                          }}</span>
+                        </div>
+                      </div>
+                      <pre
+                        v-else
+                        class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
+                        >{{ section.text }}</pre
+                      >
+                    </div>
+                  </div>
+                </div>
+              </v-expand-transition>
+            </div>
+            <v-divider v-if="index < runHistoryRows.length - 1" class="my-3" />
+          </template>
+        </template>
 
-    <v-toolbar
-      color="blue-grey-darken-1"
-      rounded="t-lg"
-      class="section-toolbar mt-6"
-    >
-      <h6 class="text-h6 ml-4">Mappings</h6>
-    </v-toolbar>
-    <div
-      v-if="task?.mappings?.length"
-      class="elevation-3 rounded-b-lg section-card swimlanes-card"
-    >
-      <Swimlanes :task="task" :show-actions="false" />
+        <div v-else class="text-medium-emphasis">
+          No run history available yet.
+        </div>
+      </v-card>
+
+      <v-toolbar
+        v-show="activePanel === 'details'"
+        color="blue-grey-darken-1"
+        rounded="t-lg"
+        class="section-toolbar mt-6"
+        v-if="pipelineRows.length"
+      >
+        <h6 class="text-h6 ml-4">Data connection</h6>
+      </v-toolbar>
+      <v-data-table
+        v-show="activePanel === 'details'"
+        v-if="pipelineRows.length"
+        :headers="pipelineHeaders"
+        :items="pipelineRows"
+        :items-per-page="-1"
+        hide-default-header
+        hide-default-footer
+        density="compact"
+        class="elevation-3 rounded-b-lg section-card pipeline-card"
+      >
+        <template #item="{ item, columns }">
+          <tr
+            v-if="item.section"
+            :class="['pipeline-section', item.sectionClass]"
+          >
+            <td :colspan="columns.length" class="section-subheading">
+              {{ item.label }}
+            </td>
+          </tr>
+          <tr v-else>
+            <td class="text-body-2">
+              <v-icon
+                v-if="item.icon"
+                :icon="item.icon"
+                size="16"
+                class="mr-1"
+              />
+              <strong>{{ item.name || '–' }}</strong>
+            </td>
+            <td class="text-body-2">{{ item.value ?? '–' }}</td>
+          </tr>
+        </template>
+      </v-data-table>
+
+      <v-toolbar
+        v-show="activePanel === 'mappings'"
+        color="blue-grey-darken-1"
+        rounded="t-lg"
+        class="section-toolbar mt-6"
+      >
+        <h6 class="text-h6 ml-4">Mappings</h6>
+      </v-toolbar>
+      <div
+        v-show="activePanel === 'mappings'"
+        v-if="task?.mappings?.length"
+        class="elevation-3 rounded-b-lg section-card swimlanes-card"
+      >
+        <Swimlanes
+          :task="task"
+          :show-actions="true"
+          @edit="openEdit = true"
+          @delete="openDelete = true"
+        />
+      </div>
+      <v-sheet
+        v-show="activePanel === 'mappings'"
+        v-else
+        class="elevation-1 rounded-b-lg pa-6 text-medium-emphasis section-card"
+      >
+        No mappings configured for this task.
+      </v-sheet>
+
+      <div class="mb-8" />
+
+      <!-- <PayloadTable /> -->
     </div>
-    <v-sheet
-      v-else
-      class="elevation-1 rounded-b-lg pa-6 text-medium-emphasis section-card"
-    >
-      No mappings configured for this task.
-    </v-sheet>
-
-    <div class="mb-8" />
-
-    <!-- <PayloadTable /> -->
   </div>
   <v-container v-else>Loading...</v-container>
 
@@ -485,12 +409,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
 import TaskForm from '@/components/Orchestration/TaskForm.vue'
 import Swimlanes from '@/components/Orchestration/Swimlanes.vue'
+import TaskDetailsNavRail, {
+  type TaskDetailsPanel,
+} from '@/components/Orchestration/TaskDetailsNavRail.vue'
 import hs, {
   StatusType,
   TaskExpanded,
@@ -545,13 +472,12 @@ const emit = defineEmits<{
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
-const openRunHistory = ref(false)
-const openLatestLogs = ref(false)
 const openRunLogs = ref<Record<string, boolean>>({})
 const task = ref<TaskExpanded | null>(null)
 const taskRuns = ref<TaskRun[]>([])
 const loadingTaskRuns = ref(false)
 const runHistoryFetchFinished = ref(false)
+const runNowRequested = ref(false)
 const highlightedRunId = ref<string | null>(null)
 let highlightTimeoutId: number | null = null
 const { workspaceTasks, workspaceDatastreams } = storeToRefs(
@@ -560,6 +486,13 @@ const { workspaceTasks, workspaceDatastreams } = storeToRefs(
 
 const { workspaces } = storeToRefs(useWorkspaceStore())
 const { setSelectedWorkspaceById } = useWorkspaceStore()
+
+// When opened from the orchestration slide-over, default to showing run history.
+const activePanel = ref<TaskDetailsPanel>(props.embedded ? 'runs' : 'details')
+
+const canRunNow = computed(
+  () => task.value?.orchestrationSystem?.type === 'INTERNAL'
+)
 
 const effectiveTaskId = computed(() => {
   const propId = props.taskId
@@ -623,7 +556,7 @@ const scrollToRunAnchor = async (runId: string) => {
 }
 
 const showRunHistoryLoading = computed(() => {
-  if (!openRunHistory.value) return false
+  if (activePanel.value !== 'runs') return false
   if (loadingTaskRuns.value) return true
   // If the user deep-linked to a runId, avoid flashing the empty-state while the first fetch is pending.
   if (effectiveRunId.value && !runHistoryFetchFinished.value) return true
@@ -712,44 +645,6 @@ const getRunStatusText = (run?: TaskRun | null): StatusType => {
   if (run.status === 'SUCCESS') return 'OK'
   if (run.status === 'RUNNING') return 'Pending'
   return 'Unknown'
-}
-
-const formatLogPayload = (run?: TaskRun | null) => {
-  if (!run) return '–'
-  const result = asResult(run)
-  const sections: string[] = []
-
-  if (typeof result.logs === 'string' && result.logs.trim()) {
-    sections.push(result.logs.trim())
-  }
-
-  const entries = result.log_entries || result.logEntries
-  if (Array.isArray(entries) && entries.length) {
-    const formatted = entries
-      .map((entry: any) => {
-        const timestamp = entry.timestamp || entry.time || ''
-        const level = entry.level || entry.levelname || ''
-        const message = entry.message || entry.msg || ''
-        return [timestamp, level, message].filter(Boolean).join(' ')
-      })
-      .join('\n')
-    if (formatted.trim()) sections.push(formatted)
-  }
-
-  if (result.error) {
-    sections.push(`Error: ${result.error}`)
-  }
-  if (result.traceback) {
-    sections.push(`Traceback:\n${result.traceback}`)
-  }
-
-  if (sections.length) return sections.join('\n\n')
-
-  try {
-    return JSON.stringify(result, null, 2)
-  } catch (error) {
-    return String(result)
-  }
 }
 
 type LogEntry = {
@@ -907,12 +802,6 @@ const buildLogSections = (run?: TaskRun | null): LogSection[] => {
 
 const toggleRunLogs = (runId: string) => {
   openRunLogs.value[runId] = !openRunLogs.value[runId]
-}
-
-const openRunHistoryDialog = async () => {
-  openRunHistory.value = !openRunHistory.value
-  if (!openRunHistory.value) return
-  await fetchTaskRuns()
 }
 
 const copyToClipboard = async (value?: string | null) => {
@@ -1289,24 +1178,12 @@ const orchestrationSystemInformation = computed(() => {
   ].filter(Boolean)
 })
 
-const latestRunStatusText = computed(() =>
-  getRunStatusText(task.value?.latestRun)
-)
-const latestRunMessage = computed(() => getRunMessage(task.value?.latestRun))
-const latestRunRuntimeUrl = computed(
-  () =>
-    getRuntimeUrl(task.value?.latestRun) ??
-    resolveRuntimeUrlFromTask(task.value?.latestRun)
-)
-
 const runHistoryRows = computed(() => {
-  const latestId = task.value?.latestRun?.id
   const seen = new Set<string>()
 
   return taskRuns.value
     .filter((run) => {
       if (!run?.id) return false
-      if (latestId && run.id === latestId) return false
       if (seen.has(run.id)) return false
       seen.add(run.id)
       return true
@@ -1320,6 +1197,69 @@ const runHistoryRows = computed(() => {
       raw: run,
     }))
 })
+
+const RUN_POLL_INTERVAL_MS = 4000
+const RUN_POLL_MAX_ATTEMPTS = 20
+let runNowPollTimeoutId: number | null = null
+
+const stopRunNowPolling = () => {
+  if (runNowPollTimeoutId != null) {
+    window.clearTimeout(runNowPollTimeoutId)
+    runNowPollTimeoutId = null
+  }
+}
+
+const scheduleRunNowPoll = (taskId: string, attempt = 0) => {
+  stopRunNowPolling()
+  if (attempt > RUN_POLL_MAX_ATTEMPTS) {
+    runNowRequested.value = false
+    return
+  }
+
+  runNowPollTimeoutId = window.setTimeout(async () => {
+    try {
+      const updated = (await hs.tasks.getItem(taskId, {
+        expand_related: true,
+      })) as unknown as TaskExpanded
+
+      if (updated) {
+        task.value = updated
+        upsertWorkspaceTask(updated)
+        if (activePanel.value === 'runs') {
+          await fetchTaskRuns()
+        }
+
+        const status = updated.latestRun?.status
+        if (status && status !== 'RUNNING') {
+          runNowRequested.value = false
+          stopRunNowPolling()
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error polling task after run-now', error)
+    }
+
+    scheduleRunNowPoll(taskId, attempt + 1)
+  }, RUN_POLL_INTERVAL_MS)
+}
+
+const runTaskNow = async () => {
+  if (!task.value) return
+  if (!canRunNow.value) return
+  if (runNowRequested.value) return
+
+  runNowRequested.value = true
+  try {
+    await hs.tasks.runTask(task.value.id)
+    Snackbar.success('Run requested.')
+    scheduleRunNowPoll(task.value.id, 0)
+  } catch (error: any) {
+    runNowRequested.value = false
+    Snackbar.error(error?.message || 'Unable to run task now.')
+    console.error('Error running task now', error)
+  }
+}
 
 async function togglePaused(
   task: Partial<TaskExpanded> & Pick<TaskExpanded, 'id'>
@@ -1375,19 +1315,20 @@ const fetchTaskRuns = async () => {
   }
 }
 
+const refreshRunHistory = async () => {
+  if (!task.value) return
+  await fetchTaskRuns()
+  if (effectiveRunId.value) {
+    await openRunHistoryAndScroll(effectiveRunId.value)
+  }
+}
+
 const openRunHistoryAndScroll = async (runId: string) => {
   if (!runId) return
-
-  // Latest run is displayed above; scroll there if requested.
-  if (task.value?.latestRun?.id && task.value.latestRun.id === runId) {
-    await scrollToRunAnchor(runId)
-    return
-  }
-
-  if (!openRunHistory.value) {
-    openRunHistory.value = true
-    await fetchTaskRuns()
-  } else if (!taskRuns.value.length && !loadingTaskRuns.value) {
+  if (
+    (!runHistoryFetchFinished.value || !taskRuns.value.length) &&
+    !loadingTaskRuns.value
+  ) {
     await fetchTaskRuns()
   }
 
@@ -1403,7 +1344,7 @@ const fetchData = async () => {
 
   upsertWorkspaceTask(task.value)
   await refreshDatastreams(task.value?.workspace.id)
-  if (openRunHistory.value) {
+  if (activePanel.value === 'runs') {
     await fetchTaskRuns()
   }
 
@@ -1433,11 +1374,15 @@ watch(
     if (newId === oldId) return
 
     // Reset task-specific UI state when switching tasks without unmounting.
-    openLatestLogs.value = false
+    stopRunNowPolling()
     openRunLogs.value = {}
+    taskRuns.value = []
     runHistoryFetchFinished.value = false
-    if (!effectiveRunId.value) {
-      openRunHistory.value = false
+    runNowRequested.value = false
+    if (props.embedded && !effectiveRunId.value) {
+      activePanel.value = 'runs'
+    } else if (!effectiveRunId.value) {
+      activePanel.value = 'details'
     }
 
     await fetchData()
@@ -1460,20 +1405,55 @@ watch(
   effectiveRunId,
   async (runId) => {
     if (!runId) return
-    // Ensure the page loads in "full run history" mode when deep-linked.
-    openRunHistory.value = true
+    // Ensure the page loads in run history mode when deep-linked.
+    activePanel.value = 'runs'
     if (!task.value) return
     await openRunHistoryAndScroll(runId)
   },
   { immediate: true }
 )
+
+watch(
+  activePanel,
+  async (panel) => {
+    if (panel === 'runs') {
+      if (
+        task.value &&
+        !loadingTaskRuns.value &&
+        (!runHistoryFetchFinished.value || taskRuns.value.length === 0)
+      ) {
+        await fetchTaskRuns()
+      }
+      return
+    }
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  stopRunNowPolling()
+  if (highlightTimeoutId) window.clearTimeout(highlightTimeoutId)
+  highlightTimeoutId = null
+})
 </script>
 
 <style scoped>
-.task-details-page {
+.task-details-shell {
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.task-details-content {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   padding: 0 16px;
   box-sizing: border-box;
+  height: 100%;
+  overflow-y: auto;
 }
 .section-card {
   background: #f8fafc;
@@ -1512,8 +1492,18 @@ watch(
   margin-bottom: 0;
 }
 
+.run-entry {
+  border-radius: 10px;
+  padding: 10px 12px;
+  overflow: hidden; /* prevent v-row negative margins from visually bleeding into neighbors */
+}
+
+.run-entry :deep(.v-row) {
+  margin: 0;
+}
+
 .run-highlight {
-  border-radius: 8px;
+  border-radius: 10px;
   animation: runHighlightPulse 2.5s ease-out;
 }
 
