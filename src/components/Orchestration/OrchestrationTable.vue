@@ -216,20 +216,101 @@
             >
               <table class="w-full table-fixed text-sm whitespace-nowrap">
                 <thead
-                  class="sticky top-0 z-10 bg-slate-50 text-xs font-semibold text-slate-600"
+                  class="sticky top-0 z-10 bg-slate-50 text-sm font-semibold text-slate-700"
                 >
                   <tr>
-                    <th class="px-3 py-2 text-left">Task name</th>
-                    <th class="px-3 py-2 text-left">Data connection</th>
-                    <th class="px-3 py-2 text-left">Status</th>
-                    <th class="px-3 py-2 text-left">Last / Next run</th>
-                    <th class="px-3 py-2 text-right">Actions</th>
+                    <th class="px-3 py-3 text-left w-[23%]">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 cursor-pointer bg-transparent p-0 text-left hover:text-slate-900"
+                        @click="toggleSort('name')"
+                        title="Click to sort, click again to reverse, click again to clear"
+                      >
+                        <span>Task name</span>
+                        <v-icon :icon="sortIcon('name')" size="16" />
+                        <span
+                          v-if="sortBadge('name')"
+                          class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700"
+                        >
+                          {{ sortBadge('name') }}
+                        </span>
+                      </button>
+                    </th>
+                    <th class="px-3 py-3 text-left w-[17%]">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 cursor-pointer bg-transparent p-0 text-left hover:text-slate-900"
+                        @click="toggleSort('dataConnection')"
+                        title="Click to sort, click again to reverse, click again to clear"
+                      >
+                        <span>Data connection</span>
+                        <v-icon :icon="sortIcon('dataConnection')" size="16" />
+                        <span
+                          v-if="sortBadge('dataConnection')"
+                          class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700"
+                        >
+                          {{ sortBadge('dataConnection') }}
+                        </span>
+                      </button>
+                    </th>
+                    <th class="px-3 py-3 text-left w-[10%]">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 cursor-pointer bg-transparent p-0 text-left hover:text-slate-900"
+                        @click="toggleSort('status')"
+                        title="Click to sort, click again to reverse, click again to clear"
+                      >
+                        <span>Status</span>
+                        <v-icon :icon="sortIcon('status')" size="16" />
+                        <span
+                          v-if="sortBadge('status')"
+                          class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700"
+                        >
+                          {{ sortBadge('status') }}
+                        </span>
+                      </button>
+                    </th>
+                    <th class="px-3 py-3 text-left w-[15%]">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 cursor-pointer bg-transparent p-0 text-left hover:text-slate-900"
+                        @click="toggleSort('lastRunAt')"
+                        title="Click to sort, click again to reverse, click again to clear"
+                      >
+                        <span>Last run</span>
+                        <v-icon :icon="sortIcon('lastRunAt')" size="16" />
+                        <span
+                          v-if="sortBadge('lastRunAt')"
+                          class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700"
+                        >
+                          {{ sortBadge('lastRunAt') }}
+                        </span>
+                      </button>
+                    </th>
+                    <th class="px-3 py-3 text-left w-[15%]">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 cursor-pointer bg-transparent p-0 text-left hover:text-slate-900"
+                        @click="toggleSort('nextRunAt')"
+                        title="Click to sort, click again to reverse, click again to clear"
+                      >
+                        <span>Next run</span>
+                        <v-icon :icon="sortIcon('nextRunAt')" size="16" />
+                        <span
+                          v-if="sortBadge('nextRunAt')"
+                          class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700"
+                        >
+                          {{ sortBadge('nextRunAt') }}
+                        </span>
+                      </button>
+                    </th>
+                    <th class="px-3 py-3 text-right w-[20%]">Actions</th>
                   </tr>
                 </thead>
                 <tbody v-if="openGroupRows.length === 0">
                   <tr>
                     <td
-                      colspan="5"
+                      colspan="6"
                       class="px-3 py-6 text-center text-sm text-slate-500"
                     >
                       No tasks registered for this orchestration system.
@@ -241,23 +322,22 @@
                     class="border-0"
                     :style="{ height: `${virtualPaddingTop}px` }"
                   >
-                    <td colspan="5"></td>
+                    <td colspan="6"></td>
                   </tr>
                   <tr
                     v-for="row in virtualRows"
                     :key="row.id"
-                    class="h-20 border-b border-slate-100 hover:bg-slate-50"
-                    :class="
-                      row.isPlaceholder ? 'text-slate-400' : 'cursor-pointer'
-                    "
-                    @click="onRowClick(row)"
+                    class="h-20 border-b border-slate-100"
+                    :class="row.isPlaceholder ? 'text-slate-400' : ''"
                   >
                     <td
                       class="px-3 py-2 font-medium text-slate-800 whitespace-normal break-words"
                     >
                       {{ row.name || '—' }}
                     </td>
-                    <td class="px-3 py-2 text-slate-600 truncate">
+                    <td
+                      class="px-3 py-2 text-slate-600 whitespace-normal break-words"
+                    >
                       {{ row.dataConnection?.name || '—' }}
                     </td>
                     <td class="px-3 py-2">
@@ -268,59 +348,59 @@
                       />
                       <span v-else class="text-slate-400">—</span>
                     </td>
-                    <td class="px-3 py-2 text-slate-600">
-                      <div class="flex flex-col gap-1">
-                        <div
-                          class="text-xs uppercase tracking-wide text-slate-400"
-                        >
-                          Last run
-                        </div>
-                        <div class="text-sm text-slate-700">
-                          {{ row.lastRun }}
-                        </div>
-                        <div
-                          class="text-xs uppercase tracking-wide text-slate-400"
-                        >
-                          Next run
-                        </div>
-                        <div class="text-sm text-slate-700">
-                          {{ row.nextRun }}
-                        </div>
-                      </div>
-                    </td>
+                    <td class="px-3 py-2 text-slate-700">{{ row.lastRun }}</td>
+                    <td class="px-3 py-2 text-slate-700">{{ row.nextRun }}</td>
                     <td class="px-3 py-2 text-right">
-                      <div class="flex items-center justify-end gap-2">
-                        <v-btn
-                          v-if="!row.isPlaceholder"
-                          variant="text"
-                          color="black"
-                          :icon="row.schedule?.paused ? mdiPlay : mdiPause"
-                          @click.stop="togglePaused(row)"
-                        />
-                        <v-btn
-                          v-if="
-                            !row.isPlaceholder &&
-                            isInternalSystem(row) &&
-                            !row.userClickedRunNow
-                          "
-                          class="ml-2"
-                          variant="outlined"
-                          color="green-darken-3"
-                          :append-icon="mdiPlay"
-                          @click.stop="runTaskNow(row)"
-                        >
-                          Run now
-                        </v-btn>
-                        <span
-                          v-else-if="
-                            !row.isPlaceholder &&
-                            isInternalSystem(row) &&
-                            row.userClickedRunNow
-                          "
-                          class="text-xs font-semibold text-slate-500"
-                        >
-                          Run requested
-                        </span>
+                      <div v-if="!row.isPlaceholder" class="flex flex-col gap-2">
+                        <div class="flex flex-wrap items-center justify-end gap-2">
+                          <v-tooltip location="top" :open-delay="0" :close-delay="0">
+                            <template #activator="{ props: tooltipProps }">
+                              <v-btn
+                                v-bind="tooltipProps"
+                                variant="text"
+                                color="black"
+                                :icon="row.schedule?.paused ? mdiPlay : mdiPause"
+                                @click.stop="togglePaused(row)"
+                                aria-label="Pause or run task"
+                              />
+                            </template>
+                            <span>{{
+                              row.schedule?.paused ? 'Resume task' : 'Pause task'
+                            }}</span>
+                          </v-tooltip>
+                          <v-btn
+                            v-if="
+                              isInternalSystem(row) && !row.userClickedRunNow
+                            "
+                            variant="outlined"
+                            color="green-darken-3"
+                            :append-icon="mdiPlay"
+                            @click.stop="runTaskNow(row)"
+                          >
+                            Run now
+                          </v-btn>
+                          <span
+                            v-else-if="
+                              isInternalSystem(row) && row.userClickedRunNow
+                            "
+                            class="text-sm font-semibold text-slate-500"
+                          >
+                            Run requested
+                          </span>
+                        </div>
+                        <div class="flex items-center justify-end">
+                          <v-btn
+                            variant="outlined"
+                            color="blue-grey-darken-3"
+                            @click.stop="goToTask(row)"
+                            aria-label="View details"
+                            title="View task details"
+                            class="text-none"
+                            :append-icon="mdiChevronRight"
+                          >
+                            View details
+                          </v-btn>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -328,7 +408,7 @@
                     class="border-0"
                     :style="{ height: `${virtualPaddingBottom}px` }"
                   >
-                    <td colspan="5"></td>
+                    <td colspan="6"></td>
                   </tr>
                 </tbody>
               </table>
@@ -390,6 +470,9 @@ import {
   mdiTrashCanOutline,
   mdiChevronRight,
   mdiChevronDown,
+  mdiArrowUp,
+  mdiArrowDown,
+  mdiArrowUpDown,
 } from '@mdi/js'
 import { mdiMenuDown, mdiMenuUp } from '@mdi/js'
 import { storeToRefs } from 'pinia'
@@ -427,6 +510,17 @@ const POLL_INTERVAL_MS = 4000
 const POLL_MAX_ATTEMPTS = 20
 
 const taskPollTimeouts = new Map<string, number>()
+
+type SortKey =
+  | 'name'
+  | 'dataConnection'
+  | 'status'
+  | 'lastRunAt'
+  | 'nextRunAt'
+type SortSpec = { key: SortKey; dir: 'asc' | 'desc' }
+
+// Multi-sort: first clicked column is primary, subsequent clicks add secondary sorts.
+const sortSpecs = ref<SortSpec[]>([{ key: 'name', dir: 'asc' }])
 
 watch(
   statusFilter,
@@ -583,8 +677,14 @@ const taskRows = computed(() =>
     ...t,
     schedule: t.schedule ?? null,
     statusName: hs.tasks.getStatusText(t),
+    statusSort: getDisplayedStatus({
+      statusName: hs.tasks.getStatusText(t),
+      schedule: t.schedule ?? null,
+    }),
     lastRun: !!t.latestRun?.startedAt ? formatTime(t.latestRun.startedAt) : '-',
     nextRun: t.schedule?.nextRunAt ? formatTime(t.schedule?.nextRunAt) : '-',
+    lastRunAt: t.latestRun?.startedAt ?? null,
+    nextRunAt: t.schedule?.nextRunAt ?? null,
     orchestrationSystemName: resolveGroupName(t),
     isPlaceholder: false,
     userClickedRunNow: !!runNowTriggeredByTaskId[t.id],
@@ -617,13 +717,63 @@ const filteredTaskRows = computed(() => {
   })
 })
 
-const sortTaskRowsByName = (rows: any[]) =>
-  rows.sort((a, b) =>
-    `${a?.name ?? ''}`.localeCompare(`${b?.name ?? ''}`, undefined, {
-      numeric: true,
-      sensitivity: 'base',
-    })
-  )
+const compareText = (a: unknown, b: unknown) =>
+  `${a ?? ''}`.localeCompare(`${b ?? ''}`, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  })
+
+const compareNullableDate = (a: unknown, b: unknown) => {
+  // Treat missing dates as "last" when sorting ascending.
+  const aVal = a ? new Date(a as any).getTime() : null
+  const bVal = b ? new Date(b as any).getTime() : null
+  if (aVal == null && bVal == null) return 0
+  if (aVal == null) return 1
+  if (bVal == null) return -1
+  return aVal - bVal
+}
+
+const buildComparatorForKey = (key: SortKey) => {
+  if (key === 'name') return (a: any, b: any) => compareText(a?.name, b?.name)
+  if (key === 'dataConnection')
+    return (a: any, b: any) =>
+      compareText(a?.dataConnection?.name, b?.dataConnection?.name)
+  if (key === 'status')
+    return (a: any, b: any) => compareText(a?.statusSort, b?.statusSort)
+  if (key === 'lastRunAt')
+    return (a: any, b: any) => compareNullableDate(a?.lastRunAt, b?.lastRunAt)
+  if (key === 'nextRunAt')
+    return (a: any, b: any) => compareNullableDate(a?.nextRunAt, b?.nextRunAt)
+  return () => 0
+}
+
+const normalizeSortSpecs = (specs: SortSpec[]): SortSpec[] => {
+  const seen = new Set<SortKey>()
+  const normalized: SortSpec[] = []
+  for (const spec of specs) {
+    if (!spec?.key || seen.has(spec.key)) continue
+    seen.add(spec.key)
+    normalized.push({ key: spec.key, dir: spec.dir })
+  }
+  return normalized
+}
+
+const sortRows = (rows: any[]) => {
+  const specs = normalizeSortSpecs(sortSpecs.value)
+  const comparators = specs.map((spec) => {
+    const base = buildComparatorForKey(spec.key)
+    const dir = spec.dir === 'asc' ? 1 : -1
+    return (a: any, b: any) => base(a, b) * dir
+  })
+
+  return [...rows].sort((a, b) => {
+    for (const cmpFn of comparators) {
+      const cmp = cmpFn(a, b)
+      if (cmp !== 0) return cmp
+    }
+    return 0
+  })
+}
 
 const includeEmptyGroups = computed(
   () =>
@@ -675,7 +825,7 @@ const groupList = computed(() => {
 
   const groups = Array.from(map.values()).map((group) => ({
     ...group,
-    items: sortTaskRowsByName(group.items),
+    items: sortRows(group.items),
     summary: groupHealthSummary(group.items),
   }))
 
@@ -815,9 +965,20 @@ async function runTaskNow(task: Partial<Task> & Pick<Task, 'id'>) {
 
 async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
   if (!task.schedule) return
-  task.schedule.paused = !task.schedule.paused
-  await hs.tasks.update(task)
-  await refreshTable()
+  const previous = !!task.schedule.paused
+  task.schedule.paused = !previous
+  try {
+    await hs.tasks.update({
+      id: task.id,
+      schedule: task.schedule,
+    } as any)
+    // Avoid full-table reload; refresh just this row so next/last run times stay accurate.
+    const updated = await hs.tasks.getItem(task.id, { expand_related: true })
+    upsertWorkspaceTask(updated as any)
+  } catch (error) {
+    task.schedule.paused = previous
+    console.error('Error toggling task paused state', error)
+  }
 }
 
 watch(
@@ -881,10 +1042,52 @@ const openDeleteDialog = (selectedItem: any) => {
   openDelete.value = true
 }
 
-const onRowClick = async (item: any) => {
+const goToTask = async (item: any) => {
   if (item.isPlaceholder) return
   await router.push({ name: 'Task', params: { id: item.id } })
 }
+
+const toggleSort = (key: SortKey) => {
+  const next = normalizeSortSpecs(sortSpecs.value)
+  const idx = next.findIndex((s) => s.key === key)
+  if (idx === -1) {
+    next.push({ key, dir: 'asc' })
+    sortSpecs.value = normalizeSortSpecs(next)
+    return
+  }
+
+  if (next[idx].dir === 'asc') {
+    next[idx] = { key, dir: 'desc' }
+    sortSpecs.value = normalizeSortSpecs(next)
+    return
+  }
+
+  // Third click clears this sort key.
+  next.splice(idx, 1)
+  sortSpecs.value = normalizeSortSpecs(next)
+}
+
+const sortIcon = (key: SortKey) => {
+  const spec = normalizeSortSpecs(sortSpecs.value).find((s) => s.key === key)
+  if (!spec) return mdiArrowUpDown
+  return spec.dir === 'asc' ? mdiArrowUp : mdiArrowDown
+}
+
+const sortBadge = (key: SortKey) => {
+  const specs = normalizeSortSpecs(sortSpecs.value)
+  if (specs.length <= 1) return null
+  const idx = specs.findIndex((s) => s.key === key)
+  if (idx === -1) return null
+  return idx + 1
+}
+
+watch(
+  sortSpecs,
+  () => {
+    resetVirtualScroll()
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
