@@ -1044,7 +1044,11 @@ const openDeleteDialog = (selectedItem: any) => {
 
 const goToTask = async (item: any) => {
   if (item.isPlaceholder) return
-  await router.push({ name: 'Task', params: { id: item.id } })
+  const currentQuery = router.currentRoute.value.query ?? {}
+  await router.push({
+    name: 'Orchestration',
+    query: { ...currentQuery, taskId: item.id, runId: undefined },
+  })
 }
 
 const toggleSort = (key: SortKey) => {

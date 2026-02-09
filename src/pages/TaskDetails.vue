@@ -7,7 +7,7 @@
           color="black"
           :icon="mdiArrowLeft"
           class="mr-2"
-          @click="router.push({ name: 'Orchestration' })"
+          @click="onBack"
         />
       </v-col>
       <v-col cols="auto">
@@ -103,7 +103,14 @@
         {{ openRunHistory ? 'Hide full run history' : 'View full run history' }}
       </v-btn>
     </v-toolbar>
-    <v-card class="elevation-3 rounded-b-lg section-card pa-4 last-run-card">
+    <v-card
+      class="elevation-3 rounded-b-lg section-card pa-4 last-run-card"
+      :id="task?.latestRun?.id ? runDomId(task.latestRun.id) : undefined"
+      :class="{
+        'run-highlight':
+          !!task?.latestRun?.id && highlightedRunId === task.latestRun.id,
+      }"
+    >
       <template v-if="task?.latestRun">
         <v-row dense>
           <v-col cols="12" md="3">
@@ -120,19 +127,44 @@
             <strong>Finished</strong>
             <div>{{ formatTimeWithZone(task.latestRun.finishedAt) }}</div>
           </v-col>
-          <v-col cols="12">
-            <strong>Run message</strong>
-            <div>{{ latestRunMessage }}</div>
-          </v-col>
-          <v-col cols="12" v-if="latestRunRuntimeUrl">
-            <strong>Runtime source URI</strong>
-            <div>
-              <div class="d-flex align-center ga-2">
-                <span class="break-all">{{ latestRunRuntimeUrl }}</span>
-                <v-btn
-                  icon
-                  variant="text"
-                  size="small"
+	          <v-col cols="12">
+	            <strong>Run message</strong>
+	            <div>{{ latestRunMessage }}</div>
+	          </v-col>
+	          <v-col cols="12" v-if="task.latestRun?.id">
+	            <strong>Run link</strong>
+	            <div class="d-flex align-center ga-2">
+	              <a
+	                class="text-blue-600 underline break-all"
+	                :href="runLinkUrl(task.latestRun.id)"
+	              >
+	                {{ runLinkUrl(task.latestRun.id) }}
+	              </a>
+	              <v-btn
+	                icon
+	                variant="text"
+	                size="small"
+	                color="blue"
+	                @click="copyToClipboard(runLinkUrl(task.latestRun.id))"
+	              >
+	                <v-icon :icon="mdiContentCopy" />
+	              </v-btn>
+	            </div>
+	          </v-col>
+		          <v-col cols="12" v-if="latestRunRuntimeUrl">
+		            <strong>Runtime source URI</strong>
+		            <div>
+	              <div class="d-flex align-center ga-2">
+	                <a
+	                  class="text-blue-600 underline break-all"
+	                  :href="latestRunRuntimeUrl"
+	                >
+	                  {{ latestRunRuntimeUrl }}
+	                </a>
+	                <v-btn
+	                  icon
+	                  variant="text"
+	                  size="small"
                   color="blue"
                   @click="copyToClipboard(latestRunRuntimeUrl)"
                 >
@@ -204,126 +236,171 @@
       <template v-else>
         No runs have been recorded for this task yet.
       </template>
-      <v-expand-transition>
-        <div v-if="openRunHistory" class="mt-4 pt-4 border-t border-[#cfd8dc]">
-          <template v-if="runHistoryRows.length">
-            <template v-for="(run, index) in runHistoryRows" :key="run.id">
-              <div class="mb-4">
-                <v-row dense>
-                  <v-col cols="12" md="3">
-                    <strong>Status</strong>
-                    <div class="mt-1">
-                      <TaskStatus
-                        :status="getRunStatusText(run.raw)"
-                        :paused="false"
-                      />
-                    </div>
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <strong>Started</strong>
-                    <div>{{ run.startedAt }}</div>
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <strong>Finished</strong>
-                    <div>{{ run.finishedAt }}</div>
-                  </v-col>
-                  <v-col cols="12">
-                    <strong>Run message</strong>
-                    <div>{{ run.message }}</div>
-                  </v-col>
-                  <v-col cols="12" v-if="run.runtimeUrl">
-                    <strong>Runtime source URI</strong>
-                    <div>
-                      <div class="d-flex align-center ga-2">
-                        <span class="break-all">{{ run.runtimeUrl }}</span>
-                        <v-btn
-                          icon
-                          variant="text"
-                          size="small"
-                          color="blue"
-                          @click="copyToClipboard(run.runtimeUrl)"
-                        >
-                          <v-icon :icon="mdiContentCopy" />
-                        </v-btn>
-                      </div>
-                    </div>
-                  </v-col>
-                </v-row>
-                <div class="mt-2">
-                  <v-btn
-                    variant="text"
-                    color="blue-grey-darken-2"
-                    :prepend-icon="mdiCodeBraces"
-                    @click="toggleRunLogs(run.id)"
-                  >
-                    {{
-                      openRunLogs[run.id] ? 'Hide full logs' : 'See full logs'
-                    }}
-                  </v-btn>
-                </div>
-                <v-expand-transition>
-                  <div v-if="openRunLogs[run.id]" class="mt-3">
-                    <div class="grid gap-3">
-                      <div
-                        v-for="(section, idx) in buildLogSections(run.raw)"
-                        :key="`${section.title}-${idx}`"
-                        class="grid gap-2"
-                      >
-                        <div
-                          class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
-                        >
-                          {{ section.title }}
-                        </div>
-                        <div
-                          v-if="section.type === 'lines'"
-                          class="grid gap-1.5"
-                        >
-                          <div
-                            v-for="(entry, entryIdx) in section.entries"
-                            :key="entryIdx"
-                            class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
-                          >
-                            <span
-                              v-if="entry.timestamp"
-                              class="tabular-nums text-slate-600"
-                            >
-                              {{ entry.timestamp }}
-                            </span>
-                            <span
-                              v-if="entry.level"
-                              :class="[
-                                'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
-                                logLevelClass(entry.level),
-                              ]"
-                            >
-                              {{ entry.level }}
-                            </span>
-                            <span class="whitespace-pre-wrap break-words">{{
-                              entry.message
-                            }}</span>
-                          </div>
-                        </div>
-                        <pre
-                          v-else
-                          class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
-                          >{{ section.text }}</pre
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </v-expand-transition>
-              </div>
-              <v-divider
-                v-if="index < runHistoryRows.length - 1"
-                class="my-3"
-              />
-            </template>
-          </template>
-          <div v-else class="text-medium-emphasis">
-            No run history available yet.
-          </div>
-        </div>
-      </v-expand-transition>
+	      <v-expand-transition>
+	        <div v-if="openRunHistory" class="mt-4 pt-4 border-t border-[#cfd8dc]">
+	          <template v-if="showRunHistoryLoading">
+	            <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
+	              <div class="flex items-center gap-3 text-sm text-slate-600">
+	                <v-progress-circular
+	                  indeterminate
+	                  size="20"
+	                  width="2"
+	                  color="blue-grey-darken-1"
+	                />
+	                <span class="font-medium">Loading run history...</span>
+	              </div>
+	            </div>
+	            <v-skeleton-loader type="paragraph, paragraph, paragraph" />
+	          </template>
+	          <template v-else-if="runHistoryRows.length">
+	            <template v-for="(run, index) in runHistoryRows" :key="run.id">
+	              <div
+	                class="mb-4"
+	                :id="runDomId(run.id)"
+	                :class="{
+	                  'run-highlight': highlightedRunId === run.id,
+	                }"
+	              >
+	                <v-row dense>
+	                  <v-col cols="12" md="3">
+	                    <strong>Status</strong>
+	                    <div class="mt-1">
+	                      <TaskStatus
+	                        :status="getRunStatusText(run.raw)"
+	                        :paused="false"
+	                      />
+	                    </div>
+	                  </v-col>
+	                  <v-col cols="12" md="3">
+	                    <strong>Started</strong>
+	                    <div>{{ run.startedAt }}</div>
+	                  </v-col>
+	                  <v-col cols="12" md="3">
+	                    <strong>Finished</strong>
+	                    <div>{{ run.finishedAt }}</div>
+	                  </v-col>
+	                  <v-col cols="12">
+	                    <strong>Run message</strong>
+	                    <div>{{ run.message }}</div>
+	                  </v-col>
+	                  <v-col cols="12">
+	                    <strong>Run link</strong>
+	                    <div class="d-flex align-center ga-2">
+	                      <a
+	                        class="text-blue-600 underline break-all"
+	                        :href="runLinkUrl(run.id)"
+	                      >
+	                        {{ runLinkUrl(run.id) }}
+	                      </a>
+	                      <v-btn
+	                        icon
+	                        variant="text"
+	                        size="small"
+	                        color="blue"
+	                        @click="copyToClipboard(runLinkUrl(run.id))"
+	                      >
+	                        <v-icon :icon="mdiContentCopy" />
+	                      </v-btn>
+	                    </div>
+	                  </v-col>
+		                  <v-col cols="12" v-if="run.runtimeUrl">
+		                    <strong>Runtime source URI</strong>
+		                    <div>
+		                      <div class="d-flex align-center ga-2">
+		                        <a
+		                          class="text-blue-600 underline break-all"
+		                          :href="run.runtimeUrl"
+		                        >
+		                          {{ run.runtimeUrl }}
+		                        </a>
+		                        <v-btn
+		                          icon
+		                          variant="text"
+		                          size="small"
+	                          color="blue"
+	                          @click="copyToClipboard(run.runtimeUrl)"
+	                        >
+	                          <v-icon :icon="mdiContentCopy" />
+	                        </v-btn>
+	                      </div>
+	                    </div>
+	                  </v-col>
+	                </v-row>
+	                <div class="mt-2">
+	                  <v-btn
+	                    variant="text"
+	                    color="blue-grey-darken-2"
+	                    :prepend-icon="mdiCodeBraces"
+	                    @click="toggleRunLogs(run.id)"
+	                  >
+	                    {{
+	                      openRunLogs[run.id] ? 'Hide full logs' : 'See full logs'
+	                    }}
+	                  </v-btn>
+	                </div>
+	                <v-expand-transition>
+	                  <div v-if="openRunLogs[run.id]" class="mt-3">
+	                    <div class="grid gap-3">
+	                      <div
+	                        v-for="(section, idx) in buildLogSections(run.raw)"
+	                        :key="`${section.title}-${idx}`"
+	                        class="grid gap-2"
+	                      >
+	                        <div
+	                          class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-600"
+	                        >
+	                          {{ section.title }}
+	                        </div>
+	                        <div
+	                          v-if="section.type === 'lines'"
+	                          class="grid gap-1.5"
+	                        >
+	                          <div
+	                            v-for="(entry, entryIdx) in section.entries"
+	                            :key="entryIdx"
+	                            class="grid grid-cols-[minmax(120px,180px)_minmax(70px,90px)_1fr] items-start gap-2.5 font-mono text-xs text-slate-700 max-md:grid-cols-1"
+	                          >
+	                            <span
+	                              v-if="entry.timestamp"
+	                              class="tabular-nums text-slate-600"
+	                            >
+	                              {{ entry.timestamp }}
+	                            </span>
+	                            <span
+	                              v-if="entry.level"
+	                              :class="[
+	                                'self-start rounded-full border border-transparent px-2 py-0.5 text-center text-[0.7rem] font-semibold uppercase tracking-[0.04em] max-md:justify-self-start',
+	                                logLevelClass(entry.level),
+	                              ]"
+	                            >
+	                              {{ entry.level }}
+	                            </span>
+	                            <span class="whitespace-pre-wrap break-words">{{
+	                              entry.message
+	                            }}</span>
+	                          </div>
+	                        </div>
+	                        <pre
+	                          v-else
+	                          class="m-0 rounded-md border border-[#cfd8dc] bg-slate-100 p-3 text-xs leading-snug text-slate-800 whitespace-pre-wrap break-words"
+	                          >{{ section.text }}</pre
+	                        >
+	                      </div>
+	                    </div>
+	                  </div>
+	                </v-expand-transition>
+	              </div>
+	              <v-divider
+	                v-if="index < runHistoryRows.length - 1"
+	                class="my-3"
+	              />
+	            </template>
+	          </template>
+	          <div v-else class="text-medium-emphasis">
+	            No run history available yet.
+	          </div>
+	        </div>
+	      </v-expand-transition>
     </v-card>
 
     <v-toolbar
@@ -408,7 +485,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { Snackbar } from '@/utils/notifications'
@@ -425,6 +502,7 @@ import DeleteTaskCard from '@/components/Orchestration/DeleteTaskCard.vue'
 import { formatTimeWithZone } from '@/utils/time'
 import TaskStatus from '@/components/Orchestration/TaskStatus.vue'
 import { useOrchestrationStore } from '@/store/orchestration'
+import { useWorkspaceStore } from '@/store/workspaces'
 import {
   mdiBroadcast,
   mdiArrowLeft,
@@ -447,6 +525,23 @@ import {
   mdiTrashCanOutline,
 } from '@mdi/js'
 
+const props = withDefaults(
+  defineProps<{
+    taskId?: string | null
+    runId?: string | null
+    embedded?: boolean
+  }>(),
+  {
+    taskId: null,
+    runId: null,
+    embedded: false,
+  }
+)
+
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
+
 const route = useRoute()
 const openEdit = ref(false)
 const openDelete = ref(false)
@@ -456,9 +551,87 @@ const openRunLogs = ref<Record<string, boolean>>({})
 const task = ref<TaskExpanded | null>(null)
 const taskRuns = ref<TaskRun[]>([])
 const loadingTaskRuns = ref(false)
+const runHistoryFetchFinished = ref(false)
+const highlightedRunId = ref<string | null>(null)
+let highlightTimeoutId: number | null = null
 const { workspaceTasks, workspaceDatastreams } = storeToRefs(
   useOrchestrationStore()
 )
+
+const { workspaces } = storeToRefs(useWorkspaceStore())
+const { setSelectedWorkspaceById } = useWorkspaceStore()
+
+const effectiveTaskId = computed(() => {
+  const propId = props.taskId
+  if (typeof propId === 'string' && propId.trim()) return propId
+
+  const param = route.params.id
+  if (typeof param === 'string') return param
+  if (Array.isArray(param)) return param[0] ?? ''
+  return ''
+})
+
+const effectiveRunId = computed(() => {
+  const propId = props.runId
+  if (typeof propId === 'string' && propId.trim()) return propId
+
+  const queryValue = route.query.runId
+  if (typeof queryValue === 'string' && queryValue.trim()) return queryValue
+  return null
+})
+
+const onBack = () => {
+  if (props.embedded || props.taskId) {
+    emit('close')
+    return
+  }
+  router.push({ name: 'Orchestration' })
+}
+
+const runDomId = (runId: string) => `task-run-${runId}`
+
+const runLinkHref = (runId: string) =>
+  router.resolve({
+    name: 'Orchestration',
+    query: { taskId: effectiveTaskId.value, runId },
+  }).href
+
+const runLinkUrl = (runId: string) => {
+  const href = runLinkHref(runId)
+  if (typeof window === 'undefined') return href
+  return new URL(href, window.location.origin).toString()
+}
+
+const scrollToRunAnchor = async (runId: string) => {
+  const id = runDomId(runId)
+  // Transitions can delay DOM insertion; retry a few frames.
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    await nextTick()
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      highlightedRunId.value = runId
+      if (highlightTimeoutId) window.clearTimeout(highlightTimeoutId)
+      highlightTimeoutId = window.setTimeout(() => {
+        highlightedRunId.value = null
+        highlightTimeoutId = null
+      }, 2500)
+      return
+    }
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  }
+}
+
+const showRunHistoryLoading = computed(() => {
+  if (!openRunHistory.value) return false
+  if (loadingTaskRuns.value) return true
+  // If the user deep-linked to a runId, avoid flashing the empty-state while the first fetch is pending.
+  if (effectiveRunId.value && !runHistoryFetchFinished.value) return true
+  // If the user opened the run history but we haven't finished the first fetch, show loading until we know.
+  if (!runHistoryFetchFinished.value && runHistoryRows.value.length === 0)
+    return true
+  return false
+})
 
 const asResult = (run?: TaskRun | null) => {
   const value = run?.result as any
@@ -1187,6 +1360,7 @@ const fetchTaskRuns = async () => {
   if (!task.value) return
 
   loadingTaskRuns.value = true
+  runHistoryFetchFinished.value = false
   try {
     const response = await hs.tasks.getTaskRuns(task.value.id, {
       order_by: ['-startedAt'],
@@ -1197,11 +1371,33 @@ const fetchTaskRuns = async () => {
     console.error('Error fetching task runs', error)
   } finally {
     loadingTaskRuns.value = false
+    runHistoryFetchFinished.value = true
   }
 }
 
+const openRunHistoryAndScroll = async (runId: string) => {
+  if (!runId) return
+
+  // Latest run is displayed above; scroll there if requested.
+  if (task.value?.latestRun?.id && task.value.latestRun.id === runId) {
+    await scrollToRunAnchor(runId)
+    return
+  }
+
+  if (!openRunHistory.value) {
+    openRunHistory.value = true
+    await fetchTaskRuns()
+  } else if (!taskRuns.value.length && !loadingTaskRuns.value) {
+    await fetchTaskRuns()
+  }
+
+  await scrollToRunAnchor(runId)
+}
+
 const fetchData = async () => {
-  task.value = (await hs.tasks.getItem(route.params.id.toString(), {
+  if (!effectiveTaskId.value) return
+
+  task.value = (await hs.tasks.getItem(effectiveTaskId.value, {
     expand_related: true,
   })) as unknown as TaskExpanded
 
@@ -1209,6 +1405,15 @@ const fetchData = async () => {
   await refreshDatastreams(task.value?.workspace.id)
   if (openRunHistory.value) {
     await fetchTaskRuns()
+  }
+
+  // If the user deep-linked to a task/run in a different workspace, select it so the list matches.
+  if (task.value?.workspace?.id && workspaces.value.length) {
+    setSelectedWorkspaceById(task.value.workspace.id)
+  }
+
+  if (effectiveRunId.value) {
+    await openRunHistoryAndScroll(effectiveRunId.value)
   }
 }
 
@@ -1221,9 +1426,47 @@ const onTaskUpdated = async (updated: TaskExpanded) => {
   openEdit.value = false
 }
 
-onMounted(async () => {
-  await fetchData()
-})
+watch(
+  effectiveTaskId,
+  async (newId, oldId) => {
+    if (!newId) return
+    if (newId === oldId) return
+
+    // Reset task-specific UI state when switching tasks without unmounting.
+    openLatestLogs.value = false
+    openRunLogs.value = {}
+    runHistoryFetchFinished.value = false
+    if (!effectiveRunId.value) {
+      openRunHistory.value = false
+    }
+
+    await fetchData()
+  },
+  { immediate: true }
+)
+
+watch(
+  workspaces,
+  (list) => {
+    if (!list?.length) return
+    if (task.value?.workspace?.id) {
+      setSelectedWorkspaceById(task.value.workspace.id)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  effectiveRunId,
+  async (runId) => {
+    if (!runId) return
+    // Ensure the page loads in "full run history" mode when deep-linked.
+    openRunHistory.value = true
+    if (!task.value) return
+    await openRunHistoryAndScroll(runId)
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
@@ -1267,5 +1510,19 @@ onMounted(async () => {
 }
 .swimlanes-card :deep(.swimlanes) {
   margin-bottom: 0;
+}
+
+.run-highlight {
+  border-radius: 8px;
+  animation: runHighlightPulse 2.5s ease-out;
+}
+
+@keyframes runHighlightPulse {
+  0% {
+    background: rgba(255, 235, 59, 0.35);
+  }
+  100% {
+    background: transparent;
+  }
 }
 </style>
