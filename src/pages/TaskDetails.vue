@@ -188,88 +188,97 @@
               :class="{
                 'run-highlight': highlightedRunId === run.id,
               }"
-            >
-              <div class="run-entry-top">
-                <div class="run-entry-top-left">
-                  <TaskStatus
-                    :status="getRunStatusText(run.raw)"
-                    :paused="false"
-                    class="run-entry-status"
-                  />
-                  <div class="run-entry-title">
-                    <div class="run-entry-title-row">
-                      <div class="run-entry-runid">
-                        Run {{ shortId(run.id) }}
-                      </div>
-                      <div class="run-entry-duration">
-                        {{ runDurationText(run.raw) }}
-                      </div>
-                    </div>
-                    <div class="run-entry-times">
-                      <span class="run-entry-time">
-                        <strong>Started</strong> {{ run.startedAt }}
-                      </span>
-                      <span class="run-entry-sep">•</span>
-                      <span class="run-entry-time">
-                        <strong>Finished</strong> {{ run.finishedAt }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+	            >
+	              <div class="run-entry-top">
+	                <div class="run-entry-top-left">
+	                  <div class="run-entry-runid-top">
+	                    Run {{ shortId(run.id) }}
+	                  </div>
+	                  <TaskStatus
+	                    :status="getRunStatusText(run.raw)"
+	                    :paused="false"
+	                    class="run-entry-status"
+	                  />
+	                </div>
+	                <div class="run-entry-summary" :title="run.message">
+	                  {{ run.message }}
+	                </div>
                 <div class="run-entry-top-right">
-                  <div class="run-entry-top-right-label">Copy run as URL</div>
-                  <v-btn
-                    icon
-                    variant="text"
-                    size="small"
-                    color="blue"
-                    @click="copyToClipboard(runLinkUrl(run.id))"
-                    title="Copy run link"
-                  >
-                    <v-icon :icon="mdiContentCopy" />
-                  </v-btn>
-                </div>
-              </div>
+                  <div class="run-entry-copy-label">Copy run link</div>
+                  <v-tooltip text="Copy run link" location="bottom">
+                    <template #activator="{ props: tooltipProps }">
+                      <v-btn
+                        v-bind="tooltipProps"
+	                        icon
+	                        variant="text"
+	                        size="small"
+	                        color="blue-grey-darken-2"
+	                        @click="copyToClipboard(runLinkUrl(run.id))"
+	                        aria-label="Copy run link"
+	                      >
+	                        <v-icon :icon="mdiContentCopy" />
+	                      </v-btn>
+	                    </template>
+	                  </v-tooltip>
+	                </div>
+	              </div>
+	
+	              <div class="run-entry-meta">
+	                <div class="run-entry-meta-row">
+	                  <div class="run-entry-times-inline">
+	                    <span class="run-entry-time">
+	                      <span class="run-entry-meta-label">Started</span>
+	                      {{ run.startedAt }}
+	                    </span>
+	                    <span class="run-entry-sep">•</span>
+	                    <span class="run-entry-time">
+	                      <span class="run-entry-meta-label">Finished</span>
+	                      {{ run.finishedAt }}
+	                    </span>
+	                  </div>
+	                  <div class="run-entry-duration">
+	                    {{ runDurationText(run.raw) }}
+	                  </div>
+	                </div>
+	              </div>
 
-              <div class="run-entry-message">
-                <div class="run-entry-label">Message</div>
-                <div class="run-entry-message-text">
-                  {{ run.message }}
-                </div>
-              </div>
+	              <div v-if="run.runtimeUrl" class="run-entry-runtime">
+	                <div class="run-entry-runtime-row">
+	                  <div class="run-entry-runtime-label">Runtime URI</div>
+	                  <div class="run-entry-runtime-value">
+	                    <div class="run-entry-runtime-linkwrap">
+	                      <a
+	                        class="text-slate-600 underline break-all hover:text-blue-700"
+	                        :href="run.runtimeUrl"
+	                        target="_blank"
+	                        rel="noopener"
+	                      >
+	                        {{ run.runtimeUrl }}
+	                      </a>
+	                      <v-tooltip text="Copy runtime URI" location="bottom">
+	                        <template #activator="{ props: tooltipProps }">
+	                          <v-btn
+	                            v-bind="tooltipProps"
+	                            icon
+	                            variant="text"
+	                            size="small"
+	                            color="blue-grey-darken-2"
+	                            @click="copyToClipboard(run.runtimeUrl)"
+	                            aria-label="Copy runtime URI"
+	                          >
+	                            <v-icon :icon="mdiContentCopy" />
+	                          </v-btn>
+	                        </template>
+	                      </v-tooltip>
+	                    </div>
+	                  </div>
+	                </div>
+	              </div>
 
-              <div class="run-entry-links">
-                <div v-if="run.runtimeUrl" class="run-entry-link-row">
-                  <div class="run-entry-label">Runtime source URI</div>
-                  <div class="run-entry-link-value">
-                    <a
-                      class="text-blue-600 underline break-all"
-                      :href="run.runtimeUrl"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {{ run.runtimeUrl }}
-                    </a>
-                    <v-btn
-                      icon
-                      variant="text"
-                      size="small"
-                      color="blue"
-                      @click="copyToClipboard(run.runtimeUrl)"
-                      title="Copy runtime URI"
-                    >
-                      <v-icon :icon="mdiContentCopy" />
-                    </v-btn>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                class="run-entry-footer border-t border-slate-100 px-2 pt-2 pb-2.5"
-              >
+              <div class="run-entry-footer">
                 <v-btn
                   variant="tonal"
-                  color="blue-grey-darken-2"
+                  color="cyan-darken-3"
                   :prepend-icon="mdiCodeBraces"
                   class="text-none"
                   @click="toggleRunLogs(run.id)"
@@ -278,12 +287,16 @@
                 </v-btn>
               </div>
 
-              <v-expand-transition>
-                <div v-if="openRunLogs[run.id]" class="px-4 pb-4">
-                  <div class="grid gap-3">
-                    <div
-                      v-for="(section, idx) in buildLogSections(run.raw)"
-                      :key="`${section.title}-${idx}`"
+	              <!-- Logs expand outside of the footer (keeps the "View logs" area clean). -->
+	              <v-expand-transition>
+	                <div
+	                  v-if="openRunLogs[run.id]"
+	                  class="border-t border-slate-100 px-4 pt-3 pb-4"
+	                >
+	                  <div class="grid gap-3">
+	                    <div
+	                      v-for="(section, idx) in buildLogSections(run.raw)"
+	                      :key="`${section.title}-${idx}`"
                       class="grid gap-2"
                     >
                       <div
@@ -1602,33 +1615,80 @@ onBeforeUnmount(() => {
 
 .run-entry-top {
   display: flex;
+  /* Allow the summary message to grow vertically without awkward centering. */
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   padding: 14px 16px 10px;
 }
 
 .run-entry-top-left {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  min-width: 0;
+  gap: 3px;
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+}
+
+.run-entry-runid-top {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .run-entry-status {
   flex: 0 0 auto;
-  margin-top: 2px;
 }
 
-.run-entry-title {
+.run-entry-summary {
+  flex: 1 1 auto;
   min-width: 0;
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  word-break: break-word;
+  white-space: normal;
 }
 
-.run-entry-title-row {
+.run-entry-meta {
+  background: #ffffff;
+  padding: 10px 16px 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.run-entry-meta-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
+}
+
+.run-entry-times-inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.run-entry-meta-label {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-right: 6px;
+  font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .run-entry-runid {
@@ -1641,21 +1701,11 @@ onBeforeUnmount(() => {
   font-size: 0.8rem;
   font-weight: 700;
   color: #334155;
-  background: #f1f5f9;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   padding: 2px 10px;
   white-space: nowrap;
-}
-
-.run-entry-times {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
-  color: #475569;
-  font-size: 0.9rem;
 }
 
 .run-entry-sep {
@@ -1664,80 +1714,80 @@ onBeforeUnmount(() => {
 
 .run-entry-top-right {
   display: flex;
-  align-items: center;
+  /* Keep the action aligned to the top when the summary wraps. */
+  align-items: flex-start;
   gap: 6px;
   flex: 0 0 auto;
 }
 
-.run-entry-top-right-label {
+.run-entry-copy-label {
   font-size: 0.7rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: #64748b;
   white-space: nowrap;
+  margin-top: 2px;
 }
 
-.run-entry-message {
-  padding: 0 16px 12px;
+.run-entry-footer {
+  background: #ffffff;
+  padding: 10px 16px 12px;
+  border-top: 1px solid #f1f5f9;
 }
 
-.run-entry-label {
+.run-entry-runtime {
+  background: #ffffff;
+  padding: 10px 16px 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.run-entry-runtime-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.run-entry-runtime-label {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #64748b;
-  margin-bottom: 4px;
-}
-
-.run-entry-message-text {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 10px 12px;
-  color: #0f172a;
-  line-height: 1.35;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.run-entry-links {
-  padding: 0 16px 10px;
-  display: grid;
-  gap: 10px;
-}
-
-.run-entry-link-row {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 10px;
-  align-items: center;
-}
-
-.run-entry-link-row .run-entry-label {
   margin-bottom: 0;
 }
 
-.run-entry-link-value {
+.run-entry-runtime-value {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  justify-content: flex-end;
+  align-items: flex-start;
   min-width: 0;
+  font-size: 0.85rem;
+  color: #334155;
 }
 
-.run-entry-footer {
-  border-top: 1px solid #eef2f7;
-  padding: 8px 8px 10px;
+.run-entry-runtime-linkwrap {
+  max-width: 100%;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.run-entry-runtime-linkwrap a {
+  min-width: 0;
+  text-align: right;
 }
 
 @media (max-width: 768px) {
-  .run-entry-link-row {
+  .run-entry-runtime-row {
     grid-template-columns: 1fr;
     align-items: start;
   }
 
-  .run-entry-link-row .run-entry-label {
+  .run-entry-runtime-label {
     margin-bottom: 4px;
   }
 }
