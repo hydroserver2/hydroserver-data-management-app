@@ -1669,6 +1669,24 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   font-size: 0.9rem;
   font-weight: 900;
+  --v-chip-height: 32px;
+  letter-spacing: 0.01em;
+}
+
+.run-entry-status.v-chip {
+  /* Apply visuals on the actual v-chip root to avoid radius mismatch with Vuetify internals. */
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  box-shadow:
+    0 1px 0 rgba(2, 6, 23, 0.04),
+    0 4px 12px rgba(2, 6, 23, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.run-entry-status :deep(.v-chip__underlay),
+.run-entry-status :deep(.v-chip__overlay) {
+  /* Ensure the colored underlay + interaction overlay match the chip radius exactly. */
+  border-radius: inherit;
 }
 
 .run-entry-summary {
