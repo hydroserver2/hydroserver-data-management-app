@@ -87,7 +87,7 @@
 
       <v-toolbar
         v-show="activePanel === 'details'"
-        color="blue-grey-darken-1"
+        color="cyan-darken-3"
         rounded="t-lg"
         class="section-toolbar"
       >
@@ -142,7 +142,7 @@
 
       <v-toolbar
         v-show="activePanel === 'runs'"
-        color="blue-grey-darken-1"
+        color="cyan-darken-3"
         rounded="t-lg"
         class="section-toolbar mt-0"
       >
@@ -215,7 +215,7 @@
                   </div>
                 </div>
                 <div class="run-entry-top-right">
-                  <div class="run-entry-top-right-label">Run link</div>
+                  <div class="run-entry-top-right-label">Copy run as URL</div>
                   <v-btn
                     icon
                     variant="text"
@@ -335,7 +335,7 @@
 
       <v-toolbar
         v-show="activePanel === 'details'"
-        color="blue-grey-darken-1"
+        color="cyan-darken-3"
         rounded="t-lg"
         class="section-toolbar mt-6"
         v-if="pipelineRows.length"
@@ -379,7 +379,7 @@
 
       <v-toolbar
         v-show="activePanel === 'mappings'"
-        color="blue-grey-darken-1"
+        color="cyan-darken-3"
         rounded="t-lg"
         class="section-toolbar mt-4"
       >
@@ -813,6 +813,14 @@ const normalizeLogEntries = (result: any): LogEntry[] => {
 
 const stageFromMessage = (message: string) => {
   const lower = message.toLowerCase()
+  // Treat setup + extractor-related messages as part of the Extract stage so the
+  // run history doesn't show an extra "Logs" section above "Extract".
+  if (lower.startsWith('etl task')) return 'Extract'
+  if (lower.startsWith('transformer timestamp')) return 'Extract'
+  if (lower.startsWith('runtime variables resolved')) return 'Extract'
+  if (lower.startsWith('task variables resolved')) return 'Extract'
+  if (lower.startsWith('resolved runtime source uri')) return 'Extract'
+  if (lower.startsWith('extractor returned payload')) return 'Extract'
   if (lower.includes('starting extract')) return 'Extract'
   if (lower.includes('starting transform')) return 'Transform'
   if (lower.includes('starting load')) return 'Load'
@@ -831,7 +839,7 @@ const buildLogSections = (run?: TaskRun | null): LogSection[] => {
   const entries = normalizeLogEntries(result)
   if (entries.length) {
     const grouped: LogSection[] = []
-    let currentTitle = 'Logs'
+    let currentTitle = stageFromMessage(entries[0]?.message || '') || 'Logs'
     let currentEntries: LogEntry[] = []
 
     const pushSection = () => {

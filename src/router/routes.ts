@@ -79,7 +79,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/orchestration',
     name: 'Orchestration',
     component: () => import('@/pages/Orchestration.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, hideFooter: true },
   },
   {
     path: '/hydroloader/download',

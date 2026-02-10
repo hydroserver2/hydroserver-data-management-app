@@ -1,10 +1,10 @@
 <template>
   <v-card>
-    <v-toolbar flat color="blue-grey" class="gap-2">
+    <v-toolbar flat color="cyan-darken-3" class="gap-3">
       <v-toolbar-title class="flex-shrink-0">
         Orchestration systems
       </v-toolbar-title>
-      <div class="ml-auto flex min-w-0 items-center gap-2">
+      <div class="ml-auto flex min-w-0 items-center gap-3">
         <v-text-field
           class="w-[250px] max-w-[250px]"
           clearable
@@ -32,7 +32,7 @@
           autocomplete="off"
           name="orchestration-status-filter"
           spellcheck="false"
-          class="w-[280px] max-w-[280px]"
+          class="w-[280px] max-w-[280px] mx-1"
         >
           <template #selection="{ item, index }">
             <v-chip
@@ -48,6 +48,7 @@
           </template>
         </v-autocomplete>
         <v-btn
+          class="mr-4"
           @click="
             openDataConnectionTableDialog = !openDataConnectionTableDialog
           "
@@ -55,7 +56,6 @@
           color="white"
           variant="outlined"
           density="comfortable"
-          class="mr-2"
           :append-icon="openDataConnectionTableDialog ? mdiMenuUp : mdiMenuDown"
         >
           Manage data connections
@@ -189,7 +189,7 @@
                 </v-chip>
               </div>
             </div>
-            <div class="ml-auto flex items-center gap-2">
+            <div class="ml-auto flex items-center gap-3">
               <v-btn-add
                 class="hidden md:inline-flex"
                 color="white"
@@ -351,21 +351,34 @@
                     <td class="px-3 py-2 text-slate-700">{{ row.lastRun }}</td>
                     <td class="px-3 py-2 text-slate-700">{{ row.nextRun }}</td>
                     <td class="px-3 py-2 text-right">
-                      <div v-if="!row.isPlaceholder" class="flex flex-col gap-2">
-                        <div class="flex flex-wrap items-center justify-end gap-2">
-                          <v-tooltip location="top" :open-delay="0" :close-delay="0">
+                      <div
+                        v-if="!row.isPlaceholder"
+                        class="flex flex-col gap-3"
+                      >
+                        <div
+                          class="flex flex-wrap items-center justify-end gap-3"
+                        >
+                          <v-tooltip
+                            location="top"
+                            :open-delay="0"
+                            :close-delay="0"
+                          >
                             <template #activator="{ props: tooltipProps }">
                               <v-btn
                                 v-bind="tooltipProps"
                                 variant="text"
                                 color="black"
-                                :icon="row.schedule?.paused ? mdiPlay : mdiPause"
+                                :icon="
+                                  row.schedule?.paused ? mdiPlay : mdiPause
+                                "
                                 @click.stop="togglePaused(row)"
                                 aria-label="Pause or run task"
                               />
                             </template>
                             <span>{{
-                              row.schedule?.paused ? 'Resume task' : 'Pause task'
+                              row.schedule?.paused
+                                ? 'Resume task'
+                                : 'Pause task'
                             }}</span>
                           </v-tooltip>
                           <v-btn
@@ -388,7 +401,7 @@
                             Run requested
                           </span>
                         </div>
-                        <div class="flex items-center justify-end">
+                        <div class="flex items-center justify-end gap-3">
                           <v-btn
                             variant="outlined"
                             color="blue-grey-darken-3"
@@ -511,12 +524,7 @@ const POLL_MAX_ATTEMPTS = 20
 
 const taskPollTimeouts = new Map<string, number>()
 
-type SortKey =
-  | 'name'
-  | 'dataConnection'
-  | 'status'
-  | 'lastRunAt'
-  | 'nextRunAt'
+type SortKey = 'name' | 'dataConnection' | 'status' | 'lastRunAt' | 'nextRunAt'
 type SortSpec = { key: SortKey; dir: 'asc' | 'desc' }
 
 // Multi-sort: first clicked column is primary, subsequent clicks add secondary sorts.

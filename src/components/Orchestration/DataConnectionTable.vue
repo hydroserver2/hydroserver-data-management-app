@@ -4,7 +4,6 @@
       <v-spacer />
       <v-text-field
         label="Search"
-        class="mx-4"
         clearable
         v-model="search"
         :prepend-inner-icon="mdiMagnify"

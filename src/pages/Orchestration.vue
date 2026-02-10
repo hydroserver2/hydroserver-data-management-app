@@ -1,62 +1,56 @@
 <template>
-  <div class="my-4 mx-6">
-    <v-row class="my-1">
-      <v-col cols="12">
-        <WorkspaceToolbar layout="orchestration" title="Job Orchestration">
-          <template #actions>
-            <v-btn
-              :append-icon="mdiChevronRight"
-              color="blue-grey-darken-4"
-              :to="{ name: 'HydroLoader' }"
-              density="comfortable"
-              variant="tonal"
-            >
-              Download Streaming Data Loader
-            </v-btn>
-          </template>
-        </WorkspaceToolbar>
+  <div class="orchestration-page">
+    <div class="mx-auto flex w-full flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      <WorkspaceToolbar layout="orchestration" title="Job orchestration">
+        <template #actions>
+          <v-btn
+            :append-icon="mdiChevronRight"
+            color="blue-grey-darken-4"
+            :to="{ name: 'HydroLoader' }"
+            density="comfortable"
+            variant="tonal"
+          >
+            Download Streaming Data Loader
+          </v-btn>
+        </template>
+      </WorkspaceToolbar>
 
-        <v-expand-transition>
-          <div v-if="!!selectedWorkspace && openDataConnectionTableDialog">
-            <DataConnectionTable :workspace-id="selectedWorkspace.id" />
-          </div>
-        </v-expand-transition>
-      </v-col>
-    </v-row>
+      <v-expand-transition>
+        <div v-if="!!selectedWorkspace && openDataConnectionTableDialog">
+          <DataConnectionTable :workspace-id="selectedWorkspace.id" />
+        </div>
+      </v-expand-transition>
 
-    <template v-if="!!selectedWorkspace">
-      <OrchestrationTable :workspace-id="selectedWorkspace.id" />
-    </template>
-  </div>
+      <template v-if="!!selectedWorkspace">
+        <OrchestrationTable :workspace-id="selectedWorkspace.id" />
+      </template>
+    </div>
 
-  <!-- Slide-over task details. Kept under the Orchestration route so page state persists.
+    <!-- Slide-over task details. Kept under the Orchestration route so page state persists.
        Implemented without v-dialog so the global Navbar remains visible. -->
-  <transition
-    name="taskdetails-slide"
-    appear
-    @after-leave="afterDetailsLeave"
-  >
-    <div
-      v-if="overlayOpen"
-      ref="overlayRef"
-      class="taskdetails-overlay"
-      tabindex="-1"
-      @keydown.esc.prevent="closeDetails"
-    >
-      <div class="taskdetails-scrim" @click="closeDetails" />
-      <div class="taskdetails-panel" role="dialog" aria-modal="true">
-        <div class="taskdetails-panel-inner">
-          <TaskDetails
-            v-if="selectedTaskId"
-            :task-id="selectedTaskId"
-            :run-id="selectedRunId"
-            embedded
-            @close="closeDetails"
-          />
+    <transition name="taskdetails-slide" @after-leave="afterDetailsLeave">
+      <div
+        v-if="overlayOpen"
+        ref="overlayRef"
+        class="taskdetails-overlay"
+        tabindex="-1"
+        @keydown.esc.prevent="closeDetails"
+      >
+        <div class="taskdetails-scrim" @click="closeDetails" />
+        <div class="taskdetails-panel" role="dialog" aria-modal="true">
+          <div class="taskdetails-panel-inner">
+            <TaskDetails
+              v-if="selectedTaskId"
+              :task-id="selectedTaskId"
+              :run-id="selectedRunId"
+              embedded
+              @close="closeDetails"
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </transition>
+    </transition>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -161,6 +155,13 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.orchestration-page {
+  background-color: #eef2f6;
+  min-height: calc(
+    100dvh - var(--v-layout-top, 0px) - var(--v-layout-bottom, 0px)
+  );
+}
+
 .taskdetails-overlay {
   /* Keep the app navigation visible by starting below the Vuetify app-bar layout offset. */
   position: fixed;
