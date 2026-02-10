@@ -17,13 +17,19 @@
       >
         <v-row class="ma-0" align="center">
           <v-col cols="auto">
-            <v-btn
-              variant="text"
-              color="black"
-              :icon="mdiArrowLeft"
-              class="mr-2"
-              @click="onBack"
-            />
+            <v-tooltip text="Back to job orchestration" location="bottom">
+              <template #activator="{ props: tooltipProps }">
+                <v-btn
+                  v-bind="tooltipProps"
+                  variant="text"
+                  color="black"
+                  :icon="mdiArrowLeft"
+                  class="mr-2"
+                  aria-label="Back to job orchestration"
+                  @click="onBack"
+                />
+              </template>
+            </v-tooltip>
           </v-col>
           <v-col cols="auto">
             <div class="leading-tight">
@@ -140,48 +146,44 @@
         </template>
       </v-data-table>
 
-      <v-toolbar
-        v-show="activePanel === 'runs'"
-        color="cyan-darken-3"
-        rounded="t-lg"
-        class="section-toolbar mt-0"
-      >
-        <h6 class="text-h6 ml-4">Run history</h6>
-        <v-spacer />
-        <v-btn
-          variant="text"
-          color="white"
-          :prepend-icon="mdiHistory"
-          class="mr-2"
-          @click="refreshRunHistory"
-        >
-          Refresh history
-        </v-btn>
-      </v-toolbar>
-      <v-card
-        v-show="activePanel === 'runs'"
-        class="elevation-3 rounded-t-0 rounded-b-lg section-card pa-4 run-history-card"
-      >
+      <!-- Run history cards float directly on the page background (no surrounding container). -->
+      <div v-show="activePanel === 'runs'" class="flex flex-col gap-1">
+        <v-toolbar color="cyan-darken-3" rounded="lg" class="section-toolbar">
+          <h6 class="text-h6 ml-4">Run history</h6>
+          <v-spacer />
+          <v-btn
+            variant="text"
+            color="white"
+            :prepend-icon="mdiHistory"
+            class="mr-2"
+            @click="refreshRunHistory"
+          >
+            Refresh history
+          </v-btn>
+        </v-toolbar>
+
         <template v-if="showRunHistoryLoading">
-          <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
-            <div class="flex items-center gap-3 text-sm text-slate-600">
-              <v-progress-circular
-                indeterminate
-                size="20"
-                width="2"
-                color="blue-grey-darken-1"
-              />
-              <span class="font-medium">Loading run history...</span>
+          <v-card variant="outlined" class="run-entry pa-4">
+            <div class="mb-4 rounded-md bg-slate-50 px-4 py-3">
+              <div class="flex items-center gap-3 text-sm text-slate-600">
+                <v-progress-circular
+                  indeterminate
+                  size="20"
+                  width="2"
+                  color="blue-grey-darken-1"
+                />
+                <span class="font-medium">Loading run history...</span>
+              </div>
             </div>
-          </div>
-          <v-skeleton-loader type="paragraph, paragraph, paragraph" />
+            <v-skeleton-loader type="paragraph, paragraph, paragraph" />
+          </v-card>
         </template>
 
         <template v-else-if="runHistoryRows.length">
           <template v-for="run in runHistoryRows" :key="run.id">
             <v-card
               :id="runDomId(run.id)"
-              class="mb-4 run-entry"
+              class="run-entry"
               variant="outlined"
               :class="{
                 'run-highlight': highlightedRunId === run.id,
@@ -328,10 +330,14 @@
           </template>
         </template>
 
-        <div v-else class="text-medium-emphasis">
+        <v-card
+          v-else
+          variant="outlined"
+          class="run-entry pa-4 text-medium-emphasis"
+        >
           No run history available yet.
-        </div>
-      </v-card>
+        </v-card>
+      </div>
 
       <v-toolbar
         v-show="activePanel === 'details'"
