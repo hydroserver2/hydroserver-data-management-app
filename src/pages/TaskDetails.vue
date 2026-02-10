@@ -191,35 +191,19 @@
 	            >
 	              <div class="run-entry-top">
 	                <div class="run-entry-top-left">
-	                  <div class="run-entry-runid-top">
-	                    Run {{ shortId(run.id) }}
+	                  <div class="run-entry-idrow">
+	                    <div class="run-entry-runid-top">
+	                      Run {{ shortId(run.id) }}
+	                    </div>
+	                    <TaskStatus
+	                      :status="getRunStatusText(run.raw)"
+	                      :paused="false"
+	                      class="run-entry-status"
+	                    />
 	                  </div>
-	                  <TaskStatus
-	                    :status="getRunStatusText(run.raw)"
-	                    :paused="false"
-	                    class="run-entry-status"
-	                  />
 	                </div>
 	                <div class="run-entry-summary" :title="run.message">
 	                  {{ run.message }}
-	                </div>
-                <div class="run-entry-top-right">
-                  <div class="run-entry-copy-label">Copy run link</div>
-                  <v-tooltip text="Copy run link" location="bottom">
-                    <template #activator="{ props: tooltipProps }">
-                      <v-btn
-                        v-bind="tooltipProps"
-	                        icon
-	                        variant="text"
-	                        size="small"
-	                        color="blue-grey-darken-2"
-	                        @click="copyToClipboard(runLinkUrl(run.id))"
-	                        aria-label="Copy run link"
-	                      >
-	                        <v-icon :icon="mdiContentCopy" />
-	                      </v-btn>
-	                    </template>
-	                  </v-tooltip>
 	                </div>
 	              </div>
 	
@@ -230,69 +214,103 @@
 	                      <span class="run-entry-meta-label">Started</span>
 	                      {{ run.startedAt }}
 	                    </span>
-	                    <span class="run-entry-sep">•</span>
-	                    <span class="run-entry-time">
-	                      <span class="run-entry-meta-label">Finished</span>
-	                      {{ run.finishedAt }}
-	                    </span>
 	                  </div>
 	                  <div class="run-entry-duration">
 	                    {{ runDurationText(run.raw) }}
 	                  </div>
 	                </div>
 	              </div>
-
-	              <div v-if="run.runtimeUrl" class="run-entry-runtime">
-	                <div class="run-entry-runtime-row">
-	                  <div class="run-entry-runtime-label">Runtime URI</div>
-	                  <div class="run-entry-runtime-value">
-	                    <div class="run-entry-runtime-linkwrap">
-	                      <a
-	                        class="text-slate-600 underline break-all hover:text-blue-700"
-	                        :href="run.runtimeUrl"
-	                        target="_blank"
-	                        rel="noopener"
-	                      >
-	                        {{ run.runtimeUrl }}
-	                      </a>
-	                      <v-tooltip text="Copy runtime URI" location="bottom">
-	                        <template #activator="{ props: tooltipProps }">
-	                          <v-btn
-	                            v-bind="tooltipProps"
-	                            icon
-	                            variant="text"
-	                            size="small"
-	                            color="blue-grey-darken-2"
-	                            @click="copyToClipboard(run.runtimeUrl)"
-	                            aria-label="Copy runtime URI"
-	                          >
-	                            <v-icon :icon="mdiContentCopy" />
-	                          </v-btn>
-	                        </template>
-	                      </v-tooltip>
-	                    </div>
-	                  </div>
-	                </div>
+	
+	              <div class="run-entry-footer">
+	                <v-btn
+	                  variant="tonal"
+	                  color="cyan-darken-3"
+	                  :prepend-icon="mdiCodeBraces"
+	                  class="text-none"
+	                  @click="toggleRunLogs(run.id)"
+	                >
+	                  {{
+	                    openRunLogs[run.id]
+	                      ? 'Hide run details'
+	                      : 'View run details'
+	                  }}
+	                </v-btn>
 	              </div>
-
-              <div class="run-entry-footer">
-                <v-btn
-                  variant="tonal"
-                  color="cyan-darken-3"
-                  :prepend-icon="mdiCodeBraces"
-                  class="text-none"
-                  @click="toggleRunLogs(run.id)"
-                >
-                  {{ openRunLogs[run.id] ? 'Hide logs' : 'View logs' }}
-                </v-btn>
-              </div>
-
+	
 	              <!-- Logs expand outside of the footer (keeps the "View logs" area clean). -->
 	              <v-expand-transition>
 	                <div
 	                  v-if="openRunLogs[run.id]"
 	                  class="border-t border-slate-100 px-4 pt-3 pb-4"
 	                >
+		                  <div class="mb-3 grid gap-2">
+		                    <div
+		                      v-if="run.runtimeUrl"
+		                      class="run-entry-detail-row"
+		                    >
+		                      <div class="run-entry-detail-label">
+		                        Runtime source URI
+		                      </div>
+		                      <div class="run-entry-detail-value">
+		                        <div class="run-entry-detail-linkwrap">
+		                          <a
+		                            class="text-slate-600 underline break-all hover:text-blue-700"
+		                            :href="run.runtimeUrl"
+		                            target="_blank"
+		                            rel="noopener"
+		                          >
+		                            {{ run.runtimeUrl }}
+		                          </a>
+		                          <v-tooltip
+		                            text="Copy runtime source URI"
+		                            location="bottom"
+		                          >
+		                            <template
+		                              #activator="{ props: tooltipProps }"
+		                            >
+		                              <v-btn
+		                                v-bind="tooltipProps"
+		                                icon
+		                                variant="text"
+		                                size="small"
+		                                color="blue-grey-darken-2"
+		                                @click="copyToClipboard(run.runtimeUrl)"
+		                                aria-label="Copy runtime source URI"
+		                              >
+		                                <v-icon :icon="mdiContentCopy" />
+		                              </v-btn>
+		                            </template>
+		                          </v-tooltip>
+		                        </div>
+		                      </div>
+		                    </div>
+
+		                    <div
+		                      class="run-entry-detail-row run-entry-detail-row-inline"
+		                    >
+		                      <div class="run-entry-detail-inline">
+		                        <div class="run-entry-detail-label">
+		                          Copy run as URL
+		                        </div>
+		                        <v-tooltip text="Copy run as URL" location="bottom">
+		                          <template #activator="{ props: tooltipProps }">
+		                            <v-btn
+		                              v-bind="tooltipProps"
+		                              icon
+		                              variant="text"
+		                              size="small"
+		                              color="blue-grey-darken-2"
+		                              @click="copyToClipboard(runLinkUrl(run.id))"
+		                              aria-label="Copy run as URL"
+		                            >
+		                              <v-icon :icon="mdiContentCopy" />
+		                            </v-btn>
+		                          </template>
+		                        </v-tooltip>
+		                      </div>
+		                    </div>
+		                  </div>
+
 	                  <div class="grid gap-3">
 	                    <div
 	                      v-for="(section, idx) in buildLogSections(run.raw)"
@@ -1624,9 +1642,7 @@ onBeforeUnmount(() => {
 
 .run-entry-top-left {
   display: flex;
-  flex-direction: column;
   align-items: flex-start;
-  gap: 3px;
   flex: 0 0 auto;
   padding: 8px 10px;
   border-radius: 12px;
@@ -1634,10 +1650,16 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(6, 182, 212, 0.18);
 }
 
+.run-entry-idrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .run-entry-runid-top {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #64748b;
+  color: #0e7490; /* cyan-700 */
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1645,15 +1667,17 @@ onBeforeUnmount(() => {
 
 .run-entry-status {
   flex: 0 0 auto;
+  font-size: 0.9rem;
+  font-weight: 900;
 }
 
 .run-entry-summary {
   flex: 1 1 auto;
   min-width: 0;
-  font-weight: 800;
-  color: #0f172a;
-  font-size: 0.95rem;
-  line-height: 1.25;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.3;
   word-break: break-word;
   white-space: normal;
 }
@@ -1712,22 +1736,53 @@ onBeforeUnmount(() => {
   color: #cbd5e1;
 }
 
-.run-entry-top-right {
-  display: flex;
-  /* Keep the action aligned to the top when the summary wraps. */
-  align-items: flex-start;
-  gap: 6px;
-  flex: 0 0 auto;
+.run-entry-detail-row {
+  display: grid;
+  /* Give labels enough room so they don't collide with long URLs. */
+  grid-template-columns: minmax(160px, 190px) 1fr;
+  gap: 10px;
+  align-items: start;
 }
 
-.run-entry-copy-label {
+.run-entry-detail-row-inline {
+  grid-template-columns: 1fr;
+}
+
+.run-entry-detail-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.run-entry-detail-label {
   font-size: 0.7rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: #64748b;
   white-space: nowrap;
-  margin-top: 2px;
+  padding-top: 2px;
+}
+
+.run-entry-detail-value {
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.run-entry-detail-linkwrap {
+  max-width: 100%;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.run-entry-detail-linkwrap a {
+  min-width: 0;
+  text-align: left;
 }
 
 .run-entry-footer {
@@ -1736,58 +1791,13 @@ onBeforeUnmount(() => {
   border-top: 1px solid #f1f5f9;
 }
 
-.run-entry-runtime {
-  background: #ffffff;
-  padding: 10px 16px 12px;
-  border-top: 1px solid #f1f5f9;
-}
-
-.run-entry-runtime-row {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 10px;
-  align-items: start;
-}
-
-.run-entry-runtime-label {
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #64748b;
-  margin-bottom: 0;
-}
-
-.run-entry-runtime-value {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  min-width: 0;
-  font-size: 0.85rem;
-  color: #334155;
-}
-
-.run-entry-runtime-linkwrap {
-  max-width: 100%;
-  display: inline-flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.run-entry-runtime-linkwrap a {
-  min-width: 0;
-  text-align: right;
-}
-
 @media (max-width: 768px) {
-  .run-entry-runtime-row {
+  .run-entry-detail-row {
     grid-template-columns: 1fr;
     align-items: start;
   }
 
-  .run-entry-runtime-label {
+  .run-entry-detail-label {
     margin-bottom: 4px;
   }
 }
