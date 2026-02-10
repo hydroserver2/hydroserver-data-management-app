@@ -2,7 +2,7 @@
   <div :class="layout === 'orchestration' ? 'w-full flex flex-col gap-4' : ''">
     <div v-if="layout === 'orchestration'" class="w-full">
       <v-card class="w-full rounded-lg border border-slate-200" elevation="2">
-        <div class="px-4 py-3">
+        <div class="px-4 py-4">
           <v-row class="ma-0 gap-3" align="center" no-gutters>
             <v-col cols="auto">
               <h5 class="text-h5 font-weight-bold mb-0">
@@ -11,7 +11,7 @@
             </v-col>
             <v-spacer />
             <v-col cols="12" sm="auto" class="min-w-0">
-              <div class="min-w-0 w-full sm:w-[340px] max-w-full">
+              <div class="min-w-0 w-full sm:w-[380px] md:w-[420px] max-w-full">
                 <WorkspaceSelector class="w-full min-w-0" />
               </div>
             </v-col>
@@ -175,13 +175,22 @@
               message="You don't have permissions to create a workspace. Contact your system administrator to change your permissions."
             >
               <template #default>
-                <v-btn-add class="mr-2" color="white" @click="openCreate = true">
+                <v-btn-add
+                  class="mr-2"
+                  color="white"
+                  @click="openCreate = true"
+                >
                   Add workspace
                 </v-btn-add>
               </template>
 
               <template #denied>
-                <v-btn-add disabled class="mr-2" color="white" variant="outlined">
+                <v-btn-add
+                  disabled
+                  class="mr-2"
+                  color="white"
+                  variant="outlined"
+                >
                   Add workspace
                 </v-btn-add>
               </template>
