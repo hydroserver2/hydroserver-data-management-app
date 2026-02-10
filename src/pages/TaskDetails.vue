@@ -188,133 +188,126 @@
               :class="{
                 'run-highlight': highlightedRunId === run.id,
               }"
-	            >
-	              <div class="run-entry-top">
-	                <div class="run-entry-top-left">
-	                  <div class="run-entry-idrow">
-	                    <div class="run-entry-runid-top">
-	                      Run {{ shortId(run.id) }}
-	                    </div>
-	                    <TaskStatus
-	                      :status="getRunStatusText(run.raw)"
-	                      :paused="false"
-	                      class="run-entry-status"
-	                    />
-	                  </div>
-	                </div>
-	                <div class="run-entry-summary" :title="run.message">
-	                  {{ run.message }}
-	                </div>
-	              </div>
-	
-	              <div class="run-entry-meta">
-	                <div class="run-entry-meta-row">
-	                  <div class="run-entry-times-inline">
-	                    <span class="run-entry-time">
-	                      <span class="run-entry-meta-label">Started</span>
-	                      {{ run.startedAt }}
-	                    </span>
-	                  </div>
-	                  <div class="run-entry-duration">
-	                    {{ runDurationText(run.raw) }}
-	                  </div>
-	                </div>
-	              </div>
-	
-	              <div class="run-entry-footer">
-	                <v-btn
-	                  variant="tonal"
-	                  color="cyan-darken-3"
-	                  :prepend-icon="mdiCodeBraces"
-	                  class="text-none"
-	                  @click="toggleRunLogs(run.id)"
-	                >
-	                  {{
-	                    openRunLogs[run.id]
-	                      ? 'Hide run details'
-	                      : 'View run details'
-	                  }}
-	                </v-btn>
-	              </div>
-	
-	              <!-- Logs expand outside of the footer (keeps the "View logs" area clean). -->
-	              <v-expand-transition>
-	                <div
-	                  v-if="openRunLogs[run.id]"
-	                  class="border-t border-slate-100 px-4 pt-3 pb-4"
-	                >
-		                  <div class="mb-3 grid gap-2">
-		                    <div
-		                      v-if="run.runtimeUrl"
-		                      class="run-entry-detail-row"
-		                    >
-		                      <div class="run-entry-detail-label">
-		                        Runtime source URI
-		                      </div>
-		                      <div class="run-entry-detail-value">
-		                        <div class="run-entry-detail-linkwrap">
-		                          <a
-		                            class="text-slate-600 underline break-all hover:text-blue-700"
-		                            :href="run.runtimeUrl"
-		                            target="_blank"
-		                            rel="noopener"
-		                          >
-		                            {{ run.runtimeUrl }}
-		                          </a>
-		                          <v-tooltip
-		                            text="Copy runtime source URI"
-		                            location="bottom"
-		                          >
-		                            <template
-		                              #activator="{ props: tooltipProps }"
-		                            >
-		                              <v-btn
-		                                v-bind="tooltipProps"
-		                                icon
-		                                variant="text"
-		                                size="small"
-		                                color="blue-grey-darken-2"
-		                                @click="copyToClipboard(run.runtimeUrl)"
-		                                aria-label="Copy runtime source URI"
-		                              >
-		                                <v-icon :icon="mdiContentCopy" />
-		                              </v-btn>
-		                            </template>
-		                          </v-tooltip>
-		                        </div>
-		                      </div>
-		                    </div>
+            >
+              <div class="run-entry-top">
+                <div class="run-entry-top-left">
+                  <TaskStatus
+                    :status="getRunStatusText(run.raw)"
+                    :paused="false"
+                    class="run-entry-status"
+                  />
+                </div>
+                <div class="run-entry-summary" :title="run.message">
+                  {{ run.message }}
+                </div>
+                <div class="run-entry-runid-top run-entry-runid-right">
+                  Run {{ shortId(run.id) }}
+                </div>
+              </div>
 
-		                    <div
-		                      class="run-entry-detail-row run-entry-detail-row-inline"
-		                    >
-		                      <div class="run-entry-detail-inline">
-		                        <div class="run-entry-detail-label">
-		                          Copy run as URL
-		                        </div>
-		                        <v-tooltip text="Copy run as URL" location="bottom">
-		                          <template #activator="{ props: tooltipProps }">
-		                            <v-btn
-		                              v-bind="tooltipProps"
-		                              icon
-		                              variant="text"
-		                              size="small"
-		                              color="blue-grey-darken-2"
-		                              @click="copyToClipboard(runLinkUrl(run.id))"
-		                              aria-label="Copy run as URL"
-		                            >
-		                              <v-icon :icon="mdiContentCopy" />
-		                            </v-btn>
-		                          </template>
-		                        </v-tooltip>
-		                      </div>
-		                    </div>
-		                  </div>
+              <div class="run-entry-meta">
+                <div class="run-entry-meta-row">
+                  <div class="run-entry-times-inline">
+                    <span class="run-entry-time">
+                      <span class="run-entry-meta-label">Started</span>
+                      {{ run.startedAt }}
+                    </span>
+                  </div>
+                  <div class="run-entry-duration">
+                    {{ runDurationText(run.raw) }}
+                  </div>
+                </div>
+              </div>
 
-	                  <div class="grid gap-3">
-	                    <div
-	                      v-for="(section, idx) in buildLogSections(run.raw)"
-	                      :key="`${section.title}-${idx}`"
+              <div class="run-entry-footer">
+                <v-btn
+                  variant="tonal"
+                  color="cyan-darken-3"
+                  :prepend-icon="mdiCodeBraces"
+                  class="text-none"
+                  @click="toggleRunLogs(run.id)"
+                >
+                  {{
+                    openRunLogs[run.id]
+                      ? 'Hide run details'
+                      : 'View run details'
+                  }}
+                </v-btn>
+              </div>
+
+              <!-- Logs expand outside of the footer (keeps the "View logs" area clean). -->
+              <v-expand-transition>
+                <div
+                  v-if="openRunLogs[run.id]"
+                  class="border-t border-slate-100 px-4 pt-3 pb-4"
+                >
+                  <div class="mb-3 grid gap-2">
+                    <div v-if="run.runtimeUrl" class="run-entry-detail-row">
+                      <div class="run-entry-detail-label">
+                        Runtime source URI
+                      </div>
+                      <div class="run-entry-detail-value">
+                        <div class="run-entry-detail-linkwrap">
+                          <a
+                            class="text-slate-600 underline break-all hover:text-blue-700"
+                            :href="run.runtimeUrl"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            {{ run.runtimeUrl }}
+                          </a>
+                          <v-tooltip
+                            text="Copy runtime source URI"
+                            location="bottom"
+                          >
+                            <template #activator="{ props: tooltipProps }">
+                              <v-btn
+                                v-bind="tooltipProps"
+                                icon
+                                variant="text"
+                                size="small"
+                                color="blue-grey-darken-2"
+                                @click="copyToClipboard(run.runtimeUrl)"
+                                aria-label="Copy runtime source URI"
+                              >
+                                <v-icon :icon="mdiContentCopy" />
+                              </v-btn>
+                            </template>
+                          </v-tooltip>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      class="run-entry-detail-row run-entry-detail-row-inline"
+                    >
+                      <div class="run-entry-detail-inline">
+                        <div class="run-entry-detail-label">
+                          Copy run as URL
+                        </div>
+                        <v-tooltip text="Copy run as URL" location="bottom">
+                          <template #activator="{ props: tooltipProps }">
+                            <v-btn
+                              v-bind="tooltipProps"
+                              icon
+                              variant="text"
+                              size="small"
+                              color="blue-grey-darken-2"
+                              @click="copyToClipboard(runLinkUrl(run.id))"
+                              aria-label="Copy run as URL"
+                            >
+                              <v-icon :icon="mdiContentCopy" />
+                            </v-btn>
+                          </template>
+                        </v-tooltip>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="grid gap-3">
+                    <div
+                      v-for="(section, idx) in buildLogSections(run.raw)"
+                      :key="`${section.title}-${idx}`"
                       class="grid gap-2"
                     >
                       <div
@@ -1635,7 +1628,7 @@ onBeforeUnmount(() => {
   display: flex;
   /* Allow the summary message to grow vertically without awkward centering. */
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
   padding: 14px 16px 10px;
 }
@@ -1644,10 +1637,11 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: flex-start;
   flex: 0 0 auto;
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(6, 182, 212, 0.08);
-  border: 1px solid rgba(6, 182, 212, 0.18);
+  /* No background/border wrapper around the status. */
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
 }
 
 .run-entry-idrow {
@@ -1663,6 +1657,12 @@ onBeforeUnmount(() => {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.run-entry-runid-right {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-top: 2px; /* visually aligns with summary first line */
 }
 
 .run-entry-status {
