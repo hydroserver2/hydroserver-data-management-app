@@ -341,11 +341,53 @@
                       {{ row.dataConnection?.name || '—' }}
                     </td>
                     <td class="px-3 py-2">
-                      <TaskStatus
+                      <v-tooltip
                         v-if="!row.isPlaceholder"
-                        :status="row.statusName"
-                        :paused="row.schedule?.paused"
-                      />
+                        location="bottom"
+                        :open-delay="0"
+                        :close-delay="80"
+                        content-class="pa-0 ma-0 bg-transparent"
+                        max-width="520"
+                      >
+                        <template #activator="{ props: tooltipProps }">
+                          <span v-bind="tooltipProps" class="inline-flex">
+                            <TaskStatus
+                              :status="row.statusName"
+                              :paused="row.schedule?.paused"
+                            />
+                          </span>
+                        </template>
+                        <v-card
+                          elevation="6"
+                          rounded="lg"
+                          class="ma-0 pa-0 border border-slate-200"
+                          style="max-width: 520px"
+                        >
+                          <v-card-text class="px-4 py-3">
+                            <div
+                              class="mb-1 flex items-center justify-between gap-3"
+                            >
+                              <div
+                                class="text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-slate-600"
+                              >
+                                Last run summary
+                              </div>
+                              <div
+                                v-if="row.lastRun && row.lastRun !== '-'"
+                                class="text-xs font-medium text-slate-500"
+                              >
+                                {{ row.lastRun }}
+                              </div>
+                            </div>
+                            <div class="text-sm leading-snug text-slate-800">
+                              {{
+                                row.lastRunMessage ||
+                                'No run history available yet.'
+                              }}
+                            </div>
+                          </v-card-text>
+                        </v-card>
+                      </v-tooltip>
                       <span v-else class="text-slate-400">—</span>
                     </td>
                     <td class="px-3 py-2 text-slate-700">{{ row.lastRun }}</td>
@@ -680,6 +722,27 @@ const resolveOrchestrationSystem = (task: any) => {
   )
 }
 
+const asResult = (run?: any) => {
+  const value = run?.result as any
+  return value && typeof value === 'object' ? value : {}
+}
+
+const getRunMessage = (run?: any) => {
+  if (!run) return ''
+  const result = asResult(run)
+  return (
+    run?.failureReason ||
+    result.summary ||
+    result.status_message ||
+    result.statusMessage ||
+    result.failure_reason ||
+    result.failureReason ||
+    result.error ||
+    result.message ||
+    ''
+  )
+}
+
 const taskRows = computed(() =>
   workspaceTasks.value.map((t) => ({
     ...t,
@@ -693,6 +756,7 @@ const taskRows = computed(() =>
     nextRun: t.schedule?.nextRunAt ? formatTime(t.schedule?.nextRunAt) : '-',
     lastRunAt: t.latestRun?.startedAt ?? null,
     nextRunAt: t.schedule?.nextRunAt ?? null,
+    lastRunMessage: getRunMessage(t.latestRun as any),
     orchestrationSystemName: resolveGroupName(t),
     isPlaceholder: false,
     userClickedRunNow: !!runNowTriggeredByTaskId[t.id],
