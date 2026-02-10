@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar title="Data connections" flat color="blue-grey">
+    <v-toolbar title="Data connections" flat color="teal">
       <v-spacer />
       <v-text-field
         label="Search"
@@ -13,7 +13,10 @@
         maxWidth="300"
       />
 
-      <v-btn-add class="mx-4" @click="openCreateDialog(null)"
+      <v-btn-add
+        color="teal-lighten-3"
+        class="mx-4"
+        @click="openCreateDialog(null)"
         >Add data connection</v-btn-add
       >
     </v-toolbar>
