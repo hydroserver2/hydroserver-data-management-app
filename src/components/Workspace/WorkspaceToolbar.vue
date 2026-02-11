@@ -10,10 +10,8 @@
               </h5>
             </v-col>
             <v-spacer />
-            <v-col cols="12" sm="auto" class="min-w-0">
-              <div class="min-w-0 w-full sm:w-[380px] md:w-[420px] max-w-full">
-                <WorkspaceSelector class="w-full min-w-0" />
-              </div>
+            <v-col cols="auto">
+              <WorkspaceSelector />
             </v-col>
             <v-col cols="12" sm="auto">
               <v-btn
@@ -50,9 +48,7 @@
       v-else-if="compactControls"
       class="flex items-center gap-2 min-w-0 flex-nowrap"
     >
-      <div class="min-w-0 w-[390px] max-w-[450px]">
-        <WorkspaceSelector class="w-full min-w-0" />
-      </div>
+      <WorkspaceSelector />
       <v-btn
         @click="openWorkspaceTable = !openWorkspaceTable"
         rounded="xl"

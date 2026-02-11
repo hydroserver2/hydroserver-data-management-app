@@ -566,6 +566,21 @@ const effectiveRunId = computed(() => {
   return null
 })
 
+const isTaskExpandedPayload = (value: unknown): value is TaskExpanded => {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as Partial<TaskExpanded>
+  return !!candidate.id && !!candidate.workspace && !!candidate.dataConnection
+}
+
+const routeToAccessDenied = async () => {
+  await router.replace({
+    name: 'AccessDenied',
+    query: {
+      from: route.fullPath,
+    },
+  })
+}
+
 const onBack = () => {
   if (props.embedded || props.taskId) {
     emit('close')
@@ -649,7 +664,11 @@ const downloadTaskJsonConfiguration = () => {
 const runLinkHref = (runId: string) =>
   router.resolve({
     name: 'Orchestration',
-    query: { taskId: effectiveTaskId.value, runId },
+    query: {
+      workspaceId: task.value?.workspace?.id,
+      taskId: effectiveTaskId.value,
+      runId,
+    },
   }).href
 
 const runLinkUrl = (runId: string) => {
@@ -1462,9 +1481,46 @@ const openRunHistoryAndScroll = async (runId: string) => {
 const fetchData = async () => {
   if (!effectiveTaskId.value) return
 
-  task.value = (await hs.tasks.getItem(effectiveTaskId.value, {
-    expand_related: true,
-  })) as unknown as TaskExpanded
+  let taskResponse: Awaited<ReturnType<typeof hs.tasks.get>>
+  try {
+    taskResponse = await hs.tasks.get(effectiveTaskId.value, {
+      expand_related: true,
+    })
+  } catch (error: unknown) {
+    Snackbar.error('Unable to fetch task details.')
+    console.error('Error fetching task details', error)
+    return
+  }
+
+  if (taskResponse.status === 403) {
+    await routeToAccessDenied()
+    return
+  }
+
+  if (!taskResponse.ok) {
+    Snackbar.error(taskResponse.message || 'Unable to fetch task details.')
+    console.error('Error fetching task details', taskResponse)
+    return
+  }
+
+  if (!isTaskExpandedPayload(taskResponse.data)) {
+    Snackbar.error('Unable to fetch task details.')
+    console.error('Unexpected task details payload', taskResponse)
+    return
+  }
+
+  const fetchedTask = taskResponse.data
+
+  if (
+    fetchedTask.workspace?.id &&
+    workspaces.value.length &&
+    !workspaces.value.some((workspace) => workspace.id === fetchedTask.workspace.id)
+  ) {
+    await routeToAccessDenied()
+    return
+  }
+
+  task.value = fetchedTask
 
   upsertWorkspaceTask(task.value)
   await refreshDatastreams(task.value?.workspace.id)
@@ -1519,6 +1575,10 @@ watch(
   (list) => {
     if (!list?.length) return
     if (task.value?.workspace?.id) {
+      if (!list.some((workspace) => workspace.id === task.value?.workspace?.id)) {
+        void routeToAccessDenied()
+        return
+      }
       setSelectedWorkspaceById(task.value.workspace.id)
     }
   },

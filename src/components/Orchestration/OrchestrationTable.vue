@@ -1133,7 +1133,12 @@ const goToTask = async (item: any) => {
   const currentQuery = router.currentRoute.value.query ?? {}
   await router.push({
     name: 'Orchestration',
-    query: { ...currentQuery, taskId: item.id, runId: undefined },
+    query: {
+      ...currentQuery,
+      workspaceId: props.workspaceId,
+      taskId: item.id,
+      runId: undefined,
+    },
   })
 }
 

@@ -67,12 +67,18 @@ import { mdiChevronRight } from '@mdi/js'
 import { useRoute } from 'vue-router'
 import router from '@/router/router'
 
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore())
-const { setWorkspaces } = useWorkspaceStore()
+const workspaceStore = useWorkspaceStore()
+const { selectedWorkspace, workspaces } = storeToRefs(workspaceStore)
+const { setWorkspaces, setSelectedWorkspaceById } = workspaceStore
 
 const { openDataConnectionTableDialog } = storeToRefs(useDataConnectionStore())
 
 const route = useRoute()
+
+const selectedWorkspaceIdFromQuery = computed(() => {
+  const value = route.query.workspaceId
+  return typeof value === 'string' && value.trim() ? value : null
+})
 
 const selectedTaskId = computed(() => {
   const value = route.query.taskId
@@ -83,6 +89,33 @@ const selectedRunId = computed(() => {
   const value = route.query.runId
   return typeof value === 'string' && value.trim() ? value : null
 })
+const workspaceFetchCompleted = ref(false)
+
+const routeToAccessDenied = async () => {
+  await router.replace({
+    name: 'AccessDenied',
+    query: {
+      from: route.fullPath,
+    },
+  })
+}
+
+const applyWorkspaceFromQuery = async () => {
+  const workspaceId = selectedWorkspaceIdFromQuery.value
+  if (!workspaceId) return true
+  if (!workspaces.value.length && !workspaceFetchCompleted.value) return true
+
+  const workspace = workspaces.value.find((ws) => ws.id === workspaceId)
+  if (!workspace) {
+    await routeToAccessDenied()
+    return false
+  }
+
+  if (selectedWorkspace.value?.id !== workspace.id) {
+    setSelectedWorkspaceById(workspace.id)
+  }
+  return true
+}
 
 // Local visibility state so we can animate out before mutating the URL.
 const overlayOpen = ref<boolean>(!!selectedTaskId.value)
@@ -125,6 +158,24 @@ watch(
   { immediate: true }
 )
 
+watch(
+  selectedWorkspaceIdFromQuery,
+  async () => {
+    await applyWorkspaceFromQuery()
+  },
+  { immediate: true }
+)
+
+watch(selectedWorkspace, async (workspace) => {
+  if (!workspace?.id) return
+  if (selectedWorkspaceIdFromQuery.value === workspace.id) return
+
+  await router.replace({
+    name: 'Orchestration',
+    query: { ...route.query, workspaceId: workspace.id },
+  })
+})
+
 const afterDetailsLeave = () => {
   const mode = pendingCloseMode.value
   pendingCloseMode.value = null
@@ -143,13 +194,18 @@ const afterDetailsLeave = () => {
 }
 
 onMounted(async () => {
+  if (!(await applyWorkspaceFromQuery())) return
+
   try {
     const workspacesResponse = await hs.workspaces.listAllItems({
       is_associated: true,
     })
+    workspaceFetchCompleted.value = true
     setWorkspaces(workspacesResponse)
   } catch (error) {
     console.error('Error fetching workspaces', error)
+  } finally {
+    await applyWorkspaceFromQuery()
   }
 })
 </script>
