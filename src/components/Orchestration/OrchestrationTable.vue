@@ -1110,12 +1110,22 @@ onBeforeUnmount(() => {
 })
 
 const isInternalSystem = (item: any) => {
-  const directType = item.orchestrationSystem?.type
-  if (directType) return directType === 'INTERNAL'
+  const isInternalType = (value: unknown) =>
+    typeof value === 'string' && value.trim().toUpperCase() === 'INTERNAL'
+
+  const directType =
+    item?.orchestrationSystem?.type ??
+    item?.orchestrationSystem?.orchestrationSystemType ??
+    item?.orchestrationSystem?.orchestration_system_type ??
+    item?.orchestrationSystemType ??
+    item?.orchestration_system_type
+  if (isInternalType(directType)) return true
+
+  const systemId = item?.orchestrationSystemId ?? item?.orchestrationSystem?.id
   const matched = orchestrationSystems.value.find(
-    (os) => os.id === item.orchestrationSystemId
+    (os) => os.id === systemId
   )
-  return matched?.type === 'INTERNAL'
+  return isInternalType((matched as any)?.type)
 }
 
 const openCreateDialog = (selectedItem: any) => {

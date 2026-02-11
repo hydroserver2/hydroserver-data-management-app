@@ -543,9 +543,19 @@ const { setSelectedWorkspaceById } = useWorkspaceStore()
 // When opened from the orchestration slide-over, default to showing run history.
 const activePanel = ref<TaskDetailsPanel>(props.embedded ? 'runs' : 'details')
 
-const canRunNow = computed(
-  () => task.value?.orchestrationSystem?.type === 'INTERNAL'
-)
+const isInternalOrchestrationType = (value: unknown) =>
+  typeof value === 'string' && value.trim().toUpperCase() === 'INTERNAL'
+
+const canRunNow = computed(() => {
+  const orchestrationSystem = task.value?.orchestrationSystem as
+    | Record<string, unknown>
+    | undefined
+  const type =
+    orchestrationSystem?.type ??
+    orchestrationSystem?.orchestrationSystemType ??
+    orchestrationSystem?.orchestration_system_type
+  return isInternalOrchestrationType(type)
+})
 
 const effectiveTaskId = computed(() => {
   const propId = props.taskId
