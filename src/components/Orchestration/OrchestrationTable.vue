@@ -110,16 +110,21 @@
         </p>
       </div>
 
-      <div v-else class="space-y-3">
+      <div
+        v-else
+        class="overflow-hidden rounded-b-lg border border-slate-200 bg-white shadow-sm"
+      >
         <section
-          v-for="group in groupList"
+          v-for="(group, index) in groupList"
           :key="group.name"
-          class="overflow-hidden rounded-b-lg border border-slate-200 bg-white shadow-sm"
+          class="overflow-hidden bg-white"
+          :class="index > 0 ? 'border-t border-slate-200' : ''"
         >
           <div
             role="button"
             tabindex="0"
-            class="flex w-full items-center gap-3 border-b border-slate-200 bg-[#eceff1] px-4 py-3 text-left cursor-pointer"
+            class="flex w-full items-center gap-3 bg-[#eceff1] px-4 py-3 text-left cursor-pointer select-none"
+            :class="isGroupOpen(group.name) ? 'border-b border-slate-200' : ''"
             @click="toggleGroup(group.name)"
             @keydown.enter.prevent="toggleGroup(group.name)"
             @keydown.space.prevent="toggleGroup(group.name)"
@@ -208,7 +213,7 @@
             </div>
           </div>
 
-          <div v-if="isGroupOpen(group.name)" class="border-t border-slate-200">
+          <div v-if="isGroupOpen(group.name)">
             <div
               class="max-h-[62vh] overflow-auto"
               ref="bodyScrollRef"
@@ -942,8 +947,17 @@ const virtualPaddingBottom = computed(() => {
 
 const isGroupOpen = (groupName: string) => openGroupName.value === groupName
 
+const clearSelection = () => {
+  if (typeof window === 'undefined') return
+  window.getSelection()?.removeAllRanges()
+}
+
 const toggleGroup = (groupName: string) => {
   openGroupName.value = openGroupName.value === groupName ? null : groupName
+  clearSelection()
+  if (typeof window !== 'undefined') {
+    window.requestAnimationFrame(clearSelection)
+  }
 }
 
 const onBodyScroll = (event: Event) => {
