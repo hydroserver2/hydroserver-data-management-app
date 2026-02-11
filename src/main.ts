@@ -28,8 +28,13 @@ async function initializeApp() {
 
   const { user } = storeToRefs(useUserStore())
 
-  const res = await hs.user.get()
-  user.value = res.status == 401 ? new User() : res.data
+  // Avoid spamming the console with an expected 401 before a user logs in.
+  // The session snapshot already tells us whether an authenticated user exists.
+  user.value = new User()
+  if (hs.session.isAuthenticated) {
+    const res = await hs.user.get()
+    user.value = res.status == 401 ? new User() : res.data
+  }
 
   if (hs.session.isAuthenticated) {
     try {
