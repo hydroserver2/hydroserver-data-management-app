@@ -47,46 +47,80 @@
           </v-col>
           <v-spacer />
           <v-col cols="auto" class="d-flex ga-2">
-            <v-btn
-              variant="outlined"
-              :prepend-icon="mdiPencil"
-              rounded="xl"
-              color="secondary"
-              class="mr-1"
-              @click="openEdit = true"
-            >
-              Edit task
-            </v-btn>
-            <v-btn-delete
-              variant="outlined"
-              rounded="xl"
-              :prepend-icon="mdiTrashCanOutline"
-              color="red-darken-3"
-              class="mr-1"
-              @click="openDelete = true"
-            >
-              Delete task
-            </v-btn-delete>
-            <v-btn
+            <v-tooltip location="top" :disabled="canEditTask">
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps" class="inline-flex">
+                  <v-btn
+                    variant="outlined"
+                    :prepend-icon="mdiPencil"
+                    rounded="xl"
+                    color="secondary"
+                    class="mr-1"
+                    :disabled="!canEditTask"
+                    @click="openEdit = true"
+                  >
+                    Edit task
+                  </v-btn>
+                </span>
+              </template>
+              <span>{{ readOnlyTooltip }}</span>
+            </v-tooltip>
+            <v-tooltip location="top" :disabled="canEditTask">
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps" class="inline-flex">
+                  <v-btn-delete
+                    variant="outlined"
+                    rounded="xl"
+                    :prepend-icon="mdiTrashCanOutline"
+                    color="red-darken-3"
+                    class="mr-1"
+                    :disabled="!canEditTask"
+                    @click="openDelete = true"
+                  >
+                    Delete task
+                  </v-btn-delete>
+                </span>
+              </template>
+              <span>{{ readOnlyTooltip }}</span>
+            </v-tooltip>
+            <v-tooltip
               v-if="canRunNow"
-              variant="outlined"
-              rounded="xl"
-              color="green-darken-3"
-              class="mr-1"
-              :append-icon="mdiPlay"
-              :disabled="runNowRequested"
-              @click="runTaskNow"
+              location="top"
+              :disabled="!runNowDisabledReason"
             >
-              {{ runNowRequested ? 'Run requested' : 'Run now' }}
-            </v-btn>
-            <v-btn
-              variant="text"
-              color="black"
-              :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
-              @click.stop="togglePaused(task)"
-            >
-              Pause/Run
-            </v-btn>
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps" class="inline-flex">
+                  <v-btn
+                    variant="outlined"
+                    rounded="xl"
+                    color="green-darken-3"
+                    class="mr-1"
+                    :append-icon="mdiPlay"
+                    :disabled="!canEditTask || runNowRequested"
+                    @click="runTaskNow"
+                  >
+                    {{ runNowRequested ? 'Run requested' : 'Run now' }}
+                  </v-btn>
+                </span>
+              </template>
+              <span>{{ runNowDisabledReason }}</span>
+            </v-tooltip>
+            <v-tooltip location="top" :disabled="canEditTask">
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps" class="inline-flex">
+                  <v-btn
+                    variant="text"
+                    color="black"
+                    :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
+                    :disabled="!canEditTask"
+                    @click.stop="togglePaused(task)"
+                  >
+                    Pause/Run
+                  </v-btn>
+                </span>
+              </template>
+              <span>{{ readOnlyTooltip }}</span>
+            </v-tooltip>
           </v-col>
         </v-row>
       </div>
@@ -471,6 +505,8 @@ import TaskDetailsNavRail, {
   type TaskDetailsPanel,
 } from '@/components/Orchestration/TaskDetailsNavRail.vue'
 import hs, {
+  PermissionAction,
+  PermissionResource,
   StatusType,
   TaskExpanded,
   TaskRun,
@@ -482,6 +518,7 @@ import { formatTimeWithZone } from '@/utils/time'
 import TaskStatus from '@/components/Orchestration/TaskStatus.vue'
 import { useOrchestrationStore } from '@/store/orchestration'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import {
   mdiBroadcast,
   mdiArrowLeft,
@@ -539,6 +576,7 @@ const { workspaceTasks, workspaceDatastreams } = storeToRefs(
 
 const { workspaces } = storeToRefs(useWorkspaceStore())
 const { setSelectedWorkspaceById } = useWorkspaceStore()
+const { hasPermission, isAdmin, isOwner } = useWorkspacePermissions()
 
 // When opened from the orchestration slide-over, default to showing run history.
 const activePanel = ref<TaskDetailsPanel>(props.embedded ? 'runs' : 'details')
@@ -555,6 +593,28 @@ const canRunNow = computed(() => {
     orchestrationSystem?.orchestrationSystemType ??
     orchestrationSystem?.orchestration_system_type
   return isInternalOrchestrationType(type)
+})
+
+const canEditTask = computed(() => {
+  const workspace = task.value?.workspace
+  if (!workspace) return false
+
+  const roleName = `${workspace.collaboratorRole?.name ?? ''}`.toLowerCase()
+  if (isAdmin() || isOwner(workspace) || roleName === 'editor') return true
+
+  return hasPermission(
+    PermissionResource.Workspace,
+    PermissionAction.Edit,
+    workspace
+  )
+})
+const readOnlyTooltip =
+  'You have read-only access to this workspace. Ask an editor or owner to make changes.'
+
+const runNowDisabledReason = computed(() => {
+  if (!canEditTask.value) return readOnlyTooltip
+  if (runNowRequested.value) return 'A run has already been requested.'
+  return ''
 })
 
 const effectiveTaskId = computed(() => {
@@ -1399,6 +1459,7 @@ const scheduleRunNowPoll = (taskId: string, attempt = 0) => {
 
 const runTaskNow = async () => {
   if (!task.value) return
+  if (!canEditTask.value) return
   if (!canRunNow.value) return
   if (runNowRequested.value) return
 
@@ -1417,6 +1478,7 @@ const runTaskNow = async () => {
 async function togglePaused(
   task: Partial<TaskExpanded> & Pick<TaskExpanded, 'id'>
 ) {
+  if (!canEditTask.value) return
   if (!task.schedule) return
   task.schedule.paused = !task.schedule.paused
   await hs.tasks.update(task)
@@ -1439,6 +1501,7 @@ async function refreshDatastreams(workspaceId?: string | null) {
 }
 
 const onDelete = async () => {
+  if (!canEditTask.value) return
   try {
     await hs.tasks.delete(task.value!.id)
     await router.push({ name: 'Orchestration' })
@@ -1524,7 +1587,9 @@ const fetchData = async () => {
   if (
     fetchedTask.workspace?.id &&
     workspaces.value.length &&
-    !workspaces.value.some((workspace) => workspace.id === fetchedTask.workspace.id)
+    !workspaces.value.some(
+      (workspace) => workspace.id === fetchedTask.workspace.id
+    )
   ) {
     await routeToAccessDenied()
     return
@@ -1585,7 +1650,9 @@ watch(
   (list) => {
     if (!list?.length) return
     if (task.value?.workspace?.id) {
-      if (!list.some((workspace) => workspace.id === task.value?.workspace?.id)) {
+      if (
+        !list.some((workspace) => workspace.id === task.value?.workspace?.id)
+      ) {
         void routeToAccessDenied()
         return
       }
@@ -1746,9 +1813,7 @@ onBeforeUnmount(() => {
 .run-entry-status.v-chip {
   /* Apply visuals on the actual v-chip root to avoid radius mismatch with Vuetify internals. */
   border: 1px solid rgba(2, 6, 23, 0.12);
-  box-shadow:
-    0 1px 0 rgba(2, 6, 23, 0.04),
-    0 4px 12px rgba(2, 6, 23, 0.1);
+  box-shadow: 0 1px 0 rgba(2, 6, 23, 0.04), 0 4px 12px rgba(2, 6, 23, 0.1);
   border-radius: 9999px;
   overflow: hidden;
 }

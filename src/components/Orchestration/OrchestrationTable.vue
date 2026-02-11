@@ -195,21 +195,45 @@
               </div>
             </div>
             <div class="ml-auto flex items-center gap-3">
-              <v-btn-add
-                class="hidden md:inline-flex"
-                color="white"
-                @click.stop="openCreateDialog(group.orchestrationSystem)"
-                :disabled="!group.orchestrationSystem"
+              <v-tooltip
+                location="top"
+                :disabled="!groupActionDisabledReason(group)"
               >
-                Add task
-              </v-btn-add>
-              <v-btn
-                variant="text"
-                color="red-darken-2"
-                :icon="mdiTrashCanOutline"
-                @click.stop="openDeleteDialog(group.orchestrationSystem)"
-                :disabled="!group.orchestrationSystem"
-              />
+                <template #activator="{ props: tooltipProps }">
+                  <span v-bind="tooltipProps" class="inline-flex">
+                    <v-btn-add
+                      class="hidden md:inline-flex"
+                      color="white"
+                      @click.stop="openCreateDialog(group.orchestrationSystem)"
+                      :disabled="
+                        !canEditOrchestration || !group.orchestrationSystem
+                      "
+                    >
+                      Add task
+                    </v-btn-add>
+                  </span>
+                </template>
+                <span>{{ groupActionDisabledReason(group) }}</span>
+              </v-tooltip>
+              <v-tooltip
+                location="top"
+                :disabled="!groupActionDisabledReason(group)"
+              >
+                <template #activator="{ props: tooltipProps }">
+                  <span v-bind="tooltipProps" class="inline-flex">
+                    <v-btn
+                      variant="text"
+                      color="red-darken-2"
+                      :icon="mdiTrashCanOutline"
+                      @click.stop="openDeleteDialog(group.orchestrationSystem)"
+                      :disabled="
+                        !canEditOrchestration || !group.orchestrationSystem
+                      "
+                    />
+                  </span>
+                </template>
+                <span>{{ groupActionDisabledReason(group) }}</span>
+              </v-tooltip>
             </div>
           </div>
 
@@ -411,26 +435,32 @@
                             :close-delay="0"
                           >
                             <template #activator="{ props: tooltipProps }">
-                              <v-btn
-                                v-bind="tooltipProps"
-                                variant="text"
-                                color="black"
-                                :icon="
-                                  row.schedule?.paused ? mdiPlay : mdiPause
-                                "
-                                @click.stop="togglePaused(row)"
-                                aria-label="Pause or run task"
-                              />
+                              <span v-bind="tooltipProps" class="inline-flex">
+                                <v-btn
+                                  variant="text"
+                                  color="black"
+                                  :icon="
+                                    row.schedule?.paused ? mdiPlay : mdiPause
+                                  "
+                                  :disabled="!canEditOrchestration"
+                                  @click.stop="togglePaused(row)"
+                                  aria-label="Pause or run task"
+                                />
+                              </span>
                             </template>
                             <span>{{
-                              row.schedule?.paused
+                              !canEditOrchestration
+                                ? readOnlyTooltip
+                                : row.schedule?.paused
                                 ? 'Resume task'
                                 : 'Pause task'
                             }}</span>
                           </v-tooltip>
                           <v-btn
                             v-if="
-                              isInternalSystem(row) && !row.userClickedRunNow
+                              canEditOrchestration &&
+                              isInternalSystem(row) &&
+                              !row.userClickedRunNow
                             "
                             variant="outlined"
                             color="green-darken-3"
@@ -441,7 +471,9 @@
                           </v-btn>
                           <span
                             v-else-if="
-                              isInternalSystem(row) && row.userClickedRunNow
+                              canEditOrchestration &&
+                              isInternalSystem(row) &&
+                              row.userClickedRunNow
                             "
                             class="text-sm font-semibold text-slate-500"
                           >
@@ -518,6 +550,8 @@ import router from '@/router/router'
 import { formatTime } from '@/utils/time'
 import hs, {
   OrchestrationSystem,
+  PermissionAction,
+  PermissionResource,
   StatusType,
   Task,
   TaskExpanded,
@@ -536,8 +570,10 @@ import {
 } from '@mdi/js'
 import { mdiMenuDown, mdiMenuUp } from '@mdi/js'
 import { storeToRefs } from 'pinia'
+import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useDataConnectionStore } from '@/store/dataConnection'
 import { useOrchestrationStore } from '@/store/orchestration'
+import { useWorkspaceStore } from '@/store/workspaces'
 
 const props = defineProps<{
   workspaceId: string
@@ -546,6 +582,8 @@ const props = defineProps<{
 const { openDataConnectionTableDialog } = storeToRefs(useDataConnectionStore())
 const { workspaceTasks, orchestrationSearch, orchestrationStatusFilter } =
   storeToRefs(useOrchestrationStore())
+const { workspaces } = storeToRefs(useWorkspaceStore())
+const { hasPermission, isAdmin, isOwner } = useWorkspacePermissions()
 
 const openCreate = ref(false)
 const openDelete = ref(false)
@@ -570,6 +608,35 @@ const POLL_INTERVAL_MS = 4000
 const POLL_MAX_ATTEMPTS = 20
 
 const taskPollTimeouts = new Map<string, number>()
+
+const workspaceForPage = computed(() =>
+  workspaces.value.find((workspace) => workspace.id === props.workspaceId)
+)
+
+const canEditOrchestration = computed(() => {
+  const workspace = workspaceForPage.value
+  if (!workspace) return false
+
+  const roleName = `${workspace.collaboratorRole?.name ?? ''}`.toLowerCase()
+  if (isAdmin() || isOwner(workspace) || roleName === 'editor') return true
+
+  return hasPermission(
+    PermissionResource.Workspace,
+    PermissionAction.Edit,
+    workspace
+  )
+})
+const readOnlyTooltip =
+  'You have read-only access to this workspace. Ask an editor or owner to make changes.'
+
+const groupActionDisabledReason = (group: {
+  orchestrationSystem?: OrchestrationSystem
+}) => {
+  if (!canEditOrchestration.value) return readOnlyTooltip
+  if (!group?.orchestrationSystem)
+    return 'No orchestration system is available for this action.'
+  return ''
+}
 
 type SortKey = 'name' | 'dataConnection' | 'status' | 'lastRunAt' | 'nextRunAt'
 type SortSpec = { key: SortKey; dir: 'asc' | 'desc' }
@@ -1039,6 +1106,7 @@ const scheduleTaskPoll = (taskId: string, attempt = 0) => {
 }
 
 async function runTaskNow(task: Partial<Task> & Pick<Task, 'id'>) {
+  if (!canEditOrchestration.value) return
   runNowTriggeredByTaskId[task.id] = true
   try {
     await hs.tasks.runTask(task.id)
@@ -1050,6 +1118,7 @@ async function runTaskNow(task: Partial<Task> & Pick<Task, 'id'>) {
 }
 
 async function togglePaused(task: Partial<Task> & Pick<Task, 'id'>) {
+  if (!canEditOrchestration.value) return
   if (!task.schedule) return
   const previous = !!task.schedule.paused
   task.schedule.paused = !previous
@@ -1122,18 +1191,18 @@ const isInternalSystem = (item: any) => {
   if (isInternalType(directType)) return true
 
   const systemId = item?.orchestrationSystemId ?? item?.orchestrationSystem?.id
-  const matched = orchestrationSystems.value.find(
-    (os) => os.id === systemId
-  )
+  const matched = orchestrationSystems.value.find((os) => os.id === systemId)
   return isInternalType((matched as any)?.type)
 }
 
 const openCreateDialog = (selectedItem: any) => {
+  if (!canEditOrchestration.value) return
   selectedOrchestrationSystem.value = selectedItem
   openCreate.value = true
 }
 
 const openDeleteDialog = (selectedItem: any) => {
+  if (!canEditOrchestration.value) return
   selectedOrchestrationSystem.value = selectedItem
   openDelete.value = true
 }
