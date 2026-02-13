@@ -83,32 +83,41 @@
 
           <div class="cell d-flex align-center w-100">
             <template class="d-flex align-center w-100">
-              <v-chip
+              <v-btn
                 v-if="!p.targetIdentifier"
                 size="small"
-                :color="hasTargetError(mi, pi) ? 'error' : 'green-lighten-1'"
-                class="mr-4"
-                :class="{ 'chip-error': hasTargetError(mi, pi) }"
                 variant="outlined"
+                :color="hasTargetError(mi, pi) ? 'error' : 'green-lighten-1'"
+                class="mr-4 target-selector-btn text-none"
+                :class="{ 'target-selector-btn-error': hasTargetError(mi, pi) }"
                 @click="openTargetSelector(mi, pi)"
                 :prepend-icon="mdiImport"
-                >Select target datastream
-              </v-chip>
-              <v-chip v-else class="text-caption">
-                <span
-                  @click="openTargetSelector(mi, pi)"
-                  class="font-weight-medium"
-                  >{{ String(p.targetIdentifier) }}</span
-                >&nbsp;&ndash;&nbsp;
-                <span class="text-medium-emphasis">
-                  {{
-                    linkedDatastreams.find((d) => d.id == p.targetIdentifier)
-                      ?.name ||
-                    draftDatastreams.find((d) => d.id == p.targetIdentifier)
-                      ?.name
-                  }}
+              >
+                Select target datastream
+              </v-btn>
+
+              <v-btn
+                v-else
+                size="small"
+                variant="tonal"
+                color="green-darken-2"
+                class="mr-4 target-selector-btn target-selector-btn-selected text-none"
+                :prepend-icon="mdiImport"
+                @click="openTargetSelector(mi, pi)"
+              >
+                <span class="target-selector-content">
+                  <span class="target-id">{{ String(p.targetIdentifier) }}</span>
+                  <span class="target-name">
+                    {{
+                      linkedDatastreams.find((d) => d.id == p.targetIdentifier)
+                        ?.name ||
+                      draftDatastreams.find((d) => d.id == p.targetIdentifier)
+                        ?.name
+                    }}
+                  </span>
                 </span>
-              </v-chip>
+              </v-btn>
+
               <div
                 v-if="hasTargetError(mi, pi)"
                 class="text-error text-caption mt-1"
@@ -480,5 +489,48 @@ function onAddMapping() {
   gap: 8px;
   grid-column: 1 / -1; /* make the action row span all 3 columns */
   margin-top: 4px;
+}
+
+.target-selector-btn {
+  max-width: calc(100% - 2.25rem);
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    background-color 0.14s ease;
+}
+
+.target-selector-btn:hover,
+.target-selector-btn:focus-visible {
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  transform: translateY(-1px);
+}
+
+.target-selector-btn-selected {
+  justify-content: flex-start;
+  min-width: 16rem;
+}
+
+.target-selector-content {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.target-id {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.target-name {
+  color: rgba(0, 0, 0, 0.66);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.target-selector-btn-error {
+  box-shadow: 0 0 0 1px rgba(211, 47, 47, 0.3);
 }
 </style>
