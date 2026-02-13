@@ -114,6 +114,7 @@ import { useDisplay } from 'vuetify/lib/framework.mjs'
 import {
   mdiBarcode,
   mdiCardAccountDetails,
+  mdiChartLine,
   mdiContentCopy,
   mdiFileDocumentOutline,
   mdiLock,
@@ -121,6 +122,15 @@ import {
   mdiPineTree,
   mdiTagMultipleOutline,
 } from '@mdi/js'
+
+const props = withDefaults(
+  defineProps<{
+    ratingCurveCount?: number
+  }>(),
+  {
+    ratingCurveCount: 0,
+  }
+)
 
 const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
@@ -146,41 +156,51 @@ const copyValue = async (value: string) => {
 }
 
 const thingProperties = computed(() => {
-  return thing.value
-    ? [
-        {
-          icon: mdiCardAccountDetails,
-          label: 'ID',
-          value: thing.value.id,
-        },
-        {
-          icon: mdiBarcode,
-          label: 'Site code',
-          value: thing.value.samplingFeatureCode,
-        },
-        {
-          icon: mdiFileDocumentOutline,
-          label: 'Description',
-          value: thing.value.description,
-        },
-        {
-          icon: mdiPineTree,
-          label: 'Site type',
-          value: thing.value.siteType,
-        },
-        {
-          icon: thing.value.isPrivate ? mdiLock : mdiLockOpenVariant,
-          iconColor: thing.value.isPrivate ? 'red-darken-2' : 'green',
-          label: 'Privacy',
-          value: thing.value.isPrivate ? 'Private' : 'Public',
-        },
-        {
-          icon: mdiTagMultipleOutline,
-          label: 'Additional metadata',
-          value: tags.value || [],
-        },
-      ]
-    : []
+  if (!thing.value) return []
+
+  const properties: ThingPropertyRow[] = [
+    {
+      icon: mdiCardAccountDetails,
+      label: 'ID',
+      value: thing.value.id,
+    },
+    {
+      icon: mdiBarcode,
+      label: 'Site code',
+      value: thing.value.samplingFeatureCode,
+    },
+    {
+      icon: mdiFileDocumentOutline,
+      label: 'Description',
+      value: thing.value.description,
+    },
+    {
+      icon: mdiPineTree,
+      label: 'Site type',
+      value: thing.value.siteType,
+    },
+    {
+      icon: thing.value.isPrivate ? mdiLock : mdiLockOpenVariant,
+      iconColor: thing.value.isPrivate ? 'red-darken-2' : 'green',
+      label: 'Privacy',
+      value: thing.value.isPrivate ? 'Private' : 'Public',
+    },
+    {
+      icon: mdiTagMultipleOutline,
+      label: 'Additional metadata',
+      value: tags.value || [],
+    },
+  ]
+
+  if (props.ratingCurveCount > 0) {
+    properties.push({
+      icon: mdiChartLine,
+      label: 'Rating Curves',
+      value: props.ratingCurveCount,
+    })
+  }
+
+  return properties
 })
 
 const tagProperty = computed(() => {
@@ -190,6 +210,13 @@ const tagProperty = computed(() => {
     value: tags.value || [],
   }
 })
+
+type ThingPropertyRow = {
+  icon: string
+  iconColor?: string
+  label: string
+  value: string | number | { key: string; value: string }[]
+}
 </script>
 
 <style scoped>

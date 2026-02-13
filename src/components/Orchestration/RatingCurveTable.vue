@@ -34,16 +34,6 @@
           :key="attachment.id"
           class="rating-curve-item"
         >
-          <div class="rating-curve-item-main">
-            <div class="text-subtitle-2">{{ attachment.name }}</div>
-            <div
-              v-if="attachment.description"
-              class="text-caption text-medium-emphasis"
-            >
-              {{ attachment.description }}
-            </div>
-          </div>
-
           <div class="rating-curve-item-preview">
             <div
               v-if="isPreviewLoading(attachment.id)"
@@ -77,6 +67,16 @@
               Preview unavailable
             </div>
             <div v-else class="text-caption text-medium-emphasis">No points</div>
+          </div>
+
+          <div class="rating-curve-item-main">
+            <div class="text-subtitle-2">{{ attachment.name }}</div>
+            <div
+              v-if="attachment.description"
+              class="text-caption text-medium-emphasis"
+            >
+              {{ attachment.description }}
+            </div>
           </div>
         </div>
       </div>
@@ -129,16 +129,6 @@
                 :key="attachment.id"
                 class="rating-curve-item"
               >
-                <div class="rating-curve-item-main">
-                  <div class="text-subtitle-2">{{ attachment.name }}</div>
-                  <div
-                    v-if="attachment.description"
-                    class="text-caption text-medium-emphasis"
-                  >
-                    {{ attachment.description }}
-                  </div>
-                </div>
-
                 <div class="rating-curve-item-preview">
                   <div
                     v-if="isPreviewLoading(attachment.id)"
@@ -173,6 +163,16 @@
                   </div>
                   <div v-else class="text-caption text-medium-emphasis">
                     No points
+                  </div>
+                </div>
+
+                <div class="rating-curve-item-main">
+                  <div class="text-subtitle-2">{{ attachment.name }}</div>
+                  <div
+                    v-if="attachment.description"
+                    class="text-caption text-medium-emphasis"
+                  >
+                    {{ attachment.description }}
                   </div>
                 </div>
 
@@ -754,7 +754,6 @@ async function createAttachment() {
     previewRowsByAttachmentId.value[tempId] = previewRows
     openCreate.value = false
     resetCreateState()
-    Snackbar.success('Rating curve will be added when you save the site.')
     return
   }
 
@@ -784,7 +783,6 @@ async function createAttachment() {
 
     openCreate.value = false
     resetCreateState()
-    Snackbar.success('Rating curve created.')
   } catch (error: any) {
     Snackbar.error(error?.message || 'Unable to create rating curve.')
   } finally {
@@ -1160,7 +1158,7 @@ watch(openEdit, (isOpen) => {
 
 .rating-curve-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 8.5rem auto;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: center;
   padding: 0.45rem 0.2rem;

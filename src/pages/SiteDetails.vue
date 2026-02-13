@@ -140,7 +140,7 @@
 
     <v-row class="mb-0">
       <v-col cols="12" md="8">
-        <SiteDetailsTable />
+        <SiteDetailsTable :rating-curve-count="ratingCurveCount" />
       </v-col>
 
       <v-col cols="12" md="4">
@@ -181,14 +181,6 @@
           No photos added yet.
         </div>
 
-        <div v-if="thing" class="mt-4">
-          <RatingCurveTable
-            :thing-id="thing.id"
-            :can-edit="false"
-            :inline-read-only="true"
-            :refresh-token="ratingCurveRefreshToken"
-          />
-        </div>
       </v-col>
     </v-row>
 
@@ -254,7 +246,6 @@ import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
-import RatingCurveTable from '@/components/Orchestration/RatingCurveTable.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useHydroShare } from '@/composables/useHydroShare'
@@ -293,7 +284,7 @@ const extraPhotoCount = computed(() =>
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
-const ratingCurveRefreshToken = ref(0)
+const ratingCurveCount = ref(0)
 const selectedPhotoIndex = ref<number | null>(null)
 const isPhotoViewerOpen = ref(false)
 const hasMultiplePhotos = computed(() => (photos.value?.length ?? 0) > 1)
@@ -338,6 +329,11 @@ function switchToAccessControlModal() {
 async function loadThingPhotos() {
   const res = await hs.things.getAttachments(thingId)
   if (!res.ok || !Array.isArray(res.data)) return
+
+  ratingCurveCount.value = res.data.filter(
+    (attachment: FileAttachment) =>
+      attachment.fileAttachmentType === 'rating_curve'
+  ).length
   photos.value = res.data.filter(
     (attachment: FileAttachment) => attachment.fileAttachmentType === 'Photo'
   )
@@ -345,7 +341,6 @@ async function loadThingPhotos() {
 
 function onSiteFormClosed() {
   isRegisterModalOpen.value = false
-  ratingCurveRefreshToken.value += 1
   void loadThingPhotos()
 }
 
