@@ -118,7 +118,57 @@
                   :rules="rules.required"
                   class="mb-2"
                   @update:model-value="onAttachmentSelected"
-                />
+                >
+                  <template #item="{ props: itemProps, item }">
+                    <v-list-item v-bind="itemProps" :title="undefined" :subtitle="undefined">
+                      <div class="attachment-option">
+                        <div class="attachment-option-preview">
+                          <div
+                            v-if="isAttachmentPreviewLoading(item.raw.value)"
+                            class="text-caption text-medium-emphasis"
+                          >
+                            Loading...
+                          </div>
+                          <div
+                            v-else-if="getAttachmentPreviewPath(item.raw.value)"
+                            class="attachment-option-preview-box"
+                          >
+                            <svg
+                              class="attachment-option-preview-svg"
+                              :viewBox="`0 0 ${OPTION_PREVIEW_SVG_WIDTH} ${OPTION_PREVIEW_SVG_HEIGHT}`"
+                              preserveAspectRatio="none"
+                            >
+                              <path
+                                class="rating-curve-line"
+                                :d="getAttachmentPreviewPath(item.raw.value)"
+                                fill="none"
+                                vector-effect="non-scaling-stroke"
+                                stroke-linejoin="round"
+                                stroke-linecap="round"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            v-else-if="getAttachmentPreviewError(item.raw.value)"
+                            class="text-caption text-error"
+                          >
+                            Preview unavailable
+                          </div>
+                          <div v-else class="text-caption text-medium-emphasis">No points</div>
+                        </div>
+                        <div class="attachment-option-main">
+                          <div class="attachment-option-title">{{ item.raw.name }}</div>
+                          <div
+                            v-if="item.raw.description"
+                            class="attachment-option-description"
+                          >
+                            {{ item.raw.description }}
+                          </div>
+                        </div>
+                      </div>
+                    </v-list-item>
+                  </template>
+                </v-select>
 
                 <div
                   v-if="!attachmentsLoading && !attachmentOptions.length"
@@ -369,6 +419,13 @@ const previewRows = ref<RatingCurvePreviewRow[]>([])
 const previewError = ref('')
 const PREVIEW_SVG_WIDTH = 320
 const PREVIEW_SVG_HEIGHT = 120
+const OPTION_PREVIEW_SVG_WIDTH = 96
+const OPTION_PREVIEW_SVG_HEIGHT = 28
+const previewRowsByAttachmentId = ref<Record<string, RatingCurvePreviewRow[]>>(
+  {}
+)
+const previewLoadingByAttachmentId = ref<Record<string, boolean>>({})
+const previewErrorByAttachmentId = ref<Record<string, string>>({})
 
 const thingOptions = computed(() =>
   things.value.map((thing) => ({
@@ -383,6 +440,8 @@ const attachmentOptions = computed(() =>
       ? `${attachment.name} - ${attachment.description}`
       : attachment.name,
     value: attachment.id,
+    name: attachment.name,
+    description: attachment.description || '',
   }))
 )
 
@@ -482,6 +541,9 @@ function clearRatingCurveSelection() {
   attachments.value = []
   previewRows.value = []
   previewError.value = ''
+  previewRowsByAttachmentId.value = {}
+  previewLoadingByAttachmentId.value = {}
+  previewErrorByAttachmentId.value = {}
   resetCreateFormState()
   if (local.value.type === 'rating_curve') {
     setRatingCurveReference(local.value, '')
@@ -666,12 +728,18 @@ async function loadAttachmentsForThing(thingId: string) {
   attachmentsLoading.value = true
   previewRows.value = []
   previewError.value = ''
+  previewRowsByAttachmentId.value = {}
+  previewLoadingByAttachmentId.value = {}
+  previewErrorByAttachmentId.value = {}
 
   try {
     const items = await hs.thingFileAttachments.listItems(thingId, {
       type: RATING_CURVE_ATTACHMENT_TYPE,
     })
     attachments.value = normalizeRatingCurveAttachments(items)
+    for (const attachment of attachments.value) {
+      void loadAttachmentPreview(attachment)
+    }
     syncSelectedAttachmentWithReference()
   } catch (error: any) {
     attachments.value = []
@@ -746,6 +814,12 @@ function formatPreviewNumber(value: number) {
 
 async function loadPreviewForAttachment(attachment: ThingFileAttachment) {
   previewError.value = ''
+  const cacheKey = String(attachment.id)
+  const cachedRows = previewRowsByAttachmentId.value[cacheKey]
+  if (cachedRows?.length) {
+    previewRows.value = cachedRows
+    return
+  }
   try {
     const res = await hs.thingFileAttachments.fetchRatingCurvePreview(
       attachment.link,
@@ -754,14 +828,108 @@ async function loadPreviewForAttachment(attachment: ThingFileAttachment) {
     if (!res.ok) {
       previewRows.value = []
       previewError.value = res.message || 'Unable to load rating curve preview.'
+      previewErrorByAttachmentId.value[cacheKey] = previewError.value
       return
     }
     previewRows.value = res.data
+    previewRowsByAttachmentId.value[cacheKey] = res.data
+    previewErrorByAttachmentId.value[cacheKey] = ''
   } catch (error: any) {
     previewRows.value = []
     previewError.value =
       error?.message || 'Unable to load rating curve preview.'
+    previewErrorByAttachmentId.value[cacheKey] = previewError.value
   }
+}
+
+async function loadAttachmentPreview(attachment: ThingFileAttachment) {
+  const key = String(attachment.id)
+  if (previewLoadingByAttachmentId.value[key]) return
+  if (previewRowsByAttachmentId.value[key]?.length) return
+
+  previewLoadingByAttachmentId.value[key] = true
+  previewErrorByAttachmentId.value[key] = ''
+  try {
+    const res = await hs.thingFileAttachments.fetchRatingCurvePreview(
+      attachment.link,
+      20
+    )
+    if (!res.ok) {
+      previewRowsByAttachmentId.value[key] = []
+      previewErrorByAttachmentId.value[key] =
+        res.message || 'Unable to load preview.'
+      return
+    }
+    previewRowsByAttachmentId.value[key] = res.data
+  } catch {
+    previewRowsByAttachmentId.value[key] = []
+    previewErrorByAttachmentId.value[key] = 'Unable to load preview.'
+  } finally {
+    previewLoadingByAttachmentId.value[key] = false
+  }
+}
+
+function isAttachmentPreviewLoading(attachmentId: string | number) {
+  return !!previewLoadingByAttachmentId.value[String(attachmentId)]
+}
+
+function getAttachmentPreviewError(attachmentId: string | number) {
+  return previewErrorByAttachmentId.value[String(attachmentId)] ?? ''
+}
+
+function getAttachmentPreviewRows(
+  attachmentId: string | number
+): RatingCurvePreviewRow[] {
+  return previewRowsByAttachmentId.value[String(attachmentId)] ?? []
+}
+
+function getAttachmentPreviewPath(attachmentId: string | number): string {
+  const points = getAttachmentPreviewRows(attachmentId)
+    .map((row) => ({
+      x: Number(row.inputValue),
+      y: Number(row.outputValue),
+    }))
+    .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+    .sort((a, b) => a.x - b.x)
+
+  let xMin = points[0]?.x
+  let xMax = points[0]?.x
+  let yMin = points[0]?.y
+  let yMax = points[0]?.y
+
+  if (
+    xMin === undefined ||
+    xMax === undefined ||
+    yMin === undefined ||
+    yMax === undefined
+  ) {
+    return ''
+  }
+
+  for (const point of points) {
+    if (point.x < xMin) xMin = point.x
+    if (point.x > xMax) xMax = point.x
+    if (point.y < yMin) yMin = point.y
+    if (point.y > yMax) yMax = point.y
+  }
+
+  if (xMin === xMax) {
+    const delta = Math.abs(xMin || 1) * 0.1
+    xMin -= delta
+    xMax += delta
+  }
+  if (yMin === yMax) {
+    const delta = Math.abs(yMin || 1) * 0.1
+    yMin -= delta
+    yMax += delta
+  }
+
+  return buildSparklinePath(
+    points,
+    { xMin, xMax, yMin, yMax },
+    OPTION_PREVIEW_SVG_WIDTH,
+    OPTION_PREVIEW_SVG_HEIGHT
+  )
 }
 
 async function onSubmit() {
@@ -943,5 +1111,50 @@ const exprBalancedParens: Rule = (v) => {
 .rating-curve-line {
   stroke: #00796b;
   stroke-width: 2;
+}
+
+.attachment-option {
+  align-items: center;
+  display: flex;
+  gap: 0.625rem;
+  width: 100%;
+}
+
+.attachment-option-preview {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-width: 6.25rem;
+}
+
+.attachment-option-preview-box {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  height: 1.75rem;
+  width: 6rem;
+}
+
+.attachment-option-preview-svg {
+  height: 100%;
+  width: 100%;
+}
+
+.attachment-option-main {
+  min-width: 0;
+}
+
+.attachment-option-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.attachment-option-description {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
