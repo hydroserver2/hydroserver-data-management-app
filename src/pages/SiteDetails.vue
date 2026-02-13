@@ -389,23 +389,18 @@ onMounted(async () => {
     console.error('Error fetching photos from DB', error)
   )
 
-  const [thingResponse, hydroShareArchiveResponse, tagResponse] =
-    await Promise.all([
-      hs.things.getItem(thingId).catch((error: any) => {
-        if (parseInt(error.status) === 403) authorized.value = false
-        else console.error('Error fetching thing', error)
+  const [thingResponse, tagResponse] = await Promise.all([
+    hs.things.getItem(thingId).catch((error: any) => {
+      if (parseInt(error.status) === 403) authorized.value = false
+      else console.error('Error fetching thing', error)
 
-        return null
-      }),
-      hs.things.getHydroShareArchive(thingId).catch((error) => {
-        // console.error('Error fetching hydroShareArchive', error)
-        return null
-      }),
-      hs.things.getTags(thingId).catch((error) => {
-        console.error('Error fetching additional metadata tags', error)
-        return null
-      }),
-    ])
+      return null
+    }),
+    hs.things.getTags(thingId).catch((error) => {
+      console.error('Error fetching additional metadata tags', error)
+      return null
+    }),
+  ])
 
   tags.value = tagResponse?.data
   thing.value = thingResponse ?? undefined
@@ -415,7 +410,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching workspace', error)
   }
-  hydroShareArchive.value = hydroShareArchiveResponse?.data ?? null
+  hydroShareArchive.value = null
   loaded.value = true
 })
 </script>
