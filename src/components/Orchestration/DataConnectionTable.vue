@@ -14,14 +14,14 @@
       />
 
       <v-btn
-        class="mx-4"
+        class="ml-4"
         color="white"
         variant="outlined"
-        density="comfortable"
+        density="compact"
         :append-icon="mdiMenuUp"
         @click="openDataConnectionTableDialog = false"
       >
-        Manage data connections
+        Close data connections table
       </v-btn>
 
       <v-tooltip location="top" :disabled="canEditWorkspace">

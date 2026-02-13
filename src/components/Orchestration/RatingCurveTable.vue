@@ -432,6 +432,10 @@ const props = withDefaults(
   }
 )
 
+const emit = defineEmits<{
+  (e: 'attachments-changed', attachments: ThingFileAttachment[]): void
+}>()
+
 type DisplayRatingCurve = {
   id: string | number
   name: string
@@ -628,6 +632,10 @@ function formatFileSize(sizeBytes: number) {
   return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function emitAttachmentsChanged() {
+  emit('attachments-changed', [...backendAttachments.value])
+}
+
 async function refreshAttachments() {
   if (props.deferPersist) {
     try {
@@ -659,6 +667,7 @@ async function refreshAttachments() {
 
   if (!props.thingId) {
     backendAttachments.value = []
+    emitAttachmentsChanged()
     return
   }
 
@@ -668,6 +677,7 @@ async function refreshAttachments() {
       type: 'rating_curve',
     })
     backendAttachments.value = items.sort((a, b) => a.name.localeCompare(b.name))
+    emitAttachmentsChanged()
     for (const attachment of backendAttachments.value) {
       void loadPreviewForAttachment(attachment)
     }
@@ -779,6 +789,7 @@ async function createAttachment() {
     backendAttachments.value = [...backendAttachments.value, created].sort((a, b) =>
       a.name.localeCompare(b.name)
     )
+    emitAttachmentsChanged()
     previewRowsByAttachmentId.value[String(created.id)] = previewRows
 
     openCreate.value = false
@@ -828,6 +839,7 @@ async function deleteAttachment() {
     backendAttachments.value = backendAttachments.value.filter(
       (item) => String(item.id) !== String(activeAttachment.value?.id)
     )
+    emitAttachmentsChanged()
 
     delete previewRowsByAttachmentId.value[String(activeAttachment.value.id)]
     delete previewErrorByAttachmentId.value[String(activeAttachment.value.id)]
@@ -886,7 +898,6 @@ async function saveEditAttachment() {
     delete previewLoadingByAttachmentId.value[String(item.id)]
     openEdit.value = false
     resetEditState()
-    Snackbar.success('Rating curve file update will be applied when you save the site.')
     return
   }
 
@@ -906,12 +917,12 @@ async function saveEditAttachment() {
     backendAttachments.value = backendAttachments.value.map((attachment) =>
       String(attachment.id) === String(item.id) ? res.data! : attachment
     )
+    emitAttachmentsChanged()
     previewRowsByAttachmentId.value[String(item.id)] = previewRows
     delete previewErrorByAttachmentId.value[String(item.id)]
     delete previewLoadingByAttachmentId.value[String(item.id)]
     openEdit.value = false
     resetEditState()
-    Snackbar.success('Rating curve file updated.')
   } catch (error: any) {
     Snackbar.error(error?.message || 'Unable to update rating curve file.')
   } finally {

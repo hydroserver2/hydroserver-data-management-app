@@ -73,8 +73,8 @@
             density="compact"
             class="mb-4"
           >
-            Select the site (Thing) first, then choose one of that site's rating
-            curve files.
+            Select the site first, then choose one of that site's rating curve
+            files or add a new rating curve file to the selected site.
           </v-alert>
 
           <template v-if="canSelectThing">
@@ -83,7 +83,7 @@
               :items="thingOptions"
               item-title="title"
               item-value="value"
-              label="Thing *"
+              label="Site *"
               clearable
               :loading="thingsLoading"
               :rules="rules.required"
@@ -91,73 +91,169 @@
               @update:model-value="onThingSelected"
             />
 
-            <v-select
-              v-model="selectedAttachmentId"
-              :items="attachmentOptions"
-              item-title="title"
-              item-value="value"
-              label="Select rating curve *"
-              clearable
-              :disabled="!selectedThingId"
-              :loading="attachmentsLoading"
-              :rules="rules.required"
-              class="mb-2"
-              @update:model-value="onAttachmentSelected"
-            />
-
-            <div
-              v-if="selectedThingId && !attachmentsLoading && !attachmentOptions.length"
-              class="text-caption text-medium-emphasis mb-3"
-            >
-              No rating curves found for this site.
-            </div>
-
-            <v-alert
-              v-if="previewError"
-              type="warning"
-              variant="tonal"
-              density="compact"
-              class="mb-2"
-            >
-              {{ previewError }}
-            </v-alert>
-
-            <div v-if="selectedAttachment" class="mb-4">
-              <div class="d-flex align-center mb-2">
-                <span class="text-subtitle-2">Preview</span>
-              </div>
-
-              <div v-if="previewCurvePoints.length" class="rating-curve-preview">
-                <svg
-                  class="rating-curve-preview-svg"
-                  :viewBox="`0 0 ${PREVIEW_SVG_WIDTH} ${PREVIEW_SVG_HEIGHT}`"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    v-if="previewSparklinePath"
-                    class="rating-curve-line"
-                    :d="previewSparklinePath"
-                    fill="none"
-                    vector-effect="non-scaling-stroke"
-                    stroke-linejoin="round"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-              <div
-                v-if="previewRanges"
-                class="text-caption text-medium-emphasis mt-1"
+            <template v-if="selectedThingId">
+              <v-radio-group
+                v-model="ratingCurveInputMode"
+                inline
+                hide-details
+                class="mb-3"
               >
-                Showing {{ previewCurvePoints.length }} numeric points. x:
-                {{ formatPreviewNumber(previewRanges.xMin) }} to
-                {{ formatPreviewNumber(previewRanges.xMax) }}. y:
-                {{ formatPreviewNumber(previewRanges.yMin) }} to
-                {{ formatPreviewNumber(previewRanges.yMax) }}.
+                <v-radio
+                  label="Select existing rating curve"
+                  value="existing"
+                />
+                <v-radio label="Create new rating curve" value="create" />
+              </v-radio-group>
+
+              <template v-if="ratingCurveInputMode === 'existing'">
+                <v-select
+                  v-model="selectedAttachmentId"
+                  :items="attachmentOptions"
+                  item-title="title"
+                  item-value="value"
+                  label="Select rating curve *"
+                  clearable
+                  :disabled="!selectedThingId"
+                  :loading="attachmentsLoading"
+                  :rules="rules.required"
+                  class="mb-2"
+                  @update:model-value="onAttachmentSelected"
+                />
+
+                <div
+                  v-if="!attachmentsLoading && !attachmentOptions.length"
+                  class="text-caption text-medium-emphasis mb-3"
+                >
+                  No rating curves found for this site. Switch to "Create new
+                  rating curve" to add one.
+                </div>
+              </template>
+
+              <template v-else>
+                <input
+                  ref="createFileInput"
+                  type="file"
+                  accept=".csv,text/csv"
+                  class="d-none"
+                  @change="onCreateFileSelected"
+                />
+                <v-btn
+                  variant="outlined"
+                  color="teal-darken-1"
+                  block
+                  class="mb-2 text-none"
+                  :loading="createSaving"
+                  @click="openCreateFilePicker"
+                >
+                  {{
+                    selectedCreateFile ? 'Change CSV file' : 'Choose CSV file *'
+                  }}
+                </v-btn>
+                <div v-if="selectedCreateFile" class="d-flex align-center mb-3">
+                  <span class="text-caption text-medium-emphasis">
+                    Selected:
+                    <strong>{{ selectedCreateFile.name }}</strong>
+                    ({{ formatFileSize(selectedCreateFile.size) }})
+                  </span>
+                  <v-spacer />
+                  <v-btn
+                    variant="text"
+                    size="small"
+                    :disabled="createSaving"
+                    @click="clearCreateFile"
+                  >
+                    Clear
+                  </v-btn>
+                </div>
+                <v-alert
+                  v-if="createFileValidationError"
+                  type="error"
+                  variant="tonal"
+                  density="compact"
+                  class="mb-3"
+                >
+                  {{ createFileValidationError }}
+                </v-alert>
+                <div
+                  v-else-if="createFileValidationPending"
+                  class="text-caption text-medium-emphasis mb-3"
+                >
+                  Validating rating curve CSV...
+                </div>
+
+                <v-text-field
+                  v-model="createAttachmentName"
+                  label="Rating curve name *"
+                  class="mb-3"
+                />
+                <v-textarea
+                  v-model="createAttachmentDescription"
+                  label="Description"
+                  rows="2"
+                  class="mb-3"
+                />
+
+                <v-btn
+                  color="teal-darken-1"
+                  class="text-none"
+                  :loading="createSaving"
+                  :disabled="!canCreateAttachment"
+                  @click="createAttachmentForThing"
+                >
+                  Create rating curve
+                </v-btn>
+              </template>
+
+              <v-alert
+                v-if="previewError"
+                type="warning"
+                variant="tonal"
+                density="compact"
+                class="mb-2"
+              >
+                {{ previewError }}
+              </v-alert>
+
+              <div v-if="selectedAttachment" class="mb-4">
+                <div class="d-flex align-center mb-2">
+                  <span class="text-subtitle-2">Preview</span>
+                </div>
+
+                <div
+                  v-if="previewCurvePoints.length"
+                  class="rating-curve-preview"
+                >
+                  <svg
+                    class="rating-curve-preview-svg"
+                    :viewBox="`0 0 ${PREVIEW_SVG_WIDTH} ${PREVIEW_SVG_HEIGHT}`"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      v-if="previewSparklinePath"
+                      class="rating-curve-line"
+                      :d="previewSparklinePath"
+                      fill="none"
+                      vector-effect="non-scaling-stroke"
+                      stroke-linejoin="round"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </div>
+                <div
+                  v-if="previewRanges"
+                  class="text-caption text-medium-emphasis mt-1"
+                >
+                  Showing {{ previewCurvePoints.length }} numeric points. x:
+                  {{ formatPreviewNumber(previewRanges.xMin) }} to
+                  {{ formatPreviewNumber(previewRanges.xMax) }}. y:
+                  {{ formatPreviewNumber(previewRanges.yMin) }} to
+                  {{ formatPreviewNumber(previewRanges.yMax) }}.
+                </div>
+                <div v-else class="text-caption text-medium-emphasis">
+                  No numeric preview rows available.
+                </div>
               </div>
-              <div v-else class="text-caption text-medium-emphasis">
-                No numeric preview rows available.
-              </div>
-            </div>
+            </template>
           </template>
 
           <v-alert v-else type="info" variant="tonal" density="compact">
@@ -196,6 +292,10 @@ import {
   getRatingCurveReference,
   setRatingCurveReference,
 } from '@/utils/orchestration/ratingCurve'
+import {
+  parseRatingCurveCsvFile,
+  toRatingCurveFileValidationMessage,
+} from '@/utils/orchestration/ratingCurveFile'
 
 const props = defineProps<{
   transformation?: DataTransformation
@@ -255,6 +355,15 @@ const selectedThingId = ref<string | null>(null)
 const attachments = ref<ThingFileAttachment[]>([])
 const attachmentsLoading = ref(false)
 const selectedAttachmentId = ref<string | number | null>(null)
+const ratingCurveInputMode = ref<'existing' | 'create'>('existing')
+const createFileInput = ref<HTMLInputElement | null>(null)
+const createAttachmentFile = ref<File | null>(null)
+const createAttachmentName = ref('')
+const createAttachmentDescription = ref('')
+const createSaving = ref(false)
+const createFileValidationError = ref('')
+const createFileValidationPending = ref(false)
+let createValidationRunId = 0
 
 const previewRows = ref<RatingCurvePreviewRow[]>([])
 const previewError = ref('')
@@ -282,9 +391,24 @@ const selectedAttachment = computed(() =>
     (attachment) => String(attachment.id) === String(selectedAttachmentId.value)
   )
 )
+const selectedCreateFile = computed(() => createAttachmentFile.value)
+const canCreateAttachment = computed(
+  () =>
+    !!selectedThingId.value &&
+    !!selectedCreateFile.value &&
+    !!createAttachmentName.value.trim() &&
+    !createSaving.value &&
+    !createFileValidationPending.value &&
+    !createFileValidationError.value
+)
 
 type RatingCurvePoint = { x: number; y: number }
-type RatingCurveRange = { xMin: number; xMax: number; yMin: number; yMax: number }
+type RatingCurveRange = {
+  xMin: number
+  xMax: number
+  yMin: number
+  yMax: number
+}
 
 const previewCurvePoints = computed<RatingCurvePoint[]>(() =>
   previewRows.value
@@ -342,7 +466,8 @@ function extractThingIdFromRatingCurveUrl(reference: string): string | null {
     const pathSegments = parsed.pathname.split('/').filter(Boolean)
     if (pathSegments.length < 5) return null
     if (pathSegments[pathSegments.length - 5] !== 'things') return null
-    if (pathSegments[pathSegments.length - 3] !== 'file-attachments') return null
+    if (pathSegments[pathSegments.length - 3] !== 'file-attachments')
+      return null
     if (pathSegments[pathSegments.length - 1] !== 'download') return null
 
     return pathSegments[pathSegments.length - 4] ?? null
@@ -352,10 +477,12 @@ function extractThingIdFromRatingCurveUrl(reference: string): string | null {
 }
 
 function clearRatingCurveSelection() {
+  ratingCurveInputMode.value = 'existing'
   selectedAttachmentId.value = null
   attachments.value = []
   previewRows.value = []
   previewError.value = ''
+  resetCreateFormState()
   if (local.value.type === 'rating_curve') {
     setRatingCurveReference(local.value, '')
   }
@@ -393,6 +520,121 @@ function syncSelectedAttachmentWithReference() {
   selectedAttachmentId.value = selected?.id ?? null
 }
 
+function normalizeRatingCurveAttachments(items: ThingFileAttachment[]) {
+  return items
+    .filter(
+      (attachment) =>
+        attachment.fileAttachmentType === RATING_CURVE_ATTACHMENT_TYPE
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function resetCreateFormState() {
+  createValidationRunId += 1
+  createAttachmentFile.value = null
+  createAttachmentName.value = ''
+  createAttachmentDescription.value = ''
+  createFileValidationError.value = ''
+  createFileValidationPending.value = false
+  if (createFileInput.value) {
+    createFileInput.value.value = ''
+  }
+}
+
+function openCreateFilePicker() {
+  createFileInput.value?.click()
+}
+
+function onCreateFileSelected(event: Event) {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0] ?? null
+  createAttachmentFile.value = file
+}
+
+function clearCreateFile() {
+  createAttachmentFile.value = null
+  if (createFileInput.value) {
+    createFileInput.value.value = ''
+  }
+}
+
+function formatFileSize(sizeBytes: number) {
+  if (sizeBytes < 1024) return `${sizeBytes} B`
+  if (sizeBytes < 1024 * 1024) return `${(sizeBytes / 1024).toFixed(1)} KB`
+  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+async function validateCreateFile(file: File | null): Promise<boolean> {
+  const runId = ++createValidationRunId
+  createFileValidationError.value = ''
+
+  if (!file) {
+    createFileValidationPending.value = false
+    return true
+  }
+
+  createFileValidationPending.value = true
+  try {
+    await parseRatingCurveCsvFile(file)
+    if (runId !== createValidationRunId) return false
+    createFileValidationError.value = ''
+    return true
+  } catch (error: unknown) {
+    if (runId !== createValidationRunId) return false
+    createFileValidationError.value = toRatingCurveFileValidationMessage(error)
+    return false
+  } finally {
+    if (runId === createValidationRunId) {
+      createFileValidationPending.value = false
+    }
+  }
+}
+
+async function createAttachmentForThing() {
+  const thingId = selectedThingId.value
+  const file = selectedCreateFile.value
+  const trimmedName = createAttachmentName.value.trim()
+  if (!thingId || !file || !trimmedName) return
+
+  if (createFileValidationPending.value) {
+    Snackbar.error('Please wait for rating curve validation to finish.')
+    return
+  }
+
+  const isValidFile = await validateCreateFile(file)
+  if (!isValidFile) {
+    Snackbar.error(
+      createFileValidationError.value || 'Invalid rating curve CSV format.'
+    )
+    return
+  }
+
+  createSaving.value = true
+  try {
+    const res = await hs.thingFileAttachments.upload(thingId, file, {
+      type: RATING_CURVE_ATTACHMENT_TYPE,
+      name: trimmedName,
+      description: createAttachmentDescription.value.trim() || undefined,
+    })
+
+    if (!res.ok || !res.data) {
+      Snackbar.error(res.message || 'Unable to create rating curve.')
+      return
+    }
+
+    attachments.value = normalizeRatingCurveAttachments([
+      ...attachments.value,
+      res.data,
+    ])
+    onAttachmentSelected(res.data.id)
+    resetCreateFormState()
+  } catch (error: any) {
+    Snackbar.error(error?.message || 'Unable to create rating curve.')
+  } finally {
+    createSaving.value = false
+  }
+}
+
 async function loadThings() {
   if (!props.workspaceId) {
     things.value = []
@@ -426,9 +668,10 @@ async function loadAttachmentsForThing(thingId: string) {
   previewError.value = ''
 
   try {
-    attachments.value = await hs.thingFileAttachments.listItems(thingId, {
+    const items = await hs.thingFileAttachments.listItems(thingId, {
       type: RATING_CURVE_ATTACHMENT_TYPE,
     })
+    attachments.value = normalizeRatingCurveAttachments(items)
     syncSelectedAttachmentWithReference()
   } catch (error: any) {
     attachments.value = []
@@ -527,12 +770,18 @@ async function onSubmit() {
 
   if (local.value.type === 'rating_curve') {
     if (!selectedThingId.value) {
-      Snackbar.error('Select a Thing before saving this rating curve transformation.')
+      Snackbar.error(
+        'Select a Thing before saving this rating curve transformation.'
+      )
       return
     }
 
     if (!selectedAttachment.value) {
-      Snackbar.error('Select a rating curve before saving this transformation.')
+      Snackbar.error(
+        ratingCurveInputMode.value === 'create'
+          ? 'Create and select a new rating curve before saving this transformation.'
+          : 'Select a rating curve before saving this transformation.'
+      )
       return
     }
 
@@ -560,11 +809,13 @@ watch(
   () => props.transformation,
   () => {
     local.value = makeInitial()
+    ratingCurveInputMode.value = 'existing'
     selectedThingId.value = null
     selectedAttachmentId.value = null
     attachments.value = []
     previewRows.value = []
     previewError.value = ''
+    resetCreateFormState()
     loadThings()
   }
 )
@@ -578,6 +829,29 @@ watch(selectedAttachment, (attachment) => {
     return
   }
   void loadPreviewForAttachment(attachment)
+})
+
+watch(ratingCurveInputMode, (mode) => {
+  if (local.value.type !== 'rating_curve') return
+  if (!selectedThingId.value) return
+  if (mode !== 'create') return
+
+  onAttachmentSelected(null)
+})
+
+watch(selectedCreateFile, (file) => {
+  if (!file) {
+    createValidationRunId += 1
+    createFileValidationError.value = ''
+    createFileValidationPending.value = false
+    return
+  }
+
+  if (!createAttachmentName.value.trim()) {
+    createAttachmentName.value = file.name
+  }
+
+  void validateCreateFile(file)
 })
 
 onMounted(() => {
