@@ -60,7 +60,9 @@
                 {{
                   t.type === 'expression'
                     ? t.expression || 'expression()'
-                    : `lookup: ${t.lookupTableId ?? 'select table'}`
+                    : getRatingCurveReference(t)
+                    ? 'rating curve'
+                    : 'select rating curve'
                 }}
               </v-chip>
 
@@ -174,6 +176,7 @@
   <v-dialog v-model="transformOpen" width="40rem">
     <DataTransformationForm
       :transformation="editingTransform || undefined"
+      :workspace-id="resolvedWorkspaceId"
       @created="onCreateTransform"
       @updated="onUpdateTransform"
       @close="transformOpen = false"
@@ -199,12 +202,16 @@ import type {
   Task,
 } from '@hydroserver/client'
 import DataTransformationForm from './DataTransformationForm.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
 import { DatastreamExtended } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
+import {
+  getRatingCurveReference,
+  setRatingCurveReference,
+} from '@/utils/orchestration/ratingCurve'
 import {
   mdiFunctionVariant,
   mdiImport,
@@ -216,9 +223,20 @@ import {
 import { useOrchestrationStore } from '@/store/orchestration'
 
 const task = defineModel<Task>('task', { required: true })
+const props = defineProps<{
+  workspaceId?: string | null
+}>()
 const { linkedDatastreams, draftDatastreams } = storeToRefs(
   useOrchestrationStore()
 )
+const resolvedWorkspaceId = computed(() => {
+  return (
+    props.workspaceId ||
+    (task.value as any)?.workspaceId ||
+    (task.value as any)?.workspace?.id ||
+    null
+  )
+})
 
 const localForm = ref<VForm>()
 const isValid = ref(true)
@@ -347,10 +365,10 @@ function onUpdateTransform(updated: DataTransformation) {
   if (updated.type === 'expression') {
     ;(t as any).type = 'expression'
     ;(t as any).expression = updated.expression
-    delete (t as any).lookupTableId
+    delete (t as any).ratingCurveUrl
   } else {
-    ;(t as any).type = 'lookup'
-    ;(t as any).lookupTableId = updated.lookupTableId
+    ;(t as any).type = 'rating_curve'
+    setRatingCurveReference(t, getRatingCurveReference(updated))
     delete (t as any).expression
   }
   transformOpen.value = false

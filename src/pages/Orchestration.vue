@@ -3,15 +3,17 @@
     <div class="mx-auto flex w-full flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
       <WorkspaceToolbar layout="orchestration" title="Job orchestration">
         <template #actions>
-          <v-btn
-            :append-icon="mdiChevronRight"
-            color="blue-grey-darken-4"
-            :to="{ name: 'HydroLoader' }"
-            density="comfortable"
-            variant="tonal"
-          >
-            Download Streaming Data Loader
-          </v-btn>
+          <div class="d-flex flex-wrap ga-2 justify-end">
+            <v-btn
+              :append-icon="mdiChevronRight"
+              color="blue-grey-darken-4"
+              :to="{ name: 'HydroLoader' }"
+              density="comfortable"
+              variant="tonal"
+            >
+              Download Streaming Data Loader
+            </v-btn>
+          </div>
         </template>
       </WorkspaceToolbar>
 

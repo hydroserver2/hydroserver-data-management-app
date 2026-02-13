@@ -130,7 +130,7 @@
         </v-btn>
         <v-dialog v-if="thing" v-model="isRegisterModalOpen" width="80rem">
           <SiteForm
-            @close="isRegisterModalOpen = false"
+            @close="onSiteFormClosed"
             :thing-id="thingId"
             :workspace-id="thing.workspaceId"
           />
@@ -179,6 +179,15 @@
         </div>
         <div v-else class="text-body-2 text-medium-emphasis">
           No photos added yet.
+        </div>
+
+        <div v-if="thing" class="mt-4">
+          <RatingCurveTable
+            :thing-id="thing.id"
+            :can-edit="false"
+            :inline-read-only="true"
+            :refresh-token="ratingCurveRefreshToken"
+          />
         </div>
       </v-col>
     </v-row>
@@ -245,6 +254,7 @@ import SiteAccessControl from '@/components/Site/SiteAccessControl.vue'
 import DatastreamTable from '@/components/Datastream/DatastreamTable.vue'
 import SiteDetailsTable from '@/components/Site/SiteDetailsTable.vue'
 import SiteDeleteModal from '@/components/Site/SiteDeleteModal.vue'
+import RatingCurveTable from '@/components/Orchestration/RatingCurveTable.vue'
 import FullScreenLoader from '@/components/base/FullScreenLoader.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useHydroShare } from '@/composables/useHydroShare'
@@ -267,6 +277,9 @@ const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
 const { xs } = useDisplay()
 const isMobile = computed(() => xs.value)
+const canEditThing = computed(() =>
+  hasPermission(PermissionResource.Thing, PermissionAction.Edit)
+)
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 const maxPhotoThumbnails = 6
@@ -280,6 +293,7 @@ const extraPhotoCount = computed(() =>
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
+const ratingCurveRefreshToken = ref(0)
 const selectedPhotoIndex = ref<number | null>(null)
 const isPhotoViewerOpen = ref(false)
 const hasMultiplePhotos = computed(() => (photos.value?.length ?? 0) > 1)
@@ -319,6 +333,20 @@ const locationDetails = computed(() => {
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
   isAccessControlModalOpen.value = true
+}
+
+async function loadThingPhotos() {
+  const res = await hs.things.getAttachments(thingId)
+  if (!res.ok || !Array.isArray(res.data)) return
+  photos.value = res.data.filter(
+    (attachment: FileAttachment) => attachment.fileAttachmentType === 'Photo'
+  )
+}
+
+function onSiteFormClosed() {
+  isRegisterModalOpen.value = false
+  ratingCurveRefreshToken.value += 1
+  void loadThingPhotos()
 }
 
 function openPhoto(photo: FileAttachment) {
@@ -362,15 +390,9 @@ async function onDeleteThing() {
 
 onMounted(async () => {
   photos.value = []
-  hs.things
-    .getAttachments(thingId)
-    .then((res) => {
-      photos.value = res.data.filter(
-        (attachment: FileAttachment) =>
-          attachment.fileAttachmentType === 'Photo'
-      )
-    })
-    .catch((error) => console.error('Error fetching photos from DB', error))
+  void loadThingPhotos().catch((error) =>
+    console.error('Error fetching photos from DB', error)
+  )
 
   const [thingResponse, hydroShareArchiveResponse, tagResponse] =
     await Promise.all([

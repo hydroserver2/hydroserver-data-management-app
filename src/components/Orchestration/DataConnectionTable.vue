@@ -13,6 +13,17 @@
         maxWidth="300"
       />
 
+      <v-btn
+        class="mx-4"
+        color="white"
+        variant="outlined"
+        density="comfortable"
+        :append-icon="mdiMenuUp"
+        @click="openDataConnectionTableDialog = false"
+      >
+        Manage data connections
+      </v-btn>
+
       <v-tooltip location="top" :disabled="canEditWorkspace">
         <template #activator="{ props: tooltipProps }">
           <span v-bind="tooltipProps" class="inline-flex">
@@ -107,11 +118,12 @@ import hs, {
   PermissionAction,
   PermissionResource,
 } from '@hydroserver/client'
-import { mdiMagnify, mdiPencil, mdiDelete } from '@mdi/js'
+import { mdiMagnify, mdiPencil, mdiDelete, mdiMenuUp } from '@mdi/js'
 import { useTableLogic } from '@/composables/useTableLogic'
 import DeleteDataConnectionCard from './DeleteDataConnectionCard.vue'
 import { useWorkspacePermissions } from '@/composables/useWorkspacePermissions'
 import { useWorkspaceStore } from '@/store/workspaces'
+import { useDataConnectionStore } from '@/store/dataConnection'
 import { storeToRefs } from 'pinia'
 
 const props = defineProps<{
@@ -123,6 +135,7 @@ const search = ref()
 const selectedOrchestrationSystem = ref<OrchestrationSystem>()
 const loading = ref(false)
 const { workspaces } = storeToRefs(useWorkspaceStore())
+const { openDataConnectionTableDialog } = storeToRefs(useDataConnectionStore())
 const { hasPermission, isAdmin, isOwner } = useWorkspacePermissions()
 
 const workspaceForPage = computed(() =>
