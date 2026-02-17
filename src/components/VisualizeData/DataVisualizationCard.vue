@@ -4,6 +4,13 @@
       <v-progress-linear color="primary" :active="isActive" indeterminate />
     </template>
 
+    <div v-if="showNoDataWarning" class="plot-warning">
+      <v-alert type="warning" density="comfortable" variant="tonal">
+        No data available for the selected date range. Please select a
+        different date range to re-plot.
+      </v-alert>
+    </div>
+
     <keep-alive>
       <v-card-text
         v-if="canPlot"
@@ -93,7 +100,7 @@
       </v-card-text>
     </keep-alive>
 
-    <div v-if="!isDataAvailable && viewMode === 'plot'" class="plot-empty">
+    <div v-if="showInstructions && viewMode === 'plot'" class="plot-empty">
       <v-card-text>
         <div class="plot-empty__title">Visualize data</div>
         <v-timeline align="start" density="compact">
@@ -126,16 +133,6 @@
             </div>
           </v-timeline-item>
         </v-timeline>
-      </v-card-text>
-
-      <v-card-text
-        v-if="plottedDatastreams.length && !updating && hasLoadedSelectedSeries"
-        class="text-center"
-      >
-        <v-alert type="warning" dense>
-          No data available for the selected date range. Please select a
-          different date range to re-plot.
-        </v-alert>
       </v-card-text>
     </div>
   </v-card>
@@ -443,6 +440,7 @@ const updating = computed(() =>
 const isDataAvailable = computed(() =>
   graphSeriesArray.value.some((series) => series.data && series.data.length > 0)
 )
+const hasSelectedDatastreams = computed(() => plottedDatastreams.value.length > 0)
 
 const hasLoadedSelectedSeries = computed(() => {
   if (!plottedDatastreams.value.length) return false
@@ -456,7 +454,15 @@ const hasLoadedSelectedSeries = computed(() => {
 })
 
 const canPlot = computed(() =>
-  Boolean(plotlyOptions.value && isDataAvailable.value)
+  Boolean(plotlyOptions.value && hasSelectedDatastreams.value)
+)
+const showInstructions = computed(() => !hasSelectedDatastreams.value)
+const showNoDataWarning = computed(
+  () =>
+    hasSelectedDatastreams.value &&
+    !updating.value &&
+    hasLoadedSelectedSeries.value &&
+    !isDataAvailable.value
 )
 const viewMode = computed<'plot' | 'summary'>({
   get: () => (showSummaryStatistics.value ? 'summary' : 'plot'),
@@ -821,6 +827,15 @@ onMounted(() => {
   padding: 0;
   flex: 1;
   min-height: 0;
+}
+
+.plot-warning {
+  padding: 0;
+}
+
+.plot-warning :deep(.v-alert) {
+  margin: 0;
+  border-radius: 0;
 }
 
 .plot-empty {
