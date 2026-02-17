@@ -298,13 +298,25 @@
   <v-dialog v-model="openEdit" width="42rem">
     <v-card>
       <v-card-title class="text-h6 bg-teal-darken-1 text-white">
-        Update rating curve file
+        Update rating curve
       </v-card-title>
       <v-divider />
       <v-card-text class="pt-4">
         <div class="text-body-2 mb-3">
           Selected rating curve: <strong>{{ editAttachment?.name }}</strong>
         </div>
+
+        <v-text-field
+          v-model="editAttachmentName"
+          label="Rating curve name *"
+          class="mb-3"
+        />
+        <v-textarea
+          v-model="editAttachmentDescription"
+          label="Description"
+          rows="2"
+          class="mb-3"
+        />
 
         <input
           ref="editFileInput"
@@ -320,7 +332,7 @@
           class="mb-2 text-none"
           @click="openEditFilePicker"
         >
-          {{ selectedEditFile ? 'Change CSV file' : 'Choose replacement CSV file *' }}
+          {{ selectedEditFile ? 'Change CSV file' : 'Choose replacement CSV file' }}
         </v-btn>
         <div v-if="selectedEditFile" class="d-flex align-center mb-3">
           <span class="text-caption text-medium-emphasis">
@@ -462,6 +474,8 @@ const attachmentDescription = ref('')
 const editAttachment = ref<DisplayRatingCurve | null>(null)
 const editAttachmentFile = ref<File | File[] | null>(null)
 const editFileInput = ref<HTMLInputElement | null>(null)
+const editAttachmentName = ref('')
+const editAttachmentDescription = ref('')
 const activeAttachment = ref<DisplayRatingCurve | null>(null)
 
 const createFileValidationError = ref('')
@@ -502,16 +516,25 @@ const displayAttachments = computed<DisplayRatingCurve[]>(() => {
   const deletedIds = new Set(
     ratingCurveStore.pendingDeleteIds.map((item) => String(item))
   )
+  const metadataUpdatesById = new Map(
+    ratingCurveStore.pendingMetadataUpdates.map((item) => [
+      String(item.attachmentId),
+      item,
+    ])
+  )
 
   const existing = ratingCurveStore.existingRatingCurves
     .filter((attachment) => !deletedIds.has(String(attachment.id)))
-    .map((attachment) => ({
-      id: attachment.id,
-      name: attachment.name,
-      description: attachment.description || '',
-      link: attachment.link,
-      pending: false,
-    }))
+    .map((attachment) => {
+      const pendingMetadata = metadataUpdatesById.get(String(attachment.id))
+      return {
+        id: attachment.id,
+        name: pendingMetadata?.name ?? attachment.name,
+        description: pendingMetadata?.description ?? (attachment.description || ''),
+        link: attachment.link,
+        pending: false,
+      }
+    })
 
   const queued = ratingCurveStore.pendingCreates.map((item) => ({
     id: item.tempId,
@@ -549,9 +572,22 @@ const selectedEditFile = computed(() => {
 const canSaveEditAttachment = computed(
   () =>
     !!editAttachment.value &&
-    !!selectedEditFile.value &&
+    !!editAttachmentName.value.trim() &&
     !editFileValidationPending.value &&
-    !editFileValidationError.value
+    !editFileValidationError.value &&
+    hasEditChanges.value
+)
+const hasEditMetadataChanges = computed(() => {
+  const item = editAttachment.value
+  if (!item) return false
+  return (
+    editAttachmentName.value.trim() !== item.name ||
+    editAttachmentDescription.value.trim() !== (item.description || '')
+  )
+})
+const hasEditFileChange = computed(() => !!selectedEditFile.value)
+const hasEditChanges = computed(
+  () => hasEditMetadataChanges.value || hasEditFileChange.value
 )
 const editPreviewPath = computed(() => {
   const points = toCurvePoints(editPreviewRows.value)
@@ -584,6 +620,8 @@ function resetEditState() {
   editFileValidationError.value = ''
   editFileValidationPending.value = false
   editAttachmentFile.value = null
+  editAttachmentName.value = ''
+  editAttachmentDescription.value = ''
   editPreviewRows.value = []
   if (editFileInput.value) {
     editFileInput.value.value = ''
@@ -703,6 +741,8 @@ function openEditDialog(item: DisplayRatingCurve) {
   if (!canEditThing.value) return
   resetEditState()
   editAttachment.value = item
+  editAttachmentName.value = item.name
+  editAttachmentDescription.value = item.description || ''
   openEdit.value = true
 }
 
@@ -856,46 +896,78 @@ async function deleteAttachment() {
 
 async function saveEditAttachment() {
   const item = editAttachment.value
-  const file = selectedEditFile.value
-  if (!item || !file) return
+  if (!item) return
 
-  if (editFileValidationPending.value) {
+  const file = selectedEditFile.value
+  const trimmedName = editAttachmentName.value.trim()
+  const trimmedDescription = editAttachmentDescription.value.trim()
+  if (!trimmedName) return
+
+  const metadataChanged =
+    trimmedName !== item.name || trimmedDescription !== (item.description || '')
+  const fileChanged = !!file
+
+  if (!metadataChanged && !fileChanged) {
+    openEdit.value = false
+    resetEditState()
+    return
+  }
+
+  if (fileChanged && editFileValidationPending.value) {
     Snackbar.error('Please wait for rating curve validation to finish.')
     return
   }
 
-  const isValidFile = await validateEditFile(file)
-  if (!isValidFile) {
-    Snackbar.error(
-      editFileValidationError.value || 'Invalid rating curve CSV format.'
-    )
-    return
-  }
+  let previewRows: RatingCurvePreviewRow[] | null = null
+  if (fileChanged && file) {
+    const isValidFile = await validateEditFile(file)
+    if (!isValidFile) {
+      Snackbar.error(
+        editFileValidationError.value || 'Invalid rating curve CSV format.'
+      )
+      return
+    }
 
-  const parsed = await parseRatingCurveCsvFile(file)
-  const previewRows: RatingCurvePreviewRow[] = parsed.rows.map((row) => ({
-    inputValue: String(row.inputValue),
-    outputValue: String(row.outputValue),
-  }))
+    const parsed = await parseRatingCurveCsvFile(file)
+    previewRows = parsed.rows.map((row) => ({
+      inputValue: String(row.inputValue),
+      outputValue: String(row.outputValue),
+    }))
+  }
 
   if (props.deferPersist) {
     if (item.pending) {
       const updated = ratingCurveStore.updateQueuedRatingCurveCreate(
         String(item.id),
-        file,
-        previewRows
+        {
+          ...(fileChanged && file ? { file } : {}),
+          ...(previewRows ? { previewRows } : {}),
+          name: trimmedName,
+          description: trimmedDescription,
+        }
       )
       if (!updated) {
-        Snackbar.error('Unable to update pending rating curve file.')
+        Snackbar.error('Unable to update pending rating curve.')
         return
       }
     } else {
-      ratingCurveStore.queueExistingRatingCurveReplace(item.id, file, previewRows)
+      if (metadataChanged) {
+        ratingCurveStore.queueExistingRatingCurveMetadataUpdate(
+          item.id,
+          trimmedName,
+          trimmedDescription
+        )
+      }
+      if (fileChanged && file && previewRows) {
+        ratingCurveStore.queueExistingRatingCurveReplace(item.id, file, previewRows)
+      }
     }
 
-    previewRowsByAttachmentId.value[String(item.id)] = previewRows
-    delete previewErrorByAttachmentId.value[String(item.id)]
-    delete previewLoadingByAttachmentId.value[String(item.id)]
+    if (previewRows) {
+      previewRowsByAttachmentId.value[String(item.id)] = previewRows
+      delete previewErrorByAttachmentId.value[String(item.id)]
+      delete previewLoadingByAttachmentId.value[String(item.id)]
+    }
     openEdit.value = false
     resetEditState()
     return
@@ -908,23 +980,51 @@ async function saveEditAttachment() {
 
   saving.value = true
   try {
-    const res = await hs.thingFileAttachments.replaceFile(props.thingId, item.id, file)
-    if (!res.ok || !res.data) {
-      Snackbar.error(res.message || 'Unable to update rating curve file.')
-      return
+    let updatedAttachment =
+      backendAttachments.value.find(
+        (attachment) => String(attachment.id) === String(item.id)
+      ) || null
+
+    if (metadataChanged) {
+      const metaRes = await hs.thingFileAttachments.update(props.thingId, item.id, {
+        name: trimmedName,
+        description: trimmedDescription,
+      })
+      if (!metaRes.ok || !metaRes.data) {
+        Snackbar.error(metaRes.message || 'Unable to update rating curve.')
+        return
+      }
+      updatedAttachment = metaRes.data
+    }
+
+    if (fileChanged && file) {
+      const fileRes = await hs.thingFileAttachments.replaceFile(
+        props.thingId,
+        item.id,
+        file
+      )
+      if (!fileRes.ok || !fileRes.data) {
+        Snackbar.error(fileRes.message || 'Unable to update rating curve file.')
+        return
+      }
+      updatedAttachment = fileRes.data
     }
 
     backendAttachments.value = backendAttachments.value.map((attachment) =>
-      String(attachment.id) === String(item.id) ? res.data! : attachment
+      String(attachment.id) === String(item.id)
+        ? updatedAttachment || attachment
+        : attachment
     )
     emitAttachmentsChanged()
-    previewRowsByAttachmentId.value[String(item.id)] = previewRows
-    delete previewErrorByAttachmentId.value[String(item.id)]
-    delete previewLoadingByAttachmentId.value[String(item.id)]
+    if (previewRows) {
+      previewRowsByAttachmentId.value[String(item.id)] = previewRows
+      delete previewErrorByAttachmentId.value[String(item.id)]
+      delete previewLoadingByAttachmentId.value[String(item.id)]
+    }
     openEdit.value = false
     resetEditState()
   } catch (error: any) {
-    Snackbar.error(error?.message || 'Unable to update rating curve file.')
+    Snackbar.error(error?.message || 'Unable to update rating curve.')
   } finally {
     saving.value = false
   }

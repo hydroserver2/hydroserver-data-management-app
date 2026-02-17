@@ -275,6 +275,7 @@ async function uploadThing() {
     const firstFailure =
       ratingCurveResult.message ||
       ratingCurveResult.failedCreates[0]?.message ||
+      ratingCurveResult.failedMetadataUpdates[0]?.message ||
       ratingCurveResult.failedReplaces[0]?.message ||
       ratingCurveResult.failedDeletes[0]?.message ||
       'Some rating curve changes could not be saved.'

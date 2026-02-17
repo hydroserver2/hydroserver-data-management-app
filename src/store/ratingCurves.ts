@@ -20,10 +20,17 @@ export type PendingRatingCurveReplace = {
   previewRows: RatingCurvePreviewRow[]
 }
 
+export type PendingRatingCurveMetadataUpdate = {
+  attachmentId: string | number
+  name: string
+  description: string
+}
+
 export type UpdateRatingCurvesResult = {
   ok: boolean
   message?: string
   failedCreates: Array<{ tempId: string; name: string; message: string }>
+  failedMetadataUpdates: Array<{ id: string | number; message: string }>
   failedReplaces: Array<{ id: string | number; message: string }>
   failedDeletes: Array<{ id: string | number; message: string }>
 }
@@ -31,6 +38,7 @@ export type UpdateRatingCurvesResult = {
 export const useRatingCurveStore = defineStore('ratingCurves', () => {
   const existingRatingCurves = ref<ThingFileAttachment[]>([])
   const pendingCreates = ref<PendingRatingCurveCreate[]>([])
+  const pendingMetadataUpdates = ref<PendingRatingCurveMetadataUpdate[]>([])
   const pendingReplaces = ref<PendingRatingCurveReplace[]>([])
   const pendingDeleteIds = ref<Array<string | number>>([])
   const loading = ref(false)
@@ -40,6 +48,7 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
   const resetRatingCurves = () => {
     existingRatingCurves.value = []
     pendingCreates.value = []
+    pendingMetadataUpdates.value = []
     pendingReplaces.value = []
     pendingDeleteIds.value = []
   }
@@ -88,17 +97,57 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
 
   const updateQueuedRatingCurveCreate = (
     tempId: string,
-    file: File,
-    previewRows: RatingCurvePreviewRow[]
+    updates: {
+      file?: File
+      name?: string
+      description?: string
+      previewRows?: RatingCurvePreviewRow[]
+    }
   ) => {
     const index = pendingCreates.value.findIndex((item) => item.tempId === tempId)
     if (index === -1) return false
     pendingCreates.value[index] = {
       ...pendingCreates.value[index],
-      file,
-      previewRows,
+      ...(updates.file ? { file: updates.file } : {}),
+      ...(updates.name !== undefined ? { name: updates.name } : {}),
+      ...(updates.description !== undefined
+        ? { description: updates.description }
+        : {}),
+      ...(updates.previewRows ? { previewRows: updates.previewRows } : {}),
     }
     return true
+  }
+
+  const queueExistingRatingCurveMetadataUpdate = (
+    attachmentId: string | number,
+    name: string,
+    description: string
+  ) => {
+    const key = String(attachmentId)
+    const index = pendingMetadataUpdates.value.findIndex(
+      (item) => String(item.attachmentId) === key
+    )
+    const nextItem: PendingRatingCurveMetadataUpdate = {
+      attachmentId,
+      name,
+      description,
+    }
+
+    if (index === -1) {
+      pendingMetadataUpdates.value.push(nextItem)
+      return
+    }
+
+    pendingMetadataUpdates.value[index] = nextItem
+  }
+
+  const removeQueuedRatingCurveMetadataUpdate = (
+    attachmentId: string | number
+  ) => {
+    const key = String(attachmentId)
+    pendingMetadataUpdates.value = pendingMetadataUpdates.value.filter(
+      (item) => String(item.attachmentId) !== key
+    )
   }
 
   const queueExistingRatingCurveReplace = (
@@ -136,6 +185,7 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
     if (pendingDeleteIds.value.some((item) => String(item) === key)) return
     pendingDeleteIds.value.push(attachmentId)
     removeQueuedRatingCurveReplace(attachmentId)
+    removeQueuedRatingCurveMetadataUpdate(attachmentId)
   }
 
   const updateRatingCurves = async (
@@ -144,9 +194,12 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
     loading.value = true
     let generalError = ''
     const failedCreates: UpdateRatingCurvesResult['failedCreates'] = []
+    const failedMetadataUpdates: UpdateRatingCurvesResult['failedMetadataUpdates'] =
+      []
     const failedReplaces: UpdateRatingCurvesResult['failedReplaces'] = []
     const failedDeletes: UpdateRatingCurvesResult['failedDeletes'] = []
     const appliedCreateTempIds = new Set<string>()
+    const appliedMetadataUpdateIds = new Set<string>()
     const appliedReplaceIds = new Set<string>()
     const appliedDeleteIds = new Set<string>()
 
@@ -167,6 +220,40 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
             failedDeletes.push({
               id,
               message: error?.message || 'Unable to delete rating curve.',
+            })
+          }
+        }
+      }
+
+      if (pendingMetadataUpdates.value.length) {
+        for (const item of pendingMetadataUpdates.value) {
+          const key = String(item.attachmentId)
+          if (appliedDeleteIds.has(key)) {
+            appliedMetadataUpdateIds.add(key)
+            continue
+          }
+
+          try {
+            const res = await hs.thingFileAttachments.update(
+              thingId,
+              item.attachmentId,
+              {
+                name: item.name,
+                description: item.description,
+              }
+            )
+            if (!res.ok || !res.data) {
+              failedMetadataUpdates.push({
+                id: item.attachmentId,
+                message: res.message || 'Unable to update rating curve metadata.',
+              })
+              continue
+            }
+            appliedMetadataUpdateIds.add(key)
+          } catch (error: any) {
+            failedMetadataUpdates.push({
+              id: item.attachmentId,
+              message: error?.message || 'Unable to update rating curve metadata.',
             })
           }
         }
@@ -239,6 +326,9 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
       pendingCreates.value = pendingCreates.value.filter(
         (item) => !appliedCreateTempIds.has(item.tempId)
       )
+      pendingMetadataUpdates.value = pendingMetadataUpdates.value.filter(
+        (item) => !appliedMetadataUpdateIds.has(String(item.attachmentId))
+      )
       pendingReplaces.value = pendingReplaces.value.filter(
         (item) => !appliedReplaceIds.has(String(item.attachmentId))
       )
@@ -252,10 +342,12 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
       ok:
         !generalError &&
         failedCreates.length === 0 &&
+        failedMetadataUpdates.length === 0 &&
         failedReplaces.length === 0 &&
         failedDeletes.length === 0,
       message: generalError || undefined,
       failedCreates,
+      failedMetadataUpdates,
       failedReplaces,
       failedDeletes,
     }
@@ -264,6 +356,7 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
   return {
     existingRatingCurves,
     pendingCreates,
+    pendingMetadataUpdates,
     pendingReplaces,
     pendingDeleteIds,
     loading,
@@ -271,6 +364,8 @@ export const useRatingCurveStore = defineStore('ratingCurves', () => {
     queueRatingCurveCreate,
     removeQueuedRatingCurveCreate,
     updateQueuedRatingCurveCreate,
+    queueExistingRatingCurveMetadataUpdate,
+    removeQueuedRatingCurveMetadataUpdate,
     queueExistingRatingCurveReplace,
     removeQueuedRatingCurveReplace,
     queueExistingRatingCurveDelete,
