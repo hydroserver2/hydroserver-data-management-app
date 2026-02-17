@@ -19,7 +19,12 @@
 
     <v-row justify="center" class="mt-6">
       <span class="mr-2">Already have an account?</span>
-      <router-link to="/login">Sign In</router-link>
+      <router-link
+        to="/login"
+        class="text-[rgb(var(--v-theme-primary))] underline underline-offset-2 hover:decoration-2 focus:decoration-2"
+      >
+        Sign In
+      </router-link>
     </v-row>
 
     <OAuth />
