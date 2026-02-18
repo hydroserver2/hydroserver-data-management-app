@@ -53,17 +53,23 @@
       v-if="disableAccountCreation !== 'true'"
     >
       <span class="mr-2">Don't have an account?</span>
-      <router-link to="/sign-up" class="light-text signup-link"
-        >Sign Up</router-link
+      <router-link
+        to="/sign-up"
+        class="text-[rgb(var(--v-theme-primary))] underline underline-offset-2 hover:decoration-2 focus:decoration-2"
       >
+        Sign Up
+      </router-link>
     </v-row>
 
     <OAuth />
 
     <v-row justify="center" class="my-10">
-      <router-link to="/reset-password" class="light-text forgot-password-link"
-        >Forgot your password?</router-link
+      <router-link
+        to="/reset-password"
+        class="text-[rgb(var(--v-theme-primary))] underline underline-offset-2 hover:decoration-2 focus:decoration-2"
       >
+        Forgot your password?
+      </router-link>
     </v-row>
   </v-container>
 </template>

@@ -188,22 +188,10 @@
 
     <v-dialog v-model="isPhotoViewerOpen" width="60rem">
       <v-card v-if="selectedPhoto">
-        <div class="relative">
-          <v-img :src="selectedPhoto.link" height="32rem" cover />
-          <v-btn
-            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 text-slate-800 shadow-[0_4px_10px_rgba(15,23,42,0.15)]"
-            variant="text"
-            :icon="mdiChevronLeft"
-            :disabled="!hasMultiplePhotos"
-            @click="showPrevPhoto"
-          />
-          <v-btn
-            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 text-slate-800 shadow-[0_4px_10px_rgba(15,23,42,0.15)]"
-            variant="text"
-            :icon="mdiChevronRight"
-            :disabled="!hasMultiplePhotos"
-            @click="showNextPhoto"
-          />
+        <div
+          class="flex h-[32rem] w-full items-center justify-center bg-slate-900/90 max-[960px]:h-[24rem] max-[600px]:h-[18rem]"
+        >
+          <v-img :src="selectedPhoto.link" contain class="h-full w-full" />
         </div>
         <v-card-text
           v-if="selectedPhoto.name"
@@ -211,7 +199,25 @@
         >
           {{ selectedPhoto.name }}
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions
+          class="flex flex-wrap items-center justify-center gap-2 px-4 pb-3 pt-1"
+        >
+          <v-btn
+            variant="outlined"
+            :prepend-icon="mdiChevronLeft"
+            :disabled="!hasMultiplePhotos"
+            @click="showPrevPhoto"
+          >
+            Previous
+          </v-btn>
+          <v-btn
+            variant="outlined"
+            :append-icon="mdiChevronRight"
+            :disabled="!hasMultiplePhotos"
+            @click="showNextPhoto"
+          >
+            Next
+          </v-btn>
           <v-spacer />
           <v-btn variant="text" @click="isPhotoViewerOpen = false">Close</v-btn>
         </v-card-actions>
