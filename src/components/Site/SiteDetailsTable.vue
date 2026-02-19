@@ -44,6 +44,16 @@
             <span v-else>{{ tag.value }}</span>
           </v-chip>
         </div>
+        <div v-else-if="item.label === 'Rating Curves'">
+          <v-btn
+            variant="text"
+            color="teal-darken-1"
+            class="text-none px-0 rating-curve-view-btn"
+            @click="openRatingCurveDialog"
+          >
+            View rating curves ({{ props.ratingCurveCount }})
+          </v-btn>
+        </div>
         <p v-else class="site-detail-text">{{ item.value }}</p>
       </div>
     </div>
@@ -98,18 +108,54 @@
           <span v-else>{{ tag.value }}</span>
         </v-chip>
       </div>
+      <div v-else-if="item.label === 'Rating Curves'">
+        <v-btn
+          variant="text"
+          color="teal-darken-1"
+          class="text-none px-0 rating-curve-view-btn"
+          @click="openRatingCurveDialog"
+        >
+          View rating curves ({{ props.ratingCurveCount }})
+        </v-btn>
+      </div>
       <p v-else>{{ item.value }}</p>
     </template>
   </v-data-table>
+
+  <v-dialog v-model="isRatingCurveDialogOpen" width="56rem" max-width="95vw">
+    <v-card>
+      <v-card-title class="text-h6 bg-teal-darken-1 text-white">
+        View rating curves
+      </v-card-title>
+      <v-divider />
+      <v-card-text class="pt-4">
+        <RatingCurveTable
+          v-if="thing?.id"
+          :thing-id="thing.id"
+          :can-edit="false"
+          inline-read-only
+          download-only
+          :show-header="false"
+          :refresh-token="ratingCurveRefreshToken"
+        />
+      </v-card-text>
+      <v-divider />
+      <v-card-actions>
+        <v-spacer />
+        <v-btn-cancel @click="isRatingCurveDialogOpen = false">Close</v-btn-cancel>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useThingStore } from '@/store/thing'
 import { materialColors } from '@/utils/materialColors'
 import { useTagStore } from '@/store/tags'
 import { Snackbar } from '@/utils/notifications'
+import RatingCurveTable from '@/components/Orchestration/RatingCurveTable.vue'
 import { useDisplay } from 'vuetify/lib/framework.mjs'
 import {
   mdiBarcode,
@@ -136,6 +182,8 @@ const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
 const { smAndDown } = useDisplay()
 const isMobile = computed(() => smAndDown.value)
+const isRatingCurveDialogOpen = ref(false)
+const ratingCurveRefreshToken = ref(0)
 
 const isUrl = (value: string): boolean => {
   try {
@@ -153,6 +201,11 @@ const copyValue = async (value: string) => {
   } catch {
     Snackbar.error('Failed to copy ID')
   }
+}
+
+const openRatingCurveDialog = () => {
+  ratingCurveRefreshToken.value += 1
+  isRatingCurveDialogOpen.value = true
 }
 
 const thingProperties = computed(() => {
@@ -262,6 +315,11 @@ type ThingPropertyRow = {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.5rem;
+}
+
+.rating-curve-view-btn {
+  min-height: 0;
+  height: auto;
 }
 
 @media (max-width: 700px) {

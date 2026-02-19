@@ -1,5 +1,5 @@
 <template>
-  <div class="rating-curve-manager">
+  <div v-if="showHeader" class="rating-curve-manager">
     <div class="d-flex align-center mb-2">
       <h6 class="text-h6 mb-0">Rating Curves</h6>
       <v-chip class="ml-2" size="small" variant="tonal">
@@ -77,6 +77,23 @@
             >
               {{ attachment.description }}
             </div>
+          </div>
+
+          <div v-if="downloadOnly" class="rating-curve-item-actions">
+            <v-tooltip location="top">
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps" class="inline-flex">
+                  <v-btn
+                    :icon="mdiDownload"
+                    variant="text"
+                    :loading="isDownloading(attachment.id)"
+                    :disabled="!attachment.link || isDownloading(attachment.id)"
+                    @click="downloadAttachment(attachment)"
+                  />
+                </span>
+              </template>
+              <span>{{ downloadTooltipText }}</span>
+            </v-tooltip>
           </div>
         </div>
       </div>
@@ -204,6 +221,23 @@
                       </span>
                     </template>
                     <span>{{ readOnlyTooltip }}</span>
+                  </v-tooltip>
+                </div>
+
+                <div v-else-if="downloadOnly" class="rating-curve-item-actions">
+                  <v-tooltip location="top">
+                    <template #activator="{ props: tooltipProps }">
+                      <span v-bind="tooltipProps" class="inline-flex">
+                        <v-btn
+                          :icon="mdiDownload"
+                          variant="text"
+                          :loading="isDownloading(attachment.id)"
+                          :disabled="!attachment.link || isDownloading(attachment.id)"
+                          @click="downloadAttachment(attachment)"
+                        />
+                      </span>
+                    </template>
+                    <span>{{ downloadTooltipText }}</span>
                   </v-tooltip>
                 </div>
               </div>
@@ -416,7 +450,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { mdiDelete, mdiPencil } from '@mdi/js'
+import { mdiDelete, mdiDownload, mdiPencil } from '@mdi/js'
 import hs, {
   type RatingCurvePreviewRow,
   type ThingFileAttachment,
@@ -434,12 +468,16 @@ const props = withDefaults(
     canEdit?: boolean
     deferPersist?: boolean
     inlineReadOnly?: boolean
+    downloadOnly?: boolean
+    showHeader?: boolean
     refreshToken?: number
   }>(),
   {
     canEdit: false,
     deferPersist: false,
     inlineReadOnly: false,
+    downloadOnly: false,
+    showHeader: true,
     refreshToken: 0,
   }
 )
@@ -491,12 +529,14 @@ const PREVIEW_SVG_HEIGHT = 38
 const previewRowsByAttachmentId = ref<Record<string, RatingCurvePreviewRow[]>>({})
 const previewLoadingByAttachmentId = ref<Record<string, boolean>>({})
 const previewErrorByAttachmentId = ref<Record<string, string>>({})
+const downloadingByAttachmentId = ref<Record<string, boolean>>({})
 
 const canEditThing = computed(() => props.canEdit)
 const inlineReadOnly = computed(() => props.inlineReadOnly && !canEditThing.value)
 const showManageButton = computed(() => canEditThing.value && !inlineReadOnly.value)
 const readOnlyTooltip =
   'You have read-only access to this site. Ask an editor or owner to make changes.'
+const downloadTooltipText = 'Download rating curve'
 
 const loading = computed(() =>
   props.deferPersist ? ratingCurveStore.loading : backendLoading.value
@@ -1069,10 +1109,105 @@ function getPreviewError(attachmentId: string | number) {
   return previewErrorByAttachmentId.value[String(attachmentId)] ?? ''
 }
 
+function isDownloading(attachmentId: string | number) {
+  return !!downloadingByAttachmentId.value[String(attachmentId)]
+}
+
 function getPreviewPath(attachmentId: string | number): string {
   const points = toCurvePoints(getPreviewRows(attachmentId))
   const ranges = computeCurveRange(points)
   return buildSparklinePath(points, ranges, PREVIEW_SVG_WIDTH, PREVIEW_SVG_HEIGHT)
+}
+
+async function downloadAttachment(item: DisplayRatingCurve) {
+  const key = String(item.id)
+  if (downloadingByAttachmentId.value[key]) return
+
+  if (!item.link) {
+    Snackbar.error('Rating curve download link unavailable.')
+    return
+  }
+
+  downloadingByAttachmentId.value[key] = true
+  try {
+    let response: Response
+    try {
+      response = await fetch(item.link, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          Accept: 'text/csv, text/plain, application/octet-stream',
+        },
+      })
+    } catch {
+      triggerDownloadLink(item.link, buildDownloadFilename(item.name))
+      return
+    }
+
+    if (!response.ok) {
+      Snackbar.error('Unable to download rating curve.')
+      return
+    }
+
+    const blob = await response.blob()
+    const dispositionFilename = filenameFromContentDisposition(
+      response.headers.get('content-disposition')
+    )
+    triggerDownloadBlob(
+      blob,
+      dispositionFilename || buildDownloadFilename(item.name)
+    )
+  } catch (error: any) {
+    Snackbar.error(error?.message || 'Unable to download rating curve.')
+  } finally {
+    downloadingByAttachmentId.value[key] = false
+  }
+}
+
+function triggerDownloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+function triggerDownloadLink(downloadUrl: string, filename: string) {
+  const link = document.createElement('a')
+  link.href = downloadUrl
+  link.download = filename
+  link.target = '_blank'
+  link.rel = 'noopener'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+function buildDownloadFilename(name: string) {
+  const sanitized = `${name ?? ''}`
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, '_')
+  const baseName = sanitized || 'rating_curve'
+  return /\.csv$/i.test(baseName) ? baseName : `${baseName}.csv`
+}
+
+function filenameFromContentDisposition(value: string | null) {
+  if (!value) return ''
+
+  const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(value)
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1].replace(/["']/g, ''))
+    } catch {
+      return utf8Match[1].replace(/["']/g, '')
+    }
+  }
+
+  const basicMatch = /filename="?([^";]+)"?/i.exec(value)
+  return basicMatch?.[1] ?? ''
 }
 
 function toCurvePoints(rows: RatingCurvePreviewRow[]): RatingCurvePoint[] {
