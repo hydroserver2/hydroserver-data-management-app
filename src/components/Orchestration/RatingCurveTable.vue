@@ -215,7 +215,8 @@
                           :icon="mdiDelete"
                           variant="text"
                           color="delete"
-                          :disabled="!canEditThing"
+                          :loading="isValidatingDelete(attachment.id)"
+                          :disabled="!canEditThing || isValidatingDelete(attachment.id)"
                           @click="handleDeleteClick(attachment)"
                         />
                       </span>
@@ -446,11 +447,48 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-dialog v-model="openLinkedTasks" width="42rem" max-width="95vw">
+    <v-card>
+      <v-toolbar flat color="red-darken-4">
+        <v-card-title class="text-h5">
+          <v-icon :icon="mdiAlert" />
+          Cannot delete rating curve
+        </v-card-title>
+      </v-toolbar>
+      <v-divider />
+      <v-card-text class="pt-4">
+        <div class="text-body-2 mb-3">
+          <strong>{{ blockedAttachment?.name }}</strong> is linked to one or more
+          tasks. Remove this rating curve from those tasks before deleting it.
+        </div>
+        <div class="linked-task-buttons">
+          <v-btn
+            v-for="task in blockedTasks"
+            :key="task.id"
+            :to="taskDetailsRoute(task)"
+            variant="outlined"
+            color="primary"
+            block
+            class="text-none linked-task-btn"
+          >
+            <span class="linked-task-btn-name">{{ task.name || task.id }}</span>
+            <span class="linked-task-btn-id">{{ task.id }}</span>
+          </v-btn>
+        </div>
+      </v-card-text>
+      <v-divider />
+      <v-card-actions>
+        <v-spacer />
+        <v-btn-cancel @click="openLinkedTasks = false">Close</v-btn-cancel>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { mdiDelete, mdiDownload, mdiPencil } from '@mdi/js'
+import { mdiAlert, mdiDelete, mdiDownload, mdiPencil } from '@mdi/js'
 import hs, {
   type RatingCurvePreviewRow,
   type ThingFileAttachment,
@@ -460,6 +498,7 @@ import {
   parseRatingCurveCsvFile,
   toRatingCurveFileValidationMessage,
 } from '@/utils/orchestration/ratingCurveFile'
+import { getRatingCurveReference } from '@/utils/orchestration/ratingCurve'
 import { useRatingCurveStore } from '@/store/ratingCurves'
 
 const props = withDefaults(
@@ -469,6 +508,7 @@ const props = withDefaults(
     deferPersist?: boolean
     inlineReadOnly?: boolean
     downloadOnly?: boolean
+    workspaceId?: string
     showHeader?: boolean
     refreshToken?: number
   }>(),
@@ -477,6 +517,7 @@ const props = withDefaults(
     deferPersist: false,
     inlineReadOnly: false,
     downloadOnly: false,
+    workspaceId: '',
     showHeader: true,
     refreshToken: 0,
   }
@@ -504,6 +545,7 @@ const openManage = ref(false)
 const openCreate = ref(false)
 const openEdit = ref(false)
 const openDelete = ref(false)
+const openLinkedTasks = ref(false)
 
 const attachmentFile = ref<File | File[] | null>(null)
 const createFileInput = ref<HTMLInputElement | null>(null)
@@ -515,6 +557,10 @@ const editFileInput = ref<HTMLInputElement | null>(null)
 const editAttachmentName = ref('')
 const editAttachmentDescription = ref('')
 const activeAttachment = ref<DisplayRatingCurve | null>(null)
+const blockedAttachment = ref<DisplayRatingCurve | null>(null)
+const blockedTasks = ref<
+  Array<{ id: string; name: string; workspaceId: string }>
+>([])
 
 const createFileValidationError = ref('')
 const createFileValidationPending = ref(false)
@@ -530,6 +576,7 @@ const previewRowsByAttachmentId = ref<Record<string, RatingCurvePreviewRow[]>>({
 const previewLoadingByAttachmentId = ref<Record<string, boolean>>({})
 const previewErrorByAttachmentId = ref<Record<string, string>>({})
 const downloadingByAttachmentId = ref<Record<string, boolean>>({})
+const deleteValidationByAttachmentId = ref<Record<string, boolean>>({})
 
 const canEditThing = computed(() => props.canEdit)
 const inlineReadOnly = computed(() => props.inlineReadOnly && !canEditThing.value)
@@ -792,9 +839,10 @@ function openDeleteDialog(item: DisplayRatingCurve) {
   openDelete.value = true
 }
 
-function handleDeleteClick(item: DisplayRatingCurve) {
+async function handleDeleteClick(item: DisplayRatingCurve) {
   if (!canEditThing.value) return
   if (!props.deferPersist) {
+    if (await blockDeletionIfLinkedWithSpinner(item)) return
     openDeleteDialog(item)
     return
   }
@@ -803,6 +851,7 @@ function handleDeleteClick(item: DisplayRatingCurve) {
     ratingCurveStore.removeQueuedRatingCurveCreate(String(item.id))
     delete previewRowsByAttachmentId.value[String(item.id)]
   } else {
+    if (await blockDeletionIfLinkedWithSpinner(item)) return
     ratingCurveStore.queueExistingRatingCurveDelete(item.id)
     delete previewRowsByAttachmentId.value[String(item.id)]
     delete previewErrorByAttachmentId.value[String(item.id)]
@@ -904,6 +953,11 @@ async function deleteAttachment() {
     return
   }
 
+  if (await blockDeletionIfLinked(activeAttachment.value)) {
+    openDelete.value = false
+    return
+  }
+
   saving.value = true
   try {
     const res = await hs.thingFileAttachments.delete(
@@ -931,6 +985,145 @@ async function deleteAttachment() {
     Snackbar.error(error?.message || 'Unable to delete rating curve.')
   } finally {
     saving.value = false
+  }
+}
+
+function taskDetailsRoute(task: { id: string; workspaceId: string }) {
+  return {
+    name: 'Orchestration',
+    query: {
+      workspaceId: task.workspaceId,
+      taskId: task.id,
+    },
+  }
+}
+
+async function blockDeletionIfLinked(item: DisplayRatingCurve) {
+  if (item.pending || !item.link) return false
+
+  const workspaceId = props.workspaceId?.trim()
+  if (!workspaceId) {
+    Snackbar.error('Unable to validate rating curve usage for this site.')
+    return true
+  }
+
+  const linkedTasks = await findTasksUsingRatingCurve(item.link, workspaceId)
+  if (linkedTasks === null) return true
+  if (!linkedTasks.length) return false
+
+  blockedAttachment.value = item
+  blockedTasks.value = linkedTasks
+  openLinkedTasks.value = true
+  return true
+}
+
+async function blockDeletionIfLinkedWithSpinner(item: DisplayRatingCurve) {
+  const key = String(item.id)
+  if (deleteValidationByAttachmentId.value[key]) return true
+
+  deleteValidationByAttachmentId.value[key] = true
+  try {
+    return await blockDeletionIfLinked(item)
+  } finally {
+    delete deleteValidationByAttachmentId.value[key]
+  }
+}
+
+async function findTasksUsingRatingCurve(
+  ratingCurveLink: string,
+  workspaceId: string
+) {
+  try {
+    const tasks = (await hs.tasks.listAllItems({
+      workspace_id: [workspaceId],
+      expand_related: true,
+    } as any)) as any[]
+
+    return tasks
+      .filter((task) => taskUsesRatingCurve(task, ratingCurveLink))
+      .map((task) => ({
+        id: String(task.id),
+        name: `${task.name ?? ''}`.trim(),
+        workspaceId:
+          String(task.workspaceId ?? task.workspace?.id ?? workspaceId) || workspaceId,
+      }))
+  } catch (error: any) {
+    Snackbar.error(error?.message || 'Unable to validate rating curve usage.')
+    return null
+  }
+}
+
+function taskUsesRatingCurve(task: any, ratingCurveLink: string) {
+  const mappings = Array.isArray(task?.mappings) ? task.mappings : []
+  for (const mapping of mappings) {
+    const paths = Array.isArray(mapping?.paths) ? mapping.paths : []
+    for (const path of paths) {
+      const transformations = Array.isArray(path?.dataTransformations)
+        ? path.dataTransformations
+        : []
+      for (const transformation of transformations) {
+        const reference = getRatingCurveReference(transformation)
+        if (isSameRatingCurveReference(reference, ratingCurveLink)) return true
+      }
+    }
+  }
+  return false
+}
+
+function isSameRatingCurveReference(left: string, right: string) {
+  const leftRef = parseRatingCurveReference(left)
+  const rightRef = parseRatingCurveReference(right)
+
+  if (leftRef.raw && rightRef.raw && leftRef.raw === rightRef.raw) return true
+  if (leftRef.pathname && rightRef.pathname && leftRef.pathname === rightRef.pathname) {
+    return true
+  }
+  if (
+    leftRef.attachmentId &&
+    rightRef.attachmentId &&
+    leftRef.attachmentId === rightRef.attachmentId
+  ) {
+    return true
+  }
+
+  return false
+}
+
+function parseRatingCurveReference(value: string) {
+  const raw = `${value ?? ''}`.trim().replace(/\/+$/, '')
+  if (!raw) {
+    return {
+      raw: '',
+      pathname: '',
+      attachmentId: '',
+    }
+  }
+
+  try {
+    const parsed = new URL(raw, globalThis.location?.origin ?? undefined)
+    const pathname = parsed.pathname.replace(/\/+$/, '')
+    return {
+      raw,
+      pathname,
+      attachmentId: extractAttachmentId(pathname),
+    }
+  } catch {
+    return {
+      raw,
+      pathname: raw.replace(/\/+$/, ''),
+      attachmentId: extractAttachmentId(raw),
+    }
+  }
+}
+
+function extractAttachmentId(path: string) {
+  const match =
+    /\/things\/[^/]+\/file-attachments\/([^/]+)\/download\/?$/i.exec(path)
+  if (!match?.[1]) return ''
+  try {
+    return decodeURIComponent(match[1])
+  } catch {
+    return match[1]
   }
 }
 
@@ -1111,6 +1304,10 @@ function getPreviewError(attachmentId: string | number) {
 
 function isDownloading(attachmentId: string | number) {
   return !!downloadingByAttachmentId.value[String(attachmentId)]
+}
+
+function isValidatingDelete(attachmentId: string | number) {
+  return !!deleteValidationByAttachmentId.value[String(attachmentId)]
 }
 
 function getPreviewPath(attachmentId: string | number): string {
@@ -1452,6 +1649,37 @@ watch(openEdit, (isOpen) => {
 
 .rating-curve-edit-preview {
   margin-top: 0.25rem;
+}
+
+.linked-task-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.linked-task-btn {
+  height: auto;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+}
+
+.linked-task-btn-name,
+.linked-task-btn-id {
+  display: block;
+  width: 100%;
+}
+
+.linked-task-btn-name {
+  font-weight: 600;
+  color: currentColor;
+}
+
+.linked-task-btn-id {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  opacity: 0.9;
+  text-transform: none;
 }
 
 @media (max-width: 680px) {

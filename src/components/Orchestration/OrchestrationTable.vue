@@ -794,14 +794,9 @@ const resolveOrchestrationSystem = (task: any) => {
   )
 }
 
-const asResult = (run?: any) => {
-  const value = run?.result as any
-  return value && typeof value === 'object' ? value : {}
-}
-
 const getRunMessage = (run?: any) => {
-  if (!run) return ''
-  const result = asResult(run)
+  const result =
+    run?.result && typeof run.result === 'object' ? run.result : {}
   return (
     run?.failureReason ||
     result.summary ||

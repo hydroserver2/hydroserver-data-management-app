@@ -85,6 +85,7 @@
               <v-col>
                 <RatingCurveTable
                   :thing-id="thingId"
+                  :workspace-id="workspaceId"
                   :can-edit="true"
                   :defer-persist="true"
                 />

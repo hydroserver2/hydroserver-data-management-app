@@ -132,6 +132,7 @@
         <RatingCurveTable
           v-if="thing?.id"
           :thing-id="thing.id"
+          :workspace-id="thing.workspaceId"
           :can-edit="false"
           inline-read-only
           download-only
