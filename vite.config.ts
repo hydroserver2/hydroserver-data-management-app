@@ -78,6 +78,7 @@ export default defineConfig(({ mode }) => {
           '**/src/utils/CSVDownloadUtils.ts',
           '**/src/utils/plotting/plotly.ts',
           '**/src/utils/plotting/graphSeriesUtils.ts',
+          '**/src/utils/orchestration/ratingCurve.ts',
           '**/src/utils/test/**',
           '**/src/utils/time.ts',
           '**/src/utils/googleMaps/**',

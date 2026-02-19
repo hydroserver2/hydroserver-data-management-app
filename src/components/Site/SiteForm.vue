@@ -80,6 +80,17 @@
                 ></v-textarea>
               </v-col>
             </v-row>
+
+            <v-row class="mt-2">
+              <v-col>
+                <RatingCurveTable
+                  :thing-id="thingId"
+                  :workspace-id="workspaceId"
+                  :can-edit="true"
+                  :defer-persist="true"
+                />
+              </v-col>
+            </v-row>
           </v-col>
           <v-col cols="12" md="6">
             <h6 class="text-h6 my-4">Site Location</h6>
@@ -177,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import OpenLayersMap from '@/components/Maps/OpenLayersMap.vue'
 import { useThingStore } from '@/store/thing'
 import { VForm } from 'vuetify/components'
@@ -185,8 +196,11 @@ import { rules } from '@/utils/rules'
 import { storeToRefs } from 'pinia'
 import SitePhotoManager from '@/components/Site/SitePhotoManager.vue'
 import SiteTagManager from '@/components/Site/SiteTagManager.vue'
+import RatingCurveTable from '@/components/Orchestration/RatingCurveTable.vue'
 import { usePhotosStore } from '@/store/photos'
+import { useRatingCurveStore } from '@/store/ratingCurves'
 import { useTagStore } from '@/store/tags'
+import { Snackbar } from '@/utils/notifications'
 import countryList from 'country-list'
 import { useVocabularyStore } from '@/composables/useVocabulary'
 import hs, { Thing } from '@hydroserver/client'
@@ -200,6 +214,7 @@ const countryTitle = (item: { name: string; code: string } | undefined) => {
 
 const { thing: storedThing } = storeToRefs(useThingStore())
 const { updatePhotos } = usePhotosStore()
+const { updateRatingCurves, resetRatingCurves } = useRatingCurveStore()
 const { tags } = storeToRefs(useTagStore())
 const { updateTags } = useTagStore()
 const vocabularyStore = useVocabularyStore()
@@ -231,6 +246,7 @@ async function populateThing() {
 }
 
 function closeDialog() {
+  resetRatingCurves()
   emit('close')
 }
 
@@ -255,7 +271,19 @@ async function uploadThing() {
 
   await updateTags(storedThing.value!.id)
   await updatePhotos(storedThing.value!.id)
-  emit('close')
+  const ratingCurveResult = await updateRatingCurves(storedThing.value!.id)
+  if (!ratingCurveResult.ok) {
+    const firstFailure =
+      ratingCurveResult.message ||
+      ratingCurveResult.failedCreates[0]?.message ||
+      ratingCurveResult.failedMetadataUpdates[0]?.message ||
+      ratingCurveResult.failedReplaces[0]?.message ||
+      ratingCurveResult.failedDeletes[0]?.message ||
+      'Some rating curve changes could not be saved.'
+    Snackbar.error(firstFailure)
+    return
+  }
+  closeDialog()
 }
 
 function onMapLocationClicked(locationData: Thing) {
@@ -268,6 +296,7 @@ function onMapLocationClicked(locationData: Thing) {
 }
 
 onMounted(async () => {
+  resetRatingCurves()
   countries.value = countryList.getData()
   if (props.thingId) {
     await populateThing()
@@ -275,5 +304,9 @@ onMounted(async () => {
   } else {
     loaded.value = true
   }
+})
+
+onUnmounted(() => {
+  resetRatingCurves()
 })
 </script>

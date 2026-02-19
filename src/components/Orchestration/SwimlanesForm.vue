@@ -60,7 +60,9 @@
                 {{
                   t.type === 'expression'
                     ? t.expression || 'expression()'
-                    : `lookup: ${t.lookupTableId ?? 'select table'}`
+                    : getRatingCurveReference(t)
+                    ? 'rating curve'
+                    : 'select rating curve'
                 }}
               </v-chip>
 
@@ -81,32 +83,41 @@
 
           <div class="cell d-flex align-center w-100">
             <template class="d-flex align-center w-100">
-              <v-chip
+              <v-btn
                 v-if="!p.targetIdentifier"
                 size="small"
-                :color="hasTargetError(mi, pi) ? 'error' : 'green-lighten-1'"
-                class="mr-4"
-                :class="{ 'chip-error': hasTargetError(mi, pi) }"
                 variant="outlined"
+                :color="hasTargetError(mi, pi) ? 'error' : 'green-lighten-1'"
+                class="mr-4 target-selector-btn text-none"
+                :class="{ 'target-selector-btn-error': hasTargetError(mi, pi) }"
                 @click="openTargetSelector(mi, pi)"
                 :prepend-icon="mdiImport"
-                >Select target datastream
-              </v-chip>
-              <v-chip v-else class="text-caption">
-                <span
-                  @click="openTargetSelector(mi, pi)"
-                  class="font-weight-medium"
-                  >{{ String(p.targetIdentifier) }}</span
-                >&nbsp;&ndash;&nbsp;
-                <span class="text-medium-emphasis">
-                  {{
-                    linkedDatastreams.find((d) => d.id == p.targetIdentifier)
-                      ?.name ||
-                    draftDatastreams.find((d) => d.id == p.targetIdentifier)
-                      ?.name
-                  }}
+              >
+                Select target datastream
+              </v-btn>
+
+              <v-btn
+                v-else
+                size="small"
+                variant="tonal"
+                color="green-darken-2"
+                class="mr-4 target-selector-btn target-selector-btn-selected text-none"
+                :prepend-icon="mdiImport"
+                @click="openTargetSelector(mi, pi)"
+              >
+                <span class="target-selector-content">
+                  <span class="target-id">{{ String(p.targetIdentifier) }}</span>
+                  <span class="target-name">
+                    {{
+                      linkedDatastreams.find((d) => d.id == p.targetIdentifier)
+                        ?.name ||
+                      draftDatastreams.find((d) => d.id == p.targetIdentifier)
+                        ?.name
+                    }}
+                  </span>
                 </span>
-              </v-chip>
+              </v-btn>
+
               <div
                 v-if="hasTargetError(mi, pi)"
                 class="text-error text-caption mt-1"
@@ -174,6 +185,7 @@
   <v-dialog v-model="transformOpen" width="40rem">
     <DataTransformationForm
       :transformation="editingTransform || undefined"
+      :workspace-id="resolvedWorkspaceId"
       @created="onCreateTransform"
       @updated="onUpdateTransform"
       @close="transformOpen = false"
@@ -199,12 +211,16 @@ import type {
   Task,
 } from '@hydroserver/client'
 import DataTransformationForm from './DataTransformationForm.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
 import { DatastreamExtended } from '@hydroserver/client'
 import { rules } from '@/utils/rules'
 import { VForm } from 'vuetify/components'
+import {
+  getRatingCurveReference,
+  setRatingCurveReference,
+} from '@/utils/orchestration/ratingCurve'
 import {
   mdiFunctionVariant,
   mdiImport,
@@ -216,9 +232,20 @@ import {
 import { useOrchestrationStore } from '@/store/orchestration'
 
 const task = defineModel<Task>('task', { required: true })
+const props = defineProps<{
+  workspaceId?: string | null
+}>()
 const { linkedDatastreams, draftDatastreams } = storeToRefs(
   useOrchestrationStore()
 )
+const resolvedWorkspaceId = computed(() => {
+  return (
+    props.workspaceId ||
+    (task.value as any)?.workspaceId ||
+    (task.value as any)?.workspace?.id ||
+    null
+  )
+})
 
 const localForm = ref<VForm>()
 const isValid = ref(true)
@@ -347,10 +374,10 @@ function onUpdateTransform(updated: DataTransformation) {
   if (updated.type === 'expression') {
     ;(t as any).type = 'expression'
     ;(t as any).expression = updated.expression
-    delete (t as any).lookupTableId
+    delete (t as any).ratingCurveUrl
   } else {
-    ;(t as any).type = 'lookup'
-    ;(t as any).lookupTableId = updated.lookupTableId
+    ;(t as any).type = 'rating_curve'
+    setRatingCurveReference(t, getRatingCurveReference(updated))
     delete (t as any).expression
   }
   transformOpen.value = false
@@ -462,5 +489,48 @@ function onAddMapping() {
   gap: 8px;
   grid-column: 1 / -1; /* make the action row span all 3 columns */
   margin-top: 4px;
+}
+
+.target-selector-btn {
+  max-width: calc(100% - 2.25rem);
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    background-color 0.14s ease;
+}
+
+.target-selector-btn:hover,
+.target-selector-btn:focus-visible {
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  transform: translateY(-1px);
+}
+
+.target-selector-btn-selected {
+  justify-content: flex-start;
+  min-width: 16rem;
+}
+
+.target-selector-content {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.target-id {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.target-name {
+  color: rgba(0, 0, 0, 0.66);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.target-selector-btn-error {
+  box-shadow: 0 0 0 1px rgba(211, 47, 47, 0.3);
 }
 </style>

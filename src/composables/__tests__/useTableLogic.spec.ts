@@ -10,19 +10,29 @@ const defaultFetchFunction = (wsId: string): Promise<Unit[]> =>
 
 const defaultDeleteFunction = (id: string): Promise<void> => Promise.resolve()
 
+type CreateDummyOptions = {
+  apiFetchFunction?: (wsId: string) => Promise<Unit[]>
+  apiDeleteFunction?: (id: string) => Promise<void>
+  workspaceId?: string | null
+}
+
 const createDummyComponent = ({
   apiFetchFunction = defaultFetchFunction,
   apiDeleteFunction = defaultDeleteFunction,
-} = {}) =>
+  workspaceId = 'test-workspace',
+}: CreateDummyOptions = {}) =>
   defineComponent({
     setup() {
-      const workspaceId = ref('test-workspace')
-      return useTableLogic(
-        apiFetchFunction,
-        apiDeleteFunction,
-        Unit,
-        workspaceId
-      )
+      const workspaceIdRef = ref<string | null>(workspaceId)
+      return {
+        workspaceIdRef,
+        ...useTableLogic(
+          apiFetchFunction,
+          apiDeleteFunction,
+          Unit,
+          workspaceIdRef
+        ),
+      }
     },
     template: '<div>{{ items }}</div>',
   })
@@ -65,6 +75,16 @@ describe('useTableLogic', () => {
     expect(wrapper.vm.item).toEqual(unitFixtures[2])
   })
 
+  it('ignores unknown dialog values', async () => {
+    const wrapper = mount(createDummyComponent())
+    await flushPromises()
+
+    wrapper.vm.openDialog(unitFixtures[0], 'unknown')
+    expect(wrapper.vm.openEdit).toBe(false)
+    expect(wrapper.vm.openDelete).toBe(false)
+    expect(wrapper.vm.openAccessControl).toBe(false)
+  })
+
   it('updates an item correctly', async () => {
     const wrapper = mount(createDummyComponent())
     await flushPromises()
@@ -72,6 +92,15 @@ describe('useTableLogic', () => {
     const updatedItem = { ...unitFixtures[0], name: 'Updated' }
     wrapper.vm.onUpdate(updatedItem)
     expect(wrapper.vm.items).toContainEqual(updatedItem)
+  })
+
+  it('does not update list when updated item id is missing', async () => {
+    const wrapper = mount(createDummyComponent())
+    await flushPromises()
+
+    const originalItems = [...wrapper.vm.items]
+    wrapper.vm.onUpdate({ ...unitFixtures[0], id: 'missing' })
+    expect(wrapper.vm.items).toEqual(originalItems)
   })
 
   it('deletes an item correctly', async () => {
@@ -84,5 +113,49 @@ describe('useTableLogic', () => {
 
     expect(wrapper.vm.items).not.toContainEqual(unitFixtures[0])
     expect(wrapper.vm.openDelete).toBe(false)
+  })
+
+  it('keeps delete dialog open and logs when delete fails', async () => {
+    const error = new Error('delete failed')
+    const apiDeleteFunction = vi.fn().mockRejectedValue(error)
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
+    const wrapper = mount(createDummyComponent({ apiDeleteFunction }))
+    await flushPromises()
+
+    wrapper.vm.openDialog(unitFixtures[0], 'delete')
+    await wrapper.vm.onDelete()
+
+    expect(consoleErrorSpy).toHaveBeenCalled()
+    expect(wrapper.vm.openDelete).toBe(true)
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('does not fetch data when workspace id is empty', async () => {
+    const apiFetchFunction = vi.fn().mockResolvedValue(unitFixtures)
+    const wrapper = mount(
+      createDummyComponent({
+        apiFetchFunction,
+        workspaceId: null,
+      })
+    )
+    await flushPromises()
+
+    expect(apiFetchFunction).not.toHaveBeenCalled()
+    expect(wrapper.vm.items).toEqual([])
+  })
+
+  it('logs when fetch fails', async () => {
+    const error = new Error('fetch failed')
+    const apiFetchFunction = vi.fn().mockRejectedValue(error)
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
+    mount(createDummyComponent({ apiFetchFunction }))
+    await flushPromises()
+
+    expect(consoleErrorSpy).toHaveBeenCalled()
+    consoleErrorSpy.mockRestore()
   })
 })

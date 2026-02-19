@@ -79,13 +79,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/orchestration',
     name: 'Orchestration',
     component: () => import('@/pages/Orchestration.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/etl-task/:id',
-    name: 'Task',
-    component: () => import('@/pages/TaskDetails.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, hideFooter: true },
   },
   {
     path: '/hydroloader/download',
@@ -162,6 +156,12 @@ export const routes: RouteRecordRaw[] = [
     name: 'Metadata',
     component: () => import('@/pages/Metadata.vue'),
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/access-denied',
+    name: 'AccessDenied',
+    component: () => import('@/pages/AccessDenied.vue'),
+    meta: { requiresAuth: true, title: 'Access Denied' },
   },
   {
     path: '/visualize-data/:thingId?',

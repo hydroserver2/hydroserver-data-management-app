@@ -13,6 +13,7 @@
 import { computed } from 'vue'
 import type { DataTransformation } from '@hydroserver/client'
 import { mdiFunctionVariant, mdiTableSearch } from '@mdi/js'
+import { getRatingCurveReference } from '@/utils/orchestration/ratingCurve'
 
 const props = defineProps<{ t: DataTransformation }>()
 
@@ -22,6 +23,7 @@ const color = computed(() =>
 
 const label = computed(() => {
   if (props.t.type === 'expression') return props.t.expression
-  return `lookup: ${props.t.lookupTableId}`
+  const reference = getRatingCurveReference(props.t)
+  return reference ? 'rating curve' : 'rating curve'
 })
 </script>

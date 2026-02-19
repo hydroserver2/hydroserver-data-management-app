@@ -130,7 +130,7 @@
         </v-btn>
         <v-dialog v-if="thing" v-model="isRegisterModalOpen" width="80rem">
           <SiteForm
-            @close="isRegisterModalOpen = false"
+            @close="onSiteFormClosed"
             :thing-id="thingId"
             :workspace-id="thing.workspaceId"
           />
@@ -140,7 +140,7 @@
 
     <v-row class="mb-0">
       <v-col cols="12" md="8">
-        <SiteDetailsTable />
+        <SiteDetailsTable :rating-curve-count="ratingCurveCount" />
       </v-col>
 
       <v-col cols="12" md="4">
@@ -180,6 +180,7 @@
         <div v-else class="text-body-2 text-medium-emphasis">
           No photos added yet.
         </div>
+
       </v-col>
     </v-row>
 
@@ -273,6 +274,9 @@ const { thing } = storeToRefs(useThingStore())
 const { tags } = storeToRefs(useTagStore())
 const { xs } = useDisplay()
 const isMobile = computed(() => xs.value)
+const canEditThing = computed(() =>
+  hasPermission(PermissionResource.Thing, PermissionAction.Edit)
+)
 
 const hasPhotos = computed(() => !loading.value && photos.value?.length > 0)
 const maxPhotoThumbnails = 6
@@ -286,6 +290,7 @@ const extraPhotoCount = computed(() =>
 const isRegisterModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isAccessControlModalOpen = ref(false)
+const ratingCurveCount = ref(0)
 const selectedPhotoIndex = ref<number | null>(null)
 const isPhotoViewerOpen = ref(false)
 const hasMultiplePhotos = computed(() => (photos.value?.length ?? 0) > 1)
@@ -325,6 +330,24 @@ const locationDetails = computed(() => {
 function switchToAccessControlModal() {
   isDeleteModalOpen.value = false
   isAccessControlModalOpen.value = true
+}
+
+async function loadThingPhotos() {
+  const res = await hs.things.getAttachments(thingId)
+  if (!res.ok || !Array.isArray(res.data)) return
+
+  ratingCurveCount.value = res.data.filter(
+    (attachment: FileAttachment) =>
+      attachment.fileAttachmentType === 'rating_curve'
+  ).length
+  photos.value = res.data.filter(
+    (attachment: FileAttachment) => attachment.fileAttachmentType === 'Photo'
+  )
+}
+
+function onSiteFormClosed() {
+  isRegisterModalOpen.value = false
+  void loadThingPhotos()
 }
 
 function openPhoto(photo: FileAttachment) {
@@ -368,33 +391,22 @@ async function onDeleteThing() {
 
 onMounted(async () => {
   photos.value = []
-  hs.things
-    .getAttachments(thingId)
-    .then((res) => {
-      photos.value = res.data.filter(
-        (attachment: FileAttachment) =>
-          attachment.fileAttachmentType === 'Photo'
-      )
-    })
-    .catch((error) => console.error('Error fetching photos from DB', error))
+  void loadThingPhotos().catch((error) =>
+    console.error('Error fetching photos from DB', error)
+  )
 
-  const [thingResponse, hydroShareArchiveResponse, tagResponse] =
-    await Promise.all([
-      hs.things.getItem(thingId).catch((error: any) => {
-        if (parseInt(error.status) === 403) authorized.value = false
-        else console.error('Error fetching thing', error)
+  const [thingResponse, tagResponse] = await Promise.all([
+    hs.things.getItem(thingId).catch((error: any) => {
+      if (parseInt(error.status) === 403) authorized.value = false
+      else console.error('Error fetching thing', error)
 
-        return null
-      }),
-      hs.things.getHydroShareArchive(thingId).catch((error) => {
-        // console.error('Error fetching hydroShareArchive', error)
-        return null
-      }),
-      hs.things.getTags(thingId).catch((error) => {
-        console.error('Error fetching additional metadata tags', error)
-        return null
-      }),
-    ])
+      return null
+    }),
+    hs.things.getTags(thingId).catch((error) => {
+      console.error('Error fetching additional metadata tags', error)
+      return null
+    }),
+  ])
 
   tags.value = tagResponse?.data
   thing.value = thingResponse ?? undefined
@@ -404,7 +416,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching workspace', error)
   }
-  hydroShareArchive.value = hydroShareArchiveResponse?.data ?? null
+  hydroShareArchive.value = null
   loaded.value = true
 })
 </script>

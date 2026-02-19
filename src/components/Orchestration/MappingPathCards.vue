@@ -47,7 +47,7 @@
             />
 
             <span v-if="t.type === 'expression'">expression</span>
-            <span v-else>lookup tbl.</span>
+            <span v-else>rating curve</span>
           </v-chip>
         </v-col>
 
@@ -62,8 +62,9 @@
 
           <v-text-field
             v-else
-            v-model="t.lookupTableId"
-            placeholder="Lookup table id"
+            :model-value="getRatingCurveReference(t)"
+            @update:model-value="setRatingCurveReference(t, String($event ?? ''))"
+            placeholder="Rating curve URL"
             hide-details
           />
         </v-col>
@@ -103,7 +104,7 @@
             <v-list-item @click="addLookup(p)">
               <v-list-item-title>
                 <v-icon :icon="mdiTableSearch" size="16" class="mr-1" />
-                Lookup table
+                Rating curve
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -128,9 +129,12 @@ import DatastreamSelectAndDisplay from '@/components/Datastream/DatastreamSelect
 import {
   MappingPath,
   ExpressionDataTransformation,
-  LookupTableDataTransformation,
   Mapping,
 } from '@hydroserver/client'
+import {
+  getRatingCurveReference,
+  setRatingCurveReference,
+} from '@/utils/orchestration/ratingCurve'
 import {
   mdiFunctionVariant,
   mdiPlus,
@@ -147,7 +151,8 @@ function addExpression(p: MappingPath) {
 }
 
 function addLookup(p: MappingPath) {
-  const t: LookupTableDataTransformation = { type: 'lookup', lookupTableId: '' }
+  const t: any = { type: 'rating_curve', ratingCurveUrl: '' }
+  setRatingCurveReference(t, '')
   p.dataTransformations.push(t)
 }
 

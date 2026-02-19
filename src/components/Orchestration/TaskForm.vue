@@ -107,7 +107,11 @@
         </div>
 
         <v-divider class="mb-6" />
-        <SwimlanesForm v-model:task="task" ref="swimlanesRef" />
+        <SwimlanesForm
+          v-model:task="task"
+          :workspace-id="taskWorkspaceId || null"
+          ref="swimlanesRef"
+        />
       </v-card-text>
     </v-form>
 
@@ -179,6 +183,15 @@ const selectedDataConnection = computed<DataConnection | undefined>(() =>
     (j) => j.id === task.value.dataConnectionId
   )
 )
+const taskWorkspaceId = computed(() => {
+  return (
+    task.value.workspaceId ||
+    (task.value as any)?.workspace?.id ||
+    props.oldTask?.workspace?.id ||
+    selectedWorkspace.value?.id ||
+    ''
+  )
+})
 const perTaskPlaceholders = computed<PlaceholderVariable[]>(() => {
   const placeholders =
     (selectedDataConnection.value as any)?.extractor?.settings
@@ -243,6 +256,8 @@ function hydrateTask(source?: TaskExpanded) {
 
   if (!base.schedule) base.schedule = defaultSchedule()
   if (!base.mappings) base.mappings = []
+  if (!base.workspaceId && (base as any).workspace?.id)
+    base.workspaceId = String((base as any).workspace.id)
   if (!base.dataConnectionId && (base as any).dataConnection?.id)
     base.dataConnectionId = String((base as any).dataConnection.id)
   ;(['startTime', 'nextRunAt'] as const).forEach((k) => {
@@ -294,7 +309,7 @@ async function onSubmit() {
 
   submitLoading.value = true
 
-  task.value.workspaceId = selectedWorkspace.value?.id || ''
+  task.value.workspaceId = taskWorkspaceId.value || ''
   task.value.orchestrationSystemId =
     props.orchestrationSystem?.id || task.value.orchestrationSystemId
   if (!task.value.schedule) task.value.schedule = defaultSchedule()
