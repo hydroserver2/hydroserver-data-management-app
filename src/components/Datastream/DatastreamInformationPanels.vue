@@ -15,8 +15,30 @@
       <v-expansion-panel-text>
         <v-list dense>
           <v-list-item v-for="(item, index) in generalItems" :key="index">
-            <strong>{{ item.label }}</strong
-            >: {{ item.value }}
+            <template v-if="item.label === 'Tags'">
+              <div class="tag-list-row">
+                <strong>{{ item.label }}</strong
+                >:
+                <div class="tag-list-wrap">
+                  <span v-if="!item.value?.length">No tags</span>
+                  <v-chip
+                    v-for="(tag, tagIndex) in item.value"
+                    :key="`${tag.key}:${tag.value}:${tagIndex}`"
+                    class="tag-chip"
+                    color="blue-grey-lighten-5"
+                    size="small"
+                    variant="flat"
+                  >
+                    <strong>{{ tag.key }}</strong
+                    >: {{ tag.value }}
+                  </v-chip>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <strong>{{ item.label }}</strong
+              >: {{ item.value }}
+            </template>
           </v-list-item>
         </v-list>
       </v-expansion-panel-text>
@@ -92,7 +114,7 @@
 <script setup lang="ts">
 import { formatTimeWithZone } from '@/utils/time'
 import { onMounted, ref } from 'vue'
-import hs from '@hydroserver/client'
+import hs, { type Tag } from '@hydroserver/client'
 
 const props = defineProps({
   datastreamId: { type: String, required: true },
@@ -114,6 +136,16 @@ onMounted(async () => {
     expand_related: true,
   })
   const d = datastream.value!
+  let datastreamTags: Tag[] = Array.isArray(d.tags) ? d.tags : []
+
+  if (!Array.isArray(d.tags)) {
+    try {
+      const tagsResponse = await hs.datastreams.getTags(d.id)
+      datastreamTags = Array.isArray(tagsResponse.data) ? tagsResponse.data : []
+    } catch (error) {
+      console.error('Error fetching datastream tags', error)
+    }
+  }
 
   generalItems = [
     { label: 'Workspace Name', value: d.workspace.name },
@@ -157,6 +189,7 @@ onMounted(async () => {
       label: 'Time Aggregation Interval Unit',
       value: d.timeAggregationIntervalUnit,
     },
+    { label: 'Tags', value: datastreamTags },
     { label: 'Is Private', value: d.isPrivate ? 'Yes' : 'No' },
     { label: 'Is Visible', value: d.isVisible ? 'Yes' : 'No' },
   ]
@@ -219,3 +252,31 @@ onMounted(async () => {
   ]
 })
 </script>
+
+<style scoped>
+.tag-list-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+}
+
+.tag-list-wrap {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.tag-chip {
+  max-width: 100%;
+  min-height: 1.6rem;
+  height: auto;
+}
+
+.tag-chip :deep(.v-chip__content) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+</style>
