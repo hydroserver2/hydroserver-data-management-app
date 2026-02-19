@@ -50,4 +50,50 @@ describe('useFormLogic', () => {
     expect(wrapper.vm.item).toEqual(initialUnit)
     expect(wrapper.vm.isEdit).toBe(true)
   })
+
+  it('does not submit when form is invalid', async () => {
+    const createItem = vi.fn()
+    const wrapper = mount(createDummyComponent({ createItem }))
+
+    wrapper.vm.myForm = { validate: vi.fn().mockResolvedValue(undefined) } as any
+    wrapper.vm.valid = false
+
+    const result = await wrapper.vm.uploadItem()
+    expect(result).toBeUndefined()
+    expect(createItem).not.toHaveBeenCalled()
+  })
+
+  it('submits create when form is valid and no initial item exists', async () => {
+    const createResult = { ...unit2 } as Unit
+    const createItem = vi.fn().mockResolvedValue({ data: createResult })
+    const wrapper = mount(createDummyComponent({ createItem }))
+
+    wrapper.vm.myForm = { validate: vi.fn().mockResolvedValue(undefined) } as any
+    wrapper.vm.valid = true
+
+    const result = await wrapper.vm.uploadItem()
+    expect(createItem).toHaveBeenCalledTimes(1)
+    expect(result).toEqual(createResult)
+  })
+
+  it('submits update when form is valid and initial item exists', async () => {
+    const initialUnit = Object.assign(new Unit(), unit1)
+    const updateResult = { ...unit1, symbol: 'm2' } as Unit
+    const updateItem = vi.fn().mockResolvedValue({ data: updateResult })
+
+    const wrapper = mount(
+      createDummyComponent({
+        updateItem,
+        initialUnit,
+      })
+    )
+    await flushPromises()
+
+    wrapper.vm.myForm = { validate: vi.fn().mockResolvedValue(undefined) } as any
+    wrapper.vm.valid = true
+
+    const result = await wrapper.vm.uploadItem()
+    expect(updateItem).toHaveBeenCalledTimes(1)
+    expect(result).toEqual(updateResult)
+  })
 })
