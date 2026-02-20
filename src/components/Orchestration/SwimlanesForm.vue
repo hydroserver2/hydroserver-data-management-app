@@ -10,15 +10,37 @@
       At least one source target mapping is required.
     </v-alert>
     <div class="swimlanes">
-      <div class="head">Source (CSV column name/index or JSON key)</div>
-      <div class="head">Data transformations</div>
-      <div class="head">Target</div>
+      <div class="head">
+        {{
+          isAggregationTask
+            ? 'Source datastream'
+            : 'Source (CSV column name/index or JSON key)'
+        }}
+      </div>
+      <div class="head">
+        {{ isAggregationTask ? 'Aggregation statistic' : 'Data transformations' }}
+      </div>
+      <div class="head">
+        {{ isAggregationTask ? 'Target datastream' : 'Target' }}
+      </div>
 
       <template v-for="(m, mi) in task.mappings" :key="mi">
         <template v-for="(p, pi) in m.paths" :key="pi">
           <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
             <template v-if="pi === 0" class="d-flex align-center w-100">
+              <v-autocomplete
+                v-if="isAggregationTask"
+                v-model="m.sourceIdentifier"
+                :items="workspaceDatastreamOptions"
+                item-title="title"
+                item-value="value"
+                density="compact"
+                label="Source datastream *"
+                color="blue"
+                :rules="rules.required"
+              />
               <v-text-field
+                v-else
                 v-model="m.sourceIdentifier"
                 placeholder="e.g., water_level_ft"
                 density="compact"
@@ -30,7 +52,19 @@
           </div>
 
           <div class="cell transforms">
-            <div class="transform-row d-flex flex-wrap w-100">
+            <v-select
+              v-if="isAggregationTask"
+              :model-value="getAggregationStatistic(p)"
+              :items="aggregationStatisticOptions"
+              item-title="title"
+              item-value="value"
+              label="Aggregation statistic *"
+              density="compact"
+              :rules="rules.required"
+              @update:model-value="setAggregationStatistic(p, $event)"
+            />
+
+            <div v-else class="transform-row d-flex flex-wrap w-100">
               <v-chip
                 v-if="!p.dataTransformations?.length"
                 size="small"
@@ -83,8 +117,19 @@
 
           <div class="cell d-flex align-center w-100">
             <template class="d-flex align-center w-100">
+              <v-autocomplete
+                v-if="isAggregationTask"
+                v-model="p.targetIdentifier"
+                :items="workspaceDatastreamOptions"
+                item-title="title"
+                item-value="value"
+                label="Target datastream *"
+                density="compact"
+                :rules="rules.required"
+              />
+
               <v-btn
-                v-if="!p.targetIdentifier"
+                v-else-if="!p.targetIdentifier"
                 size="small"
                 variant="outlined"
                 :color="hasTargetError(mi, pi) ? 'error' : 'green-lighten-1'"
@@ -119,7 +164,7 @@
               </v-btn>
 
               <div
-                v-if="hasTargetError(mi, pi)"
+                v-if="!isAggregationTask && hasTargetError(mi, pi)"
                 class="text-error text-caption mt-1"
               >
                 Target is required
@@ -151,6 +196,7 @@
           </v-btn>
 
           <v-btn
+            v-if="!isAggregationTask"
             size="small"
             :prepend-icon="mdiSourceBranch"
             variant="text"
@@ -159,7 +205,12 @@
             Add source
           </v-btn>
 
-          <v-btn-add size="small" variant="text" @click="onAddPath(mi)">
+          <v-btn-add
+            v-if="!isAggregationTask"
+            size="small"
+            variant="text"
+            @click="onAddPath(mi)"
+          >
             Add target path
           </v-btn-add>
         </div>
@@ -192,7 +243,7 @@
     />
   </v-dialog>
 
-  <v-dialog v-model="datastreamSelectorOpen" width="75rem">
+  <v-dialog v-if="!isAggregationTask" v-model="datastreamSelectorOpen" width="75rem">
     <DatastreamSelectorCard
       card-title="Select a target datastream"
       @selected-datastream="onTargetSelected"
@@ -211,7 +262,7 @@ import type {
   Task,
 } from '@hydroserver/client'
 import DataTransformationForm from './DataTransformationForm.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import DatastreamSelectorCard from '@/components/Datastream/DatastreamSelectorCard.vue'
 import { storeToRefs } from 'pinia'
 import { DatastreamExtended } from '@hydroserver/client'
@@ -235,8 +286,22 @@ const task = defineModel<Task>('task', { required: true })
 const props = defineProps<{
   workspaceId?: string | null
 }>()
-const { linkedDatastreams, draftDatastreams } = storeToRefs(
+const { linkedDatastreams, draftDatastreams, workspaceDatastreams } = storeToRefs(
   useOrchestrationStore()
+)
+const isAggregationTask = computed(
+  () => ((task.value as any)?.type ?? 'ETL') === 'Aggregation'
+)
+const aggregationStatisticOptions = [
+  { title: 'Simple mean', value: 'simple_mean' },
+  { title: 'Time-weighted daily mean', value: 'time_weighted_daily_mean' },
+  { title: 'Last value of day', value: 'last_value_of_day' },
+]
+const workspaceDatastreamOptions = computed(() =>
+  workspaceDatastreams.value.map((ds) => ({
+    title: `${ds.name} (${ds.id})`,
+    value: ds.id,
+  }))
 )
 const resolvedWorkspaceId = computed(() => {
   return (
@@ -257,6 +322,58 @@ function hasTargetError(mi: number, pi: number) {
   return showErrors.value && missingTargetKeys.value.has(`${mi}:${pi}`)
 }
 
+function ensureAggregationTransformation(path: MappingPath): any {
+  if (!Array.isArray(path.dataTransformations)) path.dataTransformations = []
+  const existing = path.dataTransformations.find(
+    (t: any) => t?.type === 'aggregation'
+  ) as any
+  const transform =
+    existing ??
+    ({
+      type: 'aggregation',
+      aggregationStatistic: 'simple_mean',
+      timezoneMode: 'fixedOffset',
+      timezone: '-0700',
+    } as any)
+
+  if (!existing) path.dataTransformations = [transform]
+  return transform
+}
+
+function getAggregationStatistic(path: MappingPath) {
+  return ensureAggregationTransformation(path).aggregationStatistic || 'simple_mean'
+}
+
+function setAggregationStatistic(path: MappingPath, value: string) {
+  const transform = ensureAggregationTransformation(path)
+  transform.aggregationStatistic = value || 'simple_mean'
+  path.dataTransformations = [transform]
+}
+
+function enforceAggregationShape() {
+  if (!isAggregationTask.value) return
+
+  if (!task.value.mappings?.length) {
+    task.value.mappings = [
+      {
+        sourceIdentifier: '',
+        paths: [{ targetIdentifier: '', dataTransformations: [] }],
+      } as Mapping,
+    ]
+  }
+
+  if (task.value.mappings.length > 1) {
+    task.value.mappings = [task.value.mappings[0]]
+  }
+
+  const mapping = task.value.mappings[0] as any
+  if (!Array.isArray(mapping.paths) || mapping.paths.length === 0) {
+    mapping.paths = [{ targetIdentifier: '', dataTransformations: [] }]
+  }
+  if (mapping.paths.length > 1) mapping.paths = [mapping.paths[0]]
+  ensureAggregationTransformation(mapping.paths[0])
+}
+
 async function validate() {
   const vuetify = await localForm.value?.validate()
   let ok = (vuetify?.valid ?? isValid.value) === true
@@ -264,6 +381,11 @@ async function validate() {
   showErrors.value = true
   noMappingsError.value = task.value.mappings.length === 0
   if (noMappingsError.value) ok = false
+
+  if (isAggregationTask.value) {
+    missingTargetKeys.value = new Set<string>()
+    return ok
+  }
 
   const nextMissingKeys = new Set<string>()
 
@@ -286,6 +408,7 @@ defineExpose({ validate })
 if (task.value.mappings.length === 0) {
   onAddMapping()
 }
+enforceAggregationShape()
 
 const transformOpen = ref(false)
 const editingPath = ref<MappingPath | null>(null)
@@ -295,6 +418,7 @@ const activeMi = ref<number | null>(null)
 const activePi = ref<number | null>(null)
 
 function openTargetSelector(mi: number, pi: number) {
+  if (isAggregationTask.value) return
   activeMi.value = mi
   activePi.value = pi
   datastreamSelectorOpen.value = true
@@ -418,6 +542,7 @@ function removeMappingRow(mi: number, pi: number) {
 }
 
 function onAddPath(mi: number) {
+  if (isAggregationTask.value) return
   const m = task.value.mappings[mi]
   if (!m) return
   if (!Array.isArray(m.paths)) (m as any).paths = []
@@ -429,6 +554,7 @@ function onAddPath(mi: number) {
 
 function onAddMapping() {
   if (!task.value.mappings) (task.value as any).mappings = []
+  if (isAggregationTask.value && task.value.mappings.length >= 1) return
 
   const newMapping: Mapping = {
     sourceIdentifier: '',
@@ -440,8 +566,19 @@ function onAddMapping() {
     ],
   }
 
+  if (isAggregationTask.value) {
+    ensureAggregationTransformation(newMapping.paths[0])
+  }
   task.value.mappings.push(newMapping)
 }
+
+watch(
+  isAggregationTask,
+  () => {
+    enforceAggregationShape()
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

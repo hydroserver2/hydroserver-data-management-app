@@ -1095,9 +1095,21 @@ const taskInformation = computed(() => {
 
 const taskTemplateInformation = computed(() => {
   const dataConnection: any = task.value?.dataConnection
-  if (!dataConnection) return []
+  const taskType = (task.value as any)?.type ?? dataConnection?.type ?? '–'
+
+  const rows: any[] = [
+    {
+      icon: mdiInformationOutline,
+      label: 'Template',
+      name: 'Workflow type',
+      value: taskType,
+    },
+  ]
+
+  if (!dataConnection) return rows
 
   return [
+    ...rows,
     {
       icon: mdiCardAccountDetails,
       label: 'Data connection ID',
@@ -1109,12 +1121,6 @@ const taskTemplateInformation = computed(() => {
       label: 'Data connection',
       name: 'Data connection name',
       value: dataConnection.name,
-    },
-    {
-      icon: mdiInformationOutline,
-      label: 'Template',
-      name: 'Workflow type',
-      value: dataConnection.type ?? '–',
     },
   ].filter((row) => row.value !== undefined && row.value !== null)
 })
