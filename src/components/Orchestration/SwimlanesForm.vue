@@ -174,47 +174,49 @@
           <div :class="['cell', 'd-flex', 'align-center', 'w-100']">
             <template class="d-flex align-center w-100">
               <template v-if="isAggregationTask">
-                <v-btn
-                  v-if="!p.targetIdentifier"
-                  size="small"
-                  variant="outlined"
-                  :color="
-                    aggregationTargetMissing ? 'error' : 'green-lighten-1'
-                  "
-                  class="mr-4 target-selector-btn text-none"
-                  :class="{
-                    'target-selector-btn-error': aggregationTargetMissing,
-                  }"
-                  @click="openAggregationDatastreamSelector('target', mi, pi)"
-                  :prepend-icon="mdiImport"
-                >
-                  Select target datastream
-                </v-btn>
+                <div class="aggregation-field-stack">
+                  <v-btn
+                    v-if="!p.targetIdentifier"
+                    size="small"
+                    variant="outlined"
+                    :color="
+                      aggregationTargetMissing ? 'error' : 'green-lighten-1'
+                    "
+                    class="mr-4 target-selector-btn text-none"
+                    :class="{
+                      'target-selector-btn-error': aggregationTargetMissing,
+                    }"
+                    @click="openAggregationDatastreamSelector('target', mi, pi)"
+                    :prepend-icon="mdiImport"
+                  >
+                    Select target datastream
+                  </v-btn>
 
-                <v-btn
-                  v-else
-                  size="small"
-                  variant="tonal"
-                  color="green-darken-2"
-                  class="mr-4 target-selector-btn target-selector-btn-selected text-none"
-                  :prepend-icon="mdiImport"
-                  @click="openAggregationDatastreamSelector('target', mi, pi)"
-                >
-                  <span class="target-selector-content">
-                    <span class="target-id">{{
-                      String(p.targetIdentifier)
-                    }}</span>
-                    <span class="target-name">
-                      {{ datastreamNameById(p.targetIdentifier) }}
+                  <v-btn
+                    v-else
+                    size="small"
+                    variant="tonal"
+                    color="green-darken-2"
+                    class="mr-4 target-selector-btn target-selector-btn-selected text-none"
+                    :prepend-icon="mdiImport"
+                    @click="openAggregationDatastreamSelector('target', mi, pi)"
+                  >
+                    <span class="target-selector-content">
+                      <span class="target-id">{{
+                        String(p.targetIdentifier)
+                      }}</span>
+                      <span class="target-name">
+                        {{ datastreamNameById(p.targetIdentifier) }}
+                      </span>
                     </span>
-                  </span>
-                </v-btn>
+                  </v-btn>
 
-                <div
-                  v-if="aggregationTargetMissing"
-                  class="text-error text-caption mt-1"
-                >
-                  Target datastream is required
+                  <div
+                    v-if="aggregationTargetMissing"
+                    class="text-error text-caption mt-1 aggregation-field-error"
+                  >
+                    Target datastream is required
+                  </div>
                 </div>
               </template>
 
@@ -889,7 +891,19 @@ watch(
   white-space: normal;
 }
 
+.aggregation-field-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
 .target-selector-btn-error {
   box-shadow: 0 0 0 1px rgba(211, 47, 47, 0.3);
+}
+
+.aggregation-field-error {
+  display: block;
+  width: 100%;
 }
 </style>
