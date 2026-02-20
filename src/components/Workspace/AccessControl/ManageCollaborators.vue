@@ -276,7 +276,6 @@ const collaboratorToFormData = (c: Collaborator) => ({
 onMounted(async () => {
   const [cRes, rolesResponse] = await Promise.all([
     hs.workspaces.getCollaborators(props.workspace.id),
-    // @ts-ignore
     hs.workspaces.getRoles({
       order_by: ['name'],
       is_user_role: true,

@@ -213,10 +213,7 @@ async function copyKey(key: string) {
 
 onMounted(async () => {
   try {
-    // @ts-ignore
-    // TODO: Update API to make workspace_id optional instead of required so TypeScript doesn't complain
     const res = await hs.workspaces.getRoles({
-      // workspace_id: [props.workspaceId],
       is_apikey_role: true,
       order_by: ['name'],
     })
