@@ -9,7 +9,7 @@
     >
       At least one source target mapping is required.
     </v-alert>
-    <div class="swimlanes">
+    <div :class="['swimlanes', { 'swimlanes-aggregation': isAggregationTask }]">
       <div class="head">
         {{
           isAggregationTask
@@ -18,7 +18,9 @@
         }}
       </div>
       <div class="head">
-        {{ isAggregationTask ? 'Aggregation statistic' : 'Data transformations' }}
+        {{
+          isAggregationTask ? 'Aggregation statistic' : 'Data transformations'
+        }}
       </div>
       <div class="head">
         {{ isAggregationTask ? 'Target datastream' : 'Target' }}
@@ -26,19 +28,57 @@
 
       <template v-for="(m, mi) in task.mappings" :key="mi">
         <template v-for="(p, pi) in m.paths" :key="pi">
-          <div class="cell source" :class="{ 'source-empty': pi !== 0 }">
+          <div
+            :class="[
+              'cell',
+              { source: !isAggregationTask, 'source-empty': pi !== 0 },
+            ]"
+          >
             <template v-if="pi === 0" class="d-flex align-center w-100">
-              <v-autocomplete
-                v-if="isAggregationTask"
-                v-model="m.sourceIdentifier"
-                :items="workspaceDatastreamOptions"
-                item-title="title"
-                item-value="value"
-                density="compact"
-                label="Source datastream *"
-                color="blue"
-                :rules="rules.required"
-              />
+              <template v-if="isAggregationTask">
+                <v-btn
+                  v-if="!m.sourceIdentifier"
+                  size="small"
+                  variant="outlined"
+                  :color="
+                    aggregationSourceMissing ? 'error' : 'green-lighten-1'
+                  "
+                  class="mr-4 target-selector-btn text-none"
+                  :class="{
+                    'target-selector-btn-error': aggregationSourceMissing,
+                  }"
+                  @click="openAggregationDatastreamSelector('source', mi, pi)"
+                  :prepend-icon="mdiImport"
+                >
+                  Select source datastream
+                </v-btn>
+
+                <v-btn
+                  v-else
+                  size="small"
+                  variant="tonal"
+                  color="green-darken-2"
+                  class="mr-4 target-selector-btn target-selector-btn-selected text-none"
+                  :prepend-icon="mdiImport"
+                  @click="openAggregationDatastreamSelector('source', mi, pi)"
+                >
+                  <span class="target-selector-content">
+                    <span class="target-id">{{
+                      String(m.sourceIdentifier)
+                    }}</span>
+                    <span class="target-name">
+                      {{ datastreamNameById(m.sourceIdentifier) }}
+                    </span>
+                  </span>
+                </v-btn>
+
+                <div
+                  v-if="aggregationSourceMissing"
+                  class="text-error text-caption mt-1"
+                >
+                  Source datastream is required
+                </div>
+              </template>
               <v-text-field
                 v-else
                 v-model="m.sourceIdentifier"
@@ -51,9 +91,16 @@
             </template>
           </div>
 
-          <div class="cell transforms">
+          <div
+            :class="[
+              'cell',
+              'transforms',
+              { 'aggregation-plain-cell': isAggregationTask },
+            ]"
+          >
             <v-select
               v-if="isAggregationTask"
+              class="aggregation-statistic-select"
               :model-value="getAggregationStatistic(p)"
               :items="aggregationStatisticOptions"
               item-title="title"
@@ -63,8 +110,17 @@
               :rules="rules.required"
               @update:model-value="setAggregationStatistic(p, $event)"
             />
+            <div
+              v-if="isAggregationTask && aggregationStatisticMissing"
+              class="text-error text-caption mt-1 aggregation-statistic-error"
+            >
+              Aggregation statistic is required
+            </div>
 
-            <div v-else class="transform-row d-flex flex-wrap w-100">
+            <div
+              v-if="!isAggregationTask"
+              class="transform-row d-flex flex-wrap w-100"
+            >
               <v-chip
                 v-if="!p.dataTransformations?.length"
                 size="small"
@@ -115,18 +171,52 @@
             </div>
           </div>
 
-          <div class="cell d-flex align-center w-100">
+          <div :class="['cell', 'd-flex', 'align-center', 'w-100']">
             <template class="d-flex align-center w-100">
-              <v-autocomplete
-                v-if="isAggregationTask"
-                v-model="p.targetIdentifier"
-                :items="workspaceDatastreamOptions"
-                item-title="title"
-                item-value="value"
-                label="Target datastream *"
-                density="compact"
-                :rules="rules.required"
-              />
+              <template v-if="isAggregationTask">
+                <v-btn
+                  v-if="!p.targetIdentifier"
+                  size="small"
+                  variant="outlined"
+                  :color="
+                    aggregationTargetMissing ? 'error' : 'green-lighten-1'
+                  "
+                  class="mr-4 target-selector-btn text-none"
+                  :class="{
+                    'target-selector-btn-error': aggregationTargetMissing,
+                  }"
+                  @click="openAggregationDatastreamSelector('target', mi, pi)"
+                  :prepend-icon="mdiImport"
+                >
+                  Select target datastream
+                </v-btn>
+
+                <v-btn
+                  v-else
+                  size="small"
+                  variant="tonal"
+                  color="green-darken-2"
+                  class="mr-4 target-selector-btn target-selector-btn-selected text-none"
+                  :prepend-icon="mdiImport"
+                  @click="openAggregationDatastreamSelector('target', mi, pi)"
+                >
+                  <span class="target-selector-content">
+                    <span class="target-id">{{
+                      String(p.targetIdentifier)
+                    }}</span>
+                    <span class="target-name">
+                      {{ datastreamNameById(p.targetIdentifier) }}
+                    </span>
+                  </span>
+                </v-btn>
+
+                <div
+                  v-if="aggregationTargetMissing"
+                  class="text-error text-caption mt-1"
+                >
+                  Target datastream is required
+                </div>
+              </template>
 
               <v-btn
                 v-else-if="!p.targetIdentifier"
@@ -151,7 +241,9 @@
                 @click="openTargetSelector(mi, pi)"
               >
                 <span class="target-selector-content">
-                  <span class="target-id">{{ String(p.targetIdentifier) }}</span>
+                  <span class="target-id">{{
+                    String(p.targetIdentifier)
+                  }}</span>
                   <span class="target-name">
                     {{
                       linkedDatastreams.find((d) => d.id == p.targetIdentifier)
@@ -171,6 +263,7 @@
               </div>
 
               <v-btn
+                v-if="!isAggregationTask"
                 icon
                 variant="text"
                 color="red-darken-3"
@@ -183,7 +276,7 @@
             </template>
           </div>
         </template>
-        <div class="mapping-actions">
+        <div v-if="!isAggregationTask" class="mapping-actions">
           <v-btn
             size="small"
             variant="text"
@@ -196,7 +289,6 @@
           </v-btn>
 
           <v-btn
-            v-if="!isAggregationTask"
             size="small"
             :prepend-icon="mdiSourceBranch"
             variant="text"
@@ -221,7 +313,10 @@
       </template>
     </div>
 
-    <div class="mapping-actions" v-if="task.mappings.length === 0">
+    <div
+      class="mapping-actions"
+      v-if="!isAggregationTask && task.mappings.length === 0"
+    >
       <v-btn
         size="small"
         :prepend-icon="mdiSourceBranch"
@@ -233,7 +328,7 @@
     </div>
   </v-form>
 
-  <v-dialog v-model="transformOpen" width="40rem">
+  <v-dialog v-if="!isAggregationTask" v-model="transformOpen" width="40rem">
     <DataTransformationForm
       :transformation="editingTransform || undefined"
       :workspace-id="resolvedWorkspaceId"
@@ -243,13 +338,37 @@
     />
   </v-dialog>
 
-  <v-dialog v-if="!isAggregationTask" v-model="datastreamSelectorOpen" width="75rem">
+  <v-dialog
+    v-if="!isAggregationTask"
+    v-model="datastreamSelectorOpen"
+    width="75rem"
+  >
     <DatastreamSelectorCard
       card-title="Select a target datastream"
       @selected-datastream="onTargetSelected"
       @close="datastreamSelectorOpen = false"
       enforce-unique-selections
       :draft-datastreams="draftDatastreams"
+    />
+  </v-dialog>
+
+  <v-dialog
+    v-if="isAggregationTask"
+    v-model="aggregationDatastreamSelectorOpen"
+    width="75rem"
+  >
+    <DatastreamSelectorCard
+      :card-title="
+        aggregationSelectorRole === 'source'
+          ? 'Select source datastream'
+          : 'Select target datastream'
+      "
+      @selected-datastream="onAggregationDatastreamSelected"
+      @close="aggregationDatastreamSelectorOpen = false"
+      :enforce-unique-selections="aggregationSelectorRole === 'target'"
+      :draft-datastreams="
+        aggregationSelectorRole === 'target' ? draftDatastreams : undefined
+      "
     />
   </v-dialog>
 </template>
@@ -286,9 +405,8 @@ const task = defineModel<Task>('task', { required: true })
 const props = defineProps<{
   workspaceId?: string | null
 }>()
-const { linkedDatastreams, draftDatastreams, workspaceDatastreams } = storeToRefs(
-  useOrchestrationStore()
-)
+const { linkedDatastreams, draftDatastreams, workspaceDatastreams } =
+  storeToRefs(useOrchestrationStore())
 const isAggregationTask = computed(
   () => ((task.value as any)?.type ?? 'ETL') === 'Aggregation'
 )
@@ -297,12 +415,6 @@ const aggregationStatisticOptions = [
   { title: 'Time-weighted daily mean', value: 'time_weighted_daily_mean' },
   { title: 'Last value of day', value: 'last_value_of_day' },
 ]
-const workspaceDatastreamOptions = computed(() =>
-  workspaceDatastreams.value.map((ds) => ({
-    title: `${ds.name} (${ds.id})`,
-    value: ds.id,
-  }))
-)
 const resolvedWorkspaceId = computed(() => {
   return (
     props.workspaceId ||
@@ -317,6 +429,9 @@ const isValid = ref(true)
 const showErrors = ref(false)
 const missingTargetKeys = ref<Set<string>>(new Set())
 const noMappingsError = ref(false)
+const aggregationSourceMissing = ref(false)
+const aggregationTargetMissing = ref(false)
+const aggregationStatisticMissing = ref(false)
 
 function hasTargetError(mi: number, pi: number) {
   return showErrors.value && missingTargetKeys.value.has(`${mi}:${pi}`)
@@ -341,13 +456,16 @@ function ensureAggregationTransformation(path: MappingPath): any {
 }
 
 function getAggregationStatistic(path: MappingPath) {
-  return ensureAggregationTransformation(path).aggregationStatistic || 'simple_mean'
+  return (
+    ensureAggregationTransformation(path).aggregationStatistic || 'simple_mean'
+  )
 }
 
 function setAggregationStatistic(path: MappingPath, value: string) {
   const transform = ensureAggregationTransformation(path)
   transform.aggregationStatistic = value || 'simple_mean'
   path.dataTransformations = [transform]
+  aggregationStatisticMissing.value = false
 }
 
 function enforceAggregationShape() {
@@ -383,9 +501,30 @@ async function validate() {
   if (noMappingsError.value) ok = false
 
   if (isAggregationTask.value) {
+    enforceAggregationShape()
+    const mapping = task.value.mappings?.[0] as any
+    const path = mapping?.paths?.[0] as any
+    const statistic = path?.dataTransformations?.[0]?.aggregationStatistic
+
+    aggregationSourceMissing.value = !mapping?.sourceIdentifier
+    aggregationTargetMissing.value = !path?.targetIdentifier
+    aggregationStatisticMissing.value =
+      typeof statistic !== 'string' || statistic.trim().length === 0
+
+    if (
+      aggregationSourceMissing.value ||
+      aggregationTargetMissing.value ||
+      aggregationStatisticMissing.value
+    ) {
+      ok = false
+    }
     missingTargetKeys.value = new Set<string>()
     return ok
   }
+
+  aggregationSourceMissing.value = false
+  aggregationTargetMissing.value = false
+  aggregationStatisticMissing.value = false
 
   const nextMissingKeys = new Set<string>()
 
@@ -416,12 +555,39 @@ const editingTransform = ref<DataTransformation | null>(null)
 const datastreamSelectorOpen = ref(false)
 const activeMi = ref<number | null>(null)
 const activePi = ref<number | null>(null)
+const aggregationDatastreamSelectorOpen = ref(false)
+const aggregationSelectorRole = ref<'source' | 'target'>('source')
+const aggregationSelectorMi = ref<number | null>(null)
+const aggregationSelectorPi = ref<number | null>(null)
+
+function datastreamNameById(id: string | number | undefined | null) {
+  if (id === undefined || id === null || `${id}` === '') return ''
+  const key = String(id)
+  return (
+    workspaceDatastreams.value.find((d) => d.id === key)?.name ||
+    linkedDatastreams.value.find((d) => d.id === key)?.name ||
+    draftDatastreams.value.find((d) => String(d.id) === key)?.name ||
+    ''
+  )
+}
 
 function openTargetSelector(mi: number, pi: number) {
   if (isAggregationTask.value) return
   activeMi.value = mi
   activePi.value = pi
   datastreamSelectorOpen.value = true
+}
+
+function openAggregationDatastreamSelector(
+  role: 'source' | 'target',
+  mi: number,
+  pi: number
+) {
+  if (!isAggregationTask.value) return
+  aggregationSelectorRole.value = role
+  aggregationSelectorMi.value = mi
+  aggregationSelectorPi.value = pi
+  aggregationDatastreamSelectorOpen.value = true
 }
 
 function referencedTargetIds(): Set<string> {
@@ -490,6 +656,29 @@ function onTargetSelected(event: DatastreamExtended) {
   }
 
   activeMi.value = activePi.value = null
+}
+
+function onAggregationDatastreamSelected(event: DatastreamExtended) {
+  const mi = aggregationSelectorMi.value
+  const pi = aggregationSelectorPi.value
+  if (mi == null || pi == null) return
+
+  const mapping = task.value.mappings[mi]
+  const path = mapping?.paths?.[pi]
+  if (!mapping || !path) return
+
+  if (aggregationSelectorRole.value === 'source') {
+    mapping.sourceIdentifier = event.id
+    aggregationSourceMissing.value = false
+  } else {
+    path.targetIdentifier = event.id
+    draftDatastreams.value = [event, ...draftDatastreams.value]
+    syncDraftDatastreams()
+    aggregationTargetMissing.value = false
+  }
+
+  aggregationSelectorMi.value = null
+  aggregationSelectorPi.value = null
 }
 
 function onUpdateTransform(updated: DataTransformation) {
@@ -589,6 +778,14 @@ watch(
   row-gap: 8px;
   margin-bottom: 12px;
 }
+.swimlanes-aggregation {
+  --aggregation-statistic-width: 18rem;
+  grid-template-columns:
+    minmax(0, 1fr)
+    fit-content(var(--aggregation-statistic-width))
+    minmax(0, 1fr);
+  column-gap: 12px;
+}
 .head {
   font-weight: 600;
   color: rgba(0, 0, 0, 0.6);
@@ -603,6 +800,13 @@ watch(
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+}
+.aggregation-plain-cell {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  min-height: 0;
 }
 .source {
   background: transparent;
@@ -630,10 +834,29 @@ watch(
 
 .target-selector-btn {
   max-width: calc(100% - 2.25rem);
-  transition:
-    transform 0.14s ease,
-    box-shadow 0.14s ease,
+  height: auto;
+  transition: transform 0.14s ease, box-shadow 0.14s ease,
     background-color 0.14s ease;
+}
+
+.swimlanes-aggregation .target-selector-btn {
+  margin-right: 0 !important;
+  max-width: 100%;
+  width: 100%;
+}
+
+.swimlanes-aggregation .aggregation-statistic-select,
+.swimlanes-aggregation .aggregation-statistic-error {
+  max-width: var(--aggregation-statistic-width);
+  width: var(--aggregation-statistic-width);
+}
+
+.target-selector-btn :deep(.v-btn__content) {
+  display: flex;
+  justify-content: flex-start;
+  text-align: left;
+  white-space: normal;
+  width: 100%;
 }
 
 .target-selector-btn:hover,
@@ -644,27 +867,26 @@ watch(
 
 .target-selector-btn-selected {
   justify-content: flex-start;
-  min-width: 16rem;
+  min-width: 0;
 }
 
 .target-selector-content {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.4rem;
+  display: block;
   max-width: 100%;
-  overflow: hidden;
 }
 
 .target-id {
+  display: block;
   font-weight: 600;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .target-name {
   color: rgba(0, 0, 0, 0.66);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: block;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .target-selector-btn-error {
