@@ -105,21 +105,24 @@
               </template>
               <span>{{ runNowDisabledReason }}</span>
             </v-tooltip>
-            <v-tooltip location="top" :disabled="canEditTask">
+            <v-tooltip
+              location="top"
+              :disabled="!pauseToggleDisabledReason"
+            >
               <template #activator="{ props: tooltipProps }">
                 <span v-bind="tooltipProps" class="inline-flex">
                   <v-btn
                     variant="text"
                     color="black"
                     :prepend-icon="task.schedule?.paused ? mdiPlay : mdiPause"
-                    :disabled="!canEditTask"
+                    :disabled="!!pauseToggleDisabledReason"
                     @click.stop="togglePaused(task)"
                   >
                     Pause/Run
                   </v-btn>
                 </span>
               </template>
-              <span>{{ readOnlyTooltip }}</span>
+              <span>{{ pauseToggleDisabledReason }}</span>
             </v-tooltip>
           </v-col>
         </v-row>
@@ -617,6 +620,12 @@ const runNowDisabledReason = computed(() => {
   return ''
 })
 
+const pauseToggleDisabledReason = computed(() => {
+  if (!canEditTask.value) return readOnlyTooltip
+  if (!task.value?.schedule) return 'This task has no schedule to pause.'
+  return ''
+})
+
 const effectiveTaskId = computed(() => {
   const propId = props.taskId
   if (typeof propId === 'string' && propId.trim()) return propId
@@ -639,7 +648,28 @@ const effectiveRunId = computed(() => {
 const isTaskExpandedPayload = (value: unknown): value is TaskExpanded => {
   if (!value || typeof value !== 'object') return false
   const candidate = value as Partial<TaskExpanded>
-  return !!candidate.id && !!candidate.workspace && !!candidate.dataConnection
+  const hasId = typeof candidate.id === 'string' && candidate.id.length > 0
+  const hasWorkspace =
+    !!candidate.workspace &&
+    typeof candidate.workspace === 'object' &&
+    typeof (candidate.workspace as any).id === 'string' &&
+    (candidate.workspace as any).id.length > 0
+  const hasOrchestrationSystem =
+    !!candidate.orchestrationSystem &&
+    typeof candidate.orchestrationSystem === 'object' &&
+    typeof (candidate.orchestrationSystem as any).id === 'string' &&
+    (candidate.orchestrationSystem as any).id.length > 0
+  const hasMappings = Array.isArray(candidate.mappings)
+  const hasTaskType =
+    candidate.type === 'ETL' || candidate.type === 'Aggregation'
+
+  return (
+    hasId &&
+    hasWorkspace &&
+    hasOrchestrationSystem &&
+    hasMappings &&
+    hasTaskType
+  )
 }
 
 const routeToAccessDenied = async () => {
